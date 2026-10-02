@@ -717,17 +717,20 @@ describe("getPageData", () => {
     "has answer-first weight-loss metadata for $locale",
     ({ locale, title, visible, goal }) => {
       const data = getPageData("vaegttab", locale)!;
+      // Svensk og norsk løbende tekst skriver tusindtalsseparator med mellemrum,
+      // dansk med punktum — `formatBelob` af dagsmålet, se `vaegttab-eksempler`.
+      const dagsmal = locale === "da" ? "2.209" : "2 209";
 
       expect(data.metaTitle).toBe(title);
       expect(data.metaTitle.length).toBeLessThanOrEqual(60);
       expect(data.description).toContain(visible);
-      expect(data.description).toContain("2.209");
+      expect(data.description).toContain(dagsmal);
       expect(data.metaDescription).toContain("550 kcal");
-      expect(data.metaDescription).toContain("2.209");
+      expect(data.metaDescription).toContain(dagsmal);
       expect(data.metaDescription.length).toBeLessThanOrEqual(160);
       expect(data.ogTitle).toBe(title);
-      expect(data.ogDescription).toContain("2.209");
-      expect(data.schemaDescription).toContain("2.209");
+      expect(data.ogDescription).toContain(dagsmal);
+      expect(data.schemaDescription).toContain(dagsmal);
       const goalFaq = data.faqItems.find((item) => goal.test(item.question));
       expect(goalFaq?.answer).toContain("2.759");
       expect(goalFaq?.answer).toContain("550 kcal");
@@ -747,8 +750,9 @@ describe("getPageData", () => {
 
     for (const locale of ["da", "se", "no"] as const) {
       const data = getPageData("vaegttab", locale)!;
+      const dagsmal = locale === "da" ? "2.209" : "2 209";
       expect(data.description).toContain("550");
-      expect(data.description).toContain("2.209");
+      expect(data.description).toContain(dagsmal);
     }
   });
 

@@ -1,20 +1,22 @@
-STATUS: 2/10 19:05. CI grøn ved start (`37034220496`). PR-TJEK 2/10 15:12 og
+STATUS: 2/10 17:30. CI grøn ved start (`37037443374`). PR-TJEK 2/10 15:12 og
    17:30: ingen åbne PR'er (næste tjek 3/10). Sentry: ingen opgave med reel
    effekt — MINBEREGNER-2 var allerede rettet i `def070c`, MINBEREGNER-1 er
    15 hændelser / 0 brugere = bot-trafik. CEO-kø punkt 0: lukket 2/10 14:48.
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — grøn 2/10 18:55 (**3768** tests i 231 filer, +1).
-   **Denne iteration:** den svenske Excel-tabel på `beraknare.se/renteberegner`
-   skrev `=BETALNING(4/12;240;-200000)` — 33 % pr. måned, **66 666,67 kr** mod de
-   **1 211,96 kr** svarcellen lige til højre lovede (målt uafhængigt). Raten i
-   en formel er en brøk, så 4 % er `0,04`; den ligner nu den danske
-   `=YDELSE(0,04/12;240;-200000)`. Fælde-teksten «0,04/12, inte 0.04/12» lå
-   under den forkerte formel, så **porten modsagde brødteksten**: evalueringen
-   sprang BETALNING-rækkerne over, og semikolon-testen forbød netop det
-   decimalkomma, fælden kræver. Se `docs/plan-arkiv.md`.
-   **Næste iteration:** `/vaegttab` (24 fund, se 1.277) → `/kalorier` (17, se
-   2.825) → `/leasing` (9, se 2.923), alle i `page-data.ts` alene. Som
-   **feature**: `/leasing` (3.124 visninger, pos. 12,2) mangler en
+   `npm run build` — grøn 2/10 17:27 (**3781** tests i 232 filer, +13), plus
+   `locale-leak.mjs --gate` 0 og `knapgruppe-scan.mjs` 0/0.
+   **Denne iteration:** `/vaegttab`s titel og fire beskrivelsesfelter skrev
+   2.209 / 2.759 / 550 kcal som tal i sætningen, i alle tre sprog. De læses nu
+   fra `vaegttabEksempelTal`, som regner med præcis `VaegttabBeregners` egen
+   formel, og komponentens egne kopier af formlen, faktorerne og 7.700 kcal
+   pr. kilo er væk. Dansk er byte-uændret; **svensk og norsk** skrev «2.209» med
+   dansk punktum og skriver nu «2 209», som er `Intl`s og begge sprogs
+   tusindtalsseparator — samme retning som planens åbne `no`-punkt. Se
+   `docs/plan-arkiv.md`.
+   **Næste iteration:** `/vaegttab`s **FAQ-svar** (12 fund tilbage, halve 2 af
+   samme opgave: 1.000 / 7.700 / 1.500 / 1.200 / 1.780 kcal) → `/kalorier`
+   (17) → `/moms` (⛔ lovgrænser) → `/leasing` (9). Som **feature**:
+   `/leasing` (3.124 visninger, pos. 12,2) mangler en
    leasingkalkylator-til-sammenligning, konkurrenterne har den.
 
 ## Fase 3 — trafik-drevet
@@ -138,25 +140,46 @@ porten.
 (`procentpoint-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
 
 **Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
-**alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
-portens docblock siger. Efter `/renteberegner` er de **176** (var 195 ved
-iterationens start); procentpoint-rettelsen ændrer tallet **ikke** (målt med
-portens egen mønster mod begge kodestande: **164 mod 164**), fordi de to
-strenge aldrig indeholdt et tusindtalstal — de lå uden for portens
-rækkeevidde hele vejen, præcis som `/lon-efter-skatt`. Det er næsten alle
-**FAQ-svar**, altså JSON-LD Google har. Køen pr. slug efter `/renteberegner` er lukket: `vaegttab` 24 ·
-`kalorier` 17 · `moms` 15 · `pension` 12 · `leasing` 9 · `rentefradrag` 7 ·
-`kvadratmeter` 6 · `konfirmation` 6 · `efterloen` 5 · `aktieskat` 5 ·
-`loen-efter-skat` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
-**Anbefalet rækkefølge:** `/vaegttab` (24, største sluse; se 1.277 visninger)
-→ `/kalorier` (17, se 2.825) → `/moms` (men ⛔ de 3 lovgrænser) →
-`/leasing` (9, se 2.923) → `/kvadratmeter` (6, se 3.705).
+alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
+portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
+iterationens start); efter `/vaegttab` halve 1 er de **152** målt 2/10 17:29.
+Køen pr. slug efter `/vaegttab` er: `kalorier` 17 · `moms` 15 ·
+`vaegttab` **12 (kun FAQ-svarene — halve 2)** · `pension` 12 · `leasing` 9 ·
+`rentefradrag` 7 · `kvadratmeter` 6 · `konfirmation` 6 · `efterloen` 5 ·
+`aktieskat` 5 · `loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
+**Anbefalet rækkefølge:** `/vaegttab` FAQ (12, se 1.277 visninger — halve 2 af
+den opgave der lukkede metadata i dag) → `/kalorier` (17, se 2.825) →
+`/moms` (men ⛔ de 3 lovgrænser) → `/leasing` (9, se 2.923) →
+`/kvadratmeter` (6, se 3.705).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
-eget modul, og en mutation i porten. `/vaegttab` er 24 fund, så den deles i to
-halvdele. **Hvis porten udvides til `.ts` med det samme, bliver listen 176
-lang og de 176 tal bliver en tilladelsesliste** — det er måske nok det, men en
-tilladelsesliste over fejl er dyrere end porten er bred. Derfor: fix slugs
-først, portudvidelsen som sidste skridt når de er nede mod 0.
+eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
+(12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
+bliver listen 152 lang og de 152 tal bliver en tilladelsesliste** — det er
+måske nok det, men en tilladelsesliste over fejl er dyrere end porten er bred.
+Derfor: fix slugs først, portudvidelsen som sidste skridt når de er nede mod 0.
+
+**Lukket 2/10 17:30 — `vaegttab-tal-fra-modul` (halve 1: metadata).** De fire
+beskrivelsesfelter og titlen på alle tre sprog skrev «2.209», «2.759» og
+«550 kcal» som tal i sætningen (12 fund). De læses nu fra
+`vaegttabOverskrifter(locale)` i ny `src/lib/vaegttab-eksempler.ts`, som bygger
+dem på `beregnBmr` + `beregnTdee` fra `makroer.ts` — **de samme to funktioner
+`KalorieBeregner` bruger** — så eksemplet er værktøjets egen kørsel. Samme opgave
+fjernede de tre private kopier i `VaegttabBeregner.tsx`: sin egen
+Mifflin-St-Jeor-funktion, fem aktivitetsfaktorer og `KCAL_PR_KG = 7700`. Uden
+det var «fra sit eget modul» kun halvt sandt — modulet og værktøjet havde hver
+deres formel. **Målt:** dansk er byte-uændret på alle fire felter (test mod
+præcis den gamle streng), `bmr/tdee/samlet/dagligtDeficit/dagligtMaal` er
+**1.780 / 2.759 / 46.200 / 550 / 2.209** regnet uafhængigt i testen, og nye
+inputs giver nye tal (90 kg/175/45/stillesiddende/5 kg/10 uger → 1.773,75 →
+2.128,5 → 1.578,5). **Modvejs målt:** `VAEGTTAB_KCAL_PR_KG` 7.700 → 7.000 giver
+**9 røde** af 137 i to filer; en hårdkodet «2.500 kcal» i `page-data.ts` giver
+**1 rød** på `da læser titlen og beskrivelserne fra modulet`. **Sideeffekt
+rettet:** svensk og norsk skrev tusindtalsseparator med dansk punktum («2.209»
+læses som 2,209 kcal) — de skriver nu «2 209», samme retning som planens åbne
+`no`-punkt, og samme tegn som de svenske sider, der allerede er rettet
+(`/renteberegner`, `/moms`, `/procent`). Titler 39/39/47 tegn, beskrivelser
+128/127/128 — alle under Google's grænser. `/vaegttab` se: 1.277 visninger,
+13 klik, 0,2 %, pos. 8,2; da under top-15.
 
 **Lukket 2/10 18:55 — `svensk-excel-formel`.** Den svenske Excel-tabel på
 `/renteberegner` skrev `=BETALNING(4/12;240;-200000)`, som er 33 % pr. måned
@@ -199,6 +222,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `vaegttab-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/vaegttab`: `<title>` skal være byte-uændret «Vægttab: 6 kg på 12 uger = 550 kcal/dag» og `<meta name="description">` «Mand på 80 kg, 180 cm og 30 år med moderat aktivitet: 6 kg på 12 uger kræver 550 kcal i underskud, så du skal spise **2.209** kcal om dagen.»; `og:description` og JSON-LD `description` skal have «**2.209** kcal om dagen (TDEE **2.759** kcal).» og «spiser **2.209** kcal/dag.». **Hele HTML'en skal have 0** `2 209` (dansk side) og FAQ'en skal stadig have «2.759»/«2.209»/«7.700»/«1.500»/«1.200» — de er halve 2, ikke denne. `beraknare.se/vaegttab`: `<title>` «Viktminskning: 6 kg på 12 veckor = 550 kcal/dag» og beskrivelsen «… du behöver äta **2 209** kcal per dag.» — **2 209 med mellemrum**, og **intet** «2.209» på domænet. `beregner.no`: 404'er (❓ nedenfor), uændret |
 | `svensk-excel-formel` (**ny**, vindue 2/10 21:30) | `beraknare.se/renteberegner`: Excel-tabellen skal have **`=BETALNING(0,04/12;240;-200000)`** → svar **1 211,96 kr** og **`=BETALNING(0,04/12;240;-200000)*240-200000`** → **90 870,56 kr**, og fældene skal sige «Använd det svenska decimaltecknet (komma) i räntan: **0,04/12**, inte 0.04/12.». **Intet** `BETALNING(4/12` i hele HTML'en, og **intet** `BETALNING(0.04` (punktum som decimaltegn). Tredje række `=200000*4/100` → **8 000 kr** uændret. **0** `NaN` og **0** `æ`/`ø`. `minberegner.dk/renteberegner`: **0** `BETALNING`, **7** `=YDELSE(0,04/12;240;-200000)` og **2** `=RENTENPERIODER(0,04/12;-1211,96;200000)` uændrede |
 | `procentpoint-faq-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/procent`: FAQ'en skal have **«Procentpoint trækker du to procenttal fra hinanden: 22,1 % til 19,7 % er -2,4 procentpoint. Procent regner du på det gamle tal: de samme tal er -10,9 %.»** — **intet** «11,3 %» i hele HTML'en (det skal kun stå på `/ejendomsvaerdiskat`, om mio. kr). `beraknare.se/procent`: «Procentenheter får du genom att dra två procenttal från varandra: 22,1 % till 19,7 % är **−2,4** procentenheter. Procent räknar du på det gamla talet: samma tal är **−10,9** %.» — minus skal være **U+2212** (prøv: `grep -c $'är −2,4'` på strippet HTML), fordi `Intl` skriver det for sv-SE, så FAQ'en nu bærer samme tegn som tabellen ved siden af. Dansk minus er ASCII-bindestreg. **Intet** «NaN» nogen steder |
 | `renteberegner-belob-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/renteberegner`: `<meta name="description">` skal være **byte-uændret** «Annuitetslån på **100.000** kr. med **5** % rente i **5** år: **1.887** kr. i måneden og **13.227** kr. i samlet rente. Beregn også serielån.» — dansk er bevidst uændret. **Intet** «1.887» på beraknare.se og intet «1 887» på minberegner.dk. `beraknare.se/renteberegner`: `<title>` skal være «Räntekalkylator: **100 000** kr i **5** år = **1 887** kr/mån» og beskrivelsen «… kostar **1 887** kr i månaden … Total ränta: **13 227** kr.», FAQ'en skal have **syv** spørgsmål hvor «Vad är formeln för ett annuitetslån?» svarer «… lån på **200 000** kr till **4** % i **20** år ger **1 212** kr i månaden — **240** månader, **290 871** kr i alt varav **90 871** kr är ränta.» og «Hur räknar jag ett annuitetslån i Excel?» svarer «… =BETALNING(**0,05**/12;**60**;-100000) ger **1 887** kr …». `minberegner.dk/renteberegner`: FAQ'en skal have **seks** spørgsmål hvor formelsvaret svarer «… lån på **200.000** kr. til **4** % i **20** år giver **1.211,96** kr. pr. måned. I Excel er det =YDELSE(**0,04**/12;**240**;-200000)». **Intet** «1 887» og **intet** «13 227» på minberegner.dk. **Intet** «NaN» nogen steder |

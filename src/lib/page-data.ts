@@ -38,6 +38,7 @@ import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
 import { ugeDatoerFaqSvar } from "./ugenummer";
 import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
+import { vaegttabOverskrifter } from "./vaegttab-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
@@ -190,6 +191,14 @@ const krPrKm = (value: number, decimals: number) =>
   value.toFixed(decimals).replace(".", ",") + " kr. pr. km";
 /** Procent med komma — dansk, svensk og norsk bruger ikke punktum. */
 const pct = (value: number) => value.toFixed(1).replace(".", ",");
+
+// ─── /vaegttab — titel og de fire beskrivelsesfelter lovede 2.209 / 2.759 /
+// 550 kcal som tal i sætningen. De kommer nu fra `vaegttabEksempelTal`, som
+// regner med præcis VaegttabBeregners egen formel, så søgeresultatet ikke kan
+// love et tal, værktøjet ikke længere producerer. Dansk er byte-uændret.
+const vaegttabDa = vaegttabOverskrifter("da");
+const vaegttabNo = vaegttabOverskrifter("no");
+const vaegttabSe = vaegttabOverskrifter("se");
 
 /**
  * De to interval-svar i pinse-klyngen, regnet i `pinse-intervaller` i stedet
@@ -996,17 +1005,17 @@ const daPages: Record<string, PageData> = {
     "vaegttab": {
       slug: "vaegttab",
       title: "Vægttab Beregner",
-      description: "Mand på 80 kg, 180 cm og 30 år med moderat aktivitet: 6 kg på 12 uger kræver 550 kcal i underskud, så du skal spise 2.209 kcal om dagen.",
-      metaTitle: "Vægttab: 6 kg på 12 uger = 550 kcal/dag",
-      metaDescription: "6 kg på 12 uger kræver 550 kcal i dagligt underskud. Mand på 80 kg, 180 cm og 30 år: spis 2.209 kcal om dagen (TDEE 2.759 kcal).",
+      description: vaegttabDa.description,
+      metaTitle: vaegttabDa.metaTitle,
+      metaDescription: vaegttabDa.metaDescription,
       keywords: ["vægttab beregner", "kalorieunderskud", "tab dig", "kalorier vægttab", "sundt vægttab", "kg pr uge"],
-      ogTitle: "Vægttab: 6 kg på 12 uger = 550 kcal/dag",
-      ogDescription: "6 kg på 12 uger kræver 550 kcal i dagligt underskud. Mand på 80 kg, 180 cm og 30 år: spis 2.209 kcal om dagen (TDEE 2.759 kcal).",
+      ogTitle: vaegttabDa.metaTitle,
+      ogDescription: vaegttabDa.metaDescription,
       category: "Sundhed",
       breadcrumbCategory: "Sundhed",
       breadcrumbCategoryHref: "/kategori/sundhed",
       schemaName: "Vægttab Beregner",
-      schemaDescription: "Beregn dagligt kalorieunderskud: 6 kg på 12 uger er 550 kcal/dag, så en mand på 80 kg spiser 2.209 kcal/dag.",
+      schemaDescription: vaegttabDa.schemaDescription,
       schemaCategory: "HealthApplication",
       faqItems: [
       { question: "Hvor hurtigt kan man tabe sig sundt?", answer: "0,5-1 kg pr. uge. Svarer til 500-1.000 kcal underskud pr. dag." },
@@ -2402,17 +2411,17 @@ const noPages: Record<string, PageData> = {
     "vaegttab": {
       slug: "vaegttab",
       title: "Vekttap Kalkulator",
-      description: "Mann på 80 kg, 180 cm og 30 år med moderat aktivitet: 6 kg på 12 uker krever 550 kcal i underskudd, så du må spise 2.209 kcal per dag.",
-      metaTitle: "Vekttap: 6 kg på 12 uker = 550 kcal/dag",
-      metaDescription: "6 kg på 12 uker krever 550 kcal i daglig underskudd. Mann på 80 kg, 180 cm og 30 år: spis 2.209 kcal per dag (TDEE 2.759 kcal).",
+      description: vaegttabNo.description,
+      metaTitle: vaegttabNo.metaTitle,
+      metaDescription: vaegttabNo.metaDescription,
       keywords: ["vekttap kalkulator", "kaloriunderskudd", "gå ned i vekt", "kalorier vekttap", "sunt vekttap", "kg per uke"],
-      ogTitle: "Vekttap: 6 kg på 12 uker = 550 kcal/dag",
-      ogDescription: "6 kg på 12 uker krever 550 kcal i daglig underskudd. Mann på 80 kg, 180 cm og 30 år: spis 2.209 kcal per dag (TDEE 2.759 kcal).",
+      ogTitle: vaegttabNo.metaTitle,
+      ogDescription: vaegttabNo.metaDescription,
       category: "Helse",
       breadcrumbCategory: "Helse",
       breadcrumbCategoryHref: "/kategori/sundhed",
       schemaName: "Vekttap Kalkulator",
-      schemaDescription: "Beregn daglig underskudd: 6 kg på 12 uker er 550 kcal/dag, så en mann på 80 kg spiser 2.209 kcal/dag.",
+      schemaDescription: vaegttabNo.schemaDescription,
       schemaCategory: "HealthApplication",
       faqItems: [
       { question: "Hvor raskt kan man gå ned i vekt sunt?", answer: "0,5-1 kg per uke. Tilsvarer 500-1.000 kcal underskudd per dag." },
@@ -3590,17 +3599,17 @@ const sePages: Record<string, PageData> = {
     "vaegttab": {
       slug: "vaegttab",
       title: "Viktminskning Kalkylator",
-      description: "Man på 80 kg, 180 cm och 30 år med måttlig aktivitet: 6 kg på 12 veckor kräver 550 kcal i underskott, så du behöver äta 2.209 kcal per dag.",
-      metaTitle: "Viktminskning: 6 kg på 12 veckor = 550 kcal/dag",
-      metaDescription: "6 kg på 12 veckor kräver 550 kcal i dagligt underskott. Man på 80 kg, 180 cm och 30 år: ät 2.209 kcal per dag (TDEE 2.759 kcal).",
+      description: vaegttabSe.description,
+      metaTitle: vaegttabSe.metaTitle,
+      metaDescription: vaegttabSe.metaDescription,
       keywords: ["viktminskning kalkylator", "kaloriunderskott", "gå ner i vikt", "kalorier viktminskning", "hälsosam viktminskning"],
-      ogTitle: "Viktminskning: 6 kg på 12 veckor = 550 kcal/dag",
-      ogDescription: "6 kg på 12 veckor kräver 550 kcal i dagligt underskott. Man på 80 kg, 180 cm och 30 år: ät 2.209 kcal per dag (TDEE 2.759 kcal).",
+      ogTitle: vaegttabSe.metaTitle,
+      ogDescription: vaegttabSe.metaDescription,
       category: "Hälsa",
       breadcrumbCategory: "Hälsa",
       breadcrumbCategoryHref: "/kategori/sundhed",
       schemaName: "Viktminskning Kalkylator",
-      schemaDescription: "Beräkna dagligt kaloriunderskott: 6 kg på 12 veckor är 550 kcal/dag, så en man på 80 kg äter 2.209 kcal/dag.",
+      schemaDescription: vaegttabSe.schemaDescription,
       schemaCategory: "HealthApplication",
       faqItems: [
       { question: "Hur snabbt kan man gå ner i vikt hälsosamt?", answer: "0,5-1 kg per vecka. Motsvarar 500-1.000 kcal underskott per dag." },

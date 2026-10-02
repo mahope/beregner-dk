@@ -7,28 +7,22 @@ import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatNumber } from '@/lib/format';
+import { AKTIVITETS_FAKTORER, beregnBmr } from '@/lib/makroer';
+import { VAEGTTAB_KCAL_PR_KG } from '@/lib/vaegttab-eksempler';
 
 type Koen = "mand" | "kvinde";
 type Aktivitet = "stillesiddende" | "let" | "moderat" | "aktiv" | "meget_aktiv";
 
 const AKTIVITETSFAKTORER: Record<Aktivitet, { faktor: number; label: string; beskrivelse: string }> = {
-  stillesiddende: { faktor: 1.2, label: "Stillesiddende", beskrivelse: "Kontorarbejde, ingen motion" },
-  let: { faktor: 1.375, label: "Let aktiv", beskrivelse: "Let motion 1-3 dage/uge" },
-  moderat: { faktor: 1.55, label: "Moderat aktiv", beskrivelse: "Motion 3-5 dage/uge" },
-  aktiv: { faktor: 1.725, label: "Aktiv", beskrivelse: "Hård motion 6-7 dage/uge" },
-  meget_aktiv: { faktor: 1.9, label: "Meget aktiv", beskrivelse: "Fysisk krævende job + motion" },
+  stillesiddende: { faktor: AKTIVITETS_FAKTORER.stillesiddende, label: "Stillesiddende", beskrivelse: "Kontorarbejde, ingen motion" },
+  let: { faktor: AKTIVITETS_FAKTORER.let, label: "Let aktiv", beskrivelse: "Let motion 1-3 dage/uge" },
+  moderat: { faktor: AKTIVITETS_FAKTORER.moderat, label: "Moderat aktiv", beskrivelse: "Motion 3-5 dage/uge" },
+  aktiv: { faktor: AKTIVITETS_FAKTORER.aktiv, label: "Aktiv", beskrivelse: "Hård motion 6-7 dage/uge" },
+  meget_aktiv: { faktor: AKTIVITETS_FAKTORER.meget_aktiv, label: "Meget aktiv", beskrivelse: "Fysisk krævende job + motion" },
 };
 
-// 1 kg fedt ≈ 7.700 kcal
-const KCAL_PR_KG = 7700;
-
-function beregnBMR(vaegt: number, hoejde: number, alder: number, koen: Koen): number {
-  // Mifflin-St Jeor formel
-  if (koen === "mand") {
-    return 10 * vaegt + 6.25 * hoejde - 5 * alder + 5;
-  }
-  return 10 * vaegt + 6.25 * hoejde - 5 * alder - 161;
-}
+// 1 kg fedt ≈ 7.700 kcal — VAEGTTAB_KCAL_PR_KG, som også læses af /vaegttabs
+// egen brødtekst, så de to ikke kan glide fra hinanden.
 
 export default function VaegttabBeregner() {
   const { locale } = useLocale();
@@ -193,10 +187,10 @@ export default function VaegttabBeregner() {
 
     const totalTab = v - mv;
     const kgPrUge = totalTab / u;
-    const totalKcalDeficit = totalTab * KCAL_PR_KG;
+    const totalKcalDeficit = totalTab * VAEGTTAB_KCAL_PR_KG;
     const dagligtDeficit = totalKcalDeficit / (u * 7);
 
-    const bmr = beregnBMR(v, h, a, koen);
+    const bmr = beregnBmr(koen, v, h, a);
     const tdee = bmr * AKTIVITETSFAKTORER[aktivitet].faktor;
     const dagligtMaal = tdee - dagligtDeficit;
 
@@ -212,7 +206,7 @@ export default function VaegttabBeregner() {
 
     // Anbefalet tempo: 0.5-0.75 kg/uge
     const anbefaletUger = Math.ceil(totalTab / 0.5);
-    const anbefaletDeficit = (totalTab * KCAL_PR_KG) / (anbefaletUger * 7);
+    const anbefaletDeficit = (totalTab * VAEGTTAB_KCAL_PR_KG) / (anbefaletUger * 7);
     const anbefaletKalorier = tdee - anbefaletDeficit;
 
     if (!hasTracked.current) {

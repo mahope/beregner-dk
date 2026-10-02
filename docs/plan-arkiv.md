@@ -25115,3 +25115,92 @@ sitemap, ingen `<title>`, ingen `<meta description>`, ingen dansk side.
 **Gate grøn:** lint (689 filer), typecheck, **3768 tests / 231 filer** (+1),
 build (168 sider, de 7 kendte CSS-advarsler uændrede). Punkt 13:
 `git diff | grep -nE '^\+.*\$[0-9]'` er tom.
+
+---
+
+## `vaegttab-tal-fra-modul` — 2/10 17:30 — halve 1 af `/vaegttab`s 24 fund
+
+**Hvorfor denne.** Planens kø anbefalede `/vaegttab` først af F5b-slugene, fordi
+den var den største sluse: **24 fund** i `page-data.ts`, målt med egen
+AST-probe i samme mønster som portens `strengBelob`. Den blev delt i to
+halvdele a 12 fund, og denne er metadata — de fire beskrivelsesfelter og titlen
+i alle tre sprog, fordi det er dem Google viser.
+
+**Målt først, ikke regnet.** `node`-probe med TypeScript-parseren over
+`src/lib/page-data.ts`: `vaegttab` 24, `kalorier` 17, `moms` 15, `pension` 12,
+`leasing` 9 — planens rækkefølge holdt. De 24 fund var **8 pr. sprog** og
+identiske på linjerne 999/1001/1004/1009/1012/1013/1014/1016 (da), 2405-2422
+(no) og 3593-3610 (se).
+
+**Rettelsen.** Ny `src/lib/vaegttab-eksempler.ts`:
+
+- `VAEGTTAB_KCAL_PR_KG = 7700`
+- `VAEGTTAB_EKSEMPEL` — 80 kg, 180 cm, 30 år, moderat, 6 kg, 12 uger
+- `vaegttabEksempelTal()` — `beregnBmr` + `beregnTdee` fra `makroer.ts`,
+  underskuddet fordelt på `uger × 7` dage
+- `vaegttabOverskrifter(locale)` — de fire strenge pr. sprog, alle tal igennem
+  `formatBelob`
+
+`page-data.ts` har nu tre konstanter (`vaegttabDa/No/Se`) i stedet for 24
+håndskrevne tal.
+
+**Dybden i opgaven: værktøjet havde sine egne kopier.** `VaegttabBeregner.tsx`
+indeholdt en privat `beregnBMR` (Mifflin-St Jeor), fem private
+aktivitetsfaktorer og `const KCAL_PR_KG = 7700`. Uden at fjerne dem ville
+«siden læser sit tal fra sit eget modul» være en halv sandhed: modulet bruger
+`makroer.ts`, værktøjet bruger sin egen formel — to implementationer af én
+Mifflin-St Jeor, som `KalorieBeregner` allerede læser fra `makroer.ts`.
+Komponenten importerer nu `beregnBmr`, `AKTIVITETS_FAKTORER` og
+`VAEGTTAB_KCAL_PR_KG`; de tre private kopier er væk. Beregningslogikken er
+identisk før og efter (kun kaldets rækkefølge ændret: `beregnBMR(v,h,a,koen)` →
+`beregnBmr(koen,v,h,a)`), så ingen eksisterende test ændrede svar.
+
+**Sidefund: svensk og norsk skrev tusindtalsseparator med dansk punktum.**
+`beraknare.se/vaegttab` lovede «2.209 kcal» og «TDEE 2.759 kcal» — i svensk
+løbende tekst læses «2.209» som to komma to nul ni. `formatBelob` giver
+«2 209», som er `Intl`s svenske og norske separator og den retning planens åbne
+`no`-punkt allerede peger på. Samme tegn som de svenske sider der *er* rettet
+(`/renteberegner` «1 887 kr», `/moms` «1 000 kr», `/procent` «2 500 kr»).
+**Dansk er byte-uændret** på alle fire felter — det er låst i testen mod den
+gamle streng, ikke mod en interpolation.
+
+**Målt:**
+
+- `bmr / tdee / samletUnderskud / dagligtDeficit / dagligtMaal` =
+  **1.780 / 2.759 / 46.200 / 550 / 2.209**, regnet uafhængigt af modulet i
+  testen (10×80 + 6,25×180 − 5×30 + 5; × 1,55; 6×7.700; ÷ 84; − 550).
+- Et andet eksempel giver andre tal: 90 kg / 175 cm / 45 år / stillesiddende /
+  5 kg / 10 uger → BMR **1.773,75**, TDEE **2.128,5**, dagsmål **1.578,5**.
+  Formlen læser altså ingen konstanter.
+- Titler **39 / 39 / 47** tegn, beskrivelser **128 / 127 / 128** — under
+  Google's 60/160.
+- `ogTitle === metaTitle` og `ogDescription === metaDescription` i alle tre
+  sprog (de var to ens strenge i kilden).
+- Fundene for sluggen: **24 → 12**, portens total **176 → 152**. De 12 der
+  bliver, er FAQ-svarene (500-1.000, 7.700, 1.500, 1.200, 1.780) — halve 2.
+
+**Modsvejs målt.** `VAEGTTAB_KCAL_PR_KG` 7.700 → 7.000: **9 røde** af 137 i
+`vaegttab-eksempler.test.ts` + `page-data.test.ts`. En hårdkodet «2.500 kcal»
+i `page-data.ts`'s danske `description`: **1 rød** på
+`da læser titlen og beskrivelserne fra modulet`. Begge muterede filer genskabt
+(`diff -q` tom).
+
+**Gamle låse opdateret, ikke slettet.** `page-data.test.ts` skrev «2.209» for
+alle tre sprog og `vaegttab/page.test.tsx` skrev den fulde sætning for `se` og
+`no`. De bruger nu `locale === "da" ? "2.209" : "2 209"`. De tre FAQ-låse på
+«2.759»/«2.209» er **urørte** — de er halve 2.
+
+**Ikke rørt:** beregningslogikken i `VaegttabBeregner.tsx` (kun import og to
+kald), `/kalorier`, `makroer.ts`, nogen anden slug, `src/app/vaegttab/page.tsx`,
+sitemap, JSON-LD-strukturen.
+
+**Gate grøn:** lint (**691 filer**), typecheck, **3781 tests / 232 filer**
+(+13), build (168 sider), `locale-leak.mjs --gate` exit 0,
+`knapgruppe-scan.mjs` **0/0**. Punkt 13:
+`git diff master | grep -nE '^\+.*\$[0-9]'` er tom. Branch `ceo/vaegttab-tal-fra-modul`,
+squashet til `master` i ét commit med planen.
+
+**MÅL:** `/vaegttab` se baseline **1.277 visninger / 13 klik / CTR 0,2 % /
+pos. 8,2** pr. 2026-09-02 → 2026-09-30. Dansk under top-15, så ingen CTR-baseline
+at flytte. Rettelsen er en korrekthedstask, ikke en CTR-tasking — forventningen er
+**ingen** ændring i visninger; beskrivelserne er byte-uændrede på dansk.

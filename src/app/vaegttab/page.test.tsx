@@ -35,12 +35,12 @@ describe("vaegttab page", () => {
     {
       locale: "se" as const,
       heading: "Viktminskning Kalkylator",
-      answer: "6 kg på 12 veckor kräver 550 kcal i underskott, så du behöver äta 2.209 kcal per dag",
+      answer: "6 kg på 12 veckor kräver 550 kcal i underskott, så du behöver äta 2 209 kcal per dag",
     },
     {
       locale: "no" as const,
       heading: "Vekttap Kalkulator",
-      answer: "6 kg på 12 uker krever 550 kcal i underskudd, så du må spise 2.209 kcal per dag",
+      answer: "6 kg på 12 uker krever 550 kcal i underskudd, så du må spise 2 209 kcal per dag",
     },
   ])("viser det konkrete kalorie-svar og beregneren i $locale", async ({ locale, heading, answer }) => {
     vi.mocked(getLocale).mockResolvedValue(locale);
