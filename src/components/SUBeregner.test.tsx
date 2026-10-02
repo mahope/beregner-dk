@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -253,5 +255,22 @@ describe("SUBeregner", () => {
 
     expect(screen.getByLabelText(/Forventet arbejdsindkomst/)).toHaveValue(0);
     expect(resultCard("Månedlig SU (før skat)")).toHaveTextContent("7.426");
+  });
+  test("skriver valutaenheden kun én gang", async () => {
+    // `formatKr` er `formatCurrency`, som selv afslutter med valutaenheden, så
+    // et bogstaveligt " kr." efter kalden skrev "3.799 kr. kr." — både i det
+    // viste resultat og i de sætninger, der kun vises ved en bestemt ordning.
+    renderSU();
+
+    await waitFor(() => {
+      expect(resultCard("Månedlig SU (før skat)")).toHaveTextContent("7.426");
+    });
+    const tekst = (document.body.textContent ?? "").replace(/[\u00a0\u202f\u2009]/g, " ");
+    expect(tekst).not.toMatch(/kr\. kr\.|kr kr/);
+    // Samme regel for de sætninger, der kun vises i legacy- og ungdomsordningen:
+    // de skal ikke kunne få den dobbelte enhed tilbage, hvis porten ovenfor
+    // aldrig renderer dem.
+    const kilde = readFileSync(join(process.cwd(), "src/components/SUBeregner.tsx"), "utf8");
+    expect(kilde).not.toMatch(/formatKr\([^{}]*\)\s*kr\./);
   });
 });

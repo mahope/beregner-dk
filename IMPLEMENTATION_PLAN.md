@@ -18,8 +18,8 @@ STATUS: 2/10 20:54. CI grøn ved start (`37044864618`). PR-TJEK 2/10 19:47:
     `TopskatBeregner` og `AktieskatBeregner` bruger `toLocaleString` og har
     derfor **aldrig** haft dobbelt enhed. Mutation: « kr.» tilbage i
     pensionstillæg-sætningen giver **1 rød** af 11.
-    **Næste iteration:** `SUBeregner` (7 kallesteder) → og så **skal** der være
-    en feature.
+    **Næste iteration:** en **feature** — `/dage-til`-hubben (forslaget nedenfor)
+    er den mest målbare, fordi GSC viser to konkrete søgninger i den familie.
     **Forslag til næste feature (researchet 2/10 20:50, ikke bygget):** en
     `/dage-til`-**hub** i da + se. Målt: `/dage-til` og `/dagar-till` er **404**
     på begge domæner, de 23 + 20 countdown-sider har ingen fælles side (kun
@@ -267,11 +267,19 @@ sprog og låser månedsydelsen til `beregnLeasingSammenlign`-værdien med én en
 Mutation: « kr.» tilbage i alle 20 kald giver **2 røde** af 3.
 `/leasing` se: 2.923 visninger / 33 klik / 1,1 % / pos. 12,2.
 
-**Åben: dobbelt valutaenhed i `SUBeregner` (sidste).** Samme mønster som pension
-og leasing: `formatKr` = `formatCurrency` og **7** sætninger sætter « kr.»
-oveni (bl.a. «Inkl. 3.799 kr. forældrelån» og to grænsetal i brødteksten).
-*Accept:* ingen `formatKr(…)} kr.` tilbage, og en test på den renderede streng
-som de to andre.
+**Lukket 2/10 21:01 — `su-dobbelt-valuta` (sidste i klassen).** Alle **7**
+`formatKr(…)} kr.` i `SUBeregner` er væk, så «Inkl. 3.799 kr. forældrelån» og
+de fire grænsetal i brødteksten har én enhed. Den nye test dømmer den
+**rendrede** side (ingen «kr. kr.») **og** læser kilden, så de sætninger der
+kun vises i legacy- og ungdomsordningen heller ikke kan få den dobbelte enhed
+tilbage. Mutation: « kr.» tilbage i alle 7 kald → **1 rød** af 15.
+**Hele dobbelt-enheds-fejlen er nu lukket** i de tre komponenter der havde den
+(3 målt, ikke 7 som den gamle note sagde).
+
+⚠️ **Flake målt 2/10 21:00:** én fuld kørsel gav «1 failed | 3806 passed» uden
+at loggen fangede filnavnet; de to næste fulde kørsler er grønne (3807/3807).
+Hvis den dukker op igen, er det ikke denne opgave — ingen af de tre berørte
+filer blev ændret i den kørsel.
 
 **Åben: norske tusindtalsseparatorer.** `/renteberegner` skriver nu «1 887»
 med mellemrum, mens resten af `noPages` skriver «2.500» med punktum («BMR
@@ -298,6 +306,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `su-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/su`: hele HTML'en skal have **0** `kr. kr.` og **0** `kr kr`. Brødteksten skal have «Inkl. **3.799** kr. forældrelån», «… ligger mellem **7.426** kr. og **20.749** kr. pr. måned», «Det separate forsørgertillæg er **1.114** kr. pr. måned før skat» og «… ungdomsuddannelse er 18-19-åriges grundsats **6.043** kr., mens den faste sats fra 20 år er **6.043** kr.». `beraknare.se/su` (dansk fallback): samme tal, 0 dobbelt enheder. `Intet** `NaN` |
 | `leasing-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/leasing`: hele HTML'en skal have **0** `kr. kr.` og **0** `kr kr`. Resultatblokken skal have «**4.121** kr.», «**178.350** kr.», «**28.350** kr.», «**150.000** kr.» (værdi på biler), «**169.140** kr.» (billån i alt), «**9.210** kr.» (forskel) og «**30.000** kr.» pr. måned med `/mån` på de to månedstal. `beraknare.se/leasing`: de samme tal med **mellemrum** («4 121 kr») og **én** enhed, 0 dobbelt. `Intet** `NaN` |
 | `pension-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/pension`: sætningen under resultatlisten skal være «Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på **8.729 kr.**» — og **hele HTML'en skal have 0** `kr. kr.` og **0** `kr kr`. Rækkerne skal stadig være «16.273 kr.», «7.544 kr.» og «8.729 kr.». `beraknare.se/pension`: samme sætning med **én** enhed («8.729 kr», Intl skriver «kr» for sv-SE) og 0 dobbelt enheder. |
 | `pension-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/pension`: sætningen under resultatlisten skal være «Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på **8.729 kr.**» — og **hele HTML'en skal have 0** `kr. kr.` og **0** `kr kr`. Rækkerne skal stadig være «16.273 kr.», «7.544 kr.» og «8.729 kr.». `beraknare.se/pension`: samme sætning med **én** enhed («8.729 kr», Intl skriver «kr» for sv-SE) og 0 dobbelt enheder. |

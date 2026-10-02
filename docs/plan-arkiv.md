@@ -25397,3 +25397,33 @@ kald giver **2 røde** af 3; filen genskabt byte-for-byte (`diff -q` tom).
 
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test`
 (3806 i 234 filer) · `npm run build` — alle grønne 2/10 20:57.
+
+## Lukket 2/10 21:01 — `su-dobbelt-valuta` (sidste i klassen)
+
+**Find:** samme rodårsag for tredje gang. `SUBeregner.tsx:162` definerer
+`formatKr` som `formatCurrency(...)`, som selv afslutter med valutaenheden,
+og **7** sætninger satte « kr.» oveni: «Inkl. 3.799 kr. kr. forældrelån», to
+grænsetal i «… ligger mellem … og … kr. pr. måned», forsørgertillægget, de to
+legacy-satser og den gamle ordnings-grundsats. Rettelsen er de 7 literals
+fjernet.
+
+**Port:** den nye test i `SUBeregner.test.tsx` gør begge dele, fordi de syv
+steder ikke alle kan renders i én tilstand: den dømmer den **rendrede** side
+(`document.body.textContent` må ikke matche `/kr\. kr\.|kr kr/`) **og** læser
+kilden med `readFileSync`, så legacy- og ungdomsordningens sætninger heller
+ikke kan få den dobbelte enhed tilbage. Samme mønster som
+`regnestykker.test.ts` bruger. **Modvejs målt:** « kr.» tilbage i alle 7 kald
+giver **1 rød** af 15; filen genskabt byte-for-byte (`diff -q` tom).
+
+**Hele klassen er nu lukket:** de tre komponenter, der faktisk brugte
+`formatCurrency` — `PensionBeregner` (4), `LeasingBeregner` (20) og
+`SUBeregner` (7) — har ingen dobbelt enhed tilbage. De fire andre i den gamle
+note har aldrig haft den.
+
+**Flake:** én fuld kørsel 2/10 21:00 endte på «1 failed | 3806 passed» uden at
+loggen fangede hvilken fil; de to følgende fulde kørsler er grønne (3807/3807
+i 235 filer). Ikke reproduceret, og ingen af de tre berørte filer blev ændret
+mellem kørslerne.
+
+**Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test`
+(3807 i 235 filer) · `npm run build` — grønne 2/10 21:01.

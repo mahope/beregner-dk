@@ -498,7 +498,7 @@ export default function SUBeregner() {
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {harBarnUnder18
-              ? `Inkl. ${formatKr(SU_2026.loan.parentMonthly)} kr. forældrelån`
+              ? `Inkl. ${formatKr(SU_2026.loan.parentMonthly)} forældrelån`
               : `pr. måned fra ${SU_2026.rules.minimumLoanAge} år`}
           </p>
         </div>
@@ -513,7 +513,7 @@ export default function SUBeregner() {
             Udeboendesats kræver godkendelse
           </p>
           <p className="text-amber-800 dark:text-amber-300">
-            En 18-19-årig får normalt hjemmeboende SU uden godkendelse. Beregningen bruger derfor den aktuelle hjemmeboende grundsats på {formatKr(SU_2026.homewardBase)}. Med godkendelse vises den godkendte ungdomssats på {formatKr(SU_2026.youthAway18To19Base)} kr. før skat.
+            En 18-19-årig får normalt hjemmeboende SU uden godkendelse. Beregningen bruger derfor den aktuelle hjemmeboende grundsats på {formatKr(SU_2026.homewardBase)}. Med godkendelse vises den godkendte ungdomssats på {formatKr(SU_2026.youthAway18To19Base)} før skat.
           </p>
         </div>
       )}
@@ -527,7 +527,7 @@ export default function SUBeregner() {
             Forældreindkomst påvirker satsen
           </p>
           <p className="text-amber-800 dark:text-amber-300">
-            Den valgte sats er et grundbeløb før skat. Det samlede beløb afhænger af forældrenes indkomstgrundlag i {SU_2026.parentalIncomeYear} og ligger mellem {formatKr(beregning.basisSU)} og {formatKr(beregning.maximumParentalIncomeSU ?? beregning.basisSU)} kr. pr. måned. Beregningen bruger grundbeløbet og tilhørende fribeløbsscenario.
+            Den valgte sats er et grundbeløb før skat. Det samlede beløb afhænger af forældrenes indkomstgrundlag i {SU_2026.parentalIncomeYear} og ligger mellem {formatKr(beregning.basisSU)} og {formatKr(beregning.maximumParentalIncomeSU ?? beregning.basisSU)} pr. måned. Beregningen bruger grundbeløbet og tilhørende fribeløbsscenario.
           </p>
         </div>
       )}
@@ -542,8 +542,8 @@ export default function SUBeregner() {
           </p>
           <p className="text-amber-800 dark:text-amber-300">
             {uddannelse === "ungdom" && youthAgeGroup === "18to19" && !harBarnUnder18
-              ? `18-19-årige i den gamle ordning har en grundsats på ${formatKr(SU_2026.youthLegacy18To19Base)} kr. og kan få et indkomstafhængigt tillæg op til ${formatKr(SU_2026.homewardLegacy)} kr. før skat.`
-              : `Visse studerende, hvis uddannelse startede før ${SU_2026.currentHomewardSchemeStart}, beholder den faste sats på ${formatKr(SU_2026.homewardLegacy)} kr. Fribeløbet følger den normale status, fordi den faste sats ikke er en indkomstreduktion.`}
+              ? `18-19-årige i den gamle ordning har en grundsats på ${formatKr(SU_2026.youthLegacy18To19Base)} og kan få et indkomstafhængigt tillæg op til ${formatKr(SU_2026.homewardLegacy)} før skat.`
+              : `Visse studerende, hvis uddannelse startede før ${SU_2026.currentHomewardSchemeStart}, beholder den faste sats på ${formatKr(SU_2026.homewardLegacy)} Fribeløbet følger den normale status, fordi den faste sats ikke er en indkomstreduktion.`}
           </p>
         </div>
       )}
@@ -571,7 +571,7 @@ export default function SUBeregner() {
             Forsørgertillæg
           </p>
           <p className="text-blue-800 dark:text-blue-300">
-            Det separate forsørgertillæg er {formatKr(SU_2026.singleParentSupplement)} kr. pr. måned før skat, når du er berettiget. Det er en beregnet sum sammen med den valgte SU og ikke én enkelt offentlig sats.
+            Det separate forsørgertillæg er {formatKr(SU_2026.singleParentSupplement)} pr. måned før skat, når du er berettiget. Det er en beregnet sum sammen med den valgte SU og ikke én enkelt offentlig sats.
           </p>
         </div>
       )}
@@ -660,7 +660,7 @@ export default function SUBeregner() {
           </div>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-            Visse uddannelser, der startede før {SU_2026.currentHomewardSchemeStart}, kan følge en ældre ordning. På ungdomsuddannelse er 18-19-åriges grundsats {formatKr(SU_2026.youthLegacy18To19Base)} kr., mens den faste sats fra 20 år er {formatKr(SU_2026.homewardLegacy)} kr.
+            Visse uddannelser, der startede før {SU_2026.currentHomewardSchemeStart}, kan følge en ældre ordning. På ungdomsuddannelse er 18-19-åriges grundsats {formatKr(SU_2026.youthLegacy18To19Base)}, mens den faste sats fra 20 år er {formatKr(SU_2026.homewardLegacy)}
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
           Kilder:{" "}
