@@ -168,7 +168,9 @@ describe("leasingSammenlignFaqSvar", () => {
     const se = leasingSammenlignFaqSvar(sammenlign, "se");
     expect(se).toContain("178 350 kr");
     expect(se).toContain("169 140 kr");
-    expect(se).toContain("9 210 kr mer");
+    // Billånet er billigere (169 140 < 178 350), så forskellen er «mindre».
+    expect(sammenlign.billigst).toBe("billaan");
+    expect(se).toContain("9 210 kr mindre");
     expect(se).toContain("150 000 kr kvar att sälja den för");
     expect(se).toContain("4,5 %");
     expect(se).toContain("36 månader");
@@ -180,20 +182,46 @@ describe("leasingSammenlignFaqSvar", () => {
     const se = leasingSammenlignFaqSvar(sammenlign, "se");
 
     expect(da).toContain("178.350 kr.");
-    expect(da).toContain("169.140 kr.");
-    expect(da).toContain("9.210 kr. mere");
+    expect(da).toContain("169.140 kr,");
+    expect(da).toContain("9.210 kr mindre");
     expect(no).toContain("178 350 kr");
-    expect(no).toContain("9 210 kr mer");
+    expect(no).toContain("9 210 kr mindre");
     expect(new Set([da, no, se]).size).toBe(3);
+  });
+
+  test("ingen sætning sætter kr. ved siden af sit eget punktum", () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      const svar = leasingSammenlignFaqSvar(sammenlign, locale);
+      expect(svar).not.toMatch(/kr\.\.|kr\.,/);
+    }
   });
 
   test("svaret skifter retning, når leasing bliver billigere", () => {
     // Uden restværdi er de to afdragsformer næsten lige dyre, og leasing
-    // vinder. Sætningen må ikke stå og sige "mer" om en fordel.
+    // vinder. Sætningen må ikke stå og sige "mindre" om en fordel.
     const ingenRest = beregnLeasingSammenlign({ ...LEASING_EKSEMPEL, restvaerdi: 0 })!;
     const se = leasingSammenlignFaqSvar(ingenRest, "se");
     expect(ingenRest.billigst).toBe("leasing");
-    expect(se).toContain("mindre");
-    expect(se).not.toContain("mer.");
+    expect(se).toContain("mer");
+    expect(se).not.toContain("mindre");
+  });
+
+  // Bevar at «mer»/«mindre» beskriver **billånet**: ordet skal følge den
+  // afdragsform, der reelt er billigst, i alle tre sprog. Uden denne kan
+  // en ny standardværdi få sætningen til at modsige tabellen.
+  test("«mer»/«mindre» følger den billigste afdragsform i alle sprog", () => {
+    const restvaerdier = [150000, 10000, 0, 60000];
+    for (const restvaerdi of restvaerdier) {
+      const s = beregnLeasingSammenlign({ ...LEASING_EKSEMPEL, restvaerdi })!;
+      const forventetDa = s.billigst === "billaan" ? "mindre" : "mere";
+      const forventetSeNo = s.billigst === "billaan" ? "mindre" : "mer";
+      for (const locale of ["da", "se", "no"] as const) {
+        const svar = leasingSammenlignFaqSvar(s, locale);
+        const ord = svar.match(/(mindre|mere|mer)\./)?.[1];
+        expect(ord, `restvaerdi ${restvaerdi}, ${locale}`).toBe(
+          locale === "da" ? forventetDa : forventetSeNo,
+        );
+      }
+    }
   });
 });

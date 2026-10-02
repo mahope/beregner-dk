@@ -270,6 +270,22 @@ export const LEASING_EKSEMPEL: LeasingInput = {
 };
 
 /**
+ * «mer» eller «mindre» i sætningen om forskellen mellem leasing og billån.
+ *
+ * Sætningen har **billånet** som subjekt («Ett billån … kostar 169 140 kr,
+ * alltså 9 210 kr …»), så ordet skal beskrive billånet i forhold til
+ * leasingen. Det afgør `sammenlign.billigst` — den samme vinder resten af
+ * siden viser — så ordet og tabellen ikke kan modsige hinanden. (Før stod
+ * det i sin egen ternie på `billaanFordel`, hvis fortegn var omvendt, så
+ * standardeksemplet sagde «9 210 kr mer» om et billån der er billigere.)
+ */
+function sammenlignOrd(sammenlign: LeasingSammenlign, locale: Locale): string {
+  const billaanErBilligere = sammenlign.billigst === "billaan";
+  if (locale === "da") return billaanErBilligere ? "mindre" : "mere";
+  return billaanErBilligere ? "mindre" : "mer";
+}
+
+/**
  * Svaret på «blir leasing billigere eller dyrere end et billån?», regnet på
  * `LEASING_EKSEMPEL`.
  *
@@ -285,7 +301,9 @@ export function leasingSammenlignFaqSvar(
   sammenlign: LeasingSammenlign,
   locale: Locale,
 ): string {
-  const enhed = locale === "da" ? "kr." : "kr";
+  // Skabelonen ejer punktet: den skriver «kr» (ikke «kr.») i dansk, fordi
+  // «kr.» + skabelonens punktum gav «178.350 kr..» og «169.140 kr.,».
+  const enhed = "kr";
   const leasing = formatBelob(sammenlign.leasing.nettoOmkostning, locale);
   const billaan = formatBelob(sammenlign.billaan.nettoOmkostning, locale);
   const tilbage = formatBelob(sammenlign.billaan.ejerVedUdlob, locale);
@@ -297,18 +315,16 @@ export function leasingSammenlignFaqSvar(
 
   // Hvilken af de to der er dyrest, afhænger af tallene — en sætning der
   // antager, at leasing altid er dyrest, ville være forkert for de andre
-  // løbetider og restværdier, som brugeren netop kan indtaste.
+  // løbetider og restværdier, som brugeren netop kan indtaste. Derfor er
+  // både beløbet og ordet læst af `sammenlign`, ikke af et tegn.
   const forskel = Math.abs(sammenlign.billaanFordel);
-  const leasingDyrest = sammenlign.billaanFordel > 0;
+  const ord = sammenlignOrd(sammenlign, locale);
 
   if (locale === "se") {
-    const mere = leasingDyrest ? "mer" : "mindre";
-    return `Det beror på restvärdet och räntan. Med kalkylatorns standardvärden — ${pris} kr i bilpris, ${rest} kr i restvärde, ${rente} % ränta, ${indskud} kr i kontantinsats och ${maaneder} månader — kostar leasingen ${leasing} ${enhed}. Ett billån med samma förutsättningar kostar ${billaan} ${enhed}, alltså ${formatBelob(forskel, locale)} ${enhed} ${mere}. Skillnaden är att du äger bilen under ett billån: du har ${tilbage} ${enhed} kvar att sälja den för när långivstiden är slut, medan du med leasing står med 0 ${enhed}.`;
+    return `Det beror på restvärdet och räntan. Med kalkylatorns standardvärden — ${pris} kr i bilpris, ${rest} kr i restvärde, ${rente} % ränta, ${indskud} kr i kontantinsats och ${maaneder} månader — kostar leasingen ${leasing} ${enhed}. Ett billån med samma förutsättningar kostar ${billaan} ${enhed}, alltså ${formatBelob(forskel, locale)} ${enhed} ${ord}. Skillnaden är att du äger bilen under ett billån: du har ${tilbage} ${enhed} kvar att sälja den för när långivstiden är slut, medan du med leasing står med 0 ${enhed}.`;
   }
   if (locale === "no") {
-    const mer = leasingDyrest ? "mer" : "mindre";
-    return `Det avhenger av restverdien og renten. Med kalkylatorens standardverdier — ${pris} kr i bilpris, ${rest} kr i restverdi, ${rente} % rente, ${indskud} kr i egenkapital og ${maaneder} måneder — koster leasingen ${leasing} ${enhed}. Et billån med samme forutsetninger koster ${billaan} ${enhed}, altså ${formatBelob(forskel, locale)} ${enhed} ${mer}. Forskjellen er at du eier bilen på et billån: du har ${tilbage} ${enhed} igjen å selge den for når løpetiden er ute, mens du med leasing står igjen med 0 ${enhed}.`;
+    return `Det avhenger av restverdien og renten. Med kalkylatorens standardverdier — ${pris} kr i bilpris, ${rest} kr i restverdi, ${rente} % rente, ${indskud} kr i egenkapital og ${maaneder} måneder — koster leasingen ${leasing} ${enhed}. Et billån med samme forutsetninger koster ${billaan} ${enhed}, altså ${formatBelob(forskel, locale)} ${enhed} ${ord}. Forskjellen er at du eier bilen på et billån: du har ${tilbage} ${enhed} igjen å selge den for når løpetiden er ute, mens du med leasing står igjen med 0 ${enhed}.`;
   }
-  const mere = leasingDyrest ? "mere" : "mindre";
-  return `Det afhænger af restværdien og renten. Med beregnerens standardværdier — ${pris} kr. i bilpris, ${rest} kr. i restværdi, ${rente} % rente, ${indskud} kr. i udbetaling og ${maaneder} måneder — koster leasingen ${leasing} ${enhed}. Et billån med samme forudsætninger koster ${billaan} ${enhed}, altså ${formatBelob(forskel, locale)} ${enhed} ${mere}. Forskellen er, at du ejer bilen på et billån: du har ${tilbage} ${enhed} tilbage at sælge den for, når lånet er betalt, mens du med leasing står med 0 ${enhed}.`;
+  return `Det afhænger af restværdien og renten. Med beregnerens standardværdier — ${pris} kr i bilpris, ${rest} kr i restværdi, ${rente} % rente, ${indskud} kr i udbetaling og ${maaneder} måneder — koster leasingen ${leasing} ${enhed}. Et billån med samme forudsætninger koster ${billaan} ${enhed}, altså ${formatBelob(forskel, locale)} ${enhed} ${ord}. Forskellen er, at du ejer bilen på et billån: du har ${tilbage} ${enhed} tilbage at sælge den for, når lånet er betalt, mens du med leasing står med 0 ${enhed}.`;
 }

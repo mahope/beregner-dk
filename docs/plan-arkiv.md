@@ -25517,3 +25517,35 @@ domænerne), `/dato` + `/nedtaelling` (link til hubben), og
 
 **MÅL.** `/dage-til` er en ny URL → 0 besøgende/28d 2/10. Måles i Plausible
 16/10; GSC efter 14 dage (de to søgninger ovenfor).
+
+## `leasing-faq-retning` — 2/10 (review-punkt 0)
+
+Begge åbne fund i `~/.local/oxloop/review/minberegner.md` lå i samme funktion
+og samme commit (`6491f2c`), så de er rettet i én opgave.
+
+- **[HØJ] «mer» vendte den rigtige vej.** Sætningen har **billånet** som
+  subjekt («Ett billån … kostar 169 140 kr, alltså 9 210 kr …»), men
+  variablen afgjorde, om **leasing** var dyrest, så ordet beskrev det modsatte.
+  Målt på den gamle kode: standardeksemplet sagde «alltså **9 210 kr mer**»
+  om et billån (169 140) der er **billigere** end leasingen (178 350).
+  Rettelse: ordet læses nu af `sammenlign.billigst` — den samme vinder resten af
+  siden viser — i `sammenlignOrd()`, så det ikke kan hænge ved en manuel
+  ternie på et fortegn. Målt på tre restværdier: 150 000 → «9 210 kr
+  **mindre**» (billigst = billaan), 10 000 → «240 kr mer» og 0 → «915 kr mer»
+  (billigst = leasing).
+- **[LAV] «kr..» i dansk.** `enhed` var `locale === "da" ? "kr." : "kr"`, og
+  skabelonen lukker selv med punktum, så dansk skrev «178.350 **kr..**» og
+  «169.140 **kr.,**». Fundet skrev, at også norsk var ramt; **målt er kun
+  `da`** — norsk skrev «178 350 kr.» og var ren, fordi `enhed` for `no` er
+  «kr». Rettelse: `enhed = "kr"` i alle sprog, skabelonen ejer punktet.
+- Porten låste fejlen fast: de tre forventninger i `leasing.test.ts` sagde
+  «9 210 kr **mer**» (da, no og se), og «svaret skifter retning»-prøven brugte
+  `restvaerdi: 0`, hvor «mindre» var lige så forkert, men grøn fordi den kun
+  tjekkede at «mer.» ikke stod der. De er rettet, og to nye prøver er lagt til:
+  en der dømmer «mindre|mere|mer» mod `billigst` for fire restværdier i alle
+  tre sprog, og en der forbyder `kr..`/`kr.,`.
+- **Verificeret:** de fem prøver i `leasingSammenlignFaqSvar` er **alle røde**
+  mod den gamle kode (mutation: gammel `leasing.ts` + nye tests → `5 failed |
+  13 passed`) og grønne på den nye (18/18). Gate 2/10 19:52: `lint`,
+  `typecheck`, `TZ=UTC npm run test` (**3824** tests i 236 filer), `npm run
+  build`, `locale-leak.mjs --gate` exit 0 (før og efter — ingen ny lækage).
