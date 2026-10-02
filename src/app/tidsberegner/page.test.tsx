@@ -305,6 +305,77 @@ describe("Excel-svaret på /tidsberegner", () => {
       expect(tempoSvar).toContain("4:59");
     }
   });
+
+  /**
+   * C84-lukningen for brødteksten. Fund 2/10: tempo-tabellen renderer
+   * `formatSekunder` af `beregnTempo`, altså 4:59 for halvmarathon, mens
+   * afsnittet «tid ÷ tempo = distance» lige under den skrev 4:58 i hånden på
+   * den danske gren. Den svenska skrev 4:59, så samme regnestykke fik to svar
+   * på to domæner.
+   *
+   * Testen dømmer på den **server-renderede** afsnitstekst og læser facit fra
+   * modulet, så et håndskrevet tempo er rødt uanset hvilket tal det er — ikke
+   * bare 4:58. Det er pointen: `toContain("4:59")` på hele siden ville være
+   * grøn, fordi tabellen indeholder 4:59 i forvejen, altså vakuum-grøn for den
+   * afsnitstegst der var forkerte.
+   */
+  test("afsnittet 'tid ÷ tempo = distance' skriver tempoet fra modulet, ikke i hånden", async () => {
+    const halv = TEMPO_EKSEMPLER.find((e) => e.id === "halvmaraton")!;
+    const moduletsTempo = formatSekunder(
+      beregnTempo(halv.minutter, halv.km)!.sekunderPerKm
+    );
+
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await TidsberegnerPage());
+
+      // Find afsnittet, ikke hele siden: det er her et håndskrevet tempo står.
+      const afsnit = html.match(
+        /<p>[^<]*<strong>tid ÷ tempo = (?:distance|distans)<\/strong>[\s\S]*?<\/p>/
+      );
+      expect(afsnit).not.toBeNull();
+
+      // Alle m:ss-tokens i afsnittet skal være modulets tempo. Rækken er ens
+      // i begge sprog, så en afvigelse er en fejl — ikke en sprogforskel.
+      const tokens = (afsnit![0].match(/\b\d+:\d{2}\b/g) ?? []);
+      expect(tokens.length).toBeGreaterThan(0);
+      for (const token of tokens) {
+        expect(token).toBe(moduletsTempo);
+      }
+    }
+
+    // Målt 2/10 under npx tsx: beregnTempo(105, 21.1) → 299 → 4:59. 4:58 er
+    // Math.floor(298,58) og altså den aflæsning, fundet så i brødteksten.
+    expect(moduletsTempo).toBe("4:59");
+    expect(moduletsTempo).not.toBe(formatSekunder(Math.floor(298.58)));
+  });
+
+  test("tempo-tabellen og afsnittet er samme række, målt på den tabellenes egen celle", async () => {
+    // Krydscheck mellem de to steder på siden: rækken for halvmarathon skal
+    // have præcis modulets tempo i tabellen. Uden denne kunne tabellen blive
+    // håndskrevet mens afsnittet stadig læste fra modulet — så ville fundet
+    // bare flytte sig.
+    const raekke = TEMPO_EKSEMPLER.find((e) => e.id === "halvmaraton")!;
+    const moduletsTempo = formatSekunder(
+      beregnTempo(raekke.minutter, raekke.km)!.sekunderPerKm
+    );
+
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    // Find rækken på dens *plads* i TEMPO_EKSEMPLER, så testen ikke hænger
+    // op på den danske etiket eller på et hårdkodet minuttal. Rækkerne fra
+    // modulet danner rækkefølgen, og hver `<td>` er navn, tid, pr. km, pr. mil.
+    const index = TEMPO_EKSEMPLER.findIndex((e) => e.id === "halvmaraton");
+    const rækker = html.match(/<td>[^<]*<\/td><td>\d+ min\.<\/td><td>\d+:\d{2}<\/td><td>\d+:\d{2}<\/td>/g) ?? [];
+    expect(rækker.length).toBe(TEMPO_EKSEMPLER.length);
+
+    const celler = rækker[index].match(/<td>(\d+:\d{2})<\/td>/g) ?? [];
+    expect(celler[0]).toBe(`<td>${moduletsTempo}</td>`);
+  });
 });
 
 /**

@@ -1,33 +1,27 @@
-STATUS: 2/10 03:50. Rød CI: ingen (seneste kørsel grøn 2/10 00:37Z). Sentry:
+STATUS: 2/10 03:40. Rød CI: ingen (seneste kørsel grøn 2/10 01:03Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
   5f137d4 — ingen ny hændelsesgruppe siden sidste iteration. PR-TJEK: 2026-10-02
   — ingen åbne PR'er. BRANCH-TJEK: ikke kørt. CEO-kø punkt 0 er lukket i de otte
-  punkter. Fase 3's flaskehals er CTR, og den første **nye feature** er landet.
+  punkter. Fase 3's flaskehals er CTR; første nye feature (`/pace`) er landet.
   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 03:46: 0 · 0 · **3575 grønne i 219 filer** ·
-  0 (`/pace` er `ƒ` = dynamisk, ikke prerenderet). De fire forhenværende fund
-  var mine egne skrivefejl i JSX, fanget af `biome lint`.
-  **Denne iteration: `/pace` — et løbetidsværktøj.** `ceo/pace-tidsberegner`.
-  Datagrund: **8 af 10** danske completions under «tid beregner» er sport
-  («marathon tid beregner», «km tid beregner», «pace tid beregner» …), og
-  `/tidsberegners` tredjestørste søgning er «hvor lang tid» (828 visninger,
-  pos. 6) på 74.546 visninger med 0,3 % CTR. `/tidsberegner` havde to
-  tempo-FAQ'er, men intet værktøj og ingen holdtider.
-  Ny `src/lib/pace.ts` (ren brøkregning, ingen kilde nødvendig) med **20
-  tests**, begge retninger (tid → tempo og tempo → tid) og holdtider.
-  Sidste holdtid bærer afrundingen, så **splitsummerer altid til totalen** —
-  testet over alle distancer 0,1–42,5 km. `formaterLobetid` giver `3:30:00`
-  med timer, hvor `formatSekunder` giver `210:00` — marathons tid kan ikke
-  skrives som minutter. Halvmarahton-eksemplet er bevidst **1:45 → 4:59 pr.
-  km**, præcis som `/tidsberegners` egen FAQ siger, så de to sider ikke
-  modsiger hinanden. Registreret i `calculator-list` (da/no/se + `relatedMap`),
-  `page-data` (da + se), `categories`, `home-data` (da/no/se) og `icons.ts`
-  (`Timer`); sitemapken følger `getAvailableSlugs` automatisk.
-  *Fund under egen diff:* mit første batch-script til registreringen **faldt
-  på gulvet efter `page-data`** (fejlende anchor), så kun 4 af 9 filer blev
-  ændret. Helt hændeligt fangede `meta-description`-porten det (`da /pace`
-  manglede) — præcis den port, der er lavet til at lade en side mangle data.
-  ⚠️ **Åbne VERIFICÉR-noter: 14**, alle med vindue **2/10 07:30**.
+  `npm run build`. Målt 2/10 03:36: 0 · 0 · **3577 grønne i 219 filer** ·
+  0 (`/tidsberegner` er `ƒ` = dynamisk).
+  **Denne iteration: åbent review-fund fra 2/10 lukket — `/tidsberegner`
+  modsagde sig selv om halvmarathon.** `ceo/tidsberegner-halvmaraton-tempo`.
+  Tabellen siger 4:59 (regnet), den danske brødtekst sagde 4:58 (håndskrevet),
+  den svenske 4:59 — samme regnestykke, to svar, to domæner, 74.546 visninger.
+  Rettelse: begge sprog læser `TEMPO_HALV`, fundet i præcis den række tabellen
+  renderer, så de to ikke kan glide fra hinanden. Ny port dømmer på renderet
+  afsnitstekst — den gamle dømmede på FAQ'en og var blind for brødteksten.
+  Detaljer, målinger og mutationer: sektionen nedenfor og commit-bodens body.
+  ⚠️ **Åbne VERIFICÉR-noter: 15**, alle med vindue **2/10 07:30**.
+
+## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmaraton-tempo`)
+
+  `/tidsberegner` skrev 4:59 i tabellen og 4:58 i brødteksten på samme side.
+  Rettet ved at læse fra tabellens egen række; ny port dømmer på renderet
+  afsnitstekst og er målt rød mod den gamle kode. Målinger, mutationer og de
+  fire fund under egen diff-review: `docs/plan-arkiv.md`.
 
 ## Review-fund 29/9 — lukket (detaljer i `docs/plan-arkiv.md`)
 
@@ -286,6 +280,14 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **`/tidsberegner` skal give ét svar på halvmarathon, på begge domæner.**
+  `ceo/tidsberegner-halvmaraton-tempo`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/tidsberegner | grep -o 'halvmarathon på 1 time og 45
+  minutter er 21,1 km ved[^<]*'` skal give **4:59**, og det samme på
+  `https://beraknare.se/tidsberegner` skal give **4:59** — altså to domæner, ét
+  tal. Begge steder skal desuden vise præcis **én** forekomst af `4:58` i
+  tempo-afsnittet: `grep -c '4:58'` skal være 0. Vindue **2/10 07:30**.
 
 - ⏳ **`/pace` skal optage `/pace` i sitemap og have sit eget svar i titlen.**
   `ceo/pace-tidsberegner`. Prøven er på indhold: `curl -s

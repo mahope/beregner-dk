@@ -23458,3 +23458,80 @@ fuldt ud, selv når resten af gaten er grøn.**
 
 **Mål:** `/tidsberegner` 290 besøgende/28d (bounce 8 %) pr. Plausible
 2026-10-02. `/pace` er ny og har ingen baseline. Genmål 16/10.
+
+---
+
+## Review-fund 2/10 — `/tidsberegner` modsagde sig selv om halvmarathon (MIDDEL, lukket 2/10)
+
+Branch `ceo/tidsberegner-halvmaraton-tempo`. Fundet var ét, rettelsen er lavet,
+og porten der burde have fanget den var blind.
+
+**Fundet.** Tempo-tabellen på `/tidsberegner` renderer
+`formatSekunder(raekke.tempo.sekunderPerKm)` for hver række i
+`TEMPO_EKSEMPLER`. Halvmarathon-rækken er `{ id: "halvmaraton", km: 21.1,
+minutter: 105 }` (`tidsberegner.ts:130`), så cellen er
+`beregnTempo(105, 21.1)` → 299 → **4:59**. Syv linjer under tabellen skrev
+afsnittet «tid ÷ tempo = distance» derimod **4:58** i hånden, på den danske
+gren. Den svenska gren skrev 4:59, så de to domæner gav to svar på præcis det
+samme regnestykke. `/tidsberegner` har 74.546 visninger, 0,3 % CTR, pos. 6,9 —
+altså en indekseret modsigelse på en af Fase 3's tre største sider.
+
+**Målt** under `npx tsx` med repoets egne funktioner:
+`beregnTempo(105, 21.1)` → `{sekunderPerKm: 299, sekunderPerMil: 481}` →
+`formatSekunder` → **4:59 / 8:01**. 4:58 er `Math.floor(298,58)`; fundets
+måling viste at 4:58 ikke er en alternativ aflæsning men den floorede værdi,
+altså der var intet at vælge imellem, kun en fejl.
+
+**Hullet var portens.** To porter burde have set den og gjorde det ikke:
+1. `regnestykker`-porten (`src/app/regnestykker.test.ts`) ser kun tal i
+   `ts.isJsxText` med de fem mønstre `gang`/`del`/`procentAf`/`stigning`/`andel`.
+   De fem regexer kopieret ordret fra testen mod den fejlagtige sætning giver
+   `gang 0, del 0, procentAf 0, stigning 0, andel 0` — **0 fund**.
+2. `tempo-FAQ'en indeholder de samme tal som tempo-afsnittet` dømmer på FAQ'en i
+   `page-data`, altså på den tekst `FAQSchema` får — ikke på brødteksten. Den
+   kommentar i testen siger «Ellers kunne svaret i JSON-LD'en love 4:58 mens
+   tabellen viser 4:59», altså den dømmer en fejl, der aldrig opstod.
+
+**Rettelsen.** Én konstant, to interpolationer:
+`const TEMPO_HALV = TEMPO_RAEKKE.find((r) => r.id === "halvmaraton")!` — læst fra
+præcis den række tabellen renderer, ikke fra `TEMPO_EKSEMPLER` endnu engang, så
+der kun findes ét sted der kan glide. Begge sprog skriver
+`{formatSekunder(TEMPO_HALV.tempo.sekunderPerKm)}`.
+
+**Den nye port.** Den dømmer på den **server-renderede** markup: den isolerer
+`<p>…tid ÷ tempo = distance…</p>` og kræver at *alle* `m:ss`-tokens i det afsnit
+er modulets tempo. Det er generalt, så et håndskrevet tal er rødt uanset hvilket
+det er — ikke kun 4:58.
+
+**Bevis for porten (punkt 12).**
+- Mod den gamle kode giver den `expected '4:58' to be '4:59'`. Gentaget efter at
+  regexen blev rettet, samme resultat.
+- Mod en mutation af tabellens celle til `9:99` går **den anden** test rød
+  (krydscheck mod tabellens egen celle) mens afsnitstesten bliver grøn — altså
+  de to tests isolerer hver sin fejlklasse, som de skal.
+- Hvorfor `toContain("4:59")` på hele siden ikke ville have været et bevis:
+  tabellen renderer 4:59 uanset brødteksten, så porten ville være grøn for den
+  afsnitstegst der faktisk var forkerte. Det er den vakuum-grøn-fælde, de tre
+  tidligere revisioner har advaret om.
+
+**Fund under egen diff-review (4, alle rettet i samme opgave).**
+1. Min `edit` havde mistet `tempo-FAQ'en indeholder de samme tal`-testens
+   indrykning. Biome sagde ja til den — det fangede den ikke, jeg så den.
+2. Docblocken skrev «syv linjer under den». Linjetallet er ikke en egenskab;
+   skrevet som «lige under den».
+3. Docblocken skrev «en ny række i `TEMPO_EKSEMPLER` kan ikke gøre `!` til
+   undefined». Det er *fjernelse* af `halvmaraton` der gør det, og det er
+   aldrig en gyldig grund til `!` — kun en kort note om, hvad `!` dækker over.
+4. Min første regex brugte `[^]` i håb om «alle tegn inkl. linjeskift».
+   `biome lint` (`noEmptyCharacterClassInRegex`) fangede den: `[^]` er en *tom*
+   negated character class og matcher alt, så regexen havde væet grøn ved ethvert
+   afsnit. Rettet til `[\s\S]*?`. **Dette er detektionsrækkefølgen point 13 er
+   lavet til: en regex-ændring kan se rigtig ud og være vacuous.**
+
+**Ikke verificeret.** Ingen produktionskørsel — VERIFICÉR-noten er skrevet med
+sluggen. Layout er ikke ændret (to tal i to eksisterende afsnit), så ingen
+screenshots.
+
+**Mål:** `/tidsberegner` 291 besøgende/28d (bounce 8 %), 74.546 visninger,
+0,3 % CTR, pos. 6,9 pr. GSC 2026-09-01→09-29. Rettelsen flytter ikke trafik i
+sig selv; den fjerner en modsigelse på en side der ligger i top-3. Genmål 16/10.

@@ -93,6 +93,14 @@ const TEMPO_RAEKKE = TEMPO_EKSEMPLER.map((eksempel) => ({
   tempo: beregnTempo(eksempel.minutter, eksempel.km)!,
 }));
 
+/**
+ * Halvmarathon-rækken fra tempo-tabellen. Brødteksten læser sit tempo herfra,
+ * så «tid ÷ tempo = distance» ikke kan skrive et andet tal end den tabel der
+ * står lige over den. Rækken slås op på id, så rækkefølgen i `TEMPO_EKSEMPLER`
+ * ikke betyder noget — men `halvmaraton` skal findes, ellers er `!` falsk.
+ */
+const TEMPO_HALV = TEMPO_RAEKKE.find((raekke) => raekke.id === "halvmaraton")!;
+
 const TEMPO_NAEVN_DA: Record<TempoEksempel["id"], string> = {
   km5: "5 km",
   km10: "10 km",
@@ -329,9 +337,10 @@ export default async function TidsberegnerPage() {
           Har du en løbetid og vil vide, hvor langt du nåede, er det
           modsatte regnestykke det samme:{" "}
           <strong>tid ÷ tempo = distance</strong>. Et 5 km-løb på 25 minutter er
-          altså 5 km, og en halvmarathon på 1 time og 45 minutter er 21,1 km ved
-          4:58 pr. kilometer. Samme regel som værktøjet bruger ovenfor: et
-          interval er bare en tid delt med en distance.
+          altså 5 km, og en halvmarathon på 1 time og 45 minutter er 21,1 km ved{" "}
+          {formatSekunder(TEMPO_HALV.tempo.sekunderPerKm)} pr. kilometer. Samme
+          regel som værktøjet bruger ovenfor: et interval er bare en tid delt med
+          en distance.
         </p>
 
         <h2>Sådan beregner du tid mellem to klokkeslæt i Excel</h2>
@@ -596,9 +605,10 @@ export default async function TidsberegnerPage() {
         <p>
           Har du en loptid och vill veta hur långt du kom, är det motsatt
           uttryck: <strong>tid ÷ tempo = distans</strong>. Ett 5 km-lopp på 25
-          minuter är alltså 5 km, och en halvmaraton på 1 timme och 45 minuter
-          är 21,1 km med 4:59 per kilometer. Samma regel som verktyget använder
-          ovan: ett intervall är bara en tid delad med en distans.
+          minuter är alltså 5 km, och en halvmaraton på 1 timme och 45 minuter är 21,1
+          km med {formatSekunder(TEMPO_HALV.tempo.sekunderPerKm)} per kilometer.
+          Samma regel som verktyget använder ovan: ett intervall är bara en tid
+          delad med en distans.
         </p>
 
         <h2>Så räknar du ut timmar mellan två klockslag i Excel</h2>
