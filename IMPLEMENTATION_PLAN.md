@@ -1,33 +1,26 @@
-STATUS: 2/10 19:55. CI grøn ved start (`37054519818`). PR-TJEK 2/10 19:47: ingen
+STATUS: 2/10 22:15. CI grøn ved start (`37056820848`). PR-TJEK 2/10 19:47: ingen
     åbne PR'er (næste tjek 3/10). Sentry: ingen uløste fejl 14 dage, og det er et
     **rigtigt** signal — `sentryDsn()` har fallback-DSN, `init` kører i
     `sentry.server.config.ts` + `instrumentation-client.ts`, kun i produktion,
     intet replay, ingen source maps. CEO-kø punkt 0: lukket 2/10 14:48.
     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-    `npm run build` — grøn 2/10 19:52 (**3824** tests i 236 filer), plus
-    `locale-leak.mjs --gate` (exit 0, før og efter), `href-scan` (0),
-    `knapgruppe-scan` (0) og `rendered-leak-scan` (1 **forhårslig** på /dato,
-    se ❓).
-    **Denne iteration er et REVIEW-FUND (punkt 0), ikke en feature.**
-    `/leasing`-FAQ'en på beraknare.se sagde i samme sætning, at leasingen
-    koster 178 350 kr, at billånet koster 169 140 kr — og at billånet alligevel
-    koster «9 210 kr **mer**». Ordet beskrev det modsatte af det ternien afgjorde,
-    og porten låste fejlen fast. Det er **JSON-LD og synlig brødtekst** på en
-    side med 2.923 visninger, altså præcis de tal Google citerer. Ordet læses nu
-    af `sammenlign.billigst` — den samme vinder resten af siden viser — så det
-    ikke kan hænge ved et fortegn igen. Samme funktion skrev «kr..» i dansk
-    (fundet sagde også norsk; målt er kun dansk, norsk var ren). De fem prøver
-    er **alle røde** mod den gamle kode og grønne på den nye. Se
-    `docs/plan-arkiv.md`. **MÅL:** beraknare.se/leasing 2.923 visninger /
-    33 klik / 1,1 % / pos. 12,2 — uændret baseline, rettelsen er en
-    korrekthedsting (punkt 11), ikke en CTR-ændring; måles 16/10.
-    **Næste iteration:** (1) de to små tekstfejl nederst i ❓, (2) en research-
-    iteration — **hele feature-køen er ⛔-blokeret igen**, så kandidater skal
-    findes i GSC-tallene. Første kandidat: en `/klokken-i`-**hub** pr. mønster fra
-    `dage-til-hub` (24.401 visninger på `/tidszone`, og «hvad er klokken i usa
-    når den er 12 i danmark» (178v) + «hvad er klokken i de forskellige
-    tidszoner» (89v) ligger på pos. 5-6, mens landesiderne kun er linket fra
-    `/klokken-i` og bloggen).
+    `npm run build` — grøn 2/10 22:10 (**3838** tests i 237 filer), plus
+    `locale-leak --gate` (exit 0), `href-scan` (0) og `knapgruppe-scan` (0).
+    **Denne iteration er en FEATURE: `/klokken-i` + `/klockan-i`-hub.** Sektionen
+    havde 12 landesider i hvert sprog og ingen side af sin egen, så «hvad er
+    klokken i de forskellige tidszoner» (89 visninger, pos. 5) og «hvad er
+    klokken i usa når den er 12 i danmark» (178v, pos. 6) ikke havde noget sted
+    at lande — man skulle gætte et landnavn. Hubben lister alle tolv lande med
+    klokken lige nu, sorteret efter hvor tæt landet ligger på dansk/svensk tid,
+    og hver række linker til den side der har hele tidszonen. Tallene kommer fra
+    `beregnKlokkenNu` — samme kald som den linkede side — så række og side kan
+    ikke stride. Begge ruter er `force-dynamic`, så «lige nu» ikke frosses ved
+    build (målt i build-output: begge er ƒ). 14 nye tests; mutation (sortering
+    vendt) dør. **MÅL:** `/tidszone` 24.401 visninger / 106 klik / 0,4 % / pos. 7,6
+    — uændret baseline, hubben er ny trafik; `/klokken-i` 0 (ny URL 2/10) →
+    Plausible 16/10. **Næste iteration:** (1) de to små tekstfejl nederst i ❓,
+    (2) de **otte** åbne VERIFICÉR-noter fra 2/10 — vinduet 21:30 er gået, så de
+    skal måles på indhold nu.
 
 ## Fase 3 — trafik-drevet
 
@@ -131,12 +124,15 @@ er blokeret af en ❓ og må ikke gættes.
   **MÅL:** `/dage-til` 0 (ny URL 2/10) → Plausible 16/10; GSC 14 dage:
   «hvor mange dage er der til 1. december» (1.254v, pos. 5) og «… til den 24.
   december» (1.025v, pos. 5).
-- **`/klokken-i`-hub** — *Hvem:* samme fejl som dage-til: `/tidszone` har 24.401
-  visninger (0,4 %, pos. 7,6), «hvad er klokken i usa når den er 12 i danmark»
-  (178v, pos. 6) og «hvad er klokken i de forskellige tidszoner» (89v, pos. 5),
-  mens landesiderne kun linkes fra `/klokken-i` og bloggen.
-  *Accept:* en hub der lister alle lande med klokken nu, i da + se.
-  *Datagrund:* GSC 2/10 + `/tidszone` under top-15 i Plausible.
+- **[x] ✅ `/klokken-i`-hub** — se `docs/plan-arkiv.md`. *Hvem:* de 12
+  landesider var kun linket fra `/tidszone` og bloggen, så «hvad er klokken i
+  de forskellige tidszoner» (89v, pos. 5) havde intet sted at lande.
+  *Accept:* `/klokken-i` + `/klockan-i` lister hvert land med klokken lige nu
+  og tidsforskellen, sorteret efter hvor tæt landet ligger på dansk/svensk tid,
+  med canonical/hreflang, daglig sitemap-entry og 301 mellem domænerne.
+  **MÅL:** `/klokken-i` 0 (ny URL 2/10) → Plausible 16/10; GSC: «hvad er
+  klokken i usa når den er 12 i danmark» (178v) og «hvad er klokken i de
+  forskellige tidszoner» (89v), begge på pos. 5-6.
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -247,12 +243,15 @@ kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` un
 sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
 
+`VERIFICÉR DEPLOY: /klokken-i + /klockan-i (hub med klokken i 12 lande) ceo/klokken-i-hub 2/10 22:30`
+
 `VERIFICÉR DEPLOY: /dage-til + /dagar-till (hub med alle datoer) ceo/dage-til-hub 2/10 21:30`
 
 `VERIFICÉR DEPLOY: /leasing FAQ'ens retning + kr.. i dansk ceo/leasing-faq-retning 2/10 19:55`
 
 | Slug | Prøv på indhold |
 |---|---|
+| `klokken-i-hub` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/klokken-i`: `<title>` skal være «Hvad er klokken i …? Klokken i 12 lande lige nu», `<meta name="description">` skal starte med «Det er HH:MM i <første land på siden>» og slutte med «Se klokken i alle 12 lande og tidsforskellen til Danmark.». `<h1>` «Hvad er klokken i …?» **én** gang. Siden skal have **12** links til `/klokken-i/*` plus ét til `/tidszone`. Rækkerne er sorteret på \|minutter\|, så rækkefølgen skifter med sommer-/vintertid: **første** række skal være det land der ligger tættest på Danmark (0 eller 60 minutter) og **sidste** det fjerneste (Australien/New York, 8-9 timer) — mål det på de to yderste, ikke på hele rækkefølgen. `beraknare.se/klockan-i`: samme **12** links med svenske slugs (`/klockan-i/spanien` …) og **intet** dansk: hverken «Tyrkiet» eller bogstaverne æ/ø. `minberegner.dk/klockan-i` skal **301** til `/klokken-i`, og `beraknare.se/klokken-i` 301 til `/klockan-i`. Sitemap på begge domæner skal have `…/klokken-i` og `…/klockan-i` som `daily`. `minberegner.dk/tidszone` skal have teksten «klokken i tolv lande» med link til hubben, `beraknare.se/tidszone` «klockan i tolv länder». **Intet** `NaN` |
 | `leasing-faq-retning` (**ny**, vindue 3/10 07:30) | `beraknare.se/leasing`: FAQ'en skal have **syv** spørgsmål, hvor «Blir leasing dyrare eller billigare än ett billån?» svarer «… kostar leasingen **178 350** kr. Ett billån med samma förutsättningar kostar **169 140** kr, alltså **9 210** kr **mindre**.» Samme sætning i JSON-LD `acceptedAnswer`. **Intet** «alltså 9 210 kr mer» i hele HTML'en (det var den gamle, modsatte retning). `minberegner.dk/leasing` (dansk): FAQ'en skal stadig have de **tre** generiske spørgsmål, uændret. **Intet** `NaN` nogen steder. Hvis dansk/norsk engang bindes på `faqItems`, må de heller ikke have «kr..»/«kr.,» (kun dansk gjorde det; norsk var ren) |
 | `dage-til-hub` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/dage-til`: `<title>` skal være «Hvor mange dage er der til …? 23 datoer med dagens tal», `<meta name="description">` skal starte med «29 dage til Halloween 2026» (eller dagens nærmeste dato med dens år) og slutte med «Se alle 23 datoer med dagens antal dage, sorteret efter hvad der kommer først.». `<h1>` «Hvor mange dage er der til …?» én gang. Siden skal have **23** links til `/dage-til/*` og links til `/dato` og `/nedtaelling`. `beraknare.se/dagar-till`: `<title>` «Hur många dagar är det till …? 20 datum med dagens tal», **20** links til `/dagar-till/*`, og **intet** dansk: hverken «til» som præposition, «dage» som enhed eller bogstaverne æ/ø. `minberegner.dk/dagar-till` skal **301** til `/dage-til`, og `beraknare.se/dage-til` 301 til `/dagar-till`. Sitemap på begge domæner skal have `…/dage-til` og `…/dagar-till` som `daily`. **Intet** `NaN` |
 | `su-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/su`: hele HTML'en skal have **0** `kr. kr.` og **0** `kr kr`. Brødteksten skal have «Inkl. **3.799** kr. forældrelån», «… ligger mellem **7.426** kr. og **20.749** kr. pr. måned», «Det separate forsørgertillæg er **1.114** kr. pr. måned før skat» og «… ungdomsuddannelse er 18-19-åriges grundsats **6.043** kr., mens den faste sats fra 20 år er **6.043** kr.». `beraknare.se/su` (dansk fallback): samme tal, 0 dobbelt enheder. `Intet** `NaN` |

@@ -311,6 +311,72 @@ export function getKlokkenPrefix(locale: Locale): string | undefined {
   return undefined;
 }
 
+/**
+ * Sektionens egen side, uden skråstreg i slutningen: `/klokken-i` på dansk og
+ * `/klockan-i` på svensk. Landesiderne hænger under `getKlokkenPrefix`, som
+ * ender på skråstreg, så det er det ene sted i modulet der skal tage den af —
+ * ellers ville en sitemap-entry pege på `/klokken-i/`, som routeren svarer 308
+ * på, og `hreflang` mellem de to sprog ville pege på det anden sprog.
+ */
+export function getKlokkenHubPath(locale: Locale): string | undefined {
+  const prefix = getKlokkenPrefix(locale);
+  return prefix ? prefix.replace(/\/$/, "") : undefined;
+}
+
+export interface KlokkenHubRaekke {
+  id: string;
+  href: string;
+  /** Landets navn i det valgte sprog. */
+  land: string;
+  /** Hovedbyen — den by siden svarer på. */
+  by: string;
+  /** «HH:MM» i byens egen tid. */
+  tid: string;
+  /** «6 timer bagud» / «5 timmar och 45 minuter före». */
+  forskel: string;
+  /** Tidsforskellen i minutter, signeret: positivt er foran Danmark. */
+  minutter: number;
+}
+
+/**
+ * Alle landene som én række pr. land, tættest på Danmark først.
+ *
+ * Sektionen havde 12 landesider i hvert sprog og ingen side af sin egen, så
+ * den, der spørger «hvad er klokken i» (178 visninger, pos. 6) og «hvad er
+ * klokken i de forskellige tidszoner» (89 visninger, pos. 5) ikke havde noget
+ * sted at lande — de skulle gætte et landnavn for at få et svar. Hubben svarer
+ * på den åbne form og linker videre til den side der har hele regnestykket.
+ *
+ * Tallet i hver række kommer fra `beregnKlokkenNu` — samme kald som den
+ * linkede landside bruger med samme `tidspunkt` — så rækken og siden kan ikke
+ * stride. Sorteret på `|minutter|`, altså efter hvor tæt landet ligger på
+ * Danmark, og ved lighed på landets navn, så rækkefølgen aldrig afhænger af
+ * rækkefølgen i `KLOKKEN_LANDE`.
+ */
+export function getKlokkenHubRaekker(
+  sprog: KlokkenSprog,
+  tidspunkt: Date
+): KlokkenHubRaekke[] {
+  const prefix = getKlokkenPrefix(sprog);
+  if (!prefix) return [];
+  return KLOKKEN_LANDE.map((land) => {
+    const svar = beregnKlokkenNu(land.byer[0], sprog, tidspunkt);
+    return {
+      id: slugForSprog(land, sprog),
+      href: `${prefix}${slugForSprog(land, sprog)}`,
+      land: landetsNavn(land, sprog),
+      by: svar.by,
+      tid: svar.tid,
+      forskel: svar.forskel,
+      minutter: tidsforskelMinutter(tidspunkt, land.byer[0].zone),
+    };
+  }).sort((a, b) => {
+    const forskel = Math.abs(a.minutter) - Math.abs(b.minutter);
+    if (forskel !== 0) return forskel;
+    return a.land.localeCompare(b.land, sprog === "da" ? "da" : "sv");
+  });
+}
+
 /** «6 timer bagud» — med minutter, når forskellen ikke er et helt timeantal. */
 function forskelTekst(
   minutter: number,

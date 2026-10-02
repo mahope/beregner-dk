@@ -25549,3 +25549,60 @@ og samme commit (`6491f2c`), så de er rettet i én opgave.
   13 passed`) og grønne på den nye (18/18). Gate 2/10 19:52: `lint`,
   `typecheck`, `TZ=UTC npm run test` (**3824** tests i 236 filer), `npm run
   build`, `locale-leak.mjs --gate` exit 0 (før og efter — ingen ny lækage).
+
+## `klokken-i-hub` — /klokken-i + /klockan-i (2/10 22:10)
+
+**Hvorfor:** Sektionen havde 12 landesider i hvert sprog (`/klokken-i/usa` …
+`/klokken-i/portugal`, samme liste på svensk som `/klockan-i/*`) og **ingen
+side af sin egen**. De landesider var linket fra `/tidszone` og fra ét
+blogindlæg, så de to søgninger der beskriver hele sektionen — «hvad er klokken
+i de forskellige tidszoner» (89 visninger, pos. 5) og «hvad er klokken i usa
+når den er 12 i danmark» (178v, pos. 6) — ikke havde noget sted at lande: man
+skulle gætte et landnavn for at få et svar. Samme fejl som `/dage-til` havde
+før `dage-til-hub` 2/10 21:30.
+
+**Hvad:** `getKlokkenHubRaekker(sprog, tidspunkt)` i `src/lib/klokken-i.ts`
+giver én række pr. land med klokkeslæt, by, tidsforskel og `/minutter`, sorteret
+på `|minutter|` og med landets navn som tiebreak, så rækkefølgen aldrig afhænger
+af rækkefølgen i `KLOKKEN_LANDE`. Hver række kalder `beregnKlokkenNu` — samme
+funktion som den linkede landside kalder med samme øjeblik — så række og side
+ikke kan stride; rækkerne får desuden deres `forskel`-tekst fra
+`forskelTekst` gennem `beregnKlokkenNu`, altså «6 timer bagud» /
+«5 timmar och 45 minuter före» uden en håndskreven tabel. `KlokkenIHub.tsx`
+renderer begge sprog over samme komponent, som dage-til-hubben gør, og
+`buildKlokkenHubMetadata` giver canonical + hreflang (da/se/x-default) +
+`robots: noindex` hvis en rute bliver bedt om det anden sprogs sti.
+
+**Nye ruter:** `src/app/klokken-i/page.tsx` og `src/app/klockan-i/page.tsx`,
+begge med `export const dynamic = "force-dynamic"`. Det er punkt 1 i
+`_kvalitet.md`: svaret er «lige nu», så en prerenderet side ville stå med
+tolv landes samme klokkeslæt på livstid. Målt i build-output: begge ruter er
+`ƒ` (ikke `○`).
+
+**301:** `routing.ts` får `KLOKKEN_HUBS = ["/klokken-i", "/klockan-i"]` og
+samme regel som `DAGE_TIL_HUBS` — uden den ville `beraknare.se/klokken-i` have
+serveret listen på dansk og `minberegner.dk/klockan-i` den på svensk.
+`/klockan-i` er derfor også i `SIDER_UDEN_DESCRIPTION` i
+`meta-description.test.ts` (det er den danske domænes 301-mål, samme grund som
+`/dagar-till`).
+
+**Sitemap:** hubben kommer før de tolv landsider, `daily` og prioritet 0,8 mod
+0,7 — de landsider var ellers et sæt der kun var linket fra to andre sider.
+
+**Interne links:** `/tidszone` (24.401 visninger, 0,4 %, pos. 7,6) får en sætning
+med link til hubben i begge sprog, lige før den liste den allerede havde med
+alle tolv landsider.
+
+**Verificeret:** 14 nye tests i `src/app/klokken-i-hub.test.tsx` — hver række
+mod `beregnKlokkenNu`, sorteringen, at hvert href peger på en slug
+`getKlokkenSlugs` kender, at hub-stien ikke har skråstreg, én `h1`, svensk uden
+dansk (æ/ø, «Tyrkiet», danske slugs), title ≤ 60 med «12», description ≤ 160
+der bruger rækkens klokkeslæt og land, canonical/hreflang, sitemap på begge
+domæner + ingen på norsk, 301 begge veje, og noindex på den fremmede sti.
+Mutation: sorteringen vendt → **1 rød** af 14. Gate 2/10 22:10: `lint`,
+`typecheck`, `TZ=UTC npm run test` (**3838** tests i 237 filer), `npm run
+build`, `locale-leak.mjs --gate` exit 0 (ingen ny lækage — de nye filer er
+ikke på listen), `href-scan` 0, `knapgruppe-scan` 0.
+
+**Mål:** `/tidszone` 24.401 visninger / 106 klik / 0,4 % / pos. 7,6 (uændret
+baseline), `/klokken-i` 0 — ny URL 2/10, første Plausible-tall 16/10.

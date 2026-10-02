@@ -6,7 +6,7 @@ import { getFooterBlogLinks } from "@/lib/footer-data";
 import type { Locale } from "@/lib/i18n";
 import { getAvailableSlugs } from "@/lib/page-data";
 import { getDageTilHubPath, getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
-import { getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klokken-i";
+import { getKlokkenHubPath, getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klokken-i";
 
 // The sitemap route is rendered per request (it resolves the host from
 // headers), so a wall-clock default would stamp every URL with the moment
@@ -89,13 +89,28 @@ export function buildSitemap(
     : [];
 
   const klokkenPrefix = getKlokkenPrefix(locale);
+  const klokkenHubPath = getKlokkenHubPath(locale);
   const klokkenEntries: MetadataRoute.Sitemap = klokkenPrefix
-    ? getKlokkenSlugs(locale === "se" ? "se" : "da").map((slug) => ({
-        url: `${baseUrl}${klokkenPrefix}${slug}`,
-        lastModified: now,
-        changeFrequency: "daily" as const,
-        priority: 0.7,
-      }))
+    ? [
+        // The section's own page, so the country pages are not an orphan set
+        // reachable only from the blog.
+        ...(klokkenHubPath
+          ? [
+              {
+                url: `${baseUrl}${klokkenHubPath}`,
+                lastModified: now,
+                changeFrequency: "daily" as const,
+                priority: 0.8,
+              },
+            ]
+          : []),
+        ...getKlokkenSlugs(locale === "se" ? "se" : "da").map((slug) => ({
+          url: `${baseUrl}${klokkenPrefix}${slug}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.7,
+        })),
+      ]
     : [];
 
   return [

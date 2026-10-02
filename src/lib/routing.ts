@@ -7,9 +7,13 @@ import {
   isDageTilLocale,
   resolveDageTilSlug,
 } from "./dage-til";
+import { getKlokkenHubPath } from "./klokken-i";
 
 /** The section's own path in each language. Kept here, next to the rule. */
 const DAGE_TIL_HUBS = ["/dage-til", "/dagar-till"] as const;
+
+/** Same rule for the clock section: one list, two languages, one URL each. */
+const KLOKKEN_HUBS = ["/klokken-i", "/klockan-i"] as const;
 
 export type RouteDecision =
   | { type: "allow" }
@@ -64,6 +68,20 @@ export function getRouteDecision(
   // /dage-til and beraknare.se/dage-til a second copy of /dagar-till.
   if (DAGE_TIL_HUBS.includes(normalizedPath as (typeof DAGE_TIL_HUBS)[number])) {
     const egenHub = getDageTilHubPath(domainConfig.locale);
+    if (!egenHub) return { type: "not-found" };
+    if (egenHub !== normalizedPath) {
+      return { type: "redirect", destination: egenHub, status: 301 };
+    }
+  }
+
+  // Same rule for the clock section: `/klokken-i` and `/klockan-i` are the
+  // same list of countries in two languages, so the one that is not this
+  // domain's is redirected to the one that is. Without it,
+  // beraknare.se/klokken-i would serve a second copy of the list in Danish.
+  if (
+    KLOKKEN_HUBS.includes(normalizedPath as (typeof KLOKKEN_HUBS)[number])
+  ) {
+    const egenHub = getKlokkenHubPath(domainConfig.locale);
     if (!egenHub) return { type: "not-found" };
     if (egenHub !== normalizedPath) {
       return { type: "redirect", destination: egenHub, status: 301 };

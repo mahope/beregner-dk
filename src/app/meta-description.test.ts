@@ -45,6 +45,7 @@ const SIDER_UDEN_DESCRIPTION = new Set([
   "/locale-unavailable",
   "/dagar-till",
   "/dagar-till/[dato]",
+  "/klockan-i",
 ]);
 
 /**

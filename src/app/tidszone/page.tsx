@@ -26,7 +26,7 @@ import {
   TIDSSKILLNADS_LANDE,
   tidsskillnadRaekker,
 } from "@/lib/tidszone-eksempler";
-import { KLOKKEN_LANDE, getKlokkenPrefix } from "@/lib/klokken-i";
+import { KLOKKEN_LANDE, getKlokkenHubPath, getKlokkenPrefix } from "@/lib/klokken-i";
 import Link from "next/link";
 
 /**
@@ -102,6 +102,8 @@ export default async function TidszonePage() {
   // `/klokken-i/`-rute at linke til.
   const klokkenPrefixDa = getKlokkenPrefix("da");
   const klokkenPrefixSe = getKlokkenPrefix("se");
+  const klokkenHubDa = getKlokkenHubPath("da");
+  const klokkenHubSe = getKlokkenHubPath("se");
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -482,7 +484,14 @@ export default async function TidszonePage() {
           Australien skifter tid på andre datoer end Danmark, så et fast tal
           kan være forkert i de få uger, hvor Danmark og landet ikke skifter
           samtidig. Hver side nedenfor svarer med klokkeslættet lige nu i én by
-          i landet — for USA finder du alle fire kystzoner.
+          i landet — for USA finder du alle fire kystzoner. Vil du se dem
+          alle på én side, står de på{" "}
+          {klokkenHubDa ? (
+            <Link href={klokkenHubDa} className="underline">
+              klokken i tolv lande
+            </Link>
+          ) : null}{" "}
+          med tidsforskellen til Danmark.
         </p>
         <ul>
           {klokkenPrefixDa
@@ -611,7 +620,14 @@ export default async function TidszonePage() {
           byter tid på andra datum än Sverige, så ett fast tal kan vara fel i
           de få veckor då Sverige och landet inte byter samtidigt. Varje sida
           nedan svarar med klockslaget just nu i en stad i landet — för USA
-          hittar du alla fyra kustzonerna.
+          hittar du alla fyra kustzonerna. Vill du se dem alla på en sida
+          står de på{" "}
+          {klokkenHubSe ? (
+            <Link href={klokkenHubSe} className="underline">
+              klockan i tolv länder
+            </Link>
+          ) : null}{" "}
+          med tidsskillnaden till Sverige.
         </p>
         <ul>
           {klokkenPrefixSe
