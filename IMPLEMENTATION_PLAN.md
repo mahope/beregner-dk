@@ -1,25 +1,17 @@
-STATUS: 2/10 03:40. Rød CI: ingen (seneste kørsel grøn 2/10 01:03Z). Sentry:
+STATUS: 2/10 02:10. Rød CI: ingen (seneste kørsel grøn 2/10 01:55Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
-  5f137d4 — ingen ny hændelsesgruppe siden sidste iteration. PR-TJEK: 2026-10-02
-  — ingen åbne PR'er. BRANCH-TJEK: ikke kørt. CEO-kø punkt 0 er lukket i de otte
-  punkter. Fase 3's flaskehals er CTR; første nye feature (`/pace`) er landet.
+  5f137d4 — ingen ny hændelsesgruppe. PR-TJEK: 2026-10-02 — ingen åbne PR'er.
+  CEO-kø punkt 0 er lukket (RETTET 04ca30a).
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 03:36: 0 · 0 · **3577 grønne i 219 filer** ·
-  0 (`/tidsberegner` er `ƒ` = dynamisk).
-  **`typecheck` er fra 2/10 04:05 to programmer**: `tsconfig.app.json` (hele
-  `src/**` + `next.config.ts` + `vitest.config.ts`, minus testfiler) og så
-  `tsconfig.test.json`. Målt 2/10 04:05: 0 · 0 · 3577 · 0.
-  **Denne iteration: gaten så ikke hele koden — de to huller er lukket.**
-  `ceo/typecheck-dækker-hele-src`. `npm run typecheck` kørte kun
-  `tsconfig.test.json`, hvis `include` er testfilerne og deres import-kæde, så
-  en **forkert import i en fil uden test** var usynlig: målt ved at rette
-  `@/lib/page-data` → `@/lib/page-data-TAST` i `src/app/aegloesning/page.tsx`,
-  hvor det gamle program svarede **exit 0** og det nye **exit 2** med præcis den
-  fejl. Det er samme fejlklasse som `satsTilPermille`. Derudover en note i
-  CLAUDE.md om aldrig at bruge én portfil som bevis.
-  ⚠️ **Åbne VERIFICÉR-noter: 18**, alle med vindue **2/10 07:30**. (Tallet var
-  15 i sidste STATUS; målt med `grep -c '^- ⏳'` = 18. Ikke en ny fejl — bare
-  nogle der aldrig blev talt med.)
+  `npm run build`. Målt 2/10 02:06: 0 · 0 · **3592 grønne i 220 filer** · 0
+  (`/klokken-i/[land]` og `/klockan-i/[land]` er `ƒ` = dynamiske, som de skal
+  være — se nedenfor).
+  **Denne iteration: `/klokken-i/<land>` og `/klockan-i/<land>`, 12 lande
+  pr. domæne.** Datagrund: **10 af 10** danske completioner under «hvad er klokken
+  i» er et land eller en by (autocomplete målt 2/10 04:05). Tidsforskellen
+  læses fra kalenderen med `Intl` — ingen håndskrevet forskel — så den er
+  korrekt også i de tre uger omkring skiftet hvor USA har skiftet og Danmark
+  ikke. `ceo/klokken-i-land`.
 
 ## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmarathon-tempo`)
 
@@ -35,7 +27,10 @@ STATUS: 2/10 03:40. Rød CI: ingen (seneste kørsel grøn 2/10 01:03Z). Sentry:
 
 ## Næste opgave (klar til næste iteration)
 
-**F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** `/procent` ✅ 1/10,
+**F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** Målt 2/10 02:00
+med portens egen scanner: `/renteberegner` står **0** (listen siger 6 — den er
+et loft, ikke en målsætning), så rækkefølgen er nu `/billaan` 24, `/moms` 18,
+`/bil` 16, `/opsparing` 10, `/boligsalg` 9, `/topskat` 8. `/procent` ✅ 1/10,
 `/arveafgift` ✅ 2/10 og `EfterloensBeregner` ✅ 2/10 (se STATUS), se
 `ceo/procent-eksempler-fra-modul`, `ceo/arveafgift-tal-fra-modul` og
 `ceo/review-fund-palmesondag-og-komponenter`. Porten fra 1/10 måler beløb med
@@ -270,142 +265,57 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   (bounce 8 %) er gruppen den skal flytte. Genmål **16/10**.
   *Næste skridt:* cykel-udgaven er samme værktøj, så det er et spørgsmål om
   svensk/dansk rækkefølge i autocomplete, ikke om en ny side.
-- **«Hvad er klokken i …»-clusteret (ny, målt 2/10).** *Hvem:* **9 af 10**
-  danske completions under «hvad er klokken» er «hvad er klokken i usa /
-  danmark / thailand / new york / australien / japan / tyrkiet / bali /
-  canada». `/tidszone` svarer via konverteren, men der er ingen side der
-  **svarer direkte** på «hvad er klokken i norge lige nu». *Accept:* afklar
-  først om det er én `/tidszone`-sektion med klokken nu (billigst, ingen nye
-  URL'er) eller `klokken-i/<land>`-sider (flere sider, samme mønster som
-  `/dage-til/*`). *Datagrund:* autocomplete 2/10 02:45.
+- **«Hvad er klokken i …»-clusteret — ✅ 2/10, `ceo/klokken-i-land`.**
+  *Hvem:* **10 af 10** danske completioner under «hvad er klokken i» er et land
+  eller en by (usa, danmark, thailand, new york, australien, japan, tyrkiet,
+  canada, usa nu, kina) — målt 2/10 04:05 på `suggestqueries`, hl=da gl=dk.
+  *Accept:* `/klokken-i/<land>` + `/klockan-i/<land>` med 12 lande, svaret i
+  `<h1>` og i `<title>`, USA's fire tidszoner som egne rækker, tidsforskel
+  **regnet** fra kalenderen, 15 tests, `daily` i begge sitemap — leveret.
+  *Datagrund:* autocomplete 2/10 + `/tidszone` 24.358 visninger / 0,4 % CTR /
+  pos. 7,6 (GSC 1/10), `beraknare.se/tidszone` 3.527.
+  **MÅL:** `/klokken-i/*` er nye sider, ingen baseline. `/tidszone` 24.324 /
+  104 / 0,4 % / 7,5 er gruppen de skal flytte. Genmål **16/10**.
+  *Tre valg der lå i koden, ikke i vilje:* (1) **Ingen** `/klokken-i/danmark`
+  og ingen `/klockan-i/sverige` — en læser der spørger om sit eget land kan se
+  svaret på telefonen, og siden ville være tynd fyld. (2) Ingen
+  `/klokken-i/new-york`: byen er en række på USA-siden, så en egen side er den
+  samme side igen. (3) `force-dynamic` på begge ruter — ellers frosser `next
+  build` klokkeslættet på livstid, og alle 24 sider ville stå med det samme
+  tidspunkt.
+  *Næste skridt:* der findes allerede et blogindlæg,
+  `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`, der ikke linker til
+  den nye side; det skal have et link, og `/tidszone` skal have en «Andre
+  lande»-sektion med de 12 links.
 - **Kalorieguide på `/kalorier`.** *Hvem:* 9 af 10 danske autocomplete-træffere
   under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-- ⏳ **`typecheck` ser hele `src/`, ikke kun testernes import-kæde.**
-  `ceo/typecheck-dækker-hele-src`. **Ingen produktionsændring** — kun
-  `tsconfig.app.json`, `package.json`, `.gitignore` og CLAUDE.md — så prøven er
-  lokal: `npm run typecheck` skal være grøn, og med mutationen
-  `@/lib/page-data` → `@/lib/page-data-TAST` i `src/app/aegloesning/page.tsx`
-  skal **app-programmet svare exit 2** med `TS2307` mens det gamle
-  test-program svarede exit 0. Målt 2/10 04:05. Deploy-vinduet 2/10 07:30 er
-  uden betydning for denne note; de nedenfor er dem, der skal efterprøves.
+Alle notes under har vindue **2/10 07:30** (batch-deployeren kører 07:30/12:30/
+17:30/21:30). Prøverne er på **indhold**, aldrig på HTTP 200: en 200 beviser
+at svaret serveres, ikke at det er den nye kode. Hver note er én linje her;
+den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
-- ⏳ **`/tidsberegner` skal give ét svar på halvmarathon, på begge domæner.**
-  `ceo/tidsberegner-halvmaraton-tempo`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/tidsberegner | grep -o 'halvmarathon på 1 time og 45
-  minutter er 21,1 km ved[^<]*'` skal give **4:59**, og det samme på
-  `https://beraknare.se/tidsberegner` skal give **4:59** — altså to domæner, ét
-  tal. Begge steder skal desuden vise præcis **én** forekomst af `4:58` i
-  tempo-afsnittet: `grep -c '4:58'` skal være 0. Vindue **2/10 07:30**.
-
-- ⏳ **`/pace` skal optage `/pace` i sitemap og have sit eget svar i titlen.**
-  `ceo/pace-tidsberegner`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/pace` skal indeholde «5:00» i et `h1`-afsnit og
-  `https://minberegner.dk/pace.txt` skal være 404. Først når det er sand, tæller
-  en ny `/dage-til`-lignende side som optaget i sitemap.
-- ⏳ **IndexNow-nøglefilen ligger nu på den URL, payload'en erklærer.**
-  `ceo/indexnow-noeglefil`. Prøven er på indhold: `curl -sI
-  https://minberegner.dk/abc12345.txt` skal svare **404** (den nøgle er ikke
-  konfigureret — så 404 er det *korrekte* svar her), mens
-  `https://beraknare.se/abc12345.txt` også skal være 404. Skal Mads sætte
-  `INDEXNOW_API_KEY` i env, bliver den rigtige prøve i stedet
-  `curl -s https://{vært}/{nøgle}.txt` → **200** med `content-type: text/plain`
-  og nøglen i kroppen. Før rettelsen var begge **404 altid**. Vindue
-  **2/10 07:30**. Uden nøglen i env er resten af kæden ubevistelig uden for
-  lokal test — sig til når den er sat, så jeg kan lukke den på indhold.
-- ⏳ **RSC-støjens filter kan ikke dø af en tekstændring.**
-  `ceo/sentry-router-stoej-paa-kode`. Prøven er på indhold, og den skal **ikke**
-  slå MINBEREGNER-1 til: efter deploy skal Sentry-projektet fortsat stå på **0**
-  nye hændelser for router-state-fejlen. Lokalt er beviset de ni tests i
-  `sentry-config.test.ts` + de tre end-to-end i `sentry-send.test.ts`, som alle
-  læser Next's egen installerede kaste. Vindue **2/10 07:30**.
-
-- ⏳ **Sverenske satsers og lønetekstens tal læses fra modulerne.**
-  `ceo/bolan-og-loen-tekstal-fra-modul`. `curl -s
-  https://beraknare.se/bolan` skal vise «max 2%», «30% upp till 100 000 kr,
-  sedan 21%» med korrekte mellemrum, og `curl -s https://minberegner.dk/loen`
-  skal vise «1.000 kr mere i bruttoløn» (dansk tusindtalsseparator på
-  minberegner.dk, svensk «1 000» på beraknare.se). Vindue **2/10 07:30**.
-
-- ⏳ **Palmesøndag står nu i helligdagslisten, og listen siger 13.**
-  `ceo/review-fund-palmesondag-og-komponenter`. Prøven er på indhold:
-  `curl -s https://minberegner.dk/dato` skal vise «De **13** danske helligdage»
-  i FAQ'en og **Palmesøndag** i den kommaseparerede navneliste, og
-  `curl -s https://minberegner.dk/dage-til/palmesondag` skal indeholde
-  «altid en søndag» og **ikke** «religiøse helligdage». Vindue **2/10 07:30**.
-  Tallene på `/dato` skal være uændrede: 9 helligdage på hverdag i 2026.
-- ⏳ **Efterlønnens brødtekst læser portion, timer og loft fra modulet.**
-  Samme slug. `curl -s https://minberegner.dk/efterloen` skal vise
-  «15.870 kr.», «10.580 kr. for deltidsforsikrede» (mellemrum!), «481 timer»,
-  «12 portioner» og «3.120 timer» — og **ikke** «10.580kr.». Vindue
-  **2/10 07:30**.
-- ⏳ **Beløbsscanneren ser `src/components` og `ScriptKind` følger endelsen.**
-  Samme slug. **Ingen produktionsændring** i porten — kun
-  `src/app/regnestykker.test.ts` — så prøven er lokal: de 152 `.tsx` uden for
-  `page.tsx` giver pr. fil de tal i `HAARDKODEDE_BELOB_I_KOMPONENTER`, og
-  `EfterloensBeregner.test.tsx` er grøn på den renderede tekst.
-
-- ⏳ **`/renteberegner`'s danske eksempel og Excel-tabel læser modulet.**
-  `ceo/renteberegner-eksempel-fra-modul`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/renteberegner` skal vise **uændret** «200.000 kr.»,
-  «1.211,96 kr. pr. måned», «290.870,56 kr.», «90.870,56 kr.», «0,04 ÷ 12 =
-  0,3333 %», «12,68 % om året», «4,07 % effektivt» og formlerne
-  `=YDELSE(0,04/12;240;-200000)`, `=RENTENPERIODER(0,04/12;-1211,96;200000)`
-  og `=YDELSE(0,04/12;240;-200000)*240-200000`. Tallene skal være **præcis
-  de samme som før** — hvis en af dem er ændret, er der gået en fejl i
-  koblingsformen. Vindue **2/10 07:30**.
-
-- ⏳ **Regnestykker-porten ser hele kæden og sitets egen notationsform.**
-  `ceo/regnestykker-porten-ser-hele-kaden`. **Ingen produktionsændring** — kun
-  `src/app/regnestykker.test.ts` — så der er intet at hente på det levende site.
-  Beviset er lokalt: de ni kanoniske sætninger i `KANONISKE` (6 grønne rigtige,
-  3 røde forkerte, hver rød af den rette regel) og den plantede sætning på
-  `/rentefradrag`, der gjorde tre tests røde. Deploy-vindue 2/10 07:30 er
-  uden betydning for denne note; de seks nedenfor er dem, der skal efterprøves.
-- ⏳ **/arveafgift læser bundfradraget og eksemplerne fra modulet.**
-  `ceo/arveafgift-tal-fra-modul`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/arveafgift` skal vise `392.300 kr` i **alle** de otte
-  steder (tre tabellerceller, «Nærmeste familie …», «Bundfradraget … de første
-  …», regnestykket og guideboksens to beløb) og **ikke** «nærmer sig 36,25%».
-  Samme prøve på `/blog/arveafgift-regler-og-satser` for de to guidebeløb.
-  Vindue **2/10 07:30**.
-- ⏳ **/boernepenge svarer på «hvornår udbetales».** `ceo/boernepenge-udbetalingsdatoer`.
-  Prøven er på indhold: `curl -s https://minberegner.dk/boernepenge` skal indeholde
-  «Hvornår kommer børnepengen ud?», «om N dage» og en `<time dateTime="...">` med den
-  næste betalingsdato i **dagens** danske tid. Målt 1/10 22:19 (21:30-vinduet):
-  **ikke live** — kun ét fund på «Hvornår», titlen er stadig den gamle, og
-  `NaesteUdbetalingsdato` mangler i markupken. Committen er fra 20:08 UTC = 22:08
-  dansk tid, altså *efter* 21:30-vinduet. Vindue **2/10 07:30**.
-- ⏳ **Nyt afsnit: /rentefradrag'ens «Eksempel» læser fra modulet.**
-  `ceo/rentefradrag-tal-fra-kilden`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/rentefradrag` skal indeholde `50.000 × 33,6% = 16.800 kr.`
-  — og, efter en `satser-2026`-opdatering, de nye tal. Vindue **2/10 07:30**.
-- ⏳ **/moms' Excel-tabel viser nu 800, 200 og 200, ikke 1.000 og 250.**
-  `ceo/moms-excel-talene`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/moms` skal indeholde `800 kr.` og `200 kr.` i Excel-
-  tabellens kolonne **og** teksten «De tre sidste regner på 1.000 kr. med moms».
-  Vindue **2/10 07:30**.
-- ⏳ **Beløb i JSX-tekst er målt på hele sitet (471) og porten er grøn.**
-  `ceo/regnestykker-port`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/rentefradrag` skal **ikke** længere indeholde
-  `Fordel 95.000 kr. og 5.000 kr.` som tekst — og `/toppat` skal fortsat findes
-  i sitemap. Vindue **2/10 07:30**.
-- ⏳ **`/procent` er helt uden hårdkodede beløb.** `ceo/procent-eksempler-fra-modul`.
-  Prøven er på indhold: `curl -s https://minberegner.dk/procent` skal **ikke**
-  indeholde `25% moms på 1.000 kr = 250 kr i moms` som sammenhængende tekst, og
-  skal derimod vise den i markupken med de fire beløb hver for sig. Samme prøve
-  på `Host: beraknare.se` (svensk: `moms på 1 000 kr`). Vindue **2/10 07:30**.
-
-- ⏳ **`/ejendomsvaerdiskat` læser sats, kommune-promille og eksempel fra
-  modulet.** `ceo/ejendomsvaerdiskat-tal-fra-modul`. Prøven er på **indhold og
-  på uændret tekst**: `curl -s https://minberegner.dk/ejendomsvaerdiskat` skal
-  vise «5,1‰ (0,51%)», «14‰ (1,4%)», «Progressionsgrænsen er 9.007.000 kr»,
-  tabellen med 3,1 / 5,1 / 5,7 / **6,0** / 7,4 / 17,7 ‰, og eksemplet
-  «3.000.000 × 80% × 5,1‰ = 12.240 kr/år», «1.000.000 × 80% × 5,1‰ = 4.080
-  kr/år», «16.320 kr/år (1.360 kr/måned)». Vindue **2/10 07:30**.
+| Slug | Prøv på indhold |
+|---|---|
+| `tidsberegner-halvmaraton-tempo` | `/tidsberegner` **og** `beraknare.se/tidsberegner`: «halvmarathon på 1 time og 45 minutter er 21,1 km ved» skal give **4:59** i begge; `grep -c '4:58'` skal være **0** |
+| `pace-tidsberegner` | `minberegner.dk/pace` har «5:00» i et `h1`-afsnit; `/pace.txt` er 404 |
+| `klokken-i-land` (**ny**) | `/klokken-i/usa` skal vise «Det er HH:MM i New York lige nu», «New York», «8 timer foran Danmark» om vinteren og 4 by-tider i tabellen; `beraknare.se/klockan-i/turkiet` skal vise «Vad är klockan i Türkiet?» og «Det är HH:MM i Istanbul just nu»; `/klokken-i/danmark` skal være **404**; begge sitemap skal have de 12 slugs som `daily` |
+| `indexnow-noeglefil` | `/abc12345.txt` → **404** på begge domæner (nøglen er ikke konfigureret, så 404 er korrekt). Med `INDEXNOW_API_KEY` i env: → **200**, `text/plain`, nøglen i kroppen |
+| `sentry-router-stoej-paa-kode` | Sentry skal fortsat stå på **0** nye hændelser for router-state-fejlen |
+| `bolan-og-loen-tekstal-fra-modul` | `beraknare.se/bolan` viser «max 2%» og «30% upp till 100 000 kr, sedan 21%»; `minberegner.dk/loen` viser «1.000 kr mere i bruttoløn» (dansk separator) mod «1 000» på beraknare.se |
+| `review-fund-palmesondag-og-komponenter` | `/dato` viser «De **13** danske helligdage» og Palmesøndag i navnelisten; `/dage-til/palmesondag` har «altid en søndag» og **ikke** «religiøse helligdage»; 9 helligdage på hverdag i 2026 |
+| `renteberegner-eksempel-fra-modul` | `/renteberegner` skal vise **uændret** «200.000 kr.», «1.211,96 kr. pr. måned», «290.870,56 kr.», «0,04 ÷ 12 = 0,3333 %», «12,68 % om året», «4,07 % effektivt» og de tre `=YDELSE(`/`=RENTENPERIODER(`-formler |
+| `arveafgift-tal-fra-modul` | `/arveafgift` har `392.300 kr` i alle otte steder og **ikke** «nærmer sig 36,25%» |
+| `boernepenge-udbetalingsdatoer` | `/boernepenge` har «Hvornår kommer børnepengen ud?», «om N dage» og et `<time dateTime>` med næste betalingsdato |
+| `rentefradrag-tal-fra-kilden` | `/rentefradrag` har `50.000 × 33,6% = 16.800 kr.` |
+| `moms-excel-talene` | `/moms` har `800 kr.` og `200 kr.` i Excel-kolonnen og «De tre sidste regner på 1.000 kr. med moms» |
+| `regnestykker-port` | `/rentefradrag` skal **ikke** indeholde `Fordel 95.000 kr. og 5.000 kr.` som sammenhængende tekst |
+| `procent-eksempler-fra-modul` | `/procent` skal **ikke** have `25% moms på 1.000 kr = 250 kr i moms` som sammenhængende tekst; på `beraknare.se` med svensk `moms på 1 000 kr` |
+| `ejendomsvaerdiskat-tal-fra-modul` | `/ejendomsvaerdiskat` viser «5,1‰ (0,51%)», «14‰ (1,4%)», «Progressionsgrænsen er 9.007.000 kr», rækken 3,1/5,1/5,7/**6,0**/7,4/17,7 ‰ og eksemplet «3.000.000 × 80% × 5,1‰ = 12.240 kr/år» |
+| `typecheck-dækker-hele-src`, `regnestykker-porten-ser-hele-kaden`, `regnestykker-komponent-port` | **Ingen produktionsændring** — kun `package.json`, `tsconfig.app.json` og `src/app/regnestykker.test.ts`. Beviset er lokalt: mutationen `@/lib/page-data` → `@/lib/page-data-TAST` i `src/app/aegloesning/page.tsx` skal give **exit 2** fra `typecheck` (gammelt program: exit 0), og de 152 `.tsx` uden for `page.tsx` skal give **0** fund i `HAARDKODEDE_BELOB_I_KOMPONENTER` |
 
 ## ❓ Til Mads
 

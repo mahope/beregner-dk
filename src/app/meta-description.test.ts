@@ -46,9 +46,16 @@ const SIDER_UDEN_DESCRIPTION = new Set([
   "/dagar-till/[dato]",
 ]);
 
-/** Én repræsentativ værdi pr. dynamisk segment. */
+/**
+ * Én repræsentativ værdi pr. dynamisk segment. `land` dækker
+ * `/klokken-i/[land]` og `/klockan-i/[land]`; uden den fik de to ruter et
+ * `undefined` som slug, så porten meldte dem som sider uden description.
+ */
 function paramsFor(dato: string, slug: string) {
-  return { params: Promise.resolve({ dato, slug }), searchParams: Promise.resolve({}) };
+  return {
+    params: Promise.resolve({ dato, slug, land: "usa" }),
+    searchParams: Promise.resolve({}),
+  };
 }
 
 // `import.meta.glob` frem for `readdirSync`: de dynamiske ruter hedder
@@ -57,7 +64,7 @@ function paramsFor(dato: string, slug: string) {
 type SideModul = {
   metadata?: { description?: unknown };
   generateMetadata?: (props: {
-    params: Promise<{ dato: string; slug: string }>;
+    params: Promise<{ dato: string; slug: string; land: string }>;
     searchParams: Promise<Record<string, never>>;
   }) => Promise<{ description?: unknown }>;
 };
