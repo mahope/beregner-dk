@@ -1,36 +1,33 @@
-STATUS: 2/10 02:40. Rød CI: ingen (seneste kørsel grøn 2/10 00:19Z). Sentry:
-  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3, kodetestet siden
-  5f137d4. PR-TJEK: 2026-10-02 — ingen åbne PR'er. BRANCH-TJEK: ikke kørt.
-  CEO-kø punkt 0 er lukket i de otte punkter; de to der ikke stod i forrige
-  STATUS er verificeret i kode 2/10: sankthans er fast 23./24. juni på tværs af
-  alle tre `/dage-til/*`-sider (`dage-til.ts:822-903`, ingen svensk
-  midsommar-logik), og `/husleje` siger at lejeloven justerer efter
-  nettoprisindekset og at nævnet **ikke** fastsætter en sats pr. område
-  (`page-data.ts:1901`, `HuslejeNettoprisindeks.tsx:236`).
+STATUS: 2/10 03:50. Rød CI: ingen (seneste kørsel grøn 2/10 00:37Z). Sentry:
+  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
+  5f137d4 — ingen ny hændelsesgruppe siden sidste iteration. PR-TJEK: 2026-10-02
+  — ingen åbne PR'er. BRANCH-TJEK: ikke kørt. CEO-kø punkt 0 er lukket i de otte
+  punkter. Fase 3's flaskehals er CTR, og den første **nye feature** er landet.
   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 02:38: 0 · 0 · **3551 grønne i 218 filer** · 0.
-  **Denne iteration: `/ejendomsvaerdiskat` læser sats og eksempel fra et modul.**
-  `ceo/ejendomsvaerdiskat-tal-fra-modul`. Satserne lå som et konstant-objekt
-  *inde i* `EjendomsvaerdiskatBeregner.tsx`, og beregningen lå i en `useMemo` —
-  altså utestet. Siden skrev «5,1‰», «9.007.000 kr» og eksemplet «3.000.000 ×
-  80% × 5,1‰ = 12.240 kr/år» med hånden, uden at tallene hang ved satsen.
-  Nu ligger satsene, kommune-promillerne og den rene `beregnEjendomsvaerdiskat()`
-  i `src/lib/ejendomsvaerdiskat.ts` med **13 nye tests** (grænsen, 5,1‰/14‰
-  kun over progressionsgrænsen, nul ind, custom-promille), og eksemplets tre
-  regnestykker dannes fra beregningen. Listens `ejendomsvaerdiskat` er fjernet
-  (6 fund) og portens sum 448 → 442.
-  ⚠️ **Fund under egen diff-review:** min første `grundskyldPromilleFor` lod en
-  ukendt kommune arve `customPromille` i stedet for 6,0 — en reel regression,
-  fordi `valgtKommune` kommer fra URL-state. Rettet og låst i en test. Samme
-  review fandt to håndskrevne **procentsatser** («0,51%», «1,4%») der nu
-  dannes af samme sats, og at Aarhus skrev «6,0» før og ville have skrevet «6».
-  ⚠️ **Målt i denne iteration:** en isoleret `vitest`-kørsel af den nye fil var
-  **grøn**, mens hele suiten var **rød** — `BESKATTET_ANDEL` stod efter sit
-  første brug (TDZ), og kun en anden fil, der importerer modulet, ramte den.
-  Og et bogstav i en importliste slap igennem både `lint` og `typecheck` og
-  blev først fanget af `next build`. Se de to nye opgaver.
-  **Åbne VERIFICÉR-noter: 13**, alle med vindue **2/10 07:30**.
-
+  `npm run build`. Målt 2/10 03:46: 0 · 0 · **3575 grønne i 219 filer** ·
+  0 (`/pace` er `ƒ` = dynamisk, ikke prerenderet). De fire forhenværende fund
+  var mine egne skrivefejl i JSX, fanget af `biome lint`.
+  **Denne iteration: `/pace` — et løbetidsværktøj.** `ceo/pace-tidsberegner`.
+  Datagrund: **8 af 10** danske completions under «tid beregner» er sport
+  («marathon tid beregner», «km tid beregner», «pace tid beregner» …), og
+  `/tidsberegners` tredjestørste søgning er «hvor lang tid» (828 visninger,
+  pos. 6) på 74.546 visninger med 0,3 % CTR. `/tidsberegner` havde to
+  tempo-FAQ'er, men intet værktøj og ingen holdtider.
+  Ny `src/lib/pace.ts` (ren brøkregning, ingen kilde nødvendig) med **20
+  tests**, begge retninger (tid → tempo og tempo → tid) og holdtider.
+  Sidste holdtid bærer afrundingen, så **splitsummerer altid til totalen** —
+  testet over alle distancer 0,1–42,5 km. `formaterLobetid` giver `3:30:00`
+  med timer, hvor `formatSekunder` giver `210:00` — marathons tid kan ikke
+  skrives som minutter. Halvmarahton-eksemplet er bevidst **1:45 → 4:59 pr.
+  km**, præcis som `/tidsberegners` egen FAQ siger, så de to sider ikke
+  modsiger hinanden. Registreret i `calculator-list` (da/no/se + `relatedMap`),
+  `page-data` (da + se), `categories`, `home-data` (da/no/se) og `icons.ts`
+  (`Timer`); sitemapken følger `getAvailableSlugs` automatisk.
+  *Fund under egen diff:* mit første batch-script til registreringen **faldt
+  på gulvet efter `page-data`** (fejlende anchor), så kun 4 af 9 filer blev
+  ændret. Helt hændeligt fangede `meta-description`-porten det (`da /pace`
+  manglede) — præcis den port, der er lavet til at lade en side mangle data.
+  ⚠️ **Åbne VERIFICÉR-noter: 14**, alle med vindue **2/10 07:30**.
 
 ## Review-fund 29/9 — lukket (detaljer i `docs/plan-arkiv.md`)
 
@@ -266,18 +263,16 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 - **Forskelsside til `/dato` og `/tidsberegner` på beraknare.se.** *Hvem:*
   190.447 svenske visninger på 0,12 % CTR. *Accept:* CTR over 0,3 % på 14
   dage. *Datagrund:* GSC se, 1/10. **Kan ikke før 13/10** (opgave 187).
-- **Pace/lap-beregner til løb og cykel (ny, målt 2/10 — stærkeste
-  ubbyggede klynge).** *Hvem:* **8 af 10** danske completions under «tid
-  beregner» er sport: «tid beregner løb», «marathon tid beregner»,
-  «halvmarathon tid beregner», «km tid beregner», «cykel tid beregner»,
-  «ironman tid beregner», «triathlon tid beregner», «pace tid beregner». Og
-  `/tidsberegners` **tredjestørste søgning** er «hvor lang tid» (828 visninger,
-  pos. 6) på 74.546 visninger med 0,3 % CTR. *Accept:* et pace-værktøj der
-  regner holdtider pr. kilometer fra distance + tid (og tid fra pace), med
-  tests, dansk side og interne links fra `/tidsberegner` og `/fart`. *Datagrund:*
-  GSC 1/10 + `suggestqueries` målt 2/10 02:45. **Ingen ekstern kilde nødvendig**
-  — det er ren brøkregning, så den behøver ikke at vente på ferielov eller
-  satser. Dette er den næste **feature**.
+- **Pace/lap-beregner til løb og cykel** — ✅ 2/10, `ceo/pace-tidsberegner`.
+  *Hvem:* «marathon tid beregner», «km tid beregner», «pace tid beregner» og de
+  fem øvrige sport-completions under «tid beregner». *Accept:* tempo fra
+  løbetid **og** løbetid fra tempo, holdtider pr. kilometer der summerer til
+  totalen, tests, da+se side og interne links — leveret. *Datagrund:* GSC 1/10
+  (`/tidsberegner` 74.546/203/0,3 %/6,9) + `suggestqueries` 2/10 02:45.
+  **MÅL:** `/pace` er ny, ingen baseline; `/tidsberegner` 290 besøgende/28d
+  (bounce 8 %) er gruppen den skal flytte. Genmål **16/10**.
+  *Næste skridt:* cykel-udgaven er samme værktøj, så det er et spørgsmål om
+  svensk/dansk rækkefølge i autocomplete, ikke om en ny side.
 - **«Hvad er klokken i …»-clusteret (ny, målt 2/10).** *Hvem:* **9 af 10**
   danske completions under «hvad er klokken» er «hvad er klokken i usa /
   danmark / thailand / new york / australien / japan / tyrkiet / bali /
@@ -292,6 +287,11 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
+- ⏳ **`/pace` skal optage `/pace` i sitemap og have sit eget svar i titlen.**
+  `ceo/pace-tidsberegner`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/pace` skal indeholde «5:00» i et `h1`-afsnit og
+  `https://minberegner.dk/pace.txt` skal være 404. Først når det er sand, tæller
+  en ny `/dage-til`-lignende side som optaget i sitemap.
 - ⏳ **IndexNow-nøglefilen ligger nu på den URL, payload'en erklærer.**
   `ceo/indexnow-noeglefil`. Prøven er på indhold: `curl -sI
   https://minberegner.dk/abc12345.txt` skal svare **404** (den nøgle er ikke

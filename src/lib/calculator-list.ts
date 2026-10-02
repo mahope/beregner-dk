@@ -68,6 +68,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/alkoholenheder", daOnly: true, titles: { da: "Alkoholenheder", no: "Alkoholenheter", se: "Alkoholenheter" }, descriptions: { da: "Beregn antal genstande ud fra mængde og alkoholprocent", no: "Beregn alkoholenheter ut fra mengde og alkoholprosent", se: "Beräkna alkoholenheter utifrån mängd och alkoholprocent" } },
   // Tid
   { href: "/dato", titles: { da: "Datoberegner", no: "Datokalkulator", se: "Datumkalkylator" }, descriptions: { da: "Dage mellem datoer", no: "Dager mellom datoer", se: "Dagar mellan datum" } },
+  { href: "/pace", titles: { da: "Løbetidsberegner", no: "Løpetidskalkulator", se: "Löptidsberäknare" }, descriptions: { da: "Beregn tempo og holdtider", no: "Beregn tempo og deltider", se: "Beräkna pace och deltider" } },
   { href: "/tidsberegner", titles: { da: "Tidsberegner", no: "Tidskalkulator", se: "Tidskalkylator" }, descriptions: { da: "Beregn tid og varighed", no: "Beregn tid og varighet", se: "Beräkna tid och varaktighet" } },
   { href: "/tidszone", titles: { da: "Tidszone", no: "Tidssone", se: "Tidszon" }, descriptions: { da: "Omregn tidszoner", no: "Omregn tidssoner", se: "Omvandla tidszoner" } },
   { href: "/alder", titles: { da: "Alder", no: "Alder", se: "Ålder" }, descriptions: { da: "Beregn din præcise alder", no: "Beregn din nøyaktige alder", se: "Beräkna din exakta ålder" } },
@@ -197,6 +198,7 @@ const relatedMap: Record<string, string[]> = {
   "/proteinbehov": ["/kalorier", "/bmi", "/motion-kalorier", "/vandbehov", "/vaegttab"],
   "/dato": ["/tidsberegner", "/alder", "/tidszone", "/feriepenge", "/pension", "/ugenummer"],
   "/tidsberegner": ["/dato", "/tidszone", "/alder", "/timepris", "/kalorier", "/ugenummer"],
+  "/pace": ["/tidsberegner", "/fart", "/kalorier", "/dato", "/alder"],
   "/tidszone": ["/dato", "/tidsberegner", "/valuta", "/alder", "/timepris"],
   "/alder": ["/dato", "/pension", "/bmi", "/tidsberegner", "/efterloen", "/ugenummer"],
   "/bil": ["/braendstof", "/billaan", "/elberegner", "/forbrugslaan", "/loen-efter-skat"],

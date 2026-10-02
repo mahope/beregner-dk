@@ -1,4 +1,5 @@
 import {
+  Timer,
   Activity,
   AlarmClock,
   Apple,

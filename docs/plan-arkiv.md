@@ -23425,3 +23425,36 @@ nylige sider er den første måleflade for Bing/DDG/Yahoo. Plausible's
 ikke-Google-andel: **2.153 af 7.490 = 29 %** pr. 2026-10-02 (Bing 1.334, DDG
 383, Yahoo 265, Ecosia 119, Qwant 52). Genmål **2026-10-16** — 14 dage er for
 lidt til Bing, men en ændret andel i de kilder er det første tegn.
+
+
+## 2/10 — `/pace` (løbetidsværktøj), `ceo/pace-tidsberegner`
+
+Feature-køens stærkeste ubbyggede klynge: **8 af 10** danske completions under
+«tid beregner» er sport, og `/tidsberegner` har 74.546 GSC-visninger på 0,3 %
+CTR pos. 6,9 med to tempo-FAQ'er men intet værktøj.
+
+**Leveret:** `src/lib/pace.ts` (20 tests) + `PaceBeregner.tsx` + `/pace` +
+registrering i `calculator-list`, `page-data` (da/se), `categories`,
+`home-data` (da/no/se) og `icons.ts`.
+
+**Beslutninger der bør overleveres:**
+- **Holdtiderne bærer afrundingen i den sidste kilometer.** Rundes hver
+  kilometer for sig, summerer 42 km til tiden med op til 42 sekunders
+  afvigelse. Testet for alle distancer 0,1–42,5 km mod 6 totaler.
+- **`formaterLobetid` er en ny funktion, ikke en genbrug af `formatSekunder`.**
+  `formatSekunder` i `tidsberegner.ts` giver m:ss og skriver en marathon som
+  «210:16». Paceformatet har brug for den, totaltiden har brug for timer med.
+- **Halvmarahton-eksemplet er 1:45 → 4:59 pr. km**, fordi det er det samme tal
+  `/tidsberegner` allerede skriver i sin egen tempo-FAQ. De to sider skal ikke
+  give forskellige svar på samme spørgsmål.
+- **Ingen ekstern kilde nødvendig.** Tempo = tid ÷ distance, så det er brøkregning
+  — derfor kunne opgaven ikke vente på ferielov eller på satser.
+
+**Fund under egen diff:** et batch-script til registreringen døde efter
+`page-data` (fejlende anchor), så 4 af 9 filer aldrig blev ændret. Det blev
+kun fundet fordi `meta-description`-porten meldte «mangler: da /pace» — porten
+er altså i stand til at fange en halvregistreret side. **Læs portens output
+fuldt ud, selv når resten af gaten er grøn.**
+
+**Mål:** `/tidsberegner` 290 besøgende/28d (bounce 8 %) pr. Plausible
+2026-10-02. `/pace` er ny og har ingen baseline. Genmål 16/10.
