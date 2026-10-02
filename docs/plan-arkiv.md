@@ -23811,3 +23811,67 @@ ruter er stadig `ƒ` i byggetabelen, altså `force-dynamic` holder. De 7
 build-advarsler er Tailwind-CSS i `globals.css` og er fra master.
 `node scripts/locale-leak.mjs --gate` exit 0 før og efter, output
 byte-identisk (`diff` tom) — den `FEJL:`-linje i testloggen er forhånds.
+
+## 2/10 06:20 — F5b-målingerne for `/opsparing`, `/bil`, `/billaan` og de 24 landesider (arkiveret fra planens STATUS)
+
+De fire målinger lå i planen som iterationsrapporter. De er lukket her, så
+planen igen er en arbejdskø.
+
+- **opsparing-eksempler-fra-modul (582c9b4).** Målt 2/10 05:35 med
+  `src/app/regnestykker.test.ts`' egen scanner: **10 fund på siden → 0**, listen
+  **402 → 392**. Alle ti var håndskrevne, hver sit sprog med sin egen
+  tusindtalsseparator, og «1,5 mio»/«1,7 mio» i kalletoten var ikke et resultat
+  af nogen beregning. Alt ligger nu i `src/lib/opsparing.ts`, som
+  `OpsparingsBeregner` også bruger — sin egen `simulerOpsparing` flyttede ud af
+  komponenten. To fund under egen diff-review: min kontrolformel for
+  renteudgiften var en faktor 1,05 for lav, og min egen docblock-påstand om at
+  `renteAar` månedlig forrentning var falsk (den er årlig). Mutation:
+  formelkontrollen dømmer begge.
+- **bil-omkostninger-fra-modul (415d31e).** 16 fund væk. Otte estimater i hvert
+  sprog uden kilde (vægtafgift, service, bremser, tandemrem, dæk) lå i
+  artiklen; de ligger nu i `src/lib/bil-omkostninger.ts`, som danner
+  beregnerens resultat, og benzin/elpris læses fra `braendstofForudsætninger`.
+  To modsigelser lukket med samme greb: siden lovede **2,50-4,50 kr/km** mod
+  beregnerens **4,90 kr/km** for standardindgangene, og beraknare.se regnede benzin
+  til **13,5 kr/liter** mens artiklen skrev 18-20 (startværdierne lå i
+  komponenten uden sprog). Nye tal: da **4,16-5,00 kr/km**, se **4,10-5,27 kr/km**.
+  `vaegtafgiftEl: 0` stod som «0 kr (til 2026)» — påstanden er fjernet, fordi
+  skat.dk svarer 500.
+- **billaan-tal-fra-modul (4990006).** 24 fund væk. De to eksempeltabeller laane
+  på hver sin måde, og to af tre danske rækker skrev «6 %» med 7 %'s ydelse
+  (3.017 mod 2.630, 4.525 mod 3.944); dansk «Samlet omkostning» var ydelserne
+  alene, svensk ydelserne plus udbetaling. APR-formlen manglede faktor 2 (3,46 %
+  for et 6,5 %-lån, nu 6,91 %). Porten løser den effektive rente ved bisection og
+  kræver `apr > effektiv` **og** `apr < effektiv + 1`, så den gamle formel ville
+  have failet.
+- **klokken-tidszone-paastand (bacfd42).** Se review-funden: FAQ'en på de 24
+  landesider sagde «følger din tidszone». Målt falsk — `beregnKlokkenNu` læser
+  kun `by.zone`; egen måling under `TZ=Europe/Copenhagen` og
+  `TZ=America/New_York` gav identiske tal. Rettet med to ord, én per sprog.
+  `src/app/klokken-i/KlokkenIPage.test.tsx` (5 tests) dømmer på **ejendaben** og
+  renderer den rigtige JSON-LD, målt 5/5 rød mod den gamle kode.
+- **Gaten.** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` 3637 grønne i 224
+  filer · `build` 0. `/klokken-i` og `/klockan-i` er stadig `ƒ` i byggetabelen.
+
+## 2/10 06:30 — PR 27 landet: `error.tsx`Crashede, når den skulle vise en fejl
+
+`src/app/error.tsx` (rodens error-boundary) kaldte `useLocale()`, som **kaster**
+`useLocale must be used within a LocaleProvider` uden provider. Fejlvisningen
+kastede altså selv en fejl, og brugeren fik Next's egen fallback i stedet for
+dansk tekst og «Prøv igen».
+
+**Målt** på PR'en fra `mahope` (`fix/sentry-7767249621`): den nye
+`src/app/error.test.tsx` renderer error-siden uden `LocaleProvider` — rød mod
+den gamle kode (kast fra `src/app/error.tsx:16`), grøn med rettelsen. Porten
+dømmer på den synlige danske tekst og på at `Sentry.captureException` stadig
+kaldes, så den kan ikke være grøn fordi komponenten blot er slettet.
+
+Rettelsen læser domænet fra `window.location.hostname` via
+`getDomainConfig()` i en `useEffect` med dansk startværdi. Startværdien er
+dansk, fordi en lazy `useState`-initialisering ville give en hydration-mismatch
+på beraknare.se; en fejlsides første billede på dansk er billigere end en
+mismatch.
+
+**Gate 2/10 06:25:** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` **3638
+grønne i 225 filer** (den nye test er den 3638.) · `npm run build` 0.
+`scripts/locale-leak.mjs --gate` uændret.

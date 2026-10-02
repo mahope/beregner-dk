@@ -1,140 +1,58 @@
-STATUS: 2/10 06:20. Rød CI: ingen (seneste kørsel grøn 2/10 03:34Z). Sentry:
+STATUS: 2/10 06:30. CI grøn (seneste master-kørsel 2/10 04:08Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
-  5f137d4 — ingen ny hændelsesgruppe. PR-TJEK: 2026-10-02 — ingen åbne PR'er.
-  BRANCH-TJEK: 2/10 — ingen forældede remote-branches. CEO-kø punkt 0 er lukket
-  (RETTET 04ca30a) og de otte CEO-punkter er efterprøvet i koden 2/10 04:40.
+  5f137d4 — ingen ny hændelsesgruppe. PR-TJEK: 2026-10-02 — PR 27 landet og
+  lukket. BRANCH-TJEK: 2/10 — ingen forældede branches; den nye
+  `fix/sentry-7767249621` lukkedes med PR'en. CEO-kø punkt 0 er lukket (RETTET
+  04ca30a), de otte CEO-punkter er efterprøvet i koden 2/10 04:40.
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 06:10: 0 · 0 · **3637 grønne i 224 filer** · 0
+  `npm run build`. Målt 2/10 06:25: 0 · 0 · **3638 grønne i 225 filer** · 0
   (`/klokken-i` og `/klockan-i` stadig `ƒ`, `force-dynamic` urørt).
-  **Denne iteration: FAQ'en på de 24 landesider sagde, at klokkeslættet
-  «følger din tidszone». Det er målt falsk, og halvdelen lå i den strukturerede
-  data, Google kan citere.** Egen måling 06:05 med `beregnKlokkenNu` under to
-  processer: `TZ=Europe/Copenhagen` og `TZ=America/New_York` gav **identiske**
-  tal (New York 00:02, Tokyo 13:02) — byens egen vægur, intet læserinput.
-  Rettet med to ord, én i hvert sprog. Ny port dømmer på **ejendaben** (svaret
-  skal navngive byens egen tidszone) og renderer den rigtige JSON-LD; målt 5/5
-  rød mod den gamle kode. `ceo/klokken-tidszone-paastand`.
+  **Denne iteration: PR 27 landet — rodens fejlside kastede selv en fejl.**
+  `src/app/error.tsx` kaldte `useLocale()`, som kaster `useLocale must be used
+  within a LocaleProvider` uden provider, så fejlvisningen viste Next's egen
+  fallback i stedet for dansk tekst og «Prøv igen». Målt: den nye
+  `src/app/error.test.tsx` er **rød mod den gamle kode** (kast fra
+  `error.tsx:16`) og grøn med rettelsen. Rettelsen læser domænet fra
+  `window.location.hostname` med dansk startværdi, så hydration ikke afviger.
+  `ceo/error-side-locale`. Målinger fra de fire forrige iterationer (opsparing,
+  bil, billaan, landesiderne) er flyttet til `docs/plan-arkiv.md`.
 
-## Review-fund 2/10 06:15 — lukket ✅ (LAV, `ceo/klokken-tidszone-paastand`)
+## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
-  `/klokken-i/<land>` og `/klockan-i/<land>` skrev i FAQ'en, at tallet «følger
-  **din** tidszone». Målt falsk: `beregnKlokkenNu(by, sprog, tidspunkt)` læser
-  kun `by.zone`, og egen måling under to `TZ` gav identiske tal. Halvdelen lå i
-  `FAQSchema`'s JSON-LD, altså den tekst Google kan citere, og den modsagde
-  sidens egen brødtekst otte linjer længere nede. Rettet med **to ord**.
-  Porten dømmer på ejendaben og renderer den rigtige JSON-LD, så den kan ikke
-  være grøn fordi sætningen bare forsvinder. Målinger, mutation og
-  selve fund-teksten: `docs/plan-arkiv.md`.
+Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
+blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket.
 
-## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmarathon-tempo`)
-
-  `/tidsberegner` skrev 4:59 i tabellen og 4:58 i brødteksten på samme side.
-  Rettet ved at læse fra tabellens egen række; ny port dømmer på renderet
-  afsnitstekst og er målt rød mod den gamle kode. Målinger, mutationer og de
-  fire fund under egen diff-review: `docs/plan-arkiv.md`.
-
-## Review-fund 29/9 — lukket (detaljer i `docs/plan-arkiv.md`)
-
-  R1 og R2 er begge rettet i `ceo/review-fund-palmesondag-og-komponenter`; målinger,
-  mutationer og den røde liste over følsomme filer står i arkivet.
-
-## Næste opgave (klar til næste iteration)
-
-**F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** Målt 2/10 02:00
-med portens egen scanner: `/renteberegner` står **0** (listen siger 6 — den er
-et loft, ikke en målsætning), så rækkefølgen er nu `/billaan` 24 ✅, `/moms` 18
-(❓ kilde), `/bil` 16 ✅, `/opsparing` 10 ✅, `/boligsalg` 9, `/topskat` 8.
-`/procent` ✅ 1/10, `/arveafgift` ✅ 2/10 og `EfterloensBeregner` ✅ 2/10 (se
-STATUS), se `ceo/procent-eksempler-fra-modul`, `ceo/arveafgift-tal-fra-modul` og
-`ceo/review-fund-palmesondag-og-komponenter`. Listen i
-`src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun blive
-kortere, så dette er rækkefølgen. *Accept pr. side:* listen for den side
-falder, og regnestykkerne er verificeret af `regnestykker-porten`.
-- **`/ejendomsvaerdiskat`** — ✅ 2/10 (`ceo/ejendomsvaerdiskat-tal-fra-modul`),
-  se STATUS. Bemærk at `Varde (højest) 17,7‰` i kommunetabellen stadig er
-  håndskrevet, fordi Varde ikke står i modulets kommune-liste. Den mangler en
-  kilde, så den læses ikke fra modulet endnu — ❓ nedenfor hvis den skal.
-- **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), 2 fund tilbage:
-  «Virksomheder med en årlig omsætning over **50.000 kr**» (registreringsgrænsen)
-  og «told ved import over **1.150 kr**» — sidstnævnte er en EUR-grænse omregnet
-  til kroner, så den flytter sig med valutakursen og kan ikke stå som et fast tal.
-  **Begge kræver en kilde** (❓ nedenfor), så de må ikke gættes.
-- **`/renteberegner`** — ✅ 2/10 for de **otte** håndskrevne tal i eksemplet,
-  se STATUS og `ceo/renteberegner-eksempel-fra-modul`. De **6** fund
-  `regnestykker`-porten stadig tæller på siden er *ikke* dem: de er
-  rentefradrag-sætningen («33,6 %», «50.000 kr.», «100.000 kr.», «3,3 %
-  efter skat» …), som står i `RENTEFRADRAG_2026`-nærheden. *Accept:* de 6
-  falder, og porten tæller dem ikke, fordi de læses fra modulet.
-- **Komponenterne: 0 fund** ✅ 2/10 (`ceo/review-fund-palmesondag-og-komponenter`,
-  `ceo/bolan-og-loen-tekstal-fra-modul`). Listen
-  `HAARDKODEDE_BELOB_I_KOMPONENTER` er tom, så næste håndskrevne beløb i en
-  beregner er rød med det samme. Det næste **ikke** dækkede sted er
-  strengliteraler i props — se nedenfor.
-- **Beløb i prop-strenge er stadig uden for porten** (ny, 2/10).
-  `jsxBelob` ser kun `ts.isJsxText`, så en `disclaimer`-streng i et objekt er
-  usynlig: `BoligsalgBeregner.tsx:48` skriver «Tinglysningssatser 0,6% + 1.850 kr
-  (skøde) og 1,45% + 1.825 kr (pantebrev)», og ingen port ser de to tal. *Accept:*
-  scanneren dækker strengliteraler i `.tsx` med egen liste — målt først, da der
-  kan være mange fund.
-- **`/opsparing`** — ✅ 2/10 05:35 (`ceo/opsparing-eksempler-fra-modul`), de 10
-  fund er væk: **porten målt 10 → 0 fund**, listen **402 → 392**. De var alle
-  håndskrevne, hver sit sprog med sin egen tusindtalsseparator, og «1,5 mio»/
-  «1,7 mio» i kalletoten var ikke et resultat af nogen beregning. Alt ligger nu
-  i `src/lib/opsparing.ts`, som **`OpsparingsBeregner` også bruger** (dets eget
-  `simulerOpsparing` flyttede ud af komponenten), så separatoren kommer fra
-  sidens egen formatter. Målinger, de to fund under egen diff-review (min
-  kontrolformel var en faktor 1,05 for lav, og min egen docblock-påstand om
-  månedlig forrentning var falsk) og mutationen står i `docs/plan-arkiv.md`.
-- **`/boligsalg`** — målt 2/10 05:00: 9 fund, men **otte er redaktionelle
-  prisintervaller** (mæglerhonorar, tinglysning, avance, byggeskade,
-  huseftersyn, maling, styling) uden kilde i repoet, og den niende er
-  kildeangivelsen «opdateret august 2025». `src/lib/boligsalg.ts` findes og har
-  tests, så **formelbeløb** kan læses derfra — men prisintervallerne kræver en
-  kilde. Lav trafikrækkefølge.
-- **`/topskat`** — målt 2/10 05:00: 8 fund, hvor **syv er beløbsgrænser**
-  (641.200 / 777.900 / 2.592.700 kr. pr. år, 697.000 kr./år, 845.500 kr./år og
-  de to månedstal), der højst sansynvis allerede ligger i modulets satser. Den
-  ottende er «af en lønforhøjelse på 1.000 kr.», som beholder sit tal, fordi den
-  netop *er* den forhøjelse, der illustreres.
-- **`/bil`** — ✅ 2/10 (`ceo/bil-omkostninger-fra-modul`), de 16 fund er væk.
-  Målt før rettelsen med scanneren: otte estimater i hvert sprog (vægtafgift,
-  service, bremser, tandemrem, dæk, dækkenes holdelighed) — ingen af dem med
-  en kilde. Alt ligger nu i `src/lib/bil-omkostninger.ts`, som **også** danner
-  beregnerens resultat, og benzin- og elprisen læses fra
-  `braendstofForudsætninger`. To modsigelser var lukket med samme greb: siden
-  lovede **2,50-4,50 kr/km** mod beregnerens **4,90 kr/km** for de samme
-  standardindgange, og beraknare.se regnede benzin til **13,5 kr/liter** mens
-  artiklen skrev 18-20 (fordi standardindgangene lå i komponenten uden sprog).
-  Nye tal: dansk **4,16-5,00 kr/km**, svensk **4,10-5,27 kr/km**.
-- **`/billaan`** — ✅ 2/10 (`ceo/billaan-tal-fra-modul`), de 24 fund er væk.
-  Målt før rettelsen: de to eksempeltabeller laante på hver sin måde, og **to
-  af de tre danske rækker skrev «6 %» med den månedlige ydelse for 7 %**
-  (3.017 kr i stedet for 2.630 kr, 4.525 i stedet for 3.944). Den danske
-  «Samlet omkostning» var ydelserne alene, den svenske ydelserne plus udbetaling.
-  Alt ligger nu i `src/lib/billaan.ts`, som `BillaanBeregner` **også** bruger —
-  og samme iteration fandt at beregnerens egen ÅOP-formel manglede faktor 2, så
-  den viste 3,46 % for et 6,5 %-lån (nu 6,91 % for standard-inputtet).
-  Efterspærgte **F5b-køen** er herefter: `/moms` (kræver kilde, ❓), `/bil` (16),
-  `/opsparing` (10), `/boligsalg` (9), `/topskat` (8).
-- **To huller i gaten selv — ✅ 2/10 (`ceo/typecheck-dækker-hele-src`).**
-  (a) `tsconfig.test.json` medtager kun testfiler og deres import-kæde, så en
-  **forkert import i en ikke-testfil** var usynlig for `typecheck` — kun
-  `next build` fangede `satsTilPermille`. Løst med et nyt `tsconfig.app.json`
-  i samme gate. *Accept opfyldt:* målt med mutationen på `aegloesning/page.tsx`
-  — gammelt program exit 0, nyt exit 2.
-  (b) Port-tests isoleret som bevis — lukket med en note i CLAUDE.md's
-  Test-sektion og med hele suiten kørt efter sidste ændring.
-- **Beløb i strengliteraler: målt 2/10 (ny).** Scanneren fandt **531**
-  forekomster på tværs af `.ts`/`.tsx`; uden for `page.tsx`, komponenter og test
-  ligger de fire i `home-data.ts`, to i `categories.ts` og **16 i
-  `TimeprisBeregner.tsx`** — som er håndskrevet **tre gange, på tre sprog, med
-  tre forskellige lister** (da har 7 poster, se og no har 6, og skilletegn og
-  tusindtalsformatering varierer). *Accept:* ét datasæt + formatter, brugt alle
-  tre steder. Lav trafikrækkefølge, men det er den eneste måling i rækken hvor
-  indholdet faktisk afviger mellem sprog.
-- **Blogindlæg (19 filer, 273 fund).** Redaktionelle beløb i et indlæg er ikke
-  samme fejlklasse som et beløb på en beregnerside. Beslut først om de skal med;
-  hvis ikke, skal de stå i portens undtagelsesliste som *blog*.
+1. **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), 18 fund. **Kræver en
+   kilde** (❓ nedenfor): «registrering over 50.000 kr» og «told ved import over
+   1.150 kr» (sidstnævnte er en EUR-grænse og kan ikke stå som fast tal). Må
+   ikke gættes (punkt 11).
+2. **`/boligsalg`** — 9 fund, hvor 8 er redaktionelle prisintervaller (mægler,
+   tinglysning, avance, byggeskade …) uden kilde i repoet, og den niende er
+   «opdateret august 2025». Formelbeløb kan læses fra `src/lib/boligsalg.ts`
+   (findes, har tests); prisintervallerne kræver en kilde. Lav trafikrækkefølge.
+3. **`/topskat`** — 8 fund, hvor **syv er beløbsgrænser** (641.200 / 777.900 /
+   2.592.700 kr. pr. år, 697.000 og 845.500 kr./år + de to månedstal), der
+   højst sansynvis allerede ligger i modulets satser. Den ottende («af en
+   lønforhøjelse på 1.000 kr.») beholder sit tal, fordi den netop *er* den
+   illustrerede forhøjelse. *Accept:* listen for siden falder, og porten
+   tæller dem ikke, fordi de læses fra modulet.
+4. **Beløb i prop-strenge er stadig uden for porten** (ny, 2/10). `jsxBelob` ser
+   kun `ts.isJsxText`, så `BoligsalgBeregner.tsx:48`s «0,6% + 1.850 kr (skøde)»
+   og «1,45% + 1.825 kr (pantebrev)» er usynlig for porten. *Accept:* scanneren
+   dækker strengliteraler i `.tsx` med egen liste — målt først, da der kan være
+   mange fund (`TimeprisBeregner.tsx` har 16, håndskrevet tre gange på tre sprog
+   med tre lister: da har 7 poster, se og no har 6).
+5. **Blogindlæg (19 filer, 273 fund).** Redaktionelle beløb i et indlæg er ikke
+   samme fejlklasse som et beløb på en beregnerside. Beslut først, om de skal
+   med; ellers skal de stå i portens undtagelsesliste som *blog*.
+6. **IndexNow** — nøglefil serveres, krogen efter deploy virker
+   (`src/instrumentation.ts` → `submitDeploymentIndexNow()`). ❓ om
+   `INDEXNOW_ENABLED=true` og `INDEXNOW_API_KEY` i Dokploys env.
+7. **Opgave 187** (svenske slugs + 301-redirects) — **13/10**, må ikke flyttes
+   før de svenske titelændringer er målt.
+8. **F1** — søgeniveau-data for `/procent` (150.470 visninger, 0,1 % CTR,
+   pos. 7,4). GSC's tre søgninger summerer 364 visninger af 150.470. ❓ se
+   nedenfor.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -342,14 +260,15 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Alle notes under har vindue **2/10 07:30** (den nyeste fra 06:15) (batch-deployeren kører 07:30/12:30/
+Alle notes under har vindue **2/10 07:30** (den nyeste fra 06:30) (batch-deployeren kører 07:30/12:30/
 17:30/21:30). Prøverne er på **indhold**, aldrig på HTTP 200: en 200 beviser
 at svaret serveres, ikke at det er den nye kode. Hver note er én linje her;
 den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
-| `klokken-tidszone-paastand` (**ny**) | `minberegner.dk/klokken-i/usa`: FAQ-svaret på «Hvad er klokken i New York lige nu?» skal sige «**byens egen** tidszone» og **ikke** «din tidszone» — i både den synlige tekst og JSON-LD'en; `beraknare.se/klockan-i/usa` skal sige «**stadens egen** tidszon» og **ikke** «din tidszon». `grep -c 'din tidszone'` på hele siden skal være **0** i begge domæner. Samme svar skal stå på alle 12 lande |
+| `error-side-locale` (**ny**) | **Ingen HTML-prøve findes** — ændringerne ligger kun i rodens fejlside, som ikke kan udløses uden en kastende fejl, så den kan ikke verificeres på indhold. Verificér i stedet at `minberegner.dk/api/health` svarer `status: ok`, og at der i 14 dage **ikke** dukker en Sentry-hændelse med `useLocale must be used within a LocaleProvider` op |
+| `klokken-tidszone-paastand` | `minberegner.dk/klokken-i/usa`: FAQ-svaret på «Hvad er klokken i New York lige nu?» skal sige «**byens egen** tidszone» og **ikke** «din tidszone» — i både den synlige tekst og JSON-LD'en; `beraknare.se/klockan-i/usa` skal sige «**stadens egen** tidszon» og **ikke** «din tidszon». `grep -c 'din tidszone'` på hele siden skal være **0** i begge domæner. Samme svar skal stå på alle 12 lande |
 | `opsparing-eksempler-fra-modul` | `minberegner.dk/opsparing`: «Uden renters rente» skal give `10.000 kr.` / `25.000 kr.`, «Med renters rente» `10.000 kr.` / `43.219 kr.`, og kalletoten `1.522.077 kr.` for Person A og `1.674.259 kr.` for B, med «480.000 kr.» / «720.000 kr:» og «240.000 kr. mere ind» / «152.182 kr. mere til sidst»; **intet** «1,5 mio», «1,7 mio», «5%», «(5% rente)» eller «forskellen er minimal». `beraknare.se/opsparing`: `100 000 kr` / `250 000 kr` og `100 000 kr` / `432 194 kr` med **mellemrum** i separatoren, `1 522 077 kr` / `1 674 259 kr` og `480 000 kr` / `720 000 kr`; **intet** «1,5 mkr» |
 | `bil-omkostninger-fra-modul` | `minberegner.dk/bil`: artiklen skal have `4,16-5,00 kr.` i pr/km-sætningen og rækkerne `Benzin 4,90 / Diesel 5,00 / Hybrid 4,83 / Elbil 4,16`, «7.500 kr. om året» i serviceafsnittet og `4.000/5.500/3.000/0 kr.` i vægtafgiftstabellen; **intet** «2,50-4,50 kr» og ingen `<li>` med beløb. `beraknare.se/bil`: `4,10-5,27 kr.`, rækkerne `Bensin 5,17 / Diesel 5,27 / Laddhybrid 5,10 / Elbil 4,10`, «17,57 kr/liter», «7 500 kr per år» og `Elbil 360 kr` i tabellen; **intet** «18-20 kr/liter». Beregnerens brændstofpris skal være 17,57 på beraknare.se (var 13,5 på alle domæner) |
 | `billaan-tal-fra-modul` (**ny**) | `minberegner.dk/billaan`: rækkerne skal være `100.000/10.000/5 år/6 %/1.740 kr/114.397 kr`, `200.000/20.000/7 år/6 %/**2.630 kr**/240.881 kr`, `300.000/30.000/7 år/6 %/**3.944 kr**/361.322 kr`; **intet** «3.017» eller «4.525»; beregnerens ÅOP skal være **6,91** (var 3,46) | `beraknare.se/billaan` skal have `150 000/30 000/7 %/2 376 kr/172 569 kr` med **mellemrum** i tusindtalsseparatoren |
