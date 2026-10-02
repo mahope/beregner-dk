@@ -54,10 +54,24 @@ function beregnMaegler(input: BoligsalgInput): number {
   return input.maeglerFast;
 }
 
+/**
+ * Tinglysningens to faste beløb — skoedens 1.850 kr. og pantebrevets 1.825 kr.
+ * De lå begge hårdkodet i `beregnTinglysning`, mens beregnerens egen
+ * disclaimer skrev dem igen som tekst («0,6% + 1.850 kr (skøde)»): to steder,
+ * ingen kilde til hinanden, og de svenske og norske sider får samme danske
+ * satser, fordi de deler denne funktion. Derfor er de **eksporterede navngivne
+ * konstanter**, så teksten kan læse det beløb, beregningen bruger.
+ *
+ * Beløbene er et 2026-estimat, ikke en lavest læst sats fra et offentligt
+ * register — samme forbehold som resten af modulets omkostninger.
+ */
+export const TINGLYSNING_SKOEDEBELOB = 1850;
+export const TINGLYSNING_PANTEBREVBELOB = 1825;
+
 function beregnTinglysning(input: BoligsalgInput): number {
   if (!input.tinglysningInkluderet || input.nyBoligPris <= 0) return 0;
-  const skoede = 0.006 * input.nyBoligPris + 1850;
-  const pantebrev = 0.0145 * input.nyBoligPris * 0.8 + 1825;
+  const skoede = 0.006 * input.nyBoligPris + TINGLYSNING_SKOEDEBELOB;
+  const pantebrev = 0.0145 * input.nyBoligPris * 0.8 + TINGLYSNING_PANTEBREVBELOB;
   return Math.round(skoede + pantebrev);
 }
 

@@ -305,6 +305,68 @@ const HAARDKODEDE_BELOB_I_KOMPONENTER: Record<string, number> = {};
 /** Summen af komponentlisten. */
 const HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN = 0;
 
+/**
+ * Samme port på **strengliteraler** i `.tsx`: den tredje måde et beløb kan nå
+ * læseren, og den mest almindelige — tekst står i `page-data.ts`, i en lister
+ * af `Record<Locale, …>` inde i komponenten, eller i en prop.
+ *
+ * Før 2/10 var kun `ts.isJsxText` dækket, så porten var blind for præcis de
+ * beløb, der skrives som `{ loen: "Du låner 250.000 kr." }`. Målt 2/10 med
+ * scanneren nedenfor over de 190 `.tsx` uden for testene: **111 fund i 38
+ * filer** — og det første fund er rettet i samme commit (110):
+ * `BoligsalgBeregner.tsx` skrev tinglysningens to faste beløb igen i sin egen
+ * disclaimer, mens modulet havde dem liggende i `beregnTinglysning`. Den
+ * største fil er `TimeprisBeregner.tsx` (27 — lønintervallerne for
+ * freelancere, håndskrevet tre gange på tre sprog), og fire blogindlæg har
+ * 5-9 hver. Ingen af dem lå i JSX-teksten, så den gamle port så dem alle
+ * som *0*.
+ *
+ * Listen er et loftpunktssum: en ny tekst med et håndskrevet beløb gør porten
+ * rød, og en rettet tekst sænker den.
+ */
+const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
+  "src/components/TimeprisBeregner.tsx": 27,
+  "src/app/blog/boernepenge-2026-satser-og-regler/page.tsx": 9,
+  "src/app/blog/arveafgift-regler-og-satser/page.tsx": 7,
+  "src/app/blog/su-2026-satser-og-regler/page.tsx": 6,
+  "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 5,
+  "src/app/blog/boligsalg-2026-guide-til-omkostninger-og-provenu/page.tsx": 4,
+  "src/components/ForbrugslaanBeregner.tsx": 3,
+  "src/components/DagpengeBeregner.tsx": 3,
+  "src/components/barsel/Opsaetning.tsx": 3,
+  "src/components/BillaanBeregner.tsx": 3,
+  "src/components/BoligstoetteBeregner.tsx": 3,
+  "src/components/BilBeregner.tsx": 3,
+  "src/app/blog/dagpenge-saadan-finder-du-din-sats/page.tsx": 3,
+  "src/app/blog/leasing-af-bil-2026-pris-og-guide/page.tsx": 3,
+  "src/components/GaeldsfriBeregner.tsx": 2,
+  "src/components/BraendstofBeregner.tsx": 2,
+  "src/components/EnhederBeregner.tsx": 2,
+  "src/app/opengraph-image.tsx": 2,
+  "src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx": 2,
+  "src/components/BeregnerAssistent.tsx": 1,
+  "src/components/HuslejeNettoprisindeks.tsx": 1,
+  "src/components/barsel/InfoTip.tsx": 1,
+  "src/components/HuslejePrKvm.tsx": 1,
+  "src/components/ArveafgiftBeregner.tsx": 1,
+  "src/components/AlderSeSvar.tsx": 1,
+  "src/components/AktieskatBeregner.tsx": 1,
+  "src/app/blog/hvordan-beregner-man-moms/page.tsx": 1,
+  "src/app/blog/guide-feriepenge-hvornaar-og-hvor-meget/page.tsx": 1,
+  "src/app/blog/privatoekonomi-for-unge/page.tsx": 1,
+  "src/app/blog/saadan-beregner-du-din-reelle-timeloen/page.tsx": 1,
+  "src/app/blog/boliglaan-2026-renter-og-afdrag/page.tsx": 1,
+  "src/app/blog/kvadratmeter-saadan-regner-du-ud/page.tsx": 1,
+  "src/app/blog/maanedsbudget-2026-komplet-guide/page.tsx": 1,
+  "src/app/blog/spar-penge-paa-braendstof/page.tsx": 1,
+  "src/app/blog/koeb-af-bolig-2026-omkostninger/page.tsx": 1,
+  "src/app/blog/pension-hvor-meget-skal-du-spare-op/page.tsx": 1,
+  "src/app/blog/elpriser-2026-beregn-dit-forbrug/page.tsx": 1,
+};
+
+/** Summen af strenglisten. */
+const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 110;
+
 
 const ROT = join(__dirname, "..", "..");
 const tekstfiler = () =>
@@ -326,6 +388,16 @@ const komponenter = execSync(
   .split("\n");
 
 const las = (fil: string) => readFileSync(join(ROT, fil), "utf8");
+
+/** Alle `.tsx` uden for testene: beregnere, sidens ramme og alle 124 sider. */
+const komponenterAndSider = execSync(
+  "find src/components src/app -name '*.tsx' ! -name '*.test.tsx'",
+  { encoding: "utf8", cwd: ROT }
+)
+  .toString()
+  .trim()
+  .split("\n");
+
 
 /**
  * JSX-tekst er det, læseren ser som tekst: `ts.isJsxText`. Et beløb dér skal
@@ -353,6 +425,36 @@ function jsxBelob(kilde: string, navn: string): string[] {
   const fund: string[] = [];
   const gaa = (node: ts.Node) => {
     if (ts.isJsxText(node) && /\d{1,3}[. ]\d{3}(?!\d)/.test(node.text)) {
+      fund.push(`${navn}: ${node.text.replace(/\s+/g, " ").trim().slice(0, 90)}`);
+    }
+    ts.forEachChild(node, gaa);
+  };
+  gaa(fil);
+  return fund;
+}
+
+/**
+ * Et beløb i en streng er lige så hårdkodet som et i JSX-tekst: `ts.isJsxText`
+ * rammer kun det, der står mellem to tags, så alt tekst der ligger i en
+ * lister af `Record<Locale, …>` (sidens `page-data.ts`, en komponents
+ * `tekster`-objekt) eller i en prop lå uden for porten.
+ *
+ * Template literals uden substitution (`\`` uden `${}`) er samme slags tekst og
+ * er derfor også dækket; en template med `${}` indeholder kode, ikke tekst, så
+ * den springes over — dens tal skal komme fra en beregning alligevel.
+ *
+ * Samme mønster som `jsxBelob` — tre cifre med separator og intet ciffer
+ * bagefter — så en dato som «26/9 2026» ikke læses som «9 202».
+ */
+function strengBelob(kilde: string, navn: string): string[] {
+  const kind = navn.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const fil = ts.createSourceFile(navn, kilde, ts.ScriptTarget.Latest, true, kind);
+  const fund: string[] = [];
+  const gaa = (node: ts.Node) => {
+    if (
+      (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) &&
+      /\d{1,3}[. ]\d{3}(?!\d)/.test(node.text)
+    ) {
       fund.push(`${navn}: ${node.text.replace(/\s+/g, " ").trim().slice(0, 90)}`);
     }
     ts.forEachChild(node, gaa);
@@ -543,5 +645,69 @@ describe("beløb i JSX-tekst i beregnerne", () => {
     expect(komponenter).toContain("src/components/EfterloensBeregner.tsx");
     expect(komponenter.some((f) => f.endsWith(".test.tsx"))).toBe(false);
     expect(komponenter.some((f) => f.endsWith("page.tsx"))).toBe(false);
+  });
+});
+
+describe("beløb i strengliteraler", () => {
+  test("scanneren ser tekststrenge og springer kode over", () => {
+    // Mutation: uden `isStringLiteral`-grenen så scanneren ingen af strengene,
+    // så hele fundlisten ville være tom og porten grøn på en mængde beløb den
+    // ikke kan se. Med grenen er den rød på prøven herunder.
+    const kilde = [
+      'const da = { loen: "Du låner 250.000 kr." };',
+      'const se = `Du lånar 250 000 kr.`;',
+      "const beregnet = `Du låner ${format(belob)} kr.`;",
+      'const klasse = "grid grid-cols-3";',
+      'const kildekode = "26/9 2026";',
+    ].join("\n");
+    const fund = strengBelob(kilde, "strenge.tsx");
+    expect(fund).toHaveLength(2);
+    expect(fund[0]).toContain("250.000");
+    expect(fund[1]).toContain("250 000");
+    // En template med ${} er kode: dens tal skal komme fra beregningen, så
+    // porten skal ikke tælle den.
+    expect(fund.some((f) => f.includes("${"))).toBe(false);
+    // En dato er ikke et beløb, og en CSS-klasse har ingen tal i sig.
+    expect(strengBelob('const d = "Kilde: borger.dk, verificeret 26/9 2026.";', "d.tsx")).toEqual([]);
+    // …mens «15.870 kr.» i en streng er et.
+    expect(strengBelob('const p = "Portionen er 15.870 kr.";', "p.tsx")).toHaveLength(1);
+  });
+
+  test("ingen fil har flere hårdkodede beløb i strenge end listen siger", () => {
+    // Målt 2/10 med `strengBelob` over de 190 `.tsx` uden for testene: **111
+    // fund i 38 filer**, hvoraf det første er rettet i samme commit — nu 110.
+    // Før denne måling så porten dem alle som 0, fordi de lå i strenge og ikke
+    // i JSX-tekst.
+    const fund = komponenterAndSider.flatMap((fil) => strengBelob(las(fil), fil));
+    const prFil = new Map<string, number>();
+    for (const f of fund) {
+      const fil = f.slice(0, f.indexOf(": "));
+      prFil.set(fil, (prFil.get(fil) ?? 0) + 1);
+    }
+
+    // En fil, der ikke står i listen, har et beløb porten aldrig har set.
+    const ukendte = [...prFil.keys()].filter((fil) => !(fil in HAARDKODEDE_BELOB_I_STRENGE));
+    expect(ukendte).toEqual([]);
+
+    // Mutation: sæt ét beløb mere ind i en streng, porten skal blive rød.
+    const overskredet = Object.entries(HAARDKODEDE_BELOB_I_STRENGE)
+      .filter(([fil, antal]) => (prFil.get(fil) ?? 0) > antal)
+      .map(([fil, antal]) => `${fil}: ${(prFil.get(fil) ?? 0)} > ${antal}`);
+    expect(overskredet).toEqual([]);
+
+    expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN);
+    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(110);
+  });
+
+  test("listen er målt på hele mappen, ikke på en håndplukket fil", () => {
+    // Mutation: en liste bygget af to filer ville være grøn ovenfor, hvis resten
+    // af mappen holdt op at findes — så listen skal dække begge sider og
+    // beregnere, og den skal have flere filer end de to største.
+    expect(komponenterAndSider.length).toBeGreaterThan(150);
+    expect(HAARDKODEDE_BELOB_I_STRENGE).toHaveProperty("src/components/TimeprisBeregner.tsx");
+    expect(HAARDKODEDE_BELOB_I_STRENGE).toHaveProperty(
+      "src/app/blog/su-2026-satser-og-regler/page.tsx"
+    );
+    expect(Object.keys(HAARDKODEDE_BELOB_I_STRENGE).length).toBeGreaterThan(20);
   });
 });

@@ -5,17 +5,16 @@ STATUS: 2/10 06:30. CI grøn (seneste master-kørsel 2/10 04:08Z). Sentry:
   `fix/sentry-7767249621` lukkedes med PR'en. CEO-kø punkt 0 er lukket (RETTET
   04ca30a), de otte CEO-punkter er efterprøvet i koden 2/10 04:40.
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 06:25: 0 · 0 · **3638 grønne i 225 filer** · 0
-  (`/klokken-i` og `/klockan-i` stadig `ƒ`, `force-dynamic` urørt).
-  **Denne iteration: `/topskat` fik sine beløb fra kilden.** De tre
-  skattetrins-grænser, deres bruttotals og månedstal lå håndskrevet i
-  brødteksten, mens `TopskatBeregner` fik dem fra `SATSER_2026`. Målt før:
-  **8 fund på siden, efter: 1**, listen **392 → 385**. Bruttotallene er
-  beregnerens egen betingelse (`grænse / (1 − AM-bidrag)`), så de er
-  byte-identiske med den gamle tekst — nu med kilde. `ceo/topskat-graense-fra-sats`.
-  **Også landet:** PR 27 — rodens fejlside kaldte `useLocale()` og kastede
-  derfor selv en fejl; målt rød mod den gamle kode, `4d48370`. Målinger fra
-  de fem forrige iterationer ligger i `docs/plan-arkiv.md`.
+   `npm run build`. Målt 2/10 07:20: 0 · 0 · **3641 grønne i 225 filer** · 0
+   (`/klokken-i` og `/klockan-i` stadig `ƒ`, `force-dynamic` urørt).
+   **Denne iteration: porten ser nu også strenge.** `jsxBelob` så kun
+   `ts.isJsxText`, så hele den måde tekst skrives på — en `Record<Locale, …>`
+   med «Du låner 250.000 kr.» — lå uden for porten. `strengBelob` måler **111
+   fund i 38 filer** på de 190 `.tsx`; listen er loftpunktssum, så det første
+   nye hårdkodede beløb i en streng gør porten rød (mutation målt: en indsat
+   streng i `AktieskatBeregner.tsx` gør den rød). Det første fund er rettet samme
+   sted, så listen er 110. `ceo/porten-ser-strenge`. Målinger fra de fem
+   forrige iterationer ligger i `docs/plan-arkiv.md`.
 
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
@@ -35,12 +34,16 @@ blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket.
    fra `SATSER_2026` med beregnerens egen betingelse; målt byte-identisk med
    den gamle tekst. Det ene fund er «lønforhøjelse på 1.000 kr.», der er den
    illustrerede forhøjelse.
-4. **Beløb i prop-strenge er stadig uden for porten** (ny, 2/10). `jsxBelob` ser
-   kun `ts.isJsxText`, så `BoligsalgBeregner.tsx:48`s «0,6% + 1.850 kr (skøde)»
-   og «1,45% + 1.825 kr (pantebrev)» er usynlig for porten. *Accept:* scanneren
-   dækker strengliteraler i `.tsx` med egen liste — målt først, da der kan være
-   mange fund (`TimeprisBeregner.tsx` har 16, håndskrevet tre gange på tre sprog
-   med tre lister: da har 7 poster, se og no har 6).
+4. **Beløb i prop-strenge er uden for porten** — ✅ 2/10 07:25
+   (`ceo/porten-ser-strenge`). `strengBelob` scanner `isStringLiteral` og
+   template literals uden substitution i alle 190 `.tsx`. Målt: **111 fund i 38
+   filer**, som den gamle port så som 0 — de lå i strenge, ikke i JSX-tekst.
+   Det første fund er rettet samme sted:
+   `BoligsalgBeregner.tsx`'s disclaimer skrev tinglysningens 1.850/1.825 kr igen,
+   mens modulet havde dem i `beregnTinglysning` — de er nu navngivne eksporter.
+   **Næste bane i rækken:** `TimeprisBeregner.tsx` (27 fund — lønintervallerne
+   for freelancere, håndskrevet tre gange på tre sprog), som også **mangler
+   norsk sprog** (dets `no`-objekt gentager dansk). Fire blogindlæg har 5-9 hver.
 5. **Blogindlæg (19 filer, 273 fund).** Redaktionelle beløb i et indlæg er ikke
    samme fejlklasse som et beløb på en beregnerside. Beslut først, om de skal
    med; ellers skal de stå i portens undtagelsesliste som *blog*.
@@ -266,7 +269,8 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
-| `topskat-graense-fra-sats` (**ny**) | `minberegner.dk/topskat`: rækkerne skal være `Mellemskat (7,5%) … over 641.200 kr.`, `Topskat (7,5%) … over 777.900 kr.`, `Top-topskat (5%) … over 2.592.700 kr.`, og «ca. **697.000 kr./år** (ca. **58.100 kr./md**)» + «ca. **845.500 kr./år** (ca. **70.500 kr./md**)»; `grep -c '641.200 kr\.'` skal være **2** (JSX-teksten + `<title>`/metadata) og antallet af `697.000` skal være uændret |
+| `porten-ser-strenge` (**ny**) | **Ingen produktionsændring i brugerfladen ud over én tekst:** `minberegner.dk/boligsalg` skal vise «Tinglysningssatser 0,6% + **1.850 kr.** (skøde) og 1,45% + **1.825 kr.** (pantebrev)» i beregnerens disclaimer, og beregnerens eget tal for tinglysning skal være uændret (samme formel, kun konstanterne er navngivne). Tallet skrives nu med `Intl` (`da-DK`), så «kr.» med punktum er forventet |
+| `topskat-graense-fra-sats` | `minberegner.dk/topskat`: rækkerne skal være `Mellemskat (7,5%) … over 641.200 kr.`, `Topskat (7,5%) … over 777.900 kr.`, `Top-topskat (5%) … over 2.592.700 kr.`, og «ca. **697.000 kr./år** (ca. **58.100 kr./md**)» + «ca. **845.500 kr./år** (ca. **70.500 kr./md**)»; `grep -c '641.200 kr\.'` skal være **2** (JSX-teksten + `<title>`/metadata) og antallet af `697.000` skal være uændret |
 | `error-side-locale` (**ny**) | **Ingen HTML-prøve findes** — ændringerne ligger kun i rodens fejlside, som ikke kan udløses uden en kastende fejl, så den kan ikke verificeres på indhold. Verificér i stedet at `minberegner.dk/api/health` svarer `status: ok`, og at der i 14 dage **ikke** dukker en Sentry-hændelse med `useLocale must be used within a LocaleProvider` op |
 | `klokken-tidszone-paastand` | `minberegner.dk/klokken-i/usa`: FAQ-svaret på «Hvad er klokken i New York lige nu?» skal sige «**byens egen** tidszone» og **ikke** «din tidszone» — i både den synlige tekst og JSON-LD'en; `beraknare.se/klockan-i/usa` skal sige «**stadens egen** tidszon» og **ikke** «din tidszon». `grep -c 'din tidszone'` på hele siden skal være **0** i begge domæner. Samme svar skal stå på alle 12 lande |
 | `opsparing-eksempler-fra-modul` | `minberegner.dk/opsparing`: «Uden renters rente» skal give `10.000 kr.` / `25.000 kr.`, «Med renters rente» `10.000 kr.` / `43.219 kr.`, og kalletoten `1.522.077 kr.` for Person A og `1.674.259 kr.` for B, med «480.000 kr.» / «720.000 kr:» og «240.000 kr. mere ind» / «152.182 kr. mere til sidst»; **intet** «1,5 mio», «1,7 mio», «5%», «(5% rente)» eller «forskellen er minimal». `beraknare.se/opsparing`: `100 000 kr` / `250 000 kr` og `100 000 kr` / `432 194 kr` med **mellemrum** i separatoren, `1 522 077 kr` / `1 674 259 kr` og `480 000 kr` / `720 000 kr`; **intet** «1,5 mkr» |

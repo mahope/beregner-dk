@@ -7,7 +7,11 @@ import { generateShareableLink, getStateFromUrl, ShareableLink } from "@/lib/cal
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, getCurrencySuffix } from "@/lib/format";
-import { beregnBoligsalg, DEFAULT_VALUES, type BoligsalgInput, type BoligsalgResultat } from "@/lib/boligsalg";
+import { beregnBoligsalg, DEFAULT_VALUES, TINGLYSNING_PANTEBREVBELOB, TINGLYSNING_SKOEDEBELOB, type BoligsalgInput, type BoligsalgResultat } from "@/lib/boligsalg";
+
+/** «1.850 kr.» — hele kroner, som de to tinglysningsbeløb står i teksten. */
+const kr = (belob: number) =>
+  formatCurrency(belob, "da", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
 const INPUTS: { key: keyof BoligsalgInput; label: string; min: number; max: number; suffix?: string }[] = [
   { key: "salgspris", label: "Salgspris for din bolig", min: 100000, max: 50000000, suffix: "kr" },
@@ -45,7 +49,7 @@ export default function BoligsalgBeregner() {
       tinglysningSettings: "Tinglysning af ny bolig",
       tinglysningInclude: "Medtag tinglysning af ny bolig",
       breakdown: "Omkostningsfordeling",
-      disclaimer: "Estimater baseret på gennemsnitlige danske priser 2026. Faktiske omkostninger varierer. Mæglerhonorar forhandles individuelt. Tinglysningssatser 0,6% + 1.850 kr (skøde) og 1,45% + 1.825 kr (pantebrev).",
+      disclaimer: `Estimater baseret på gennemsnitlige danske priser 2026. Faktiske omkostninger varierer. Mæglerhonorar forhandles individuelt. Tinglysningssatser 0,6% + ${kr(TINGLYSNING_SKOEDEBELOB)} (skøde) og 1,45% + ${kr(TINGLYSNING_PANTEBREVBELOB)} (pantebrev).`,
       reset: "Nulstil",
       shareLabel: "Boligsalgsberegner",
       noMaegler: "Vælg honorartype",

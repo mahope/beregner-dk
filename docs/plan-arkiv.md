@@ -23905,3 +23905,41 @@ loops naturlige skridt for den slags sider.
 
 **Gate 2/10 06:58:** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` 3638
 grønne i 225 filer · `npm run build` 0.
+
+## 2/10 07:20 — `ceo/porten-ser-strenge`
+
+**Målt før:** `jsxBelob` så kun `ts.isJsxText`, så tekst der ligger i en streng
+(`Record<Locale, …>`, prop-værdi) lå uden for porten. `strengBelob` scanner
+`ts.isStringLiteral` + `ts.isNoSubstitutionTemplateLiteral` i alle 190 `.tsx`
+uden for testene → **111 fund i 38 filer**:
+
+| fil | fund |
+|---|---|
+| `TimeprisBeregner.tsx` | 27 |
+| `blog/boernepenge-2026-satser-og-regler` | 9 |
+| `blog/arveafgift-regler-og-satser` | 7 |
+| `blog/su-2026-satser-og-regler` | 6 |
+| `blog/biloekonomi-2026-hvad-koster-det-at-eje-bil` | 5 |
+| `blog/boligsalg-2026-guide-til-omkostninger-og-provenu` | 4 |
+| 9 beregnere × 3 (`Forbrugslaan`, `Dagpenge`, `barsel/Opsaetning`, `Billaan`, `Boligstoette`, `Bil` + 3 blogindlæg) | 3 |
+| 4 × 2 + 18 × 1 | 1-2 |
+
+Porten er målt ægte: en indsat streng `const MULIG_MUTATION = "Vi regner med
+999.999 kr.";` i `AktieskatBeregner.tsx` gør `regnestykker.test.ts` rød
+(1 failed), filen er gendannet bagefter. Rettelsen i samme commit: `111 → 110`.
+
+**Rettet:** `BoligsalgBeregner.tsx`'s `da.disclaimer` skrev «0,6% + 1.850 kr
+(skøde) og 1,45% + 1.825 kr (pantebrev)», mens `beregnTinglysning` i
+`src/lib/boligsalg.ts` havde 1850 og 1825 hårdkodet to steder under. De er nu
+`TINGLYSNING_SKOEDEBELOB` / `TINGLYSNING_PANTEBREVBELOB`, eksporterede, og
+teksten læser dem gennem `formatCurrency(…, "da", {0, 0})` → «1.850 kr.»
+(punktum tilføjet af Intl). Beregningens tal er uændret — kun konstanternes
+navn er nyt.
+
+**Bemærk til senere:** `/boligsalg` er dansk-only i praksis — `beregnTinglysning`
+har ingen locale, så beraknare.se og beregner.no får danske skøde- og
+pantebrevsatser på en svensk henholdsvis norsk pris. Rettelsen kræver svenske
+og norske satser med kilde (punkt 11), så den ligger som ❓.
+
+**Gate:** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3641 grønne i 225
+filer** · `npm run build` 0.
