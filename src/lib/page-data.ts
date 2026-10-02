@@ -18,7 +18,7 @@ import {
   procentForskel,
   rabatProcent,
 } from "./procent";
-import { formatNumber } from "./format";
+import { formatNumber, formatSvenskText } from "./format";
 import {
   BESKAEFTIGELSESTILLAEG_2026,
   INDKOMSTKRAV_2026,
@@ -39,6 +39,7 @@ import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 import { PROMILLEGRANSE, PROMILLEGROV_SE } from "./promille";
+import { SVENSK_SKATT_2026 as SV_SKATT, SVENSK_SKATT_TAL } from "./svensk-skatt";
 import {
   PROMILLE_GENSTANDE_RAEKKER,
   formatPromilleTabel,
@@ -154,6 +155,9 @@ export type PageData = {
 };
 
 const kr = (value: number) => value.toLocaleString("da-DK");
+/** Svensk løbende tekst: "643 000" og "32,38" — tallene fra `svensk-skatt`. */
+const krSe = (tal: number) => formatSvenskText(tal);
+const pctSe = (andel: number, dec = 0) => formatSvenskText(andel * 100, dec);
 
 // ─── /husleje — "25.000 kr netto -> max ca. 7.500 kr/md" er udledt af
 // HUSLEJE_STANDARD, som også er beregnerens starttilstand. Det er samme
@@ -3451,11 +3455,11 @@ const sePages: Record<string, PageData> = {
       schemaDescription: "Gratis lönekalkylator. Beräkna din nettolön efter skatt 2026 med jobbskatteavdrag, kommunalskatt och statlig skatt.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-        { question: "Hur mycket skatt betalar jag på min lön 2026?", answer: "Skatten består av kommunalskatt (i genomsnitt 32,38 % 2026) på din beskattningsbara inkomst, plus statlig inkomstskatt på 20 % för beskattningsbar inkomst över 643 000 kr. Jobbskatteavdraget sänker skatten med upp till cirka 4 400 kr per månad." },
+        { question: "Hur mycket skatt betalar jag på min lön 2026?", answer: `Skatten består av kommunalskatt (i genomsnitt ${pctSe(SV_SKATT.kommunalskattSnitt, 2)} % 2026) på din beskattningsbara inkomst, plus statlig inkomstskatt på ${pctSe(SV_SKATT.statligSkatt)} % för beskattningsbar inkomst över ${krSe(SV_SKATT.skiktgrans)} kr. Jobbskatteavdraget sänker skatten med upp till cirka ${krSe(SVENSK_SKATT_TAL.jobbskatteavdragMaxManad)} kr per månad.` },
         { question: "Vad är jobbskatteavdrag?", answer: "Jobbskatteavdraget är en skattereduktion för arbetsinkomst som räknas av mot din kommunalskatt. Storleken beror på din inkomst och kommunalskattesats. För 2026 slopas avtrappningen vid höga inkomster." },
-        { question: "Vad är grundavdrag?", answer: "Grundavdraget är en del av inkomsten du inte betalar skatt på. Det varierar mellan cirka 17 400 och 45 600 kr per år 2026 beroende på din inkomst (prisbasbelopp 59 200 kr)." },
-        { question: "När betalar man statlig inkomstskatt?", answer: "Statlig inkomstskatt på 20 % tas ut på beskattningsbar förvärvsinkomst över skiktgränsen 643 000 kr 2026, vilket motsvarar en bruttolön (brytpunkt) på cirka 660 400 kr per år för den som är under 66 år." },
-        { question: "Ingår pensionsavgift och public service-avgift?", answer: "Allmän pensionsavgift (7 %) dras men krediteras fullt ut via skattereduktion, så den påverkar normalt inte din nettolön. Public service-avgiften är 1 % av inkomsten, högst 1 184 kr per år 2026." },
+        { question: "Vad är grundavdrag?", answer: `Grundavdraget är en del av inkomsten du inte betalar skatt på. Det varierar mellan cirka ${krSe(SVENSK_SKATT_TAL.grundavdragMin)} och ${krSe(SVENSK_SKATT_TAL.grundavdragMax)} kr per år 2026 beroende på din inkomst (prisbasbelopp ${krSe(SV_SKATT.prisbasbelopp)} kr).` },
+        { question: "När betalar man statlig inkomstskatt?", answer: `Statlig inkomstskatt på ${pctSe(SV_SKATT.statligSkatt)} % tas ut på beskattningsbar förvärvsinkomst över skiktgränsen ${krSe(SV_SKATT.skiktgrans)} kr 2026, vilket motsvarar en bruttolön (brytpunkt) på cirka ${krSe(SVENSK_SKATT_TAL.statligBrytpunkt)} kr per år för den som är under 66 år.` },
+        { question: "Ingår pensionsavgift och public service-avgift?", answer: `Allmän pensionsavgift (${pctSe(SV_SKATT.pensionsavgift)} %) dras men krediteras fullt ut via skattereduktion, så den påverkar normalt inte din nettolön. Public service-avgiften är ${pctSe(SV_SKATT.publicServiceSats)} % av inkomsten, högst ${krSe(SV_SKATT.publicServiceMax)} kr per år 2026.` },
       ],
     },
     "bmi": {

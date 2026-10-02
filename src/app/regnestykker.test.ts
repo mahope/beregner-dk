@@ -230,7 +230,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/kvadratmeter/page.tsx": 1,
   "src/app/loen-efter-skat/page.tsx": 1,
   "src/app/loenstigning/page.tsx": 2,
-  "src/app/lon-efter-skatt/page.tsx": 5,
+  "src/app/lon-efter-skatt/page.tsx": 0,
   "src/app/moms/page.tsx": 3,
   "src/app/pension/page.tsx": 2,
   "src/app/renteberegner/page.tsx": 6,
@@ -307,7 +307,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * `DEFAULT_VALUES` og tinglysningens eksporterede satser. **Ingen** er bevaret
  * som interval: de har ingen kilde, så de må ikke gættes (punkt 11).
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 338;
+const HAARDKODEDE_BELOB_I_LISTEN = 333;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -405,6 +405,13 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
  * barn arver 1.000.000 kr» i sig. De læses nu fra `EKSEMPEL_BARN`, så det er det
  * samme eksempel som brødteksten og beregneren regner på. Strenglisten er tom
  * for den fil.
+ */
+/**
+ * Loftet er 57 og **kun** `.tsx` — `komponenterAndSider` finder kun `*.tsx`, så
+ * `src/lib/page-data.ts` ligger uden for porten, selv om dens FAQ-svar bliver
+ * publiceret som JSON-LD. Målt 2/10 15:2x: de fire `/lon-efter-skatt`-svar, der
+ * blev læst fra `svensk-skatt`, lå derfor uden for portens rækkeevidde. At føje
+ * `.ts` til scanneren er en opgave for sig, fordi `src/lib/*.ts` har 196 fund.
  */
 const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 57;
 
@@ -658,7 +665,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
     // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
     // korpuset porten endnu dømmer — det må ikke stige i det stille.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(338);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(333);
   });
 });
 

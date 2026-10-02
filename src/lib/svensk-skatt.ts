@@ -158,3 +158,55 @@ export function beregnSvenskSkatt(
     effektivSkattProcent: Math.round((summaSkatt / arsloen) * 1000) / 10,
   };
 }
+
+/**
+ * De tal sidens brødtekst og FAQ citerer — de stod tidligere skrevet i hånden
+ * på to steder, mens beregneren regnede sit eget tal. Alt nedenfor er **udledt
+ * ved at kalde de samme funktioner som kalkylatoren kalder**, så teksten ikke
+ * kan glide fra modellen, når en sats eller prisbasbeloppet ændrer sig.
+ *
+ * Grundavdragets laagste og hoejeste vaerde er hentet paa de punkter, hvor
+ * kurven knækker (0,293 PBB og 0,77 PBB) — ikke ved at genberegne det manuelt.
+ */
+const JSA_PLAAT = 8.08 * PBB; // toppen af den tredje/fjerde jobbskatteavdrag-etappe
+
+export const SVENSK_SKATT_TAL = {
+  /** Lægste grundavdrag: 0,293 PBB. */
+  grundavdragMin: beregnGrundavdrag(10 * PBB),
+  /** Højeste grundavdrag: 0,77 PBB. */
+  grundavdragMax: beregnGrundavdrag(3.11 * PBB),
+  /**
+   * Bruttoløn, hvor statlig inkomstskatt starter: skiktgrænsen plus det
+   * grundavdrag, der gælder på det niveau (der falder tilbage til 0,293 PBB over
+   * 7,88 PBB). Den laveste bruttoløn, hvor `statligSkatt` stadig er 0.
+   */
+  statligBrytpunkt: SVENSK_SKATT_2026.skiktgrans + avrundaUppHundra(0.293 * PBB),
+  /** Største jobbskatteavdrag pr. måned, afrundet til hundrede — teksten siger «cirka». */
+  jobbskatteavdragMaxManad:
+    Math.round(
+      beregnJobbskatteavdrag(
+        JSA_PLAAT,
+        beregnGrundavdrag(JSA_PLAAT),
+        SVENSK_SKATT_2026.kommunalskattSnitt
+      ) /
+        12 /
+        100
+    ) * 100,
+  publicServiceMax: SVENSK_SKATT_2026.publicServiceMax,
+} as const;
+
+/**
+ * Forskellen i nettoløn pr. måned mellem Sveriges laveste og højeste
+ * kommunalskatt for en given årsløn — det tal brødteksten bruger i stedet for
+ * «flera hundra kronor», som blev skrevet i hånden og ikke fulgte modellen.
+ */
+export function kommunalskattSkillnadPerManad(
+  arsloen: number,
+  lagsta = 0.29,
+  hogsta = 0.35
+): number {
+  const lag = beregnSvenskSkatt(arsloen, lagsta);
+  const hog = beregnSvenskSkatt(arsloen, hogsta);
+  if (!lag || !hog) return 0;
+  return Math.round((lag.nettoAar - hog.nettoAar) / 12);
+}

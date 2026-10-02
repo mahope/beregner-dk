@@ -1,12 +1,22 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { formatSvenskText } from "@/lib/format";
+import {
+  SVENSK_SKATT_2026 as S,
+  SVENSK_SKATT_TAL,
+  kommunalskattSkillnadPerManad,
+} from "@/lib/svensk-skatt";
 import LonEfterSkattBeregner from "@/components/LonEfterSkattBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+
+/** Svensk løbende tekst: "643 000", "32,38" — samme tal som kalkylatoren regner på. */
+const krSe = (tal: number) => formatSvenskText(tal);
+const pctSe = (andel: number, dec = 0) => formatSvenskText(andel * 100, dec);
 
 export async function generateMetadata() {
   return generatePageMetadata("lon-efter-skatt");
@@ -55,27 +65,27 @@ export default async function LonEfterSkattPage() {
           <h2>Skatten steg för steg</h2>
           <ul>
             <li><strong>Grundavdrag:</strong> En del av inkomsten är skattefri. Grundavdraget är
-              mellan cirka 17 400 och 45 600 kr per år 2026 (baserat på prisbasbeloppet 59 200 kr).</li>
+              mellan cirka {krSe(SVENSK_SKATT_TAL.grundavdragMin)} och {krSe(SVENSK_SKATT_TAL.grundavdragMax)} kr per år 2026 (baserat på prisbasbeloppet {krSe(S.prisbasbelopp)} kr).</li>
             <li><strong>Kommunalskatt:</strong> Betalas på den beskattningsbara inkomsten. Snittet
-              i Sverige 2026 är 32,38 % (kommun + region), men det varierar mellan kommuner.</li>
-            <li><strong>Statlig inkomstskatt:</strong> 20 % tas ut på beskattningsbar inkomst över
-              skiktgränsen 643 000 kr 2026 (brytpunkt cirka 660 400 kr i bruttolön).</li>
+              i Sverige 2026 är {pctSe(S.kommunalskattSnitt, 2)} % (kommun + region), men det varierar mellan kommuner.</li>
+            <li><strong>Statlig inkomstskatt:</strong> {pctSe(S.statligSkatt)} % tas ut på beskattningsbar inkomst över
+              skiktgränsen {krSe(S.skiktgrans)} kr 2026 (brytpunkt cirka {krSe(SVENSK_SKATT_TAL.statligBrytpunkt)} kr i bruttolön).</li>
             <li><strong>Jobbskatteavdrag:</strong> En skattereduktion för arbetsinkomst som sänker
-              din skatt med upp till cirka 4 400 kr per månad. Avtrappningen vid höga inkomster
+              din skatt med upp till cirka {krSe(SVENSK_SKATT_TAL.jobbskatteavdragMaxManad)} kr per månad. Avtrappningen vid höga inkomster
               slopas 2026.</li>
-            <li><strong>Public service-avgift:</strong> 1 % av inkomsten, högst 1 184 kr per år.</li>
+            <li><strong>Public service-avgift:</strong> {pctSe(S.publicServiceSats)} % av inkomsten, högst {krSe(S.publicServiceMax)} kr per år.</li>
           </ul>
 
           <h2>Kommunalskatten spelar stor roll</h2>
           <p>
             Skillnaden mellan Sveriges lägsta och högsta kommunalskatt är över 6 procentenheter.
-            På en månadslön på 35 000 kr kan det skilja flera hundra kronor i månaden i nettolön
-            beroende på var du bor. Ange din egen kommunalskatt för ett mer exakt resultat.
+            På en månadslön på {krSe(35000)} kr blir skillnaden {krSe(kommunalskattSkillnadPerManad(35000 * 12))} kr i nettolön per
+            månad, beroende på var du bor. Ange din egen kommunalskatt för ett mer exakt resultat.
           </p>
 
           <h2>Bra att veta</h2>
           <p>
-            Allmän pensionsavgift (7 %) dras från lönen men <strong>krediteras fullt ut</strong>
+            Allmän pensionsavgift ({pctSe(S.pensionsavgift)} %) dras från lönen men <strong>krediteras fullt ut</strong>
             via en skattereduktion, så den påverkar normalt inte din nettolön. Begravnings- och
             eventuell kyrkoavgift varierar mellan församlingar. Kalkylatorn ger en noggrann
             uppskattning för anställda under 66 år – det exakta beloppet framgår av Skatteverkets

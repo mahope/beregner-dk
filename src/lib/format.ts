@@ -43,6 +43,23 @@ export function formatNumber(
 }
 
 /**
+ * Format a number as Swedish running text: thousands separated by a plain
+ * space ("643 000"), decimals by a comma ("32,38").
+ *
+ * `formatNumber(tal, "se")` groups identically, but `Intl` writes the separator
+ * as U+00A0. That renders the same and is the right character in a table cell,
+ * but the Swedish prose quotes these figures inside sentences, where the copy
+ * already uses a plain space — and an invisible character in source is a trap
+ * for the next reader and for every string assertion.
+ */
+export function formatSvenskText(amount: number, decimals = 0): string {
+  return formatNumber(amount, "se", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).replace(/\u00a0/g, " ");
+}
+
+/**
  * Get the Intl locale string (e.g. "da-DK", "sv-SE").
  */
 export function getIntlLocale(locale: Locale): string {
