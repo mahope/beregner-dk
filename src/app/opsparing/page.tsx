@@ -2,6 +2,8 @@ import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { rentersRenteEksempel, tidVsBeloeb } from "@/lib/opsparing";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { hentInflation } from "@/lib/statbank";
 import dynamic from "next/dynamic";
 const OpsparingsBeregner = dynamic(() => import("@/components/OpsparingsBeregner"));
@@ -23,6 +25,18 @@ export default async function OpsparingPage() {
   const pageData = getPageData("opsparing", locale) || getPageData("opsparing", "da")!;
   // Danish site: latest annual inflation from Danmarks Statistik (null on failure -> static default).
   const dstInflation = locale === "da" ? await hentInflation() : null;
+
+// Alle beløb i brødteksten regnes i `src/lib/opsparing.ts` med den samme
+  // `simulerOpsparing`, som `OpsparingsBeregner` bruger, og formateres med
+  // sidens egen tusindtalsseparator — dansk `1.522.077 kr.`, svensk
+  // `1 522 077 kr` — så de to sprog ikke kan komme ud af trit.
+  const sprog = locale === "se" ? "se" : "da";
+  const kr = (beloeb: number) =>
+    formatCurrency(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const tal = (beloeb: number) =>
+    formatNumber(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const rentersRente = rentersRenteEksempel(sprog);
+  const tidVsBelob = tidVsBeloeb();
 
   return (
     <div>
@@ -74,12 +88,14 @@ export default async function OpsparingPage() {
         <p>Her er et eksempel på forskellen:</p>
         <ul>
           <li>
-            <strong>Uden renters rente:</strong> 10.000 kr med 5% simpel rente i
-            30 år = 25.000 kr
+            <strong>Uden renters rente:</strong> {kr(rentersRente.startBeloeb)} med{" "}
+            {rentersRente.aarligRentePct} % simpel rente i {rentersRente.aar} år ={" "}
+            {kr(rentersRente.uden)}
           </li>
           <li>
-            <strong>Med renters rente:</strong> 10.000 kr med 5% renters rente i
-            30 år = 43.219 kr
+            <strong>Med renters rente:</strong> {kr(rentersRente.startBeloeb)} med{" "}
+            {rentersRente.aarligRentePct} % renters rente i {rentersRente.aar} år ={" "}
+            {kr(rentersRente.med)}
           </li>
         </ul>
         <p>Det er næsten det dobbelte!</p>
@@ -155,9 +171,20 @@ export default async function OpsparingPage() {
         <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800">Eksempel: Tid vs. beløb</p>
           <p className="text-green-700">
-            Person A starter med 25 år og sparer 1.000 kr/md i 40 år (5% rente) = <strong>1,5 mio kr</strong><br />
-            Person B starter med 35 år og sparer 2.000 kr/md i 30 år (5% rente) = <strong>1,7 mio kr</strong><br />
-            Person A indbetaler kun 480.000 kr, Person B indbetaler 720.000 kr - men forskellen er minimal!
+            Person A starter med {tidVsBelob.a.alder} år og sparer{" "}
+            {tal(tidVsBelob.a.maanedlig)} kr/md i {tidVsBelob.a.aar} år til{" "}
+            {tidVsBelob.a.aarligRentePct} % årlig rente ={" "}
+            <strong>{kr(tidVsBelob.a.slutSaldo)}</strong>
+            <br />
+            Person B starter med {tidVsBelob.b.alder} år og sparer{" "}
+            {tal(tidVsBelob.b.maanedlig)} kr/md i {tidVsBelob.b.aar} år til{" "}
+            {tidVsBelob.b.aarligRentePct} % årlig rente ={" "}
+            <strong>{kr(tidVsBelob.b.slutSaldo)}</strong>
+            <br />
+            Person A indbetaler {kr(tidVsBelob.a.indskud)}, Person B indbetaler{" "}
+            {kr(tidVsBelob.b.indskud)}: B betaler altså{" "}
+            {kr(tidVsBelob.forskelIndbetalet)} mere ind og har {kr(tidVsBelob.forskelSlutSaldo)}{" "}
+            mere til sidst. Tid vejer tungere end beløb.
           </p>
         </div>
 
@@ -205,12 +232,14 @@ export default async function OpsparingPage() {
         <p>Här är ett exempel på skillnaden:</p>
         <ul>
           <li>
-            <strong>Utan ränta-på-ränta:</strong> 100 000 kr med 5 % enkel ränta i
-            30 år = 250 000 kr
+            <strong>Utan ränta-på-ränta:</strong> {kr(rentersRente.startBeloeb)} med{" "}
+            {rentersRente.aarligRentePct} % enkel ränta i {rentersRente.aar} år ={" "}
+            {kr(rentersRente.uden)}
           </li>
           <li>
-            <strong>Med ränta-på-ränta:</strong> 100 000 kr med 5 % ränta-på-ränta i
-            30 år = 432 194 kr
+            <strong>Med ränta-på-ränta:</strong> {kr(rentersRente.startBeloeb)} med{" "}
+            {rentersRente.aarligRentePct} % ränta-på-ränta i {rentersRente.aar} år ={" "}
+            {kr(rentersRente.med)}
           </li>
         </ul>
         <p>Nästan dubbelt så mycket!</p>
@@ -282,9 +311,20 @@ export default async function OpsparingPage() {
         <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800">Exempel: tid kontra belopp</p>
           <p className="text-green-700">
-            Person A börjar vid 25 års ålder och sparar 1 000 kr/mån i 40 år (5 % ränta) = <strong>1,5 mkr</strong><br />
-            Person B börjar vid 35 års ålder och sparar 2 000 kr/mån i 30 år (5 % ränta) = <strong>1,7 mkr</strong><br />
-            Person A sätter bara in 480 000 kr, Person B sätter in 720 000 kr - men skillnaden är liten!
+            Person A börjar vid {tidVsBelob.a.alder} års ålder och sparar{" "}
+            {tal(tidVsBelob.a.maanedlig)} kr/mån i {tidVsBelob.a.aar} år till{" "}
+            {tidVsBelob.a.aarligRentePct} % årlig ränta ={" "}
+            <strong>{kr(tidVsBelob.a.slutSaldo)}</strong>
+            <br />
+            Person B börjar vid {tidVsBelob.b.alder} års ålder och sparar{" "}
+            {tal(tidVsBelob.b.maanedlig)} kr/mån i {tidVsBelob.b.aar} år till{" "}
+            {tidVsBelob.b.aarligRentePct} % årlig ränta ={" "}
+            <strong>{kr(tidVsBelob.b.slutSaldo)}</strong>
+            <br />
+            Person A sätter bara in {kr(tidVsBelob.a.indskud)}, Person B sätter in{" "}
+            {kr(tidVsBelob.b.indskud)}: B betalar alltså in{" "}
+            {kr(tidVsBelob.forskelIndbetalet)} mer och har {kr(tidVsBelob.forskelSlutSaldo)}{" "}
+            mer när perioden är slut. Tid väger tyngre än belopp.
           </p>
         </div>
 

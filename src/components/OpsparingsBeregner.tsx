@@ -9,74 +9,13 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
+import { simulerOpsparing, type AarData, type RenteFrekvens } from "@/lib/opsparing";
 import type { Inflation } from "@/lib/statbank";
 import { InflationKilde } from "@/components/InflationKilde";
 
-type Frekvens = "maanedlig" | "kvartal" | "aarlig";
+/** Typen ligger i modulet nu, fordi `simulerOpsparing` og eksemplerne gør det. */
+type Frekvens = RenteFrekvens;
 type Visning = "beregner" | "maal";
-
-interface AarData {
-  aar: number;
-  saldo: number;
-  indskud: number;
-  rente: number;
-}
-
-function simulerOpsparing(
-  startBeloeb: number,
-  maanedligIndbetaling: number,
-  aarligRentePct: number,
-  periodeAar: number,
-  renteFrekvens: Frekvens
-): { slutSaldo: number; samletIndskud: number; samletRente: number; aarligData: AarData[] } {
-  let perioderPerAar: number;
-  let maanederPerPeriode: number;
-
-  switch (renteFrekvens) {
-    case "maanedlig":
-      perioderPerAar = 12;
-      maanederPerPeriode = 1;
-      break;
-    case "kvartal":
-      perioderPerAar = 4;
-      maanederPerPeriode = 3;
-      break;
-    case "aarlig":
-    default:
-      perioderPerAar = 1;
-      maanederPerPeriode = 12;
-  }
-
-  const periodiskRente = aarligRentePct / 100 / perioderPerAar;
-  const antalMaaneder = periodeAar * 12;
-
-  let saldo = startBeloeb;
-  let samletIndskud = startBeloeb;
-  let samletRente = 0;
-  const aarligData: AarData[] = [];
-
-  for (let maaned = 1; maaned <= antalMaaneder; maaned++) {
-    saldo += maanedligIndbetaling;
-    samletIndskud += maanedligIndbetaling;
-
-    if (maaned % maanederPerPeriode === 0) {
-      const renteBeloeb = saldo * periodiskRente;
-      saldo += renteBeloeb;
-      samletRente += renteBeloeb;
-    }
-
-    if (maaned % 12 === 0) {
-      aarligData.push({
-        aar: maaned / 12,
-        saldo,
-        indskud: samletIndskud,
-        rente: samletRente,
-      });
-    }
-  }
-
-  return { slutSaldo: saldo, samletIndskud, samletRente, aarligData };
-}
 
 const graphLabels = {
   da: { growth: "Opsparingens v\u00e6kst", deposit: "Indskud", interest: "Rente", yearLabel: "\u00c5r" },

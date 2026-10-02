@@ -232,7 +232,6 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/loenstigning/page.tsx": 2,
   "src/app/lon-efter-skatt/page.tsx": 5,
   "src/app/moms/page.tsx": 18,
-  "src/app/opsparing/page.tsx": 10,
   "src/app/pension/page.tsx": 2,
   "src/app/renteberegner/page.tsx": 6,
   "src/app/rygestop/page.tsx": 2,
@@ -243,6 +242,13 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
 /**
  * Summen af listen, så de to tal ikke kan glide fra hinanden.
  *
+ * 402 → 392 den 2/10 (senere samme dag): `opsparing` stod med 10 fund — de to
+ * renters-rente-regnestykker og de tre linjer i «Tid vs. beløb» i hvert sprog.
+ * De læses nu fra `src/lib/opsparing.ts`, som danner dem med den samme
+ * `simulerOpsparing`, `OpsparingsBeregner` bruger, så brødteksten ikke længere
+ * kan have sin egen fortælling. Tusindtalsseparatoren kommer fra sidens egen
+ * formatter — «1.532.497 kr.» i dansk og «1 532 497 kr» i svensk — så de to sprog
+ * heller ikke kan glide fra hinanden. Samme greb som på `/billaan`.
  * 442 → 418 den 2/10 (senere samme dag): `billaan` stod med 24 fund — hele de to
  * eksempeltabeller, seks rækker × fire beløb. De læses nu fra
  * `src/lib/billaan.ts`, som danner dem med den samme `beregnBillaan` som
@@ -269,7 +275,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 402;
+const HAARDKODEDE_BELOB_I_LISTEN = 392;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -488,7 +494,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(402);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(392);
   });
 });
 

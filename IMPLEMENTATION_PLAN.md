@@ -1,15 +1,17 @@
-STATUS: 2/10 05:20. Rød CI: ingen (seneste kørsel grøn 2/10 02:47Z). Sentry:
+STATUS: 2/10 05:40. Rød CI: ingen (seneste kørsel grøn 2/10 03:10Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
   5f137d4 — ingen ny hændelsesgruppe. PR-TJEK: 2026-10-02 — ingen åbne PR'er.
-  BRANCH-TJEK: 2/10 — ingen forældede remote-branches (seneste er
-  `fix/sentry-7765903656` fra 1/10, under 14 dage). CEO-kø punkt 0 er lukket
+  BRANCH-TJEK: 2/10 — ingen forældede remote-branches. CEO-kø punkt 0 er lukket
   (RETTET 04ca30a) og de otte CEO-punkter er efterprøvet i koden 2/10 04:40.
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 05:08: 0 · 0 · **3616 grønne i 222 filer** · 0.
-  **Denne iteration: `/bil` har løftet 16 håndskrevne beløb ud af artiklen, og
-  siden holdt op med at modsige sit eget værktøj.** Datagrund: F5b-køens
-  trafikrækkefølge (`/moms` 18 kræver en kilde, ❓), målt med portens egen
-  scanner. `ceo/bil-omkostninger-fra-modul`.
+  `npm run build`. Målt 2/10 05:36: 0 · 0 · **3632 grønne i 223 filer** · 0
+  (`/opsparing` stadig `ƒ`, ingen rutedynamik ændret).
+  **Denne iteration: `/opsparing` har løftet ti håndskrevne beløb ud af
+  brødteksten, så siden regner dem frem med den samme simulering som
+  beregneren.** Datagrund: F5b-køens trafikrækkefølge (`/moms` 18 kræver en
+  kilde, ❓), målt med portens egen scanner — **10 → 0 fund**, listen
+  **402 → 392**. Mutation: med den gamle `page.tsx` er porten rød.
+  `ceo/opsparing-eksempler-fra-modul`.
 
 ## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmarathon-tempo`)
 
@@ -27,15 +29,14 @@ STATUS: 2/10 05:20. Rød CI: ingen (seneste kørsel grøn 2/10 02:47Z). Sentry:
 
 **F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** Målt 2/10 02:00
 med portens egen scanner: `/renteberegner` står **0** (listen siger 6 — den er
-et loft, ikke en målsætning), så rækkefølgen er nu `/billaan` 24 ✅, `/moms` 18 (❓ kilde),
-`/bil` 16 ✅, `/opsparing` 10, `/boligsalg` 9, `/topskat` 8. `/procent` ✅ 1/10,
-`/arveafgift` ✅ 2/10 og `EfterloensBeregner` ✅ 2/10 (se STATUS), se
-`ceo/procent-eksempler-fra-modul`, `ceo/arveafgift-tal-fra-modul` og
-`ceo/review-fund-palmesondag-og-komponenter`. Porten fra 1/10 måler beløb med
-tusindtalsseparator i JSX-tekst — de kan ikke glide fra satsen, fordi de ikke
-hænger ved den. Listerne i `src/app/regnestykker.test.ts` tæller forekomster pr.
-fil og må kun blive kortere, så dette er rækkefølgen. *Accept pr. side:* listen
-for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
+et loft, ikke en målsætning), så rækkefølgen er nu `/billaan` 24 ✅, `/moms` 18
+(❓ kilde), `/bil` 16 ✅, `/opsparing` 10 ✅, `/boligsalg` 9, `/topskat` 8.
+`/procent` ✅ 1/10, `/arveafgift` ✅ 2/10 og `EfterloensBeregner` ✅ 2/10 (se
+STATUS), se `ceo/procent-eksempler-fra-modul`, `ceo/arveafgift-tal-fra-modul` og
+`ceo/review-fund-palmesondag-og-komponenter`. Listen i
+`src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun blive
+kortere, så dette er rækkefølgen. *Accept pr. side:* listen for den side
+falder, og regnestykkerne er verificeret af `regnestykker-porten`.
 - **`/ejendomsvaerdiskat`** — ✅ 2/10 (`ceo/ejendomsvaerdiskat-tal-fra-modul`),
   se STATUS. Bemærk at `Varde (højest) 17,7‰` i kommunetabellen stadig er
   håndskrevet, fordi Varde ikke står i modulets kommune-liste. Den mangler en
@@ -62,6 +63,26 @@ for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
   (skøde) og 1,45% + 1.825 kr (pantebrev)», og ingen port ser de to tal. *Accept:*
   scanneren dækker strengliteraler i `.tsx` med egen liste — målt først, da der
   kan være mange fund.
+- **`/opsparing`** — ✅ 2/10 05:35 (`ceo/opsparing-eksempler-fra-modul`), de 10
+  fund er væk: **porten målt 10 → 0 fund**, listen **402 → 392**. De var alle
+  håndskrevne, hver sit sprog med sin egen tusindtalsseparator, og «1,5 mio»/
+  «1,7 mio» i kalletoten var ikke et resultat af nogen beregning. Alt ligger nu
+  i `src/lib/opsparing.ts`, som **`OpsparingsBeregner` også bruger** (dets eget
+  `simulerOpsparing` flyttede ud af komponenten), så separatoren kommer fra
+  sidens egen formatter. Målinger, de to fund under egen diff-review (min
+  kontrolformel var en faktor 1,05 for lav, og min egen docblock-påstand om
+  månedlig forrentning var falsk) og mutationen står i `docs/plan-arkiv.md`.
+- **`/boligsalg`** — målt 2/10 05:00: 9 fund, men **otte er redaktionelle
+  prisintervaller** (mæglerhonorar, tinglysning, avance, byggeskade,
+  huseftersyn, maling, styling) uden kilde i repoet, og den niende er
+  kildeangivelsen «opdateret august 2025». `src/lib/boligsalg.ts` findes og har
+  tests, så **formelbeløb** kan læses derfra — men prisintervallerne kræver en
+  kilde. Lav trafikrækkefølge.
+- **`/topskat`** — målt 2/10 05:00: 8 fund, hvor **syv er beløbsgrænser**
+  (641.200 / 777.900 / 2.592.700 kr. pr. år, 697.000 kr./år, 845.500 kr./år og
+  de to månedstal), der højst sansynvis allerede ligger i modulets satser. Den
+  ottende er «af en lønforhøjelse på 1.000 kr.», som beholder sit tal, fordi den
+  netop *er* den forhøjelse, der illustreres.
 - **`/bil`** — ✅ 2/10 (`ceo/bil-omkostninger-fra-modul`), de 16 fund er væk.
   Målt før rettelsen med scanneren: otte estimater i hvert sprog (vægtafgift,
   service, bremser, tandemrem, dæk, dækkenes holdelighed) — ingen af dem med
@@ -308,14 +329,15 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Alle notes under har vindue **2/10 07:30** (den nyeste fra 05:20) (batch-deployeren kører 07:30/12:30/
+Alle notes under har vindue **2/10 07:30** (den nyeste fra 05:35) (batch-deployeren kører 07:30/12:30/
 17:30/21:30). Prøverne er på **indhold**, aldrig på HTTP 200: en 200 beviser
 at svaret serveres, ikke at det er den nye kode. Hver note er én linje her;
 den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
-| `bil-omkostninger-fra-modul` (**ny**) | `minberegner.dk/bil`: artiklen skal have `4,16-5,00 kr.` i pr/km-sætningen og rækkerne `Benzin 4,90 / Diesel 5,00 / Hybrid 4,83 / Elbil 4,16`, «7.500 kr. om året» i serviceafsnittet og `4.000/5.500/3.000/0 kr.` i vægtafgiftstabellen; **intet** «2,50-4,50 kr» og ingen `<li>` med beløb. `beraknare.se/bil`: `4,10-5,27 kr.`, rækkerne `Bensin 5,17 / Diesel 5,27 / Laddhybrid 5,10 / Elbil 4,10`, «17,57 kr/liter», «7 500 kr per år» og `Elbil 360 kr` i tabellen; **intet** «18-20 kr/liter». Beregnerens brændstofpris skal være 17,57 på beraknare.se (var 13,5 på alle domæner) |
+| `opsparing-eksempler-fra-modul` (**ny**) | `minberegner.dk/opsparing`: «Uden renters rente» skal give `10.000 kr.` / `25.000 kr.`, «Med renters rente» `10.000 kr.` / `43.219 kr.`, og kalletoten `1.522.077 kr.` for Person A og `1.674.259 kr.` for B, med «480.000 kr.» / «720.000 kr:» og «240.000 kr. mere ind» / «152.182 kr. mere til sidst»; **intet** «1,5 mio», «1,7 mio», «5%», «(5% rente)» eller «forskellen er minimal». `beraknare.se/opsparing`: `100 000 kr` / `250 000 kr` og `100 000 kr` / `432 194 kr` med **mellemrum** i separatoren, `1 522 077 kr` / `1 674 259 kr` og `480 000 kr` / `720 000 kr`; **intet** «1,5 mkr» |
+| `bil-omkostninger-fra-modul` | `minberegner.dk/bil`: artiklen skal have `4,16-5,00 kr.` i pr/km-sætningen og rækkerne `Benzin 4,90 / Diesel 5,00 / Hybrid 4,83 / Elbil 4,16`, «7.500 kr. om året» i serviceafsnittet og `4.000/5.500/3.000/0 kr.` i vægtafgiftstabellen; **intet** «2,50-4,50 kr» og ingen `<li>` med beløb. `beraknare.se/bil`: `4,10-5,27 kr.`, rækkerne `Bensin 5,17 / Diesel 5,27 / Laddhybrid 5,10 / Elbil 4,10`, «17,57 kr/liter», «7 500 kr per år» og `Elbil 360 kr` i tabellen; **intet** «18-20 kr/liter». Beregnerens brændstofpris skal være 17,57 på beraknare.se (var 13,5 på alle domæner) |
 | `billaan-tal-fra-modul` (**ny**) | `minberegner.dk/billaan`: rækkerne skal være `100.000/10.000/5 år/6 %/1.740 kr/114.397 kr`, `200.000/20.000/7 år/6 %/**2.630 kr**/240.881 kr`, `300.000/30.000/7 år/6 %/**3.944 kr**/361.322 kr`; **intet** «3.017» eller «4.525»; beregnerens ÅOP skal være **6,91** (var 3,46) | `beraknare.se/billaan` skal have `150 000/30 000/7 %/2 376 kr/172 569 kr` med **mellemrum** i tusindtalsseparatoren |
 | `tidszone-links-til-lande` | `minberegner.dk/tidszone` skal have **12** links med `href="/klokken-i/<slug>"` og ankerteksten «Hvad er klokken i Japan?»; `beraknare.se/tidszone` skal have 12 med `/klockan-i/…` og «Vad är klockan i Kanada?»; **intet** `/klockan-i/` på minberegner.dk og intet `/klokken-i/` på beraknare.se; den svenske landetabel-boen skal **ikke** have 11 mellemrum efter «eftersom»; `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal linke til `/klokken-i/usa` |
 | `tidsberegner-halvmaraton-tempo` | `/tidsberegner` **og** `beraknare.se/tidsberegner`: «halvmarathon på 1 time og 45 minutter er 21,1 km ved» skal give **4:59** i begge; `grep -c '4:58'` skal være **0** |

@@ -23676,3 +23676,88 @@ ligger i samme tabel og er ikke beløb, så porten ser dem ikke.
 så der er **ingen baseline** at måle effekten imod. Rettelsen er korrekthed:
 tre af fire synlige tal i de to tabeller var forkerte, og en af dem modsag sin
 egen rentekolonne.
+
+---
+
+## 2/10 05:35 — `ceo/opsparing-eksempler-fra-modul` (F5b, `/opsparing` 10 fund)
+
+**Opgaven.** F5b-køens næste side i trafikrækkefølge: `/opsparing` stod med 10
+fund i `HAARDKODEDE_BELOB` (de to renters-rente-regnestykker og de tre linjer i
+«Tid vs. beløb» i hvert sprog). `/moms` (18) springes over, fordi dens to
+fund kræver en kilde (❓).
+
+**Målt før rettelsen** med portens egen scanner på de tre filer:
+
+```
+$ npx tsx <scanner> src/app/opsparing/page.tsx
+=== src/app/opsparing/page.tsx (10)
+  1. 10.000 kr med 5% simpel rente i 30 år = 25.000 kr
+  2. 10.000 kr med 5% renters rente i 30 år = 43.219 kr
+  3. Person A starter med 25 år og sparer 1.000 kr/md i 40 år (5% rente) =
+  4. Person B starter med 35 år og sparer 2.000 kr/md i 30 år (5% rente) =
+  5. Person A indbetaler kun 480.000 kr, Person B indbetaler 720.000 kr - men forskellen er minimal!
+  6. 100 000 kr med 5 % enkel ränta i 30 år = 250 000 kr
+  7. 100 000 kr med 5 % ränta-på-ränta i 30 år = 432 194 kr
+  8. Person A börjar vid 25 års ålder och sparar 1 000 kr/mån i 40 år (5 % ränta) =
+  9. Person B börjar vid 35 års ålder och sparar 2 000 kr/mån i 30 år (5 % ränta) =
+ 10. Person A sätter bara in 480 000 kr, Person B sätter in 720 000 kr - men skillnaden är liten!
+```
+
+Alle ti var korrekte i sig selv. De hang ved ingen: intet sted i koden stod, at
+«1,5 mio» kom fra 1.000 kr/md i 40 år til 5 %, og hvert sprog skrev sin egen
+tusindtalsseparator. Der var ingen `src/lib/opsparing.ts` — simuleringen lå
+inde i `OpsparingsBeregner.tsx` som en lokal `simulerOpsparing`.
+
+**Rettelsen.** `simulerOpsparing` flyttede til `src/lib/opsparing.ts` og
+eksporteres derfra; komponenten importerer den (beholder sit lokale alias
+`type Frekvens = RenteFrekvens`, så resten af filen er urørt). Modulet danner
+begge eksempler med den samme funktion, og siden formatterer med
+`formatCurrency`/`formatNumber` pr. locale, så «1 522 077 kr» i svensk ikke kan
+glide fra «1.522.077 kr.» i dansk.
+
+**Målt efter rettelsen** (`npx tsx`, modulets egne funktioner):
+
+```
+da  25.000 kr. / 43.219 kr.      se  250 000 kr / 432 194 kr
+da  A 1.522.077 kr. (480.000 kr. indsat)  B 1.674.259 kr. (720.000 kr. indsat)
+se  A 1 522 077 kr (480 000 kr insatt)    B 1 674 259 kr (720 000 kr insatt)
+    forskelle: 240 000 kr ind, 152 182 kr ud
+```
+
+Scanneren: `=== src/app/opsparing/page.tsx (0)`. Listen `402 → 392`, og
+`opsparing` er fjernet fra `HAARDKODEDE_BELOB`.
+
+**To fund under egen diff-review, begge rettet i samme commit.**
+
+1. Min uafhængige kontrolformel for årlig forrentning var **en faktor 1,05 for
+   lav**. `simulerOpsparing` lægger indbetalingen til i starten af hver måned
+   og tilskriver renten i måned 12, så beløbet tjener årets rente — altså
+   `S(n) = M·12·(1+r)·((1+r)ⁿ−1)/r`, ikke den almindelige annuity-formel. Skrevet
+   som jeg først skrev den, dømte testen de rigtige tal forkerte
+   (`1522077 mod 1449597`, forskel 72.480). Rettet i testen, ikke i modulet.
+2. Jeg skrev i modulets docblock, at de håndskrevne 1,5/1,7 mio var regnet med
+   **månedlig** forrentning, og at værktøjet derfor viste 1.449.597 kr. Det er
+   **falsk**: 1,5 mio og 1,7 mio er præcis den årlige forrentning, værktøjet har
+   som standard, afrundet til nærmeste hundredetusind (1.522.077 og 1.674.259).
+   Påstanden blev fjernet fra docblocken, fordi den ville have ført den næste
+   iteration til at lede efter en fejl der ikke var der.
+
+**Copy.** «men forskellen er minimal» er erstattet af de to faktiske tal: B
+betaler 240.000 kr. mere ind og har 152.182 kr. mere til sidst. De to *er*
+pointen med eksemplet, og de var skjult af en afrunding på 6 cifre.
+
+**Mutation (punkt 12).** Med den gamle `page.tsx` på plads (listen er allerede
+392) bliver porten rød:
+
+```
+FAIL  src/app/regnestykker.test.ts > ingen side har flere hårdkodede beløb end listen siger
+AssertionError: expected [ 'src/app/opsparing/page.tsx' ] to deeply equal []
+ ❯ src/app/regnestykker.test.ts:486
+```
+
+Med den nye `page.tsx`: 8/8 grøn. Ny `src/lib/opsparing.test.ts`: 16/16 grøn.
+
+**Gate 2/10 05:36.** `npm run lint` 0 · `npm run typecheck` 0 ·
+`TZ=UTC npm run test` **3632 grønne i 223 filer** · `npm run build` 0,
+`/opsparing` stadig `ƒ`. (Den ureviewede danske streng i
+`src/app/procent/page.tsx:560` er fra master og urørt.)
