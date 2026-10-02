@@ -183,3 +183,20 @@ export function markedsprisFaqSvar(locale: Locale): string {
   if (locale === "se") return `Dansk nivå: IT ${it}/timme, hantverkare ${haandvaerk}/timme.`;
   return `Dansk nivå: IT ${it}/time, håndverkere ${haandvaerk}/time.`;
 }
+
+/**
+ * Blogindlæggets svar på «normal timepris for en freelancer», læst fra
+ * tabellen.
+ *
+ * Det skrev «Webudviklere 600-1.200 kr, tekstforfattere 500-1.000 kr,
+ * konsulenter 800-1.500 kr» — altså en lavere start på de to første end
+ * tabellen ovenfor (`seniorUdvikler` 800-1.200, `tekstforfatter` 600-1.000),
+ * så `/timepris` og blogindlægget gav to prisér på samme fag. Indlægget er
+ * dansk, så kun `da` — de svenske og norske har ingen udgave af det.
+ */
+export function freelancerTimeprisFaqSvar(): string {
+  const udvikler = formaterMarkedspris(findMarkedspris("it", "seniorUdvikler"), "da");
+  const tekst = formaterMarkedspris(findMarkedspris("kreativ", "tekstforfatter"), "da");
+  const konsulent = formaterMarkedspris(findMarkedspris("raadgivning", "konsulent"), "da");
+  return `Det varierer meget efter branche: seniorudviklere ${udvikler}, tekstforfattere ${tekst}, konsulenter ${konsulent}. Erfaring og speciale påvirker prisen markant.`;
+}

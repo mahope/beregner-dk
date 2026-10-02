@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
+import {
+  GRUPPE_ETIKETTER,
+  POST_ETIKETTER,
+  formaterMarkedspris,
+  freelancerTimeprisFaqSvar,
+  markedspriser,
+} from "@/lib/timepris-markedspriser";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -40,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const faqItems = [
   {
     question: "Hvad er en normal timepris for en freelancer?",
-    answer: "Det varierer meget efter branche: Webudviklere 600-1.200 kr, tekstforfattere 500-1.000 kr, konsulenter 800-1.500 kr. Erfaring og speciale påvirker prisen markant.",
+    answer: freelancerTimeprisFaqSvar(),
   },
   {
     question: "Skal jeg lægge moms på min timepris?",
@@ -177,43 +185,40 @@ export default function TimeprisGuidePage() {
         </div>
 
         <h2>Typiske timepriser i Danmark (2026)</h2>
+        <p>
+          Nedenfor er de niveauer, <Link href="/timepris" className="text-blue-600 hover:underline">timeprisberegnen</Link>{" "}
+          bruger. Det er de samme tal, du får dér, så du kan regne videre på dem.
+        </p>
         <div className="not-prose my-6">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b">
-                <th className="text-left py-2">Branche</th>
-                <th className="text-right py-2">Junior</th>
-                <th className="text-right py-2">Senior</th>
+                <th className="text-left py-2">Fag</th>
+                <th className="text-right py-2">Typisk timepris</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b">
-                <td className="py-2">Webudvikling</td>
-                <td className="text-right">500-700 kr</td>
-                <td className="text-right">800-1.400 kr</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Grafisk design</td>
-                <td className="text-right">400-600 kr</td>
-                <td className="text-right">700-1.000 kr</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Tekstforfatning</td>
-                <td className="text-right">500-700 kr</td>
-                <td className="text-right">800-1.200 kr</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Marketing</td>
-                <td className="text-right">500-800 kr</td>
-                <td className="text-right">900-1.500 kr</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Konsulentarbejde</td>
-                <td className="text-right">600-900 kr</td>
-                <td className="text-right">1.000-2.000 kr</td>
-              </tr>
+              {markedspriser("da").map((gruppe) => (
+                <Fragment key={gruppe.id}>
+                  <tr className="border-b">
+                    <th className="text-left py-2 font-medium" colSpan={2}>
+                      {GRUPPE_ETIKETTER[gruppe.id].da}
+                    </th>
+                  </tr>
+                  {gruppe.poster.map((post) => (
+                    <tr key={post.id} className="border-b">
+                      <td className="py-2 pl-4">{POST_ETIKETTER[post.id].da}</td>
+                      <td className="text-right py-2">{formaterMarkedspris(post, "da")}</td>
+                    </tr>
+                  ))}
+                </Fragment>
+              ))}
             </tbody>
           </table>
+          <p className="text-xs text-gray-500 mt-2">
+            Priserne er vejledende og ekskl. moms. Faktiske priser afhænger af erfaring, speciale og
+            geografi.
+          </p>
         </div>
 
         <h2>Hvad hvis du mister opgaver?</h2>

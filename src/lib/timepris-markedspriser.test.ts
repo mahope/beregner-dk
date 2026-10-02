@@ -1,12 +1,16 @@
 import { describe, expect, test } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 
 import { getPageData } from "@/lib/page-data";
+import FreelancerTimeprisPage from "@/app/blog/saadan-finder-du-din-timepris-som-freelancer/page";
 import {
   DANSKE_MARKEDSPRISER,
   GRUPPE_ETIKETTER,
   POST_ETIKETTER,
   findMarkedspris,
   formaterMarkedspris,
+  freelancerTimeprisFaqSvar,
   markedspriserErDanske,
   markedsprisFaqSvar,
   markedsprisOmraade,
@@ -171,5 +175,49 @@ describe("/timepris-siden læser det samme sted", () => {
     expect(svar).toContain("900-1.500");
     expect(svar).not.toContain("800-1.500");
     expect(formaterMarkedspris(findMarkedspris("it", "itKonsulent"), "da")).toBe("900-1.500 kr");
+  });
+});
+/**
+ * Blogindlægget `saadan-finder-du-din-timepris-som-freelancer` havde sin
+ * egen «Typiske timepriser i Danmark (2026)»-tabel med otte håndskrevne
+ * beløb og et FAQ-svar med tre til — og de modsagde `/timepris`:
+ * indlægget skrev «Webudviklere 600-1.200 kr», «tekstforfattere 500-1.000
+ * kr» og en senior-udvikler-pris på «800-1.400 kr», som stod ingen steder i
+ * modulet. To sider på samme site gav to prisér på samme fag.
+ *
+ * Porten dømmer indlægget og modulet, så beløbene kun findes ét sted.
+ */
+describe("blogindlæggets timepriser kommer fra modulet", () => {
+  const html = renderToStaticMarkup(
+    createElement(FreelancerTimeprisPage as unknown as React.ComponentType)
+  );
+  // `renderToStaticMarkup` escaper `&`, og to gruppenavne indeholder det.
+  const synlig = html.replace(/&amp;/g, "&");
+
+  test("hver række i tabellen er en post fra modulet", () => {
+    for (const gruppe of markedspriser("da")) {
+      expect(synlig).toContain(GRUPPE_ETIKETTER[gruppe.id].da);
+      for (const post of gruppe.poster) {
+        expect(synlig).toContain(POST_ETIKETTER[post.id].da);
+        expect(synlig).toContain(formaterMarkedspris(post, "da"));
+      }
+    }
+  });
+
+  test("de håndskrevne beløb er væk", () => {
+    // 800-1.400 kr var senior-udvikler-prisen i indlæggets egen tabel.
+    expect(html).not.toContain("800-1.400");
+    expect(html).not.toContain("600-900 kr");
+    expect(html).not.toContain("1.000-2.000 kr");
+  });
+
+  test("FAQ-svaret svarer til tabellen", () => {
+    expect(synlig).toContain(freelancerTimeprisFaqSvar());
+    expect(freelancerTimeprisFaqSvar()).toContain(
+      formaterMarkedspris(findMarkedspris("it", "seniorUdvikler"), "da")
+    );
+    // Den gamle sætning startede lavere end tabellen gjorde.
+    expect(freelancerTimeprisFaqSvar()).not.toContain("600-1.200 kr");
+    expect(freelancerTimeprisFaqSvar()).not.toContain("500-1.000 kr");
   });
 });

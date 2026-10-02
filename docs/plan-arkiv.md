@@ -24248,3 +24248,28 @@ STATUS: 2/10 10:40. **Alle tre åbne review-fund fra 2/10 er lukket** (MIDDEL
   `languages` fra `KLOKKEN_LANDE`, samme modul ruterne af, så en ny tid ikke
   kan få en dansk side uden sin svenske modpart. Port: 3 tests, målt 2/2 rød
   mod den gamle kode.
+
+## 2/10 11:35 — ceo/blog-indlaeg-belob-fra-modul ✅
+
+Blogindlægget `saadan-finder-du-din-timepris-som-freelancer` havde sin egen
+«Typiske timepriser i Danmark (2026)»-tabel (otte håndskrevne beløb, Junior/Senior-
+kolonner) og sit eget FAQ-svar på «Hvad er en normal timepris for en freelancer?»
+(tre beløb) — og de modsagde `/timepris` på tre af ni poster. «800-1.400 kr» for
+seniorudvikler stod ingen steder i koden; FAQ'en sagde «Webudviklere 600-1.200 kr»
+og «tekstforfattere 500-1.000 kr» mod modulets `seniorUdvikler` 800-1.200 og
+`tekstforfatter` 600-1.000. To sider på samme site gav to prisér på samme fag.
+
+Rettelse: `freelancerTimeprisFaqSvar()` i `src/lib/timepris-markedspriser.ts` bygger
+sætningen af `findMarkedspris`, og tabellen renderer `markedspriser("da")` med
+`GRUPPE_ETIKETTER`, `POST_ETIKETTER` og `formaterMarkedspris` — samme 12 poster i
+samme fire grupper som beregnen, plus dens «vejledende og ekskl. moms»-note. Den
+nye tabel har to kolonner (Fag / Typisk timepris) i stedet for Branch/Junior/Senior,
+fordi modulets poster ikke er delt i junior/senior.
+
+Port: 3 nye tests i `timepris-markedspriser.test.ts` (renderet HTML af indlægget mod
+modulets 12 poster + de tre håndskrevne intervaller + FAQ-svaret). Målt **3 røde**
+mod `master`s fil. `regnestykker`-portens loftpunktssum 370 → 365 (JSX) og 83 → 82
+(strenge).
+
+Mål (Plausible 2/10): `/blog/saadan-finder-du-din-timepris-som-freelancer` har ingen
+baseline i top-15; `/timepris` er gruppen den skal flytte. Genmål 16/10.

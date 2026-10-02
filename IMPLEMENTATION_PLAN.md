@@ -1,13 +1,26 @@
-STATUS: 2/10 10:25. CI grøn (`509bc62`). Sentry MINBEREGNER-1 er Next-router-støj
+STATUS: 2/10 11:35. CI grøn (`9c44d4c`). Sentry MINBEREGNER-1 er Next-router-støj
   (filtreret siden 3e67ed3), MINBEREGNER-2 rettet i `4d48370`+`def070c`. Alle tre
   review-fund fra 2/10 lukket (`3875b83`, `73c7e64`, `def070c`). CEO-kø punkt 0 lukket
   (`04ca30a`). PR-TJEK 2026-10-02: ingen åbne PR'er. BRANCH-TJEK 2/10: ingen forældede.
-  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`.
+  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`
+  — målt grøn 2/10 11:30 (3681 tests i 227 filer).
   **Deploy 2/10 07:30 målt på indhold, ingen DEPLOY-MISSING.** Vindue 12:30 ikke målt
   endnu: `tidsberegner-faq-fra-modul`, `timepris-lokale-tal`, `timepris-markedspriser`,
   `timer-periode`, `moms-eksempler-fra-modul`, `error-side-locale`, `fejlside-locale`.
-  **Denne iteration: `ceo/pace-marathon-faq`. VERIFICÉR DEPLOY: /pace marathon- og 10
-  km-svar beregnet af modulet ceo/pace-marathon-faq 2/10 10:25**
+  **Denne iteration: `ceo/blog-indlaeg-belob-fra-modul`. VERIFICÉR DEPLOY:
+  /blog/saadan-finder-du-din-timepris-som-freelancer skal vise modulets 12 timepriser og
+  FAQ'en «seniorudviklere 800-1.200 kr, tekstforfattere 600-1.000 kr, konsulenter
+  800-1.500 kr», og **intet** «800-1.400», «600-900 kr» eller «1.000-2.000 kr»
+  ceo/blog-indlaeg-belob-fra-modul 2/10 11:35**
+  Fund: blogindlægget havde sin egen «Typiske timepriser i Danmark (2026)»-tabel med otte
+  håndskrevne beløb og sit eget FAQ-svar med tre til — og de modsagde `/timepris`: «800-1.400
+  kr» for seniorudvikler stod ingen steder i koden, «Webudviklere 600-1.200 kr» lå under
+  modulets 800-1.200, og «tekstforfattere 500-1.000 kr» under 600-1.000. To sider på samme
+  site gav to prisér på samme fag. Nu renderer tabellen `markedspriser("da")` med
+  `GRUPPE_ETIKETTER`/`POST_ETIKETTER` og `formaterMarkedspris`, FAQ'en læser fra
+  `freelancerTimeprisFaqSvar()`, og tabellen har fået samme «vejledende og ekskl. moms»-note
+  som beregnen. Port: 3 nye tests i `timepris-markedspriser.test.ts`, målt **3 røde** mod
+  `master`s fil; loftpunktssummen 370 → 365 (JSX) og 83 → 82 (strenge).
   Autocomplete målt 2/10 04:40 (hl=da gl=dk): under «tid beregner» er 7 af 10
   completions distancer (marathon, halvmarathon, km, cykel, ironman, triathlon, pace);
   «tid beregner» selv har ~27k månedlige søgninger på position 5, og siden havde intet
@@ -61,8 +74,11 @@ blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket.
    lå nu i `src/lib/timepris-markedspriser.ts`, FAQ'en læser fra samme modul,
    og de tre domæner får hver sit sprog i kopier/del-teksten. Listen 110 →
    **83**. **Næste fil:** `src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx`
-   (2 fund — samme intervaller i et blogindlæg) og derpå
-   `src/app/blog/boernepenge-2026-satser-og-regler/page.tsx` (9 fund).
+   — ✅ 2/10 11:35 (`ceo/blog-indlaeg-belob-fra-modul`). Ikke bare de samme intervaller:
+   de **modsagede** `/timepris` («800-1.400 kr» stod ingen steder i koden). Listen 370 →
+   **365** og 83 → **82**. **Næste fil:**
+   `src/app/blog/boernepenge-2026-satser-og-regler/page.tsx` (2 fund i portens liste,
+   ikke 9 som denne linje tidligere sagde — målt 2/10 11:30).
    `/timepris` mangler stadig **norsk brødtekst** på siden (kun `da` og `se`
    har et afsnit) — ❓ kilde til norske timepriser låser både brødteksten og
    tabellen.
@@ -310,6 +326,7 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `blog-indlaeg-belob-fra-modul` (**ny**) | `minberegner.dk/blog/saadan-finder-du-din-timepris-som-freelancer`: tabellen «Typiske timepriser i Danmark (2026)» skal have fire grupperækker (`IT & Udvikling`, `Kreativ & Marketing`, `Rådgivning`, `Håndværk & Service`) med de 12 poster, hver som `<postnavn> <interval> kr` — altså `Senior udvikler 800-1.200 kr` (ikke 1.400), `Grafisk designer 500-800 kr`, `Konsulent 800-1.500 kr`, `Fotograf 500-1.500 kr`. **Intet** «Junior»/«Senior»-hoved, intet «800-1.400», intet «600-900 kr», intet «1.000-2.000 kr». FAQ'en «Hvad er en normal timepris for en freelancer?» skal svare «… seniorudviklere 800-1.200 kr, tekstforfattere 600-1.000 kr, konsulenter 800-1.500 kr …» i både JSON-LD'en og den synlige tekst, og noten «Priserne er vejledende og ekskl. moms.» skal stå under tabellen. `/timepris` skal være **byte-uændret** |
 | `pace-marathon-faq` (**ny**) | `minberegner.dk/pace`: FAQ'en skal have «Hvad er et godt tempo for en marathon?» → «På 42,195 km er 3:30:00 et tempo på 4:59 pr. kilometer.», «Hvad er et godt tempo for en halvmaraton?» → «På 21,0975 km er 1:45:00 et tempo på 4:59 pr. kilometer.» og «Hvad er et godt tempo på 10 km?» → «På 10 km er 50:00 et tempo på 5:00 pr. kilometer.» — hver med «… Hvad der er godt for dig, afhænger af din træning og din målsætning.» **Intet** «halvmarahton» nogen steder på siden eller i JSON-LD'en. `beraknare.se/pace` skal have de samme tre spørgsmål med «per kilometer» og **ikke** «pr. kilometer». |
 | `tidsberegner-faq-fra-modul` (**ny**) | `minberegner.dk/tidsberegner`: FAQ'en skal have «Hvor mange timer er der i et år?» → «Et år har 365 dage, og 365 × 24 = 8.760 timer, altså 525.600 minutter. Måned og kvartal er gennemsnit af året, så en måned er 730 timer.» og «Hvor mange timer er der i en uge?» → «En uge har 7 dage, og 7 × 24 = 168 timer, altså 10.080 minutter. Et døgn har 24 timer, så en måned er 730 timer og et skudår 8.784 timer.». `beraknare.se/tidsberegner`: «Ett år har 365 dagar, och 365 × 24 = 8 760 timmar, alltså 525 600 minuter.» og «En vecka har 7 dagar, och 7 × 24 = 168 timmar, alltså 10 080 minuter. Ett dygn har 24 timmar, så en månad är 730 timmar och ett skottår 8 784 timmar.». Begge steder **skal** have præcis disse tal; de svenske nu med U+00A0 som `Intl` skriver tusindtalsseparatoren (ligesom resten af sitets svenske tal). De norske `faqItems` på `/tidsberegner` er **uændrede** — de har ikke de to spørgsmål |
 | `timepris-lokale-tal` (**ny**) | `beraknare.se/timepris` og `beregnerno/timepris`: de ni rækker med tusindtalsskiller skal have **mellemrum**, ikke dansk punktum — `Senior utvecklare: 800–1 200 DKK`, `IT-konsult: 900–1 500 DKK`, `Konsult: 800–1 500 DKK`, `Advokat: 1 500–3 500 DKK`, `Revisor: 900–1 800 DKK`, `Copywriter: 600–1 000 DKK`, `Marknadsföringskonsult: 700–1 200 DKK`, `Fotograf: 500–1 500 DKK`, `Lärare: 500–1 000 DKK`. **Intet** «1.500»/«3.500»/«1.800» på de to domæner (der er «.» decimaltegn, så «1.500» læses som 1,5). FAQ'en skal sige «Dansk nivå: IT 900–1 500 DKK/timme, hantverkare 400–600 DKK/timme.». `minberegner.dk/timepris` skal være **byte-uændret**: «Advokat: 1.500-3.500 kr», «IT-konsulent: 900-1.500 kr», FAQ «IT: 900-1.500 kr/time. Håndværkere: 400-600 kr/time.» Målt 2/10 07:20 før rettelsen: de svenske og norske sider skrev dansk punktum |

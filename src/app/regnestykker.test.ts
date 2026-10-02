@@ -209,7 +209,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/blog/pension-hvor-meget-skal-du-spare-op/page.tsx": 27,
   "src/app/blog/privatoekonomi-for-unge/page.tsx": 9,
   "src/app/blog/saadan-beregner-du-din-reelle-timeloen/page.tsx": 17,
-  "src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx": 10,
+  "src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx": 5,
   "src/app/blog/skat-2026-alt-du-skal-vide/page.tsx": 5,
   "src/app/blog/spar-penge-paa-braendstof/page.tsx": 2,
   "src/app/boernepenge/page.tsx": 2,
@@ -290,7 +290,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 370;
+const HAARDKODEDE_BELOB_I_LISTEN = 365;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -349,7 +349,7 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
   "src/components/BraendstofBeregner.tsx": 2,
   "src/components/EnhederBeregner.tsx": 2,
   "src/app/opengraph-image.tsx": 2,
-  "src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx": 2,
+  "src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx": 1,
   "src/components/BeregnerAssistent.tsx": 1,
   "src/components/HuslejeNettoprisindeks.tsx": 1,
   "src/components/barsel/InfoTip.tsx": 1,
@@ -371,7 +371,7 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
 };
 
 /** Summen af strenglisten. */
-const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 83;
+const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 82;
 
 
 const ROT = join(__dirname, "..", "..");
@@ -619,7 +619,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
     // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
     // korpuset porten endnu dømmer — det må ikke stige i det stille.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(370);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(365);
   });
 });
 
@@ -711,7 +711,7 @@ describe("beløb i strengliteraler", () => {
     expect(overskredet).toEqual([]);
 
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(83);
+    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(82);
   });
 
   test("listen er målt på hele mappen, ikke på en håndplukket fil", () => {
