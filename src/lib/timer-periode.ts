@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/i18n";
+import { formatNumber } from "@/lib/format";
 
 /**
  * Hvor mange timer, minutter og sekunder en periode indeholder.
@@ -100,3 +101,67 @@ export function timerIPeriode(id: TimerPeriodeId): TimerPeriode {
  * ét døgn — tallene står ikke i en tabel, men i teksten.
  */
 export const TIMER_I_SKUDAAR = DAGE_I_SKUDAAR * TIMER_I_DAGT;
+
+/** De to spørgsmål, `/tidsberegner`s FAQ svarer på med et interval. */
+export type TimerFaqId = "aar" | "uge";
+
+/**
+ * Kun de to domæner, der har svaret. `no`-siden har ingen af de to spørgsmål i
+ * sin `faqItems`, så en norsk streng ville blive en blanding — derfor er
+ * parameteren snævrere end `Locale`, så den første norske kaldsite får en
+ * typefejl i stedet for halvt dansk.
+ */
+type TimerFaqLocale = "da" | "se";
+
+/**
+ * Første sætning i et FAQ-svar: «har 365 dage, og 365 × 24 = 8.760 timer,
+ * altså 525.600 minutter.». Den gennemgår alle fire tal i perioden og i
+ * `TIMER_I_DAGT`, så regnestykket i teksten er det samme som i tabellen.
+ */
+function faqSætning(p: TimerPeriode, locale: TimerFaqLocale): string {
+  const dage = formatNumber(p.dage, locale);
+  const døgn = formatNumber(TIMER_I_DAGT, locale);
+  const timer = formatNumber(p.timer, locale);
+  const minutter = formatNumber(p.minutter, locale);
+
+  return locale === "da"
+    ? `har ${dage} dage, og ${dage} × ${døgn} = ${timer} timer, altså ${minutter} minutter.`
+    : `har ${dage} dagar, och ${dage} × ${døgn} = ${timer} timmar, alltså ${minutter} minuter.`;
+}
+
+/**
+ * Svaret på «hvor mange timer er der i et år / i en uge», læst fra
+ * `TIMER_PERIODER` — altså præcis de tal, tabellen på siden viser.
+ *
+ * Før 2/10 stod de to svar håndskrevet i `page-data.ts` i to sprog («Et år har
+ * 365 dage, og 365 × 24 = 8.760 timer» og «Ett år har 365 dagar, och 365 × 24
+ * = 8 760 timmar»), mens modulet blev lavet i samme commit netop for at tallene
+ * skulle komme derfra. Modulets egen docblock siger modsat: «Derfor kommer alle
+ * tal herfra og ikke fra brødteksten, så en periode og dens timer ikke kan
+ * glide fra hinanden.» De to steder lå altså ikke sammen, og ingen port dømte
+ * dem — en mutation af «8.760» til «9.999» i FAQ'en efterlod alle tests grønne.
+ * Svarene går desuden videre til `<FAQSchema>`s JSON-LD, altså til det Google kan
+ * vise i søgeresultatet.
+ *
+ * Subjektet læses fra periodens eget `naevn`, så «Et år» og «En vecka» ikke kan
+ * glide fra den periode, de indleder. Måneden og skudåret læses fra
+ * `timerIPeriode("maaned")` og `TIMER_I_SKUDAAR`. Mellemrum i tusindtalsseparatoren
+ * kommer fra `Intl` — altså domænets egen skrivemåde, ikke altid dansk.
+ */
+export function timerIPeriodeFaqSvar(id: TimerFaqId, locale: TimerFaqLocale): string {
+  const periode = timerIPeriode(id);
+  const maanedTimer = formatNumber(timerIPeriode("maaned").timer, locale);
+  const døgn = formatNumber(TIMER_I_DAGT, locale);
+  const skud = formatNumber(TIMER_I_SKUDAAR, locale);
+  const sætning = faqSætning(periode, locale);
+
+  if (id === "aar") {
+    return locale === "da"
+      ? `${periode.naevn[locale]} ${sætning} Måned og kvartal er gennemsnit af året, så en måned er ${maanedTimer} timer.`
+      : `${periode.naevn[locale]} ${sætning} Månad och kvartal är genomsnitt av året, så en månad är ${maanedTimer} timmar.`;
+  }
+
+  return locale === "da"
+    ? `${periode.naevn[locale]} ${sætning} Et døgn har ${døgn} timer, så en måned er ${maanedTimer} timer og et skudår ${skud} timer.`
+    : `${periode.naevn[locale]} ${sætning} Ett dygn har ${døgn} timmar, så en månad är ${maanedTimer} timmar och ett skottår ${skud} timmar.`;
+}

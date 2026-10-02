@@ -19,8 +19,9 @@ STATUS: 2/10 09:55. CI grøn (seneste master-kørsel 2/10 06:15Z). Sentry:
   (12 `/klockan-i/` på se, 0 danske dér). De ligger i `docs/plan-arkiv.md`.
   `/topskat` kan ikke skelnes fra den gamle kode ved indhold — tallene blev
   byte-identiske.
-  **Denne iteration: tusindtalsseparatoren på `/timepris` følger domænet.**
-  Review-fund MIDDEL 2/10: `formaterMarkedspris` hårdkodede
+  **Denne iteration: to review-fund fra 2/10.**
+  1. **MIDDEL, `ceo/timepris-lokale-tal` → `3875b83`.**
+  `formaterMarkedspris` hårdkodede
   `formatNumber(post.min, "da")`, så beraknare.se og beregnerno skrev «Advokat:
   1.500-3.500 DKK» og «Revisor: 900-1.800 DKK» — ni af tolv poster, og på de to
   domæner er «.» **decimaltegnet**, så et frilanserlæseinterval som 1,5-3,5 DKK.
@@ -29,6 +30,15 @@ STATUS: 2/10 09:55. CI grøn (seneste master-kørsel 2/10 06:15Z). Sentry:
   DKK» og dansk er byte-uændret. Port: ny test «tusindtalsseparatoren følger
   domænet, ikke altid dansk», målt **1/11 rød mod den gamle kode** på præcis
   `1.500–3.500 DKK` → `1 500–3 500 DKK`.
+  2. **LAV, `ceo/tidsberegner-faq-fra-modul`.** De to nye FAQ-svar på
+  `/tidsberegner` skrev selv «365 × 24 = 8.760 timer» og «et skudår 8.784
+  timer» i to sprog, altså de tal modulet i samme commit blev lavet for at
+  læse. Nu `timerIPeriodeFaqSvar(id, locale)` i `src/lib/timer-periode.ts`, som
+  bygger sætningen af `TIMER_PERIODER` og `TIMER_I_SKUDAAR` — subjektet er
+  periodens eget `naevn`. `page-data.ts` kalder den i stedet for at skrive.
+  **Port:** 3 tests, målt **1/11 rød mod den gamle kode** på præcis den mutation
+  revieweren målte som grøn («8.760 → 9.999» i det danske svar, som efterlod
+  50/50 grønne før).
   **Før:** hreflang på de 24 `/klokken-i/*`-sider. De serverede
   **én** `<link>` — kun canonical — mens `/dage-til/*` på samme domæne
   serverede alle tre. Google kunne derfor ikke se, at
@@ -320,6 +330,7 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `tidsberegner-faq-fra-modul` (**ny**) | `minberegner.dk/tidsberegner`: FAQ'en skal have «Hvor mange timer er der i et år?» → «Et år har 365 dage, og 365 × 24 = 8.760 timer, altså 525.600 minutter. Måned og kvartal er gennemsnit af året, så en måned er 730 timer.» og «Hvor mange timer er der i en uge?» → «En uge har 7 dage, og 7 × 24 = 168 timer, altså 10.080 minutter. Et døgn har 24 timer, så en måned er 730 timer og et skudår 8.784 timer.». `beraknare.se/tidsberegner`: «Ett år har 365 dagar, och 365 × 24 = 8 760 timmar, alltså 525 600 minuter.» og «En vecka har 7 dagar, och 7 × 24 = 168 timmar, alltså 10 080 minuter. Ett dygn har 24 timmar, så en månad är 730 timmar och ett skottår 8 784 timmar.». Begge steder **skal** have præcis disse tal; de svenske nu med U+00A0 som `Intl` skriver tusindtalsseparatoren (ligesom resten af sitets svenske tal). De norske `faqItems` på `/tidsberegner` er **uændrede** — de har ikke de to spørgsmål |
 | `timepris-lokale-tal` (**ny**) | `beraknare.se/timepris` og `beregnerno/timepris`: de ni rækker med tusindtalsskiller skal have **mellemrum**, ikke dansk punktum — `Senior utvecklare: 800–1 200 DKK`, `IT-konsult: 900–1 500 DKK`, `Konsult: 800–1 500 DKK`, `Advokat: 1 500–3 500 DKK`, `Revisor: 900–1 800 DKK`, `Copywriter: 600–1 000 DKK`, `Marknadsföringskonsult: 700–1 200 DKK`, `Fotograf: 500–1 500 DKK`, `Lärare: 500–1 000 DKK`. **Intet** «1.500»/«3.500»/«1.800» på de to domæner (der er «.» decimaltegn, så «1.500» læses som 1,5). FAQ'en skal sige «Dansk nivå: IT 900–1 500 DKK/timme, hantverkare 400–600 DKK/timme.». `minberegner.dk/timepris` skal være **byte-uændret**: «Advokat: 1.500-3.500 kr», «IT-konsulent: 900-1.500 kr», FAQ «IT: 900-1.500 kr/time. Håndværkere: 400-600 kr/time.» Målt 2/10 07:20 før rettelsen: de svenske og norske sider skrev dansk punktum |
 | `timepris-markedspriser` (**ny**) | `minberegner.dk/timepris`: overskriften skal være «Typiske timepriser i Danmark (2026)», de 12 rækker skal være `Junior udvikler: 500-700 kr`, `Senior udvikler: 800-1.200 kr`, `IT-konsulent: 900-1.500 kr`, `Grafisk designer: 500-800 kr`, `Tekstforfatter: 600-1.000 kr`, `Marketing konsulent: 700-1.200 kr`, `Konsulent: 800-1.500 kr`, `Advokat: 1.500-3.500 kr`, `Revisor: 900-1.800 kr`, `Håndværkere: 400-600 kr`, `Fotograf: 500-1.500 kr`, `Underviser: 500-1.000 kr`; **intet** «i Sverige» eller «i Norge». FAQ'en skal sige «IT: 900-1.500 kr/time. Håndværkere: 400-600 kr/time.» på minberegner.dk og på de to andre domæner «Dansk nivå: IT 900–1 500 DKK/timme, hantverkare 400–600 DKK/timme.» (rettet 2/10 10:05: «900–1 500», se `timepris-lokale-tal`) — **intet** «1.800 SEK» eller «1.800 NOK». `beraknare.se/timepris` overskrift «Danska typiska timpriser (2026)» + noten «Nivåerna nedan är danska…», `beregnerno/timepris` «Danske typiske timepriser (2026)» + «Nivåene nedenfor er danske…». Kopierknappen skal på beraknare.se sige «Rekommenderad timpris: …» og på beregnerno «Anbefalt timepris: … ekskl. mva» |
 | `timer-periode` (**ny**) | `minberegner.dk/tidsberegner`: «Hvor mange timer er der i et døgn, en uge, en måned og et år?» med fem rækker `Et døgn 1 24 1.440 86.400` · `En uge 7 168 10.080 604.800` · `En måned (snit af 12 måneder) 30,42 730 43.800 2.628.000` · `Et kvartal (snit af 4 kvartaler) 91,25 2.190 131.400 7.884.000` · `Et år 365 8.760 525.600 31.536.000`, og «Et skudår har 366 dage, altså 8.784 timer». `beraknare.se/tidsberegner`: samme fem rækker med **mellemrum** i separatoren (`8 760`, `525 600`, `31 536 000`) og «Ett skottår har 366 dagar, alltså 8 784 timmar»; **intet** «Hvor mange timer», **intet** «En vecka» på minberegner.dk |

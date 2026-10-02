@@ -24068,3 +24068,53 @@ locale)` pr. sprog-blok (`:513` dansk, `:825` svensk) og var ikke ramt.
 **Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3666 grønne i 227
 filer** · `npm run build` grøn. Deploy-note: `timepris-lokale-tal` (vindue
 2/10 12:30).
+
+---
+
+## `ceo/tidsberegner-faq-fra-modul` — review-fund LAV 2/10 (2026-10-02)
+
+**Fundet:** de to nye FAQ-svar på `/tidsberegner` (1e5a446) skrev selv de tal,
+`src/lib/timer-periode.ts` blev lavet for i samme commit netop for at læse:
+«Et år har 365 dage, og 365 × 24 = 8.760 timer, altså 525.600 minutter. … en
+måned er 730 timer og et skudår 8.784 timer» og de to svenske modstykker. Modulets
+egen docblock siger modsat: «Derfor kommer alle tal herfra og ikke fra
+brødteksten, så en periode og dens timer ikke kan glide fra hinanden.» Ingen
+port dømte svarene — `regnestykker.test.ts` scanner kun `.tsx`, så
+`page-data.ts` var usynlig for streng-porten.
+
+**Rettelsen** er én funktion, `timerIPeriodeFaqSvar(id, locale)`. Den bygger
+sætningen af `timerIPeriode(id)` og `TIMER_I_SKUDAAR`, og **subjektet er
+periodens eget `naevn`** («Et år» / «Ett år», «En uge» / «En vecka»), så navnet
+kan ikke glide fra den periode, sætningen indleder. `page-data.ts` kalder den i
+fire steder (to spørgsmål × `da`/`se`); de norske `faqItems` har ikke de to
+spørgsmål og er urørte.
+
+**Målt.** `365 × 24 = 8 760` (målt med `Intl`), `525 600`, `168`, `730` (365/12 ×
+24) og `8 784` (366 × 24) — de sidste to var rigtige i dag, så det er ikke en
+regnefejl, men at den port, der er bygget til den slags tal, ikke kunne se filen.
+Revieweren målte mutationen «8.760 → 9.999» i det danske svar til **50/50 grøn**;
+den er målt **rød** mod den nye kode, altså 1/11.
+
+**Porten kan fejle** på to måder, og de er målt hver for sig:
+
+1. `hvert tal i svaret kommer fra modulet, formateret i domænets skrivemåde`
+   kræver, at hvert af de nævnte tal står som `formatNumber(tal, locale)`,
+   at selve regnestykket står som `dage × 24 = timer`, og at der **kun** står
+   tusindtals-tal fra modulet — den tredje klaus dømmer tallene ved at tælle dem,
+   så et ekstra håndskrevet tal (eller et fjernet) gør den rød. `168`, `24` og
+   `730` har ingen separator og kan derfor ikke være med i optællingen.
+2. `/tidsberegners FAQ læser svaret fra modulet i stedet for at skrive det`
+   sammenligner de fire `faqItems` med `timerIPeriodeFaqSvar(id, locale)`. Det er
+   den test, mutationen «9.999» faldt på.
+
+**To valg undervejs, begge målte.** `timerIPeriodeFaqSvar`s `locale`-parameter er
+`"da" | "se"`, **ikke** `Locale`: `no`-siden har ikke de to spørgsmål, så en
+norsk streng ville være dansk med svenske endelser. Den snævre type gør den
+første norske kaldsite til en typefejl i stedet for halvt dansk. Og
+tusindtalsseparatoren kommer fra `Intl`, altså U+00A0 på de svenske svar hvor den
+gamle håndskrevne tekst havde et almindeligt mellemrum — samme som resten af
+sitets svenske tal.
+
+**Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3669 grønne i 227
+filer** · `npm run build` grøn. Deploy-note: `tidsberegner-faq-fra-modul`
+(vindue 2/10 12:30).
