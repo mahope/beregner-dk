@@ -25001,3 +25001,57 @@ opgave, anden fil (`rente-excel.ts` + `page.tsx`).
 
 **Gate grøn:** lint (689 filer), typecheck, **3760 tests / 231 filer** (+2),
 build. Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom.
+
+---
+
+## `procentpoint-faq-tal-fra-modul` — 2/10 18:35 (review-fund 19:05, MIDDEL)
+
+Fundet kom fra reviewer-loopet og er **punkt 0** for denne iteration: den
+danske og den svenske streng i `/procent`s egen FAQ modsagde den regel de
+selve udsteder. Svaret på «Hvad er forskellen på procentpoint og procent?»
+skrev «Procentpoint trækker du to procenttal fra hinanden: 22,1 % til 19,7 %
+er -2,4 procentpoint. Procent regner du på det gamle tal: de samme tal er
+**-11,3 %**». Men (19,7 − 22,1) / 22,1 = **-10,86 %**, altså -10,9 % med den
+regel sætningen selv angiver; på det nye tal bliver det -12,18 %. **-11,3 %
+fås af ingen af de to** — det svarer til en forskel på 2,497 procentpoint.
+Punkt 2 og 4 i samme sætning var altså rigtige, og punkt 3 modsagde dem.
+
+**Hvorfor det lå hele vejen uden for porten.** `strengBelob` matcher
+`/\d{1,3}[. ]\d{3}(?!\d)/` — et tusindtalstal. De to strenge indeholder 22,1 /
+19,7 / -2,4 / -11,3, altså **intet** med tusindtalsseparator, så de var uden
+for rækkevidde. Det er samme klasse som `/lon-efter-skatt`'s fire svar, der
+ligeledes lå uden for porten. Målt med portens egen mønster mod begge
+kodestande: **164 mod 164 fund** i `page-data.ts` — rettelsen flytter ingen
+tallet, fordi den aldrig var et beløb.
+
+**Rettelsen.** Ny `procentpointForskelFaqSvar(locale)` i
+`src/lib/procentpoint.ts` bygger hele sætningen af
+`PROCENTPOINT_EKSEMPEL.valg[0]` (22,1 → 19,7 — samme par som `/procent`s
+egen tabel printer, og samme par som `page.tsx:247,250` bruger to linjer
+over). Alle fire tal går gennem `procentpointForskel` /
+`procentpointRelativ`, så punkt 3 kan ikke længere glide fra punkt 2 og 4.
+`page-data.ts` kalder den i `daPages` og `sePages` — `noPages` har intet svar
+på spørgsmålet, så dansk er fallback, ikke en tredje oversættelse.
+
+**Én ændring i den svenske tekst, ud over tallet.** `Intl` skriver minus som
+**U+2212** for `sv-SE` og som ASCII-bindestreg for `da-DK`. Den nye funktion
+går gennem `formatNumber`, så FAQ'en bærer **samme tegn som tabellen ved
+siden af den** — den svenske tabel har altid vist `−2,4` med U+2212, mens
+FAQ'en skrev `-2,4` med ASCII. Det er en uoverensigtelse der lå i koden, og
+den er lukket ved at lade svaret følge `Intl`. Tilstanden er testet
+eksplicit: `page-data.test.ts`'s port bruger `talDa`/`talSe` pr. sprog, så
+et håndskrevet ASCII-minus i den svenske streng giver rød.
+
+**Porten kan fejle, målt.** `procentpointRelativ(...) - 0,44` i modulet giver
+**6 røde** af 142 i to filer — 3 i `procentpoint.test.ts` (da, se og
+«11,3 %») og 3 i `page-data.test.ts` (da, se og «ingen af de to»). Den
+gamle fejl er desuden låst som en streng: `not.toContain("11,3")` i begge
+sprog. Muteret fil genskabt byte-for-byte (`diff -q` tom).
+
+**Ikke gjort, med vilje.** `procentpointRetning` fik ingen tredje
+`-`-tilfælde tilføjet; `PROCENTPOINT_EKSEMPEL` er urørt, så parene er de
+samme som i `3720dea`. `page.tsx`' tabel er urørt — den har allerede
+`procentpointForskel`/`procentpointRelativ`, så den la aldrig i fejl.
+
+**Gate grøn:** lint (689 filer), typecheck, **3767 tests / 231 filer** (+7),
+build. Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom.

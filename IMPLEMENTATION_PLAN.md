@@ -1,24 +1,21 @@
-STATUS: 2/10 18:20. CI grøn ved start (`37028358056`). PR-TJEK 2/10 15:12
-   og 17:30: ingen åbne PR'er. Sentry: ingen opgave med reel effekt —
-   MINBEREGNER-2 var allerede rettet i `def070c` før hændelsen, MINBEREGNER-1
-   er 15 hændelser / 0 brugere = bot-trafik. CEO-kø punkt 0: lukket 2/10
-   14:48. Review-fund 2/10 15:10: rettet (`0b841f2`).
-   **17:30-vinduet er verificeret på indhold** (ikke HTTP 200): `lon-efter-skat`,
-   `boligsalg`, `arveafgift`, `su`, `triatlon`, `ugenummer`, `boernepenge` × 2
-   og `moms` er alle live med de nye sætninger. Kun `procent-faq-tal-fra-modul`
-   venter på 21:30 (merget 17:37).
+STATUS: 2/10 18:35. CI grøn ved start (`37031930026`). PR-TJEK 2/10 15:12 og
+   17:30: ingen åbne PR'er (næste tjek 3/10). Sentry: ingen opgave med reel
+   effekt — MINBEREGNER-2 var allerede rettet i `def070c`, MINBEREGNER-1 er
+   15 hændelser / 0 brugere = bot-trafik. CEO-kø punkt 0: lukket 2/10 14:48.
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — grøn 2/10 18:19 (**3760** tests i 231 filer, +2).
-   **Denne iteration:** `/renteberegner`s nitten beløb (da 5, no 6, se 8) lå som
-   rå tekst, og `FAQSchema` læser præcis `faqItems` — altså synlige for
-   Google. De læses nu fra `hovedEksempel()`, som bruger samme
-   annuitetsformel som `RenteBeregner`. Dansk er byte-identisk før/efter;
-   svensk og norsk fik «1 887»/«13 227» med mellemrum i stedet for punktum.
-   `page-data.ts` 195 → **176** fund, `/renteberegner` på **0** i tre sprog.
-   Fire mutationer i modulet giver 5/5/3/8 røde.
+   `npm run build` — grøn 2/10 18:32 (**3767** tests i 231 filer, +7).
+   **Denne iteration:** review-fundet fra 19:05 (punkt 0). `/procent`s eget
+   FAQ-svar om procentpoint skrev «-11,3 %», men sætningen siger selv at
+   procent regnes på det gamle tal, så (19,7 − 22,1) / 22,1 er **-10,9 %** —
+   tallet kom af ingen af de to regnestykker. Begge sprog læser nu
+   `procentpointForskelFaqSvar()` fra `src/lib/procentpoint.ts`, som regner
+   alle fire tal af det samme par som tabellen på siden bruger. Dansk er
+   byte-identisk på de tre andre tal; svensk får `Intl`s U+2212-minus, så
+   FAQ'en nu bærer samme tegn som tabellen ved siden af. Se `docs/plan-arkiv.md`.
    **Næste iteration:** `/kvadratmeter` (6 fund, se 3.705 visninger) eller
-   `/leasing` (9 fund, se 2.923), og som **feature** den svenske
-   Excel-formel der er gal.
+   `/leasing` (9 fund, se 2.923) — og som **feature** den svenske
+   Excel-formel der er gal, fordi den er en **fejl læseren kan se**, ikke et
+   tal i en streng.
 
 ## Fase 3 — trafik-drevet
 
@@ -134,16 +131,20 @@ porten.
 **Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
 `src/lib/*.ts` også, og listen opdateres i samme commit.
 
-**Fem filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
+**Seks filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
 (`arveafgift-belob-fra-modul`), `/boligsalg` (`boligsalg-belob-fra-modul`),
-`/procent` (`procent-faq-tal-fra-modul`) og `/renteberegner`
-(`renteberegner-belob-fra-modul`) — alle i `docs/plan-arkiv.md`.
+`/procent` (`procent-faq-tal-fra-modul`), `/renteberegner`
+(`renteberegner-belob-fra-modul`) og `/procent`s procentpoint-svar
+(`procentpoint-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
 
-**Målt 2/10 18:19 (egen AST-probe, samme mønster som portens `strengBelob`):**
+**Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
 **alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
 portens docblock siger. Efter `/renteberegner` er de **176** (var 195 ved
-iterationens start). Det er næsten alle **FAQ-svar**, altså JSON-LD Google
-har. Køen pr. slug efter `/renteberegner` er lukket: `vaegttab` 24 ·
+iterationens start); procentpoint-rettelsen ændrer tallet **ikke** (målt med
+portens egen mønster mod begge kodestande: **164 mod 164**), fordi de to
+strenge aldrig indeholdt et tusindtalstal — de lå uden for portens
+rækkeevidde hele vejen, præcis som `/lon-efter-skatt`. Det er næsten alle
+**FAQ-svar**, altså JSON-LD Google har. Køen pr. slug efter `/renteberegner` er lukket: `vaegttab` 24 ·
 `kalorier` 17 · `moms` 15 · `pension` 12 · `leasing` 9 · `rentefradrag` 7 ·
 `kvadratmeter` 6 · `konfirmation` 6 · `efterloen` 5 · `aktieskat` 5 ·
 `loen-efter-skat` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
@@ -195,6 +196,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `procentpoint-faq-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/procent`: FAQ'en skal have **«Procentpoint trækker du to procenttal fra hinanden: 22,1 % til 19,7 % er -2,4 procentpoint. Procent regner du på det gamle tal: de samme tal er -10,9 %.»** — **intet** «11,3 %» i hele HTML'en (det skal kun stå på `/ejendomsvaerdiskat`, om mio. kr). `beraknare.se/procent`: «Procentenheter får du genom att dra två procenttal från varandra: 22,1 % till 19,7 % är **−2,4** procentenheter. Procent räknar du på det gamla talet: samma tal är **−10,9** %.» — minus skal være **U+2212** (prøv: `grep -c $'är −2,4'` på strippet HTML), fordi `Intl` skriver det for sv-SE, så FAQ'en nu bærer samme tegn som tabellen ved siden af. Dansk minus er ASCII-bindestreg. **Intet** «NaN» nogen steder |
 | `renteberegner-belob-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/renteberegner`: `<meta name="description">` skal være **byte-uændret** «Annuitetslån på **100.000** kr. med **5** % rente i **5** år: **1.887** kr. i måneden og **13.227** kr. i samlet rente. Beregn også serielån.» — dansk er bevidst uændret. **Intet** «1.887» på beraknare.se og intet «1 887» på minberegner.dk. `beraknare.se/renteberegner`: `<title>` skal være «Räntekalkylator: **100 000** kr i **5** år = **1 887** kr/mån» og beskrivelsen «… kostar **1 887** kr i månaden … Total ränta: **13 227** kr.», FAQ'en skal have **syv** spørgsmål hvor «Vad är formeln för ett annuitetslån?» svarer «… lån på **200 000** kr till **4** % i **20** år ger **1 212** kr i månaden — **240** månader, **290 871** kr i alt varav **90 871** kr är ränta.» og «Hur räknar jag ett annuitetslån i Excel?» svarer «… =BETALNING(**0,05**/12;**60**;-100000) ger **1 887** kr …». `minberegner.dk/renteberegner`: FAQ'en skal have **seks** spørgsmål hvor formelsvaret svarer «… lån på **200.000** kr. til **4** % i **20** år giver **1.211,96** kr. pr. måned. I Excel er det =YDELSE(**0,04**/12;**240**;-200000)». **Intet** «1 887» og **intet** «13 227» på minberegner.dk. **Intet** «NaN» nogen steder |
 | `procent-faq-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/procent`: FAQ'en skal have de to svar «Skriv =A1/B1\*100 … Et fald fra **9.000** kr til **7.875** kr er =(B1-A1)/A1\*100 = **-12,5 %**.» og «Går en pris fra **9.000** kr til **7.875** kr, er faldet (7.875 - 9.000) / 9.000 = **-12,5 %**.», plus «10 procent af **1.600** er **160**». `beraknare.se/procent`: «**2 500** kr av **10 000** kr ger **0,25**, alltså **25** procent», «**2 500** / **10 000** = **0,25** = **25** procent», «**33 000** kr mot **30 000** kr ger **3 000** / 30 000 = **10** procent», «**10 000** till **12 500** ger … = **25** procent … **2 500** / **11 250** = **22,2** procent», «**10 000** i A1 och **12 500** i B1 ger **25** procent … **22,2** procent», «10 procent av **1 600** är **160**». **Hele teksten skal være byte-uændret** — det er pointen ved opgaven. **Intet** `1.600` på beraknare.se og intet `1 600` på minberegner.dk |
 | `lon-efter-skat-en-kilde` ✅ **DEPLOY OK 2/10 18:00** | `beraknare.se/lon-efter-skatt` og `minberegner.dk/lon-efter-skatt`: brødteksten skal sige **«mellan cirka 17 400 och 45 600 kr per år 2026»**, **«prisbasbeloppet 59 200 kr»**, **«Snittet i Sverige 2026 är 32,38 %»**, **«skiktgränsen 643 000 kr 2026»**, **«brytpunkt cirka 660 400 kr i bruttolön»**, **«upp till cirka 4 400 kr per månad»**, **«högst 1 184 kr per år»** og **«Allmän pensionsavgift (7 %)»**. Den nye sætning skal være **«På en månadslön på 35 000 kr blir skillnaden 1 277 kr i nettolön per månad»**. **Intet** «flera hundra kronor». FAQ'en skal have **fem** spørgsmål, hvor intet svar afviger fra de samme tal. `minberegner.dk/lon-efter-skatt` er dansk med svensk fallback — de svenske domæner er de to ovenfor |

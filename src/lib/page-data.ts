@@ -24,6 +24,7 @@ import {
   rabatProcent,
 } from "./procent";
 import { formatBelob, formatNumber, formatSvenskText } from "./format";
+import { procentpointForskelFaqSvar } from "./procentpoint";
 import {
   BESKAEFTIGELSESTILLAEG_2026,
   INDKOMSTKRAV_2026,
@@ -1037,7 +1038,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvordan beregner jeg procent af et tal?", answer: "Gang tallet med X og divider med 100. Eksempel: 25% af 200 = 50." },
       { question: "Hvordan beregner jeg procentvis stigning?", answer: "((Ny - Gammel) / Gammel) × 100. Fra 100 til 125 = 25% stigning." },
       { question: "Hvad er procentpoint vs procent?", answer: "Procentpoint er den absolutte forskel mellem to procenttal, procent er den relative ændring. Renten fra 2 % til 3 % er 1 procentpoint, men 50 % stigning. Regn det ud med procentpointberegneren." },
-      { question: "Hvad er forskellen på procentpoint og procent?", answer: "Procentpoint trækker du to procenttal fra hinanden: 22,1 % til 19,7 % er -2,4 procentpoint. Procent regner du på det gamle tal: de samme tal er -11,3 %. Begge svar er rigtige, men de måler hver deres ting." },
+      { question: "Hvad er forskellen på procentpoint og procent?", answer: procentpointForskelFaqSvar("da") },
       { question: "Hvor mange procentpoint er 1 procent?", answer: "Det afhænger af, hvad du regner fra. 2 % til 3 % er 1 procentpoint og 50 %. 20 % til 21 % er også 1 procentpoint, men kun 5 %. Der er ingen fast sats — procentpoint er altid bare de to tal minus hinanden." },
       { question: "Hvorfor stiger en rente 0,25 procentpoint hver gang?", answer: "Fordi Nationalbanken hæver den i skridt af 0,25 procentpoint. Hver hævning er 0,25 procentpoint uanset det niveau, den ligger på — men den procentvise stigning bliver mindre for hver hævning, fordi den regnes på et større tal." },
       { question: "Hvordan lægger jeg procent til?", answer: "Gang med (1 + procent/100). Læg 20% til 150: 150 × 1,20 = 180." },
@@ -3631,7 +3632,7 @@ const sePages: Record<string, PageData> = {
       { question: "Hur räknar man ut procent på lön?", answer: `Räkna ut skillnaden mellan ny och gammal lön och dividera med den gamla lönen. ${PROCENT_SE.loenNy} kr mot ${PROCENT_SE.loenGammal} kr ger ${PROCENT_SE.loenForskel} / ${PROCENT_SE.loenGammal} = ${PROCENT_SE.loenProcent} procent.` },
       { question: "Hur beräknar jag procentuell ökning?", answer: "((Ny - Gammal) / Gammal) × 100. Från 100 till 125 = 25% ökning." },
       { question: "Vad är procentenheter vs procent?", answer: "Procentenheter är den absoluta skillnaden mellan två procenttal, procent är den relativa förändringen. Räntan från 2 % till 3 % är 1 procentenhet, men 50 % ökning. Räkna ut det med procentenhetsräknaren." },
-      { question: "Vad är skillnaden på procentenheter och procent?", answer: "Procentenheter får du genom att dra två procenttal från varandra: 22,1 % till 19,7 % är -2,4 procentenheter. Procent räknar du på det gamla talet: samma tal är -11,3 %. Båda svaren är rätta, men de mäter var sitt." },
+      { question: "Vad är skillnaden på procentenheter och procent?", answer: procentpointForskelFaqSvar("se") },
       { question: "Hur många procentenheter är 1 procent?", answer: "Det beror på vad du räknar från. 2 % till 3 % är 1 procentenhet och 50 %. 20 % till 21 % är också 1 procentenhet, men bara 5 %. Det finns ingen fast sats — procentenheter är alltid bara de två talen minus varandra." },
       { question: "Hur lägger jag till procent?", answer: "Multiplicera med (1 + procent/100). Lägg 20% till 150: 150 × 1,20 = 180." },
       // Rabattklyngen. Svensk autocomplete (hl=se&gl=se, 2026-09-30) svarar på

@@ -12,6 +12,8 @@
  * cluster is real and the page only had a single FAQ sentence for it.
  */
 
+import { formatNumber } from "./format";
+
 /**
  * The change between two percentages expressed in percentage points.
  *
@@ -102,4 +104,38 @@ export function procentpointRetning(
   if (forskel > 0) return ord.stigning;
   if (forskel < 0) return ord.fald;
   return ord.uændret;
+}
+
+/**
+ * The answer to «Hvad er forskellen på procentpoint og procent?» — the single
+ * question this unit is searched by, and the one `FAQSchema` publishes to
+ * Google on a page with 152.615 visninger.
+ *
+ * Every figure is computed from the same pair the page's own table prints, so
+ * the two cannot drift apart. That is not a formality: the sentence used to
+ * quote the same two percentages as "-2,4 procentpoint" and "-11,3 %", and only
+ * the first of them is arithmetic — (19,7 − 22,1) / 22,1 is −10,9 %, which
+ * −11,3 % is not. The prose therefore contradicted the rule it states in the
+ * same sentence, on the site's largest page, in the answer Google shows.
+ *
+ * Written through `formatNumber` so a negative Swedish figure gets the same
+ * U+2212 minus the table beside it uses (`Intl` writes U+2212 for sv-SE, ASCII
+ * for da-DK). Norwegian has no answer to this question in `noPages`, so the
+ * Danish branch is the fallback rather than a third translation.
+ */
+export function procentpointForskelFaqSvar(locale: "da" | "se"): string {
+  // `valg[0]` — den første række i tabellen på /procent, så svaret og tabellen
+  // beskriver præcis samme par.
+  const [fald] = PROCENTPOINT_EKSEMPEL.valg;
+  const tal = (vaerdi: number) =>
+    formatNumber(vaerdi, locale, { maximumFractionDigits: 1 }).replace(/\u00a0/g, " ");
+  const gammel = tal(fald.gammel);
+  const ny = tal(fald.ny);
+  const forskel = tal(procentpointForskel(fald.gammel, fald.ny));
+  const relativ = tal(procentpointRelativ(fald.gammel, fald.ny));
+
+  if (locale === "se") {
+    return `Procentenheter får du genom att dra två procenttal från varandra: ${gammel} % till ${ny} % är ${forskel} procentenheter. Procent räknar du på det gamla talet: samma tal är ${relativ} %. Båda svaren är rätta, men de mäter var sitt.`;
+  }
+  return `Procentpoint trækker du to procenttal fra hinanden: ${gammel} % til ${ny} % er ${forskel} procentpoint. Procent regner du på det gamle tal: de samme tal er ${relativ} %. Begge svar er rigtige, men de måler hver deres ting.`;
 }

@@ -23,6 +23,12 @@ import {
   procentForskel,
   rabatProcent,
 } from "./procent";
+import {
+  PROCENTPOINT_EKSEMPEL,
+  procentpointForskel,
+  procentpointForskelFaqSvar,
+  procentpointRelativ,
+} from "./procentpoint";
 
 // ─── /procent's rabat-FAQ. Forventningerne i de to nedenstående porte er
 // *regnet* af de samme konstanter, som FAQ'en selv bygger sine svar af, så
@@ -135,6 +141,39 @@ describe("procentens rabat-FAQ", () => {
     ]) {
       expect(svar("se", spoergsmaal), spoergsmaal).not.toMatch(/\u00a0/);
     }
+  });
+});
+
+// /procent er sitets største side (152.615 visninger, 0,1 % CTR, pos. 7,4), og
+// dens FAQ går direkte i Googles rich resultat. Svaret på "hvad er forskellen
+// på procentpoint og procent" stod med alle fire tal som rå tekst, og det
+// relative tal var forkert: sætningen siger selv at procent regnes på det
+// gamle tal, så 22,1 % til 19,7 % er (19,7 - 22,1) / 22,1 = -10,9 %, ikke de
+// -11,3 % der stod. Denne port dømmer det data-laget faktisk serverer, så
+// håndskrevne tal — også i et nyt sprog — falder her.
+describe("procentpoint-svaret i /procent's FAQ", () => {
+  const fald = PROCENTPOINT_EKSEMPEL.valg[0];
+
+  const svar = (locale: "da" | "se", spoergsmaal: string) =>
+    getPageData("procent", locale)!.faqItems.find((i) => i.question === spoergsmaal)?.answer;
+
+  test.each([
+    ["da", "Hvad er forskellen på procentpoint og procent?"],
+    ["se", "Vad är skillnaden på procentenheter och procent?"],
+  ] as const)("%s: de to tal er de samme som tabellen på siden", (locale, spoergsmaal) => {
+    // `Intl` skriver minus som U+2212 på svensk og som ASCII-bindestreg på
+    // dansk, så porten bruger samme formatering som det svar den dømmer.
+    const tal = locale === "se" ? talSe : talDa;
+    const svarTekst = svar(locale, spoergsmaal)!;
+    expect(svarTekst).toBe(procentpointForskelFaqSvar(locale));
+    expect(svarTekst).toContain(`${tal(fald.gammel, 1)} %`);
+    expect(svarTekst).toContain(tal(procentpointForskel(fald.gammel, fald.ny), 1));
+    expect(svarTekst).toContain(`${tal(procentpointRelativ(fald.gammel, fald.ny), 1)} %`);
+  });
+
+  test("ingen af de to svar indeholder det gamle, ugerede -11,3 %", () => {
+    expect(svar("da", "Hvad er forskellen på procentpoint og procent?")).not.toContain("11,3");
+    expect(svar("se", "Vad är skillnaden på procentenheter och procent?")).not.toContain("11,3");
   });
 });
 
