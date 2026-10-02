@@ -191,7 +191,6 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
 
   "src/app/befordringsfradrag/page.tsx": 3,
   "src/app/bil/page.tsx": 16,
-  "src/app/billaan/page.tsx": 24,
   "src/app/blog/30-procent-reglen-husleje/page.tsx": 4,
   "src/app/blog/arveafgift-regler-og-satser/page.tsx": 15,
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 47,
@@ -245,6 +244,13 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
 /**
  * Summen af listen, så de to tal ikke kan glide fra hinanden.
  *
+ * 442 → 418 den 2/10 (senere samme dag): `billaan` stod med 24 fund — hele de to
+ * eksempeltabeller, seks rækker × fire beløb. De læses nu fra
+ * `src/lib/billaan.ts`, som danner dem med den samme `beregnBillaan` som
+ * `BillaanBeregner` bruger, så tabellen ikke kan have sin egen fortælling. To af
+ * de tre danske rækker bar «6 %» med den månedlige ydelse for 7 %, og den
+ * danske «Samlet omkostning» var ydelserne alene mod den svenskes ydelser plus
+ * udbetaling — alle tre fejl dømmes nu af `src/lib/billaan.test.ts`.
  * 448 → 442 den 2/10 (senere samme dag): `ejendomsvaerdiskat` stod med 6 fund —
  * progressionsgrænsen to gange og de tre regnestykker plus indgangssætningen i
  * eksemplet. De læses nu fra `src/lib/ejendomsvaerdiskat.ts`, som også danner
@@ -255,7 +261,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 442;
+const HAARDKODEDE_BELOB_I_LISTEN = 418;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -474,7 +480,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(442);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(418);
   });
 });
 

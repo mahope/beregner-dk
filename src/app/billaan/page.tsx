@@ -1,6 +1,8 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { formatNumber } from "@/lib/format";
+import { billaanEksempler } from "@/lib/billaan";
 import BillaanBeregner from "@/components/BillaanBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -19,6 +21,13 @@ export default async function BillaanPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("billaan", locale) || getPageData("billaan", "da")!;
+
+  // Eksempeltabellerne regnes i `src/lib/billaan.ts` med samme funktion som
+  // `BillaanBeregner` bruger, så formateringen er det eneste denne side selv
+  // står for — med sidens egen tusindtalsseparator.
+  const kr = (belob: number) =>
+    formatNumber(Math.round(belob), locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+  const sats = (rentesats: number) => `${formatNumber(rentesats, locale, { maximumFractionDigits: 1 })}%`;
 
   return (
     <div>
@@ -162,46 +171,35 @@ export default async function BillaanPage() {
 
         <h2>Hvad koster et billån typisk?</h2>
         <p>
-          Eksempel på billån (2026):
+          Eksempler på billån (2026). Lånebeløbet er bilens pris minus udbetalingen,
+          og samlet omkostning er alle ydelserne plus udbetalingen.
         </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Lånebeløb</th>
-              <th>Udbetaling</th>
-              <th>Løbetid</th>
-              <th>Rente</th>
-              <th>Månedlig ydelse</th>
-              <th>Samlet omkostning</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>100.000 kr</td>
-              <td>10.000 kr</td>
-              <td>5 år</td>
-              <td>6%</td>
-              <td>1.933 kr</td>
-              <td>116.000 kr</td>
-            </tr>
-            <tr>
-              <td>200.000 kr</td>
-              <td>20.000 kr</td>
-              <td>7 år</td>
-              <td>6%</td>
-              <td>3.017 kr</td>
-              <td>253.000 kr</td>
-            </tr>
-            <tr>
-              <td>300.000 kr</td>
-              <td>30.000 kr</td>
-              <td>7 år</td>
-              <td>6%</td>
-              <td>4.525 kr</td>
-              <td>380.000 kr</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Bilens pris</th>
+                <th>Udbetaling</th>
+                <th>Løbetid</th>
+                <th>Rente</th>
+                <th>Månedlig ydelse</th>
+                <th>Samlet omkostning</th>
+              </tr>
+            </thead>
+            <tbody>
+              {billaanEksempler("da").map((raekke) => (
+                <tr key={raekke.bilpris}>
+                  <td>{kr(raekke.bilpris)} kr</td>
+                  <td>{kr(raekke.udbetaling)} kr</td>
+                  <td>{raekke.loebetid / 12} år</td>
+                  <td>{sats(raekke.rentesats)}</td>
+                  <td>{kr(raekke.maanedligYdelse)} kr</td>
+                  <td>{kr(raekke.samletOmkostning)} kr</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6">
           <p className="font-medium text-yellow-800">Vigtigt</p>
@@ -306,46 +304,35 @@ export default async function BillaanPage() {
 
         <h2>Vad kostar ett billån typiskt?</h2>
         <p>
-          Exempel på billån (2026):
+          Exempel på billån (2026). Lånebeloppet är bilens pris minus kontantinsatsen,
+          och total kostnad är alla betalningar plus kontantinsatsen.
         </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Lånebelopp</th>
-              <th>Kontantinsats</th>
-              <th>Löptid</th>
-              <th>Ränta</th>
-              <th>Månadskostnad</th>
-              <th>Total kostnad</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>150 000 kr</td>
-              <td>30 000 kr</td>
-              <td>5 år</td>
-              <td>7%</td>
-              <td>2 376 kr</td>
-              <td>172 600 kr</td>
-            </tr>
-            <tr>
-              <td>250 000 kr</td>
-              <td>50 000 kr</td>
-              <td>7 år</td>
-              <td>7%</td>
-              <td>3 020 kr</td>
-              <td>303 700 kr</td>
-            </tr>
-            <tr>
-              <td>350 000 kr</td>
-              <td>70 000 kr</td>
-              <td>7 år</td>
-              <td>7%</td>
-              <td>4 228 kr</td>
-              <td>425 200 kr</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Bilens pris</th>
+                <th>Kontantinsats</th>
+                <th>Löptid</th>
+                <th>Ränta</th>
+                <th>Månadskostnad</th>
+                <th>Total kostnad</th>
+              </tr>
+            </thead>
+            <tbody>
+              {billaanEksempler("se").map((raekke) => (
+                <tr key={raekke.bilpris}>
+                  <td>{kr(raekke.bilpris)} kr</td>
+                  <td>{kr(raekke.udbetaling)} kr</td>
+                  <td>{raekke.loebetid / 12} år</td>
+                  <td>{sats(raekke.rentesats)}</td>
+                  <td>{kr(raekke.maanedligYdelse)} kr</td>
+                  <td>{kr(raekke.samletOmkostning)} kr</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6">
           <p className="font-medium text-yellow-800">Viktigt</p>

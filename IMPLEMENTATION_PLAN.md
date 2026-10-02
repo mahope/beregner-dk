@@ -1,17 +1,16 @@
-STATUS: 2/10 04:32. Rød CI: ingen (seneste kørsel grøn 2/10 02:08Z). Sentry:
+STATUS: 2/10 04:50. Rød CI: ingen (seneste kørsel grøn 2/10 02:33Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
   5f137d4 — ingen ny hændelsesgruppe. PR-TJEK: 2026-10-02 — ingen åbne PR'er.
-  CEO-kø punkt 0 er lukket (RETTET 04ca30a). BRANCH-TJEK: 2/10 — ingen forældede
-  remote-branches.
+  CEO-kø punkt 0 er lukket (RETTET 04ca30a) og de otte CEO-punkter er efterprøvet
+  i koden 2/10 04:40 (Valborg 30/4, dansk sankthans 23/6, påskeaften-FAQ væk,
+  `toUtcMidnight` i Europe/Copenhagen, svensk promille-FAQ regnet, `maneder: 12`).
+  BRANCH-TJEK: 2/10 — ingen forældede remote-branches.
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 04:32: 0 · 0 · **3595 grønne i 220 filer** · 0
-  (`/tidszone`, `/klokken-i/[land]` og bloggen er `ƒ` = dynamiske, som de skal
-  være — se nedenfor).
-  **Denne iteration: `/tidszone` og USA-blogindlægget linker nu til de 24 nye
-  landesider.** Datagrund: `/tidszone` er 24.358 visninger / 0,4 % CTR / pos.
-  7,6 (GSC 1/10) og de 12 landesider pr. domæne var kun linkede *til* siden,
-  aldrig *fra* den. Samme iteration fandt og rettede 11 bevarede mellemrum i
-  den svenske landetabel-boen. `ceo/tidszone-links-til-lande`.
+  `npm run build`. Målt 2/10 04:50: 0 · 0 · **3606 grønne i 221 filer** · 0.
+  **Denne iteration: `/billaan` har tre forkerte tal rettet, og ÅOP var halvt så
+  stor som den skulle.** Datagrund: F5b trafikrækkefølge (24 fund, det meste på
+  siden), og GSC har ingen `/billaan`-visning i top-15 — rettelsen er derfor
+  korrekthed, ikke trafik. `ceo/billaan-tal-fra-modul`.
 
 ## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmarathon-tempo`)
 
@@ -64,9 +63,16 @@ for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
   (skøde) og 1,45% + 1.825 kr (pantebrev)», og ingen port ser de to tal. *Accept:*
   scanneren dækker strengliteraler i `.tsx` med egen liste — målt først, da der
   kan være mange fund.
-- **`/bil`** (16), **`/billaan`** (24), **`/opsparing`** (10), **`/boligsalg`**
-  (9), **`/topskat`** (8) — ingen GSC-visning i top-15, så laveste prioritet;
-  `/bil` er desuden faldet 46 → 21 besøgende.
+- **`/billaan`** — ✅ 2/10 (`ceo/billaan-tal-fra-modul`), de 24 fund er væk.
+  Målt før rettelsen: de to eksempeltabeller laante på hver sin måde, og **to
+  af de tre danske rækker skrev «6 %» med den månedlige ydelse for 7 %**
+  (3.017 kr i stedet for 2.630 kr, 4.525 i stedet for 3.944). Den danske
+  «Samlet omkostning» var ydelserne alene, den svenske ydelserne plus udbetaling.
+  Alt ligger nu i `src/lib/billaan.ts`, som `BillaanBeregner` **også** bruger —
+  og samme iteration fandt at beregnerens egen ÅOP-formel manglede faktor 2, så
+  den viste 3,46 % for et 6,5 %-lån (nu 6,91 % for standard-inputtet).
+  Efterspærgte **F5b-køen** er herefter: `/moms` (kræver kilde, ❓), `/bil` (16),
+  `/opsparing` (10), `/boligsalg` (9), `/topskat` (8).
 - **To huller i gaten selv — ✅ 2/10 (`ceo/typecheck-dækker-hele-src`).**
   (a) `tsconfig.test.json` medtager kun testfiler og deres import-kæde, så en
   **forkert import i en ikke-testfil** var usynlig for `typecheck` — kun
@@ -300,7 +306,8 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
-| `tidszone-links-til-lande` (**ny**) | `minberegner.dk/tidszone` skal have **12** links med `href="/klokken-i/<slug>"` og ankerteksten «Hvad er klokken i Japan?»; `beraknare.se/tidszone` skal have 12 med `/klockan-i/…` og «Vad är klockan i Kanada?»; **intet** `/klockan-i/` på minberegner.dk og intet `/klokken-i/` på beraknare.se; den svenske landetabel-boen skal **ikke** have 11 mellemrum efter «eftersom»; `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal linke til `/klokken-i/usa` |
+| `billaan-tal-fra-modul` (**ny**) | `minberegner.dk/billaan`: rækkerne skal være `100.000/10.000/5 år/6 %/1.740 kr/114.397 kr`, `200.000/20.000/7 år/6 %/**2.630 kr**/240.881 kr`, `300.000/30.000/7 år/6 %/**3.944 kr**/361.322 kr`; **intet** «3.017» eller «4.525»; beregnerens ÅOP skal være **6,91** (var 3,46) | `beraknare.se/billaan` skal have `150 000/30 000/7 %/2 376 kr/172 569 kr` med **mellemrum** i tusindtalsseparatoren |
+| `tidszone-links-til-lande` | `minberegner.dk/tidszone` skal have **12** links med `href="/klokken-i/<slug>"` og ankerteksten «Hvad er klokken i Japan?»; `beraknare.se/tidszone` skal have 12 med `/klockan-i/…` og «Vad är klockan i Kanada?»; **intet** `/klockan-i/` på minberegner.dk og intet `/klokken-i/` på beraknare.se; den svenske landetabel-boen skal **ikke** have 11 mellemrum efter «eftersom»; `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal linke til `/klokken-i/usa` |
 | `tidsberegner-halvmaraton-tempo` | `/tidsberegner` **og** `beraknare.se/tidsberegner`: «halvmarathon på 1 time og 45 minutter er 21,1 km ved» skal give **4:59** i begge; `grep -c '4:58'` skal være **0** |
 | `pace-tidsberegner` | `minberegner.dk/pace` har «5:00» i et `h1`-afsnit; `/pace.txt` er 404 |
 | `klokken-i-land` (**ny**) | `/klokken-i/usa` skal vise «Det er HH:MM i New York lige nu», «New York», «8 timer foran Danmark» om vinteren og 4 by-tider i tabellen; `beraknare.se/klockan-i/turkiet` skal vise «Vad är klockan i Türkiet?» og «Det är HH:MM i Istanbul just nu»; `/klokken-i/danmark` skal være **404**; begge sitemap skal have de 12 slugs som `daily` |

@@ -10,6 +10,7 @@ import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
+import { beregnBillaan } from "@/lib/billaan";
 import { adtractionLink } from "@/lib/adtraction";
 
 interface AffiliateLink {
@@ -233,40 +234,18 @@ export default function BillaanBeregner() {
 
   // Beregningsresultater
   const result = useMemo(() => {
-    const laanebelob = bilpris - udbetaling;
-
-    // Månedlig rente
-    const maanedligRente = rentesats / 100 / 12;
-
-    // Antal betalinger
-    const antalBetalinger = loebetid;
-
-    // Månedlig ydelse (annuitetsformlen)
-    let maanedligYdelse: number;
-
-    if (maanedligRente === 0) {
-      maanedligYdelse = laanebelob / antalBetalinger;
-    } else {
-      maanedligYdelse =
-        (laanebelob * maanedligRente * Math.pow(1 + maanedligRente, antalBetalinger)) /
-        (Math.pow(1 + maanedligRente, antalBetalinger) - 1);
-    }
-
-    // Samlet beløb betalt
-    const samletBelob = maanedligYdelse * antalBetalinger;
-
-    // Samlet rente
-    const samletRente = samletBelob - laanebelob;
-
-    // APR (Approximate Annual Percentage Rate)
-    const antalTerminerPrAar = 12;
-    const samletGebyr = 0;
-    const aprApprox = ((antalTerminerPrAar * samletRente) / (laanebelob * (antalBetalinger + 1))) * 100;
-    const apr = aprApprox + (samletGebyr / (laanebelob / 2) * 100);
+    // Annuiteten ligger i `src/lib/billaan.ts`, som også danner eksempel-
+    // tabellerne under på `/billaan` — så de to kan ikke blive uenige.
+    const { laanebelob, maanedligYdelse, samletBelob, samletRente, apr } = beregnBillaan({
+      bilpris,
+      udbetaling,
+      loebetid,
+      rentesats,
+    });
 
     // Omkostninger pr. km
     const kmPrAar = 15000;
-    const samletKm = (antalBetalinger / 12) * kmPrAar;
+    const samletKm = (loebetid / 12) * kmPrAar;
     const prisPrKm = samletBelob / samletKm;
 
     return {

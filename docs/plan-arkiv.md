@@ -23593,3 +23593,86 @@ indgangslinks — effekten er langsom og vil ikke vise sig i uge 1.
 **Mål:** `/tidszone` 24.358 visninger / 104 klik / 0,4 % CTR / pos. 7,6 (da) og
 3.527 / 12 / 0,3 % / 7,7 (se), GSC 2026-09-01→09-29. `/klokken-i/*` er nye
 sider uden baseline. Genmål 16/10.
+
+---
+
+## ceo/billaan-tal-fra-modul — 2/10 04:50 (F5b, 24 fund)
+
+**Tre fejl i `/billaan`, målt på de håndskrevne tal.** De to eksempeltabeller
+havde hver sin betydning af de samme kolonner, og ingen af dem var
+beregnerens:
+
+1. **Rentekolonnen løj for to af tre danske rækker.** «200.000 kr · 6 % · 3.017 kr»
+   og «300.000 kr · 6 % · 4.525 kr». Målt med annuitetsformlen:
+   `Math.round(180000 × 0,005 × 1,005^84 / (1,005^84 − 1))` = **2.630**, og
+   300.000-prisen giver **3.944**. 3.017 og 4.525 er `Math.round`-et fra 7 %:
+   `200000 × 0,07/12 …` = 3.018 og `300000 …` = 4.527. Rækken var altså regnet
+   på 7 % og mærket 6 %.
+2. **Lånebeløbet var hele prisen i dansk, prisen minus udbetalingen i svensk.**
+   Beregneren har altid brugt `bilpris − udbetaling`. Den svenske række på
+   150.000 kr med 30.000 i udbetaling gav 2.376 kr, som **er** 120.000 til 7 %
+   i 60 måneder — altså lånt på 120.000, under et beløb der hed «Lånebelopp».
+3. **«Samlet omkostning» mente to ting.** Dansk: ydelserne alene (116.000 for en
+   bil der kostede 110.000). Svensk: ydelserne plus udbetalingen (172.600 mod
+   172.569 = rigtigt). Den svenske definition er den rigtige, så den gik videre
+   til begge sprog.
+
+**Den fjerde fejl lå i selve beregnerens ÅOP.** `BillaanBeregner.tsx` havde
+
+```
+apr = (12 × samletRente) / (laanebelob × (antalBetalinger + 1)) × 100
+```
+
+APR-metoden er `2 × n × I / (P × (N + 1))` — faktoren 2 manglede, så den viste
+**3,46 % for et 6,5 %-lån**, altså under den nominelle rente, hvilket en årlig
+omkostning i procent ikke kan være. Målt mod den årlige effektive rente, fundet
+ved at løse ydelsesligningens nutidsværdi (`npx tsx`, 230.000 / 6,5 % / 72 mdr):
+ægte effektiv **6,697 %**, rettet formel **6,914 %**, gammel **3,457 %**.
+
+**Rettelsen.** Alt i `src/lib/billaan.ts`: `beregnBillaan()` er den ene
+annuitet, og `billaanEksempler("da" | "se")` danner rækkerne med den. **`BillaanBeregner`
+kaldte den også** — dens egen useMemo med den indskrevne formel er væk, så
+kalkulator og brødtekst ikke kan komme ud af trit. Kolonnen hed nu «Bilens pris»
+i stedet for «Lånebeløb», fordi det er den der vises, og indgangssætningen siger
+hvad lånebeløbet og samlet omkostning er.
+
+**Verifieret på den renderede side**, ikke på koden (punkt 13): `next start`
+på `:3199`, `/billaan` med `Host: minberegner.dk` og `Host: beraknare.se`.
+
+| | Bilens pris | Udbetaling | Løbetid | Rente | Månedlig ydelse | Samlet omkostning |
+|---|---|---|---|---|---|---|
+| da før | 200.000 | 20.000 | 7 år | 6 % | **3.017** | 253.000 |
+| da efter | 200.000 | 20.000 | 7 år | 6 % | **2.630** | 240.881 |
+| se før | 150 000 | 30 000 | 5 år | 7 % | 2 376 | 172 600 |
+| se efter | 150 000 | 30 000 | 5 år | 7 % | 2 376 | 172 569 |
+
+Dansk tusindtalsseparator med punktum, svensk med mellemrum — begge fra sidens
+egen `formatNumber`. Beregnerens ÅOP viser nu `6,91` i markup'en, hvor den
+før viste `3,46`.
+
+**Tests.** `src/lib/billaan.test.ts`, 11 grønne. APR-testen dømmer mod en
+uafhængigt løst årlig effektiv rente og kræver `apr > nominell` **og**
+`apr < effektiv + 1` — dvs den fanger både en for lille og en for stor
+tilnærmelse. De svenske tal 2.376 og 172.569 er låst af en test, der viser at
+rettelsen ikke har ændret den række, der var rigtig. Porten
+`regnestykker.test.ts`: listen 442 → **418**, `/billaan` udgået helt.
+
+**Mutationer (punkt 12).** `TERMINER_PR_AAR * 2 *` → `TERMINER_PR_AAR *`
+gav 1 rød i APR-testen og 10 grønne. Portens `toBe(442)` → `toBe(418)` gav 1
+rød, så listen og målingen ikke kan glide fra hinanden.
+
+**Gate.** `biome lint ./src` 674 filer 0 · `tsc -p tsconfig.app.json` og
+`tsconfig.test.json` 0 · `TZ=UTC vitest run` **3606 grønne i 221 filer** ·
+`next build` 0.
+
+**Ikke rørt.** Banktabellen «Typiske billån satser (2026)» (Nordea 5,95 %,
+Bank Norwegian 5,49 %, Basisbank 6,25 %, Santander 6,50 %) er håndskreven
+påstand om navngivne banker uden kilde i koden. Den er ikke gjort værre, men
+den er heller ikke gjort bedre — den kræver en læsbar kilde (❓), fordi punkt 11
+forbyder at opfinde den. Procentangivelserne i brødteksten («5-8 %», «8-15 %»)
+ligger i samme tabel og er ikke beløb, så porten ser dem ikke.
+
+**Mål.** `/billaan` har ingen GSC-visning i top-15 og under top-15 i Plausible,
+så der er **ingen baseline** at måle effekten imod. Rettelsen er korrekthed:
+tre af fire synlige tal i de to tabeller var forkerte, og en af dem modsag sin
+egen rentekolonne.
