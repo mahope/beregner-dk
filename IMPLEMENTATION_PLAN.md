@@ -1,74 +1,31 @@
-STATUS: 2/10 10:40. **Alle tre åbne review-fund fra 2/10 er lukket** (MIDDEL
-  `3875b83`, LAV `73c7e64`, LAV `def070c`) — hver med en port målt rød mod den
-  gamle kode. De tre ligger **efter** deploy-vinduet 07:30 og får vindue **12:30**.
-  CI grøn på `ad018e9` (2/10 06:15Z); de tre nye er lokalt gaten: lint 0 ·
-  typecheck 0 · `TZ=UTC npm run test` **3671 grønne i 227 filer** · build grøn.
-  Sentry:
-  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
-  5f137d4; MINBEREGNER-2 er rettet i 4d48370 og `def070c` gør fejlsiden læse
-  domænets sprog fra konteksten i stedet for i en `useEffect`. PR-TJEK:
-  2026-10-02 — ingen åbne PR'er. BRANCH-TJEK: 2/10 — ingen forældede branches.
-  CEO-kø punkt 0 er lukket (RETTET 04ca30a).
-  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`.
-  **Deploy-vinduet 2/10 07:30 er målt på indhold.** Live: `bacfd42` (klokken-i
-  «byens egen tidszone», «din tidszone» = 0), `4d48370` (health 200),
-  `b39da19` (/topskat), `652966b` (/boligsalg), `029692b` (/timepris). **Ingen
-  DEPLOY-MISSING.** `22af62d` (moms) og `1e5a446` (timer-periode) er efter
-  vinduet og får vindue 12:30 — forventet ikke live endnu. Det samme gælder
-  `3875b83`, `73c7e64` og `def070c`.
-  **2/10 09:50 er otte ældre noter lukket ved måling på indhold:** `/topskat`
-  har `697.000 kr./år` + `over 2.592.700 kr.`, `/boligsalg` `1.850 kr. (skøde)`
-  + `1.825 kr. (pantebrev)`, `/opsparing` `1.522.077`/`1.674.259`/`43.219`,
-  `/billaan` ÅOP **6,91**, `/pace` `5:00` og `/pace.txt` 404,
-  `/klokken-i/usa` «Det er HH:MM i New York lige nu», se-siden «Vad är klockan
-  i Türkiet?», `/klokken-i/danmark` 404, og `/tidszone` **12** `/klokken-i/`
-  (12 `/klockan-i/` på se, 0 danske dér). De ligger i `docs/plan-arkiv.md`.
-  `/topskat` kan ikke skelnes fra den gamle kode ved indhold — tallene blev
-  byte-identiske.
-  **Denne iteration: tre review-fund fra 2/10.**
-  1. **MIDDEL, `ceo/timepris-lokale-tal` → `3875b83`.**
-  `formaterMarkedspris` hårdkodede
-  `formatNumber(post.min, "da")`, så beraknare.se og beregnerno skrev «Advokat:
-  1.500-3.500 DKK» og «Revisor: 900-1.800 DKK» — ni af tolv poster, og på de to
-  domæner er «.» **decimaltegnet**, så et frilanserlæseinterval som 1,5-3,5 DKK.
-  Samme fejl lå i FAQ'en og dermed i `<FAQSchema>`'s JSON-LD på de to domæner.
-  Nu `formatNumber(post.min, locale)`, så `sv-SE`/`nb-NO` skriver «1 500–3 500
-  DKK» og dansk er byte-uændret. Port: ny test «tusindtalsseparatoren følger
-  domænet, ikke altid dansk», målt **1/11 rød mod den gamle kode** på præcis
-  `1.500–3.500 DKK` → `1 500–3 500 DKK`.
-  2. **LAV, `ceo/tidsberegner-faq-fra-modul`.** De to nye FAQ-svar på
-  `/tidsberegner` skrev selv «365 × 24 = 8.760 timer» og «et skudår 8.784
-  timer» i to sprog, altså de tal modulet i samme commit blev lavet for at
-  læse. Nu `timerIPeriodeFaqSvar(id, locale)` i `src/lib/timer-periode.ts`, som
-  bygger sætningen af `TIMER_PERIODER` og `TIMER_I_SKUDAAR` — subjektet er
-  periodens eget `naevn`. `page-data.ts` kalder den i stedet for at skrive.
-  **Port:** 3 tests, målt **1/11 rød mod den gamle kode** på præcis den mutation
-  revieweren målte som grøn («8.760 → 9.999» i det danske svar, som efterlod
-  50/50 grønne før).
-  3. **LAV, `ceo/fejlside-locale`.** Rodens `error.tsx` læste domænet i en
-  `useEffect`, så **hele server-HTML'en** på beraknare.se og beregnerno sagde
-  «Noget gik galt / Prøv igen» — modsat af den commit, der ville stoppe med at
-  vise dansk på et dansk-fejl-domæne. Rod-layoutet læser domænet på serveren og
-  lægger `LocaleProvider` om hele træet, så fejlsiden læser nu **den** kontekst
-  gennem en ny `useLocaleOptional()`, der ikke kaster. Den kastende `useLocale()`
-  er urørt, for den lå i `error.tsx` netop fordi konteksten mangner, når fejlen
-  rammer `layout.tsx` selv (Sentry MINBEREGNER-2). Uden provider falder siden
-  tilbage på domænet i browseren, som før. **Port:** de to nye tests er målt
-  **2/3 rød mod den gamle kode** — den ene dømmer alle tre domæner, den anden
-  bruger `renderToStaticMarkup`, som slet ingen effekt kører, altså den HTML
-  Google ser. Den gamle port havde **én** test, kun på `localhost`.
-  **Før:** hreflang på de 24 `/klokken-i/*`-sider. De serverede
-  **én** `<link>` — kun canonical — mens `/dage-til/*` på samme domæne
-  serverede alle tre. Google kunne derfor ikke se, at
-  `minberegner.dk/klokken-i/usa` og `beraknare.se/klockan-i/usa` er samme
-  spørgsmål i to sprog, så de konkurrerede om de samme søgninger i stedet for
-  at supplere hinanden — på præcis de sider, der blev bygget for at fange
-  «hvad er klokken i» (10 af 10 danske completions, målt 2/10 04:05). Nu bygges
-  `languages` fra `KLOKKEN_LANDE`, samme modul ruterne af, så en ny tid ikke
-  kan få en dansk side uden sin svenske modpart. Port: 3 tests, målt 2/2 rød
-  mod den gamle kode.
-
+STATUS: 2/10 10:25. CI grøn (`509bc62`). Sentry MINBEREGNER-1 er Next-router-støj
+  (filtreret siden 3e67ed3), MINBEREGNER-2 rettet i `4d48370`+`def070c`. Alle tre
+  review-fund fra 2/10 lukket (`3875b83`, `73c7e64`, `def070c`). CEO-kø punkt 0 lukket
+  (`04ca30a`). PR-TJEK 2026-10-02: ingen åbne PR'er. BRANCH-TJEK 2/10: ingen forældede.
+  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`.
+  **Deploy 2/10 07:30 målt på indhold, ingen DEPLOY-MISSING.** Vindue 12:30 ikke målt
+  endnu: `tidsberegner-faq-fra-modul`, `timepris-lokale-tal`, `timepris-markedspriser`,
+  `timer-periode`, `moms-eksempler-fra-modul`, `error-side-locale`, `fejlside-locale`.
+  **Denne iteration: `ceo/pace-marathon-faq`. VERIFICÉR DEPLOY: /pace marathon- og 10
+  km-svar beregnet af modulet ceo/pace-marathon-faq 2/10 10:25**
+  Autocomplete målt 2/10 04:40 (hl=da gl=dk): under «tid beregner» er 7 af 10
+  completions distancer (marathon, halvmarathon, km, cykel, ironman, triathlon, pace);
+  «tid beregner» selv har ~27k månedlige søgninger på position 5, og siden havde intet
+  svar på dem. To fund: (a) «halvmarahton» stod i dansk brødtekst og i FAQ-spørgsmålet,
+  altså i `<FAQSchema>`'s JSON-LD; (b) marathon- og 10 km-svaret var håndskrevet — samme
+  fejlklasse som revieweren fandt på `/tidsberegner`. Nu bygger
+  `distanceEksempelFaqSvar(id, locale)` i `src/lib/pace.ts` sætningen af `beregnPace`, så
+  distancen, tiden og tempoet ikke kan glide fra hinanden; distancerne (42,195 /
+  21,0975 / 10 km) er faste regeltal fra løbernes egne regler og kræver ingen kilde.
+  Begge sprog får samme tre spørgsmål, og otte distancetermer ligger i `keywords`.
+  Port: 7 nye tests i `pace.test.ts`, målt røde mod den gamle kode — den afgørende
+  skriver marathon-svaret i hånden igen («3 timer og 30 minutter er 5:00 pr.
+  kilometer») og rammer netop `page-data.ts' svar indeholder de tal modulet regner`.
+  Eftersynet fandt to overbygninger, begge fjernet: `paceDistanceFaq` (indpakning der
+  blot kaldte videre) og `formaterPace` (rent alias). Målt undervejs, ikke ændret:
+  hreflang er allerede på alle sider — Next emiterer `languages` som `hrefLang` med
+  stort L, som et grep på `hreflang` missede; og `/bmi` er teknisk sund, så faldet
+  der er ikke indexering. «bil værdi» er service-intent og kræver en værdibaser.
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
@@ -297,8 +254,12 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   (`/tidsberegner` 74.546/203/0,3 %/6,9) + `suggestqueries` 2/10 02:45.
   **MÅL:** `/pace` er ny, ingen baseline; `/tidsberegner` 290 besøgende/28d
   (bounce 8 %) er gruppen den skal flytte. Genmål **16/10**.
-  *Næste skridt:* cykel-udgaven er samme værktøj, så det er et spørgsmål om
-  svensk/dansk rækkefølge i autocomplete, ikke om en ny side.
+  *Næste skridt ✅ 2/10:* de syv distancer under «tid beregner» er nu **svar på
+  siden**, ikke kun et værktøj — `ceo/pace-marathon-faq` tilføjede marathon-, 10 km-
+  og halvmarathonspørgsmål i begge sprog, beregnet af `beregnPace`, plus otte
+  distancetermer i `keywords` (autocomplete målt 2/10 04:40, 7 af 10 completions).
+  Cykel-udgaven er stadig samme værktøj, så det er et spørgsmål om svensk/dansk
+  rækkefølge i autocomplete, ikke om en ny side.
 - **«Hvad er klokken i …»-clusteret — ✅ 2/10, `ceo/klokken-i-land`.**
   *Hvem:* **10 af 10** danske completioner under «hvad er klokken i» er et land
   eller en by (usa, danmark, thailand, new york, australien, japan, tyrkiet,
@@ -349,6 +310,7 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `pace-marathon-faq` (**ny**) | `minberegner.dk/pace`: FAQ'en skal have «Hvad er et godt tempo for en marathon?» → «På 42,195 km er 3:30:00 et tempo på 4:59 pr. kilometer.», «Hvad er et godt tempo for en halvmaraton?» → «På 21,0975 km er 1:45:00 et tempo på 4:59 pr. kilometer.» og «Hvad er et godt tempo på 10 km?» → «På 10 km er 50:00 et tempo på 5:00 pr. kilometer.» — hver med «… Hvad der er godt for dig, afhænger af din træning og din målsætning.» **Intet** «halvmarahton» nogen steder på siden eller i JSON-LD'en. `beraknare.se/pace` skal have de samme tre spørgsmål med «per kilometer» og **ikke** «pr. kilometer». |
 | `tidsberegner-faq-fra-modul` (**ny**) | `minberegner.dk/tidsberegner`: FAQ'en skal have «Hvor mange timer er der i et år?» → «Et år har 365 dage, og 365 × 24 = 8.760 timer, altså 525.600 minutter. Måned og kvartal er gennemsnit af året, så en måned er 730 timer.» og «Hvor mange timer er der i en uge?» → «En uge har 7 dage, og 7 × 24 = 168 timer, altså 10.080 minutter. Et døgn har 24 timer, så en måned er 730 timer og et skudår 8.784 timer.». `beraknare.se/tidsberegner`: «Ett år har 365 dagar, och 365 × 24 = 8 760 timmar, alltså 525 600 minuter.» og «En vecka har 7 dagar, och 7 × 24 = 168 timmar, alltså 10 080 minuter. Ett dygn har 24 timmar, så en månad är 730 timmar och ett skottår 8 784 timmar.». Begge steder **skal** have præcis disse tal; de svenske nu med U+00A0 som `Intl` skriver tusindtalsseparatoren (ligesom resten af sitets svenske tal). De norske `faqItems` på `/tidsberegner` er **uændrede** — de har ikke de to spørgsmål |
 | `timepris-lokale-tal` (**ny**) | `beraknare.se/timepris` og `beregnerno/timepris`: de ni rækker med tusindtalsskiller skal have **mellemrum**, ikke dansk punktum — `Senior utvecklare: 800–1 200 DKK`, `IT-konsult: 900–1 500 DKK`, `Konsult: 800–1 500 DKK`, `Advokat: 1 500–3 500 DKK`, `Revisor: 900–1 800 DKK`, `Copywriter: 600–1 000 DKK`, `Marknadsföringskonsult: 700–1 200 DKK`, `Fotograf: 500–1 500 DKK`, `Lärare: 500–1 000 DKK`. **Intet** «1.500»/«3.500»/«1.800» på de to domæner (der er «.» decimaltegn, så «1.500» læses som 1,5). FAQ'en skal sige «Dansk nivå: IT 900–1 500 DKK/timme, hantverkare 400–600 DKK/timme.». `minberegner.dk/timepris` skal være **byte-uændret**: «Advokat: 1.500-3.500 kr», «IT-konsulent: 900-1.500 kr», FAQ «IT: 900-1.500 kr/time. Håndværkere: 400-600 kr/time.» Målt 2/10 07:20 før rettelsen: de svenske og norske sider skrev dansk punktum |
 | `timepris-markedspriser` (**ny**) | `minberegner.dk/timepris`: overskriften skal være «Typiske timepriser i Danmark (2026)», de 12 rækker skal være `Junior udvikler: 500-700 kr`, `Senior udvikler: 800-1.200 kr`, `IT-konsulent: 900-1.500 kr`, `Grafisk designer: 500-800 kr`, `Tekstforfatter: 600-1.000 kr`, `Marketing konsulent: 700-1.200 kr`, `Konsulent: 800-1.500 kr`, `Advokat: 1.500-3.500 kr`, `Revisor: 900-1.800 kr`, `Håndværkere: 400-600 kr`, `Fotograf: 500-1.500 kr`, `Underviser: 500-1.000 kr`; **intet** «i Sverige» eller «i Norge». FAQ'en skal sige «IT: 900-1.500 kr/time. Håndværkere: 400-600 kr/time.» på minberegner.dk og på de to andre domæner «Dansk nivå: IT 900–1 500 DKK/timme, hantverkare 400–600 DKK/timme.» (rettet 2/10 10:05: «900–1 500», se `timepris-lokale-tal`) — **intet** «1.800 SEK» eller «1.800 NOK». `beraknare.se/timepris` overskrift «Danska typiska timpriser (2026)» + noten «Nivåerna nedan är danska…», `beregnerno/timepris` «Danske typiske timepriser (2026)» + «Nivåene nedenfor er danske…». Kopierknappen skal på beraknare.se sige «Rekommenderad timpris: …» og på beregnerno «Anbefalt timepris: … ekskl. mva» |

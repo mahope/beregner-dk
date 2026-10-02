@@ -1,6 +1,14 @@
 import { describe, test, expect } from "vitest";
-import { beregnPace, beregnSplits, beregnTid, formaterLobetid } from "./pace";
+import {
+  beregnPace,
+  beregnSplits,
+  beregnTid,
+  formaterLobetid,
+  distanceEksempelFaqSvar,
+  DISTANCE_EKSEMPLER,
+} from "./pace";
 import { formatSekunder } from "./tidsberegner";
+import { getPageData } from "./page-data";
 
 const sum = (tal: number[]) => tal.reduce((a, b) => a + b, 0);
 
@@ -24,7 +32,7 @@ describe("beregnPace", () => {
     expect(fraTempo.totalSek).toBe(fraTid.totalSek);
   });
 
-  test("en halvmarahton på 1:45 er 4:59 pr. kilometer", () => {
+  test("en halvmaraton på 1:45 er 4:59 pr. kilometer", () => {
     // Samme tal som /tidsberegners egen FAQ, så de to sider ikke modsiger
     // hinanden om den samme løbetid.
     const r = beregnPace("tid", 21.0975, 105 * 60, 0)!;
@@ -32,7 +40,7 @@ describe("beregnPace", () => {
     expect(formatSekunder(r.sekunderPerKm)).toBe("4:59");
   });
 
-  test("splits for en halvmarahton summerer til den samlede tid", () => {
+  test("splits for en halvmaraton summerer til den samlede tid", () => {
     const r = beregnPace("tid", 21.0975, 105 * 60, 0)!;
     expect(r.splits).toHaveLength(22);
     expect(sum(r.splits)).toBe(r.totalSek);
@@ -144,5 +152,76 @@ describe("beregnSplits", () => {
     expect(beregnSplits(-10, 2700)).toEqual([]);
     expect(beregnSplits(Number.NaN, 2700)).toEqual([]);
     expect(beregnSplits(10, Number.NaN)).toEqual([]);
+  });
+});
+describe("distanceEksempelFaqSvar", () => {
+  test("svaret på en halvmaraton er regnet, ikke skrevet i hånden", () => {
+    const svar = distanceEksempelFaqSvar("halvmaraton", "da");
+    // 21,0975 km på 1:45 er 4:59 pr. kilometer — samme tre tal som
+    // beregnerens egen test ovenfor, så FAQ'en og værktøjet kan ikke glide.
+    expect(svar).toContain("21,0975 km");
+    expect(svar).toContain("1:45:00");
+    expect(svar).toContain("4:59 pr. kilometer");
+    const r = beregnPace("tid", 21.0975, 105 * 60, 0)!;
+    expect(svar).toContain(formatSekunder(r.sekunderPerKm));
+  });
+
+  test("svarene for de distancer, autocomplete faktisk spørger til", () => {
+    // "tid beregner" gav 7 af 10 completions derunder 2/10 (hl=da gl=dk):
+    // marathon, halvmarathon, km, cykel, ironman, triathlon og pace.
+    for (const id of DISTANCE_EKSEMPLER.map((e) => e.id)) {
+      expect(distanceEksempelFaqSvar(id, "da")).not.toBe("");
+      expect(distanceEksempelFaqSvar(id, "se")).not.toBe("");
+    }
+    expect(distanceEksempelFaqSvar("maraton", "da")).toContain("42,195 km");
+    expect(distanceEksempelFaqSvar("maraton", "da")).toContain("3:30:00");
+  });
+
+  test("svensk og dansk svarer med samme tempo men hver sit sprog", () => {
+    const da = distanceEksempelFaqSvar("halvmaraton", "da");
+    const se = distanceEksempelFaqSvar("halvmaraton", "se");
+    // Komma er decimaltegn på begge sprog, så distancen står ens — det er
+    // 4:59 og ikke decimalet, der skal være det samme. Kun ordene afviger.
+    expect(da).toContain("21,0975 km");
+    expect(se).toContain("21,0975 km");
+    expect(da).toContain("4:59 pr. kilometer");
+    expect(se).toContain("4:59 per kilometer");
+    expect(se).not.toContain("pr. kilometer");
+  });
+
+  test("en ukendt distance giver en tom streng, ikke en løs sætning", () => {
+    expect(distanceEksempelFaqSvar("hundelob" as "maraton", "da")).toBe("");
+  });
+});
+
+describe("/pace's FAQ læser tallene fra modulet", () => {
+  test("page-data.ts' svar indeholder de tal modulet regner", () => {
+    // Uden denne test kunne svaret være skrevet i hånden igen, mens
+    // pace.test.ts stadig var grøn — det var fundet på /tidsberegner.
+    for (const locale of ["da", "se"] as const) {
+      const faq = getPageData("pace", locale)!.faqItems;
+      const spoergsmaal = faq.find((f) => /marathon/i.test(f.question) && /tempo/i.test(f.question));
+      expect(spoergsmaal).toBeDefined();
+      const r = beregnPace("tid", 42.195, 3 * 3600 + 30 * 60, 0)!;
+      expect(spoergsmaal!.answer).toContain(formaterLobetid(r.totalSek));
+      expect(spoergsmaal!.answer).toContain(formatSekunder(r.sekunderPerKm));
+    }
+  });
+
+  test("sproget følger domænet, så den svenske side ikke svarer på dansk", () => {
+    const faqDa = getPageData("pace", "da")!.faqItems;
+    const faqSe = getPageData("pace", "se")!.faqItems;
+    expect(faqSe.length).toBeGreaterThanOrEqual(faqDa.length);
+    expect(faqSe.some((f) => /pr\. kilometer/.test(f.answer))).toBe(false);
+  });
+
+  test("siderne har ingen skrivefejl i distancenavnene", () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      const alle = [
+        ...(getPageData("pace", locale)?.faqItems ?? []).map((f) => f.answer),
+        ...(getPageData("tidsberegner", locale)?.faqItems ?? []).map((f) => f.answer),
+      ].join(" ");
+      expect(alle).not.toMatch(/halvmarahton/i);
+    }
   });
 });

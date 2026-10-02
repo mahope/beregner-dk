@@ -24173,3 +24173,78 @@ noget der kan sendes mod produktion. Deploy-noten er derfor kodetestet plus
 **Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3671 grønne i 227
 filer** · `npm run build` grøn. Deploy-note: `fejlside-locale` (vindue 2/10
 12:30).
+
+---
+
+## Afsnit flyttet fra IMPLEMENTATION_PLAN.md 2/10 (STATUS før `ceo/pace-marathon-faq`)
+
+STATUS: 2/10 10:40. **Alle tre åbne review-fund fra 2/10 er lukket** (MIDDEL
+  `3875b83`, LAV `73c7e64`, LAV `def070c`) — hver med en port målt rød mod den
+  gamle kode. De tre ligger **efter** deploy-vinduet 07:30 og får vindue **12:30**.
+  CI grøn på `ad018e9` (2/10 06:15Z); de tre nye er lokalt gaten: lint 0 ·
+  typecheck 0 · `TZ=UTC npm run test` **3671 grønne i 227 filer** · build grøn.
+  Sentry:
+  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
+  5f137d4; MINBEREGNER-2 er rettet i 4d48370 og `def070c` gør fejlsiden læse
+  domænets sprog fra konteksten i stedet for i en `useEffect`. PR-TJEK:
+  2026-10-02 — ingen åbne PR'er. BRANCH-TJEK: 2/10 — ingen forældede branches.
+  CEO-kø punkt 0 er lukket (RETTET 04ca30a).
+  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+  `npm run build`.
+  **Deploy-vinduet 2/10 07:30 er målt på indhold.** Live: `bacfd42` (klokken-i
+  «byens egen tidszone», «din tidszone» = 0), `4d48370` (health 200),
+  `b39da19` (/topskat), `652966b` (/boligsalg), `029692b` (/timepris). **Ingen
+  DEPLOY-MISSING.** `22af62d` (moms) og `1e5a446` (timer-periode) er efter
+  vinduet og får vindue 12:30 — forventet ikke live endnu. Det samme gælder
+  `3875b83`, `73c7e64` og `def070c`.
+  **2/10 09:50 er otte ældre noter lukket ved måling på indhold:** `/topskat`
+  har `697.000 kr./år` + `over 2.592.700 kr.`, `/boligsalg` `1.850 kr. (skøde)`
+  + `1.825 kr. (pantebrev)`, `/opsparing` `1.522.077`/`1.674.259`/`43.219`,
+  `/billaan` ÅOP **6,91**, `/pace` `5:00` og `/pace.txt` 404,
+  `/klokken-i/usa` «Det er HH:MM i New York lige nu», se-siden «Vad är klockan
+  i Türkiet?», `/klokken-i/danmark` 404, og `/tidszone` **12** `/klokken-i/`
+  (12 `/klockan-i/` på se, 0 danske dér). De ligger i `docs/plan-arkiv.md`.
+  `/topskat` kan ikke skelnes fra den gamle kode ved indhold — tallene blev
+  byte-identiske.
+  **Denne iteration: tre review-fund fra 2/10.**
+  1. **MIDDEL, `ceo/timepris-lokale-tal` → `3875b83`.**
+  `formaterMarkedspris` hårdkodede
+  `formatNumber(post.min, "da")`, så beraknare.se og beregnerno skrev «Advokat:
+  1.500-3.500 DKK» og «Revisor: 900-1.800 DKK» — ni af tolv poster, og på de to
+  domæner er «.» **decimaltegnet**, så et frilanserlæseinterval som 1,5-3,5 DKK.
+  Samme fejl lå i FAQ'en og dermed i `<FAQSchema>`'s JSON-LD på de to domæner.
+  Nu `formatNumber(post.min, locale)`, så `sv-SE`/`nb-NO` skriver «1 500–3 500
+  DKK» og dansk er byte-uændret. Port: ny test «tusindtalsseparatoren følger
+  domænet, ikke altid dansk», målt **1/11 rød mod den gamle kode** på præcis
+  `1.500–3.500 DKK` → `1 500–3 500 DKK`.
+  2. **LAV, `ceo/tidsberegner-faq-fra-modul`.** De to nye FAQ-svar på
+  `/tidsberegner` skrev selv «365 × 24 = 8.760 timer» og «et skudår 8.784
+  timer» i to sprog, altså de tal modulet i samme commit blev lavet for at
+  læse. Nu `timerIPeriodeFaqSvar(id, locale)` i `src/lib/timer-periode.ts`, som
+  bygger sætningen af `TIMER_PERIODER` og `TIMER_I_SKUDAAR` — subjektet er
+  periodens eget `naevn`. `page-data.ts` kalder den i stedet for at skrive.
+  **Port:** 3 tests, målt **1/11 rød mod den gamle kode** på præcis den mutation
+  revieweren målte som grøn («8.760 → 9.999» i det danske svar, som efterlod
+  50/50 grønne før).
+  3. **LAV, `ceo/fejlside-locale`.** Rodens `error.tsx` læste domænet i en
+  `useEffect`, så **hele server-HTML'en** på beraknare.se og beregnerno sagde
+  «Noget gik galt / Prøv igen» — modsat af den commit, der ville stoppe med at
+  vise dansk på et dansk-fejl-domæne. Rod-layoutet læser domænet på serveren og
+  lægger `LocaleProvider` om hele træet, så fejlsiden læser nu **den** kontekst
+  gennem en ny `useLocaleOptional()`, der ikke kaster. Den kastende `useLocale()`
+  er urørt, for den lå i `error.tsx` netop fordi konteksten mangner, når fejlen
+  rammer `layout.tsx` selv (Sentry MINBEREGNER-2). Uden provider falder siden
+  tilbage på domænet i browseren, som før. **Port:** de to nye tests er målt
+  **2/3 rød mod den gamle kode** — den ene dømmer alle tre domæner, den anden
+  bruger `renderToStaticMarkup`, som slet ingen effekt kører, altså den HTML
+  Google ser. Den gamle port havde **én** test, kun på `localhost`.
+  **Før:** hreflang på de 24 `/klokken-i/*`-sider. De serverede
+  **én** `<link>` — kun canonical — mens `/dage-til/*` på samme domæne
+  serverede alle tre. Google kunne derfor ikke se, at
+  `minberegner.dk/klokken-i/usa` og `beraknare.se/klockan-i/usa` er samme
+  spørgsmål i to sprog, så de konkurrerede om de samme søgninger i stedet for
+  at supplere hinanden — på præcis de sider, der blev bygget for at fange
+  «hvad er klokken i» (10 af 10 danske completions, målt 2/10 04:05). Nu bygges
+  `languages` fra `KLOKKEN_LANDE`, samme modul ruterne af, så en ny tid ikke
+  kan få en dansk side uden sin svenske modpart. Port: 3 tests, målt 2/2 rød
+  mod den gamle kode.

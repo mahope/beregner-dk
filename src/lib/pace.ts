@@ -9,6 +9,9 @@
  * The formulas are pure arithmetic, so nothing here needs an external source.
  */
 
+import { formatNumber } from "./format";
+import type { Locale } from "./i18n";
+
 export type PaceModus = "tid" | "tempo";
 
 export interface PaceResultat {
@@ -106,4 +109,74 @@ export function formaterLobetid(sekunder: number): string {
   return timer > 0
     ? `${timer}:${String(minutter).padStart(2, "0")}:${String(rest).padStart(2, "0")}`
     : `${minutter}:${String(rest).padStart(2, "0")}`;
+}
+
+/**
+ * The distances Danish and Swedish runners actually search for by name —
+ * measured 2/10 on Google autocomplete, hl=da gl=dk, where "tid beregner"
+ * returned "marathon tid beregner", "halvmarathon tid beregner", "km tid
+ * beregner", "cykel tid beregner", "ironman tid beregner", "triathlon tid
+ * beregner" and "pace tid beregner": seven of ten completions under the term
+ * with by far the largest volume on the site (`tid beregner`, ~27k searches
+ * pr. måned, position 5).
+ *
+ * The official half-marathon distance is 21.0975 km and the marathon
+ * 42.195 km; both are fixed by the race rules, not chosen by us, so they need
+ * no source. The *times* are examples — they are the same two the page's own
+ * body text already uses — and they are computed with `beregnPace`, the very
+ * function behind the tool, so the answer in the FAQ cannot drift from the
+ * number the calculator shows.
+ */
+export interface DistanceEksempel {
+  id: string;
+  distanceKm: number;
+  /** The example finish time, in seconds. */
+  totalSek: number;
+}
+
+export const DISTANCE_EKSEMPLER: DistanceEksempel[] = [
+  {
+    id: "maraton",
+    distanceKm: 42.195,
+    totalSek: 3 * 3600 + 30 * 60,
+  },
+  {
+    id: "halvmaraton",
+    distanceKm: 21.0975,
+    totalSek: 105 * 60,
+  },
+  {
+    id: "tiaaenkilometer",
+    distanceKm: 10,
+    totalSek: 50 * 60,
+  },
+];
+
+/**
+ * The FAQ answer for one distance, built from the module.
+ *
+ * Before this, `/pace`'s FAQ carried the marathon and half-marathon answers as
+ * hand-typed sentences while the numbers in the body text were computed — the
+ * "claims in the prose are code" gap that `timerIPeriode` closed for
+ * `/tidsberegner`. The sentence therefore gets its distance, its time and its
+ * pace from `beregnPace`, so the three cannot disagree, and both languages get
+ * the same answer from one source.
+ */
+export function distanceEksempelFaqSvar(
+  id: DistanceEksempel["id"],
+  locale: Locale
+): string {  const eksempel = DISTANCE_EKSEMPLER.find((e) => e.id === id);
+  if (!eksempel) return "";
+
+  const resultat = beregnPace("tid", eksempel.distanceKm, eksempel.totalSek, 0)!;
+  const distance = formatNumber(eksempel.distanceKm, locale, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 4,
+  });
+  const tid = formaterLobetid(resultat.totalSek);
+  const pace = formaterLobetid(resultat.sekunderPerKm);
+
+  return locale === "se"
+    ? `På ${distance} km är ${tid} ett tempo på ${pace} per kilometer. Samma regel gäller alla distanser: dela tiden med sträckan.`
+    : `På ${distance} km er ${tid} et tempo på ${pace} pr. kilometer. Samme regel gælder alle distancer: del tiden med distancen.`;
 }

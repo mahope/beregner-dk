@@ -12,7 +12,7 @@ import Sidebar from "@/components/Sidebar";
 
 /**
  * Alle tal i brødteksten dannes af de samme funktioner som værktøjet, så
- * siden ikke kan modsige beregneren. 5 km på 25 minutter og en halvmarahton
+ * siden ikke kan modsige beregneren. 5 km på 25 minutter og en halvmaraton
  * på 1:45 er de samme to eksempler som /tidsberegners egen tempo-FAQ bruger.
  */
 const EKS = beregnPace("tid", 5, 25 * 60, 0)!;
@@ -72,7 +72,7 @@ export default async function PacePage() {
 
             <h3>Holdtider pr. kilometer</h3>
             <p>
-              En løbetid på {formaterLobetid(HALV.totalSek)} over en halvmarahton på 21,0975 km svarer til{" "}
+              En løbetid på {formaterLobetid(HALV.totalSek)} over en halvmaraton på 21,0975 km svarer til{" "}
               {formatSekunder(HALV.sekunderPerKm)} pr. kilometer. Værktøjet viser holdtiderne for hver kilometer, og de
               summerer til præcis den samme løbetid som resultatet — sidste kilometer bærer den afrunding, der ellers
               ville hoppe én sekund for hver kilometer.

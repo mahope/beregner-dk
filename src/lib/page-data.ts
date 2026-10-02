@@ -21,6 +21,7 @@ import {
 import { formatNumber } from "./format";
 import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
+import { distanceEksempelFaqSvar } from "./pace";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
@@ -96,6 +97,14 @@ const PROMILE_60_KVINDE = (genstande: number) =>
   formatPromilleTabel(PROMILE_RAEKKE(genstande).promille[vaegtNogle(60, "kvinde")]);
 const PROMILE_70_MAND = (genstande: number) =>
   formatPromilleTabel(PROMILE_RAEKKE(genstande).promille[vaegtNogle(70, "mand")]);
+
+/**
+ * `/pace`'s distance answers. Before this they were hand-typed sentences in
+ * `faqItems` — "En halvmaraton er 21,0975 km. 1 time og 45 minutter er 4:59
+ * pr. kilometer." — on a page whose every other number is computed, so the FAQ
+ * could answer a different pace than the tool above it. They are built from
+ * `distanceEksempelFaqSvar`, which calls `beregnPace`.
+ */
 
 export type PageData = {
   slug: string;
@@ -1027,7 +1036,7 @@ const daPages: Record<string, PageData> = {
       description: "Beregn tempo i minutter pr. kilometer, løbetid ud fra tempo og holdtider for hver kilometer. Til løb, cykling og triatlon.",
       metaTitle: "Løbetidsberegner: 5 km på 25 min = 5:00 pr. km",
       metaDescription: "Gratis løbetidsberegner. Beregn tempo pr. kilometer, løbetid ud fra tempo og holdtider for hver kilometer. 5 km på 25 min er 5:00 pr. km.",
-      keywords: ["løbetidsberegner", "pace beregner", "pace tid beregner", "km tid beregner", "tempo pr kilometer", "holdtider"],
+      keywords: ["løbetidsberegner", "pace beregner", "pace tid beregner", "km tid beregner", "marathon tid beregner", "halvmarathon tid beregner", "ironman tid beregner", "triathlon tid beregner", "cykel tid beregner", "tempo pr kilometer", "holdtider"],
       ogTitle: "Løbetidsberegner: 5 km på 25 min = 5:00 pr. km",
       ogDescription: "Beregn tempo pr. kilometer, løbetid ud fra tempo og holdtider for hver kilometer.",
       category: "Hverdag",
@@ -1039,7 +1048,9 @@ const daPages: Record<string, PageData> = {
       faqItems: [
       { question: "Hvordan beregner jeg tempo på en distance?", answer: "Del løbetiden med distancen. 5 km på 25 minutter er 25 divideret med 5 = 5 minutter pr. kilometer, altså 5:00 pr. km. Samme regel for alle distancer." },
       { question: "Hvordan regner jeg løbetiden ud fra tempoet?", answer: "Gang distancen med tempoet. 5 km ved 5:00 pr. kilometer er 5 gange 5:00 = 25 minutter. Vælg 'Løbetid fra tempo' i værktøjet, så får du holdtiderne for hver kilometer." },
-      { question: "Hvad er et godt tempo for en halvmarahton?", answer: "En halvmarahton er 21,0975 km. 1 time og 45 minutter er 4:59 pr. kilometer. Hvad et godt tempo er for dig, afhænger af din træning og din målsætning." },
+      { question: "Hvad er et godt tempo for en halvmaraton?", answer: distanceEksempelFaqSvar("halvmaraton", "da") + " Hvad der er godt for dig, afhænger af din træning og din målsætning." },
+      { question: "Hvad er et godt tempo for en marathon?", answer: distanceEksempelFaqSvar("maraton", "da") + " Hvad der er godt for dig, afhænger af din træning og din målsætning." },
+      { question: "Hvad er et godt tempo på 10 km?", answer: distanceEksempelFaqSvar("tiaaenkilometer", "da") + " Hvad der er godt for dig, afhænger af din træning og din målsætning." },
       { question: "Hvad er holdtider, og hvorfor summerer de ikke helt?", answer: "Holdtider er den tid hver kilometer tager. Værktøjet lægger afrundingen i den sidste kilometer, så holdtiderne summerer til præcis den løbetid, du har indtastet." },
       { question: "Kan jeg bruge værktøjet til cykling og triatlon?", answer: "Ja. Værktøjet regner i minutter pr. kilometer, så samme tempo kan bruges til løb, cykling, kajak og rulletræning." },
       ],
@@ -3597,7 +3608,7 @@ const sePages: Record<string, PageData> = {
       description: "Beräkna pace i minuter per kilometer, löptid från pace och deltider för varje kilometer. För löpning, cykel och triathlon.",
       metaTitle: "Löptidsberäknare: 5 km på 25 min = 5:00 per km",
       metaDescription: "Gratis löptidsberäknare. Beräkna pace per kilometer, löptid från pace och deltider för varje kilometer. 5 km på 25 min är 5:00 per km.",
-      keywords: ["löptidsberäknare", "pace kalkylator", "pace tid beräknare", "km tid beräknare", "tempo per kilometer", "deltider"],
+      keywords: ["löptidsberäknare", "pace kalkylator", "pace tid beräknare", "km tid beräknare", "marathon tid beräknare", "halvmarathon tid beräknare", "ironman tid beräknare", "triathlon tid beräknare", "cykel tid beräknare", "tempo per kilometer", "deltider"],
       ogTitle: "Löptidsberäknare: 5 km på 25 min = 5:00 per km",
       ogDescription: "Beräkna pace per kilometer, löptid från pace och deltider för varje kilometer.",
       category: "Vardag",
@@ -3611,6 +3622,9 @@ const sePages: Record<string, PageData> = {
       { question: "Hur räknar jag ut löptiden från pacen?", answer: "Multiplicera sträckan med pacen. 5 km med 5:00 per kilometer är 5 gånger 5:00 = 25 minuter." },
       { question: "Vad är deltider, och varför summerar de inte exakt?", answer: "Deltider är tiden för varje kilometer. Verktyget lägger avrundningen i sista kilometern, så deltiderna summerar till exakt den löptid du angett." },
       { question: "Kan jag använda verktyget till cykel och triathlon?", answer: "Ja. Verktyget räknar i minuter per kilometer, så samma pace kan användas till löpning, cykel, kayak och rullträning." },
+      { question: "Vad är ett bra tempo för en marathon?", answer: distanceEksempelFaqSvar("maraton", "se") + " Vad som är bra för dig beror på din träning och ditt mål." },
+      { question: "Vad är ett bra tempo för en halvmaraton?", answer: distanceEksempelFaqSvar("halvmaraton", "se") + " Vad som är bra för dig beror på din träning och ditt mål." },
+      { question: "Vad är ett bra tempo på 10 km?", answer: distanceEksempelFaqSvar("tiaaenkilometer", "se") + " Vad som är bra för dig beror på din träning och ditt mål." },
       ],
     },
     "tidsberegner": {
