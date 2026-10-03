@@ -1,49 +1,26 @@
-STATUS: 3/10 13:5x. **CI grøn** ved start (`37120187756`), ingen åbne PR'er
-       (PR-TJEK 3/10), ingen uløste Sentry-fejl. **Deploy-verifikation 13:4x:**
-       6 af de åbne noter er **live og dømt på indhold** (`/procent`,
-       `/boliglaan`, `/`, `/feriepenge` har 0 `\d%` i den synlige tekst).
-       `ceo/procent-interpolationer-2` (12:29) er ** stadig ikke live** —
-       1 vindue, ikke DEPLOY-MISSING endnu.
-       **Denne iteration: `/opsparing`s afkastbånd.** Målt live 13:4x: fire
-       celler skrev «0-1%», «2-4%», «4-6%», «6-8%» + `PensionBeregner.tsx:268`
-       «5-7% (aktier), 2-4% (obligationer)». Nu «0-1 %» … «6-8 %».
-       **Målte restfund på de samme sider** (curl, synlig tekst): `/billaan` 15,
-       `/arveafgift` 10, `/brutto-netto` 6, `/husleje` 4 (regelnavne),
-       `/konfirmation` 7, `/dagpenge` 1, `/kalorier` 1 («Minimum 20-25%»).
-       `/konfirmation` og `/dagpenge`s `page.tsx` har **0** `\d%` — resten
-       kommer fra `page-data.ts` og komponenterne, så F5g er **større** end
-       de fem sider den nævner.
-       **⛔ Porten dømmer det ikke endnu:** `procent-i-synlig-tekst.test.tsx`
-       renderer 16 *beregnere*, ikke sidernes statiske tabeller, så de fem
-       strenge er kun dømt ved source + live-måling. Næste iteration skal
-       lægge `/opsparing` og `/pension` ind i porten.
-       **Ingen feature denne iteration** — de tre sidste var procent-hygiejne
-       og en rettelse, så næste opgave SKAL være en feature.
-       BRANCH-TJEK: ikke kørt (sidste 2/10).
-
-STATUS (forrige): 3/10 13:4x. **CI grøn** ved start (`37118390521`), ingen åbne PR'er
-       (PR-TJEK 3/10), ingen uløste Sentry-fejl. **Begge åbne review-fund er
-       nu rettet** — de lå begge i SU-værktøjet.
-       **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-       `npm run build` — **grøn 13:3x** (exit 0, **4063** tests i 257 filer,
-       64,7 s, build exit 0).
-       **Denne iteration: «Før AM-bidrag pr. måned» lå under sit eget tal.**
-       Fund (HØJ): med 12 SU-måneder + 2 børn under 18 sat
-       `maanedGrænse = maanedMedSu`, så børnene faldt ud af måneden. Målt i den
-       renderede komponent før rettelsen: `Det svarer til pr. måned 26.437 kr.`
-       og `Før AM-bidrag pr. måned 22.553 kr.` lige under den — altså **under**
-       det tal, studenten ikke må gå over — og «hele årets grænse er det tal
-       gang 12» oven i en boks, der viser «Tillæg for børn under 18 +68.258
-       kr.». Nu er måneden hele året delt på 12, altid og uden undtagelse, og
-       `maanedGrænse` er væk: ét tal, ét sted, så de to rækker over hinanden
-       ikke kan glide fra hinanden igen. Sætningen er nu tregrenet, så
-       påstanden om satsen × 12 kun siges, når den gælder.
-       **Port:** lib-testen regner forventningen af `SU_2026` (22.553 mod 28.736
-       — rød før rettelsen), dømmer nedrundingen for 6 input-par og at de to
-       rækker er den samme måned; komponent-testen læser den synlige tekst.
-       Fund (MIDDEL): den eneste påstand om `maanedBrutto` dømte funktionen mod
-       sig selv gennem `maanedGrænse` og kunne derfor aldrig blive rød — den er
-       væk og erstattet af modregnestykkerne ovenfor.
+STATUS: 3/10 14:3x. **CI grøn** ved start (`37121105913`), ingen åbne PR'er,
+       ingen uløste Sentry-fejl, **begge review-fund er rettet** (`0554456`).
+       **Denne iteration leverer ingen kode — den er en måling.** CEO-køens
+       otte fund er verificeret lukkede i koden (valborg 30. april,
+       påskafton `offsetDays: -1`, påskeaften-FAQ væk, `toUtcMidnight` med
+       `DAGE_TIL_TIMEZONE`, advent «mellem 27. november og 3. december»),
+       så køen er tom, og næste iteration SKAL være en feature.
+       **⛔ HOVED-FUND: hreflang på `/dato` peger på en 308.** Målt live
+       3/10 14:2x: `minberegner.dk/dato` skriver
+       `hrefLang="da" href="https://minberegner.dk/dato/"` og
+       `hrefLang="sv" href="https://beraknare.se/dato/"` — **med skråstreg** —
+       mens `minberegner.dk/dato/` svarer **308 → `/dato`**. Canonical er
+       korrekt (uden skråstreg), så det er **kun hreflang** der er forkert.
+       Google følger ikke en annotation gennem en redirect, så
+       da↔sv-koblingen på sitets **#1-side** (1.119 besøgende/28d,
+       131.320 GSC-visninger) kan være død. **11 sider er målt korrekte**
+       (`/procent`, `/tidszone`, `/moms`, `/alder`, `/braendstof`,
+       `/kalorier`, `/promille`, `/renteberegner`, `/nedtaelling`,
+       `/ugenummer`, `/laaneberegner` — alle uden skråstreg), og
+       `/dage-i-aaret` har den på alle tre. **`/dato` og `/nedtaelling`
+       kalder begge `generatePageMetadata("dato")`/`(…)` med samme helper**,
+       så årsagen er ikke fundet — se opgaven.
+       **Ingen browser, ingen pixel-verifikation** denne iteration.
        BRANCH-TJEK: ikke kørt (sidste 2/10).
 
 ## Fase 3 — trafik-drevet
@@ -86,6 +63,24 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 (`/dato` 1.617 mod 1.723 ord), så det er opgave 187's slugs og domæneautoritet.
 
 ### Prioriterede opgaver
+
+**F0. [ ] hreflang uden skråstreg på `/dato` og hub-siderne.** *Hvad:*
+`/dato`s `hrefLang` skriver `https://minberegner.dk/dato/` og
+`https://beraknare.se/dato/`, og begge **308'er** til URL'en uden skråstreg.
+*Målt 3/10 14:2x (curl, hele `<head>`):* `/dato` har skråstreg på alle tre
+`rel="alternate"` (`da`, `sv`, `x-default`), `/dage-i-aaret` har den på alle
+tre, mens **11** sider er korrekte uden skråstreg — `/procent`, `/tidszone`,
+`/moms`, `/alder`, `/braendstof`, `/kalorier`, `/promille`, `/renteberegner`,
+`/nedtaelling`, `/ugenummer`, `/laaneberegner`. Canonical er korrekt overalt.
+*Accept:* `buildPageMetadata`-kaldende sider må aldrig give en `hrefLang` med
+skråstreg, fordi URL'en ikke findes (308), og **en port** renderer `/dato`,
+`/dage-i-aaret`, `/timer-i-aret` og `/dage-mellem-datoer` og dømmer at hver
+`hrefLang` er **lig med** canonical uden skråstreg. *Årsag ikke fundet:*
+`/dato` kalder `generatePageMetadata("dato")` som `/nedtaelling`, og den får
+skråstreg — bisect `buildPageMetadata` → `getAlternateSlug` → layoutets
+`metadataBase`. *MÅL:* `/dato` 131.320 visninger / 863 klik / 0,7 % / pos. 5,6
+og `beraknare.se/dato` 102.316 / 97 / 0,1 % / pos. 8,1.
+
 
 **F1. [ ] Søgeniveau-data for `/procent`** — 150.470 visninger, 0,1 %, pos 7,4.
 GSC's tre søgninger summerer 364 visninger af 150.470. **Accept:** GSC-eksport
