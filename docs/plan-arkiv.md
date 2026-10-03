@@ -27968,3 +27968,36 @@ route-filer i samme commit. To deploy-vinduer er gået siden.
 (kun den ene har ruten), om `.next`-laget er cachet fra en ældre build, eller
 om der skal være en ren rebuild. **Ingen kodeændring retter det**, så loopet
  merger ikke til `master` igen før det er set.
+
+
+## 3/10 15:5x — review-fund MIDDEL: titelsporten dømte «der står et tal»
+
+`src/lib/meta-title-tal.test.ts` læste `expect(data!.metaTitle).toMatch(/\d/)`.
+Målt polaritet fra revieweren: `/kvadratmeter`s «5 x 4 m = 20 m²» erstattet af
+«Kvadratmeterberegner 2026 - Beregn areal» gav 16/16 **grønt**; fjernet årstal i
+`/rentefradrag` gav 1 rød. Porten dømte året, ikke regningen.
+
+Rettelsen: `REGNETE_EKSEMPLER` er en tabel med det **forventede resultat** pr.
+side og pr. sprog, og hver række dømmer med `toContain`. To sider læser samme
+funktion som siden selv bruger — `kvadratmeterEksempelLignelse("da")` og
+`alderLevet(iDagISidensTidszone())` — så eksemplet kan ikke glide fra kilden.
+`/alder` dømmes mod dagens alder, så en frossen alder bliver rød. Docblockens
+tabel er rettet: `/rentefradrag`, `/boligstoette` og `/dagpenge` har **kun et
+årstal** og er taget ud af porten indtil de får et eksempel (F0d).
+
+Målt: 32/32 grønt på HEAD. Mutation 1 (eksemplet væk fra `/kvadratmeter`) 2 røde,
+mutation 2 (aldersalder frosset til 30) 1 rød. Gate: typecheck 0, lint 0,
+4095/4095 tests, build 0.
+
+## 3/10 15:3x — `/timer-i-aaret` 404'en var en URL, der ikke findes
+
+15:2x målte jeg `https://minberegner.dk/timer-i-aaret` 8 gange, fik 8 × 404 og
+konkluderede at produktionen serverede en gammel build. **Den danske rute hedder
+`/timer-i-aaret`.** Målt 15:3x: `/timer-i-aret` → 200 med titel «Hvor mange timer
+er der på et år? Timer i alle perioder», canonical `…/timer-i-aret`, hreflang
+da/se/x-default uden skråstreg; `beraknare.se/timmar-i-aret` → 200. Ruten ligger i
+`src/app/timer-i-aret/page.tsx` siden `f3b3516` (07:14) og er i hver eneste
+sitemap. Der var ingen produktionsfejl.
+
+Målemetoden var fejlen: otte curls af samme URL er ikke otte beviser, når ingen af
+dem er sammenholdt med den rute, koden faktisk definerer. Noteret som F0f.

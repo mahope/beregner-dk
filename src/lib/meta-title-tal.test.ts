@@ -1,5 +1,10 @@
 import { describe, test, expect } from "vitest";
 import { getPageData } from "./page-data";
+import { kvadratmeterEksempelLignelse } from "./kvadratmeter-eksempler";
+import { alderLevet } from "./alder-levet";
+import { iDagISidensTidszone } from "./lokal-dato";
+import { formatNumber } from "./format";
+import type { Locale } from "./i18n";
 
 /**
  * Et regnet eksempel i `metaTitle` er det stærkeste enkeltstående CTR-signal på
@@ -10,7 +15,6 @@ import { getPageData } from "./page-data";
  * | `/kvadratmeter` |    20.768 |  310 | 1,5 % |  4,9 | ja — 5 x 4 m = 20 m² |
  * | `/promille`     |     6.003 |   97 | 1,6 % |  7,8 | ja — 4 øl på 80 kg = 0,88 ‰ |
  * | `/braendstof`   |    16.518 |  174 | 1,1 % |  5,9 | ja — 500 km benzin koster 450 kr. |
- * | `/rentefradrag` |     5.082 |  296 | 5,8 % |  5,6 | ja — «33,6 % på de første 50.000 kr.» |
  * | `/renteberegner`|    12.610 |  107 | 0,8 % |  7,4 | **nej** |
  * | `/alder`        |    10.029 |   43 | 0,4 % |  7,2 | **nej → rettet 3/10** |
  * | `/tidszone`     |    23.351 |  101 | 0,4 % |  7,6 | **nej → rettet 3/10** |
@@ -19,50 +23,106 @@ import { getPageData } from "./page-data";
  * har 1,1-1,6 % CTR, og de to sider med spørgsmålstitel på pos. 7,2-7,6 har
  * 0,4 %. Så det er ikke placeringen, der afgør om folk klikker.
  *
- * Porten dømmer **tallet i titlen**, ikke hele sætningen, så en ny formulering
- * («Aldersberegner: 36 år gammel i dag») ikke låser den rigtige løsning fast —
- * kun fjernelsen af regningen gør porten rød. Samme læge som SKATTELOFT-porten
- * og `npiRetning` i `/husleje`: døm talet og forholdet, ikke ordlyden.
+ * ## Porten dømmer *resultatet*, ikke «der står et tal»
+ *
+ * Før 3/10 15:5x læste porten `expect(data!.metaTitle).toMatch(/\d/)`, altså
+ * ethvert tal. Målt polaritet: `/kvadratmeter`s eksempel
+ * «Kvadratmeterberegner: 5 x 4 m = 20 m²» erstattet af
+ * «Kvadratmeterberegner 2026 - Beregn areal» gav 16/16 **grønt** — porten så
+ * ikke, at regningen var væk. Omvendt gav fjernet årstal i `/rentefradrag» 1 rød.
+ * Så porten dømte *året* og ikke eksemplet, og docblockens tabel løj om
+ * `/rentefradrag`.
+ *
+ * Nu står derfor det **forventede resultat** i tabellen, og hver række dømmer
+ * med `toContain`. En titel, der mister sin regning, bliver rød med det
+ * manglende resultat i testnavnet — ikke fordi der mangler et tal, men fordi
+ * det er det *rigtige* tal der mangler. Samme læge som SKATTELOFT-porten,
+ * `npiRetning` i `/husleje` og `alder-side-tekst.test.ts`.
+ *
+ * ## Tre sider står uden for porten, fordi de kun har et årstal
+ *
+ * `/rentefradrag`, `/boligstoette` og `/dagpenge` skriver «… 2026 - …» og intet
+ * regnet. De er **taget ud** af tabellen i stedet for at blive dømt som om de
+ * havde et eksempel — porten og tabellen skal sige det samme (punkt 11). De er
+ * danske-only sider, så de har hverken `se` eller `no`. Der ligger en opgave på
+ * dem i planens feature-kø; de kommer tilbage i porten når de har et eksempel.
  */
-const MALTE_SIDER = [
-  "kvadratmeter",
-  "promille",
-  "braendstof",
-  "rentefradrag",
-  "procent",
-  "dato",
-  "tidsberegner",
-  "tidszone",
-  "moms",
-  "kalorier",
-  "alder",
-  "boligstoette",
-  "dagpenge",
-] as const;
+const KVADRATMETER_EKSEMPEL = kvadratmeterEksempelLignelse("da");
 
 /**
- * `/renteberegner` (12.610 visninger, 0,8 % CTR) og `/arveafgift` er de to
- * sidste sider i GSC-top-15 uden regnet eksempel. De står **ikke** i
- * `MALTE_SIDER` endnu, fordi de er ændringer i hver sin `metaTitle` med hvert
- * sit eksempelstal — det er to opgaver, ikke en ratchet på to strenge.
+ * Hver række er det resultat, titlen **skal** indeholde — ikke «et tal».
+ * Uden `se`/`no` betyder «sproget findes ikke», og `getPageData` returnerer
+ * da `undefined`; det dømmer porten med sit eget `toBeDefined`.
  */
-describe("metaTitle på sitets største sider", () => {
-  test.each(MALTE_SIDER)("%s har et regnet eksempel i titlen", (slug) => {
-    const data = getPageData(slug, "da");
-    expect(data, `getPageData("${slug}", "da") skal finde siden`).toBeDefined();
-    expect(data!.metaTitle).toMatch(/\d/);
-  });
+const REGNETE_EKSEMPLER: {
+  slug: string;
+  resulter: { da: string; se?: string; no?: string };
+}[] = [
+  // Tallene kommer fra `kvadratmeterEksempelLignelse`, samme funktion
+  // `page-data.ts` skriver titlen med — ikke en afskrift her.
+  { slug: "kvadratmeter", resulter: { da: KVADRATMETER_EKSEMPEL, se: KVADRATMETER_EKSEMPEL, no: KVADRATMETER_EKSEMPEL } },
+  { slug: "promille", resulter: { da: "4 øl på 80 kg = 0,88 ‰", se: "4 öl på 80 kg = 0,88 ‰" } },
+  { slug: "braendstof", resulter: { da: "500 km benzin koster 450 kr.", se: "500 km bensin kostar 585 kr.", no: "500 km bensin koster 450 kr." } },
+  { slug: "procent", resulter: { da: "10 % af 250 = 25 kr.", se: "10 % av 250 kr = 25 kr" } },
+  { slug: "dato", resulter: { da: "1. jan. 2026→2027 = 365", se: "1 jan. 2026→2027 = 365" } },
+  { slug: "tidsberegner", resulter: { da: "08:30 til 16:45 = 8 t 15 min", se: "08:30 till 16:45 = 8 t 15 min" } },
+  { slug: "tidszone", resulter: { da: "12 i Danmark = 06 i New York, USA", se: "12 i Sverige = 06 i New York, USA" } },
+  { slug: "moms", resulter: { da: "1.000 kr. ekskl. moms + 25 % = 1.250 kr.", se: "1 000 kr. exkl. moms + 25 % = 1 250 kr." } },
+  { slug: "kalorier", resulter: { da: "80 kg, 180 cm, 30 år, moderat = 2.759 kcal", se: "man 80 kg, 180 cm = 2 759 kcal/dag" } },
+];
 
+type SprogOgResultat = { slug: string; locale: Locale; resultat: string };
+
+const MALTE_SIDER: SprogOgResultat[] = REGNETE_EKSEMPLER.flatMap((r) =>
+  (Object.entries(r.resulter) as [Locale, string][]).map(([locale, resultat]) => ({
+    slug: r.slug,
+    locale,
+    resultat,
+  })),
+);
+
+describe("regnet eksempel i metaTitle", () => {
+  test.each(MALTE_SIDER.map((r) => [r.slug, r.locale, r.resultat] as const))(
+    "/%s (%s) skriver regnestykket «%s» i titlen",
+    (slug, locale, resultat) => {
+      const data = getPageData(slug, locale);
+      expect(data, `getPageData("${slug}", "${locale}") skal finde siden`).toBeDefined();
+      expect(data!.metaTitle).toContain(resultat);
+    },
+  );
+
+  /**
+   * `/alder` er den ene side, hvor titlen **regnes hver dag** — `{AAR}` løses af
+   * `alderLevet` på den dag siden serveres. Derfor dømmes den mod
+   * `alderLevet(iDagISidensTidszone())` og ikke mod et frosset tal: en frossen
+   * alder i Googles titellinje bliver rød, men kun på den dag den bliver
+   * forkert. Samme forkrift som `alder-side-tekst.test.ts`.
+   */
   test.each(["da", "se", "no"] as const)(
-    "titlen på /alder og /tidszone er regnet i %s, ikke frosset",
+    "/alder (%s) skriver dagens alder, ikke en frossen",
     (locale) => {
-      for (const slug of ["alder", "tidszone"] as const) {
-        const data = getPageData(slug, locale);
-        expect(data, `getPageData("${slug}", "${locale}") skal finde siden`).toBeDefined();
-        // En uløst `{AAR}` ville stå som bogstaver i Googles titellinje.
-        expect(data!.metaTitle).not.toMatch(/\{[A-Z]+\}/);
-        expect(data!.ogTitle).toBe(data!.metaTitle);
-      }
+      const iDag = iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da");
+      const aar = formatNumber(alderLevet(iDag).aar, locale);
+      const data = getPageData("alder", locale);
+      expect(data, `getPageData("alder", "${locale}") skal finde siden`).toBeDefined();
+      // En uløst `{AAR}` ville stå som bogstaver i Googles titellinje.
+      expect(data!.metaTitle).not.toMatch(/\{[A-Z]+\}/);
+      expect(data!.metaTitle).toContain(`= ${aar} år`);
+      expect(data!.ogTitle).toBe(data!.metaTitle);
+    },
+  );
+
+  /**
+   * `ogTitle` skal være lig `metaTitle` på de sider, der har et regnet eksempel —
+   * ellers skriver Facebook et andet regnestykke end Google, og den af samme
+   * grund ikke kan arve portens dømning ovenfra.
+   */
+  test.each(REGNETE_EKSEMPLER.map((r) => r.slug))(
+    "/%s har samme regnestykke i ogTitle",
+    (slug) => {
+      const data = getPageData(slug, "da");
+      expect(data, `getPageData("${slug}", "da") skal finde siden`).toBeDefined();
+      expect(data!.ogTitle).toBe(data!.metaTitle);
     },
   );
 });

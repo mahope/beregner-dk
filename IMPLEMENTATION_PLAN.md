@@ -1,30 +1,22 @@
-STATUS: 3/10 15:2x. **⛔ BLOCKED — jeg merger ikke til `master` igen.**
-       Den danske `/timer-i-aaret` giver **HTTP 404** i produktion (8/8 curl,
-       15:17–15:20), mens `beraknare.se/timmar-i-aret` giver 200, og sidens egen
-       sitemap + den svenske sides `hrefLang="da"` peger på den 404. **Det er
-       ikke koden:** lokal produktionsbuild af HEAD (228e1ff) svarer 200 med
-       `Host: minberegner.dk`, byggets ruterliste har begge ruter, porten
-       `timer-i-aret.test.tsx` (17 tests) er grøn, og 404-svaret bærer
-       `x-locale: da` + `x-hostname: minberegner.dk` — de headere sættes kun i
-       `proxy.ts:58-61`, så beslutningen var *allow*. Billedet er nyt nok
-       (live har f87a196 09:42, b9fad7e 08:51, 7cc66e0 09:10), og f3b3516
-       (07:14) tilføjede begge route-filer i én commit. **Menneske skal se
-       Dokploy-billedet** (to containere? cachet `.next`? ren rebuild?).
-       Bevis og kommandoer: `docs/plan-arkiv.md`, afsnit 3/10 15:2x.
-       **⛔ `ceo/timer-i-aret` var lukket 07:55 på fejl** — kun den svenske URL
-       blev dømt.
-       Denne iteration leverer derfor **ingen kode**: den er BLOCKED på en
-       produktionsfejl uden for repoet.
+STATUS: 3/10 15:5x. **⛔ DEN DANSKE `/timer-i-aaret` ER OK — løst op.**
+       Jeg målte i sidste iteration `minberegner.dk/timer-i-aaret` (8/8 curl,
+       404) og satte hele loopet på pause. **URL'en findes ikke:** den danske
+       side hedder `/timer-i-aret` — ét `a` mindre. Målt 3/10 15:3x: `/timer-i-aret`
+       → **200**, titel «Hvor mange timer er der på et år? Timer i alle perioder»,
+       canonical `https://minberegner.dk/timer-i-aret`, `hrefLang` da/se/x-default
+       uden skråstreg; `beraknare.se/timmar-i-aret` → 200. Der var ingen
+       produktionsfejl, og ingen skal se på Dokploy. **Læren er endnu ikke
+       gjort permanent** — se F0f.
+       **Denne iteration leverer kode:** review-fund MIDDEL om
+       `meta-title-tal.test.ts` er rettet (se F0c).
        **GATE (noteret 3/10 15:1x):** `npm run typecheck` → `npm run test`
        (hele suiten) → `npm run lint` → `npm run build`. Alle fire skal være
        grønne; rækkefølgen er build-fejl → tests → lint.
-       **CI grøn** ved start (228e1ff, 3m1s), ingen åbne PR'er, ingen uløste
-       Sentry-fejl, begge review-fund rettet (0554456), CEO-køens otte fund
-       lukkede (verificeret 3/10 15:1x: Valborg 30/4, svensk påskafton -1,
-       dansk langfredag/sankthans fast 23-24/6, påskeaften-FAQ rettet,
-       huslejenævnet-påstanden væk, `toUtcMidnight` i Europe/Copenhagen).
-       PR-TJEK: 3/10 15:1x (ingen åbne). BRANCH-TJEK: 3/10 15:1x (kun
-       `bevaret/*` + `master` på origin).
+       **Gate 3/10 15:5x:** typecheck 0, lint 0, **4095/4095 tests**, build 0.
+       **CI grøn** ved start (0c54b02, 4m17s), ingen åbne PR'er, ingen uløste
+       Sentry-fejl, CEO-køens otte fund lukkede.
+       PR-TJEK: 3/10 15:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x (kun
+       `bevaret/*` + `master` + 11 `data/*`/`claude/*`-standby på origin).
 
 ## Fase 3 — trafik-drevet
 
@@ -84,22 +76,52 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
    når den kan finde en fejl. *MÅL:* `/dato` 131.320 visninger / 863 klik /
    0,7 % / pos. 5,6 (da) og 102.316 / 97 / 0,1 % / pos. 8,1 (se).
 
-`/dato`s `hrefLang` skriver `https://minberegner.dk/dato/` og
-`https://beraknare.se/dato/`, og begge **308'er** til URL'en uden skråstreg.
-*Målt 3/10 14:2x (curl, hele `<head>`):* `/dato` har skråstreg på alle tre
-`rel="alternate"` (`da`, `sv`, `x-default`), `/dage-i-aaret` har den på alle
-tre, mens **11** sider er korrekte uden skråstreg — `/procent`, `/tidszone`,
-`/moms`, `/alder`, `/braendstof`, `/kalorier`, `/promille`, `/renteberegner`,
-`/nedtaelling`, `/ugenummer`, `/laaneberegner`. Canonical er korrekt overalt.
-*Accept:* `buildPageMetadata`-kaldende sider må aldrig give en `hrefLang` med
-skråstreg, fordi URL'en ikke findes (308), og **en port** renderer `/dato`,
-`/dage-i-aaret`, `/timer-i-aret` og `/dage-mellem-datoer` og dømmer at hver
-`hrefLang` er **lig med** canonical uden skråstreg. *Årsag ikke fundet:*
-`/dato` kalder `generatePageMetadata("dato")` som `/nedtaelling`, og den får
-skråstreg — bisect `buildPageMetadata` → `getAlternateSlug` → layoutets
-`metadataBase`. *MÅL:* `/dato` 131.320 visninger / 863 klik / 0,7 % / pos. 5,6
-og `beraknare.se/dato` 102.316 / 97 / 0,1 % / pos. 8,1.
+**F0c. [x] ✅ Titelsporten dømmer resultatet, ikke «der står et tal»** —
+   rettet 3/10 15:5x efter review-fund MIDDEL. *Hvad:* porten læste
+   `expect(data!.metaTitle).toMatch(/\d/)`, så enhver titel med et årstal var
+   grøn. Målt polaritet: `/kvadratmeter`s «5 x 4 m = 20 m²» erstattet af
+   «Kvadratmeterberegner 2026 - Beregn areal» gav 16/16 grønt. Nu står det
+   **forventede resultat** i en tabel pr. side **og pr. sprog** (da 9, se 8), og
+   hver række dømmer med `toContain`, så en titel der mister sin regning bliver
+   rød med det manglende resultat i testnavnet. `/kvadratmeter` og `/alder`
+   læser **samme funktion som siden bruger** (`kvadratmeterEksempelLignelse`,
+   `alderLevet(iDagISidensTidszone())`), så en frossen alder kan ikke gemme sig.
+   *Målt:* 32/32 grønt; mutation 1 (eksemplet væk fra `/kvadratmeter`) 2 røde,
+   mutation 2 (aldersalder frosset til 30) 1 rød. Docblockens tabel er
+   rettet, så den ikke længere påstår at `/rentefradrag` har et eksempel.
 
+**F0d. [ ] Regnet eksempel i de tre titler, der kun har et årstal.**
+   *Hvem:* alle der googler «rentefradrag 2026» (63.000 søgninger, pos. 2),
+   «beregn boligstøtte» (36.000, pos. 10) og «dagpenge beregner».
+   *Datagrund:* målt 3/10 15:3x fra `getPageData(slug, "da")` —
+   `rentefradrag` = «Rentefradrag beregner 2026 - Se din skattebesparelse»,
+   `boligstoette` = «Beregn boligstøtte 2026: standardmaksima og formue»,
+   `dagpenge` = «Dagpengeberegner 2026 - Beregn dine dagpenge». Ingen af dem har
+   et regnestykke, og de tre er derfor **taget ud af titelsporten** — porten og
+   tabellen skal sige det samme (punkt 11). De er danske-only (ingen `se`/`no`).
+   *Accept:* hver får sit resultat fra den datafil siden selv regner med
+   (`rentefradrag`-satsen, boligstøttens standardmaksimum, `DAGPENGE_2026`) og
+   kommer tilbage i `REGNETE_EKSEMPLER`. ⚠️ `/rentefradrag` har **5,8 % CTR** på
+   pos. 5,6 — sitets bedste — så en ny titel skal måles, ikke antages at hjælpe.
+   **MÅL:** `/rentefradrag` 5.082 visninger / 296 klik / 5,8 % / 5,6,
+   `/boligstoette` 7.370 / 181 / 2,5 % / 8,6 → GSC 17/10.
+
+**F0f. [ ] Port der dømmer rutenavn mod den URL, der skrives i copy og
+   deploy-noter.** *Hvad:* fejlen var ikke en fejl i koden, men en URL med et
+   ekstra `a` skrevet i en deploy-note og curl'et 8 gange. Samme fejlform
+   dræber `/procent`-noten ovenfor, der kræver to tal der flytter sig.
+   *Accept:* en test læser routemapperne under `src/app` og dømmer at hver
+   `/slug` i sitemap, canonical og `getPageData(slug).slug` findes som
+   **mappe** — så en opfundet URL ikke kan overleve i en note. Lille opgave.
+
+**F0e. [~] Fire `no`-titler på de fire største sider har intet regnestykke.**
+   Målt 3/10 15:3x: `/procent|no` = «Prosentkalkulator - Beregn prosent enkelt og
+   gratis», `/dato|no` = «Datokalkulator - …», `/tidsberegner|no` = «Tidskalkulator
+   - …», `/tidszone|no` = «Tidssonekalkulator - …» — mod samme fire sider i `da`
+   og `se`, der alle har et. De er **danske-only-stoffer**: beregner.no er
+   lukket i `hiddenDomains` og ❓ nedenfor er ubesvaret, så det er 0
+   bruger-effekt nu. Noteret, fordi porten dømmer pr. sprog og ikke må få en
+   grøn række for `no` ved at springe den over.
 
 **F0b. [x] ✅ Regnet eksempel i `metaTitle` på `/alder` og `/tidszone`** —
    `docs/plan-arkiv.md`. *Hvem:* alle der googler «aldersberegner» (27.000
@@ -347,6 +369,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 **Åbne F5b-slice: `/flyttebudget` (3 fund), mål listen på ny først.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 ## VERIFICÉR DEPLOY-noter
+
+**Ingen ny deploy-note 3/10 15:5x:** F0c rører kun `*.test.ts` og planen, så
+der er intet at verificere i produktion. Sidste åbne noter er dømt nedenfor.
 
 **Dømt 3/10 15:1x–15:2x på indhold (curl).** Fuldtekst og målinger står i
 `docs/plan-arkiv.md` (afsnit «3/10 15:2x»).
