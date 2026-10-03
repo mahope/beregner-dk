@@ -1,41 +1,30 @@
-STATUS: 3/10 23:0x. ✅ **Begge procent-klasser er lukket — `}%` (35 fund) og de rå
-       `\d%` i `<td>`/brødtekst (30 fund).** `ceo/procent-mellemrum-bilsider`.
-       Målt, ikke troet: planens opgave talte 21 linjer i syv filer; egen måling
-       fandt **30 noder i fire filer**, og to af planens filer var **allerede
-       rene i `HEAD`** — `/billaan` skriver rentesatsen gennem `sats()` (`:30`,
-       `${formatNumber(...)} %`) og `/kalorier` gennom `${usikkerMin}-${usikkerMaks} %`.
-       De 6 + 3 træffere i live-målingen 3/10 21:5x var derfor **gammel kode fra
-       før fixen**, altså et deploy-vindue og ikke en fejl i koden — den fejltype
-       planen havde mistet tiden på at lede efter. Rettet: `/bil` (8 noder —
-       tabellen med værdiforringelsen står to gange, da+se), `blog/boligsalg` (11),
-       `blog/biloekonomi` (9), `/topskat` (2) og `BoligsalgBeregner`s disclaimer
-       (1, var ikke med i planens liste). Én dansk fejl i samme sætning:
-       «(total 297.000 kr)» → «totalt». Loftet **261 → 231**, målt ved at sætte
-       det til 0 og læse den faktiske længde i fejlmeldingen.
-       `boligsalg/page.test.tsx:77` så på «3-6%» i en *forbudt*-liste og ville
-       ikke have kunnet fange den igen — opdateret til «3-6 %».
-       ⚠️ *Målt, ikke gættet:* «30% reglen» og «4%-reglen» er **regelnavne**, ikke
-       procenter, og står uændret; de tre svenske momssatser på `/moms` er ⛔ ❓.
-       Verify: typecheck, lint (757 filer), **4141 tests / 262 filer**, build.
-       Næste iteration skal være en **feature** — de tre sidste var tekstporte.
-       PR-TJEK: 3/10 23:0x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-       start (`f973a06`), ingen uløste Sentry-fejl, Sentry er kodet.
-
-## Arkiveret i denne blok
-
-- 3/10 22:2x — `ceo/procent-interpolation-til-nul`: `INTERPOLATION_LOFT` **0**,
-  35 fund i 14 filer (`/blog/arveafgift` 13, `page-data.ts` 4,
-  `kalorier-eksempler.ts` 3, …). Bivirkning: `/dagpenge`s metaDescription blev
-  161 tegn, så «ud fra din løn» → «fra din løn» (157); 7 testfiler dømte den
-  gamle lim. → `docs/plan-arkiv.md`
-- 3/10 23:0x — `ceo/procent-mellemrum-bilsider`: de 30 rå `\d%` → `docs/plan-arkiv.md`
-
-## Afsluttet: de rå procenttal i `<td>` og brødtekst (ikke `}%`)
-
-[x] ✅ 3/10 23:0x — se F5c og `docs/plan-arkiv.md`. Loftet 261 → 231; de fem
-navne-undtagelser («30% reglen» ×2, «4%-reglen») står uændret. **MÅL:** /bil 24,
-/billaan 24, /kalorier 273 besøgende/28d; øvrige ikke i top-15.
-
+STATUS: 3/10 23:2x. ✅ **`/brok` har nu de fire regneregler som værktøj** —
+        `ceo/brok-fire-regneregler`. *Hvem:* alle der googler «brøk udregner»
+        (pos. 4) og «brøkregning»; siden lå på pos. 5,1 med **0,7 % CTR**,
+        mens `/rentefradrag` på pos. 5,6 har **5,8 %** — 8x gap på næsten
+        samme placering. *Datagrund:* `/brok` 4.865 visninger / 34 klik / 0,7 %
+        / pos. 5,1 (GSC 3/10–1/10). *Målt fund:* siden skrev selv «Beregneren
+        forkorter **én** brøk», og de fire regler stod kun som regnestykker i
+        brødteksten — et løftet uden værktøj. *Accept:* plus/minus ganger
+        mindste fælles nævner og melder det, gange og dele gør ikke, dele
+        vender den anden brøk, altid forkortet med decimaltal og procent, da +
+        se, med **unike feltnavne**. **MÅL:** 4.865/34/0,7 %/5,1 → GSC 17/10.
+        ⚠️ *Porten blev stærkere, ikke svagere:* `label-a11y.test.ts` krævede
+        **præcis 2** felter på `/brok` — et fast tal, som lod to par af felter
+        hedde «Tæller (øverst)». Den tæller nu 6 **og** kræver at alle
+        feltnavne er unikke. *Målt undervejs:* min egen test troede 3/4 : 6/8
+        = 1/2; den rigtige er 1/1 (18/12 før reduktion) — testen var forkert,
+        ikke koden.
+        ❌ **Ingen fejl fundet:** `/dage-til/nytaarsaften` svarede **404** på
+        minberegner.dk, men genmålt 30 s senere **200**, og lokalt prod-build
+        giver 200. Det var Dokploys container-genbrug under et deploy-vindue,
+        ikke kode — samme fejltype som de procent-noter, der kostede tid.
+        *Læring: én 404-måling er ingen måling.*
+        Verify: typecheck, lint (757 filer), **4155 tests / 262 filer**, build.
+        Næste iteration skal fortsat være en **feature** (dette er den første
+        af tre efter tre tekstporte).
+        PR-TJEK: 3/10 23:0x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
+        start (`cb45bd0`), ingen uløste Sentry-fejl.
 
 ## Fase 3 — trafik-drevet
 
@@ -349,6 +338,14 @@ er blokeret af en ❓ og må ikke gættes.
   sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og
   `/boernepenge`. ⛔ Oppgave 187, 13/10 — må ikke flyttes.
 
+- **[x] ✅ De fire regneregler på `/brok`** — `ceo/brok-fire-regneregler` 3/10.
+  *Hvem:* elever og voksne, der googler «brøk udregner» og «brøkregning».
+  *Datagrund:* 4.865 visninger / 34 klik / **0,7 % CTR** / pos. 5,1 mod
+  `/rentefradrag`s 5,8 % på pos. 5,6 — 8x gap på næsten samme placering.
+  *Accept:* plus/minus på mindste fælles nævner (vist i UI), gange og dele uden
+  fælles nævner, dele vender den anden brøk, altid forkortet + decimaltal +
+  procent, da+se, **unike feltnavne**. **MÅL:** 4.865/34/0,7 %/5,1 → GSC 17/10.
+
 - **[x] ✅ `/renteberegner` og `/arveafgift` har et regnet eksempel i titlen** —
    se `docs/plan-arkiv.md`. *Hvem:* «renteberegner» (6.000 søgninger, pos. 8)
    og «arveafgift beregner». *Datagrund:* målt 3/10 — de var de **eneste to**
@@ -370,6 +367,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 3/10 23:2x:** `VERIFICÉR DEPLOY: <de fire regneregler som værktøj på /brok + unike feltnavne> ceo/brok-fire-regneregler 3/10 23:2x`.
+Døm på indhold: `curl -s https://minberegner.dk/brok | grep -c 'Regn med de fire regler'` skal give **1**, `grep -c 'Anden nævner'` **1**, `grep -c 'Fælles nævner'` **≥1**, og `grep -oE 'id="brok-t[12]"|id="brok-n[12]"' | wc -l` skal give **4** med hvert id kun én gang. `beraknare.se/brok` skal have «Räkna med de fyra reglerna», «Andra nämnare» og «Gemensam nämnare». Svarene skal være regnet, ikke hardkodet: 1/2 + 1/3 skal vise **5/6**, 2/3 ÷ 4/9 **3/2**. Næste deploy-vindue 4/10 07:30.
 
 **Åben note 3/10 23:0x:** `VERIFICÉR DEPLOY: <mellemrum i 30 rå procenttal på /bil (da+se), /topskat, blog/biloekonomi, blog/boligsalg + BoligsalgBeregner + «totalt 297.000 kr»> ceo/procent-mellemrum-bilsider 3/10 23:0x`.
 Døm på indhold: `curl -s https://minberegner.dk/bil | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%' | wc -l` skal give **0** (var 12), samme måling på `/topskat` (var 4) og på `minberegner.dk/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` + `…/biloekonomi-2026-hvad-koster-det-at-eje-bil` (hver 1-2). `beraknare.se/bil` skal have «20-25 %» i tabellen. Næste deploy-vindue 4/10 07:30.
@@ -436,12 +436,10 @@ der er intet at verificere i produktion. Sidste åbne noter er dømt nedenfor.
 
 **Åbne, med grunden:**
 
-- `ceo/procent-sweep-pension-boliglaan` 10:1x · `ceo/procent-interpolationer`
-  11:2x · `ceo/procent-interpolationer-2` 12:35 · `ceo/hoelligdag-cache` 11:5x
-  · `ceo/kommune-decimal-komma` 12:3x — fra commits **før** 12:30, men de
-  strenge de kræver mangler i `HEAD`: `/brutto-netto` skrev «AM-bidrag (8%):»
-  og er rettet 18:4x; `guide-feriepenge-…/page.tsx:148` er rettet i `af0297a`.
-  Ikke et deploy-problem — **F5c/F5g**.
+- De procent-noter fra før 12:30 (`ceo/procent-sweep-pension-boliglaan`,
+  `ceo/procent-interpolationer`, `-2`, `ceo/hoelligdag-cache`,
+  `ceo/kommune-decimal-komma`) kan ikke lukkes på deres strenge, fordi de
+  strenge er rettet i `HEAD` — F5c/F5g lukkede klassen i code.
 - `ceo/dato-dage-til-rækker` 13:0x · `ceo/su-indtaegtsgraense-maaned` 13:4x ·
   `ceo/titler-med-regnet-eksempel` 14:4x — fra commits **efter** 12:30
   (ca1b4b3, 0554456, 228e1ff); næste vindue er 17:30. Målt 15:2x: `/dato` har

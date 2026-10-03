@@ -300,7 +300,17 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
       test("/brok: tæller og nævner har navn", () => {
         const { container } = renderIn(locale, BrokBeregner);
         expectFieldsAreNamed(container);
-        expect(container.querySelectorAll("input").length).toBe(2);
+        // The four-rule calculator added two fractions, so /brok has six fields
+        // now. The count was 2 here when the page only had one fraction, and a
+        // fixed number is what let two pairs of fields share the label
+        // "Tæller (øverst)" — two fields a screen reader announces the same.
+        // So the assertion is now that every name is *distinct*, which is the
+        // property that actually mattered.
+        expect(container.querySelectorAll("input").length).toBe(6);
+        const names = Array.from(container.querySelectorAll("label")).map(
+          (lab) => lab.textContent?.trim() ?? ""
+        );
+        expect(new Set(names).size).toBe(names.length);
       });
 
       test("/rentefradrag: hvert lån har navn, også efter at et lån er lagt til", () => {

@@ -87,9 +87,9 @@ export default async function BrokPage() {
             </p>
             <h2>Brøkregning: de fire regneregler</h2>
             <p>
-              Beregneren forkorter én brøk. Når du skal <strong>regne med</strong> brøker — lægge dem
-              sammen, trække dem fra, gange og dele dem — er der fire regler, og alle fire er
-              regnestykker du kan læse fra venstre til højre:
+              Den første beregner forkorter én brøk, og den anden regner med to brøker efter de fire
+              regler — lægge dem sammen, trække dem fra, gange og dele dem. Tryk på den regel du
+              vil se, så får du svaret i samme brøk, i decimaltal og i procent:
             </p>
             <ul>
               <li>

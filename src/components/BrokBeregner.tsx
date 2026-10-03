@@ -6,7 +6,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { forkortBrok } from "@/lib/brok";
+import { forkortBrok, regnMedBroker, type BrokOperation } from "@/lib/brok";
 
 const labels = {
   da: {
@@ -18,6 +18,19 @@ const labels = {
     invalid: "Nævneren må ikke være 0.",
     name: "Brøkberegner",
     note: "Forkort en brøk til dens enkleste form, og se den som decimaltal og procent. Indtast hele tal.",
+    regnTitle: "Regn med de fire regler",
+    regnBody:
+      "Plus og minus skal have ens nævnere, så den mindste fælles nævner lægges under. Gange og dele skal ikke — dele vender den anden brøk.",
+    secondFraction: "Den anden brøk",
+
+    firstNumerator: "Første tæller",
+    firstDenominator: "Første nævner",
+    secondNumerator: "Anden tæller",
+    secondDenominator: "Anden nævner",
+    result: "Resultat",
+    commonDenominator: "Fælles nævner",
+    resultProcent: "Resultat i procent",
+    equalised: "Nævnerne blev gjort ens",
   },
   se: {
     numerator: "Täljare (överst)",
@@ -28,7 +41,25 @@ const labels = {
     invalid: "Nämnaren får inte vara 0.",
     name: "Bråkkalkylator",
     note: "Förkorta ett bråk till dess enklaste form och se det som decimaltal och procent. Ange heltal.",
+    regnTitle: "Räkna med de fyra reglerna",
+    regnBody:
+      "Plus och minus måste ha lika nämnare, så minsta gemensamma nämnare läggs under. Gånger och delar ska inte — delar vänder det andra bråket.",
+    secondFraction: "Det andra bråket",
+    firstFraction: "Det första bråket",
+    firstNumerator: "Första täljare",
+    firstDenominator: "Första nämnare",
+    secondNumerator: "Andra täljare",
+    secondDenominator: "Andra nämnare",
+    result: "Resultat",
+    commonDenominator: "Gemensam nämnare",
+    resultProcent: "Resultat i procent",
+    equalised: "Nämnarna gjordes lika",
   },
+} as const;
+
+const operations = {
+  da: { plus: "Plus", minus: "Minus", gange: "Gange", dele: "Dele" },
+  se: { plus: "Plus", minus: "Minus", gange: "Gånger", dele: "Dela" },
 } as const;
 
 export default function BrokBeregner() {
@@ -38,6 +69,11 @@ export default function BrokBeregner() {
 
   const [numerator, setNumerator] = useState<number>(6);
   const [denominator, setDenominator] = useState<number>(8);
+  const [taeller1, setTaeller1] = useState<number>(1);
+  const [naevner1, setNaevner1] = useState<number>(2);
+  const [taeller2, setTaeller2] = useState<number>(1);
+  const [naevner2, setNaevner2] = useState<number>(3);
+  const [operation, setOperation] = useState<BrokOperation>("plus");
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -78,6 +114,12 @@ export default function BrokBeregner() {
   }, [numerator, denominator]);
 
   const r = useMemo(() => forkortBrok(Math.trunc(numerator), Math.trunc(denominator)), [numerator, denominator]);
+
+  const regneLabels = operations[locale === "se" ? "se" : "da"];
+  const regne = useMemo(
+    () => regnMedBroker(Math.trunc(taeller1), Math.trunc(naevner1), Math.trunc(taeller2), Math.trunc(naevner2), operation),
+    [taeller1, naevner1, taeller2, naevner2, operation]
+  );
 
   const field = (id: string, label: string, value: number, onChange: (n: number) => void) => (
     <div>
@@ -130,6 +172,95 @@ export default function BrokBeregner() {
         <ShareCalculation getShareableLink={getShareableLink} calculatorName={l.name}
           resultSummary={r ? `${r.taeller}/${r.naevner}` : l.invalid} />
       </div>
+
+      <section aria-labelledby="brok-regn-title" className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h2 id="brok-regn-title" className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          {l.regnTitle}
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{l.regnBody}</p>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <fieldset>
+              <legend className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                {l.secondFraction}
+              </legend>
+              <div
+                role="group"
+                aria-label={l.secondFraction}
+                className="grid grid-cols-4 gap-1.5"
+              >
+                {(Object.keys(regneLabels) as BrokOperation[]).map((op) => (
+                  <button
+                    key={op}
+                    type="button"
+                    onClick={() => setOperation(op)}
+                    aria-pressed={operation === op}
+                    className={`px-2 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      operation === op
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    {regneLabels[op]}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <div className="flex items-end gap-3">
+              <div className="flex-1 space-y-3">
+                {field("brok-t1", l.firstNumerator, taeller1, setTaeller1)}
+                {field("brok-n1", l.firstDenominator, naevner1, setNaevner1)}
+              </div>
+              <span
+                aria-hidden="true"
+                className="pb-3 text-2xl font-bold text-gray-400 dark:text-gray-500"
+              >
+                {regneLabels[operation] === "Gange" || regneLabels[operation] === "Gånger"
+                  ? "×"
+                  : regneLabels[operation] === "Dele" || regneLabels[operation] === "Dela"
+                    ? "÷"
+                    : regneLabels[operation] === "Minus"
+                      ? "−"
+                      : "+"}
+              </span>
+              <div className="flex-1 space-y-3">
+                {field("brok-t2", l.secondNumerator, taeller2, setTaeller2)}
+                {field("brok-n2", l.secondDenominator, naevner2, setNaevner2)}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 self-start">
+            {regne ? (
+              <div className="space-y-4">
+                <div className="rounded-lg p-4 text-center bg-blue-100 dark:bg-blue-900/30">
+                  <div className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                    {l.result}
+                  </div>
+                  <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                    {regne.taeller}/{regne.naevner}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {stat(l.decimal, fmt(regne.decimal))}
+                  {stat(l.resultProcent, `${fmt(regne.procent)} %`)}
+                </div>
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  {l.commonDenominator}:{" "}
+                  <strong>{regne.fællesNaevner}</strong>
+                  {regne.brugteFællesNaevner ? ` — ${l.equalised}` : ""}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-red-500 dark:text-red-400 text-center py-8">
+                {l.invalid}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
