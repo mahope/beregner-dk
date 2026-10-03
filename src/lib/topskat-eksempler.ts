@@ -147,6 +147,28 @@ export function marginalSkatPct(
 }
 
 /**
+ * Det samme niveau **med** AM-bidrag — altså den marginalskat, værktøjet
+ * faktisk viser under top-topskat-grænsen. Tallet kommer fra
+ * {@link marginalSkatPct} ved grænsen selv, med snit-kommuneskat og uden
+ * kirkeskat, fordi det er det tilfælde brødteksten beskriver.
+ *
+ * **Hvorfor der er to tal.** Fundet 3/10 09:1x: brødteksten og FAQ-svaret
+ * kaldte summen af de fire indkomstskatter «så højt **din marginalskat** kan
+ * blive dér», men `marginalSkatPct` tager AM-bidraget først og lægger det ind i
+ * tallet — 52,06 % mod 55,9 %. Den samme side viste altså 55,9 % i sit
+ * resultatkort og lovede 52,06 % lige under. Sætningen læser derfor begge tal,
+ * og ingen af dem er håndskrevet.
+ */
+export const SKATTELOFT_MED_AM = marginalSkatPct(
+  TOPTOPSKAT_GRAENSE,
+  SATSER_2026.kommuneskatSnit,
+  0
+);
+
+/** «55,9 %» — marginalskatten under top-topskat-grænsen, med AM-bidrag. */
+export const SKATTELOFT_MED_AM_PCT = `${formatBelob(SKATTELOFT_MED_AM, DA, 1)} %`;
+
+/**
  * Den bruttoindkomst, hvor grænsen nås: mellem- og topskat beregnes af indkomsten
  * **efter** AM-bidrag, så grænsen nås ved `grænse / (1 - AM-bidrag)`. Det er
  * sidens egen betingelse, hævet fra `TopskatBeregner`, og den afrundes til nærmeste
@@ -199,10 +221,9 @@ export function topskatFaqItems(): { question: string; answer: string }[] {
       answer:
         `Under top-topskat-grænsen er de fire indkomstskatter — bundskat, ` +
         `kommuneskat, mellemskat og topskat — tilsammen ${SKATTELOFT_PCT} ` +
-        `(ekskl. AM-bidrag og kirkeskat), og det er så højt din marginalskat ` +
-        `kan blive dér. Med AM-bidrag (${AM_BIDRAG}) og kirkeskat kan den ` +
-        `reelle marginalskat dog være højere, og over top-topskat-grænsen ` +
-        `lægges ${TOPTOPSKAT} oveni.`,
+        `(ekskl. AM-bidrag og kirkeskat). Med AM-bidrag (${AM_BIDRAG}) er din ` +
+        `marginalskat dér ${SKATTELOFT_MED_AM_PCT}, og over top-topskat-grænsen ` +
+        `lægges yderligere ${TOPTOPSKAT} oveni.`,
     },
     {
       question: "Hvad er den nye top-topskat?",

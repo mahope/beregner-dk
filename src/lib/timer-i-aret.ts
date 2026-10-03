@@ -127,24 +127,44 @@ function aarOgDag(locale: TimerLocale, today: Date) {
 }
 
 /**
+ * «To uger» og «En måned (februari)» findes ikke i `timer-periode.ts`, så de
+ * regnes her af ugen og af månedernes egen længde. De er **på begge sprog**:
+ * fundet 3/10 09:1x var, at `perioderFor` læste `naevn.da` og skrev de to
+ * navne i hånden, så beraknare.se/timmar-i-aret fik «Et døgn», «To uger» og
+ * «En måned (februari)» i hovedtabellens første kolonne — blandet med de
+ * oversatte månedsnavne og en ellers svensk side. Det er præcis den fejl
+ * `routing.ts`s egen docblock siger 301'en skal forhindre.
+ */
+const PERIODER_NAVN: Record<
+  TimerLocale,
+  { toUger: string; maaned: (maaned: string) => string }
+> = {
+  da: { toUger: "To uger", maaned: (m) => `En måned (${m})` },
+  se: { toUger: "Två veckor", maaned: (m) => `En månad (${m})` },
+};
+
+/**
  * Døgnet og ugen læses fra `timer-periode.ts`, som `/tidsberegner` skriver sin
  * tabel fra. «To uger» og de tre kalendermåneder findes ikke der, så de regnes
- * her af månedernes egen længde. Årets række bruger *dagens* kalenderår, så den
- * bliver 366 dage i et skudår — og skudåret står i teksten.
+ * her af månedernes egen længde — på det sprog siden er på. Årets række bruger
+ * *dagens* kalenderår, så den bliver 366 dage i et skudår — og skudåret står i
+ * teksten.
  */
 function perioderFor(
   maaneder: MaanedRække[],
-  dageIAar: number
+  dageIAar: number,
+  locale: TimerLocale
 ): TimerRaekke[] {
   const maanederI = maanederMedHverLængde(maaneder);
+  const navn = PERIODER_NAVN[locale];
   return [
-    dageneOgTimeren("doegn", timerIPeriode("doegn").naevn.da, 1),
-    dageneOgTimeren("uge", timerIPeriode("uge").naevn.da, DAGE_PER_UGE),
-    dageneOgTimeren("to-uger", "To uger", DAGE_PER_UGE * 2),
+    dageneOgTimeren("doegn", timerIPeriode("doegn").naevn[locale], 1),
+    dageneOgTimeren("uge", timerIPeriode("uge").naevn[locale], DAGE_PER_UGE),
+    dageneOgTimeren("to-uger", navn.toUger, DAGE_PER_UGE * 2),
     ...maanederI.map((maaned) =>
-      dageneOgTimeren("maaned", `En måned (${maaned.name})`, maaned.dage)
+      dageneOgTimeren("maaned", navn.maaned(maaned.name), maaned.dage)
     ),
-    dageneOgTimeren("aar", timerIPeriode("aar").naevn.da, dageIAar),
+    dageneOgTimeren("aar", timerIPeriode("aar").naevn[locale], dageIAar),
   ];
 }
 
@@ -171,7 +191,7 @@ export function timerOversigt(
     naesteSkudaar,
     naesteSkudaarTimer: aarstal(naesteSkudaar, locale).dage * TIMER_PER_DAG,
     maaneder,
-    perioder: perioderFor(maaneder, aarstalet.dage),
+    perioder: perioderFor(maaneder, aarstalet.dage, locale),
   };
 }
 

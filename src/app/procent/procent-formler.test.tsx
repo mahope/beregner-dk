@@ -166,3 +166,29 @@ describe("procent: notationen på den renderede side", () => {
     },
   );
 });
+
+/**
+ * Pladsholderen i de to resultatfelter skal være «? %» — spørgsmålstegn, så
+ * lille mellemrum, procenttegn — fordi forældrene er `flex … gap-4`. Fundet
+ * 3/10 09:1x: omskrivningen til «8 %» (8dda809) efterlod et mellemrum FORAN
+ * pladsholderen, så den renderede `span.textContent` var « ? %» og der stod
+ * både 16 px `gap-4` og et indlejret mellemrum mellem «?» og «af».
+ *
+ * Hverken `tsc`, lint, build eller `procentUdenMellemrum` kan se det: der står
+ * intet tal i den tekst, så scanneren for «8%» passerer den. Derfor dømmer
+ * porten den renderede streng, som er der læseren møder den.
+ */
+describe("procent: pladsholderen i resultatet", () => {
+  test.each(["da", "se"] as const)(
+    "der er intet mellemrum foran spørgsmålstegnet (%s)",
+    async (locale) => {
+      const html = await render(locale);
+
+      expect(html).toContain(">? %<");
+      // Mutation: sæt mellemrummet tilbage i `ProcentBeregner`, så er dette
+      // det eneste sted, hvor prøven kan se det.
+      expect(html).not.toContain("> ? %<");
+      expect(html).not.toContain(">  ? %<");
+    },
+  );
+});

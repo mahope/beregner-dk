@@ -27165,3 +27165,60 @@ komponent, `src/components/BlogNaesteSkridt.tsx`) med konkrete verb
 `barsel-2026-regler-og-satser` har desuden links til `/barselsdagpenge`,
 `/barselsplanlaegger` **og** `/boernepenge`. Bounce skal altså søges en anden
 sted (formular-længde? ingen CTA i topfolden? `/barselsplanlaegger` er ny?).
+
+---
+
+## 3/10 08:35 — de tre åbne fund fra sidste review (punkt 0)
+
+Review 3/10 09:1x (`~/.local/oxloop/review/minberegner.md`) gav **2 MIDDEL +
+1 LAV**, alle tre fra de fem sidste commits. De er rettet i én opgave, fordi de
+er ét review-batch og hver kun er én linje kode.
+
+**1. `/topskat` modsagde sig selv i sit eget resultatkort (MIDDEL).**
+`marginalSkatPct` tager AM-bidraget først og lægger det ind i tallet
+(8 % + 92 % × 52,059 % = **55,9 %**), mens sætningen i komponentens
+skatteloft-boks og i `FAQPage`-JSON-LD'en kaldte summen af de fire
+indkomstskatter «så højt **din marginalskat** kan blive dér» (**52,06 %**).
+Målt ved 3.000.000 kr. brutto: nøgletallet stod 60,5 %, boksen under lovede
+52,06 %, og 55,9 % nås allerede ved ca. 1,44 mio — som er **under**
+top-topskat-grænsen på 2.818.200 kr. Rettelse: `SKATTELOFT_MED_AM` /
+`SKATTELOFT_MED_AM_PCT` regnet af `marginalSkatPct(TOPTOPSKAT_GRAENSE,
+kommuneskatSnit, 0)`, og sætningen læser begge tal. Ingen af dem er håndskrevet.
+
+*Porten var cirkulær:* `topskat-eksempler.test.ts` læste sætningen ordret med
+`toBe`, så den låste den forkerte påstand fast. Den nye port dømmer
+**forholdet** — `marginalSkatPct` skal være `> SKATTELOFT × 100` for seks
+bruttobeløb fra 1 mio til 5 mio — og at sætningen ikke mere siger «så højt din
+marginalskat kan blive». Den eksisterende port «hver procent i metadata og svar
+kommer fra modulet» blev rød på det nye «55,9 %» og måtte have
+`SKATTELOFT_MED_AM` i `TILLADTE_PROCENTER` — dvs. porten fangede selv tallet.
+
+**2. `/timmar-i-aret` havde danske rækkenavne i 7 af 7 rækker (MIDDEL).**
+`perioderFor()` tog ikke et sprog: den læste `timerIPeriode(id).naevn.da` for
+døgn/uge/år og skrev «To uger» og «En måned (…)» i hånden, mens månedsnavnene
+*blev* oversat. Målt i den renderede `<th scope="row">`: `["Et døgn","En uge",
+"To uger","En måned (februari)","En måned (april)","En måned (januari)","Et
+år", …12 svenske måneder…, "Hela året"]`. Rettelse: `perioderFor(maaneder,
+dageIAar, locale)` læser `naevn[locale]`, og `PERIODER_NAVN` holder «To uger»/
+«Två veckor» og «En måned (…)»/«En månad (…)».
+
+*Porten var cirkulær:* `expect(html).toContain(raekke.navn)` dømmer, at det
+samme objekt fra `perioderFor` står i HTML'en, aldrig hvilket sprog det er på.
+Den nye port tager `timerIPeriode(id).naevn[sprog]` som kilden og forbyder
+danske varianter i den svenske markup. «februari» hedder «februari» på begge
+sprog, så månedsrækkerne dømmes på indpakningen «En månad (».
+
+**3. `/procent` havde et mellemrum FORAN pladsholderen (LAV).** Omskrivningen
+til «8 %» (8dda809) efterlod `>? %<` som `> ? %<`, så den renderede
+`span.textContent` var « ? %» under en forælder med `gap-4` — altså 16 px
+**og** et indlejret mellemrum. `tsc`, lint, build og `procentUdenMellemrum`
+kan alle se det: der står intet tal i den tekst. Den nye port dømmer den
+renderede streng (`>? %<` findes, `> ? %<` gør ikke) i da og se.
+
+**Målt:** alle tre mutationer lagt tilbage i kilden giver røde porte (henholdsvis
+1, 1 og 2 tests). Gate grøn: `tsc` (app + test) exit 0, `biome lint` 745 filer
+uden fund, `TZ=UTC npm run test` **4010 tests i 253 filer** grønne (+4 mod
+4006), `next build` exit 0.
+
+**Ikke kørt:** ingen browser — repoet har intet Playwright — så mellemrummet og
+de svenske rækkenavne er målt i markup og DOM, ikke set i pixels.

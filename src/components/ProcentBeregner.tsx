@@ -262,7 +262,7 @@ export default function ProcentBeregner() {
               inline
             />
             <span className="text-gray-600 dark:text-gray-400">{l.wordEr}</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaResultProcent}> ? %</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaResultProcent}>? %</span>
             <span className="text-gray-600 dark:text-gray-400">{l.wordAf}</span>
             <InputField
               value={heltal}
@@ -335,7 +335,7 @@ export default function ProcentBeregner() {
               inline
             />
             <span className="text-gray-600 dark:text-gray-400">=</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaProcentvis}> ? %</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaProcentvis}>? %</span>
           </div>
         )}
       </div>

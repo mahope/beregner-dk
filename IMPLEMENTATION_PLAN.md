@@ -1,20 +1,17 @@
-STATUS: 3/10 08:20. CI grøn ved start (`37100318940`), ingen åbne PR'er
-      (PR-TJEK: 2026-10-03). Sentry: ingen uløste fejl 14 dage, SDK'en er
-      sat op. **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run
-      test` · `npm run build` — **grøn 3/10 08:10** (alle exit 0, **4006**
-      tests i 253 filer).
-      **Denne iteration:** F5c-slice på `page-data.ts` — **73** fund, loftet
-      **509 → 436**. Filen bærer metadata + alle FAQ-svar for *alle* slugs i
-      da/no/se, så de tre sprog nu skriver «25 %» ens. Målte mutationer: porten
-      rød før sweepen, 2 røde ved én tilbageført streng. `fact-consistency.test.ts`
-      låste «30%» fast og fik et `not.toContain`. Se `docs/plan-arkiv.md`.
-      **Deploy:** alle 12 åbne noter fra merges før 07:30 er verificeret på
-      **indhold** — 12/12 ✅, lukket 3/10 08:0x. hreflang/canonical målt
-      korrekte og tovejs på de fire store par (bekrefter: kun positionen er
-      lav). Målt og *besluttet nej* til: `/minutter-i-aret` (tynd søskende til
-      `/timer-i-aret`) og «bloggen mangler CTA» (alle 30 har `NaesteSkridt`).
-      **Næste iteration:** `/moms` (18) eller blogindlæggene i F5c — ellers en
-      feature; de målte ⛔ (feriedatoer, `sst.dk`) er stadig ubesvarede.
+STATUS: 3/10 08:35. CI grøn ved start (`37102093007`). **Gate:** `npm run lint` ·
+      `npm run typecheck` · `TZ=UTC npm run test` · `npm run build` — **grøn
+      3/10 08:33** (alle exit 0, **4010** tests i 253 filer, +4).
+      **Denne iteration:** de **3 åbne fund** fra sidste review (punkt 0, 2
+      MIDDEL + 1 LAV) er rettet og hver fik en port, der kan fejle: (1) `/topskat`
+      lovede «din marginalskat højst 52,06 %» medens værktøjet viste 55,9 %, så
+      sætningen læser nu begge tal fra `marginalSkatPct`; (2) `/timmar-i-aret`
+      havde danske rækkenavne i 7 af 7 rækker, så `perioderFor` nu tager et
+      sprog; (3) `/procent` havde et mellemrum FORAN pladsholderen, så den
+      renderede `span` hed « ? %». Alle tre mutationer målt røde. Se arkivet.
+      **Næste iteration:** de 4 åbne VERIFICÉR-noter fra 06:20–08:20 er ældre
+      end 07:30-vinduet og skal verificeres på **indhold**; derefter CEO-køens
+      punkt 0 (`dage-til.ts`: Valborg, svensk påskafton, dansk sankthans,
+      påskeaften-FAQ'en, `toUtcMidnight`).
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
 ## Fase 3 — trafik-drevet
@@ -349,6 +346,8 @@ afsnit) — ❓ kilde til norske timepriser låser både brødteksten og tabelle
 **Åben:** blogindlæg generelt (19 filer, 273 fund). Redaktionelle beløb i et
 indlæg er ikke samme fejlklasse som et beløb på en beregnerside. Beslut først,
 om de skal med; ellers skal de stå i portens undtagelsesliste som *blog*.
+
+`VERIFICÉR DEPLOY: de tre review-fund fra 3/10 09:1x (`minberegner.dk/topskat` skal have **1** «Med AM-bidrag er din marginalskat dér 55,9 %» i værktøjets skatteloft-boks og **0** «så højt din marginalskat kan blive», og samme sætning i `FAQPage`-JSON-LD'en skal være «… (ekskl. AM-bidrag og kirkeskat). Med AM-bidrag (8 %) er din marginalskat dér 55,9 %, og over top-topskat-grænsen lægges yderligere 5 % oveni.»; `beraknare.se/timmar-i-aret` skal have «Ett dygn», «En vecka», «Två veckor», «En månad (februari)», «En månad (april)», «En månad (januari)» og «Ett år» i hovedtabellens `<th scope="row">` — altså **0** «Et døgn», **0** «To uger» og **0** «En måned (»; `minberegner.dk/procent` skal have `>? %<` i begge resultatfelter — altså **0** `> ? %<`; **intet** `NaN`) ceo/rettelse-tre-reviewfund 3/10 08:35`
 
 ## Research 3/10 05:30
 

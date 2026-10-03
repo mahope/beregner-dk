@@ -206,6 +206,40 @@ describe("én forfatter pr. periode", () => {
       }
     }
   });
+
+  test("rækkenavnene står på sidens eget sprog, ikke altid på dansk", async () => {
+    // Fundet 3/10 09:1x: `perioderFor` læste `naevn.da` for døgn, uge og år
+    // og skrev «To uger» og «En måned (…)» i hånden, så beraknare.se/timmar-i-aret
+    // fik danske rækkenavne i 7 af 7 rækker — blandet med de oversatte
+    // månedsnavne i en ellers svensk side. Målt i den renderede tabel:
+    // ["Et døgn","En uge","To uger","En måned (februari)",…].
+    //
+    // Den gamle port (`toContain(raekke.navn)`) dømmer kun, at det samme
+    // objekt fra `perioderFor` står i HTML'en, aldrig hvilket sprog det er på,
+    // så den var grøn med alle syv danske navne i den svenske side.
+    const danske = timerOversigt("da", I_DAG).perioder.map((p) => p.navn);
+    for (const sprog of ["da", "se"] as const) {
+      const navne = timerOversigt(sprog, I_DAG).perioder.map((p) => p.navn);
+      for (const id of ["doegn", "uge", "aar"] as const) {
+        expect(navne, `${sprog}/${id}`).toContain(
+          timerIPeriode(id).naevn[sprog]
+        );
+      }
+    }
+    const svenske = timerOversigt("se", I_DAG).perioder.map((p) => p.navn);
+    expect(svenske).toContain("Två veckor");
+    expect(svenske.filter((n) => n.startsWith("En månad ("))).toHaveLength(3);
+
+    const html = await render("se");
+    expect(html).toContain("Två veckor");
+    expect(html).toContain("En månad (");
+    expect(html).not.toContain("En måned (");
+    // «februari» hedder «februari» på begge sprog, så månedsrækkerne dømmes på
+    // deres indpakning, de øvrige på hele navnet.
+    for (const navn of danske.filter((n) => !n.startsWith("En måned ("))) {
+      expect(html, navn).not.toContain(navn);
+    }
+  });
 });
 
 describe("tabellens tal i den renderede side", () => {

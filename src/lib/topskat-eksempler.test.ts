@@ -9,6 +9,8 @@ import {
   MELLEMSKAT,
   MELLEMSKAT_GRAENSE,
   SKATTELOFT,
+  SKATTELOFT_MED_AM,
+  SKATTELOFT_MED_AM_PCT,
   SKATTELOFT_PCT,
   marginalSkatPct,
   TOPSKAT,
@@ -66,6 +68,13 @@ const TILLADTE_PROCENTER = new Set(
     SATSER_2026.topTopskat,
     SKATTELOFT,
   ].map((sats) => `${formatBelob(sats * 100, "da", 2).replace(/\s/g, "")}%`)
+);
+// Samme niveau med AM-bidrag lagt ind — det tal sætningen lover, fordi
+// `marginalSkatPct` tager AM-bidraget først. Uden det her ville porten «hver
+// procent … kommer fra modulet» være rød på det nye tal. `SKATTELOFT_MED_AM`
+// står allerede i procent, så den ganges ikke med 100 som brøkdeleene ovenfor.
+TILLADTE_PROCENTER.add(
+  `${formatBelob(SKATTELOFT_MED_AM, "da", 2).replace(/\s/g, "")}%`
 );
 
 /** Én decimal, som værktøjet viser den. */
@@ -329,6 +338,43 @@ describe("/topskat — dansk tekst", () => {
     );
   });
 
+  test("«skatteloftet» er de fire satser — marginalskatten er højere, fordi AM-bidraget tages først", () => {
+    // Fundet 3/10 09:1x: brødteksten kaldte summen af de fire indkomstskatter
+    // «så højt **din marginalskat** kan blive dér», mens `marginalSkatPct`
+    // lægger AM-bidraget ind i tallet. Målt i den renderede komponent ved
+    // 3.000.000 kr. brutto: nøgletallet stod 60,5 %, og boksen lige under lovede
+    // 52,06 % — og 55,9 % nås allerede ved ca. 1,44 mio, som er *under*
+    // top-topskat-grænsen på 2.818.200 kr. Sådan modsagde siden sig selv i
+    // præcis det interval den beskriver, og tallet lå også i FAQPage-JSON-LD.
+    //
+    // Porten dømmer derfor **forholdet mellem de to tal** og ikke sætningen
+    // ordret: `SKATTELOFT` skal være lavere end `marginalSkatPct` for enhver
+    // indkomst over de fire grænser, ellers er den ene af de to påstande forkert.
+    const efterAm = (brutto: number) => brutto * (1 - SATSER_2026.amBidrag);
+    const kc = SATSER_2026.kommuneskatSnit;
+    const ki = SATSER_2026.kirkeskatSnit;
+    expect(SKATTELOFT_MED_AM_PCT).toBe("55,9 %");
+    expect(SKATTELOFT_MED_AM).toBe(marginalSkatPct(TOPTOPSKAT_GRAENSE, kc, 0));
+    for (const brutto of [
+      1_000_000, 1_500_000, 2_000_000, 2_800_000, 3_000_000, 5_000_000,
+    ]) {
+      expect(
+        marginalSkatPct(efterAm(brutto), kc, ki),
+        `${brutto} kr. brutto`
+      ).toBeGreaterThan(SKATTELOFT * 100);
+    }
+    // Begge tal skal stå i sætningen, så den ikke lover det ene og viser det
+    // andet. Ingen af dem er håndskrevet.
+    const svar = topskatFaqItems().find((f) =>
+      f.question.startsWith("Hvad er skatteloftet")
+    );
+    expect(svar?.answer).toContain(`din marginalskat dér ${SKATTELOFT_MED_AM_PCT}`);
+    expect(svar?.answer).not.toContain("så højt din marginalskat kan blive");
+    const komponent = las("src/components/TopskatBeregner.tsx");
+    expect(komponent).toContain("{SKATTELOFT_MED_AM_PCT}");
+    expect(komponent).not.toContain("så højt din marginalskat kan blive");
+  });
+
   test("alle fem svar er stadig på plads, og skatteloft-svaret er helt", () => {
     const side = getPageData("topskat", "da");
     expect(side?.faqItems).toHaveLength(5);
@@ -341,9 +387,8 @@ describe("/topskat — dansk tekst", () => {
     expect(skatteloft?.answer).toBe(
       "Under top-topskat-grænsen er de fire indkomstskatter — bundskat, " +
         "kommuneskat, mellemskat og topskat — tilsammen ca. 52,06 % (ekskl. " +
-        "AM-bidrag og kirkeskat), og det er så højt din marginalskat kan blive " +
-        "dér. Med AM-bidrag (8 %) og kirkeskat kan den reelle marginalskat dog " +
-        "være højere, og over top-topskat-grænsen lægges 5 % oveni."
+        "AM-bidrag og kirkeskat). Med AM-bidrag (8 %) er din marginalskat dér " +
+        "55,9 %, og over top-topskat-grænsen lægges yderligere 5 % oveni."
     );
   });
 });

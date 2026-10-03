@@ -7,7 +7,7 @@ import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { SATSER_2026 } from "@/lib/satser-2026";
-import { SKATTELOFT_PCT, TOPTOPSKAT as TOP_TOPSKAT_PCT, bruttoGraense, marginalSkatPct } from "@/lib/topskat-eksempler";
+import { SKATTELOFT_MED_AM_PCT, SKATTELOFT_PCT, TOPTOPSKAT as TOP_TOPSKAT_PCT, bruttoGraense, marginalSkatPct } from "@/lib/topskat-eksempler";
 
 // 2026-satser fra den fælles kilde (src/lib/satser-2026.ts)
 const AM_BIDRAG = SATSER_2026.amBidrag;
@@ -299,7 +299,7 @@ export default function TopskatBeregner() {
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <h2 className="font-semibold text-green-800 dark:text-green-300 mb-2">Skatteloft</h2>
           <p className="text-sm text-green-700 dark:text-green-400">
-            Under top-topskat-grænsen er bundskat, kommuneskat, mellemskat og topskat tilsammen {SKATTELOFT_PCT} (ekskl. AM-bidrag og kirkeskat), og det er så højt din marginalskat kan blive dér. Over top-topskat-grænsen lægges yderligere {TOP_TOPSKAT_PCT} oveni.
+            Under top-topskat-grænsen er bundskat, kommuneskat, mellemskat og topskat tilsammen {SKATTELOFT_PCT} (ekskl. AM-bidrag og kirkeskat). Med AM-bidrag er din marginalskat dér {SKATTELOFT_MED_AM_PCT}. Over top-topskat-grænsen lægges yderligere {TOP_TOPSKAT_PCT} oveni.
           </p>
         </div>
       </div>
