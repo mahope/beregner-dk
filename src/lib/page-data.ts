@@ -42,6 +42,12 @@ import { timerIPeriodeFaqSvar } from "./timer-periode";
 import { ugeDatoerFaqSvar } from "./ugenummer";
 import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
 import { kalorierFaqItems, kalorierOverskrifter } from "./kalorier-eksempler";
+import {
+  aktieskatBeskrivelse,
+  aktieskatFaqItems,
+  aktieskatOgBeskrivelse,
+  aktieskatSchemaBeskrivelse,
+} from "./aktieskat-eksempler";
 import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
 import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
@@ -1950,26 +1956,19 @@ faqItems: kalorierFaqItems("da"),
     "aktieskat": {
       slug: "aktieskat",
       title: "Aktieskat Beregner 2026 - Beregn skat på aktier | MinBeregner.dk",
-      description: "Beregn aktieskat 2026: 27% under 79.400 kr., 42% over. Sammenlign frit depot vs. aktiesparekonto (ASK, 17%). Se din skat og besparelse gratis.",
+      description: aktieskatBeskrivelse(),
       metaTitle: "Aktieskat Beregner 2026 - Beregn skat på aktier",
-      metaDescription: "Beregn aktieskat 2026: 27% under 79.400 kr., 42% over. Sammenlign frit depot vs. aktiesparekonto (ASK, 17%). Se din skat og besparelse gratis.",
+      metaDescription: aktieskatBeskrivelse(),
       keywords: ["aktieskat beregner", "skat på aktier", "aktieindkomst skat", "aktiesparekonto", "ASK skat", "27 procent aktieskat", "42 procent aktieskat", "progressionsgrænse aktier", "lagerbeskatning", "realisationsbeskatning"],
       ogTitle: "Aktieskat Beregner 2026 - Frit depot vs. ASK",
-      ogDescription: "Beregn din aktieskat gratis. Sammenlign frit depot (27/42%) med aktiesparekonto (17%).",
+      ogDescription: aktieskatOgBeskrivelse(),
       category: "Økonomi",
       breadcrumbCategory: "Økonomi",
       breadcrumbCategoryHref: "/kategori/oekonomi",
       schemaName: "Aktieskat Beregner 2026",
-      schemaDescription: "Beregn skat på aktieindkomst i 2026. Sammenlign frit depot (27/42%) med aktiesparekonto (17%).",
+      schemaDescription: aktieskatSchemaBeskrivelse(),
       schemaCategory: "FinanceApplication",
-      faqItems: [
-      { question: "Hvor meget skat betaler jeg af aktiegevinst i 2026?", answer: "I 2026 beskattes aktieindkomst i frit depot med 27% af de første 79.400 kr. (158.800 kr. for ægtepar) og 42% af beløb derover. I en aktiesparekonto (ASK) er satsen kun 17%." },
-      { question: "Hvad er forskellen på frit depot og aktiesparekonto?", answer: "I frit depot beskattes du ved realisationsbeskatning (27/42% når du sælger). I en aktiesparekonto (ASK) beskattes du med 17% lagerbeskatning (skat af urealiserede gevinster årligt). ASK har max indskud på 174.200 kr. i 2026." },
-      { question: "Hvad er progressionsgrænsen for aktieskat i 2026?", answer: "Progressionsgrænsen er 79.400 kr. i 2026. Aktieindkomst under denne grænse beskattes med 27%, og beløb over grænsen beskattes med 42%. For ægtepar er grænsen 158.800 kr. samlet." },
-      { question: "Kan jeg modregne tab i aktiegevinster?", answer: "Ja, tab på aktier kan modregnes i gevinster. Har du et nettotab, kan det fremføres til modregning i fremtidige aktiegevinster. Tab i frit depot kan kun modregnes i gevinster fra frit depot." },
-      { question: "Hvad er lagerbeskatning?", answer: "Lagerbeskatning betyder at du betaler skat af årets urealiserede gevinst — altså stigningen i værdi, selv om du ikke har solgt. Aktiesparekontoen bruger lagerbeskatning med en sats på 17%." },
-      { question: "Hvornår skal jeg betale aktieskat?", answer: "For frit depot betaler du skat i det år du sælger aktierne (realisationsbeskatning). For ASK betaler du skat årligt af årets værdistigning (lagerbeskatning). Skatten indberettes automatisk af din bank." },
-      ],
+      faqItems: aktieskatFaqItems(),
     },
     "arveafgift": {
       slug: "arveafgift",

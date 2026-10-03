@@ -1,22 +1,25 @@
-STATUS: 3/10 03:00. CI grøn ved start (`37082955811`). Sentry: ingen uløste
-     fejl 14 dage, og SDK'en **er** sat op (`src/sentry-config.ts` +
-     `src/sentry.server.config.ts`, samme DSN, ingen PII, ingen replay), så
-     det betyder rigtigvis ro. Sentry-punktet er lukket.
-     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-     `npm run build` — **grøn 3/10 02:58** (lint exit 0, typecheck exit 0,
-     **3913** tests i 245 filer, build exit 0).
-     **Denne iteration: review-fund 29/9, punkt 0 — begge fund rettet**
-     (`rettelse-lofter-i-privatlivs`). (1) [HØJ] `/afstand-mellem-adresser`
-     lovede **to gange** at hverken adresse eller rute gemmes, mens `rute.ts`
-     skriver ruten i hukommelsen i 7 dage under nøglen med de to koordinater;
-     privatlivspolitikken sagde det rigtigt. Ny `rute-cache.ts` rummer den ene
-     konstant og den ene sætning, som kode, brødtekst, FAQ og politik læser.
-     (2) [LAV] `5m x 4m` i `/kvadratmeter` → `5 m × 4 m`, én skrivemåde.
-     Se `docs/plan-arkiv.md`. Egen diff-review fandt desuden, at sætningen
-     måtte **ikke** begynde med «Vi gemmer hverken dine adresser» — den fik
-     politikken til at modsige sig selv tre sætninger inde.
-     **Næste iteration:** (1) mål de ti VERIFICÉR-noter i vinduet 3/10 07:30,
-     (2) F5b: næste slug er `/aktieskat` (5), så `/loen-efter-skat` (4).
+STATUS: 3/10 03:25. CI grøn ved start (`37084248300`). Sentry: ingen uløste
+      fejl 14 dage, og SDK'en **er** sat op, så Sentry-punktet er lukket.
+      **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+      `npm run build` — **grøn 3/10 03:22** (alle exit 0, **3920** tests i 246
+      filer). PR-TJEK: 2026-10-03 — ingen åbne PR'er.
+      **Denne iteration: F5b `/aktieskat`** (`aktieskat-faq-tal-fra-modul`).
+      Grænsen, de to satser, ASK-satsen og ASK-loftet lå håndskrevet i
+      metadata, i schema, i 4 af 6 FAQ-svar og i 5 beløb i brødteksten, mens
+      `AktieskatBeregner` læste `SATSER_2026` — søgeresultat og værktøj var to
+      uafhængige tal. Ny `aktieskat-eksempler.ts` læser samme modul.
+      **Deploy-diagnose: deploys er sunde, intet er faldet til.** Målt på
+      *indhold*: alt merged til og med 2/10 21:01 er live (`/su`, `/pension` har
+      0 × «kr. kr.»), alt fra 2/10 21:51 (`c4f376d`) er ikke. Sitemap
+      bekræfter samme snit: `/dage-til` (21:30) står i den, `/klokken-i`-hubben
+      (22:07) gør ikke, kun dens 12 landsider. Næste batch-vindue er
+      **3/10 07:30**, så de åbne VERIFICÉR-noter måles dér — og **0**
+      forgåede vinduer, altså ingen DEPLOY-MISSING. Den forrige notes «MÅLT
+      3/10 23:13 … ét vindue forgået» var en fejltagelse: klokken var 03:11,
+      og 23:13 kan ikke være sket endnu.
+      BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
+      **Næste iteration:** mål de 13 VERIFICÉR-noter i vinduet 3/10 07:30,
+      derefter F5b: næste slug er `/loen-efter-skat` (4).
 
 ## Fase 3 — trafik-drevet
 
@@ -233,6 +236,26 @@ bygger **alle otte** brødtekstbeløb og **alle seks** FAQ-beløb i tre sprog
 gennem `formatBelob`; `HAARDKODEDE_BELOB` for `konfirmation/page.tsx` **6 → 0**
 og listens målte sum **332 → 320**. Dansk byte-uændret.
 
+**Lukket 3/10 03:22 — `aktieskat-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **13** håndskrevne talgrupper væk — 4 metadata-
+/schemafelter + 4 af 6 FAQ-svar i `page-data.ts` og 5 beløb i `page.tsx` — så
+JSX-listens målte sum er **320 → 315** og `/aktieskat` står med **0**. **Ingen
+fejltal fundet, og det skal siges rent:** 79.400 = `SATSER_2026.
+aktieProgressionsgraense`, 27/42/17 % = `aktieSatsLav`/`Hoej`/`askSats`, 174.200
+= `askLoft`, og 158.800 er nøjagtigt 2 × 79.400. Slicen er et **lås mod
+2027-drift** — ændres en sats i `satser-2026.ts`, følger søgeresultat,
+`FAQPage`-JSON-LD og brødtekst med nu. Den eneste tekstændring er
+mellemrummet før procenttegnet («27%» → «27 %»), som er husets skrivemåde i
+`efterloen-eksempler`/`pension-eksempler`; beløbene er byte-uændret, og «kr.»
+kommer fra `getCurrencySuffix` som før. **Portens første udkast var cirkulær** —
+den læste modulets eget output og kunne derfor aldrig fange en håndskreven
+streng; den læser nu den publicerede `getPageData("aktieskat","da")`. Mutation
+(håndskrevet «79.500 kr.» + «27%» i `page-data.ts`) giver **2 røde** af 7.
+Dobbeltgrænsen for ægtepar fandtes kun i teksten — beregneren regner kun det
+enkelte depot — så den er nu **afledt** (`× 2`) med en docblock, der siger at
+reglen selv har ingen kilde i repoet og er bevaret uændret. **7 nye tests**
+(3913 → 3920).
+
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
 åbne er alle ❓-blokerede. **Ni filer er lukket**, se listen nedenfor.
 Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 →
@@ -303,7 +326,8 @@ tests** (3898 → 3905). ⛔ Se nyt ❓ om deltidsfaktoren 0,67 nedenfor.
 (`procentpoint-faq-tal-fra-modul`), `/kvadratmeter`
 (`kvadratmeter-faq-tal-fra-modul`) og `/konfirmation`
 (`konfirmation-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
-**`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende.**
+**`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende, og
+`/aktieskat` (`aktieskat-faq-tal-fra-modul`) den tiende.**
 
 **Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
@@ -311,10 +335,10 @@ portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
 Køen pr. slug (**78** målt 3/10 02:38 med egen AST-probe efter `/efterloen`):
 `moms` 15 (⛔) · `konfirmation` 6 → **0** · `efterloen` 5 → **0** ·
-`aktieskat` 5 · `loen-efter-skat` 4 · `topskat` 4 · `boernepenge` 4 ·
+`aktieskat` 5 → **0** · `loen-efter-skat` 4 · `topskat` 4 · `boernepenge` 4 ·
 `flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
 være faldet siden — mål den slug, du tager, på ny. **Anbefalet rækkefølge:**
-`/aktieskat` (5) → `/loen-efter-skat` (4) → `/topskat` (4). `/moms` er ⛔ (de
+`/loen-efter-skat` (4) → `/topskat` (4) → `/boernepenge` (4). `/moms` er ⛔ (de
 3 lovgrænser).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
@@ -413,6 +437,8 @@ De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
 `docs/plan-arkiv.md` under overskriften «VERIFICÉR DEPLOY-prøver», slug for slug
 — de blev 3/10 03:00 flyttet ud herfra, fordi de alene skubbede planen over
 40 KB.
+
+`VERIFICÉR DEPLOY: /aktieskat henter grænse og satser fra sit eget modul (metadata, schema og FAQ skal have «79.400 kr.», «158.800 kr.» og «174.200 kr.», og procenttallene skal stå med mellemrum foran: **0** × «27%», «42%», «17%», mens «27 %» står i både `<title>`-beskrivelsen og FAQ-svaret «Hvad er progressionsgrænsen for aktieskat i 2026?» i `FAQPage`-JSON-LD; brødteksten skal skrive «27 % af de første 79.400 kr.» og «158.800 kr.» for ægtepar; **intet** `NaN`, ingen «kr. kr.» og ingen dobbelt-enhed) ceo/aktieskat-faq-tal-fra-modul 3/10 03:22`
 
 ## ❓ Til Mads
 

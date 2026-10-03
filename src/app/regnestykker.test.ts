@@ -186,7 +186,7 @@ function findFejl(kode: string, fil: string): Fund[] {
  * commit af `ULIJ_HAEJ`/`ULIJ_LAV`. Resten er den kø, porten låser.
  */
 const HAARDKODEDE_BELOB: Record<string, number> = {
-  "src/app/aktieskat/page.tsx": 5,
+  "src/app/aktieskat/page.tsx": 0,
   "src/app/alder/page.tsx": 1,
 
   "src/app/befordringsfradrag/page.tsx": 3,
@@ -305,6 +305,11 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * børnebørn, 26.600 kr til svigerbørn) — de har ingen kilde i repoet, så de må
  * ikke gættes, og de må ikke forsvinde uden erstatning.
  *
+ * 320 → 315 den 3/10: `/aktieskat` stod med 5 fund i JSX-teksten —
+ * progressionsgrænsen (79.400 kr. to gange), dobbeltgrænsen for ægtepar
+ * (158.800 kr.) og ASK-loftet (174.200 kr.) stod i hånden, mens
+ * `AktieskatBeregner` læste `SATSER_2026`. De læses nu fra
+ * `aktieskat-eksempler.ts`, der læser samme modul.
  * 333 → 332 den 3/10: `/kvadratmeter` stod med 1 fund i JSX-teksten — den
  * danske blok skrev «3.000 kr.» i hånden, mens den svenske læste `PRIS_EKSEMPEL`.
  * 347 → 338 den 2/10: `/boligsalg` stod med 9 fund i JSX-teksten — otte
@@ -314,7 +319,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * `DEFAULT_VALUES` og tinglysningens eksporterede satser. **Ingen** er bevaret
  * som interval: de har ingen kilde, så de må ikke gættes (punkt 11).
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 320;
+const HAARDKODEDE_BELOB_I_LISTEN = 315;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -681,7 +686,9 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 3/10: 332 → 320, målt med portens egen `jsxBelob`, da
     // `/konfirmation`s 6 brødtekstbeløb læses fra `konfirmation-eksempler`.
     // (Listen lå 6 over det målte tal, så de 6 er ikke hele faldet.)
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(320);
+    // 3/10: 320 → 315, målt med portens egen `jsxBelob`, da `/aktieskat`s 5
+    // brødtekstbeløb læses fra `aktieskat-eksempler`.
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(315);
   });
 });
 

@@ -26302,3 +26302,96 @@ alligevel i planen og skubbede den over 40 KB. Den ligger her nu, slug for slug.
 | `leasing-faq-retning` (**målt 3/10 23:13: ikke live**, vindue 3/10 07:30) | `beraknare.se/leasing`: hele HTML'en skal have **0** `9 210 kr mer` og **3** `9 210 kr mindre` (synlig FAQ-tekst, `FAQPage`-JSON-LD, RSC) — sætningen «kostar leasingen 178 350 kr. Ett billån … kostar 169 140 kr, alltså 9 210 kr **mindre**». **0** `kr..` og **0** `kr.,` i hele HTML'en. Bemærk: **6** spørgsmål i live, ikke 7. |
 | `klokken-i-hub` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/klokken-i`: `<title>` skal være «Hvad er klokken i …? Klokken i 12 lande lige nu», `<meta name="description">` skal starte med «Det er HH:MM i <første land på siden>» og slutte med «Se klokken i alle 12 lande og tidsforskellen til Danmark.». `<h1>` «Hvad er klokken i …?» **én** gang. Siden skal have **12** links til `/klokken-i/*` plus ét til `/tidszone`. Rækkerne er sorteret på \|minutter\|, så rækkefølgen skifter med sommer-/vintertid: **første** række skal være det land der ligger tættest på Danmark (0 eller 60 minutter) og **sidste** det fjerneste (Australien/New York, 8-9 timer) — mål det på de to yderste, ikke på hele rækkefølgen. `beraknare.se/klockan-i`: samme **12** links med svenske slugs (`/klockan-i/spanien` …) og **intet** dansk: hverken «Tyrkiet» eller bogstaverne æ/ø. `minberegner.dk/klockan-i` skal **301** til `/klokken-i`, og `beraknare.se/klokken-i` 301 til `/klockan-i`. Sitemap på begge domæner skal have `…/klokken-i` og `…/klockan-i` som `daily`. `minberegner.dk/tidszone` skal have teksten «klokken i tolv lande» med link til hubben, `beraknare.se/tidszone` «klockan i tolv länder». **Intet** `NaN` |
 | `leasing-svenske-tal-fra-modul` (**ny**, vindue 3/10 07:30**) | `beraknare.se/leasing`: `<title>` skal være «Leasingkalkylator: bil på **300 000** kr = **4 121** kr/mån» og `metaDescription` «Bil på **300 000** kr med **150 000** kr i restvärde, **4,5** % ränta, **30 000** kr i kontantinsats och **36** mån: **4 121** kr i leasingkostnad per månad.». `schemaDescription` skal have «**4 121** kr per månad över **36** månader». FAQ'en skal have **syv** spørgsmål, hvor «Vad kostar leasing av en bil på **300 000** kr?» svarer «… blir månadskostnaden **4 121** kr, vilket är **178 350** kr totalt inklusive **28 350** kr i ränta.», «Vad är värdetabet på en leasingbil?» svarer «… är det **150 000** kr. Det är det belopp du betalar …» (~~belöp~~ → **belopp**, svensk stavemåde) og «Vad är fåretagsleasing och vad kostar det?» svarer «… ger **4 121** kr i leasingkostnad per månad.». **Hele HTML'en skal have 0** `\d\.\d{3}` på beløb — altså **intet** «4.121» / «300.000» / «178.350» / «28.350». **Intet** `NaN`. `minberegner.dk/leasing`: uændret (dansk og norsk blok har ingen beløb) |
+
+## 3/10 03:22 — `aktieskat-faq-tal-fra-modul` (F5b-slice 10)
+
+**Opgave.** `/aktieskat` er `daOnly`, så der er ét sprog og otte beløb/procenter
+at binde. `AktieskatBeregner` læste allerede `SATSER_2026`
+(`aktieProgressionsgraense`, `aktieSatsLav`, `aktieSatsHoej`, `askSats`,
+`askLoft`), mens **teksten** skrev dem i hånden:
+
+| Sted | Før |
+|---|---|
+| `page-data.ts` `description` + `metaDescription` | «27% under 79.400 kr., 42% over … (ASK, 17%)» |
+| `page-data.ts` `ogDescription` + `schemaDescription` | «frit depot (27/42%) med aktiesparekonto (17%)» |
+| 4 af 6 `faqItems` (publiceret som `FAQPage`-JSON-LD) | 79.400 / 158.800 / 174.200 kr. + 27/42/17 % |
+| `page.tsx` brødtekst | 5 beløb: 79.400 ×2, 158.800, 174.200, 79.400 |
+
+Altså 13 håndskrevne talgrupper. Målt med portens egen `jsxBelob`:
+`HAARDKODEDE_BELOB["src/app/aktieskat/page.tsx"]` **5 → 0**, listens sum
+**320 → 315**.
+
+**Ingen fejltal — verificeret mod modulet:**
+
+```
+79.400  = SATSER_2026.aktieProgressionsgraense   158.800 = 2 × 79.400  ✓
+27 %    = SATSER_2026.aktieSatsLav   0.27        42 %    = aktieSatsHoej 0.42  ✓
+17 %    = SATSER_2026.askSats        0.17        174.200 = askLoft             ✓
+```
+
+Slicen er derfor et **lås mod 2027-drift**: før denne kunne `satser-2026.ts` blive
+rettet, og så viste værktøjet den nye sats mens titel, beskrivelse, JSON-LD og
+brødtekst stod med den gamle. Ingen af husets porte kan se det — en streng med
+et tal er gyldig JSX.
+
+**Én reel tekstændring:** mellemrummet før procenttegnet, «27%» → «27 %» i
+brødtekst og de lange metadatafelter. Det er husets skrivemåde i
+`efterloen-eksempler`, `pension-eksempler` og `kvadratmeter-eksempler`, og det
+samme blev rettet på `/efterloen` 3/10 tidligere på dagen. **Beløbene er
+byte-uændret.** Valutaenheden kommer fra `getCurrencySuffix("da")` som før, så
+«79.400 kr.» ikke blev til «79.400 kr kr.», og `aktieBelob()` er eksporteret,
+så brødteksten ikke hardkoder «kr.» ved siden af modulet.
+
+**Dobbeltgrænsen for ægtepar (158.800 kr.) fandtes kun i teksten** —
+beregneren regner kun det enkelte depot. Den er nu **afledt**
+(`AKTIE_GRAENSE * 2`) i stedet for at være et håndskrevet tal, så de to ikke kan
+glide fra hinanden. Docblocken siger ærligt, at *reglen* (at grænsen fordobles
+for ægtepar) har ingen kilde i repoet og ikke er slået op — den er sideens
+eksisterende påstand og er bevaret uændret (punkt 11).
+
+**Porten — og en cirkulær fejl, fundet ved mutation.** Første udkast læste
+`aktieskatFaqItems()` og dømte modulets **eget** output mod modulet: 6 af 7
+tests passede mod den gamle, håndskrevne kode. Porten læser nu den publicerede
+`getPageData("aktieskat", "da")`, som er præcis det `FAQSchema` læser. Mutation
+(håndskrevet «Progressionsgrænsen er 79.500 kr. … 27%» i `page-data.ts`) giver
+**2 røde af 7**: beløbsporten og JSON-LD-bindingsprøven.
+
+**Gate:** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3920/3920** i 246
+filer · `npm run build` 0. 7 nye tests (3913 → 3920). Punkt 13 kørt på hele
+diffen: 0 forekomster af `^\+.*\$[0-9]`.
+
+## 3/10 03:11 — Deploy-diagnose: batch-deployeren er ikke gået i stykker
+
+Iterationen begyndte med at ville skrive `DEPLOY-MISSING`, fordi
+`beraknare.se/leasing` stadig sagde «9 210 kr **mer**» mens koden siger
+«9 210 kr **mindre**» (`ceo/leasing-faq-retning`, 2/10 21:51), og fordi
+`minberegner.dk/klokken-i` gav 404. **Begge dele er forventet**, og det er
+målt på indhold, ikke på HTTP-kode:
+
+```
+2/10 20:53  /pension   0 × "kr. kr."              LIVE
+2/10 21:01  /su        0 × "kr. kr."              LIVE
+2/10 21:30  /dage-til  i sitemap.xml              LIVE
+2/10 21:51  /leasing   "9 210 kr mer"             ikke live
+2/10 22:07  /klokken-i 404, men 12 landsider 200  hubben ikke live
+2/10 22:33  /vaegttab  10 × "2 209" + 3 × "2.209" ikke live
+2/10 22:56  /kalorier  4 × "1.780"                ikke live
+3/10 00:40  /efterloen 6 × "91%" + 2 × "91 %"     ikke live
+3/10 00:58  /kvadratmeter 3 × "5m x 4m"           ikke live
+```
+
+Snittet ligger præcis mellem 21:01 og 21:51 — altså lige efter **2/10 21:30**,
+som var sidste batch-vindue. Klokken var 03:11, så **0** batch-vinduer var
+forløbet siden de 13 commits. Den forrige iterations note
+(«MÅLT 3/10 23:13 … ét vindue forgået») var altså en fejltagelse: 23:13 kan ikke
+være sket endnu, og selv om den kunne, ville det være 0-1 vinduer, ikke 4.
+
+**Leverance af diagnosen:** alle 13 åbne VERIFICÉR-noter skal måles i vinduet
+**3/10 07:30** — de er ikke forsinkede, de er bare ikke kørt endnu. Og der skal
+ikke skrives `DEPLOY-MISSING`, endsige stoppe merges.
+
+**Målemetode, genbrugelig.** Strip `<!-- -->`-kommentarmarkørerne fra HTML'en,
+ellers matcher ingen regex på tal og tekst, og brug et **snit mellem to commits
+på hver side af et batch-vindue** frem for ét enkelt tegn: `/klokken-i` så
+falsk ud, fordi de 12 landsider *er* live (ældre commit) mens hubben fra samme
+commit ikke er — sitemap-grep alene ville givet et forkert svar.
