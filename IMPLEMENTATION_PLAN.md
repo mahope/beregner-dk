@@ -1,34 +1,30 @@
-STATUS: 3/10 22:0x. ✅ **Porten så ikke de fejl, den var skrevet til at se** —
-       `ceo/procent-mellemrum-rentefradrag-skattefradrag-topskat`.
-       *Målt:* den renderede port `procent-i-synlig-tekst.test.tsx` er **grøn**
-       med `{HOEJ_SATS_PCT}%` sat tilbage i `RentefradragBeregner:275`. Årsagen
-       er ikke en fejl i porten: `renderToStaticMarkup(<RentefradragBeregner/>)`
-       giver komponenten dens **tome** starttilstand, så alt under
-       `{result.lowRateAmount > 0 && …}` renderer aldrig. `regnestykker` så dem
-       heller ikke — dets scanner dømmer `JsxText` med `/\d%/`, og noden efter
-       `{HOEJ_SATS_PCT}` er kun `%`. De to porte var blinde for præcis den fejl,
-       de blev skrevet til at fange.
-       *Fix:* `interpolationUdenMellemrum()` dømmer **kilden** — en tekstnode
-       (JSX eller template) der begynner med `%` *og* følger efter en
-       interpolation. Mærket er `^%`, ikke `^\s*%`, fordi `{" "}` og
-       linjeskift giver et mellemrum i rå kilde som JSX kollapser bort.
-       Undtaget og målt: `style={{ width: `${pct}%` }}` er CSS (11 fund i
-       `Elberegner` alene), og `<span>%</span>` som badge på et talfelt
-       (`TopskatBeregner:181`, `RabatBeregner:149`) er en selvstændig pille —
-       derfor kræver reglen en interpolation som forgænger.
-       *Målt i korpuset:* 91 rå `}%` (grep) → 68 efter CSS-fradrag → **54
-       reelle** → **40** efter at denne slice rettede 14. Loftet står på 40.
-       Rettet: `/rentefradrag` (5, 442 besøgende/28d +207 %), `/renteberegner`
-       (4), `/pension` (3), `/moms` (2). Loftet i `regnestykker` 274 → **261**.
-       *Mutation:* `{HOEJ_SATS_PCT} % af` → `}% af` gør porten rød med
-       `RentefradragBeregner.tsx:275` i fejlteksten. Det kunne den
-       renderede port ikke.
-       ⚠️ *Fremtidig regel fra 3/10 19:5x:* `biome lint` på filer med
-       uvedkommende ændringer — kun `check --write` på egen kode.
-       CEO-kø punkt 0 gennemgået punkt for punkt 3/10 19:3x, alle otte fejl
-       rettet i HEAD. Begge review-fund står `RETTET 0a9b7bb`. CI grøn ved
-       start (`d286744`), ingen åbne PR'er, ingen uløste Sentry-fejl.
-       PR-TJEK: 3/10 21:0x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+STATUS: 3/10 21:5x. ✅ **Alle tre åbne review-fund rettet** — `ceo/review-fund-alder-tabel-og-sprog`.
+       *Målt, ikke troet:* `dagForAlderTabel`s begrundelse var **målt falsk** på
+       alle tre tal. Uden reglen er **8 af 26** rækker gyldige den 29. februar
+       (4, 8, 12, 16, 20, 40, 60, 80 — præcis dem hvis fødselsår er et skudår),
+       ikke «alle»; `beregnAlder(2008-02-29, 2024-02-29)` er 16 år **0 dage** og
+       5.844 dage = 16 × 365,25 helt, ikke «16 år og 1 dag»; og intervallet har 5
+       skuddage (3 strengt mellem), ikke otte. Beviset ligger nu i
+       `alder-levet.test.ts` som et mål på præcis de otte aldre, og docblock +
+       testkommentar skriver den sande begrundelse.
+       *Fix 2:* brødteksten på `/alder` lovede «den, der fylder alderen **i dag**»,
+       mens tabellen er regnet fra 28. februar — den modsagdes én dag hvert fjerde
+       år. Teksten skriver nu den dag, tallene er regnet fra (da + se).
+       *Fix 3:* **fem** danske ord i svensk brødtekst, synlige i dag på
+       beraknare.se: `og efter` (se /promille), `og ikke heller` (se /procent),
+       `Timmene er dage gange 24` + `minuter er det` (se /alder) og
+       `Antallet dagar` (se /dato) — de to sidste fandt porten, ikke mig.
+       *Ny port:* `se-tekst.test.ts` dømmer hele `sePages` for 32 ord der kun
+       findes på dansk, på ordgrænse, og springer slug/id/canonical over, fordi
+       beraknare.se bruger danske URL-slugs med vilje. Mutation: mod den gamle
+       kode giver den 7 fund på 4 sider.
+       ⚠️ *Målt fund:* `scripts/locale-leak.mjs` er **blind** for denne klasse.
+       Med alle fem fejl tilbage i `page-data.ts` giver `--gate` stadig **0
+       ureviewede** — R5 (rent ASCII-dansk) fanger dem ikke i `sePages`. Det er
+       grunden til at klassen er fundet igen og igen; se arkivet.
+       CEO-kø punkt 0 gennemgået 3/10 19:3x, alle otte fejl rettet i HEAD. CI
+       grøn ved start (`ca91b29`), ingen åbne PR'er, ingen uløste Sentry-fejl.
+       PR-TJEK: 3/10 21:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
 
 ## Åben opgave: de 40 resterende `}%`
 
@@ -363,9 +359,11 @@ blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 lukkede filers målinger står i `docs/plan-arkiv.md`.
 **Åbne F5b-slice: ingen — `/flyttebudget` er lukket 3/10 18:4x.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
+
 ## VERIFICÉR DEPLOY-noter
 
-**Åben note 3/10 19:5x:** `VERIFICÉR DEPLOY: <genereret grænse-påstand i den svenske promille-FAQ> ceo/svensk-promille-grænse 3/10 19:5x`.
+**Åben note 3/10 21:5x:** `VERIFICÉR DEPLOY: <29. februar-dagen i /alders tekst + fem danske ord i svensk FAQ + ny se-tekst-port> ceo/review-fund-alder-tabel-og-sprog 3/10 21:5x`.
+Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter ytterligare'` skal give **0** (og «— och efter ytterligare» = 1); `https://beraknare.se/procent` skal have «och inte heller», `beraknare.se/alder` «Timmarna är dagarna gånger 24 och aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas». `/alder`-teksten er daglig præcis den 29. februar, så den kan ikke dømmes før 2028-02-29 — døm da på «28. februar» i stedet for «i dag». Næste deploy-vindue 3/11 07:30.
 Døm på indhold: `curl -s https://beraknare.se/promille | grep -o 'nås alltså efter [0-9]* öl'`
 skal give **«nås alltså efter 1 öl»** (og `grep -c 'efter två öl'` = 0) i både
 den synlige FAQ og `FAQPage`-JSON-LD'en. Næste deploy-vindue 21:30.

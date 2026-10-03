@@ -40,7 +40,7 @@ export const ALDER_TOKENS = [
 export type AlderToken = (typeof ALDER_TOKENS)[number];
 
 /** "30. september 2026" / "30 september 2026" — datoen i sidens eget sprog. */
-function formaterDato(iso: string, locale: Locale): string {
+export function formaterDato(iso: string, locale: Locale): string {
   const dato = parseIsoDato(iso);
   if (!dato) {
     throw new Error(`Alder-eksemplets reference-dato ${iso} kan ikke læses`);

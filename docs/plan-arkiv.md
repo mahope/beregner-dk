@@ -28186,3 +28186,91 @@ siden» → **«tid siden dato»** som nr. 1 (og «lang tid siden» som nr. 3), 
 lång tid sedan datum». `grep -rn "tid siden|sedan dato" src/` giver 0 træffere
 i beregnerne, og GSC har «hvor lang tid» 824 visninger pos. 6 på
 `/tidsberegner`. Ny feature-opgave i planen.
+
+## 3/10 21:3x–21:5x — review-fund: alders-tabellens 29. februar + fremmedsprog i `sePages`
+
+Branch `ceo/review-fund-alder-tabel-og-sprog`. Fundene fra review-blokken 3/10
+21:0x var punkt 0, så de gik før CEO-køen.
+
+### Fund 1 (MIDDEL) — `dagForAlderTabel`s begrundelse var målt falsk
+
+Docblocken sagde: «på den dag giver **ingen** fødselsdato præcis N år: en
+fødselsdag 29. februar 2008 er 16 år *og* 1 dag den 29. februar 2024, fordi der
+kun er 8 skuddage — ikke 9 — i de 16 år», og at invarianten `dage === 0` ellers
+ville gøre *alle* rækker tomme. Alle tre påstande er falske. Målt ved at
+transskribere `foedselsdatoVedAlder`, `beregnAlder` og `levetVedAlder` 1:1 og
+regne på tre skudårsdatoer:
+
+| Måling | Resultat |
+|---|---|
+| Rækker gyldige 29/2 uden reglen | **8 af 26**: 4, 8, 12, 16, 20, 40, 60, 80 |
+| Samme på 2020-02-29 og 2028-02-29 | identisk, 8 af 26 |
+| `beregnAlder(2008-02-29, 2024-02-29)` | 16 år, 0 måneder, **0 dage**, 5.844 dage = 16 × 365,25 helt |
+| Skuddage i 2008-02-29 → 2024-02-29 | 5 (2008, 2012, 2016, 2020, 2024), 3 strengt mellem |
+
+De otte overlevende rækker er præcis dem hvis fødselsår *er* et skudår, fordi en
+fødselsdag 29. februar er netop N år gammel, når begge endepunkter er 29. februar.
+De 18 øvrige har en fødselsdag 28. februar, og den er N år **og 1 dag** den 29.
+februar — så de forsvinder. Reglen er altså stadig nødvendig; begrundelsen var
+bare læst for flere gange end den var regnet. Beviset ligger nu i
+`alder-levet.test.ts` som et mål på præcis de otte aldre, så den ikke kan
+stille sig til som en regel uden grund igen.
+
+Den anden halvdel af fundet var en synlig modsigelse: `AlderDageVedAlder.tsx`
+skrev «Hver række er den, der fylder alderen **i dag**», mens tallene den 29.
+februar er regnet fra 28. februar. Teksten skriver nu den dag, tabellen faktisk
+er regnet fra, i begge sprog. `formaterDato` blev eksporteret fra
+`alder-side-tekst.ts`, fordi den allerede formaterede præcis sådanne datoer.
+Test: `AlderDageVedAlder.test.tsx` låser klokken til 2024-02-29 og til en
+almindelig dag. Mutation målt: med komponentens gamle tekst bliver 2 af 3 røde.
+
+### Fund 2+3 (MIDDEL + LAV) — fremmedsprog i `sePages`
+
+Fem strenge, alle synlige i dag på beraknare.se:
+
+| Side | Rå | Rettet til |
+|---|---|---|
+| se /promille | «— **og** efter ytterligare en timme» | «— **och** efter ytterligare» |
+| se /procent | «du sparar, **og ikke heller** som hur mycket» | «**och inte heller**» |
+| se /alder | «**Timmene er dage gange 24 og aldrig** 23 eller 25» | «**Timmarna är dagarna gånger 24 och aldrig**» |
+| se /alder | «**Räknas i minuter er det** {MINUTTER}» | «**är det**» |
+| se /dato | «**Antallet dagar** räknas som slutsiffrans» | «**Antalet** dagar» |
+| se /alder | «**dagar-tallet** för ett år» | «**dagar-talet**» |
+
+Promille-, procent-, alder- og dato-ændringerne var på vej ind i samme commit som
+den korrekte svenske grænse (`f5a022b`) og i to ældre commits, så de lå i live
+da de blev fundet. Sidste to fandt den nye port, ikke mig.
+
+### Ny port: `src/lib/se-tekst.test.ts`
+
+32 danske ord på ordgrænse over hele `sePages`-objektet, hentet gennem
+`getAvailableSlugs("se")` + `getPageData`. Den springer nøglerne `slug`, `id`,
+`canonical`, `path`, `href` og `url` over samt strenge der ligner slugs
+(`/^[a-z0-9-]+$/`) eller indeholder `http`/`{` — nødvendigt, fordi beraknare.se
+bevidst bruger danske URL-slugs (`/tidsberegner`, `/dato`). Alt andet med et
+mellemrum i sig dømmes, også nøgler porten ikke kender, så et nyt felt fanges
+automatisk. Ordlisten er ord med hård stavemåde forskel (`altid`/`alltid`,
+`dage`/`dagar`, `af`/`av`, `til`/`till`, `tallet`/`talet`, `antallet`/`antalet`,
+`grænse`/`gräns`, `værdi`/`värde`, `ændre`/`ändra`), så den har ingen
+falsk-positiver i korpuset. Mutation målt: mod den gamle `page-data.ts` giver
+den 7 fund på 4 sider (`/se/promille: og`, `/se/procent: og + ikke`,
+`/se/alder: og + dage + tallet`, `/se/dato: antallet`).
+
+### Målt fund: `scripts/locale-leak.mjs` er blind for denne klasse
+
+Repoet har allerede en port for dansk tekst der lækker til beraknare.se:
+`scripts/locale-leak.mjs` med R4 (`æ`/`ø` i den svenske blok) og R5 (rent
+ASCII-dansk, fordi «æ/ø-argumentet» alene ikke kan se «og», «ikke», «tallet»).
+R5 er altså lavet til præcis denne fejlklasse. **Målt:** med alle fem fejlene
+tilbage i `page-data.ts` giver `node scripts/locale-leak.mjs --gate --json`
+stadig **0 ureviewede** — de fem dukker ikke op nogen vegne. Kun 7 fund i
+`page-data.ts`, alle på modulniveau (linje 241-311), altså *uden* for `sePages`.
+
+Det er den målte forklaring på, hvorfor klassen er blevet fundet igen og igen
+revieweren igennem: porten siger at den dækker R5, men den dækker den ikke i
+`sePages`. Næste iteration bør finde ud af hvorfor (formelt søger R4/R5 nok kun
+inden for en `se: {`-nøse med brace-dybde, og `sePages` er 1.253 linjer dyb med
+templates og interpoleringer). **Anbefalet løsning:** find fejlen i scannerens
+blokgenkendelse og ret den, så `locale-leak.mjs` — ikke den nye port — er den ene
+port. Indtil da dækker `se-tekst.test.ts` `sePages`, og `locale-leak.mjs`
+dækker komponenterne.

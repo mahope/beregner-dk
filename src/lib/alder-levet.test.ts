@@ -59,9 +59,26 @@ describe("levetVedAlder", () => {
     expect(foedselsdatoVedAlder(4, "2024-02-29")).toBe("2020-02-29");
   });
 
-  // Uden `dagForAlderTabel` ville invarianten `dage === 0` slå *alle* rækker
-  // fra på 29. februar: en fødselsdag 29. februar 2008 er 16 år og 1 dag den
-  // 29. februar 2024, fordi der kun er otte skuddage i de 16 år.
+  // Uden `dagForAlderTabel` døde 18 af de 26 rækker den 29. februar, fordi
+  // invarianten `dage === 0` forlanger en fødselsdato præcis N år før dagen: en
+  // fødselsdag 28. februar er 16 år *og 1 dag* den 29. februar 2024. Kun de otte
+  // aldre hvis fødselsår er et skudår har en fødselsdag 29. februar — og den er
+  // netop N år gammel, fordi begge endepunkter er 29. februar. Beviset står her,
+  // fordi det er den regel `dagForAlderTabel`s docblock begrunder med.
+  test("på 29. februar overlever kun de otte skudårsaldre uden reglen", () => {
+    for (const skudDag of ["2024-02-29", "2020-02-29", "2028-02-29"]) {
+      const aldre = [...BARN_ALDRER, ...VOKSNE_ALDRER];
+      const gyldige = aldre.filter((aar) => {
+        const foedselsdato = foedselsdatoVedAlder(aar, skudDag);
+        const r = foedselsdato ? beregnAlder({ foedselsdato, beregningsdato: skudDag }) : null;
+        return r?.aar === aar && r?.maaneder === 0 && r?.dage === 0;
+      });
+      expect(aldre).toHaveLength(26); // 8 overlever, 18 forsvinder.
+      expect(gyldige).toEqual([4, 8, 12, 16, 20, 40, 60, 80]);
+    }
+  });
+
+  // Reglen flytter dagen én dag bagud i skudår, så tabellen har alle 26 rækker.
   test("tabellen har alle sine rækker på 29. februar", () => {
     expect(dagForAlderTabel("2024-02-29")).toBe("2024-02-28");
     // En dag der ikke findes, ændrer intet.

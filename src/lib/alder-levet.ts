@@ -163,14 +163,19 @@ export function foedselsdatoVedAlder(aar: number, referenceIso: string): string 
 /**
  * Den dag alders-tabellen regner fra.
  *
- * 29. februar findes kun i skudår, og på den dag giver **ingen** fødselsdato
- * præcis N år: en fødselsdag 29. februar 2008 er 16 år *og* 1 dag den 29.
- * februar 2024, fordi der kun er 8 skuddage — ikke 9 — i de 16 år. Uden denne
- * regel ville `levetVedAlder`s `dage === 0`-invariant gøre *alle* rækkerne
- * tomme hvert fjerde år, og overskriften "fylder alderen i dag" ville være
- * løgnen. Derfor regnes tabellen fra 28. februar i skudår: hver række er så
- * "den der fylder alderen den 28. februar", højst én dag gammel og kun i
- * skudår, og resten af året er den præcise dag.
+ * 29. februar findes kun i skudår, og på den dag er 18 af de 26 rækker ugyldige
+ * uden en regel. `levetVedAlder`s `dage === 0`-invariant forlanger en
+ * fødselsdato præcis N år før dagen, og en fødselsdag 28. februar er 16 år
+ * *og 1 dag* den 29. februar 2024. Kun de otte rækker hvis fødselsår **er** et
+ * skudår — 4, 8, 12, 16, 20, 40, 60 og 80 år — har en fødselsdag 29. februar,
+ * og den er netop N år gammel, fordi begge endepunkter er 29. februar. Målt i
+ * `alder-levet.test.ts`.
+ *
+ * Derfor regnes tabellen fra 28. februar i skudår: alle 26 rækker overlever, og
+ * hver række er så "den der fylder alderen den 28. februar" — højst én dag
+ * gammel, og kun i skudår. Resten af året er den præcise dag. Brødteksten
+ * skriver den brugte dag, når den afviger fra i dag, så de to ikke kan
+ * modsige hinanden.
  */
 export function dagForAlderTabel(referenceIso: string): string {
   return referenceIso.endsWith("-02-29") ? `${referenceIso.slice(0, -2)}28` : referenceIso;
