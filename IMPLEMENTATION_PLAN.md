@@ -1,23 +1,17 @@
-STATUS: 3/10 04:58. CI grøn ved start (`37085981241`). Sentry: ingen uløste
-      fejl 14 dage, og SDK'en **er** sat op, så Sentry-punktet er lukket.
-      **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-      `npm run build` — **grøn 3/10 04:52** (alle exit 0, **3927** tests i 247
-      filer). PR-TJEK: 2026-10-03 — ingen åbne PR'er.
-      **CEO-kø punkt 0 er færdigt og afkrydset** — alle otte fund var rettet i
-      `aca17e5` (valborg 30. april, svensk påskafton lørdag, dansk sankthans fast
-      23./24. juni, påskeaften-FAQ slettet, `/husleje` på nettoprisindekset,
-      `toUtcMidnight` i `Europe/Copenhagen`, svensk promille fra egen formel,
-      `maneder: 12` + advent-teksten). Verificeret mod koden i denne iteration.
-      **Denne iteration: F5b `/loen-efter-skat`** (`loen-efter-skat-faq-tal-fra-modul`).
-      Seks talgrupper lå håndskrevet i `page-data.ts` mens
-      `BruttoNettoBeregner` læser `SATSER_2026`, og de to metadatafelter
-      modsagde hinanden om AM-bidrag («8%» mod «8 %»). **To reelle fejl fundet
-      i min egen nye hjælper, målt før commit:** `formatBelob` har nul
-      decimaler som standard, så mellemskattens 0,075 × 100 blev «8 %» i stedet
-      for «7,5 %», og «kr.»-suffixet plus et punktum gav «54.100 kr..».
-      Kommuneskattens yderste satser er nu **afledt** af `KOMMUNER`.
-      **Næste iteration:** F5b `/topskat` (4 fund, målt i samme probe), og
-      **den nye feature** `/dage-mellem-datoer` — se Feature-kø.
+STATUS: 3/10 04:15. CI grøn ved start (`37085981241` + egen push). Sentry:
+      ingen uløste fejl 14 dage, og SDK'en **er** sat op, så Sentry-punktet er
+      lukket. **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run
+      test` · `npm run build` — **grøn 3/10 04:13** (alle exit 0, **3939** tests i
+      248 filer). PR-TJEK: 2026-10-03 — ingen åbne PR'er.
+      CEO-kø punkt 0 er færdigt og afkrydset (`aca17e5`).
+      **Denne iteration: den nye feature `/dage-mellem-datoer` + `/dagar-mellan-
+      datum`** (`ceo/dage-mellem-datoer`) — første feature i rækken, se
+      `docs/plan-arkiv.md`. 12 nye tests (3927 → 3939), tre mutationer målt
+      røde. **Én reel fejl fundet i min egen brødtekst før commit:**
+      «bytter beregneren dem, så svaret aldrig kan blive negativt» er
+      modsat af `DatoBeregner.tsx:494`, der renderer `resultat.dage` med
+      fortegn — rettet til at sige det, der sker.
+      **Næste iteration:** F5b `/topskat` (4 fund) eller F1.
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
 ## Fase 3 — trafik-drevet
@@ -36,6 +30,7 @@ STATUS: 3/10 04:58. CI grøn ved start (`37085981241`). Sentry: ingen uløste
 | `/boligstoette` | 529 | 7.465 | 2,4 % | 8,7 |
 | `/` (forside) | 218, bounce 38 % | under top-15 | — | — |
 | `/dage-til` + se `/dagar-till` | **0 — nye URL'er 2/10** (hubben) | — | — | — |
+| `/dage-mellem-datoer` + se `/dagar-mellan-datum` | **0 — nye URL'er 3/10** | — | — | — |
 | se `/dato` | 133 | 101.580 | 0,1 % | 8,2 |
 | se `/tidsberegner` | 167 | 61.934 | 0,2 % | 8,0 |
 | se `/procent` | under top-15 | 26.933 | 0,0 % | 9,9 |
@@ -140,7 +135,8 @@ er blokeret af en ❓ og må ikke gættes.
   tre spørgsmål, forside-kort og interne links. **MÅL:** `/afstand-mellem-adresser`
   0 (ny URL 3/10) → Plausible 17/10; GSC 14 dage: «beregn afstand mellem to
   adresser» og «afstand mellem to adresser».
-- **`/dage-mellem-datoer` + `/dagar-mellan-datum`** — *Hvem:* alle der
+- **[x] ✅ `/dage-mellem-datoer` + `/dagar-mellan-datum`** — se
+  `docs/plan-arkiv.md`. *Hvem:* alle der
   spørger «dage mellem datoer» / «dagar mellan datum». *Datagrund:* GSC
   2/10–30/30 lister «dage mellem datoer» (438v, **9.000 søgninger**, pos. 4) på
   `/dato`, og tre svenske varianter — «dagar mellan datum» (888v, 2k, pos. 8),
@@ -370,6 +366,8 @@ De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
 `VERIFICÉR DEPLOY: /aktieskat henter grænse og satser fra sit eget modul (metadata, schema og FAQ skal have «79.400 kr.», «158.800 kr.» og «174.200 kr.», og procenttallene skal stå med mellemrum foran: **0** × «27%», «42%», «17%», mens «27 %» står i både `<title>`-beskrivelsen og FAQ-svaret «Hvad er progressionsgrænsen for aktieskat i 2026?» i `FAQPage`-JSON-LD; brødteksten skal skrive «27 % af de første 79.400 kr.» og «158.800 kr.» for ægtepar; **intet** `NaN`, ingen «kr. kr.» og ingen dobbelt-enhed) ceo/aktieskat-faq-tal-fra-modul 3/10 03:22`
 
 `VERIFICÉR DEPLOY: /loen-efter-skat henter satser og grænser fra sit eget modul (metadata og FAQ skal have «54.100 kr.», «641.200 kr,» og «777.900 kr,» med **kr** *uden* punktum midt i sætningen; procenttallene skal stå med mellemrum foran: **0** × «8%», «7,5%», «15%», mens «8 %», «7,5 %», «5 %» og «15 %» står i `description`, `metaDescription`, `ogDescription` og i FAQ-svaret «Hvornår skal jeg betale mellemskat eller topskat i 2026?» i `FAQPage`-JSON-LD; kommuneskats-svaret skal have «ca. 22,5 % (Rundersdal) til 27,8 % (Langeland)»; **intet** `NaN` og ingen «kr..» eller «kr. kr.») ceo/loen-efter-skat-faq-tal-fra-modul 3/10 04:52`
+
+`VERIFICÉR DEPLOY: /dage-mellem-datoer + /dagar-mellan-datum (nye sider med eget slugsprog: `minberegner.dk/dage-mellem-datoer` skal have `<title>` «Dage mellem datoer: beregn antal dage mellem to datoer», **1** `<h1>`, **3** spørgsmål i `FAQPage`-JSON-LD («Hvor mange dage er der mellem to datoer?», «Er 2028 et skudår, og hvor mange dage er der i det?», «Hvorfor står der både dage og hele uger?»), eksempel-sætningen «Fra 1. januar 2026 til 1. januar 2027 går der 365 dage: 52 hele uger og 1 dag til.», og **0** «aldrig kan bli negativt»; `beraknare.se/dagar-mellan-datum` skal have `<title>` «Dagar mellan datum: räkna ut antal dagar mellan två datum» og eksemplet «… går det 365 dagar: 52 hela veckor och 1 dag till.», altså **0** «aldrig kan bli negativt»; **0** `NaN` på begge; begge URL'er skal ligge i hvert sit eget sitemap med `daily`, og `minberegner.dk/dagar-mellan-datum` + `beraknare.se/dage-mellem-datoer` skal 301'e til hver sin egen sti) ceo/dage-mellem-datoer 3/10 04:15`
 
 ## ❓ Til Mads
 

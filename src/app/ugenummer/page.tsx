@@ -72,7 +72,8 @@ export default async function UgenummerPage() {
             </p>
             <p>
               Vil du se flere tidsrelaterede beregnere, så prøv{" "}
-              <Link href="/dato">datoberegneren</Link> (dage mellem datoer),{" "}
+              <Link href="/dato">datoberegneren</Link>,{" "}
+              <Link href="/dage-mellem-datoer">dage mellem datoer</Link>,{" "}
               <Link href="/nedtaelling">nedtælling</Link> (dage til en vigtig dato) eller{" "}
               <Link href="/alder">aldersberegneren</Link> (din præcise alder).
             </p>

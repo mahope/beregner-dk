@@ -26497,3 +26497,42 @@ Dobbeltgrænsen for ægtepar fandtes kun i teksten — beregneren regner kun det
 enkelte depot — så den er nu **afledt** (`× 2`) med en docblock, der siger at
 reglen selv har ingen kilde i repoet og er bevaret uændret. **7 nye tests**
 (3913 → 3920).
+
+## 3/10 04:15 — `dage-mellem-datoer` (ny feature, første i rækken)
+
+**Hvad:** egen dansk side `/dage-mellem-datoer` og egen svensk side
+`/dagar-mellan-datum` om «dage mellem datoer» — GSC 2/10–30/30 lister
+«dage mellem datoer» (438v, ca. 9.000 søgninger, pos. 4) på `/dato` og tre
+svenske varianter (888v/424v/399v, pos. 8-9) på `beraknare.se/dato`, der har
+105.188 visninger og 0,1 % CTR. Værktøjet lå som ét afsnit i `/dato`s brødtekst.
+
+**Filer:** `src/lib/dage-mellem-datoer.ts` (copy + tal), `src/components/
+DageMellemDatoer.tsx` (metadata + route), to route-filer, `routing.ts` (301),
+`sitemap.ts` (daily), `dato/page.tsx` + `ugenummer/page.tsx` (tilbage-links),
+`meta-description.test.ts` (Undtagelse for den svenske sti på dansk vært), ny
+`src/app/dage-mellem-datoer.test.tsx` (12 tests).
+
+**Målt:** 3927 → **3939** tests. Porten dømmer titlen mod søgeordet, de tre
+spørgsmål i *både* den synlige tekst og `FAQPage`-JSON-LD (JSON'en læses tilbage
+og sammenlignes med kopien), canonical/hreflang/x-default, 301 mellem domænerne
+og 404 i norsk, daily-entry i begge sitemapme, tovejs-links, og at
+`/dagar-mellan-datum` **ikke** står i sit sitemap. Dagstallene i brødteksten
+dømmes mod `heleDageMellem`/`erSkudAar`: «365 dage i 2026» og «366 dage i 2028»
+er hele sætninger, så et håndskrevet tal rammer porten.
+
+**Mutationer målt (3):** titel uden søgeordet → 1 rød; 301-reglen slået fra →
+1 rød; «366» → «365» i kalender-afsnittet → 1 rød.
+
+**To fund undervejs, begge rettet før commit:**
+1. `intl-locale-tag`-porten fangede tre toarmede `sv-SE`/`da-DK`-kæder i det nye
+   modul (den port, der fanger «norsk bliver dansk»). Erstattet af
+   `getIntlLocale(locale)`.
+2. Min egen brødtekst skrev «bytter beregneren dem, så svaret aldrig kan blive
+   negativt» — `DatoBeregner.tsx:494` renderer `resultat.dage` *med* fortegn, så
+   en slutdato før startdatoen giver et negativt tal. Punkt 11 i min egen
+   tekst; rettet i begge sprog.
+
+**Ikke kørt:** ingen Playwright/skærmbilleder (repoet har intet), så `_design.md`s
+krav er ikke efterprøvet visuelt; den nye side bruger kun eksisterende
+komponenter og tokens (DatoBeregner, FAQ, Breadcrumbs, blå boks som på
+`/dage-til`), og har ingen nye breakpoints.

@@ -165,6 +165,11 @@ export default async function DatoPage() {
 
         <h2>Sådan tæller du dage mellem to datoer i Excel</h2>
         <p>
+          Vil du kun have det ene spørgsmål, så ligger der en{" "}
+          <Link href="/dage-mellem-datoer">dedikeret side til dage mellem datoer</Link>{" "}
+          med det samme værktøj og de tre oftest stillede spørgsmål.
+        </p>
+        <p>
           Læg startdatoen i <strong>A1</strong> og slutdatoen i{" "}
           <strong>B1</strong>, så er den korte formel{" "}
           <code>=B1-A1</code>. Den tæller forskellen i hele døgn: 1. januar
@@ -474,6 +479,11 @@ export default async function DatoPage() {
         </p>
 
         <h2>Så räknar du ut dagar mellan två datum i Excel</h2>
+        <p>
+          Vill du bara ha den frågan finns det en{" "}
+          <Link href="/dagar-mellan-datum">dedikerad sida för dagar mellan datum</Link>{" "}
+          med samma verktyg och de tre vanligaste frågorna.
+        </p>
         <p>
           Lägg startdatumet i <strong>A1</strong> och slutdatumet i{" "}
           <strong>B1</strong>, så är den korta formeln <code>=B1-A1</code>. Den

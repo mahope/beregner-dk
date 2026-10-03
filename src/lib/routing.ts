@@ -8,12 +8,23 @@ import {
   resolveDageTilSlug,
 } from "./dage-til";
 import { getKlokkenHubPath } from "./klokken-i";
+import { getDageMellemPath } from "./dage-mellem-datoer";
 
 /** The section's own path in each language. Kept here, next to the rule. */
 const DAGE_TIL_HUBS = ["/dage-til", "/dagar-till"] as const;
 
 /** Same rule for the clock section: one list, two languages, one URL each. */
 const KLOKKEN_HUBS = ["/klokken-i", "/klockan-i"] as const;
+
+/**
+ * «Dage mellem datoer» er to sider med samme værktøj, så den sti der ikke er
+ * dette domænes, sender 301 videre — ellers ville minberegner.dk servere den
+ * svenske tekst i dansk og beraknare.se den danske.
+ */
+const DAGE_MELLEM_SIDER = [
+  "/dage-mellem-datoer",
+  "/dagar-mellan-datum",
+] as const;
 
 export type RouteDecision =
   | { type: "allow" }
@@ -85,6 +96,20 @@ export function getRouteDecision(
     if (!egenHub) return { type: "not-found" };
     if (egenHub !== normalizedPath) {
       return { type: "redirect", destination: egenHub, status: 301 };
+    }
+  }
+
+  // Same rule for «dage mellem datoer»: the Danish and the Swedish page hold the
+  // same calculator, so the path that is not this domain's is a 301. Without it
+  // beraknare.se/dage-mellem-datoer would serve Danish text on a Swedish domain,
+  // and the same answer would live at two URLs.
+  if (
+    DAGE_MELLEM_SIDER.includes(normalizedPath as (typeof DAGE_MELLEM_SIDER)[number])
+  ) {
+    const egenSti = getDageMellemPath(domainConfig.locale);
+    if (!egenSti) return { type: "not-found" };
+    if (egenSti !== normalizedPath) {
+      return { type: "redirect", destination: egenSti, status: 301 };
     }
   }
 

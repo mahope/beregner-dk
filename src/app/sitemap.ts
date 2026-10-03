@@ -7,6 +7,7 @@ import type { Locale } from "@/lib/i18n";
 import { getAvailableSlugs } from "@/lib/page-data";
 import { getDageTilHubPath, getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
 import { getKlokkenHubPath, getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klokken-i";
+import { getDageMellemPath } from "@/lib/dage-mellem-datoer";
 
 // The sitemap route is rendered per request (it resolves the host from
 // headers), so a wall-clock default would stamp every URL with the moment
@@ -113,6 +114,20 @@ export function buildSitemap(
       ]
     : [];
 
+  // «Dage mellem datoer» har sit eget eksempel på siden, og det følger dagens
+  // dato, så den re-crawles dagligt lige som dage-til-siderne.
+  const dageMellemPath = getDageMellemPath(locale);
+  const dageMellemEntries: MetadataRoute.Sitemap = dageMellemPath
+    ? [
+        {
+          url: `${baseUrl}${dageMellemPath}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+      ]
+    : [];
+
   return [
     {
       url: baseUrl,
@@ -123,6 +138,7 @@ export function buildSitemap(
     ...categoryEntries,
     ...blogEntries,
     ...dageTilEntries,
+    ...dageMellemEntries,
     ...klokkenEntries,
     ...infoEntries,
   ];
