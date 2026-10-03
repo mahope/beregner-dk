@@ -152,14 +152,14 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
   describe("/boliglaan (belåningsgrad og rentespænd)", () => {
     test("da: 150.000 ud af 3.000.000 er 5,0 % med komma", () => {
       const tekst = helTekst(renderIn(<BoliglaanBeregner />, "da").container);
-      expect(tekst).toContain("5,0%");
+      expect(tekst).toContain("5,0 %");
       expect(tekst).not.toContain("5.0%");
     });
 
     test("da: rentespændene bruger komma", () => {
       const tekst = helTekst(renderIn(<BoliglaanBeregner />, "da").container);
-      expect(tekst).toContain("ca. 3,5-4,0%");
-      expect(tekst).toContain("ca. 5,0-7,0%");
+      expect(tekst).toContain("ca. 3,5-4,0 %");
+      expect(tekst).toContain("ca. 5,0-7,0 %");
     });
 
     test("se: rentespændene bruger komma, punktum ville være dansk", () => {
@@ -170,7 +170,7 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
 
     test("se: belåningsgraden skriver komma", () => {
       const tekst = helTekst(renderIn(<BoliglaanBeregner />, "se").container);
-      expect(tekst).toContain("5,0%");
+      expect(tekst).toContain("5,0 %");
       expect(tekst).not.toContain("5.0%");
     });
   });

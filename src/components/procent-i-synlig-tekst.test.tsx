@@ -25,6 +25,7 @@ import { describe, expect, test } from "vitest";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import type { Locale } from "@/lib/i18n";
+import BoliglaanBeregner from "./BoliglaanBeregner";
 import FeriepengeBeregner from "./FeriepengeBeregner";
 import { HomeContent } from "./HomeContent";
 
@@ -48,6 +49,14 @@ function renderFeriepenge(locale: Locale): string {
   ).replaceAll("<!-- -->", "");
 }
 
+function renderBoliglaan(locale: Locale): string {
+  return renderToStaticMarkup(
+    <LocaleProvider locale={locale} domainConfig={getDomainConfigByLocale(locale)}>
+      <BoliglaanBeregner />
+    </LocaleProvider>,
+  ).replaceAll("<!-- -->", "");
+}
+
 describe("procenttal i synlig markup", () => {
   test("forsidens brødtekst i da, se og no har 0 procenter uden mellemrum", () => {
     for (const locale of ["da", "se", "no"] as const) {
@@ -64,12 +73,25 @@ describe("procenttal i synlig markup", () => {
     expect(fund).toEqual([]);
   });
 
+  test("boliglånsberegneren har 0 procenter uden mellemrum i da, se og no", () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      const fund = synligeProcenter(renderBoliglaan(locale));
+      expect(fund, `boliglaan (${locale})`).toEqual([]);
+    }
+  });
+
   test("de to rettede strenge står med mellemrum", () => {
     const forside = renderToStaticMarkup(
       <HomeContent locale="da" siteName="MinBeregner" />,
     ).replaceAll("<!-- -->", "");
     expect(forside).toContain("tillæg eller fratræk 25 % moms");
     expect(forside).toContain("boafgift (15 %) og tillægsafgift (25 %)");
+
+    const boliglaan = renderBoliglaan("da");
+    expect(boliglaan).toContain("ca. 3,5-4,0 %");
+    expect(boliglaan).toContain("ca. 5,0-7,0 %");
+    expect(boliglaan).toContain("95,0 % belåning");
+    expect(boliglaan).toContain("Typisk 0,5-1,5 %");
 
     const feriepenge = renderFeriepenge("da");
     expect(feriepenge).toContain("Feriepenge (12,5 %)");

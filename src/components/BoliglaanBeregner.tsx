@@ -85,7 +85,7 @@ export default function BoliglaanBeregner() {
       variableRate: "Variabel rente (F-kort)",
       interestOnly: "Afdragsfrit (10 år)",
       contributionRate: "Bidragssats (% p.a.)",
-      contributionHelp: "Typisk 0.5-1.5% afhængigt af belåningsgrad",
+      contributionHelp: "Typisk 0,5-1,5 % afhængigt af belåningsgrad",
       otherCostsTitle: "Øvrige boligomkostninger (pr. måned)",
       propertyTax: "Ejendomsskat",
       insurance: "Forsikring",
@@ -99,9 +99,9 @@ export default function BoliglaanBeregner() {
       insuranceLabel: "Forsikring",
       hoaLabel: "Ejerforening",
       ltvLabel: "belåning",
-      ltvVeryHigh: "Meget høj belåning - de fleste banker kræver mindst 5% udbetaling",
-      ltvHigh: "Over 80% belåning kræver bankgaranti eller tillægslån med højere rente",
-      ltvNormal: "Normal belåningsgrad - du får adgang til realkreditlån op til 80%",
+      ltvVeryHigh: "Meget høj belåning - de fleste banker kræver mindst 5 % udbetaling",
+      ltvHigh: "Over 80 % belåning kræver bankgaranti eller tillægslån med højere rente",
+      ltvNormal: "Normal belåningsgrad - du får adgang til realkreditlån op til 80 %",
       ltvLow: "Lav belåningsgrad - du får de bedste vilkår og laveste bidragssats",
       loanAmount: "Lånebeløb",
       annualPayment: "Årlig ydelse",
@@ -126,14 +126,14 @@ export default function BoliglaanBeregner() {
       affordResult: (amount: string) => `Råd til bolig op til ${amount}`,
       affordDisclaimer: "Beregningen er vejledende. Kontakt din bank for en præcis vurdering af din lånekapacitet.",
       ratesTitle: "Typiske renter (februar 2026)",
-      fixed4: "4% fast (30 år)",
-      fixed5: "5% fast (30 år)",
+      fixed4: "4 % fast (30 år)",
+      fixed5: "5 % fast (30 år)",
       fShort: "F-kort",
       bankLoan: "Banklån",
-      rangeFixed4: "ca. 3,5-4,0%",
-      rangeFixed5: "ca. 4,5-5,0%",
-      rangeFShort: "ca. 3,5-4,0%",
-      rangeBankLoan: "ca. 5,0-7,0%",
+      rangeFixed4: "ca. 3,5-4,0 %",
+      rangeFixed5: "ca. 4,5-5,0 %",
+      rangeFShort: "ca. 3,5-4,0 %",
+      rangeBankLoan: "ca. 5,0-7,0 %",
       ratesDisclaimer: "Renterne er vejledende. Kontakt din bank for aktuelle tilbud.",
       year10: "10 år",
       year15: "15 år",
@@ -547,7 +547,7 @@ export default function BoliglaanBeregner() {
                 max={boligpris}
                 step={10000}
                 unit={currSuffix}
-                helpText={`${formatKr(udbetaling)} (${formatNumber((udbetaling / boligpris) * 100, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%)`}
+                helpText={`${formatKr(udbetaling)} (${formatNumber((udbetaling / boligpris) * 100, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %)`}
               />
 
               <InputField
@@ -685,7 +685,7 @@ export default function BoliglaanBeregner() {
                 )}
 
                 <div className={`text-center p-4 rounded-lg bg-gray-50 dark:bg-gray-700 mb-6 ${resultat.vurdering.farve}`}>
-                  <p className="font-medium">{resultat.belaaningsgrad}% {l.ltvLabel}</p>
+                  <p className="font-medium">{resultat.belaaningsgrad} % {l.ltvLabel}</p>
                   <p className="text-sm mt-1">{resultat.vurdering.tekst}</p>
                 </div>
 
@@ -713,7 +713,7 @@ export default function BoliglaanBeregner() {
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <p className="text-sm text-gray-500 dark:text-gray-400">{l.totalRate}</p>
                     <p className="font-bold text-lg dark:text-white">
-                      {formatNumber(rente + bidragssats, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}% p.a.
+                      {formatNumber(rente + bidragssats, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} % p.a.
                     </p>
                   </div>
                 </div>

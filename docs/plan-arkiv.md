@@ -27609,3 +27609,52 @@ keyword-ændring, ikke en typografirettelse.
 samme 10 warnings som før ændringen. Første kørsel af suiten var rød, fordi
 ratchet-portens hårdkodede `toBe(436)` ikke var opdateret — den fangede
 præcis den fejl den er skrevet til at fange.
+
+## 3/10 10:30-11:00 — F5c-slice: hele `BoliglaanBeregner.tsx`
+
+**Deploy-verifikation (curl på indhold, ikke HTTP 200).** To noter lukket:
+`ceo/procent-med-mellemrum` (06:45) — forside 2 × «100 % Gratis» og 0 «100%»,
+navigation 3 × «25 % moms», /feriepenge «12,5 % af din ferieberettigede løn» og
+«AM-bidrag (8 %)», /laaneberegner «5-25 %»/«4-12 %»/«(1-5 %»/«(100 %+)»,
+/husleje «30 % af din nettoindkomst» + «33 %, men 30 %» + «30% reglen» stadig
+(regelnavnet), `beraknare.se/laaneberegner` «5-15 %»/«3-8 %»/«(2-5 %)». Alle
+fem sider: 0 `NaN`. `ceo/timer-i-aret` (07:55) — dansk `<title>` «Hvor mange
+timer er der på et år? Timer i alle perioder», 1 `<h1>`, 20 rækker med
+`scope="row"` («Et døgn», «En uge», «To uger», «En måned (februar)», «En måned
+(april)», «En måned (januar)», «Et år»), `FAQPage` med «Hvor mange timer er der
+på en uge?», `beraknare.se/timmar-i-aret` 7 × «8 760 timmar» og 0 «8.760»,
+301 begge veje, 1 sitemap-entry hver. 0 `NaN` overalt.
+
+**Ikke live endnu (målt 10:3x, forventes efter 12:30-vinduet).** Den svenske
+periodetabel viser stadig «Et døgn»/«En uge»/«En måned (februari)» — rettelsen
+er `8cf72dd` (08:34). `beraknare.se/procent` har 3 `\d%`: «Från 100 till 125 =
+25%», «Exempel: 25%», «Lägg 20%» — rettet i `a68cb2f` (08:08). `/brutto-netto`
+har «ca. 25%», «22,8%», «7,5%», «0,7%», «12,01%». `/loen-efter-skat` «8%».
+Disse er deploy-vindue, ikke kodet fejl.
+
+**Koden.** `BoliglaanBeregner.tsx`: 10 literaler i den danske blok (de svenske og
+norske skrev allerede «8 %») + 3 interpolationer. `contributionHelp` havde
+desuden **punktum** i decimalen («Typisk 0.5-1.5%») midt i en dansk streng, så
+den er rettet til «Typisk 0,5-1,5 %» — samme skrivemåde som `no`-blokkens
+«0,5–1,5 %» minus streget.
+
+**Portene.** `procent-i-synlig-tekst.test.tsx` fik en ny test, der renderer
+`BoliglaanBeregner` i da/se/no og kræver 0 procenter uden mellemrum i den
+synlige markup (script/style og attributværdier fjernet før match, samme
+regex som F5c's scanner). Den ser **begge** fejltyper: mutation på en literal
+**og** på `{belaaningsgrad}%` gav røde med fund `['95,0%', '7,0%']`.
+`decimal-komma.test.tsx` låste «ca. 3,5-4,0%» og «5,0%» fast i fire påstande
+(dansk og svensk) — de er opdateret til «5,0 %»/«ca. 3,5-4,0 %». Bemærk: de var
+ikke porten for denne fejl, de **låste den**.
+
+**Målt.** Loftet `PROCENT_UDEN_MELLEMRUM_LOFT` 371 → 361 noder (målt ved at
+sætte loftet til 0 og læse `expected 361 to be less than or equal to 0`).
+
+**Gate.** lint + typecheck + build (10 warnings, uændret) + `TZ=UTC npm run
+test`: 4046 tests i 257 filer grønne. Første kørsel meldte 1 fejl fra
+`label-a11y.test.tsx` (`processTimers`) — samme fil passerer rent enkeltvis, på
+ren master (4045/257) kommer den ikke, og en gentaget kørsel på branchen er
+grøn. Flake, ikke gate.
+
+**Ikke kørt.** Ingen browser ved 360/390/768/1280 (repoet har intet Playwright),
+så de rettede strenge er verificeret i markup og DOM, ikke set i pixels.

@@ -921,7 +921,7 @@ const PROCENT_UNDTAGELSER: Record<string, string[]> = {
   "src/app/blog/pension-hvor-meget-skal-du-spare-op/page.tsx": ["4%-reglen"],
 };
 
-const PROCENT_UDEN_MELLEMRUM_LOFT = 371;
+const PROCENT_UDEN_MELLEMRUM_LOFT = 361;
 
 const PROCENT_MED_MELLEMRUM = [
   "src/app/boliglaan/page.tsx",
@@ -986,6 +986,6 @@ describe("procentnotation", () => {
       procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
     );
     expect(fund.length).toBeLessThanOrEqual(PROCENT_UDEN_MELLEMRUM_LOFT);
-    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(371);
+    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(361);
   });
 });

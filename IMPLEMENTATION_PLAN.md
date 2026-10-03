@@ -1,23 +1,31 @@
-STATUS: 3/10 10:1x. CI grøn ved start (`37107241978`), ingen åbne PR'er, ingen
+STATUS: 3/10 10:5x. CI grøn ved start (`37108884012`), ingen åbne PR'er, ingen
        uløste Sentry-fejl. **Gate:** `npm run lint` · `npm run typecheck` ·
-       `TZ=UTC npm run test` · `npm run build` — **grøn 10:1x** (alle exit 0,
-       **4045** tests i 257 filer; build har de samme 10 warnings som før).
+       `TZ=UTC npm run test` · `npm run build` — **grøn 10:5x** (alle exit 0,
+       **4046** tests i 257 filer, build med de samme 10 warnings som før; på
+       ren master 4045/257 uden fejl, så den ene «error» i første kørsel var
+       en flake i `label-a11y.test.tsx` og kom ikke igen).
        Review-fundene fra 09:10 stod alle med `RETTET 8cf72dd`, og CEO-køens
-       pkt. 0 (Valborg 30/4, svensk påskafton, fast sankthans, påskeaften-FAQ,
-       `/husleje`, `toUtcMidnight`, `/promille`, `dato-eksempler`) er alle
-       efterprøvet i koden — ingen åbne fund.
-       **Denne iteration:** F5c-slice på de tre næststørste blogindlæg
-       (`pension-hvor-meget-skal-du-spare-op` 20, `boliglaan-2026-renter-og-afdrag`
-       19, `maanedsbudget-2026-komplet-guide` 19): **58 noder** skrevet om til
-       «8 %». Loftet i `regnestykker.test.ts` **436 → 371** (korpustallet var
-       429 ved målingen — 436-loftet var ikke opdateret efter de to sidste
-       procent-commits). Tre nye *navne*-undtagelser, kun for regelnavne:
-       «30% reglen» ×2 og «4%-reglen» ×1.
-       **Målt:** 429 → 371 noder, 66 → 63 filer. `grep -E '\}%|%»'` på de tre
-       filer: 0 træffere, så der var heller ingen interpolerede procenter i
-       dem. Point 13: 0 `$[0]`-rester efter scriptet.
-       **Næste iteration:** de åbne VERIFICÉR-noter efter 12:30-vinduet, så
-       `/su`s fribeløbs-værktøj kan lukkes på indhold.
+       pkt. 0 er efterprøvet i koden — ingen åbne fund.
+       **Denne iteration:** F5c-slice på hele `BoliglaanBeregner.tsx` — 10
+       literaler + **3 interpolationer** (belåningsgrad-boksen, udbetalings-
+       hjælpeteksten, totalrente-kortet). `/boliglaan` har 20.768 GSC-visninger
+       og 391 besøgende/28d. Den synlige tekst på den danske side var den
+       eneste af de store sider, der stadig skrev «5%», «80%» og «ca.
+       3,5-4,0%»; svensk og norsk skrev allerede «8 %». **Målt:** loftet i
+       `regnestykker.test.ts` 371 → **361** noder. Ny rendered port i
+       `procent-i-synlig-tekst.test.tsx` renderer hele komponenten i da/se/no
+       og dømmer 0 procenter uden mellemrum; mutation på **en** literal og
+       **en** interpolation gav røde med fund `['95,0%', '7,0%']`, så porten
+       ser begge fejltyper. `decimal-komma.test.tsx` låste «ca. 3,5-4,0%» og
+       «5,0%» fast — de påstande er rettet, de var ikke porten. Punkt 13: 0
+       `$[0]`-rester.
+       **Deploy-verifikation:** `ceo/procent-med-mellemrum` (06:45) og
+       `ceo/timer-i-aret` (07:55) er hentet og **lukket på indhold**. Fire
+       noter er efter 07:30-vinduet og venter 12:30 — se listen nedenfor.
+       **Næste iteration:** (1) døm de fire ventende noter efter 12:30-vinduet,
+       især `ceo/procent-punkt-sweeps`, hvor `beraknare.se/procent` stadig har 3
+       `\d%`; (2) F5c-slice på de næste komponenter med `%` efter en
+       interpolation.
        BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
        ⚠️ **Fælde fundet:** `src/lib/locale-leak-gate.test.ts` **skriver
        plantede danske strenge ind i rigtige kildefiler** og gendanner dem i en
@@ -92,7 +100,7 @@ ved serverstart. Nøglefilen lå på `/api/indexnow-key/…` og er rettet 2/10
 **F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
 dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
 
-**F5c. [~] Procentnotationen «8 %» — 371 noder målt 3/10 10:1x.**
+**F5c. [~] Procentnotationen «8 %» — 361 noder målt 3/10 10:5x.**
 *Hvad:* de største resterende er `blog/30-procent-reglen-husleje` 25 (⛔ de er
 regelnavnet — de **skal** have en undtagelse, nogen må tage stilling til om
 sitets eget navn «30% reglen» skal skrives «30 %-reglen»), `/moms` 18 (⛔ de 3
@@ -100,12 +108,22 @@ lovgrænser, ❓ nedenfor), `billaan` 17, `blog/koeb-af-bolig-…` 15,
 `arveafgift` 14, `blog/guide-feriepenge-…` 13.
 *Accept:* loftet i `regnestykker.test.ts` (`PROCENT_UDEN_MELLEMRUM_LOFT`) må
 kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 → 509 →
-436 → **371** noder (3/10 10:1x; scanneren tæller noder, så en linje med to
-procenter tælles én gang). Rækken af navne-undtagelser er nu fem, ikke to:
+436 → 371 → **361** noder (3/10 10:5x; scanneren tæller noder, så en linje med
+to procenter tælles én gang). Rækken af navne-undtagelser er nu fem, ikke to:
 «30% reglen» i `husleje/page.tsx`, `page-data.ts` og de to blogindlægs
 sidelinks, plus «4%-reglen» i pensionsindlægget. Scannerens øvrige blinde
-plet er den interpolation fra 3/10 07:47 — hold øje med `}%` i den fil der
+plet er interpolation fra 3/10 07:47 — hold øje med `}%` i den fil der
 røres. Se `docs/plan-arkiv.md`.
+**Slice 3/10 10:5x — hele `BoliglaanBeregner.tsx` (10 literaler + 3
+interpolationer).** `procent-i-synlig-tekst.test.ts` renderer nu komponenten i
+da/se/no og dømmer den synlige markup på 0, så **begge** fejltyper er lukket for
+denne side: `rangeBankLoan: "ca. 5,0-7,0%"` **og** `{belaaningsgrad}%` gav røde
+med fund `['95,0%', '7,0%']`. `decimal-komma.test.tsx` låste «ca. 3,5-4,0%» og
+«5,0%» fast — de to påstande er opdateret, de er ikke længere porten.
+*Næste slice:* samme mønster for de 12 komponenter med `%` efter en
+interpolation (`grep -n '}%' src/components/*.tsx`): `Aktieskat` 211,
+`Andelsbolig` 280, `Arveafgift` 353/379/385, `Barsel` 397, `Billaan` 352,
+`Bolan` 94/126/130/161-163/178.
 
 - **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
   *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
@@ -262,17 +280,17 @@ målinger, mutationer og reelle fejl står i `docs/plan-arkiv.md`.
 **Åbne F5b-slice: `/flyttebudget` (3 fund), mål listen på ny først.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 
+`VERIFICÉR DEPLOY: procentnotationen «8 %» i hele boliglånsværktøjet (den synlige tekst i hele HTML'en på `minberegner.dk/boliglaan` skal have **0** `\d%` — altså **0** «5%», «80%», «4%», «3,5-4,0%», «5,0-7,0%»; de rettede strenge skal stå: «Typisk 0,5-1,5 %», «5 % udbetaling», «Over 80 % belåning», «4 % fast (30 år)», «5 % fast (30 år)», «ca. 3,5-4,0 %», «ca. 4,5-5,0 %», «ca. 5,0-7,0 %», og de tre interpolationer skal skrive «95,0 % belåning», «(16,7 %)» i udbetalingsfeltets hjælpetekst og «5,05 % p.a.» i totalrente-kortet; `beraknare.se/boliglaan` og `beregner.no/boliglaan` skal have de samme strenge med mellemrum; **intet** `NaN`) ceo/boliglaan-procent 3/10 10:5x`
+
 `VERIFICÉR DEPLOY: de tre review-fund fra 3/10 09:1x (`minberegner.dk/topskat` skal have **1** «Med AM-bidrag er din marginalskat dér 55,9 %» i værktøjets skatteloft-boks og **0** «så højt din marginalskat kan blive», og samme sætning i `FAQPage`-JSON-LD'en skal være «… (ekskl. AM-bidrag og kirkeskat). Med AM-bidrag (8 %) er din marginalskat dér 55,9 %, og over top-topskat-grænsen lægges yderligere 5 % oveni.»; `beraknare.se/timmar-i-aret` skal have «Ett dygn», «En vecka», «Två veckor», «En månad (februari)», «En månad (april)», «En månad (januari)» og «Ett år» i hovedtabellens `<th scope="row">` — altså **0** «Et døgn», **0** «To uger» og **0** «En måned (»; `minberegner.dk/procent` skal have `>? %<` i begge resultatfelter — altså **0** `> ? %<`; **intet** `NaN`) ceo/rettelse-tre-reviewfund 3/10 08:35`
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» på /procent og /boliglaan (hele HTML'en på `minberegner.dk/procent` skal have **0** `\d%` — altså **0** «10%», «25%», «5%», «50%», «1%» — og opslagstabellen skal have «10 % af 250 = 25» og «5 % af 250 = 12,5», tipboksen «50 % af 40 er det samme som 40 % af 50», listen «25 % moms på 1.000 kr = 250 kr i moms», og FAQ-svarene «Eksempel: 25 % af 200 = 50.» og «Læg 20 % til 150»; `beraknare.se/procent` skal have «25 % av 250 = 25», «50 % av 40 är samma sak som 40 % av 50» og **0** «10%»/«25%»/«5%»; værktøjets egen resultatlinje skal skrive «25 %» og forklaringen «25 er 25,00 % af 100» (dvs. den interpolerede procent er rettet, ikke kun brødteksten); `minberegner.dk/boliglaan` skal have «Minimum 5 % af boligens pris (anbefalet: 10-20 %)», «Op til 80 % af boligens værdi», tabellen «0-40 %»/«0,45-0,65 %»/«1,05-1,55 %», «ca. 25,6 % fradrag» og **0** `\d%`; `beraknare.se/boliglaan` skal have «Minst 10 % av bostadens pris», «90 % av bostadens värde (bolånetaket, höjt från 85 % 2026)», «30 % avdrag» og **0** `\d%`; **intet** `NaN`) ceo/procent-punkt-sweeps 3/10 08:00`
 
 `DEPLOY OK 3/10 08:5x` — VERIFICÉR DEPLOY: /dage-i-aaret + /dagar-i-aret (nye sider med tolv-måneders-tabel: `minberegner.dk/dage-i-aaret` skal have `<title>` «Hvor mange dage er der på et år? Dage i alle 12 måneder», **1** `<h1>`, **12** månedsrækker + **1** summeringsrække i tabellen, og **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange dage er der på et år?», «Hvor mange dage er der i augusti?» og «Hvor mange dage er der i juli?» — svaret på augusti skal være «31 dage … 21 hverdage og 10 weekenddage» og på juli «31 dage … 23 hverdage og 8 weekenddage»; summeringen skal være 365 dage / 251 hverdage / 104 weekend; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar» og månedsnavnet «augusti», altså **0** «august»; `minberegner.dk/dagar-i-aret` + `beraknare.se/dage-i-aaret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; **intet** `NaN`) ceo/dage-i-aaret 3/10 06:20`
 
-`VERIFICÉR DEPLOY: /timer-i-aret + /timmar-i-aret (nye sider med periode- og måneds-tabel i time: `minberegner.dk/timer-i-aret` skal have `<title>` «Hvor mange timer er der på et år? Timer i alle perioder», **1** `<h1>`, perioderækkerne «Et døgn» 1/24/1.440, «En uge» 7/168/10.080, «To uger» 14/336/20.160, «En måned (februar)» 28/672/40.320, «En måned (april)» 30/720/43.200, «En måned (januar)» 31/744/44.640 og «Et år» 365/8.760/525.600, **12** månedsrækker + **1** summeringsrække i den anden tabel, eksempelrækken «2026 har 365 dage, som er 8.760 timer.», **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange timer er der på et år?», «Hvor mange timer er der på en uge?» og «Hvor mange timer er der på en måned?»; `beraknare.se/timmar-i-aret` skal have «8 760 timmar» og **0** «8.760», og **0** «hur mange»; `minberegner.dk/timmar-i-aret` + `beraknare.se/timer-i-aret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; `minberegner.dk/tidsberegner` skal have «timer i hvert tidsrum» med link til siden og `beraknare.se/tidsberegner» «timmar i varje tidsperiod»; **intet** `NaN`) ceo/timer-i-aret 3/10 07:55`
+`DEPLOY OK 3/10 10:3x` — VERIFICÉR DEPLOY: /timer-i-aret + /timmar-i-aret (nye sider med periode- og måneds-tabel i time: `minberegner.dk/timer-i-aret` skal have `<title>` «Hvor mange timer er der på et år? Timer i alle perioder», **1** `<h1>`, perioderækkerne «Et døgn» 1/24/1.440, «En uge» 7/168/10.080, «To uger» 14/336/20.160, «En måned (februar)» 28/672/40.320, «En måned (april)» 30/720/43.200, «En måned (januar)» 31/744/44.640 og «Et år» 365/8.760/525.600, **12** månedsrækker + **1** summeringsrække i den anden tabel, eksempelrækken «2026 har 365 dage, som er 8.760 timer.», **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange timer er der på et år?», «Hvor mange timer er der på en uge?» og «Hvor mange timer er der på en måned?»; `beraknare.se/timmar-i-aret` skal have «8 760 timmar» og **0** «8.760», og **0** «hur mange»; `minberegner.dk/timmar-i-aret` + `beraknare.se/timer-i-aret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; `minberegner.dk/tidsberegner` skal have «timer i hvert tidsrum» med link til siden og `beraknare.se/tidsberegner» «timmar i varje tidsperiod»; **intet** `NaN`) ceo/timer-i-aret 3/10 07:55`
 
-**MÅLT 3/10 09:0x: 8 af 9 krav er live** (forsiden 0 × «100%» og 2 × «100 % Gratis», navigation «25 % moms», /feriepenge «12,5 % af din ferieberettigede løn», /laaneberegner «5-25 %»/«4-12 %»/«(1-5 %)», /husleje «30 %» + «33 %, men 30 %» og «30% reglen» stadig) — og den 9. var F5d-arbejde, ikke en deploy-fejl: `ceo/procent-med-mellemrum`.
-
-`VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
+`DEPLOY OK 3/10 10:3x` — VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
 
 `VERIFICÉR DEPLOY: procenttal i forsidens brødtekst og feriepengetabellen (hele HTML'en på `minberegner.dk/` skal have **0** `\d%` — altså **0** «25%», «15%» — og stadig **2** × «100 % Gratis»; `minberegner.dk/feriepenge` skal have «Feriepenge (12,5 %)», «- AM-bidrag (8 %)» og «- Skat (estimat ~38 %)» med **0** `\d%`; `beraknare.se/` skal have «lägg till eller dra av 25 % moms», «legg til eller trekk fra 25 % MVA», «tillæg eller fratræk 25 % moms» og «boafgift (15 %) og tillægsafgift (25 %)»; **intet** `NaN`) ceo/procent-forside-feriepenge 3/10 09:4x`
 
@@ -280,19 +298,26 @@ målinger, mutationer og reelle fejl står i `docs/plan-arkiv.md`.
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i tre blogindlæg (hele HTML'en skal have **0** `\d%` i den løse tekst: `minberegner.dk/blog/pension-hvor-meget-skal-du-spare-op` skal have «12-17 %», «8-12 %», «4-5 %», «~38 %», «(70 %)», «60-80 %», «10-12 %» … «22-30 %», «*Med 5 % årligt afkast» og «30-årig = 70 % aktier, 30 % obligationer»; `minberegner.dk/blog/boliglaan-2026-renter-og-afdrag` skal have «3,5-4,5 %», «2-3 %», «2,5-3,5 %», «4-7 %», «Finansierer over 80 %», «Udbetaling (5 %)», «op til 80 %», «Banklån (5-15 %)», «150.000 kr (5 %)», «2.400.000 kr (80 %)», «450.000 kr (15 %)», «30-33 %», «0,5-1,2 %», «25-33 %», «Sæt 2-3 % af boligprisen»; `minberegner.dk/blog/maanedsbudget-2026-komplet-guide` skal have «30-35 %», «50 % til nødvendigheder», «30 % til personlige ønsker», «20 % til opsparing og gæld», «10-20 %», «15-25 %», «25.000-35.000 kr/måned», «30-40 %», «12-18 %», «8-12 %», «5-10 %» og alle otte tabel-celler «33 %», «20 %», «12 %», «8 %», «7 %», «12 %», «8 %», «100 %». **Undtagelserne er de tre regelnavne og skal STÅ:** «30% reglen» i de to blogindlægs sidelinks og «4%-reglen» i pensionsindlægget, så **2** «30% reglen» på tværs og **1** «4%-reglen»; altså **0** «30 % reglen» og **0** «4 %-reglen»; **intet** `NaN`) ceo/procent-sweep-pension-boliglaan 3/10 10:1x`
 
-## VERIFICÉR DEPLOY-noter — lukket 3/10 08:0x på indhold
+## VERIFICÉR DEPLOY-noter
 
-**12 af 12 lukket.** Alle noter fra merges før 07:30-vinduet er hentet med curl
-og dømt på **indhold**, aldrig på HTTP 200. Måleresultatet pr. slug står i
-`docs/plan-arkiv.md` under «3/10 08:15». Kort fortalt: de 12 viste den nye kode
-på indhold, og de to afvigelser (`/aktieskat`s «27/42%» og `/loen-efter-skat`s
-«8%») findes også i `git grep HEAD` — de er F5c-rester, ikke deploy-fejl, fordi
-de er brødtekst og ikke de tal, noternehandlede om.
+**14 lukket på indhold** (`ceo/procent-med-mellemrum` 06:45 og
+`ceo/timer-i-aret` 07:55 lukket 10:3x; de 12 fra før 07:30-vinduet står målt
+i `docs/plan-arkiv.md`). HTTP 200 er aldrig brugt som bevis — kun curl på
+indhold.
 
 **Åbne (merges efter 07:30-vinduet, dømmes på indhold efter 12:30):**
-`ceo/procent-med-mellemrum` 06:45 · `ceo/dage-i-aaret` 06:20 ·
-`ceo/timer-i-aret` 07:55 · `ceo/procent-punkt-sweeps` 08:00 ·
-`ceo/procent-punkt-sweep-side-data` 08:20 · `ceo/su-indtaegtsgraense` 10:1x.
+`ceo/procent-punkt-sweeps` 08:00 · `ceo/procent-punkt-sweep-side-data`
+08:20 · `ceo/su-indtaegtsgraense` 10:1x ·
+`ceo/procent-sweep-pension-boliglaan` 10:1x · `ceo/boliglaan-procent` 10:5x.
+**Målt 3/10 10:3x:** `ceo/timer-i-aret` er hentet og dømt på indhold — danske
+perioderækker «Et døgn»/«En uge»/«To uger»/«En måned (februar)»/«En måned (april)»/
+«En måned (januar)»/«Et år», 20 rækker i alt, `FAQPage` med 2 af 3 spørgsmål,
+`beraknare.se/timmar-i-aret` med «8 760 timmar» og 0 «8.760», begge 301'er
+rigtige og begge URL'er i hvert sit sitemap. Svensk tabels «Ett dygn» er fra
+review-rettelsen `8cf72dd` (08:34) og **endnu ikke live** — den venter 12:30.
+`ceo/procent-punkt-sweeps` er **delvis live**: `/procent` har 0 `\d%`, men
+`beraknare.se/procent` har 3 («Från 100 till 125 = 25%», «Exempel: 25%»,
+«Lägg 20%») — de er rettet i `a68cb2f` (08:08) og venter 12:30.
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i metadata og FAQ på tværs af alle slugs (helt korpuset i `page-data.ts` er skrevet om, så **hele HTML'en** på de berørte sider skal have **0** `\d%` — altså **0** «25%», «12,5%», «8%», «5%», «100%» — undtagen **1** «30% reglen» pr. `/husleje` (regelnavnet). Prøv især `minberegner.dk/boernepenge` («12,5 %», «2 %», «AM-bidrag (8 %)», 0 × «kr.,»), `minberegner.dk/feriepenge` («12,5 %»), `minberegner.dk/rentefradrag` («33,6 %», «25,6 %»), `minberegner.dk/su` («100 %», «80 %»), `minberegner.dk/arveafgift` («15 %», «25 %»), `minberegner.dk/husleje` («30 %», «33 %», **1** «30% reglen»), `minberegner.dk/opsparing` («5 %», «10-20 %», «~7 %», «2-4 %», «under 1 %»), `minberegner.dk/konfirmation` («40-50 %», «20-30 %», «20-25 %»), `minberegner.dk/arvestigning` («20 %», «80 %», «0,51 %», «5,1‰» — promillen skal **beholde** sin skrivemåde), `minberegner.dk/dagpenge` («90 %», «100 %», «80 %»), `minberegner.dk/brutto-netto` («25,049 %», «AM-bidrag (8 %)»), `minberegner.dk/promille` og `minberegner.dk/procent`; `beraknare.se/procent` («25 %», «20 %», «2 %», «3 %»), `beraknare.se/leasing` («85 %», «15 %», «30 %», «21 %», «20 %»), `beraknare.se/moms` («25 %», «15 %», «12 %», «20 %»), `beraknare.se/boernepenge` («100 %», «80 %») og `beraknare.se/dagpenge` («5 %»); **intet** `NaN`) ceo/procent-punkt-sweep-side-data 3/10 08:20`
 
