@@ -831,6 +831,15 @@ describe("beløb i strengliteraler", () => {
  * dem (26 + 26 brødtekst + 3 FAQ-svar i `page-data.ts` + 5 i
  * `ProcentBeregner`s hurtige reference).
  *
+ * `page-data.ts` kom på listen 3/10 08:1x med **73** fund — den største
+ * enkeltfil, fordi den bærer `description`, `metaDescription`,
+ * `ogDescription`, `schemaDescription`, keywords og alle FAQ-svar for
+ * *alle* slugs i da, no og se. Den er skrevet om med samme regel, så de tre
+ * sprog skriver «25 %»/«25 %»/«25 %» og ikke tre forskellige ting. Den ene
+ * undtagelse er «30% reglen husleje», som er husets *navn* på
+ * tommelfingerreglen (jf. `husleje/page.tsx`), ikke en løs procent. Loftet
+ * faldt derfor 509 → 436.
+ *
  * **Scannerens blinde plet, målt samme dag:** en procent der kommer fra en
  * interpolation er kode, ikke tekst, så den er usynlig her — «{HVERDAG_MOMS
  * .sats}% moms», «{formatNumber(n)}%» i resultattallet og «${pct}%» i
@@ -896,9 +905,13 @@ const procentfiler = execSync(
  */
 const PROCENT_UNDTAGELSER: Record<string, string[]> = {
   "src/app/husleje/page.tsx": ["30% reglen forklaret"],
+  // Samme regelnavn som ovenfor, men her i `page-data.ts`: det er husets
+  // *navn* på tommelfingerreglen, og det står i keywords og i huslejens svar,
+  // så «30 % reglen» ville være en ny opfindelse i stedet for en rettelse.
+  "src/lib/page-data.ts": ["30% reglen husleje"],
 };
 
-const PROCENT_UDEN_MELLEMRUM_LOFT = 509;
+const PROCENT_UDEN_MELLEMRUM_LOFT = 436;
 
 const PROCENT_MED_MELLEMRUM = [
   "src/app/boliglaan/page.tsx",
@@ -908,6 +921,7 @@ const PROCENT_MED_MELLEMRUM = [
   "src/app/procent/page.tsx",
   "src/lib/categories.ts",
   "src/lib/home-data.ts",
+  "src/lib/page-data.ts",
 ];
 
 describe("procentnotation", () => {
@@ -932,7 +946,7 @@ describe("procentnotation", () => {
     expect(procentUdenMellemrum("const x = `Rente ${pct(r)} er høj`;", "i.ts")).toEqual([]);
   });
 
-  test("forside, navigation og de tre omskrevne sider skriver «8 %»", () => {
+  test("forside, navigation og de omskrevne sider skriver «8 %»", () => {
     // Mutation: sæt «8%» tilbage i en af filerne, porten skal blive rød.
     const fund = procentfiler.flatMap((fil) =>
       procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
@@ -951,16 +965,16 @@ describe("procentnotation", () => {
   });
 
   test("korpuset har ikke fået flere procenttal uden mellemrum", () => {
-    // Loftet er målt, ikke gættet: 598 → 570 → 509, da de 28 i de fem filer
-    // og de 60 i `/procent`, `/boliglaan`, deres FAQ-svar og
-    // `ProcentBeregner`s hurtige reference blev rettet. 509 er *med* den ene
-    // dokumenterede undtagelse («30% reglen»). Det må gerne falde; det må ikke
-    // stige i det stille, fordi så kommer den nye skrivemåde ind i en ny side
-    // ubemærket.
+    // Loftet er målt, ikke gættet: 598 → 570 → 509 → 436, da de 28 i de fem
+    // filer, de 60 i `/procent`, `/boliglaan`, deres FAQ-svar og
+    // `ProcentBeregner`s hurtige reference og de 73 i `page-data.ts` blev
+    // rettet. 436 er *med* de to dokumenterede undtagelser («30% reglen»).
+    // Det må gerne falde; det må ikke stige i det stille, fordi så kommer den
+    // nye skrivemåde ind i en ny side ubemærket.
     const fund = procentfiler.flatMap((fil) =>
       procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
     );
     expect(fund.length).toBeLessThanOrEqual(PROCENT_UDEN_MELLEMRUM_LOFT);
-    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(509);
+    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(436);
   });
 });

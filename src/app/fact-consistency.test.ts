@@ -117,7 +117,9 @@ describe("huslejens 30 %-eksempel", () => {
   test("FAQ'en nævner 30 %, 33 % og at el/vand/varme trækkes fra huslejen", () => {
     const svar = getPageData("husleje", "da")!.faqItems.find((f) => f.question.includes("bør gå til husleje"))!.answer;
 
-    expect(svar).toContain(`30% af din nettoindkomst`);
+    expect(svar).toContain(`30 % af din nettoindkomst`);
+    // Mutation: skriv «30%» tilbage i `page-data.ts`, porten skal blive rød.
+    expect(svar).not.toContain("30% af din nettoindkomst");
     expect(svar).toContain(kr(HUSLEJE_EKSEMPEL.maxBoligudgifter33));
     expect(svar).toContain("eget felt");
   });

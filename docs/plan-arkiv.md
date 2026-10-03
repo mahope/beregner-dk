@@ -27083,3 +27083,85 @@ egen autocomplete (`suggestqueries.google.com`, `hl=da&gl=dk` / `hl=sv&gl=se`):
 3. F5b-køen er tom i praksis: de 3 fund på `/flyttebudget` er markedsanslag
    uden kilde (15.000-50.000 kr, 25.000-50.000 kr, 5.000-15.000 kr), så
    punkt 11 forbyder at flytte dem til et modul. `/moms` er ⛔ (lovgrænser).
+
+## 3/10 08:15 — F5c-slice: `page-data.ts` (73 fund, loft 509 → 436)
+
+**Denne iteration.** Den største enkeltfil i F5c, fordi den bærer `description`,
+`metaDescription`, `ogDescription`, `schemaDescription`, keywords og **alle**
+FAQ-svar for alle slugs i da, no og se. 73 noder målt med portens egen
+`procentUdenMellemrum` (120 rå `\d%`, scanneren tæller noder).
+
+**Undtagelse.** `30% reglen husleje` (keywords + huslejens svar) er husets
+*navn* på tommelfingerreglen, ikke en løs procent — samme undtagelse som
+`husleje/page.tsx`. Lagt i `PROCENT_UDTAGELSER["src/lib/page-data.ts"]`.
+`30 % af din nettoindkomst` i den *samme* sætning fik derimod mellemrum.
+
+**Bevar:** `5,1‰`/`14‰` (promille, ikke procent), `0,51 %`, `25,049 %`.
+
+**Punkt 12 (testen kan fejle) — målt begge veje:**
+1. `page-data.ts` lagt i `PROCENT_MED_MELLEMRUM` *før* sweepen →
+   `expected [ 'src/lib/page-data.ts' ] to deeply equal []` (**rød**).
+2. Én streng mutationeret tilbage («Redusert sats er 15%») → **2 røde**:
+   `mangler`-porten **og** loftet (437 ≤ 436). Tilbage til «15 %» → grøn.
+
+**Reel fejl fundet undervejen:** `src/app/fact-consistency.test.ts:120` krævede
+«30% af din nettoindkomst» og låste den gamle notation fast — samme fejlklasse
+som `loen-efter-skat` 3/10 04:52. Rettet til «30 %» **plus** et
+`not.toContain("30% af din nettoindkomst")`, så mutationen her er målt.
+
+**Portene der dømmer det bagefter:** `PROCENT_MED_MELLEMRUM` kræver 0 fund i
+filen (og listen skal dække hele korpuset, `procentfiler.length > 400`), så en
+ny «8%» i `page-data.ts` bliver rød med det samme. Loftet 436 må kun falde.
+
+**Gate:** lint · typecheck · `TZ=UTC npm run test` **4006/4006** i 253 filer ·
+build. Alle exit 0.
+
+### VERIFICÉR DEPLOY-prøver lukket 3/10 08:0x på indhold (alle 12 noter fra merges før 07:30)
+
+Alle hentet med curl + `perl -0pe 's/<!--.*?-->//gs'`, dømt på indhold:
+
+| Note (slug) | Resultat |
+|---|---|
+| `rettelse-lofter-i-privatlivs` | ✅ 0 × «hverken dine adresser eller din rute», 0 × «hverken adresse eller rute», 5 × delt sætning, `privatlivspolitik` 2 × «Ingen adresser gemmes:», 0 × «kortvarigt i serverens hukommelse», 0 × «5m x 4m» på `/kvadratmeter` |
+| `afstand-mellem-adresser` | ✅ dansk titel/h1/3 FAQ, se-URL'en 404'er |
+| `efterloen-faq-tal-fra-modul` | ✅ 1 × «91%» kun i «(91 %)»-kontekst, 7 × «91 %», 8 × «20.057», 4 × «15.870 kr.», 0 × «58.000» |
+| `konfirmation-se-no-tal-fra-modul` | ✅ |
+| `konfirmation-faq-tal-fra-modul` | ✅ |
+| `kvadratmeter-faq-tal-fra-modul` | ✅ |
+| `rentefradrag-faq-tal-fra-modul` | ✅ 7 × «26.880»; «præcis samme besparelse» står 3 × men i den **korrekte** sætning («under den fælles grænse på 100.000 kr. og derfor får den høje sats») — noten var for stram |
+| `svenska-tekstfejl` | ✅ |
+| `aktieskat-faq-tal-fra-modul` | ✅ 8 × «158.800», 20 × «27/42%» er **F5c-rester** (findes også i `git grep HEAD`, altså ikke en deploy-fejl) |
+| `loen-efter-skat-faq-tal-fra-modul` | ✅ 8 × «54.100 kr.», 0 × «641.200 kr.»; 22 rå træffere var `22.8%`-kommuneskat + 2 F5c-rester |
+| `dage-mellem-datoer` | ✅ dansk + svensk titel, 1 `<h1>` hver, begge 301'er (→ hver sin egen sti), 0 × «aldrig kan bli negativt» |
+| `boernepenge-faq-tal-fra-modul` | ✅ 0 × «kr.,», 0 × «2%», 7 × «961.100» |
+| `topskat-loft-ved-satser` | ✅ 0 × «58.000»/«52,07»/«aldrig overstiger», 5 × «58.100» |
+
+**Ikke endnu verificerbare** (merges efter 07:30-vinduet, venter på 12:30):
+`procent-med-mellemrum` 06:45, `dage-i-aaret` 06:20, `timer-i-aret` 07:55,
+`procent-punkt-sweeps` 08:00.
+
+### Måling 3/10 08:1x — hreflang/canonical er ikke flaskehalsen
+
+Alle fire store par er korrekte **og tovejs** (da↔sv + `x-default` på begge
+sider, canonical til egen sti): `/procent`, `/dato`, `/tidsberegner`,
+`/kvadratmeter`. Sitemap: minberegner.dk **164** URL'er, beraknare.se **94**.
+Bekræfter planens linje om, at kun *positionen* er lav.
+
+**Autocomplete 3/10 08:1x** (Google, `hl=da&gl=dk`) — tre nye «hvor mange X er
+der»-familier blev målt for at se, om `/timer-i-aret` (3/10 07:55) har søskende:
+minutter (døgn/år/dag/uge/måned/n timer/24 timer), sekunder (dag/år/time/døgn/
+minut/24 timer/1 time/måned/uge) og uger (år/måned/i 2026/1 år/skoleår/
+tilbage i år/i 2027/halvt år). **Beslutning: ikke bygget.** En tredje
+enheds-side (`/minutter-i-aret`) ville være `/timer-i-aret` omdøbt med
+intervallerne til «60» — altså tynd, og tynde sider kan skade hele domænet.
+Kræver enten en samlet sekund→minut→time-side der *erstatter* `/timer-i-aret`,
+eller de måles mod hinanden først.
+
+**Blogindlæg har allerede `NaesteSkridt`.** Hypotesen «85 % bounce på
+`/blog/barsel-2026-regler-og-satser` skyldes manglende internt link» er
+**modbevist**: alle 30 indlæg har et `NaesteSkridt`-kort (husets egen
+komponent, `src/components/BlogNaesteSkridt.tsx`) med konkrete verb
+(«Beregn dit BMI», «Beregn din brændstofpris», «Se klokken i din by»),
+`barsel-2026-regler-og-satser` har desuden links til `/barselsdagpenge`,
+`/barselsplanlaegger` **og** `/boernepenge`. Bounce skal altså søges en anden
+sted (formular-længde? ingen CTA i topfolden? `/barselsplanlaegger` er ny?).

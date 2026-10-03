@@ -1,16 +1,22 @@
-STATUS: 3/10 08:00. CI grøn ved start (`37099188256`), ingen åbne PR'er
+STATUS: 3/10 08:20. CI grøn ved start (`37100318940`), ingen åbne PR'er
       (PR-TJEK: 2026-10-03). Sentry: ingen uløste fejl 14 dage, SDK'en er
       sat op. **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run
-      test` · `npm run build` — **grøn 3/10 07:47** (alle exit 0, **4006**
+      test` · `npm run build` — **grøn 3/10 08:10** (alle exit 0, **4006**
       tests i 253 filer).
-      **Denne iteration: `/procent` + `/boliglaan` skriver «8 %»** — 71
-      forekomster rettet, heraf **11** som kilde-scanneren ikke kan se, fordi
-      procenten kommer fra en interpolation («{HVERDAG_MOMS.sats}%»,
-      «{formatNumber(n)}%», «${pct}%»). To nye *renderede* porte låser dem.
-      Se `docs/plan-arkiv.md`. **Næste iteration:** resten af F5c —
-      `page-data.ts` (73) → `/moms` (18) → blogindlæggene — eller en feature,
-      hvis feature-køen løses af en ❓.
+      **Denne iteration:** F5c-slice på `page-data.ts` — **73** fund, loftet
+      **509 → 436**. Filen bærer metadata + alle FAQ-svar for *alle* slugs i
+      da/no/se, så de tre sprog nu skriver «25 %» ens. Målte mutationer: porten
+      rød før sweepen, 2 røde ved én tilbageført streng. `fact-consistency.test.ts`
+      låste «30%» fast og fik et `not.toContain`. Se `docs/plan-arkiv.md`.
+      **Deploy:** alle 12 åbne noter fra merges før 07:30 er verificeret på
+      **indhold** — 12/12 ✅, lukket 3/10 08:0x. hreflang/canonical målt
+      korrekte og tovejs på de fire store par (bekrefter: kun positionen er
+      lav). Målt og *besluttet nej* til: `/minutter-i-aret` (tynd søskende til
+      `/timer-i-aret`) og «bloggen mangler CTA» (alle 30 har `NaesteSkridt`).
+      **Næste iteration:** `/moms` (18) eller blogindlæggene i F5c — ellers en
+      feature; de målte ⛔ (feriedatoer, `sst.dk`) er stadig ubesvarede.
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
+
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -75,15 +81,15 @@ ved serverstart. Nøglefilen lå på `/api/indexnow-key/…` og er rettet 2/10
 **F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
 dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
 
-**F5c. [~] Procentnotationen «8 %» — 598 fund målt, 509 tilbage 3/10.**
-*Hvad:* de største resterende er `page-data.ts` 73 (metadata + FAQ på tværs af
-alle slugs), `/moms` 18, `blog/30-procent-reglen-husleje` 25 (⛔ de er
-regelnavnet, se portens undtagelse), `blog/pension-…` 20 og
-`blog/boliglaan-2026-renter-og-afdrag` 19.
+**F5c. [~] Procentnotationen «8 %» — 598 fund målt, 436 tilbage 3/10 08:10.**
+*Hvad:* de største resterende er `blog/30-procent-reglen-husleje` 25 (⛔ de er
+regelnavnet, se portens undtagelse), `/moms` 18, `blog/pension-…` 20 og
+`blog/boliglaan-2026-renter-og-afdrag` 19. `page-data.ts` 73 er **lukket**
+3/10 08:10.
 *Accept:* loftet i `regnestykker.test.ts` (`PROCENT_UDEN_MELLEMRUM_LOFT`) må
-kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 → **509** noder
-(3/10 07:47; scanneren tæller noder, så en linje med to procenter tælles én
-gang).
+kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 → 509 →
+**436** noder (3/10 08:10; scanneren tæller noder, så en linje med to procenter
+tælles én gang).
 **Målt 3/10 07:47 — den blinde plet er fundet:** scanneren læser kun
 `JsxText` og strengliteraler, så **en procent fra en interpolation er kode** og
 er usynlig for den. `/procent` havde 11 til i sin *renderede* HTML. To nye
@@ -185,10 +191,24 @@ er blokeret af en ❓ og må ikke gættes.
   canonical/hreflang, 301 mellem domænerne, daglig sitemap-entry og
   tovejs-link fra `/tidsberegner`. **MÅL:** 0 (nye URL'er 3/10) → Plausible
   17/10; GSC 14 dage mod `/tidsberegner` 72.471 visninger / 0,3 % / pos. 6,8.
+- **⛔ Målt og lagt på hylden 3/10 08:1x — `/minutter-i-aret`.** Googles egen
+  autocomplete har tre søskende-familier til `/timer-i-aret`: «hvor mange
+  minutter er der» (døgn/år/dag/uge/måned/n timer), «hvor mange sekunder er
+  der» (dag/år/time/døgn/minut/måned/uge) og «hvor mange uger er der»
+  (år/måned/i 2026/tilbage i år). En tredje enheds-side er `/timer-i-aret` med
+  «60» i stedet for «1» — tynd, og tynde sider kan skade hele domænet. Bygges
+  kun som **én** samlet sekund→minut→time-side der erstatter `/timer-i-aret`, og
+  den skal måles mod den side først.
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
   ⛔ Ferielovens startdato (❓ opgave 201) — må ikke gættes.
+- **⛔ Målt og modbevist 3/10 08:1x — «bloggen mangler CTA».** Hypotesen bag
+  85 % bounce på `/blog/barsel-2026-regler-og-satser` er modbevist: alle 30
+  indlæg har et `NaesteSkridt`-kort med et konkret verb, og barsel-indlægget
+  linker desuden til `/barselsdagpenge`, `/barselsplanlaegger` og
+  `/boernepenge`. Bounce skal findes et andet sted (formular-længde? intet i
+  topfolden? planlæggeren er ny?) — målt før der bygges.
 - **Kalorieguide pr. portion på `/kalorier`** — 9 af 10 danske autocomplete-
   træffere under «kalorier» er madvarer. ⛔ `sst.dk` svarer 429 (❓ opgave 119).
 - **Svensk dækning af de manglende kalkulatorer** — beraknare.se har 89
@@ -345,54 +365,20 @@ filer) ligger i `docs/plan-arkiv.md`. Alle tre er brugt: to førte til
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
 
-## Åbne VERIFICÉR DEPLOY-noter
+## VERIFICÉR DEPLOY-noter — lukket 3/10 08:0x på indhold
 
-Batch-deployeren kører 07:30/12:30/17:30/21:30. Prøverne er på **indhold**,
-aldrig på HTTP 200: en 200 beviser at svaret serveres, ikke at det er den nye
-kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` under
-sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
-ingen regex på tal og tekst.
+**12 af 12 lukket.** Alle noter fra merges før 07:30-vinduet er hentet med curl
+og dømt på **indhold**, aldrig på HTTP 200. Måleresultatet pr. slug står i
+`docs/plan-arkiv.md` under «3/10 08:15». Kort fortalt: de 12 viste den nye kode
+på indhold, og de to afvigelser (`/aktieskat`s «27/42%» og `/loen-efter-skat`s
+«8%») findes også i `git grep HEAD` — de er F5c-rester, ikke deploy-fejl, fordi
+de er brødtekst og ikke de tal, noternehandlede om.
 
-`VERIFICÉR DEPLOY: ruten gemmes i 7 dage, ikke slet ikke (`minberegner.dk/afstand-mellem-adresser`: hele HTML'en skal have **0** `hverken dine adresser eller din rute` og **0** `hverken adresse eller rute`, og **1** `Ruten og de to koordinater gemmes i serverens hukommelse i 7 dage, så samme opslag ikke skal beregnes to gange.` i både den synlige brødtekst og `FAQPage`-JSON-LD; `minberegner.dk/privatlivspolitik`: samme sætning skal stå, overskriften skal være «Ingen adresser gemmes:», **0** `kortvarigt i serverens hukommelse` og **0** `hverken adresser, koordinater`. `/kvadratmeter`: FAQ-svaret på «Gang længde med bredde» skal være «Gang længde med bredde. **5 m × 4 m** = 20 m².» i alle tre sprog, altså **0** `5m x 4m` på alle tre domæner. **Intet** `NaN`) ceo/rettelse-lofter-i-privatlivs 3/10 03:00`
+**Åbne (merges efter 07:30-vinduet, venter på batch-deployeren 12:30):**
+`ceo/procent-med-mellemrum` 06:45 · `ceo/dage-i-aaret` 06:20 ·
+`ceo/timer-i-aret` 07:55 · `ceo/procent-punkt-sweeps` 08:00.
 
-`VERIFICÉR DEPLOY: /afstand-mellem-adresser (dansk side med afstandsværktøj: `<title>` «Afstandsberegner: beregn kørselsafstand mellem to adresser», `<h1>` én gang, 3 FAQ-spørgsmål i `FAQPage`-JSON-LD med «Hvordan beregnes afstanden?», og «Adressevælger fra Klimadatastyrelsen» i brødteksten; `minberegner.dk/befordringsfradrag` skal linke til siden via «Relaterede beregnere»; `minberegner.dk/afstand-mellem-adresser` skal ligge i sitemap.xml. `beraknare.se/afstand-mellem-adresser` skal 404/e-redirecte, fordi siden er daOnly) ceo/afstand-mellem-adresser 3/10 02:55`
-
-`VERIFICÉR DEPLOY: /efterloen FAQ og metadata (procenten skal være «91 %» med mellemrum i BÅDE `description` og `metaDescription` og i FAQ-svaret «Hvad er efterlønssatsen i 2026?» — altså **0** × «91%»; satsen skal stå «20.057» i alle tre steder; «Hvad er efterlønspræmien?» skal have «15.870 kr.» og «10.580 kr.»; «Hvornår kan jeg gå på efterløn?» skal være byte-uændret med «63½-64 år for født i 1959» og «66 år for født 1967-1970»; **intet** `NaN`) ceo/efterloen-faq-tal-fra-modul 3/10 02:40`
-
-`VERIFICÉR DEPLOY: /konfirmation FAQ i alle tre sprog (beraknare.se skal have «mellan 10 000 och 25 000 kr», 0 × «10.000», 0 × «SEK», og fotografintervallet «1 000-3 000 kr») ceo/konfirmation-se-no-tal-fra-modul 3/10 01:40`
-
-`VERIFICÉR DEPLOY: /konfirmation FAQ (svaret på «Hvad koster en konfirmation?» skal være gaveintervallet 10.000-25.000 kr. + henvisning til beregneren, ikke «8.000-25.000 DKK») ceo/konfirmation-faq-tal-fra-modul 3/10 01:50`
-
-`VERIFICÉR DEPLOY: /kvadratmeter FAQ (svensk og norsk «10 000 cm²» og «3 000 kr», materialerne «Nivåerna är danska») ceo/kvadratmeter-faq-tal-fra-modul 3/10 00:45`
-
-`VERIFICÉR DEPLOY: /rentefradrag FAQ (parret får 26.880 kr., ikke «præcis samme besparelse») ceo/rentefradrag-faq-tal-fra-modul 3/10 00:30`
-
-`VERIFICÉR DEPLOY: svensk «Första maj» + «använda» på /dato og /nedtaelling ceo/svenska-tekstfejl 3/10 23:20`
-
-
-
-
-
-Lukket 3/10 23:13 på indhold: `pension-dobbelt-valuta`, `leasing-dobbelt-valuta`,
-`su-dobbelt-valuta` og `dage-til-hub` — målingerne står i
-`docs/plan-arkiv.md`. Bemærk at planens «23 danske / 20 svenske» datoer var et
-skøn: `getDageTilSlugs()` giver **22 / 19**, og live har 22 / 19.
-
-De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
-`docs/plan-arkiv.md` under overskriften «VERIFICÉR DEPLOY-prøver», slug for slug
-— de blev 3/10 03:00 flyttet ud herfra, fordi de alene skubbede planen over
-40 KB.
-
-`VERIFICÉR DEPLOY: /aktieskat henter grænse og satser fra sit eget modul (metadata, schema og FAQ skal have «79.400 kr.», «158.800 kr.» og «174.200 kr.», og procenttallene skal stå med mellemrum foran: **0** × «27%», «42%», «17%», mens «27 %» står i både `<title>`-beskrivelsen og FAQ-svaret «Hvad er progressionsgrænsen for aktieskat i 2026?» i `FAQPage`-JSON-LD; brødteksten skal skrive «27 % af de første 79.400 kr.» og «158.800 kr.» for ægtepar; **intet** `NaN`, ingen «kr. kr.» og ingen dobbelt-enhed) ceo/aktieskat-faq-tal-fra-modul 3/10 03:22`
-
-`VERIFICÉR DEPLOY: /loen-efter-skat henter satser og grænser fra sit eget modul (metadata og FAQ skal have «54.100 kr.», «641.200 kr,» og «777.900 kr,» med **kr** *uden* punktum midt i sætningen; procenttallene skal stå med mellemrum foran: **0** × «8%», «7,5%», «15%», mens «8 %», «7,5 %», «5 %» og «15 %» står i `description`, `metaDescription`, `ogDescription` og i FAQ-svaret «Hvornår skal jeg betale mellemskat eller topskat i 2026?» i `FAQPage`-JSON-LD; kommuneskats-svaret skal have «ca. 22,5 % (Rundersdal) til 27,8 % (Langeland)»; **intet** `NaN` og ingen «kr..» eller «kr. kr.») ceo/loen-efter-skat-faq-tal-fra-modul 3/10 04:52`
-
-`VERIFICÉR DEPLOY: /dage-mellem-datoer + /dagar-mellan-datum (nye sider med eget slugsprog: `minberegner.dk/dage-mellem-datoer` skal have `<title>` «Dage mellem datoer: beregn antal dage mellem to datoer», **1** `<h1>`, **3** spørgsmål i `FAQPage`-JSON-LD («Hvor mange dage er der mellem to datoer?», «Er 2028 et skudår, og hvor mange dage er der i det?», «Hvorfor står der både dage og hele uger?»), eksempel-sætningen «Fra 1. januar 2026 til 1. januar 2027 går der 365 dage: 52 hele uger og 1 dag til.», og **0** «aldrig kan bli negativt»; `beraknare.se/dagar-mellan-datum` skal have `<title>` «Dagar mellan datum: räkna ut antal dagar mellan två datum» og eksemplet «… går det 365 dagar: 52 hela veckor och 1 dag till.», altså **0** «aldrig kan bli negativt»; **0** `NaN` på begge; begge URL'er skal ligge i hvert sit eget sitemap med `daily`, og `minberegner.dk/dagar-mellan-datum` + `beraknare.se/dage-mellem-datoer` skal 301'e til hver sin egen sti) ceo/dage-mellem-datoer 3/10 04:15`
-
-
-`VERIFICÉR DEPLOY: /boernepenge henter satser, årstal og aftrapping fra sit eget modul (`minberegner.dk/boernepenge`: `description` skal have «0-2 år: 5.370 kr/kvartal, 3-6 år: 4.248 kr/kvartal, 7-14 år: 3.342 kr/kvartal, 15-17 år: 1.114 kr/md»; `metaDescription` skal have «0-2 år 5.370, 3-6 år 4.248 og 7-14 år 3.342 kr/kvartal, 15-17 år 1.114 kr/md» — altså **0** × «kr.,» på hele siden og **0** × «2%»; brødteksten skal skrive «Hvis din indkomst overstiger 961.100 kr. i 2026, nedsættes ydelsen med 2 % af beløbet over grænsen.» og «Tjener du 1.100.000 kr, er du 138.900 kr. over grænsen.» med **kr uden punktum** foran kommaet; FAQ-svaret «Hvor meget får jeg i børnepenge 2026?» skal have «5.370 kr/kvartal (21.480 kr/år)», «4.248 kr/kvartal (16.992 kr/år)», «3.342 kr/kvartal (13.368 kr/år)» og «1.114 kr/måned (13.368 kr/år)»; FAQ-svaret «Bliver børnepenge modregnet ved høj indkomst?» skal have «overstiger 961.100 kr. i 2026», «1.000.000 kr. giver 2 % af 38.900 kr. = 778 kr. årligt»; **intet** `NaN`) ceo/boernepenge-faq-tal-fra-modul 3/10 05:05`
-
-`VERIFICÉR DEPLOY: /topskat henter grænser, satser, bruttoindkomster **og marginalskat** fra sit eget modul (begge commits fra 3/10 deployer sammen): metadata og FAQ skal have «mellemskat fra 641.200 kr,» — **kr uden punktum** foran kommaet — og «topskat fra 777.900 kr.», altså **0** × «641.200 kr.,»; FAQ-svaret «Hvornår betaler man topskat i 2026?» skal have «(7,5 %)», «(yderligere 7,5 %)» og «ca. 697.000 kr./år (ca. 58.100 kr./md)» og «845.500 kr./år (ca. 70.500 kr./md)» — altså **0** × «58.000»; FAQ-svaret «Hvad er skatteloftet?» skal være «Under top-topskat-grænsen er de fire indkomstskatter … tilsammen **ca. 52,06 %** …» og **ikke** «Skatteloftet sikrer», altså **0** × «52,07», **0** × «aldrig overstiger» på hele siden; værktøjet skal vise **61,1 %** marginalskat ved 3.000.000 kr. brutto (ikke 60,1) — kontroller ved at sætte feltet til 3000000 og læse resultatkortets «Marginal skat»-linje; **intet** `NaN`) ceo/topskat-loft-ved-satser 3/10 04:45`
+`VERIFICÉR DEPLOY: procentnotationen «8 %» i metadata og FAQ på tværs af alle slugs (helt korpuset i `page-data.ts` er skrevet om, så **hele HTML'en** på de berørte sider skal have **0** `\d%` — altså **0** «25%», «12,5%», «8%», «5%», «100%» — undtagen **1** «30% reglen» pr. `/husleje` (regelnavnet). Prøv især `minberegner.dk/boernepenge` («12,5 %», «2 %», «AM-bidrag (8 %)», 0 × «kr.,»), `minberegner.dk/feriepenge` («12,5 %»), `minberegner.dk/rentefradrag` («33,6 %», «25,6 %»), `minberegner.dk/su` («100 %», «80 %»), `minberegner.dk/arveafgift` («15 %», «25 %»), `minberegner.dk/husleje` («30 %», «33 %», **1** «30% reglen»), `minberegner.dk/opsparing` («5 %», «10-20 %», «~7 %», «2-4 %», «under 1 %»), `minberegner.dk/konfirmation` («40-50 %», «20-30 %», «20-25 %»), `minberegner.dk/arvestigning` («20 %», «80 %», «0,51 %», «5,1‰» — promillen skal **beholde** sin skrivemåde), `minberegner.dk/dagpenge` («90 %», «100 %», «80 %»), `minberegner.dk/brutto-netto` («25,049 %», «AM-bidrag (8 %)»), `minberegner.dk/promille` og `minberegner.dk/procent`; `beraknare.se/procent` («25 %», «20 %», «2 %», «3 %»), `beraknare.se/leasing` («85 %», «15 %», «30 %», «21 %», «20 %»), `beraknare.se/moms` («25 %», «15 %», «12 %», «20 %»), `beraknare.se/boernepenge` («100 %», «80 %») og `beraknare.se/dagpenge` («5 %»); **intet** `NaN`) ceo/procent-punkt-sweep-side-data 3/10 08:20`
 
 ## ❓ Til Mads
 
