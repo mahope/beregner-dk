@@ -1,27 +1,19 @@
-STATUS: 3/10 14:3x. **CI grøn** ved start (`37121105913`), ingen åbne PR'er,
-       ingen uløste Sentry-fejl, **begge review-fund er rettet** (`0554456`).
-       **Denne iteration leverer ingen kode — den er en måling.** CEO-køens
-       otte fund er verificeret lukkede i koden (valborg 30. april,
-       påskafton `offsetDays: -1`, påskeaften-FAQ væk, `toUtcMidnight` med
-       `DAGE_TIL_TIMEZONE`, advent «mellem 27. november og 3. december»),
-       så køen er tom, og næste iteration SKAL være en feature.
-       **⛔ HOVED-FUND: hreflang på `/dato` peger på en 308.** Målt live
-       3/10 14:2x: `minberegner.dk/dato` skriver
-       `hrefLang="da" href="https://minberegner.dk/dato/"` og
-       `hrefLang="sv" href="https://beraknare.se/dato/"` — **med skråstreg** —
-       mens `minberegner.dk/dato/` svarer **308 → `/dato`**. Canonical er
-       korrekt (uden skråstreg), så det er **kun hreflang** der er forkert.
-       Google følger ikke en annotation gennem en redirect, så
-       da↔sv-koblingen på sitets **#1-side** (1.119 besøgende/28d,
-       131.320 GSC-visninger) kan være død. **11 sider er målt korrekte**
-       (`/procent`, `/tidszone`, `/moms`, `/alder`, `/braendstof`,
-       `/kalorier`, `/promille`, `/renteberegner`, `/nedtaelling`,
-       `/ugenummer`, `/laaneberegner` — alle uden skråstreg), og
-       `/dage-i-aaret` har den på alle tre. **`/dato` og `/nedtaelling`
-       kalder begge `generatePageMetadata("dato")`/`(…)` med samme helper**,
-       så årsagen er ikke fundet — se opgaven.
-       **Ingen browser, ingen pixel-verifikation** denne iteration.
-       BRANCH-TJEK: ikke kørt (sidste 2/10).
+STATUS: 3/10 14:4x. **CI grøn** ved start, ingen åbne PR'er, ingen uløste
+       Sentry-fejl (SDK'en er sat op med DSN og scrubber, så «ingen fejl» er
+       et ægte tal), **begge review-fund er rettet** (`0554456`), CEO-køens otte
+       fund verificeret lukkede. Denne iteration er en **feature**:
+       `/alder` og `/tidszone` får et regnet eksempel i `metaTitle`.
+       **MÅLT fund:** CTR følger ikke position. `/kvadratmeter` har 1,5 % CTR
+       på pos. 4,9 og `/promille` 1,6 % på pos. 7,8 — begge med et regnet
+       eksempel i titlen — mens `/alder` (0,4 %, pos. 7,2) og `/tidszone`
+       (0,4 %, pos. 7,6) lå på **spørgsmålstitler**. De var de eneste to sider
+       i GSC-top-15 med under 1,1 % CTR, der stadig ikke havde et regnet
+       eksempel; de er nu rettet, og `ogTitle` på `/tidszone` har aldrig været
+       lig `metaTitle` — det er den også rettet. Port `meta-title-tal.test.ts`
+       dømmer **tallet i titlen**, ikke sætningen, så en ny formulering ikke
+       låser løsningen fast.
+       **⏳ åbne deploy-noter:** 12 (se afsnittet nedenfor).
+       BRANCH-TJEK: ikke kørt (sidste 2/10). PR-TJEK: ikke kørt (ingen åbne).
 
 ## Fase 3 — trafik-drevet
 
@@ -34,7 +26,10 @@ STATUS: 3/10 14:3x. **CI grøn** ved start (`37121105913`), ingen åbne PR'er,
 | `/tidsberegner` | 290 | 73.666 | 0,3 % | 6,9 |
 | `/tidszone` | under top-15 | 24.324 | 0,4 % | 7,5 |
 | `/moms` | under top-15 | 22.464 | 0,2 % | 7,0 |
-| `/kvadratmeter` | 390 | 21.344 | 1,4 % | 4,9 |
+| `/kvadratmeter` | 391 | 20.768 | 1,5 % | 4,9 |
+| `/alder` | under top-15 | 10.029 | **0,4 %** | 7,2 |
+| `/tidszone` | under top-15 | 23.351 | **0,4 %** | 7,6 |
+| `/promille` | 148 | 6.003 | 1,6 % | 7,8 |
 | `/braendstof` | 263 | 17.051 | 1,1 % | 5,9 |
 | `/boligstoette` | 529 | 7.465 | 2,4 % | 8,7 |
 | `/su` | **127 (fald fra 201)** | under top-15 | — | — |
@@ -81,6 +76,15 @@ skråstreg — bisect `buildPageMetadata` → `getAlternateSlug` → layoutets
 `metadataBase`. *MÅL:* `/dato` 131.320 visninger / 863 klik / 0,7 % / pos. 5,6
 og `beraknare.se/dato` 102.316 / 97 / 0,1 % / pos. 8,1.
 
+
+**F0b. [x] ✅ Regnet eksempel i `metaTitle` på `/alder` og `/tidszone`** —
+   `docs/plan-arkiv.md`. *Hvem:* alle der googler «aldersberegner» (27.000
+   søgninger, pos. 4) og «tidszoner» (4.000, pos. 10). *Accept:* begge titler
+   har et regnet eksempel, `ogTitle` er lig `metaTitle`, `{AAR}` er løst fra
+   `alderLevet` (aldrig frosset), og `meta-title-tal.test.ts` dømmer tallet.
+   **MÅL:** `/alder` 10.029 visninger / 43 klik / **0,4 %** / pos. 7,2 (da) og
+   3.689 / 14 / 0,4 % / 7,6 (se) mod `/kvadratmeter`s 1,5 % på pos. 4,9 →
+   GSC 17/10. `/tidszone` 23.351 / 101 / **0,4 %** / 7,6.
 
 **F1. [ ] Søgeniveau-data for `/procent`** — 150.470 visninger, 0,1 %, pos 7,4.
 GSC's tre søgninger summerer 364 visninger af 150.470. **Accept:** GSC-eksport
@@ -300,6 +304,15 @@ er blokeret af en ❓ og må ikke gættes.
   sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og
   `/boernepenge`. ⛔ Oppgave 187, 13/10 — må ikke flyttes.
 
+- **`/renteberegner` og `/arveafgift` mangler et regnet eksempel i titlen** —
+  *Hvem:* alle der googler «renteberegner» (6.000 søgninger, pos. 8) og
+  «arveafgift beregner». *Datagrund:* målt 3/10 — de er de **eneste to** af
+  GSC-top-15 der stadig har spørgsmålstitel; `/renteberegner` har 12.610
+  visninger og **0,8 %** CTR på pos. 7,4. *Accept:* begge titler får et regnet
+  eksempel fra `rente-eksempler.ts` / arveafgiftens egen datakilde, og de lægges
+  i `MALTE_SIDER` i `meta-title-tal.test.ts`. **MÅL:** `/renteberegner`
+  12.610 visninger / 107 klik / 0,8 % / pos. 7,4 → GSC 17/10.
+
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
@@ -330,6 +343,17 @@ med komma); `minberegner.dk/laaneberegner` skal have «Lån … er til 5 % - yde
 
 `VERIFICÉR DEPLOY: procenter med mellemrum og dansk komma i tretten beregnere (hele HTML'en skal have **0** `\d%` i den synlige tekst, altså **0** «70%», «25%», «8%», «90%», «15%», «6,91%», «10,47%», «36,25%» på `minberegner.dk/1rm`, `/moms`, `/dagpenge`, `/budget`, `/husleje`, `/billaan`, `/forbrugslaan`, `/aktieskat`, `/del-regning`, `/lon-efter-skatt`, `/arveafgift` og `/brutto-netto`, og de rettede strenge skal stå: «En uge (70 %)»-rækkerne på /1rm, «(25 %)» i /moms' resultatboks, «Dagpenge = 90 % af løn efter AM-bidrag (8 %)», «30 %»-tippen på /husleje, «6,91 %» og «20 %» på /billaan og /forbrugslaan, «27 % af 50.000 kr.» + «Effektiv skat: 27 %» på /aktieskat, «5 %»-knapperne på /del-regning, «15 % boafgift + 25 % tillægsafgift (op til 36,25 %)» på /arveafgift; **og med komma**: `beraknare.se/lon-efter-skatt` (siden er `seOnly` og giver 404 på `minberegner.dk` og `beregner.no`) skal have «Effektiv skatt 20,2 %» og «Kommunalskatt (32,38 %)» med **0** «20.2»/«32.38», `minberegner.dk/brutto-netto` skal have «Effektiv skat: 33,3 %» og «33,3 kr.» med **0** «33.3%»/«33.3 kr.»; «30% reglen» skal ** stadig stå som regelnavn; samme tegn på `beraknare.se` og `beregner.no`; **intet** `NaN`) ceo/procent-interpolationer-2 3/10 12:35`
 
+`VERIFICÉR DEPLOY: regnet eksempel i titlen på /alder og /tidszone (helt
+indhold, HTTP 200 beviser intet: `minberegner.dk/alder` skal have
+`<title>Aldersberegner: født 15. marts 1990 = 36 år</title>` — tallet følger
+dagen, så dommen er **formen** «Aldersberegner: født 15. marts 1990 = <N> år»
+og at der **0** `{AAR}` er i HTML'en; `beraknare.se/alder` skal have «Ålderskalkylator:
+född 15 mars 1990 = <N> år» med samme form; `minberegner.dk/tidszone` skal have
+«Tidszoner: 12 i Danmark = 06 i New York, USA» i både `<title>` og
+`og:title`, `beraknare.se/tidszone» «Tidszoner: 12 i Sverige = 06 i New York,
+USA»; **0** `og:title` der afviger fra `<title>` på de to sider; **intet**
+`NaN`) ceo/titler-med-regnet-eksempel 3/10 14:4x`
+
 ## VERIFICÉR DEPLOY-noter
 
 **17 lukket på indhold** (de 14 fra før 07:30 plus `ceo/dage-i-aaret` 06:20,
@@ -350,13 +374,8 @@ deploy-problem** (⛔ nedad). Resten dømmes på indhold efter 17:30:
 `ceo/rettelse-tre-reviewfund` er hentet og dømt på indhold; målingerne står i
 `docs/plan-arkiv.md`.
 
-⛔ **`ceo/procent-punkt-sweep-side-data` kan ikke lukkes, fordi svinget aldrig
-blev lavet.** Den lover 0 `\d%` på `/opsparing`, `/konfirmation`, `/arveafgift`,
-`/dagpenge` og `/husleje`; live 3/10 12:47 har de 28 / 7 / 30 / 10 / 10 `\d%`,
-og det er **koden**: `src/app/opsparing/page.tsx:116,121,126,131` skriver
-«0-1%», «2-4%», «4-6%», «6-8%», og `PensionBeregner.tsx:268` skriver «5-7% (aktier),
-2-4% (obligationer)». Noten er skrevet over en rettelse, der ikke skete — ikke en
-fejl i deployet. Den bliver F5g.
+⛔ **`ceo/procent-punkt-sweep-side-data`** kan ikke lukkes (svinget skete
+aldrig); den er gjort til opgave **F5g** og flyttet til `docs/plan-arkiv.md`.
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i metadata og FAQ på tværs af alle slugs (helt korpuset i `page-data.ts` er skrevet om, så **hele HTML'en** på de berørte sider skal have **0** `\d%` — altså **0** «25%», «12,5%», «8%», «5%», «100%» — undtagen **1** «30% reglen» pr. `/husleje` (regelnavnet). Prøv især `minberegner.dk/boernepenge` («12,5 %», «2 %», «AM-bidrag (8 %)», 0 × «kr.,»), `minberegner.dk/feriepenge` («12,5 %»), `minberegner.dk/rentefradrag` («33,6 %», «25,6 %»), `minberegner.dk/su` («100 %», «80 %»), `minberegner.dk/arveafgift` («15 %», «25 %»), `minberegner.dk/husleje` («30 %», «33 %», **1** «30% reglen»), `minberegner.dk/opsparing` («5 %», «10-20 %», «~7 %», «2-4 %», «under 1 %»), `minberegner.dk/konfirmation` («40-50 %», «20-30 %», «20-25 %»), `minberegner.dk/arvestigning` («20 %», «80 %», «0,51 %», «5,1‰» — promillen skal **beholde** sin skrivemåde), `minberegner.dk/dagpenge` («90 %», «100 %», «80 %»), `minberegner.dk/brutto-netto` («25,049 %», «AM-bidrag (8 %)»), `minberegner.dk/promille` og `minberegner.dk/procent`; `beraknare.se/procent` («25 %», «20 %», «2 %», «3 %»), `beraknare.se/leasing` («85 %», «15 %», «30 %», «21 %», «20 %»), `beraknare.se/moms` («25 %», «15 %», «12 %», «20 %»), `beraknare.se/boernepenge` («100 %», «80 %») og `beraknare.se/dagpenge` («5 %»); **intet** `NaN`) ceo/procent-punkt-sweep-side-data 3/10 08:20`
 

@@ -404,22 +404,25 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Aldersberegner: hvor gammel er du i år, måneder og dage?",
+      headTerm: "Aldersberegner:",
+      example: "født 15. marts 1990",
       birthDate: "fødselsdato",
     },
     {
       locale: "se" as const,
-      title: "Ålderskalkylator: hur gammal är du i år, månader och dagar?",
+      headTerm: "Ålderskalkylator:",
+      example: "född 15 mars 1990",
       birthDate: "födelsedatum",
     },
     {
       locale: "no" as const,
-      title: "Alderskalkulator: hvor gammel er du i år, måneder og dager?",
+      headTerm: "Alderskalkulator:",
+      example: "født 15. mars 1990",
       birthDate: "fødselsdatoen",
     },
   ])(
     "has answer-first age metadata for $locale",
-    ({ locale, title, birthDate }) => {
+    ({ locale, headTerm, example, birthDate }) => {
       const data = getPageData("alder", locale)!;
       // Alderen og dage-tallet regnes for i dag, så testen låser *kilden*
       // (alderLevet) frem for et tal, der bliver dagsvis forkert. Før denne
@@ -429,12 +432,20 @@ describe("getPageData", () => {
       const age = formatAlder(levet, locale);
       const days = formatDageLived(levet, locale);
 
-      expect(data.metaTitle).toBe(title);
+      // Titlen skal ramme hovedsøgeordet *og* have et regnet eksempel i sig,
+      // fordi de danske og svenske søgeresultater med et regnet tal i titlen
+      // ligger på 1,1-1,6 % CTR mod 0,4 % for spørgsmålstitler (GSC 3/10).
+      // Tallet læses fra `levet`, så porten bliver rød både hvis `{AAR}`
+      // lækker ud i Google og hvis nogen fryser et alderstal i page-data.ts.
+      expect(data.metaTitle.startsWith(headTerm)).toBe(true);
+      expect(data.metaTitle).toContain(example);
+      expect(data.metaTitle).toContain(`${formatNumber(levet.aar, locale)} år`);
+      expect(data.metaTitle).not.toContain("{");
       expect(data.metaTitle.length).toBeLessThanOrEqual(60);
       expect(data.description).toContain(age);
       expect(data.metaDescription).toContain(age);
       expect(data.metaDescription.length).toBeLessThanOrEqual(160);
-      expect(data.ogTitle).toBe(title);
+      expect(data.ogTitle).toBe(data.metaTitle);
       expect(data.ogDescription).toContain(age);
       expect(data.schemaDescription).toContain(birthDate);
       const daysFaq = data.faqItems.find((item) => item.answer.includes(days));

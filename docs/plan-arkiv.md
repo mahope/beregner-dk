@@ -27884,3 +27884,14 @@ STATUS: 3/10 13:0x. **CI grøn** ved start (`37116710590`), ingen åbne PR'er
        lukket på indhold: `ceo/su-indtaegtsgraense` og `ceo/rettelse-tre-reviewfund`
        (se `docs/plan-arkiv.md`). HTTP 200 er aldrig brugt som bevis.
        BRANCH-TJEK: ikke kørt (sidste 2/10).
+
+
+## 3/10 14:4x — `ceo/procent-punkt-sweep-side-data` (flyttet ud af planen)
+
+⛔ **`ceo/procent-punkt-sweep-side-data` kan ikke lukkes, fordi svinget aldrig
+blev lavet.** Den lover 0 `\d%` på `/opsparing`, `/konfirmation`, `/arveafgift`,
+`/dagpenge` og `/husleje`; live 3/10 12:47 har de 28 / 7 / 30 / 10 / 10 `\d%`,
+og det er **koden**: `src/app/opsparing/page.tsx:116,121,126,131` skriver
+«0-1%», «2-4%», «4-6%», «6-8%», og `PensionBeregner.tsx:268` skriver «5-7% (aktier),
+2-4% (obligationer)». Noten er skrevet over en rettelse, der ikke skete — ikke en
+fejl i deployet. Den bliver F5g.
