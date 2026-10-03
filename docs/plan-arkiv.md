@@ -27222,3 +27222,47 @@ uden fund, `TZ=UTC npm run test` **4010 tests i 253 filer** grønne (+4 mod
 
 **Ikke kørt:** ingen browser — repoet har intet Playwright — så mellemrummet og
 de svenske rækkenavne er målt i markup og DOM, ikke set i pixels.
+
+**Deploy-verificering 3/10 08:5x — de to ældste åbne noter.** 07:30-vinduet var
+kørt, så `ceo/dage-i-aaret` (06:20) og `ceo/procent-med-mellemrum` (06:45) blev
+hentet og dømt på **indhold**, ikke på HTTP 200.
+
+`/dage-i-aaret` + `/dagar-i-aret`: ✅ **DEPLOY OK.** `<title>` ordret i begge
+sprog, **1** `<h1>`, 12 månedsrækker + summeringsrække, og summeringen er
+**365 / 251 / 104**. Målt de 12 månedsrækker som sum: `365, 251, 104` — de
+hænger sammen. De tre `FAQPage`-spørgsmål står ordret, og svarene er «Augusti
+har 31 dage, og der er 21 hverdage og 10 weekenddage» / «Juli har 31 dage, og
+der er 23 hverdage og 8 weekenddage» (da) og «Augusti har 31 dagar, och det är
+21 vardagar och 10 helgdagar» (se). 301 begge veje, begge URL'er i hvert sit
+sitemap, **0** `NaN`.
+
+*Noten havde én for streng prøve:* den krævede «**0** «august»» på den svenske
+side, men «august**i**» indeholder «august» som delstreng. Den rigtige prøve er
+«august» **uden** «i»: målt **0** danske «august» og **9** svenske «augusti» —
+lavre case i måneds-tabellen er svensk korrekt («augusti»), og «Augusti» med
+stort begyndelsesbogstav i brødteksten er det også.
+
+*Målt undervejs, ikke en fejl:* summeringsrækken er 365 dage men 251 + 104 =
+355, fordi de 10 helligdage der falder på en hverdag tælles i ingen af de to
+kolonner. Siden siger det selv: «Hverdage er de dage der ikke er weekend
+eller helligdag». Svensk summerer 365 / 252 / 104, fordi de svenske
+helligdage falder anderledes — det er ikke en copyfejl.
+
+`ceo/procent-med-mellemrum` (06:45): ⚠️ **delvist landet.** Alt hvad opgaven
+rørte, er live: forsiden **0** «100%», navigationens momskort «25 % moms»,
+`/feriepenge` «12,5 % af din ferieberettigede løn» + «AM-bidrag (8 %)» +
+«(35.000 × 12 × 12,5 %)», `/laaneberegner` «5-25 %»/«4-12 %»/«(1-5 %)»/
+«(100 %+)», svensk «5-15 %»/«3-8 %»/«(2-5 %)», `/husleje` «30 % af din
+nettoindkomst» + «Nogle kilder siger 33 %, men 30 %» + «30% reglen forklaret»
+stadig, **0** `NaN` overalt. Men den synlige markup har **6** `d%` tilbage
+(JSON-LD og RSC-payload ikke medregnet): **3** på forsiden — «tillæg eller
+fratræk **25%** moms» og «boafgift (**15%**) og tillægsafgift (**25%**)», alle i
+`src/lib/footer-data.ts` — og **3** i `/feriepenge`s tabellabels «Feriepenge
+(**12,5%**)», «AM-bidrag (**8%**)» og «Skat (estimat ~**38%**)». Dertil **3** i
+sidens FAQ-svar («**12,5%** af lønnen», «AM-bidrag (**8%**)», «typisk **1%**»).
+Ingen af dem var i opgavens diff, så det er ikke en regress — det er den næste
+slice. Ny opgave **F5d** med de målte tal i planen.
+
+Metode: `curl` på de fire URL'er + `/sitemap.xml`, Python til at skære RSC-
+payloaden (`__next_f`) og `<script>`-blokkene fra, så kun den synlige markup
+tæller. Ingen skrivninger, ingen deploy-trigger.

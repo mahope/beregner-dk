@@ -8,9 +8,13 @@ STATUS: 3/10 08:35. CI grøn ved start (`37102093007`). **Gate:** `npm run lint`
       havde danske rækkenavne i 7 af 7 rækker, så `perioderFor` nu tager et
       sprog; (3) `/procent` havde et mellemrum FORAN pladsholderen, så den
       renderede `span` hed « ? %». Alle tre mutationer målt røde. Se arkivet.
-      **Næste iteration:** de 4 åbne VERIFICÉR-noter fra 06:20–08:20 er ældre
-      end 07:30-vinduet og skal verificeres på **indhold**; derefter CEO-køens
-      punkt 0 (`dage-til.ts`: Valborg, svensk påskafton, dansk sankthans,
+      **Deploy:** 06:20-noten (`/dage-i-aaret`) verificeret på **indhold** —
+      ✅ 12 månedsrækker + summering 365/251/104, 3 FAQ-spørgsmål ordret, 301'er
+      begge veje, sitemap, **0** `NaN`; «0 «august»» var en naiv delstreng, fordi
+      «august**i**» indeholder «august» — dansk «august» er **0**. 06:45-noten er
+      **delvist** landet: 6 synlige `\d%` er tilbage → **F5d**.
+      **Næste iteration:** **F5d** (6 målte rester), så de 2 åbne VERIFICÉR-noter
+      fra 07:55/08:00/08:20 efter 12:30-vinduet; derefter CEO-køens punkt 0 (`dage-til.ts`: Valborg, svensk påskafton, dansk sankthans,
       påskeaften-FAQ'en, `toUtcMidnight`).
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
@@ -109,6 +113,21 @@ eller en `Record<Locale, …>`, og en port (samme som `DANSKE_ORD`-listen i
 `PaceBeregner.test.tsx`) dømmer `da`/`no`/`se` hver for sig. ⛔ ❓ nedenfor:
 `beregner.no` serverer et andet site, så rettelsen har 0 bruger-effekt indtil
 den er besvaret — og norsk trafik er 0 i Plausible.
+
+**F5d. [ ] `DEPLOY-MISSING` — de sidste synlige «25%» på to sider (3/10 08:5x).**
+Alt hvad `ceo/procent-med-mellemrum` rørte er live og korrekt: forsiden har **0**
+«100%», navigationens momskort siger «25 % moms», `/feriepenge` har «12,5 % af
+din ferieberettigede løn» og «AM-bidrag (8 %)», `/laaneberegner` har «5-25 %»,
+«4-12 %», «(1-5 %)», «(100 %+)» og svensk «5-15 %»/«3-8 %»/«(2-5 %)»,
+`/husleje` har «30 % af din nettoindkomst» og «30% reglen forklaret» stadig.
+**MÅLT** på de to sider (kun synlig markup, JSON-LD og RSC-payload taget fra)
+er der tilbage: **3** på forsiden — «tillæg eller fratræk **25%** moms» og
+«boafgift (**15%**) og tillægsafgift (**25%**)», alle i
+`src/lib/footer-data.ts` — og **3** i `/feriepenge`s tabellabels «Feriepenge
+(**12,5%**)», «AM-bidrag (**8%**)» og «Skat (estimat ~**38%**»)», plus **3** i
+sidens FAQ-svar («**12,5%** af lønnen», «AM-bidrag (**8%**)», «typisk **1%**»).
+Acceptkriterium: **0** `\d%` i den synlige markup på begge sider, samme
+AST-scanner som F5b/F5c, og en port der renderer de to sider.
 
 ## Feature-kø
 
@@ -358,11 +377,11 @@ filer) ligger i `docs/plan-arkiv.md`. Alle tre er brugt: to førte til
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» på /procent og /boliglaan (hele HTML'en på `minberegner.dk/procent` skal have **0** `\d%` — altså **0** «10%», «25%», «5%», «50%», «1%» — og opslagstabellen skal have «10 % af 250 = 25» og «5 % af 250 = 12,5», tipboksen «50 % af 40 er det samme som 40 % af 50», listen «25 % moms på 1.000 kr = 250 kr i moms», og FAQ-svarene «Eksempel: 25 % af 200 = 50.» og «Læg 20 % til 150»; `beraknare.se/procent` skal have «25 % av 250 = 25», «50 % av 40 är samma sak som 40 % av 50» og **0** «10%»/«25%»/«5%»; værktøjets egen resultatlinje skal skrive «25 %» og forklaringen «25 er 25,00 % af 100» (dvs. den interpolerede procent er rettet, ikke kun brødteksten); `minberegner.dk/boliglaan` skal have «Minimum 5 % af boligens pris (anbefalet: 10-20 %)», «Op til 80 % af boligens værdi», tabellen «0-40 %»/«0,45-0,65 %»/«1,05-1,55 %», «ca. 25,6 % fradrag» og **0** `\d%`; `beraknare.se/boliglaan` skal have «Minst 10 % av bostadens pris», «90 % av bostadens värde (bolånetaket, höjt från 85 % 2026)», «30 % avdrag» og **0** `\d%`; **intet** `NaN`) ceo/procent-punkt-sweeps 3/10 08:00`
 
-`VERIFICÉR DEPLOY: /dage-i-aaret + /dagar-i-aret (nye sider med tolv-måneders-tabel: `minberegner.dk/dage-i-aaret` skal have `<title>` «Hvor mange dage er der på et år? Dage i alle 12 måneder», **1** `<h1>`, **12** månedsrækker + **1** summeringsrække i tabellen, og **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange dage er der på et år?», «Hvor mange dage er der i augusti?» og «Hvor mange dage er der i juli?» — svaret på augusti skal være «31 dage … 21 hverdage og 10 weekenddage» og på juli «31 dage … 23 hverdage og 8 weekenddage»; summeringen skal være 365 dage / 251 hverdage / 104 weekend; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar» og månedsnavnet «augusti», altså **0** «august»; `minberegner.dk/dagar-i-aret` + `beraknare.se/dage-i-aaret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; **intet** `NaN`) ceo/dage-i-aaret 3/10 06:20`
+`DEPLOY OK 3/10 08:5x` — VERIFICÉR DEPLOY: /dage-i-aaret + /dagar-i-aret (nye sider med tolv-måneders-tabel: `minberegner.dk/dage-i-aaret` skal have `<title>` «Hvor mange dage er der på et år? Dage i alle 12 måneder», **1** `<h1>`, **12** månedsrækker + **1** summeringsrække i tabellen, og **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange dage er der på et år?», «Hvor mange dage er der i augusti?» og «Hvor mange dage er der i juli?» — svaret på augusti skal være «31 dage … 21 hverdage og 10 weekenddage» og på juli «31 dage … 23 hverdage og 8 weekenddage»; summeringen skal være 365 dage / 251 hverdage / 104 weekend; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar» og månedsnavnet «augusti», altså **0** «august»; `minberegner.dk/dagar-i-aret` + `beraknare.se/dage-i-aaret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; **intet** `NaN`) ceo/dage-i-aaret 3/10 06:20`
 
 `VERIFICÉR DEPLOY: /timer-i-aret + /timmar-i-aret (nye sider med periode- og måneds-tabel i time: `minberegner.dk/timer-i-aret` skal have `<title>` «Hvor mange timer er der på et år? Timer i alle perioder», **1** `<h1>`, perioderækkerne «Et døgn» 1/24/1.440, «En uge» 7/168/10.080, «To uger» 14/336/20.160, «En måned (februar)» 28/672/40.320, «En måned (april)» 30/720/43.200, «En måned (januar)» 31/744/44.640 og «Et år» 365/8.760/525.600, **12** månedsrækker + **1** summeringsrække i den anden tabel, eksempelrækken «2026 har 365 dage, som er 8.760 timer.», **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange timer er der på et år?», «Hvor mange timer er der på en uge?» og «Hvor mange timer er der på en måned?»; `beraknare.se/timmar-i-aret` skal have «8 760 timmar» og **0** «8.760», og **0** «hur mange»; `minberegner.dk/timmar-i-aret` + `beraknare.se/timer-i-aret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; `minberegner.dk/tidsberegner` skal have «timer i hvert tidsrum» med link til siden og `beraknare.se/tidsberegner» «timmar i varje tidsperiod»; **intet** `NaN`) ceo/timer-i-aret 3/10 07:55`
 
-`VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
+`DEPLOY-MISSING 3/10 08:5x (delvist, se F5d nedenfor)` — VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
 
 ## VERIFICÉR DEPLOY-noter — lukket 3/10 08:0x på indhold
 
