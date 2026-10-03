@@ -27715,3 +27715,50 @@ strenglistens loft **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 3
 `su`, `arveafgift`, `/boligsalg`, `/procent`, `/renteberegner`,
 `/procentpoint`, `/kvadratmeter`, `/konfirmation`, `/efterloen`, `/aktieskat`,
 `/loen-efter-skat`, `/topskat`, `/boernepenge`.
+
+## 3/10 12:3x — F5e-resten: kommune-listen på /lon-efter-skat og /brutto-netto
+
+**Fund (fra planens egen ⛔ under F5e):** `LoenBeregner.tsx:276`
+interpolerede `k.kommuneskat` råt, så listen af kommuner skrev
+«Gentofte (22.8 %)» med **punktum** i dansk markup — i **alle 98 valg**, ikke
+kun i Gentofte. Målt i den renderede komponent:
+
+```
+Albertslund (25.3 %)  Brønderslev (27 %)  Gentofte (22.8 %)  København (23.8 %)
+Aarhus (25.1 %)       Ærø (27 %)         Tønder (26.4 %)
+```
+
+Linjen 282 under feltet skrev «Kirkeskat: 0.43 %» på samme måde. Det er præcis
+den fejl F5e blev oprettet for 11:2x («Kommuneskat (24.94 %)») ét felt længere
+oppe på samme side — så porten fra dengang dømte den øverste linje og lod de
+97 valg under den stå.
+
+**Rettelse:** begge steder går gennem `formatNumber(tal, locale)`. Valget er
+`locale` (ikke et hårdkodet `"da"` som resultatlinjen), fordi komponenten
+allerede henter den fra `useLocale()` — så den svenske udgave får samme
+decimaler. `formatNumber` uden eksplicitte optioner giver `Intl`s normale
+regler (0-3 decimaler), altså «22,8 %» og «27 %» — **samme** tal og samme
+præcision som før, kun med komma. Kirkeskat-linjen får desuden et fallback på
+`SKATTESATSER.kirkeSkat * 100` som de to andre steder i komponenten har, så den
+ikke længere kan skrive en tom sats hvis en kommune ikke findes i dataene.
+
+**Port:** to nye tests i `decimal-komma.test.tsx` under
+`/lon-efter-skat (effektiv skatteprocent)`:
+1. `Gentofte (22,8 %)` **og** `not.toMatch(/\(\d+\.\d+ ?%\)/)` — sidste del
+   dømmer alle 98 valg på én gang, ikke kun det første.
+2. Efter `fireEvent.change` på `#loen-kommune` til «Gentofte»: `Kirkeskat: 0,43 %`.
+
+**Målt:** begge **røde før** rettelsen (kviksmit på den rå markup), grønne
+efter. Gate: biome lint 751 filer, `tsc` app + test, `TZ=UTC vitest run`
+**4051 tests i 257 filer**, `next build` — alle exit 0.
+
+**Næste slice målt på ny:** `EnRepMaxBeregner.tsx:127` (`{row.pct}% · {row.reps}`)
+og `MomsBeregner.tsx:244` (`{o.sats}%`) — begge råt interpolerede og med
+**intet** mellemrum før procenttegnet. De er ikke nået af F5c's liste, så de
+skal måles på ny før de rettes.
+
+**Deploy-måling 12:34:** de otte ventende VERIFICÉR-noter er **ikke** dømt.
+12:30-vinduet var endnu ikke rullet: `minberegner.dk/procent` var frisk (0
+`\d%`), mens `beraknare.se/procent` stadig viste 3 gamle strenge (de er
+rettet i `a68cb2f`) og `/brutto-netto`s FAQ-JSON-LD skrev «AM-bidrag (8%)».
+HTTP 200 siger intet, så noterne dømmes på ny efter 17:30.

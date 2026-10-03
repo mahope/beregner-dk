@@ -1,41 +1,29 @@
-STATUS: 3/10 11:4x. **CI var rød ved start** — kørsel `37112627105` («Skriv
-       procenttal med mellemrum i fem beregnere») faldt med én fejl:
-       `dato-eksempler.test.ts:175` løb ud af tid (5000 ms). Lokalt tog
-       den test **2,11 s** af et budget på 5 s, altså 42 % — den var én langsom
-       CI-runner fra rød. **Rettet i denne iteration** (se nedenfor).
+STATUS: 3/10 12:3x. **CI grøn** ved start (`37113979889`), ingen åbne PR'er,
+       ingen uløste Sentry-fejl (SDK'en er sat op). CEO-køens otte fund er
+       **alle fundet rettet i koden** (Valborg 30/4, svensk påskafton lørdag
+       via `offsetDays: -1`, dansk sankthans fast 23./24. juni, påskeaften-FAQ
+       slettet, nettoprisindeks på /husleje, `toUtcMidnight` i
+       `DAGE_TIL_TIMEZONE`, svensk promille-FAQ fra `PROMILLEGRANSE.se`,
+       `maneder: 12` med forklaring) — ingen ny opgave derfra.
        **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-       `npm run build` — **grøn 11:4x** (alle exit 0, **4048** tests i 257
-       filer, build exit 0). Ingen åbne PR'er, ingen uløste Sentry-fejl
-       (SDK'en er sat op: `src/instrumentation.ts` +
-       `instrumentation-client.ts`).
-       **Denne iteration: rød CI som første opgave.** Rodårsagen var
-       dobbeltarbejde, ikke en flækket test. `erHelligdag()` byggede hele
-       årets helligdagsliste — påske med — for **hver eneste kalenderdag**,
-       og `maanederITaar()` gør det for de tolv måneder; `denneMaanedEksempel()`
-       byggede så alle tolv måneder for at læse ** én** række, og den
-       dagudtømmende test kalder den 744 gange. To rettelser: en memoiseret
-       `Set<number>` pr. år+i `helligdage.ts` (`helligdagsdage()`), og den nye
-       `maanedRaekke()` som `maanederITaar()` og `denneMaanedEksempel()`
-       begge læser, så tallene har **én** kilde. **Målt:** testen 2,11 s →
-       0,25 s (8x), hele filen 2,16 s → 0,28 s, suiten 167 s → **42 s**
-       lokalt. Mutation: cache der ignorerer `locale` → 2 røde tests;
-       `skudaar: false` → 2 røde. Punkt 13: 0 `$[0]`-rester.
-       **Deploy-verifikation:** de seks ventende noter fra før 12:30 er
-       **stadig åbne** og dømmes efter 12:30-vinduet — HTTP 200 er ikke bevis.
-       **Næste iteration:** (1) døm de seks noter på indhold efter 12:30;
-       (2) F5e decimal-komma (`Kommuneskat (24.94 %)` på `/brutto-netto`);
-       (3) F5c-slice på de næste interpolerede procenter (`Elberegner` 12,
-       `HuslejeBudgetBeregner` 2, `BudgetBeregner` 2, `LonEfterSkattBeregner` 3).
-       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
-       ⚠️ **En anden proces committer i samme arbejdsmappe (12:1x).** Et commit
-       med besked fra et **fremmed projekt** («Markér hvilke emnefund i
-       søgningen der kan læses», `/emner/<slug>`, 2585 tests) lagde sig på
-       master og **swooped mine tre stagede filer med sig**. Jeg fandt det ved
-       at `git log` viste en besked, jeg ikke havde skrevet. Rettet med
-       `git commit --amend` (indholdet var 100 % mit, intet andres arbejde i
-       committen) og pushet som `42adddd`. **Næste iteration:** kør
-       `git branch --show-current && git status --short` i samme kommando som
-       committen, og læs `git log --oneline -1` med egne øjne før push.
+       `npm run build` — **grøn 12:3x** (exit 0, **4051** tests i 257 filer,
+       44,8 s, build exit 0).
+       **Denne iteration: F5e-resten — kommune-listen på /brutto-netto.**
+       `LoenBeregner.tsx:276` interpolerede `k.kommuneskat` råt, så **alle 98
+       kommuner** skrev «Gentofte (22.8 %)» med punktum i dansk markup — samme
+       fejl som «Kommuneskat (24.94 %)» lige ovenfor, ét felt længere oppe.
+       Linjen 282 skrev «Kirkeskat: 0.43 %» på samme måde. Begge går nu
+       gennem `formatNumber(…, locale)`, så de læser **samme** kommunesats som
+       resultatlinjen og `22,8 %` er præcis den værdi, der står i regnestykket.
+       *Målt:* rødt før rettelsen (2/2 nye tests), grønt bagefter; portene er
+       «Gentofte (22,8 %)» + **0** `\d+.\d+ %` i parantes i hele markupken, og
+       «Kirkeskat: 0,43 %» efter valgt kommune.
+       **Næste slice målt på ny:** `EnRepMaxBeregner.tsx:127` (`{row.pct}%`) og
+       `MomsBeregner.tsx:244` (`{o.sats}%`) — begge råt og uden mellemrum.
+       **Deploy:** de otte ventende noter er **ikke dømt** — målt 12:34 var
+       12:30-vinduet endående i gang (/procent frisk, /brutto-netto og
+       beraknare.se/procent stadig gammel kode). Dømmes efter 17:30.
+       BRANCH-TJEK: ikke kørt (sidste 2/10).
 
 ## Fase 3 — trafik-drevet
 
@@ -153,7 +141,7 @@ tilbage), `LoenBeregner` (resten), `HuslejeBudgetBeregner` 2,
   erstattet af værktøjet ovenfor i stedet for at blive gættet.
 
 **F5e. [x] ✅ Målte decimaler med punktum i dansk tekst (3/10 11:2x — fundet af
-den nye port; delvist lukket 12:1x).** *Hvad:* den renderede `/brutto-netto`
+den nye port; lukket 12:3x med kommune-listen).** *Hvad:* den renderede `/brutto-netto`
 skrev «Kommuneskat (**24.94** %)» med **punktum** i den danske markup, fordi
 `LoenBeregner.tsx:426` interpolerer kommunesatsprocenten råt fra
 input-feltet; `Kirkeskat (0,64 %)` bruger derimod komma.
@@ -317,7 +305,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i tre blogindlæg (hele HTML'en skal have **0** `\d%` i den løse tekst: `minberegner.dk/blog/pension-hvor-meget-skal-du-spare-op` skal have «12-17 %», «8-12 %», «4-5 %», «~38 %», «(70 %)», «60-80 %», «10-12 %» … «22-30 %», «*Med 5 % årligt afkast» og «30-årig = 70 % aktier, 30 % obligationer»; `minberegner.dk/blog/boliglaan-2026-renter-og-afdrag` skal have «3,5-4,5 %», «2-3 %», «2,5-3,5 %», «4-7 %», «Finansierer over 80 %», «Udbetaling (5 %)», «op til 80 %», «Banklån (5-15 %)», «150.000 kr (5 %)», «2.400.000 kr (80 %)», «450.000 kr (15 %)», «30-33 %», «0,5-1,2 %», «25-33 %», «Sæt 2-3 % af boligprisen»; `minberegner.dk/blog/maanedsbudget-2026-komplet-guide` skal have «30-35 %», «50 % til nødvendigheder», «30 % til personlige ønsker», «20 % til opsparing og gæld», «10-20 %», «15-25 %», «25.000-35.000 kr/måned», «30-40 %», «12-18 %», «8-12 %», «5-10 %» og alle otte tabel-celler «33 %», «20 %», «12 %», «8 %», «7 %», «12 %», «8 %», «100 %». **Undtagelserne er de tre regelnavne og skal STÅ:** «30% reglen» i de to blogindlægs sidelinks og «4%-reglen» i pensionsindlægget, så **2** «30% reglen» på tværs og **1** «4%-reglen»; altså **0** «30 % reglen» og **0** «4 %-reglen»; **intet** `NaN`) ceo/procent-sweep-pension-boliglaan 3/10 10:1x`
 
-`VERIFICÉR DEPLOY: procentnotationen «8 %» i de fem interpolerede beregnere (hele HTML'en skal have **0** `\d%` i den synlige tekst på `minberegner.dk/kalorier` — altså **0** «(11%)», «(25%)» og **0** «(25 %)» mangler, men «300 kcal (11 %)», «657 kcal (25 %)» og «1.676 kcal (64 %)» skal stå, og `title`-attributterne skal sige «Protein: 11 %», «Fedt: 25 %» og «Kulhydrater: 64 %»; `minberegner.dk/brutto-netto` skal have «- AM-bidrag (8 %)», «Bundskat (12,01 %)», «Mellemskat (7,5 %)», «Topskat (7,5 %)», «Top-topskat (5 %)», «Effektiv skatteprocent: 33,9 %», «Kommuneskat (24.94 %)» og «Kirkeskat (0,64 %)», og kommune-listen skal have «Gentofte (22.8 %)» med **0** «(22.8%)»; `minberegner.dk/laaneberegner` skal have «Lån … er til 5 % - ydelse» og **0** `\d%` i loanSummary; `minberegner.dk/bolan` skal have «Kontantinsats: … kr (20 %), «85 %», «2 %/år» og «max 7 %). Ränteavdraget är 1,5 % upp till … kr, sedan 1,1 %.»; `minberegner.dk/opsparing` skal have «Real værdi (efter 2 % inflation):», «+5,2 %» og «2 % p.a.»; **intet** `NaN`) ceo/procent-interpolationer 3/10 11:2x`
+`VERIFICÉR DEPLOY: procentnotationen «8 %» i de fem interpolerede beregnere (hele HTML'en skal have **0** `\d%` i den synlige tekst på `minberegner.dk/kalorier` — altså **0** «(11%)», «(25%)» og **0** «(25 %)» mangler, men «300 kcal (11 %)», «657 kcal (25 %)» og «1.676 kcal (64 %)» skal stå, og `title`-attributterne skal sige «Protein: 11 %», «Fedt: 25 %» og «Kulhydrater: 64 %»; `minberegner.dk/brutto-netto` skal have «- AM-bidrag (8 %)», «Bundskat (12,01 %)», «Mellemskat (7,5 %)», «Topskat (7,5 %)», «Top-topskat (5 %)», «Effektiv skatteprocent: 33,9 %», «Kommuneskat (24.94 %)» og «Kirkeskat (0,64 %)», og kommune-listen skal have «Gentofte (22,8 %)» med **0** `\d+.\d+ %` i parantes
+(slaget ned i `ceo/kommune-decimal-komma` 12:3x, som efterfølgende skriver den
+med komma); `minberegner.dk/laaneberegner` skal have «Lån … er til 5 % - ydelse» og **0** `\d%` i loanSummary; `minberegner.dk/bolan` skal have «Kontantinsats: … kr (20 %), «85 %», «2 %/år» og «max 7 %). Ränteavdraget är 1,5 % upp till … kr, sedan 1,1 %.»; `minberegner.dk/opsparing` skal have «Real værdi (efter 2 % inflation):», «+5,2 %» og «2 % p.a.»; **intet** `NaN`) ceo/procent-interpolationer 3/10 11:2x`
 
 `VERIFICÉR DEPLOY: memoiserede helligdage og måneder (tallene skal være **uændrede**, så dommen er tallene og ikke HTTP 200: `minberegner.dk/dage-i-aaret` skal stadig have summeringsrækken **365** dage / **251** hverdage / **104** weekenddage og månedsrækkerne juli **23** hverdage / **8** weekenddage og augusti **21** / **10**; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar»; `minberegner.dk/dato` skal have helligdagslisten med «5. april» (påskedag), «14. maj» (kristi himmelfartsdag) og «24. maj» (pinsedag) 2026 og en måneds-række med de samme **251** hverdage for hele året; `minberegner.dk/timer-i-aaret` skal have alle **12** månedsrækker plus summeringen; **intet** `NaN`) ceo/hoelligdag-cache 3/10 11:5x`
 
@@ -330,7 +320,17 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 i `docs/plan-arkiv.md`). HTTP 200 er aldrig brugt som bevis — kun curl på
 indhold.
 
-**Åbne (merges efter 07:30-vinduet, dømmes på indhold efter 12:30):**
+**Målt 12:34 (4 min efter 12:30-vinduet) — endnu ikke dømt, vinduet var
+ stadig i gang:** `minberegner.dk/procent` er **frisk** (0 `\d%`), men
+ `beraknare.se/procent` har stadig 3 (`a68cb2f` er i kilden) og
+ `minberegner.dk/brutto-netto`s `FAQPage` skriver «AM-bidrag (8%)» med
+ punktum. Det er enten et vindue der endnu ikke var rullet, eller en batch
+ der kørte for sent — **ingen af delene må dømmes på HTTP 200**. Alle otte
+ noter dømmes på ny efter 17:30-vinduet; det samme gælder
+ `ceo/procent-punkt-sweep-side-data`, hvis `/brutto-netto` er dens
+ undtagelse.
+
+**Åbne (merges efter 07:30-vinduet, dømmes på indhold efter 17:30):**
 `ceo/procent-punkt-sweeps` 08:00 · `ceo/procent-punkt-sweep-side-data`
 08:20 · `ceo/su-indtaegtsgraense` 10:1x ·
 `ceo/procent-sweep-pension-boliglaan` 10:1x · `ceo/boliglaan-procent` 10:5x.
@@ -346,6 +346,8 @@ review-rettelsen `8cf72dd` (08:34) og **endnu ikke live** — den venter 12:30.
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i metadata og FAQ på tværs af alle slugs (helt korpuset i `page-data.ts` er skrevet om, så **hele HTML'en** på de berørte sider skal have **0** `\d%` — altså **0** «25%», «12,5%», «8%», «5%», «100%» — undtagen **1** «30% reglen» pr. `/husleje` (regelnavnet). Prøv især `minberegner.dk/boernepenge` («12,5 %», «2 %», «AM-bidrag (8 %)», 0 × «kr.,»), `minberegner.dk/feriepenge` («12,5 %»), `minberegner.dk/rentefradrag` («33,6 %», «25,6 %»), `minberegner.dk/su` («100 %», «80 %»), `minberegner.dk/arveafgift` («15 %», «25 %»), `minberegner.dk/husleje` («30 %», «33 %», **1** «30% reglen»), `minberegner.dk/opsparing` («5 %», «10-20 %», «~7 %», «2-4 %», «under 1 %»), `minberegner.dk/konfirmation` («40-50 %», «20-30 %», «20-25 %»), `minberegner.dk/arvestigning` («20 %», «80 %», «0,51 %», «5,1‰» — promillen skal **beholde** sin skrivemåde), `minberegner.dk/dagpenge` («90 %», «100 %», «80 %»), `minberegner.dk/brutto-netto` («25,049 %», «AM-bidrag (8 %)»), `minberegner.dk/promille` og `minberegner.dk/procent`; `beraknare.se/procent` («25 %», «20 %», «2 %», «3 %»), `beraknare.se/leasing` («85 %», «15 %», «30 %», «21 %», «20 %»), `beraknare.se/moms` («25 %», «15 %», «12 %», «20 %»), `beraknare.se/boernepenge` («100 %», «80 %») og `beraknare.se/dagpenge` («5 %»); **intet** `NaN`) ceo/procent-punkt-sweep-side-data 3/10 08:20`
 
+`VERIFICÉR DEPLOY: kommune-listen på /lon-efter-skat og /brutto-netto (hele HTML'en skal have **0** `\d+.\d+ %` i parantes — altså **0** «Gentofte (22.8 %)» og **0** «Kirkeskat: 0.43 %» — mens kommune-listen skal have «Gentofte (22,8 %)», «København (23,8 %)», «Aarhus (25,1 %)» og «Brønderslev (27 %)»; `beraknare.se/lon-efter-skat` skal have de samme tal med komma; **intet** `NaN`) ceo/kommune-decimal-komma 3/10 12:3x`
+
 ## ❓ Til Mads
 
 - ❓ **Hvor deployes den norske udgave? (ny, 2/10 14:15, højst prioriteret.)**
@@ -356,6 +358,18 @@ review-rettelsen `8cf72dd` (08:34) og **endnu ikke live** — den venter 12:30.
   `hiddenDomains` («not yet launched»). Al norsk tekst, også den norske
   dagpenge-linje fra `1174169`, er derfor usynlig for brugere. Skal `beregner.no`
   servere denne app, eller er den norske udgave ikke i drift?
+- ❓ **Ferieåret er ikke længere 1. september – 31. december (ny, målt
+  12:3x).** `page-data.ts:1822` siger «Med den nye ferielov (fra 2020) er
+  optjeningsperioden 1. september til 31. august, og ferieåret løber fra
+  1. september til 31. december året efter», `/feriepenge/page.tsx:59-62`
+  siger det samme, og bloggen `guide-feriepenge-hvornaar-og-hvor-meget`
+  har det i to tabeller og i brødteksten. **Det er reglerne fra FØR
+  ferielovsændringen.** retsinformation.dk er en SPA (`/api/eli/…` og
+  `/api/search` giver begge HTML), `lex.dk/ferieloven` og `da.dk` 404'er,
+  så **intet** kan verificeres herfra. Ét skærmbillede af ferielovens § 7
+  (ferieår og optjening) låser det, og rettelsen får sin egen test i
+  `page-data`-porten, fordi den er brødtekst på tre sider og i FAQ- og
+  JSON-LD-output. Koden er bevidst urørt — punkt 11.
 - ❓ **Søgningseksport fra Search Console (30/9).** GSC's opsummering viser kun
   3-4 søgninger pr. side; for `/procent` (150.470 visninger, sitets største side)
   er de tre tilsammen **364 visninger**. **Et skærmbillede af Search Console →

@@ -273,13 +273,13 @@ export default function LoenBeregner() {
               <option value="">Manuel indtastning (gennemsnit)</option>
               {KOMMUNER.map(k => (
                 <option key={k.navn} value={k.navn}>
-                  {k.navn} ({k.kommuneskat} %)
+                  {k.navn} ({formatNumber(k.kommuneskat, locale)} %)
                 </option>
               ))}
             </select>
             {valgtKommune && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Kirkeskat: {KOMMUNER.find(k => k.navn === valgtKommune)?.kirkeskat} %
+                Kirkeskat: {formatNumber(KOMMUNER.find(k => k.navn === valgtKommune)?.kirkeskat ?? SKATTESATSER.kirkeSkat * 100, locale)} %
               </p>
             )}
             {!valgtKommune && (

@@ -156,6 +156,25 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
       expect(tekst).toContain("Kommuneskat (24,94 %)");
       expect(tekst).not.toContain("24.94 %");
     });
+
+    test("da: kommune-listen skriver komma, ikke punktum", () => {
+      // Samme fejl ét felt længere oppe: listen af kommuner interpolerer
+      // satsen råt fra `KOMMUNER`, så hvert af de 98 valg skrev
+      // «Gentofte (22.8 %)» med punktum i dansk markup.
+      const tekst = helTekst(renderIn(<LoenBeregner />, "da").container);
+      expect(tekst).toContain("Gentofte (22,8 %)");
+      expect(tekst).not.toMatch(/\(\d+\.\d+ ?%\)/);
+    });
+
+    test("da: kirkeskatlinjen under kommune-listen skriver komma", () => {
+      const { container } = renderIn(<LoenBeregner />, "da");
+      fireEvent.change(container.querySelector("#loen-kommune")!, {
+        target: { value: "Gentofte" },
+      });
+      const tekst = helTekst(container);
+      expect(tekst).toContain("Kirkeskat: 0,43 %");
+      expect(tekst).not.toContain("0.43 %");
+    });
   });
 
   describe("/boliglaan (belåningsgrad og rentespænd)", () => {
