@@ -43,7 +43,7 @@ const faqItems = [
   {
     question: "Hvad er renten på et boliglån i 2026?",
     answer:
-      "Renten på et 30-årigt fastforrentet realkreditlån med afdrag ligger i starten af 2026 på ca. 3,5-4,5% afhængigt af løbetid og lånetype. Variabelt forrentede lån ligger lavere, typisk 2-3%.",
+      "Renten på et 30-årigt fastforrentet realkreditlån med afdrag ligger i starten af 2026 på ca. 3,5-4,5 % afhængigt af løbetid og lånetype. Variabelt forrentede lån ligger lavere, typisk 2-3 %.",
   },
   {
     question: "Hvor meget kan jeg låne til bolig?",
@@ -53,7 +53,7 @@ const faqItems = [
   {
     question: "Hvad er forskellen på realkredit og banklån?",
     answer:
-      "Realkreditlån finansierer op til 80% af boligens værdi til lavere rente. Banklån dækker de resterende 5-15% til højere rente. De 5% udbetaling skal du selv have.",
+      "Realkreditlån finansierer op til 80 % af boligens værdi til lavere rente. Banklån dækker de resterende 5-15 % til højere rente. De 5 % udbetaling skal du selv have.",
   },
 ];
 
@@ -107,28 +107,28 @@ export default function BoliglånGuidePage() {
             <tbody>
               <tr>
                 <td>Fastforrentet 30 år, m/afdrag</td>
-                <td>3,5-4,5%</td>
+                <td>3,5-4,5 %</td>
                 <td>Tryghed, stabil ydelse</td>
               </tr>
               <tr>
                 <td>Fastforrentet 30 år, u/afdrag</td>
-                <td>3,5-4,5%</td>
+                <td>3,5-4,5 %</td>
                 <td>Lavere ydelse, kortvarigt</td>
               </tr>
               <tr>
                 <td>Variabelt F-kort/F1</td>
-                <td>2-3%</td>
+                <td>2-3 %</td>
                 <td>Lavest ydelse, højere risiko</td>
               </tr>
               <tr>
                 <td>Variabelt F3/F5</td>
-                <td>2,5-3,5%</td>
+                <td>2,5-3,5 %</td>
                 <td>Kompromis mellem fast og variabel</td>
               </tr>
               <tr>
                 <td>Banklån (top-up)</td>
-                <td>4-7%</td>
-                <td>Finansierer over 80%</td>
+                <td>4-7 %</td>
+                <td>Finansierer over 80 %</td>
               </tr>
             </tbody>
           </table>
@@ -139,17 +139,17 @@ export default function BoliglånGuidePage() {
           Når du køber bolig, finansieres den typisk med tre dele:
         </p>
         <ul>
-          <li><strong>Udbetaling (5%):</strong> Det beløb, du selv betaler kontant</li>
-          <li><strong>Realkreditlån (op til 80%):</strong> Lån med sikkerhed i boligen til lav rente</li>
-          <li><strong>Banklån (5-15%):</strong> Tillægslån til højere rente, der dækker gabet</li>
+          <li><strong>Udbetaling (5 %):</strong> Det beløb, du selv betaler kontant</li>
+          <li><strong>Realkreditlån (op til 80 %):</strong> Lån med sikkerhed i boligen til lav rente</li>
+          <li><strong>Banklån (5-15 %):</strong> Tillægslån til højere rente, der dækker gabet</li>
         </ul>
         <p>
           <strong>Eksempel:</strong> Ved en bolig til 3 mio. kr:
         </p>
         <ul>
-          <li>Udbetaling: 150.000 kr (5%)</li>
-          <li>Realkreditlån: 2.400.000 kr (80%)</li>
-          <li>Banklån: 450.000 kr (15%)</li>
+          <li>Udbetaling: 150.000 kr (5 %)</li>
+          <li>Realkreditlån: 2.400.000 kr (80 %)</li>
+          <li>Banklån: 450.000 kr (15 %)</li>
         </ul>
 
         <h2>Fast vs. variabel rente</h2>
@@ -176,7 +176,7 @@ export default function BoliglånGuidePage() {
         <h2>Hvad har du råd til?</h2>
         <p>
           En god tommelfingerregel er, at dine samlede boligudgifter (ydelse, ejendomsskat,
-          forsikring, vedligeholdelse) ikke bør overstige <strong>30-33% af husstandens indkomst
+          forsikring, vedligeholdelse) ikke bør overstige <strong>30-33 % af husstandens indkomst
           før skat</strong>.
         </p>
         <p>
@@ -189,7 +189,7 @@ export default function BoliglånGuidePage() {
 
         <h2>Bidragssatser og ÅOP</h2>
         <p>
-          Ud over renten betaler du et <strong>bidrag</strong> til realkreditinstituttet (typisk 0,5-1,2% af
+          Ud over renten betaler du et <strong>bidrag</strong> til realkreditinstituttet (typisk 0,5-1,2 % af
           restgælden årligt). Bidraget afhænger af belåningsgrad, boligtype og låntype.
         </p>
         <p>
@@ -204,7 +204,7 @@ export default function BoliglånGuidePage() {
         <h2>Skattefradrag på boliglånsrenter</h2>
         <p>
           Du kan trække renter på dit boliglån fra i skat. I 2026 giver rentefradraget en
-          skattebesparelse på ca. <strong>25-33%</strong> af dine renteudgifter (afhængigt af kommuneskat).
+          skattebesparelse på ca. <strong>25-33 %</strong> af dine renteudgifter (afhængigt af kommuneskat).
         </p>
         <p>
           <strong>Eksempel:</strong> Betaler du 100.000 kr i renter om året, sparer du ca. 25.000-33.000 kr
@@ -217,7 +217,7 @@ export default function BoliglånGuidePage() {
         <ul>
           <li><strong>Sammenlign tilbud:</strong> Indhent tilbud fra mindst 2-3 realkreditinstitutter og banker</li>
           <li><strong>Overvej lånmix:</strong> En kombination af fast og variabel rente kan balancere sikkerhed og pris</li>
-          <li><strong>Regn med buffer:</strong> Sæt 2-3% af boligprisen af til uforudsete udgifter ved indflytning</li>
+          <li><strong>Regn med buffer:</strong> Sæt 2-3 % af boligprisen af til uforudsete udgifter ved indflytning</li>
           <li><strong>Husk ejendomsværdiskat:</strong> Beregn den med vores{" "}
             <Link href="/ejendomsvaerdiskat" className="text-blue-600 hover:underline">ejendomsværdiskat-beregner</Link>
           </li>

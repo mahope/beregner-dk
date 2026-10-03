@@ -57,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const faqItems = [
   {
     question: "Hvor meget skal jeg spare op til pension?",
-    answer: "En tommelfingerregel er at spare 12-17% af din bruttoløn til pension. Med arbejdsgiverbidrag på 8-12% og dit eget bidrag på 4-5% når de fleste dette. Jo tidligere du starter, jo mindre behøver du at spare procentuelt.",
+    answer: "En tommelfingerregel er at spare 12-17 % af din bruttoløn til pension. Med arbejdsgiverbidrag på 8-12 % og dit eget bidrag på 4-5 % når de fleste dette. Jo tidligere du starter, jo mindre behøver du at spare procentuelt.",
   },
   {
     question: "Hvornår er det for sent at starte pensionsopsparing?",
@@ -122,7 +122,7 @@ export default function PensionGuidePage() {
         <h2>Den korte version: Hvor meget skal du spare?</h2>
         <p>
           Lad os starte med det vigtigste spørgsmål. De fleste eksperter anbefaler, at du 
-          sparer <strong>12-17% af din bruttoløn</strong> til pension. For de fleste danskere 
+          sparer <strong>12-17 % af din bruttoløn</strong> til pension. For de fleste danskere 
           opnås dette automatisk via arbejdsmarkedspension:
         </p>
 
@@ -132,20 +132,20 @@ export default function PensionGuidePage() {
             <tbody className="text-gray-700 dark:text-gray-300">
               <tr className="border-b border-blue-200 dark:border-blue-700">
                 <td className="py-2">Arbejdsgivers bidrag</td>
-                <td className="text-right">8-12%</td>
+                <td className="text-right">8-12 %</td>
               </tr>
               <tr className="border-b border-blue-200 dark:border-blue-700">
                 <td className="py-2">Dit bidrag</td>
-                <td className="text-right">4-5%</td>
+                <td className="text-right">4-5 %</td>
               </tr>
               <tr className="font-bold">
                 <td className="py-2">Total indbetaling</td>
-                <td className="text-right text-blue-700 dark:text-blue-400">12-17%</td>
+                <td className="text-right text-blue-700 dark:text-blue-400">12-17 %</td>
               </tr>
             </tbody>
           </table>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-            Eksempel: Med 40.000 kr/md i løn og 15% pension = 6.000 kr/md til pension
+            Eksempel: Med 40.000 kr/md i løn og 15 % pension = 6.000 kr/md til pension
           </p>
         </div>
 
@@ -201,12 +201,12 @@ export default function PensionGuidePage() {
         <h3>Søjle 2: Arbejdsmarkedspension</h3>
         <p>
           De fleste danskere har en <strong>arbejdsmarkedspension</strong> via deres 
-          ansættelse. Arbejdsgiver og du indbetaler tilsammen 12-17% af din løn til 
+          ansættelse. Arbejdsgiver og du indbetaler tilsammen 12-17 % af din løn til 
           en pensionskasse (PFA, Danica, Velliv, etc.).
         </p>
         <p>
           Denne pension er ofte din vigtigste pensionskilde, da beløbene bliver store 
-          over et helt arbejdsliv. Med 6.000 kr/md i indbetaling og 4% afkast har du 
+          over et helt arbejdsliv. Med 6.000 kr/md i indbetaling og 4 % afkast har du 
           over 2 millioner kr efter 25 år.
         </p>
 
@@ -223,7 +223,7 @@ export default function PensionGuidePage() {
         <h2>Hvor meget har du brug for som pensionist?</h2>
         <p>
           Det store spørgsmål: Hvad skal du egentlig bruge som pensionist? Tommelfingerreglen er, 
-          at de fleste har brug for <strong>60-80% af deres arbejdsindkomst</strong> som pensionist.
+          at de fleste har brug for <strong>60-80 % af deres arbejdsindkomst</strong> som pensionist.
         </p>
 
         <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
@@ -235,11 +235,11 @@ export default function PensionGuidePage() {
                 <td className="text-right">45.000 kr/md</td>
               </tr>
               <tr className="border-b border-yellow-200 dark:border-yellow-700">
-                <td className="py-2">Netto efter skat (~38%)</td>
+                <td className="py-2">Netto efter skat (~38 %)</td>
                 <td className="text-right">~28.000 kr/md</td>
               </tr>
               <tr className="border-b border-yellow-200 dark:border-yellow-700">
-                <td className="py-2">Behov som pensionist (70%)</td>
+                <td className="py-2">Behov som pensionist (70 %)</td>
                 <td className="text-right">~19.500 kr/md</td>
               </tr>
               <tr className="border-b border-yellow-200 dark:border-yellow-700">
@@ -278,23 +278,23 @@ export default function PensionGuidePage() {
             <tbody>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">25 år</td>
-                <td>10-12% af løn</td>
+                <td>10-12 % af løn</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">30 år</td>
-                <td>12-15% af løn</td>
+                <td>12-15 % af løn</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">35 år</td>
-                <td>15-18% af løn</td>
+                <td>15-18 % af løn</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">40 år</td>
-                <td>18-22% af løn</td>
+                <td>18-22 % af løn</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">50 år</td>
-                <td>22-30% af løn</td>
+                <td>22-30 % af løn</td>
               </tr>
             </tbody>
           </table>
@@ -310,7 +310,7 @@ export default function PensionGuidePage() {
           opsparet. Med 20.000 kr/md i behov (240.000 kr/år) svarer det til 6 mio. kr.
         </p>
         <p>
-          Dette er baseret på &quot;4%-reglen&quot; - at du kan hæve 4% af din opsparing årligt 
+          Dette er baseret på &quot;4%-reglen&quot; - at du kan hæve 4 % af din opsparing årligt 
           uden at løbe tør (over 25-30 år med afkast).
         </p>
 
@@ -323,8 +323,8 @@ export default function PensionGuidePage() {
             Aktieandel = 100 - din alder
           </p>
           <p className="text-sm text-center text-gray-600 dark:text-gray-400 mt-2">
-            30-årig = 70% aktier, 30% obligationer<br />
-            50-årig = 50% aktier, 50% obligationer
+            30-årig = 70 % aktier, 30 % obligationer<br />
+            50-årig = 50 % aktier, 50 % obligationer
           </p>
         </div>
 
@@ -364,7 +364,7 @@ export default function PensionGuidePage() {
               </tr>
             </tbody>
           </table>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">*Med 5% årligt afkast</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">*Med 5 % årligt afkast</p>
         </div>
 
         <p>

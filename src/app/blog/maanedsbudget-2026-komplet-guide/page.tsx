@@ -42,15 +42,15 @@ export async function generateMetadata(): Promise<Metadata> {
 const faqItems = [
   {
     question: "Hvor meget bør jeg bruge på bolig?",
-    answer: "Tommelfingerreglen siger maks. 30-35% af din nettoindkomst. Bor du til leje i København, kan det være svært at holde sig under 30%, men undgå at gå over 40% — så bliver din økonomi sårbar over for rentestigninger eller tab af indtægt.",
+    answer: "Tommelfingerreglen siger maks. 30-35 % af din nettoindkomst. Bor du til leje i København, kan det være svært at holde sig under 30 %, men undgå at gå over 40 % — så bliver din økonomi sårbar over for rentestigninger eller tab af indtægt.",
   },
   {
     question: "Hvad er 50/30/20-reglen?",
-    answer: "50/30/20-reglen fordeler din nettoindkomst efter skat: 50% til nødvendigheder (bolig, mad, transport, forsikring), 30% til personlige ønsker (rejser, restaurant, streaming, hobby) og 20% til opsparing og gældsafbetaling. Reglen er en tommelfingerregel udviklet af Elizabeth Warren og kan tilpasses efter din situation.",
+    answer: "50/30/20-reglen fordeler din nettoindkomst efter skat: 50 % til nødvendigheder (bolig, mad, transport, forsikring), 30 % til personlige ønsker (rejser, restaurant, streaming, hobby) og 20 % til opsparing og gældsafbetaling. Reglen er en tommelfingerregel udviklet af Elizabeth Warren og kan tilpasses efter din situation.",
   },
   {
     question: "Hvor meget bør jeg spare op hver måned?",
-    answer: "Mindst 10-20% af din nettoindkomst. Har du gæld med høj rente (f.eks. forbrugslån og kassekredit), bør du prioritere at betale den ud først — det giver en højere garanteret gevinst end opsparing. Har du ingen gæld, bør du have en opsparing på 3-6 måneders leveomkostninger som buffer.",
+    answer: "Mindst 10-20 % af din nettoindkomst. Har du gæld med høj rente (f.eks. forbrugslån og kassekredit), bør du prioritere at betale den ud først — det giver en højere garanteret gevinst end opsparing. Har du ingen gæld, bør du have en opsparing på 3-6 måneders leveomkostninger som buffer.",
   },
   {
     question: "Hvad er forskellen på faste og variable udgifter?",
@@ -62,7 +62,7 @@ const faqItems = [
   },
   {
     question: "Hvor meget koster en gennemsnitlig dansk husstand?",
-    answer: "En gennemsnitlig dansk husstand bruger ca. 25.000-35.000 kr/måned inkl. bolig, mad, transport og faste udgifter. Bolig er den største post (ca. 30-40% af budgettet), derefter mad og dagligvarer (ca. 12-18%), transport (ca. 8-12%) og forsikring/faste udgifter (ca. 5-10%).",
+    answer: "En gennemsnitlig dansk husstand bruger ca. 25.000-35.000 kr/måned inkl. bolig, mad, transport og faste udgifter. Bolig er den største post (ca. 30-40 % af budgettet), derefter mad og dagligvarer (ca. 12-18 %), transport (ca. 8-12 %) og forsikring/faste udgifter (ca. 5-10 %).",
   },
 ];
 
@@ -241,10 +241,10 @@ export default function MaanedsbudgetGuidePage() {
 
         <h3>4. Sæt et opsparingsmål</h3>
         <p>
-          En tommelfingerregel er at spare <strong>mindst 10-20% af din nettoindkomst</strong> op
+          En tommelfingerregel er at spare <strong>mindst 10-20 % af din nettoindkomst</strong> op
           hver måned. Har du gæld med høj rente (forbrugslån, kassekredit, kviklån), bør du
           prioritere at betale den ud før du sparer op — det giver dig en garanteret gevinst på
-          15-25% årligt.
+          15-25 % årligt.
         </p>
         <p>
           <strong>Nødbufferen</strong> bør være på 3-6 måneders leveomkostninger, typisk
@@ -276,13 +276,13 @@ export default function MaanedsbudgetGuidePage() {
           nettoindkomst i tre kategorier:
         </p>
         <ul>
-          <li><strong>50% til nødvendigheder:</strong> bolig, mad, transport, forsikring, minimumsbetaling på gæld</li>
-          <li><strong>30% til personlige ønsker:</strong> restaurant, rejser, streaming, tøj, hobby — alt du kan leve uden</li>
-          <li><strong>20% til opsparing og gæld:</strong> ekstra afdrag på lån, aktier, pension, nødbuffer</li>
+          <li><strong>50 % til nødvendigheder:</strong> bolig, mad, transport, forsikring, minimumsbetaling på gæld</li>
+          <li><strong>30 % til personlige ønsker:</strong> restaurant, rejser, streaming, tøj, hobby — alt du kan leve uden</li>
+          <li><strong>20 % til opsparing og gæld:</strong> ekstra afdrag på lån, aktier, pension, nødbuffer</li>
         </ul>
         <p>
           Har du en høj boligudgift (f.eks. i København), kan nødvendighederne sagtens løbe op i
-          60-65%. I så fald må du skære i ønsker eller finde en billigere bolig på sigt.
+          60-65 %. I så fald må du skære i ønsker eller finde en billigere bolig på sigt.
           Omvendt har du lave boligudgifter, kan du øge opsparingsandelen.
         </p>
 
@@ -311,42 +311,42 @@ export default function MaanedsbudgetGuidePage() {
             <tr>
               <td>Bolig (husleje/fællesudgifter/renter)</td>
               <td>10.000 kr</td>
-              <td>33%</td>
+              <td>33 %</td>
             </tr>
             <tr>
               <td>Mad og dagligvarer</td>
               <td>6.000 kr</td>
-              <td>20%</td>
+              <td>20 %</td>
             </tr>
             <tr>
               <td>Transport (bil + brændstof)</td>
               <td>3.500 kr</td>
-              <td>12%</td>
+              <td>12 %</td>
             </tr>
             <tr>
               <td>Faste udgifter (forsikring, a-kasse)</td>
               <td>2.500 kr</td>
-              <td>8%</td>
+              <td>8 %</td>
             </tr>
             <tr>
               <td>Forbrug (el, varme, vand)</td>
               <td>2.000 kr</td>
-              <td>7%</td>
+              <td>7 %</td>
             </tr>
             <tr>
               <td>Fritid, tøj, rejser</td>
               <td>3.500 kr</td>
-              <td>12%</td>
+              <td>12 %</td>
             </tr>
             <tr>
               <td>Opsparing</td>
               <td>2.500 kr</td>
-              <td>8%</td>
+              <td>8 %</td>
             </tr>
             <tr className="font-bold border-t-2">
               <td>I alt</td>
               <td>30.000 kr</td>
-              <td>100%</td>
+              <td>100 %</td>
             </tr>
           </tbody>
         </table>

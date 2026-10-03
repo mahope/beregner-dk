@@ -909,9 +909,19 @@ const PROCENT_UNDTAGELSER: Record<string, string[]> = {
   // *navn* på tommelfingerreglen, og det står i keywords og i huslejens svar,
   // så «30 % reglen» ville være en ny opfindelse i stedet for en rettelse.
   "src/lib/page-data.ts": ["30% reglen husleje"],
+  // 3/10 10:1x, samme begrundelse i de to blogindlægs sidelink til
+  // `/husleje`. Undtagelsen er hele noden, så de løse procenter i samme
+  // indlæg (der var 37 på denne slice) stadig skal være skrevet «8 %».
+  "src/app/blog/boliglaan-2026-renter-og-afdrag/page.tsx": ["30% reglen"],
+  "src/app/blog/maanedsbudget-2026-komplet-guide/page.tsx": ["30% reglen"],
+  // «4%-reglen» er indlæggets *navn* på reglen. Scanneren undtager hele
+  // noden, så afsnittet «Dette er baseret på "4%-reglen" …» springes over med
+  // sit ene løse «4%» i samme sætning — det er samme fejl slags som de to
+  // «30% reglen»-noder ovenfor, og de er kun tre noder i hele korpuset.
+  "src/app/blog/pension-hvor-meget-skal-du-spare-op/page.tsx": ["4%-reglen"],
 };
 
-const PROCENT_UDEN_MELLEMRUM_LOFT = 436;
+const PROCENT_UDEN_MELLEMRUM_LOFT = 371;
 
 const PROCENT_MED_MELLEMRUM = [
   "src/app/boliglaan/page.tsx",
@@ -965,16 +975,17 @@ describe("procentnotation", () => {
   });
 
   test("korpuset har ikke fået flere procenttal uden mellemrum", () => {
-    // Loftet er målt, ikke gættet: 598 → 570 → 509 → 436, da de 28 i de fem
-    // filer, de 60 i `/procent`, `/boliglaan`, deres FAQ-svar og
-    // `ProcentBeregner`s hurtige reference og de 73 i `page-data.ts` blev
-    // rettet. 436 er *med* de to dokumenterede undtagelser («30% reglen»).
+    // Loftet er målt, ikke gættet: 598 → 570 → 509 → 436 → 371, da de 28 i
+    // de fem filer, de 60 i `/procent`, `/boliglaan`, deres FAQ-svar og
+    // `ProcentBeregner`s hurtige reference, de 73 i `page-data.ts` og de 58 i
+    // tre blogindlæg blev rettet. 371 er *med* de fem dokumenterede
+    // undtagelser («30% reglen» ×3 og «4%-reglen» ×1).
     // Det må gerne falde; det må ikke stige i det stille, fordi så kommer den
     // nye skrivemåde ind i en ny side ubemærket.
     const fund = procentfiler.flatMap((fil) =>
       procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
     );
     expect(fund.length).toBeLessThanOrEqual(PROCENT_UDEN_MELLEMRUM_LOFT);
-    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(436);
+    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(371);
   });
 });

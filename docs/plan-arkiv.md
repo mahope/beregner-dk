@@ -27560,3 +27560,52 @@ iteration.
 samme 2 warnings som før ændringen målt ved `git stash`. Ingen browser — så
 værktøjet er set i **DOM og markup, ikke i pixels**, og de fire felter er
 ikke tjekket visuelt ved 360/390/768/1280 (repoet har intet Playwright).
+
+## 3/10 10:1x — F5c-slice: procentnotationen «8 %» i tre blogindlæg
+
+**Målt før:** korpuset 429 noder i 66 filer (loftet stod stadig på 436 efter de
+to procent-commits fra 07:10 og 06:52, så tælleren var lavere end loftet).
+**Målt efter:** 371 noder i 63 filer — loftet `PROCENT_UDEN_MELLEMRUM_LOFT`
+436 → 371, og ratchet-portens `toBe(436)` → `toBe(371)`.
+
+Slice: de tre næststørste filer efter `blog/30-procent-reglen-husleje` (⛔) og
+`/moms` (⛔):
+
+| Fil | Fund før | Fund efter |
+|---|---|---|
+| `src/app/blog/pension-hvor-meget-skal-du-spare-op/page.tsx` | 20 | 0 |
+| `src/app/blog/boliglaan-2026-renter-og-afdrag/page.tsx` | 19 | 0 |
+| `src/app/blog/maanedsbudget-2026-komplet-guide/page.tsx` | 19 | 0 |
+
+56 linjer ændret, alle med `(?<=\d)%` → ` %`. `git diff -U0 -- src/app/blog`
+indeholdt 56 `+`-linjer med `[0-9] %` og **0** andre ændringer, så scriptet
+rørte intet uden for procenterne. Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'`
+ gav 0 træffere.
+
+**Den blinde plet fra 3/10 07:47 blev tjekket på denne slice:** `grep -nE '\}%|%»'` på de
+tre filer gav 0 træffere — de indeholdt altså ingen interpolerede procenter,
+kun løs tekst. Den blå plet er altså ikke i blogindlæggene.
+
+**Tre nye undtagelser i `PROCENT_UNDTAGELSER`, kun for regelnavne.** Scanneren
+undtager hele noden, så det er tre noder i hele korpuset:
+
+- `blog/boliglaan-2026-renter-og-afdrag` og `blog/maanedsbudget-2026-komplet-guide`
+  har hver én `<span>`-sidelink med teksten «30% reglen: Hvor meget bør du
+  bruge på husleje? →». Samme begrundelse som de to eksisterende: det er
+  husets *navn* på tommelfingerreglen, ikke en løs procent.
+- `blog/pension-hvor-meget-skal-du-spare-op` har «4%-reglen» i et afsnit, der
+  også indeholder «hæve 4% af din opsparing». Hele noden er undtaget, så den ene
+  løse procent i samme sætning springes over med — samme fejl slags som de to
+  ovenfor, tre noder i korpuset.
+
+**Ikke gjort, fordi det er en navneafgørelse:** `blog/30-procent-reglen-husleje`
+har stadig 25 fund, og de er *ikke* kun «30% reglen»: nogle er løse procenter i
+samme indlæg. En undtagelse på hele filen ville skjule dem. Afgørelsen er, om
+sitets egen betegnelse skal skrives «30 %-reglen» — det er en navne- og
+keyword-ændring, ikke en typografirettelse.
+
+**Verificeret:** `npm run lint` exit 0 · `npm run typecheck` exit 0 ·
+`TZ=UTC npm run test` 4045/4045 i 257 filer · `npm run build` exit 0 med de
+samme 10 warnings som før ændringen. Første kørsel af suiten var rød, fordi
+ratchet-portens hårdkodede `toBe(436)` ikke var opdateret — den fangede
+præcis den fejl den er skrevet til at fange.

@@ -1,24 +1,23 @@
-STATUS: 3/10 10:0x. CI grøn ved start (`37105491866`), ingen åbne PR'er, ingen
-       uløste Sentry-fejl (SDK'en er sat op i `src/instrumentation*.ts`).
-       **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-       `npm run build` — **grøn 10:0x** (alle exit 0, **4045** tests i 257
-       filer, +30; build har de samme 2 warnings som før ændringen).
-       **Denne iteration:** `/su` får et **fribeløbs-værktøj**, der svarer
-       direkte på «hvor meget må man tjene ved siden af SU» (dansk
-       autocomplete **nr. 1** under «hvor meget», målt 3/10) på en side der
-       falder (201 → 127 besøgende/28d). Planens ⛔ «SU-fælleshold» er
-       **modbevist og lukket**: `grep -io "fælles[a-zæøå]*|partner"` på su.dk's
-       fribeløbs- og indkomstsider giver **0 træffere**, og su.dk skriver
-       «Din egenindkomst må ikke være større end dit årsfribeløb» — grænsen er
-       **individuel pr. person**, der er ingen fællesholdsregel at bygge.
-       Satserne hænger på `SU_2026.freeAllowance`, som tabellen og FAQ'en
-       allerede læser, så de ikke kan glide fra hinanden.
-       **Målt, ikke gættet:** `satser-for-fribeloeb` (planens gamle kilde)
-       svarer **404**; den rigtige er **`satser-for-maanedsfribeloeb`**, hentet
-       3/10 — 15.297 / 20.749 / 23.598 / 45.420 / 3.921 / 34.129, alle
-       identiske med modulet.
-       **Næste iteration:** en feature eller F5c-slice; de åbne
-       VERIFICÉR-noter efter 12:30-vinduet.
+STATUS: 3/10 10:1x. CI grøn ved start (`37107241978`), ingen åbne PR'er, ingen
+       uløste Sentry-fejl. **Gate:** `npm run lint` · `npm run typecheck` ·
+       `TZ=UTC npm run test` · `npm run build` — **grøn 10:1x** (alle exit 0,
+       **4045** tests i 257 filer; build har de samme 10 warnings som før).
+       Review-fundene fra 09:10 stod alle med `RETTET 8cf72dd`, og CEO-køens
+       pkt. 0 (Valborg 30/4, svensk påskafton, fast sankthans, påskeaften-FAQ,
+       `/husleje`, `toUtcMidnight`, `/promille`, `dato-eksempler`) er alle
+       efterprøvet i koden — ingen åbne fund.
+       **Denne iteration:** F5c-slice på de tre næststørste blogindlæg
+       (`pension-hvor-meget-skal-du-spare-op` 20, `boliglaan-2026-renter-og-afdrag`
+       19, `maanedsbudget-2026-komplet-guide` 19): **58 noder** skrevet om til
+       «8 %». Loftet i `regnestykker.test.ts` **436 → 371** (korpustallet var
+       429 ved målingen — 436-loftet var ikke opdateret efter de to sidste
+       procent-commits). Tre nye *navne*-undtagelser, kun for regelnavne:
+       «30% reglen» ×2 og «4%-reglen» ×1.
+       **Målt:** 429 → 371 noder, 66 → 63 filer. `grep -E '\}%|%»'` på de tre
+       filer: 0 træffere, så der var heller ingen interpolerede procenter i
+       dem. Point 13: 0 `$[0]`-rester efter scriptet.
+       **Næste iteration:** de åbne VERIFICÉR-noter efter 12:30-vinduet, så
+       `/su`s fribeløbs-værktøj kan lukkes på indhold.
        BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
        ⚠️ **Fælde fundet:** `src/lib/locale-leak-gate.test.ts` **skriver
        plantede danske strenge ind i rigtige kildefiler** og gendanner dem i en
@@ -93,22 +92,20 @@ ved serverstart. Nøglefilen lå på `/api/indexnow-key/…` og er rettet 2/10
 **F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
 dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
 
-**F5c. [~] Procentnotationen «8 %» — 598 fund målt, 436 tilbage 3/10 08:10.**
+**F5c. [~] Procentnotationen «8 %» — 371 noder målt 3/10 10:1x.**
 *Hvad:* de største resterende er `blog/30-procent-reglen-husleje` 25 (⛔ de er
-regelnavnet, se portens undtagelse), `/moms` 18, `blog/pension-…` 20 og
-`blog/boliglaan-2026-renter-og-afdrag` 19. `page-data.ts` 73 er **lukket**
-3/10 08:10.
+regelnavnet — de **skal** have en undtagelse, nogen må tage stilling til om
+sitets eget navn «30% reglen» skal skrives «30 %-reglen»), `/moms` 18 (⛔ de 3
+lovgrænser, ❓ nedenfor), `billaan` 17, `blog/koeb-af-bolig-…` 15,
+`arveafgift` 14, `blog/guide-feriepenge-…` 13.
 *Accept:* loftet i `regnestykker.test.ts` (`PROCENT_UDEN_MELLEMRUM_LOFT`) må
 kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 → 509 →
-**436** noder (3/10 08:10; scanneren tæller noder, så en linje med to procenter
-tælles én gang).
-**Målt 3/10 07:47 — den blinde plet er fundet:** scanneren læser kun
-`JsxText` og strengliteraler, så **en procent fra en interpolation er kode** og
-er usynlig for den. `/procent` havde 11 til i sin *renderede* HTML. To nye
-renderede porte dømmer markupken i da + se (`procent-formler.test.tsx` og
-`src/app/boliglaan/page.test.tsx`); **den næste slice skal greppe på `}%` og
-`}%»` i den fil den rører** — det er den fund, der ikke står i `/\d%/`.
-Se `docs/plan-arkiv.md`.
+436 → **371** noder (3/10 10:1x; scanneren tæller noder, så en linje med to
+procenter tælles én gang). Rækken af navne-undtagelser er nu fem, ikke to:
+«30% reglen» i `husleje/page.tsx`, `page-data.ts` og de to blogindlægs
+sidelinks, plus «4%-reglen» i pensionsindlægget. Scannerens øvrige blinde
+plet er den interpolation fra 3/10 07:47 — hold øje med `}%` i den fil der
+røres. Se `docs/plan-arkiv.md`.
 
 - **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
   *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
@@ -267,13 +264,6 @@ målinger, mutationer og reelle fejl står i `docs/plan-arkiv.md`.
 
 `VERIFICÉR DEPLOY: de tre review-fund fra 3/10 09:1x (`minberegner.dk/topskat` skal have **1** «Med AM-bidrag er din marginalskat dér 55,9 %» i værktøjets skatteloft-boks og **0** «så højt din marginalskat kan blive», og samme sætning i `FAQPage`-JSON-LD'en skal være «… (ekskl. AM-bidrag og kirkeskat). Med AM-bidrag (8 %) er din marginalskat dér 55,9 %, og over top-topskat-grænsen lægges yderligere 5 % oveni.»; `beraknare.se/timmar-i-aret` skal have «Ett dygn», «En vecka», «Två veckor», «En månad (februari)», «En månad (april)», «En månad (januari)» og «Ett år» i hovedtabellens `<th scope="row">` — altså **0** «Et døgn», **0** «To uger» og **0** «En måned (»; `minberegner.dk/procent` skal have `>? %<` i begge resultatfelter — altså **0** `> ? %<`; **intet** `NaN`) ceo/rettelse-tre-reviewfund 3/10 08:35`
 
-## Research 3/10 05:30
-
-De tre målinger (Googles egen autocomplete for «hvor mange dage er der» og
-«hvor mange timer er der», og den AST-målte procenttelling på 598 fund i 73
-filer) ligger i `docs/plan-arkiv.md`. Alle tre er brugt: to førte til
-`/dage-i-aaret` og `/timer-i-aret`, den tredje til F5c.
-
 `VERIFICÉR DEPLOY: procentnotationen «8 %» på /procent og /boliglaan (hele HTML'en på `minberegner.dk/procent` skal have **0** `\d%` — altså **0** «10%», «25%», «5%», «50%», «1%» — og opslagstabellen skal have «10 % af 250 = 25» og «5 % af 250 = 12,5», tipboksen «50 % af 40 er det samme som 40 % af 50», listen «25 % moms på 1.000 kr = 250 kr i moms», og FAQ-svarene «Eksempel: 25 % af 200 = 50.» og «Læg 20 % til 150»; `beraknare.se/procent` skal have «25 % av 250 = 25», «50 % av 40 är samma sak som 40 % av 50» og **0** «10%»/«25%»/«5%»; værktøjets egen resultatlinje skal skrive «25 %» og forklaringen «25 er 25,00 % af 100» (dvs. den interpolerede procent er rettet, ikke kun brødteksten); `minberegner.dk/boliglaan` skal have «Minimum 5 % af boligens pris (anbefalet: 10-20 %)», «Op til 80 % af boligens værdi», tabellen «0-40 %»/«0,45-0,65 %»/«1,05-1,55 %», «ca. 25,6 % fradrag» og **0** `\d%`; `beraknare.se/boliglaan` skal have «Minst 10 % av bostadens pris», «90 % av bostadens värde (bolånetaket, höjt från 85 % 2026)», «30 % avdrag» og **0** `\d%`; **intet** `NaN`) ceo/procent-punkt-sweeps 3/10 08:00`
 
 `DEPLOY OK 3/10 08:5x` — VERIFICÉR DEPLOY: /dage-i-aaret + /dagar-i-aret (nye sider med tolv-måneders-tabel: `minberegner.dk/dage-i-aaret` skal have `<title>` «Hvor mange dage er der på et år? Dage i alle 12 måneder», **1** `<h1>`, **12** månedsrækker + **1** summeringsrække i tabellen, og **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange dage er der på et år?», «Hvor mange dage er der i augusti?» og «Hvor mange dage er der i juli?» — svaret på augusti skal være «31 dage … 21 hverdage og 10 weekenddage» og på juli «31 dage … 23 hverdage og 8 weekenddage»; summeringen skal være 365 dage / 251 hverdage / 104 weekend; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar» og månedsnavnet «augusti», altså **0** «august»; `minberegner.dk/dagar-i-aret` + `beraknare.se/dage-i-aaret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; **intet** `NaN`) ceo/dage-i-aaret 3/10 06:20`
@@ -288,6 +278,8 @@ filer) ligger i `docs/plan-arkiv.md`. Alle tre er brugt: to førte til
 
 `VERIFICÉR DEPLOY: /su's fribeløbs-værktøj (hele HTML'en på `minberegner.dk/su` skal have **1** `<h2>` «Hvor meget må jeg tjene ved siden af min SU?» og **1** «Du må højst tjene» med **248.988** i `<strong class="text-lg">` (12 × 20.749), og i samme boks «Det svarer til pr. måned» **20.749**, «Før AM-bidrag pr. måned» **22.553** og «Før AM-bidrag for hele året» **270.639** (= 248.988 / 0,92, nedrundet), «Alle 12 måneder bruger den samme sats», **0** «12 måneder uden SU», **0** «laveste sats», **0** «Tillæg for børn under 18» (kun vises når der vælges børn) og **0** «kr..»; fribeløbs-tabellen i samme side skal stadig have **15.297**, **23.598**, **45.420**, **3.921** og **34.129**; `beraknare.se/su` og `beregner.no/su` skal have **0** «Hvor meget må jeg tjene ved siden af min SU?»; **intet** `NaN`) ceo/su-indtaegtsgraense 3/10 10:1x`
 
+`VERIFICÉR DEPLOY: procentnotationen «8 %» i tre blogindlæg (hele HTML'en skal have **0** `\d%` i den løse tekst: `minberegner.dk/blog/pension-hvor-meget-skal-du-spare-op` skal have «12-17 %», «8-12 %», «4-5 %», «~38 %», «(70 %)», «60-80 %», «10-12 %» … «22-30 %», «*Med 5 % årligt afkast» og «30-årig = 70 % aktier, 30 % obligationer»; `minberegner.dk/blog/boliglaan-2026-renter-og-afdrag` skal have «3,5-4,5 %», «2-3 %», «2,5-3,5 %», «4-7 %», «Finansierer over 80 %», «Udbetaling (5 %)», «op til 80 %», «Banklån (5-15 %)», «150.000 kr (5 %)», «2.400.000 kr (80 %)», «450.000 kr (15 %)», «30-33 %», «0,5-1,2 %», «25-33 %», «Sæt 2-3 % af boligprisen»; `minberegner.dk/blog/maanedsbudget-2026-komplet-guide` skal have «30-35 %», «50 % til nødvendigheder», «30 % til personlige ønsker», «20 % til opsparing og gæld», «10-20 %», «15-25 %», «25.000-35.000 kr/måned», «30-40 %», «12-18 %», «8-12 %», «5-10 %» og alle otte tabel-celler «33 %», «20 %», «12 %», «8 %», «7 %», «12 %», «8 %», «100 %». **Undtagelserne er de tre regelnavne og skal STÅ:** «30% reglen» i de to blogindlægs sidelinks og «4%-reglen» i pensionsindlægget, så **2** «30% reglen» på tværs og **1** «4%-reglen»; altså **0** «30 % reglen» og **0** «4 %-reglen»; **intet** `NaN`) ceo/procent-sweep-pension-boliglaan 3/10 10:1x`
+
 ## VERIFICÉR DEPLOY-noter — lukket 3/10 08:0x på indhold
 
 **12 af 12 lukket.** Alle noter fra merges før 07:30-vinduet er hentet med curl
@@ -297,9 +289,10 @@ på indhold, og de to afvigelser (`/aktieskat`s «27/42%» og `/loen-efter-skat`
 «8%») findes også i `git grep HEAD` — de er F5c-rester, ikke deploy-fejl, fordi
 de er brødtekst og ikke de tal, noternehandlede om.
 
-**Åbne (merges efter 07:30-vinduet, venter på batch-deployeren 12:30):**
+**Åbne (merges efter 07:30-vinduet, dømmes på indhold efter 12:30):**
 `ceo/procent-med-mellemrum` 06:45 · `ceo/dage-i-aaret` 06:20 ·
-`ceo/timer-i-aret` 07:55 · `ceo/procent-punkt-sweeps` 08:00.
+`ceo/timer-i-aret` 07:55 · `ceo/procent-punkt-sweeps` 08:00 ·
+`ceo/procent-punkt-sweep-side-data` 08:20 · `ceo/su-indtaegtsgraense` 10:1x.
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i metadata og FAQ på tværs af alle slugs (helt korpuset i `page-data.ts` er skrevet om, så **hele HTML'en** på de berørte sider skal have **0** `\d%` — altså **0** «25%», «12,5%», «8%», «5%», «100%» — undtagen **1** «30% reglen» pr. `/husleje` (regelnavnet). Prøv især `minberegner.dk/boernepenge` («12,5 %», «2 %», «AM-bidrag (8 %)», 0 × «kr.,»), `minberegner.dk/feriepenge` («12,5 %»), `minberegner.dk/rentefradrag` («33,6 %», «25,6 %»), `minberegner.dk/su` («100 %», «80 %»), `minberegner.dk/arveafgift` («15 %», «25 %»), `minberegner.dk/husleje` («30 %», «33 %», **1** «30% reglen»), `minberegner.dk/opsparing` («5 %», «10-20 %», «~7 %», «2-4 %», «under 1 %»), `minberegner.dk/konfirmation` («40-50 %», «20-30 %», «20-25 %»), `minberegner.dk/arvestigning` («20 %», «80 %», «0,51 %», «5,1‰» — promillen skal **beholde** sin skrivemåde), `minberegner.dk/dagpenge` («90 %», «100 %», «80 %»), `minberegner.dk/brutto-netto` («25,049 %», «AM-bidrag (8 %)»), `minberegner.dk/promille` og `minberegner.dk/procent`; `beraknare.se/procent` («25 %», «20 %», «2 %», «3 %»), `beraknare.se/leasing` («85 %», «15 %», «30 %», «21 %», «20 %»), `beraknare.se/moms` («25 %», «15 %», «12 %», «20 %»), `beraknare.se/boernepenge` («100 %», «80 %») og `beraknare.se/dagpenge` («5 %»); **intet** `NaN`) ceo/procent-punkt-sweep-side-data 3/10 08:20`
 
