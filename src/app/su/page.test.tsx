@@ -7,6 +7,7 @@ import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { SU_2026 } from "@/lib/satser-2026";
 import SUPage from "./page";
+import { LocaleProvider } from "@/components/LocaleProvider";
 
 vi.mock("@/components/StructuredData", () => ({
   CalculatorSchema: () => null,
@@ -25,6 +26,22 @@ vi.mock("@/lib/get-locale", () => ({
 }));
 
 const kilde = readFileSync(join(__dirname, "page.tsx"), "utf8");
+
+/**
+ * `/su` renderer `SuIndtaegtsgraense`, som læser sproget og valutaen fra
+ * `LocaleProvider` — ligesom de andre værktøjer på siden. Uden wrapperen
+ * kaster den, og de fire tests her ville fejle på en kaste frem for på deres
+ * egne påstande.
+ */
+const renderSide = async (locale: "da" | "se" | "no" = "da") => {
+  const domainConfig = getDomainConfigByLocale(locale);
+  vi.mocked(getCurrentDomainConfig).mockResolvedValue(domainConfig);
+  return renderToStaticMarkup(
+    <LocaleProvider locale={locale} domainConfig={domainConfig}>
+      {await SUPage()}
+    </LocaleProvider>,
+  );
+};
 const da = (n: number) => new Intl.NumberFormat("da-DK").format(n);
 
 /**
@@ -44,7 +61,7 @@ describe("SU-siden", () => {
   });
 
   test("renderer forældreindkomstgrænserne fra modulet", async () => {
-    const html = renderToStaticMarkup(await SUPage());
+    const html = await renderSide();
 
     expect(SU_2026.parentalIncome.maxSupplementAtOrBelow).toBe(419589);
     expect(SU_2026.parentalIncome.noSupplementAtOrAbove).toBe(710077);
@@ -56,7 +73,7 @@ describe("SU-siden", () => {
   });
 
   test("renderer forsørgertillægget ved delt bolig og udlandsstudielånet", async () => {
-    const html = renderToStaticMarkup(await SUPage());
+    const html = await renderSide();
 
     expect(SU_2026.singleParentSupplementSharedHome).toBe(2966);
     expect(SU_2026.loan.abroadTotal).toBe(129106);
@@ -68,7 +85,7 @@ describe("SU-siden", () => {
   });
 
   test("beskriver den delte bolig-situation præcist", async () => {
-    const html = renderToStaticMarkup(await SUPage());
+    const html = await renderSide();
 
     expect(html).toContain("kontanthjælp");
     expect(html).toContain(SU_2026.sources.parentalIncome);
@@ -85,7 +102,7 @@ describe("SU-siden", () => {
   });
 
   test("hjemmeboende-afsnittet står før fribeløbsafsnittet", async () => {
-    const html = renderToStaticMarkup(await SUPage());
+    const html = await renderSide();
     const foraeldre = html.indexOf(`Forældrenes indkomstgrundlag i ${SU_2026.parentalIncomeYear}`);
     const fribeloeb = html.indexOf("Fribeløb 2026");
 

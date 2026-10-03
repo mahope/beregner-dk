@@ -27487,3 +27487,76 @@ lookbehindet blokkerede multi-cifre tal — mutationen afslørede det.
 Første mutationstest viste også at kun 1 af 3 tests blev rød, altså at porten
 tilså det forkerte regex som grønt. Lært: ratchet-tests skal have deres egen
 mutation, ellers dømmer de en fejl som grøn.
+
+## 3/10 10:0x — `/su` fribeløbs-værktøj (`ceo/su-indtaegtsgraense`)
+
+**Researchen, der låste opgaven.** Planens ⛔ «SU-fælleshold» pegede på
+`su.dk/su/naar-du-faar-su/saa-meget-maa-du-tjene/satser-for-fribeloeb`, som
+**svarer 404**. Søgningen på forældresiden gav den rigtige adresse:
+**`satser-for-maanedsfribeloeb`** (200). Målt 3/10:
+
+| Sats | 2026 |
+|---|---|
+| Laveste månedsfribeløb, ungdomsuddannelser | 15.297 |
+| Laveste månedsfribeløb, videregående uddannelser | 20.749 |
+| Mellemste månedsfribeløb | 23.598 |
+| Højeste månedsfribeløb | 45.420 |
+| Nedsat månedsfribeløb (handicaptillæg) | 3.921 |
+| Forhøjelse pr. barn under 18 år | 34.129 |
+
+Alle seks er **identiske** med `SU_2026.freeAllowance` i `satser-2026.ts`, så
+der var ingen sats at ændre — kun et værktøj der manglede. su.dk's egen
+tekst: satserne er «før skat, men efter AM-bidrag», og «det betyder ikke
+noget, at du en måned tjener et meget stort beløb og den næste måned slet
+ikke tjener noget, så længe samlet for hele året holder dig inden for
+årsfribeløbet».
+
+**Fælleshold-grænsen findes ikke.** `grep -io "fælles[a-zæøå]*|partner"` på
+su.dk's `satser-for-maanedsfribeloeb`, `om-aarsfribeloeb` og
+`saadan-beregner-du-din-indkomst` giver **0 træffere**, og siden skriver
+«Din egenindkomst må ikke være større end dit årsfribeløb». Fribeløbet er
+individuelt pr. person. Opgaven som den var skrevet i planen var derfor
+ubyggelig uden at gætte en regel, og blev erstattet af værktøjet i stedet.
+
+**Hvad der blev bygget.** `src/lib/su-indtaegtsgraense.ts` (ren logik) +
+`src/components/SuIndtaegtsgraense.tsx` (værktøj) monteret på `/su` i da
+kun. Fem felter: uddannelse, antal SU-måneder, status i de øvrige måneder
+(indskrevet uden SU / ikke under uddannelse), børn under 18, handicaptillæg.
+Svaret er årsfribeløbet, det samme fordelt pr. måned, og begge tal **før
+AM-bidrag** — den omvendte konvertering, som ingen ellers har, så tallet kan
+sammenholdes med en løneblank. Brutto **rundes ned** (`Math.floor`), fordi
+grænsen er et tal brugeren skal blive *under*.
+
+**Fejl fundet undervejen (alle rettet i samme opgave).**
+1. `bruttoForEfterAM(20749)` gav i testen 22.554; korrekt er 20.749 / 0,92 =
+   22.553,26 → **22.553**. Testen fangede min egen fejlregning.
+2. Værktøjet skrev «Hvert barn hæver årsfribeløbet med 34.129 kr.**.**» —
+   `formatCurrency` har allerede punktum.
+3. Resultatteksten læste «Det er **alle 12 måneder uden SU**, der bruger den
+   anden sats» ved 12 SU-måneder, altså modsætningen af den valgte situation.
+   Nu to grene: «Alle 12 måneder bruger den samme sats» hvis ingen måneder er
+   uden SU, ellers «N af de 12 måneder er uden SU».
+4. Tillægsrækken for børn var vist med «+0 kr.» når der var 0 børn, fordi
+   betingelsen testede `result.barnUnder18` (satsen pr. barn) i stedet for
+   antallet.
+5. Efter mutation «handicaptillæg» kaldte teksten 3.921 for «den laveste
+   sats». Det er det **nedsatte** fribeløb, ikke en af de tre sats — sætningen
+   siger nu «den samme sats», og en test låser den.
+
+**Mutationer målt røde.** Børn-rækken slettet → rød i
+`SuIndtaegtsgraense.test.tsx`. Brutto-tallet gjort til efter-AM-tallet → rød i
+sidetesten. Værktøjet vist på se/no → rød i sidetesten. `maanedssats` gjort
+til et håndskrevet `return 15297` → **4 røde** på tværs af de to filer.
+
+**Fælde fundet, ikke forårsaget.** `src/lib/locale-leak-gate.test.ts` planter
+danske strenge i rigtige kildefiler og gendanner dem i en `finally`. En
+`vitest`-kørsel dræbt af et 120-s timeout efterlod en fæld i
+`src/app/procent/page.tsx`, som gjorde både porten og næste kørsel rød.
+Beviset: med fælden kasséret er porten grøn 22/22, og uændret på HEAD er den
+også grøn 22/22. Noteret i planens STATUS, fordi den rammer den næste
+iteration.
+
+**Ikke kørt:** `tsc` og `biome lint` er grønne, `next build` exit 0 med de
+samme 2 warnings som før ændringen målt ved `git stash`. Ingen browser — så
+værktøjet er set i **DOM og markup, ikke i pixels**, og de fire felter er
+ikke tjekket visuelt ved 360/390/768/1280 (repoet har intet Playwright).

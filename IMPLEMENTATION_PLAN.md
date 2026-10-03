@@ -1,20 +1,32 @@
-STATUS: 3/10 09:5x. CI grøn ved start (`37104447259`), ingen åbne PR'er.
+STATUS: 3/10 10:0x. CI grøn ved start (`37105491866`), ingen åbne PR'er, ingen
+       uløste Sentry-fejl (SDK'en er sat op i `src/instrumentation*.ts`).
        **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-       `npm run build` — **grøn 3/10 09:4x** (alle exit 0, **4015** tests i 254
-       filer, +3).
-       **Denne iteration:** **F5d lukket** — de 9 sidste synlige «25%», «15%»,
-       «12,5%», «8%» og «38%» er væk fra forsidens brødtekst (da + se) og
-       feriepengetabellen. De lå i **`HomeContent.tsx` og
-       `FeriepengeBeregner.tsx`**, ikke i `footer-data.ts` som F5d-noten
-       antog, og planen havde heller ikke set de **to svenske** strenge. Ny
-       port `procent-i-synlig-tekst.test.tsx` renderer de to komponenter
-       direkte og dømmer markupken med samme regex som F5c's scanner; den er
-       målt rød 3/3 ved mutation. De to gamle porte kunne ikke se fejlen:
-       `forside.test.tsx` mockerer `HomeContent` med vilje, og
-       `regnestykker.test.ts`s loft på 436 nåede længe før de to filer.
-       **Næste iteration:** en **feature** (senest `/timer-i-aaret`), og
-       først de åbne VERIFICÉR-noter efter 12:30-vinduet.
+       `npm run build` — **grøn 10:0x** (alle exit 0, **4045** tests i 257
+       filer, +30; build har de samme 2 warnings som før ændringen).
+       **Denne iteration:** `/su` får et **fribeløbs-værktøj**, der svarer
+       direkte på «hvor meget må man tjene ved siden af SU» (dansk
+       autocomplete **nr. 1** under «hvor meget», målt 3/10) på en side der
+       falder (201 → 127 besøgende/28d). Planens ⛔ «SU-fælleshold» er
+       **modbevist og lukket**: `grep -io "fælles[a-zæøå]*|partner"` på su.dk's
+       fribeløbs- og indkomstsider giver **0 træffere**, og su.dk skriver
+       «Din egenindkomst må ikke være større end dit årsfribeløb» — grænsen er
+       **individuel pr. person**, der er ingen fællesholdsregel at bygge.
+       Satserne hænger på `SU_2026.freeAllowance`, som tabellen og FAQ'en
+       allerede læser, så de ikke kan glide fra hinanden.
+       **Målt, ikke gættet:** `satser-for-fribeloeb` (planens gamle kilde)
+       svarer **404**; den rigtige er **`satser-for-maanedsfribeloeb`**, hentet
+       3/10 — 15.297 / 20.749 / 23.598 / 45.420 / 3.921 / 34.129, alle
+       identiske med modulet.
+       **Næste iteration:** en feature eller F5c-slice; de åbne
+       VERIFICÉR-noter efter 12:30-vinduet.
        BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
+       ⚠️ **Fælde fundet:** `src/lib/locale-leak-gate.test.ts` **skriver
+       plantede danske strenge ind i rigtige kildefiler** og gendanner dem i en
+       `finally`. Bliver processen dræbt (fx af et timeout), bliver fælden
+       **liggende i filen**, og både porten og næste kørsel fejler. Sket én
+       gang her i `src/app/procent/page.tsx`. **Efter enhver afbrudt
+       `vitest`-kørsel: `git status` og kassér alt ud over den opgaves egne
+       filer.**
 
 ## Fase 3 — trafik-drevet
 
@@ -30,6 +42,7 @@ STATUS: 3/10 09:5x. CI grøn ved start (`37104447259`), ingen åbne PR'er.
 | `/kvadratmeter` | 390 | 21.344 | 1,4 % | 4,9 |
 | `/braendstof` | 263 | 17.051 | 1,1 % | 5,9 |
 | `/boligstoette` | 529 | 7.465 | 2,4 % | 8,7 |
+| `/su` | **127 (fald fra 201)** | under top-15 | — | — |
 | `/` (forside) | 218, bounce 38 % | under top-15 | — | — |
 | `/dage-til` + se `/dagar-till` | **0 — nye URL'er 2/10** (hubben) | — | — | — |
 | `/dage-mellem-datoer` + se `/dagar-mellan-datum` | **0 — nye URL'er 3/10** | — | — | — |
@@ -97,18 +110,21 @@ renderede porte dømmer markupken i da + se (`procent-formler.test.tsx` og
 `}%»` i den fil den rører** — det er den fund, der ikke står i `/\d%/`.
 Se `docs/plan-arkiv.md`.
 
-- **SU-fælleshold: «hvor meget må man tjene ved siden af SU»** — *Hvem:*
-  studerende på 1. års SU og deres forældre, hver august–december. *Datagrund:*
-  dansk autocomplete **nr. 1** under «hvor meget» målt 3/10 09:2x, og
+- **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
+  *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
+  *Datagrund:* dansk autocomplete **nr. 1** under «hvor meget» målt 3/10, og
   `/su` **falder** (201 → 127 besøgende/28d) selv om spørgsmålet er helt
-  sæsonbetonet. `grep -rn "fælleshold" src/` giver **0 træffere**, så
-  indkomstgrænsen for fællesøkonomi findes ikke på sitet i dag, selv om
-  `su.ts` allerede regner på månedsløn. *Accept:* fællesholdsgrænse læst fra
-  ét modul med kilde, værktøj der finder «din indtægt kan højst være X kr.»
-  for dig + din partner, og tal fra samme modul i brødteksten.
-  ⛔ **`su.dk/su/naar-du-faar-su/saa-meget-maa-du-tjene/satser-for-fribeloeb`
-  svarer 404 (målt 3/10 09:24)** — find den rigtige fællesholdsside før der
-  skrives ét tal. Gæt ikke grænsen.
+  sæsonbetonet. `grep -rn "fælleshold" src/` gav **0 træffere**: indtægtsgrænsen
+  var en tabel, ikke et svar. *Accept:* uddannelse + SU-måneder + status i de
+  øvrige måneder + børn under 18 + handicaptillæg → **årsfribeløb**, pr. måned
+  og før AM-bidrag, alle tal fra `SU_2026.freeAllowance`, med su.dk's egen
+  præcisering om at året måles som helhed. **MÅL:** `/su` 127 besøgende/28d
+  (3/10) → Plausible 17/10.
+- **⛔ Lukket og modbevist 3/10 10:0x — «SU-fælleshold».** Der findes ingen
+  fællesholdsgrænse: su.dk's fribeløbs- og indkomstsider har **0** fund af
+  «fællesøkonomi»/«partner», og reglen er «Din egenindkomst må ikke være
+  større end dit årsfribeløb». Uden den var opgaven ubyggelig, så den er
+  erstattet af værktøjet ovenfor i stedet for at blive gættet.
 
 **F9. [ ] `locale === "se" ? "se" : "da"` — 13 steder med dansk på
 norske domæner.** *Hvad:* mønstret er målt med grep efter `ceo/norsk-pace-side`
@@ -269,6 +285,8 @@ filer) ligger i `docs/plan-arkiv.md`. Alle tre er brugt: to førte til
 `VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
 
 `VERIFICÉR DEPLOY: procenttal i forsidens brødtekst og feriepengetabellen (hele HTML'en på `minberegner.dk/` skal have **0** `\d%` — altså **0** «25%», «15%» — og stadig **2** × «100 % Gratis»; `minberegner.dk/feriepenge` skal have «Feriepenge (12,5 %)», «- AM-bidrag (8 %)» og «- Skat (estimat ~38 %)» med **0** `\d%`; `beraknare.se/` skal have «lägg till eller dra av 25 % moms», «legg til eller trekk fra 25 % MVA», «tillæg eller fratræk 25 % moms» og «boafgift (15 %) og tillægsafgift (25 %)»; **intet** `NaN`) ceo/procent-forside-feriepenge 3/10 09:4x`
+
+`VERIFICÉR DEPLOY: /su's fribeløbs-værktøj (hele HTML'en på `minberegner.dk/su` skal have **1** `<h2>` «Hvor meget må jeg tjene ved siden af min SU?» og **1** «Du må højst tjene» med **248.988** i `<strong class="text-lg">` (12 × 20.749), og i samme boks «Det svarer til pr. måned» **20.749**, «Før AM-bidrag pr. måned» **22.553** og «Før AM-bidrag for hele året» **270.639** (= 248.988 / 0,92, nedrundet), «Alle 12 måneder bruger den samme sats», **0** «12 måneder uden SU», **0** «laveste sats», **0** «Tillæg for børn under 18» (kun vises når der vælges børn) og **0** «kr..»; fribeløbs-tabellen i samme side skal stadig have **15.297**, **23.598**, **45.420**, **3.921** og **34.129**; `beraknare.se/su` og `beregner.no/su` skal have **0** «Hvor meget må jeg tjene ved siden af min SU?»; **intet** `NaN`) ceo/su-indtaegtsgraense 3/10 10:1x`
 
 ## VERIFICÉR DEPLOY-noter — lukket 3/10 08:0x på indhold
 

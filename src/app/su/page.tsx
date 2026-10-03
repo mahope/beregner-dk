@@ -4,6 +4,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { SU_2026 } from "@/lib/satser-2026";
 import SUBeregner from "@/components/SUBeregner";
+import SuIndtaegtsgraense from "@/components/SuIndtaegtsgraense";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -48,6 +49,8 @@ export default async function SUPage() {
           med aldersgrænser, forældreindkomst, fribeløb og officielle kilder.
         </div>
       )}
+
+      {locale === "da" && <SuIndtaegtsgraense />}
 
       {locale === "da" && (
         <div className="mt-12 prose max-w-none dark:prose-invert">
