@@ -26,16 +26,16 @@ const labels = {
 } as const;
 
 const defaultDrinks = [
-  { label: "Almindelig øl (33 cl, 4,6%)", volume: 33, abv: 4.6 },
-  { label: "Stærk øl (33 cl, 8%)", volume: 33, abv: 8 },
-  { label: "Vin (12 cl, 12%)", volume: 12, abv: 12 },
-  { label: "Vin (18 cl, 12%)", volume: 18, abv: 12 },
-  { label: "Hvidvin (16 cl, 12%)", volume: 16, abv: 12 },
-  { label: "Flaske øl (50 cl, 4,6%)", volume: 50, abv: 4.6 },
-  { label: "Alkoholfri øl (33 cl, 0,5%)", volume: 33, abv: 0.5 },
-  { label: "Cider (33 cl, 4,5%)", volume: 33, abv: 4.5 },
-  { label: "Shot (4 cl, 40%)", volume: 4, abv: 40 },
-  { label: "Likør (4 cl, 24%)", volume: 4, abv: 24 },
+  { label: "Almindelig øl (33 cl, 4,6 %)", volume: 33, abv: 4.6 },
+  { label: "Stærk øl (33 cl, 8 %)", volume: 33, abv: 8 },
+  { label: "Vin (12 cl, 12 %)", volume: 12, abv: 12 },
+  { label: "Vin (18 cl, 12 %)", volume: 18, abv: 12 },
+  { label: "Hvidvin (16 cl, 12 %)", volume: 16, abv: 12 },
+  { label: "Flaske øl (50 cl, 4,6 %)", volume: 50, abv: 4.6 },
+  { label: "Alkoholfri øl (33 cl, 0,5 %)", volume: 33, abv: 0.5 },
+  { label: "Cider (33 cl, 4,5 %)", volume: 33, abv: 4.5 },
+  { label: "Shot (4 cl, 40 %)", volume: 4, abv: 40 },
+  { label: "Likør (4 cl, 24 %)", volume: 4, abv: 24 },
 ];
 
 export default function AlkoholenhederBeregner() {

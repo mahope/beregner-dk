@@ -42,17 +42,17 @@ const faqItems = [
   {
     question: "Hvad koster det at købe bolig ud over købsprisen?",
     answer:
-      "Udover købsprisen skal du typisk betale 3-5% af boligens pris i omkostninger: tinglysningsafgift (skøde + pant), advokat/rådgiver, bankgebyrer, ejerskifteforsikring og evt. tilstandsrapport.",
+      "Udover købsprisen skal du typisk betale 3-5 % af boligens pris i omkostninger: tinglysningsafgift (skøde + pant), advokat/rådgiver, bankgebyrer, ejerskifteforsikring og evt. tilstandsrapport.",
   },
   {
     question: "Hvor meget skal man have i udbetaling?",
     answer:
-      "Du skal have minimum 5% af boligens pris i udbetaling. Ved en bolig til 3 mio. kr er det 150.000 kr. Derudover skal du have penge til tinglysning og andre handelsomkostninger.",
+      "Du skal have minimum 5 % af boligens pris i udbetaling. Ved en bolig til 3 mio. kr er det 150.000 kr. Derudover skal du have penge til tinglysning og andre handelsomkostninger.",
   },
   {
     question: "Hvad er ejendomsværdiskatten i 2026?",
     answer:
-      "Ejendomsværdiskatten i 2026 er 0,92% af boligens vurderede værdi op til ca. 9,2 mio. kr og 3% af værdien derover. Der gives et forsigtighedsfradrag på 20% af vurderingen.",
+      "Ejendomsværdiskatten i 2026 er 0,92 % af boligens vurderede værdi op til ca. 9,2 mio. kr og 3 % af værdien derover. Der gives et forsigtighedsfradrag på 20 % af vurderingen.",
   },
 ];
 
@@ -107,15 +107,15 @@ export default function BoligkoebGuidePage() {
             </thead>
             <tbody>
               <tr>
-                <td>Udbetaling (5%)</td>
+                <td>Udbetaling (5 %)</td>
                 <td>150.000 kr</td>
               </tr>
               <tr>
-                <td>Tinglysning skøde (0,6% + 1.850 kr)</td>
+                <td>Tinglysning skøde (0,6 % + 1.850 kr)</td>
                 <td>19.850 kr</td>
               </tr>
               <tr>
-                <td>Tinglysning pant (1,45% + 1.825 kr)</td>
+                <td>Tinglysning pant (1,45 % + 1.825 kr)</td>
                 <td>ca. 43.000 kr</td>
               </tr>
               <tr>
@@ -144,13 +144,13 @@ export default function BoligkoebGuidePage() {
 
         <h2>1. Udbetalingen</h2>
         <p>
-          Du skal have minimum <strong>5% af boligens pris</strong> som udbetaling. Det er
+          Du skal have minimum <strong>5 % af boligens pris</strong> som udbetaling. Det er
           et krav fra realkreditinstitutterne. Beløbet kan ikke lånes — det skal komme fra
           din opsparing, gaver eller salg af eksisterende bolig.
         </p>
         <p>
           Jo mere du lægger i udbetaling, desto billigere bliver dit banklån (da du låner
-          mindre til den høje rente over 80% belåning).
+          mindre til den høje rente over 80 % belåning).
         </p>
 
         <h2>2. Tinglysningsafgift</h2>
@@ -159,8 +159,8 @@ export default function BoligkoebGuidePage() {
           registreres:
         </p>
         <ul>
-          <li><strong>Skøde:</strong> 0,6% af købsprisen + fast afgift 1.850 kr</li>
-          <li><strong>Pantebrev:</strong> 1,45% af lånebeløbet + fast afgift 1.825 kr</li>
+          <li><strong>Skøde:</strong> 0,6 % af købsprisen + fast afgift 1.850 kr</li>
+          <li><strong>Pantebrev:</strong> 1,45 % af lånebeløbet + fast afgift 1.825 kr</li>
         </ul>
         <p>
           <strong>Tip:</strong> Har du et eksisterende pantebrev, kan du overføre stempel
@@ -217,7 +217,7 @@ export default function BoligkoebGuidePage() {
                 <td>5.000-15.000 kr</td>
               </tr>
               <tr>
-                <td>Vedligeholdelse (1% af værdi)</td>
+                <td>Vedligeholdelse (1 % af værdi)</td>
                 <td>20.000-40.000 kr</td>
               </tr>
               <tr>
@@ -233,9 +233,9 @@ export default function BoligkoebGuidePage() {
           Som boligejer betaler du ejendomsværdiskat. I 2026 er satserne:
         </p>
         <ul>
-          <li><strong>0,92%</strong> af vurderingen op til ca. 9,2 mio. kr</li>
-          <li><strong>3%</strong> af vurderingen over ca. 9,2 mio. kr</li>
-          <li>Der gives et <strong>forsigtighedsfradrag på 20%</strong> af vurderingen</li>
+          <li><strong>0,92 %</strong> af vurderingen op til ca. 9,2 mio. kr</li>
+          <li><strong>3 %</strong> af vurderingen over ca. 9,2 mio. kr</li>
+          <li>Der gives et <strong>forsigtighedsfradrag på 20 %</strong> af vurderingen</li>
         </ul>
         <p>
           Beregn din ejendomsværdiskat med vores{" "}
@@ -246,7 +246,7 @@ export default function BoligkoebGuidePage() {
 
         <h2>Tjekliste for boligkøbere</h2>
         <ol>
-          <li><strong>Spar op:</strong> Minimum 5% + handelsomkostninger (8-10% total)</li>
+          <li><strong>Spar op:</strong> Minimum 5 % + handelsomkostninger (8-10 % total)</li>
           <li><strong>Få forhåndsgodkendelse:</strong> Bank/realkredit fortæller hvad du kan låne</li>
           <li><strong>Find advokat:</strong> Gerne inden du finder bolig</li>
           <li><strong>Beregn din ydelse:</strong> Brug{" "}

@@ -1,32 +1,29 @@
-STATUS: 4/10 01:0x. ✅ **BMI-porten er genskabt med alle 30 tests** —
-        `ceo/bmi-testport`. `10c012a` (alderfeltet) **erstattede** hele
-        `BMIBeregner.test.tsx`: 473 linjer / 25 tests blev til 60 linjer / 6,
-        så 19 tests om enhedsskift, delelinks og WHR-grænser forsvandt med
-        den. Filen er nu 543 linjer / 30 tests: de 25 gamle plus alderens fire
-        (enhed i etiketten, børnevarslet under 18, ingen varsel fra 18, alderen
-        i delelinken). *Verify:* typecheck, lint (758 filer), **4173 tests /
-        263 filer**; de 25 genskabte dømmer delelinks, gentaget enhedsskift og
-        WHR-grænserne, de 4 nye dømmer alderen i da/se/no.
+STATUS: 4/10 01:3x. ✅ **de 25 sidste rå procenter i boligkøbsguiden og
+        drikkelisten er væk** — `ceo/procent-koeb-af-bolig-alkohol`. Loftet i
+        `regnestykker.test.ts` **231 → 206**, begge filer står nu i
+        `PROCENT_MED_MELLEMRUM`, og en ny render-test dømmer
+        `AlkoholenhederBeregner` i markup (drikkelisten skrev «4,6%», mens
+        `/alkoholenheder`s egen brødtekst skrev «4,6 %» på samme side).
+        Mutation: **3 røde** af 26. Gate: typecheck, lint (758 filer),
+        **4174 tests / 263 filer**.
+        ✅ 4/10 01:0x: **BMI-porten er genskabt med alle 30 tests** —
+        `ceo/bmi-testport`: 25 tests om enhedsskift, delelinks og WHR-grænser
+        plus 4 om alderen (enhed i etiketten, børnevarslet under 18, ingen
+        varsel fra 18, alderen i delelinken). *Verify:* 4173 tests / 263 filer.
         ✅ 4/10 00:5x: **`/bmi` spørger nu om alder** — `ceo/bmi-alder`.
         `inputs.alder` lå i delelinken som død kode; målt 4/10 er «bmi beregner
         med alder», «bmi beregner med alder og køn», «bmi skala ældre» og
         «beregn bmi formel» danske autocomplete-træffere, og `/bmi` er
         næststørste side (**938 besøgende/28d, −24 %**). Alderen bruges kun
-        til WHO's voksenbånd (18+) — børnepercentiler er bevidst ikke regnet.
-        → Se `docs/plan-arkiv.md`.
-        ✅ 4/10 00:1x: **de tre review-fund på `/brok` er rettet** —
-        `ceo/brok-grupper-og-runding`. Regelknapperne har egen legend
-        («Vælg regel»/«Välj regel»), hver brøk sit eget `fieldset`, og
-        `fælles nævner` er rettet til **`fællesnævner`**. Decimaler i et felt
-        rundes nu ind i feltet (før stod `1.5` i «Første tæller» og regnedes
-        som `1`, tavst). Nye 8 tests er målt **røde 7/8** mod den gamle kode.
-        ✅ 4/10 00:0x: `TidszoneBeregner.test.tsx` håndskrev «Sydney +8t», men
-        Sydney skiftede til AEDT 4/10, så porten gik rød to gange om året.
-        Nu regnes forventningen fra `TIDSZONER_BEREGNER` + `erSommertid`.
-        **Næste iteration skal være en feature** (seneste: 3/10 `/brok` +
-        `/boernepenge`-titel, 4/10 `/bmi`-alder — altså to features i træk).
+        til WHO's voksenbånd (18+). ✅ 4/10 00:1x: **de tre review-fund på
+        `/brok` er rettet** — `ceo/brok-grupper-og-runding`. ✅ 4/10 00:0x:
+        `TidszoneBeregner.test.tsx` håndskrev «Sydney +8t», som gik rød to
+        gange om året. → Se `docs/plan-arkiv.md`.
+        **Næste iteration skal være en feature**: hele feature-køens åbne
+        punkter er ⛔ på menneskekilder (❓ 119 sst.dk 429, ❓ feriedatoer,
+        ❓ opgave 187 til 13/10), så næste feature skal findes uden for dem.
         PR-TJEK: 3/10 23:4x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-        start (`20260a8`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+        start (`e551435`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
 
 ## CEO-kø punkt 0 — verificeret i koden 4/10 01:0x (alle otte lukket)
 
@@ -172,10 +169,13 @@ den **synlige** markup. Slice 10:5x (boliglån), 11:2x (fem beregnere) og
 (`/lon-efter-skatt` 20.2 %, `/brutto-netto` 33.3 %), og de to
 resultattilstande kan hverken scanneren eller markup-porten se, så de har fire
 egne tests i `decimal-komma.test.tsx`. Detaljer og målinger: `docs/plan-arkiv.md`.
-*Næste slice (målt på ny 3/10 23:0x):* de tre største filer er nu
-`blog/30-procent-reglen-husleje` (25, ⛔ de er regelnavnet), `/moms` (16, ⛔ de 3
-lovgrænser, ❓ nedenfor), `blog/koeb-af-bolig-2026-omkostninger` (15) og
-`AlkoholenhederBeregner.tsx` (10). Mål med `grep -cE '[0-9]%' <fil>`.
+*Slice 4/10 01:3x ✅* — de to sidste uundtagede største filer er lukket:
+`blog/koeb-af-bolig-2026-omkostninger` (15 noder) og `AlkoholenhederBeregner`
+(10), loftet **231 → 206**, begge i `PROCENT_MED_MELLEMRUM` plus en ny
+render-test på drikkelisten. *Målt:* `grep -cE '[0-9]+([.,][0-9]+)?%'` giver
+**0** i begge. *Næste slice måles på ny:* de to største er `blog/30-procent-
+reglen-husleje` (25, ⛔ regelnavn) og `/moms` (16, ⛔ lovgrænser, ❓), så resten
+af F5c er kun filer under 15 og kræver en ny måling.
 
 **F5g. [~] Slice 3/10 18:4x: 45 noder i `/billaan` (da+se), `/arveafgift`,
 `/brutto-netto`, `/kalorier` og `/flyttebudget`.** Alle boede i `page.tsx` (brødtekst og
@@ -397,10 +397,14 @@ blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
 **Åben række (strenglisten):** næste fil skal måles på ny. Loftene og de
 lukkede filers målinger står i `docs/plan-arkiv.md`.
-**Åbne F5b-slice: ingen — `/flyttebudget` er lukket 3/10 18:4x.**
-`/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
+**Åbne F5b-slice: ingen — `/flyttebudget` er lukket 3/10 18:4x**, og F5c's
+sidste uundtagede slice er lukket 4/10 01:3x. `/moms` er ⛔ (de 3 lovgrænser,
+❓ nedenfor), og de to største F5c-filer er ⛔ regelnavne.
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 4/10 01:3x:** `VERIFICÉR DEPLOY: <mellemrum i de 25 rå procenter i boligkøbsguiden (FAQ, tabeller, brødtekst) og i de ti drikke-knapper på /alkoholenheder> ceo/procent-koeb-af-bolig-alkohol 4/10 01:3x`.
+Døm på **indhold**: `curl -s https://minberegner.dk/blog/koeb-af-bolig-2026-omkostninger | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%' | wc -l` skal give **0** (var 18), og «Udbetaling (5 %)», «Tinglysning skøde (0,6 % + 1.850 kr)», «forsigtighedsfradrag på 20 %» skal stå i markup. `curl -s https://minberegner.dk/alkoholenheder | grep -c '4,6 %'` skal give **≥1** for «Almindelig øl (33 cl, 4,6 %)» og `grep -c '4,6%'` **0**; samme for «0,5 %», «40 %», «24 %». Sidens brødtekst har allerede «4,6 %» i `HEAD`, så den skal ikke bruges som bevis. Næste deploy-vindue 4/10 07:30.
 
 **Åben note 4/10 00:5x:** `VERIFICÉR DEPLOY: <alderfelt på BMI-værktøjet med enhed, børnevarsel under 18 og alder i delelinken> ceo/bmi-alder 4/10 00:5x`.
 Døm på indhold: `curl -s https://minberegner.dk/bmi | grep -oE '<label[^>]*>Alder[^<]*</label>'` skal give **1** med `Alder (år)`, og `<input` for feltet skal have `value="40"` (eller den værdi kilden har). `grep -c 'Delelinken indeholder en alder under 18'` skal give **0** i den statiske markup (den vises kun efter valg) — døm i stedet på at feltet findes. `beraknare.se/bmi` skal have «Ålder (år)». Næste deploy-vindue 4/10 07:30.
@@ -422,18 +426,6 @@ Døm på indhold: `curl -s https://minberegner.dk/blog/arveafgift-regler-og-sats
 
 **Åben note 3/10 21:5x:** `VERIFICÉR DEPLOY: <29. februar-dagen i /alders tekst + fem danske ord i svensk FAQ + ny se-tekst-port> ceo/review-fund-alder-tabel-og-sprog 3/10 21:5x`.
 Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter ytterligare'` skal give **0** (og «— och efter ytterligare» = 1); `https://beraknare.se/procent` skal have «och inte heller», `beraknare.se/alder` «Timmarna är dagarna gånger 24 och aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas». `/alder`-teksten er daglig præcis den 29. februar, så den kan ikke dømmes før 2028-02-29 — døm da på «28. februar» i stedet for «i dag». Næste deploy-vindue 3/11 07:30.
-
-**Åben note 3/10 17:4x (delvis live — se målingen 21:5x):** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
-Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. ⚠️ Målt 3/10 21:5x: **deltvist** — /arveafgift, /brutto-netto og /flyttebudget er 0, /billaan **6** (alle «6%» i alderstabellen), /kalorier **3** («10-15%»). De 9 er rå procenttal i `<td>`/brødtekst — en anden kodebane end `}%`, så committen dækkede dem ikke; de er **ikke** et deploy-problem. Tidligere måling 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. ⚠️ **3/10 23:0x — de 9 var aldrig fejl i `HEAD`.** Egen måling: `/billaan` har 0 rå procenter (rentesatsen går gennem `sats()`, `${formatNumber(...)} %`) og `/kalorier` har 0 (`${usikkerMin}-${usikkerMaks} %` i `kalorier-eksempler.ts:220,259,279`). Træfferne i live var **gammel kode fra før fixen**. Noten er derfor ikke længere en deploy-måling: de to strenge dømmes igen 4/10 07:30, og resten af klassen er rettet i `ceo/procent-mellemrum-bilsider`.
-
-**Dømt 4/10 00:0x på indhold (curl) — de fem procent-noter er delvist forkerte
-og én er åben.** `/rentefradrag`, `/billaan` og `/kalorier` giver **0** rå
-procenttal i live, så de er rettet; men `⛔ /dagpenge` har stadig **3× `8%`** og
-**6× `90%`** og er derfor **ikke** lukket. Noternes hårde strenge (`<td>33,6 %`,
-`Boafgift (15 %)`, «Dagpenge = 80 % af løn efter 8 % AM-bidrag») gav **0** mod
-live: de er skrevet mod markup fra en tidligere iteration og er ikke længere
-gyldige forventninger — de skal dømmes på **0 rå procenter**, ikke på strenge.
-Målingerne og de lukkede noter: `docs/plan-arkiv.md`.
 
 ## ❓ Til Mads
 

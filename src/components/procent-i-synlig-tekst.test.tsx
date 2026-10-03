@@ -29,6 +29,7 @@ import { LocaleProvider } from "@/components/LocaleProvider";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import type { Locale } from "@/lib/i18n";
 import AktieskatBeregner from "./AktieskatBeregner";
+import AlkoholenhederBeregner from "./AlkoholenhederBeregner";
 import AndelsboligBeregner from "./AndelsboligBeregner";
 import ArveafgiftBeregner from "./ArveafgiftBeregner";
 import BarselBeregner from "./BarselBeregner";
@@ -333,6 +334,18 @@ describe("procenttal i synlig markup", () => {
     expect(topskat).toMatch(/Kommuneskat \([\d.,]+ %\)/);
     expect(topskat).toContain("AM-bidrag (8 %)");
     expect(topskat).toContain("Bundskat (12,01 %)");
+  });
+
+  test("drikkelisten i alkoholenhederberegneren har 0 procenter uden mellemrum", () => {
+    // 4/10 01:2x: de ti serveringsknapper skrev «Almindelig øl (33 cl, 4,6%)»,
+    // mens sidenes egen brødtekst (`/alkoholenheder`) allerede skrev «4,6 %» —
+    // samme værktøj, to skrivemåder. Mutation: sæt «4,6%» tilbage i
+    // `defaultDrinks`, porten skal blive rød.
+    const markup = renderMedLocale("da", <AlkoholenhederBeregner />);
+    expect(synligeProcenter(markup)).toEqual([]);
+    expect(markup).toContain("Almindelig øl (33 cl, 4,6 %)");
+    expect(markup).toContain("Alkoholfri øl (33 cl, 0,5 %)");
+    expect(markup).toContain("Shot (4 cl, 40 %)");
   });
 
   test("de to rettede strenge står med mellemrum", () => {

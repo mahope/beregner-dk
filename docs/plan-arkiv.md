@@ -28477,3 +28477,67 @@ Dømt 4/10 00:0x på indhold: `/rentefradrag` 0 rå procenter, altså rettet.
 på `src/app/dagpenge/page.tsx`, `src/components/DagpengeBeregner.tsx` og
 `src/lib/dagpenge*.ts` giver **0** — de 9 rå procenter var gammel kode i live.
 Genmåles 4/10 07:30 med `0` som eneste streng.
+
+## Slice 4/10 01:2x — de 25 sidste rå procenter i boligkøbsguiden og drikkelisten
+
+**Opgave:** F5c's næste slice, målt 3/10 23:0x som de to største *uundtagede*
+filer: `src/app/blog/koeb-af-bolig-2026-omkostninger/page.tsx` (15 noder) og
+`src/components/AlkoholenhederBeregner.tsx` (10 noder). De to største
+filer overhovedet var og er ⛔: `blog/30-procent-reglen-husleje` (25, de er
+regelnavnet) og `/moms` (16, de 3 lovgrænser, ❓).
+
+**Hvad der blev rettet.** Boligkøbsguiden skrev «3-5%», «5%», «0,92%», «3%»,
+«20%», «0,6%», «1,45%», «1%», «80%» og «8-10%» — i FAQ-svarene (som også
+ligger i JSON-LD og i `metaDescription`), i to tabeller og i brødteksten.
+Drikkelisten skrev «Almindelig øl (33 cl, 4,6%)» … «Likør (4 cl, 24%)» i de ti
+knapper under «Almindelige serveringer», **mens `/alkoholenheder`s egen
+brødtekst allerede skrev «4,6 %»** (`src/app/alkoholenheder/page.tsx:57`) —
+samme tal, to skrivemåder på samme side. Det var sidens egen port
+`procent-i-synlig-tekst.test.tsx` der havde dømt brødteksten, ikke knapperne.
+
+**Målt.** Loftet i `regnestykker.test.ts` **231 → 206** (25 noder; scanneren
+tæller noder, så en linje med to procenter tælles én gang — de 18 rå
+forekomster i guiden er 15 noder). Begge filer står nu i
+`PROCENT_MED_MELLEMRUM`, så porten dømmer dem enkeltvis og ikke kun via
+loftet. Ny render-test i `procent-i-synlig-tekst.test.tsx` dømmer
+`AlkoholenhederBeregner` i markup **og** på tre konkrete strenge
+(«4,6 %», «0,5 %», «40 %»), fordi komponent-portene er blinde for
+strengliteraler.
+
+**Mutation.** Sæt «4,6%» tilbage i `defaultDrinks` og «Udbetaling (5%)» tilbage
+i guiden: **3 røde** af 26 — render-porten (`['4,6%']`), listen
+(`forside, navigation og de omskrevne sider skriver «8 %»`) og loftet
+(208 mod 206). Ren fil: 26/26.
+
+**Gate:** typecheck, lint (758 filer), **4174 tests / 263 filer**.
+`git diff | grep -nE '^\+.*\$[0-9]'` → 0 (punkt 13).
+
+**Næste slice måles på ny:** `grep -cE '[0-9]+([.,][0-9]+)?%' <fil>`. De to
+største uundtagede er nu `blog/30-procent-reglen-husleje` (25, ⛔ regelnavn)
+og `/moms` (16, ⛔ lovgrænser, ❓), så resten af F5c er **kun** filer under 15
+og kræver en ny måling.
+
+**Noter om denne slice:** den er bevidst **ikke** en feature, fordi hele
+feature-køen er ⛔ på menneskekilder (❓ 119 sst.dk 429, ❓ feriedatoer,
+❓ opgave 187 til 13/10) — kontraktens regel om en lille rigtig
+forbedring i stedet for en plan-iteration.
+
+## Fra planen 4/10 01:3x — to lukkede blokke
+
+**«Dømt 4/10 00:0x på indhold (curl)»** (hele afsnittet, fjernet fra planen):
+`/rentefradrag`, `/billaan` og `/kalorier` gav **0** rå procenttal i live, så
+de er rettet; men `⛔ /dagpenge` havde stadig **3× `8%`** og **6× `90%`**.
+Noternes hårde strenge (`<td>33,6 %`, `Boafgift (15 %)`, «Dagpenge = 80 % af
+løn efter 8 % AM-bidrag») gav **0** mod live: de var skrevet mod markup fra en
+tidligere iteration. De skal dømmes på **0 rå procenter**, ikke på strenge.
+Senere målt (4/10 01:2x): `/dagpenge` er rettet i `HEAD` — de 9 kommer fra
+`page-data.ts:150` (`DAGPENGE_BESKRIVELSE`) og `:1867` (FAQ-svaret), som begge
+skriver `${DAGPENGE_PROCENT_TEKST} %`, så live viste gammel kode fra før 21:30.
+
+**«Åben note 3/10 17:4x»** (hele noten, fjernet): mellemrum i procenttal på
+`/billaan`, `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. Den
+blev dømt 3/10 21:5x som **deltvist** (6 rå procenter i `/billaan`s
+alderstabel, 3 i `/kalorier`), og 3/10 23:0x som **fuldstændig fejl i målingen**:
+egen måling viste 0 rå procenter i begge filer, fordi rentesatsen går gennem
+`sats()` og kalorierne gennem `${usikkerMin}-${usikkerMaks} %`. Resterne i den
+anden kodebane blev rettet i `ceo/procent-mellemrum-bilsider`.
