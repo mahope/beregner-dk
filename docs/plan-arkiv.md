@@ -26974,3 +26974,43 @@ urørt» låste «30% reglen forklaret» og dømmer nu de to rettede brødteksts
 **Gate:** lint · typecheck · `TZ=UTC npm run test` (**3984** i 251 filer) ·
 build — alle grønne 3/10 06:45. 3 nye tests (3981 → 3984). Punkt 13: 0
 forekomster af `$1` i diffen.
+
+## 3/10 07:55 — `timer-i-aret`: «hvor mange timer er der på et år» får sin egen side
+
+**Datagrund.** Googles egen autocomplete 3/10 (`suggestqueries.google.com`):
+«hvor mange timer er der på et år» er **nr. 1** under «hvor mange timer er der»
+og «hur många timmar är det på ett år» er **nr. 1** under «hur många timmar är
+det». `timer-periode.ts` (2/10) målte det samme og lagde tabellen ind på
+`/tidsberegner` (72.471 GSC-visninger, 0,3 % CTR, pos. 6,8) som ét `<h2>` blandt
+24.
+
+**Målt.** Ny `src/lib/timer-i-aret.ts` (regnestykket `dage × 24` med
+`TIMER_I_DAGT` og `MINUTTER_PER_TIME`, årstallet fra `aarstal()` og månederne fra
+`maanederITaar()`), `src/components/TimerIAaret.tsx` og to route-filer.
+Periodetabel: døgn, uge, to uger, tre kalendermåneder (28/30/31 dage fundet i
+månedernes egen længde), år. Måneds-tabel med 12 rækker + summering.
+FAQ'ens tre svar er de tre målte spørgsmål, og **alle tal** er regnet.
+
+**Én forfatter pr. periode — den vigtigste rettelse undervejs.** Første udgave
+havde sin egen `døgn`/`uge`/`kvartal`-række, hvilket gav to tal for «et døgn» og
+to for «et kvartal» (kalendermåned mod `TIMER_PERIODER`s snit på 91,25 dage).
+Døgn og uge læses nu fra `timer-periode.ts`, kvartal og halvtår er **fjernet** fra
+tabellen, og porten dømmer begge dele.
+
+**Porten** (`src/app/timer-i-aret.test.tsx`, 16 tests): titel og `<h1>` mod den
+målte søgning, de tre spørgsmål i JSON-LD *og* i `<FAQ>`, invarianten
+`timer = dage × 24` og `minutter = timer × 60` for alle perioder og måneder,
+summen af de tolv måneder = årets timer, døgn/uge = `timerIPeriode(...)`,
+ingen «kvartal»/«halvt-aar», dansk «8.760» mod svensk «8 760», 301 mellem
+domænerne, canonical/hreflang, `noindex` på den forkerte sti, daglig
+sitemap-entry, og tovejslinket fra `/tidsberegner`. To mutationer målt røde:
+`TIMER_PER_DAG = 25` → 4 røde; tovejslinket til `/dato` → 1 rød.
+
+**Gate:** lint + typecheck + 4000 tests i 252 filer + build, alle exit 0.
+`meta-description.test.ts`s alias-udelukkelse fik `/timmar-i-aret` — samme
+regel som `/dagar-i-aret`.
+
+**Ikke gjort (bevidst):** kvartal/halvtår, «arbejdsuge» og «arbejdsmåned»
+(37-timers ugen og den svenske månedsnorm på 173 timer mangler en kilde i
+repoet — jf. ❓ i planen), og «hvor mange timer er der til juleaften», som er en
+tredje slags spørgsmål (nedtælling i time) og hører hjemme i `/dage-til`.

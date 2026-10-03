@@ -1,14 +1,14 @@
-STATUS: 3/10 06:45. CI grøn ved start (`37094498538`), ingen åbne PR'er
+STATUS: 3/10 07:55. CI grøn ved start (`37097262776`), ingen åbne PR'er
       (PR-TJEK: 2026-10-03). Sentry: ingen uløste fejl 14 dage, SDK'en er
       sat op. **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run
-      test` · `npm run build` — **grøn 3/10 06:45** (alle exit 0, **3984**
-      tests i 251 filer).
-      **Denne iteration: procentnotationen er ensrettet og målt** — 28 «8%» er
-      nu «8 %» på forsiden, i navigationen og på feriepenge/laaneberegner/husleje,
-      og en ny port i `regnestykker.test.ts` tæller hele korpuset i stedet for
-      tre filer. Se `docs/plan-arkiv.md`. **Næste iteration:** fortsæt
-      procent-sweepet ned fra `page-data.ts` (76) → `/procent` (26) →
-      `/boliglaan` (26), så «8 %» bliver husets skrivemåde hele vejen.
+      test` · `npm run build` — **grøn 3/10 07:52** (alle exit 0, **4000**
+      tests i 252 filer).
+      **Denne iteration: `/timer-i-aret` + `/timmar-i-aret`** — «hvor mange
+      timer er der på et år» er dansk **og** svensk autocomplete **nr. 1**, og
+      svaret lå som ét afsnit blandt 24 på `/tidsberegner`. Se
+      `docs/plan-arkiv.md`. **Næste iteration:** procent-sweepet ned fra
+      `page-data.ts` (76) → `/procent` (26) → `/boliglaan` (26), så «8 %»
+      bliver husets skrivemåde hele vejen.
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 ## Fase 3 — trafik-drevet
 
@@ -162,6 +162,18 @@ er blokeret af en ❓ og må ikke gættes.
   daglig sitemap-entry og tovejs-links med `/dato` og `/ugenummer`.
   **MÅL:** 0 (nye URL'er 3/10) → Plausible 17/10; GSC 14 dage mod
   `/dato` 136.071 visninger / 0,7 % / pos. 5,6 (da) og 105.188 / 0,1 % / 8,1 (se).
+- **[x] ✅ `/timer-i-aret` + `/timmar-i-aret`** — se `docs/plan-arkiv.md`.
+  *Hvem:* alle der spørger «hvor mange timer er der på et år / en uge / en
+  måned». *Datagrund:* Googles egen autocomplete 3/10 har «hvor mange timer er
+  der på et år» som **nr. 1** under «hvor mange timer er der» og «hur många
+  timmar är det på ett år» som **nr. 1** under «hur många timmar är det»;
+  `timer-periode.ts` (2/10) målte det samme og lagde tabellen ind på
+  `/tidsberegner` som ét afsnit blandt 24. *Accept:* egen dansk og svensk side
+  med periode-tabel (døgn, uge, to uger, tre kalendermåneder, år), tolv-måneders-
+  tabel i timer, «timer tilbage af året», de tre målte spørgsmål som `FAQPage`,
+  canonical/hreflang, 301 mellem domænerne, daglig sitemap-entry og
+  tovejs-link fra `/tidsberegner`. **MÅL:** 0 (nye URL'er 3/10) → Plausible
+  17/10; GSC 14 dage mod `/tidsberegner` 72.471 visninger / 0,3 % / pos. 6,8.
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -347,6 +359,8 @@ skrive. Rækkefølgen herunder er **målt voksende**, ikke gættet.
    (lovgrænser). *Accept:* F5b lukkes og næste opgave er altid en feature.
 
 `VERIFICÉR DEPLOY: /dage-i-aaret + /dagar-i-aret (nye sider med tolv-måneders-tabel: `minberegner.dk/dage-i-aaret` skal have `<title>` «Hvor mange dage er der på et år? Dage i alle 12 måneder», **1** `<h1>`, **12** månedsrækker + **1** summeringsrække i tabellen, og **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange dage er der på et år?», «Hvor mange dage er der i augusti?» og «Hvor mange dage er der i juli?» — svaret på augusti skal være «31 dage … 21 hverdage og 10 weekenddage» og på juli «31 dage … 23 hverdage og 8 weekenddage»; summeringen skal være 365 dage / 251 hverdage / 104 weekend; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar» og månedsnavnet «augusti», altså **0** «august»; `minberegner.dk/dagar-i-aret` + `beraknare.se/dage-i-aaret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; **intet** `NaN`) ceo/dage-i-aaret 3/10 06:20`
+
+`VERIFICÉR DEPLOY: /timer-i-aret + /timmar-i-aret (nye sider med periode- og måneds-tabel i time: `minberegner.dk/timer-i-aret` skal have `<title>` «Hvor mange timer er der på et år? Timer i alle perioder», **1** `<h1>`, perioderækkerne «Et døgn» 1/24/1.440, «En uge» 7/168/10.080, «To uger» 14/336/20.160, «En måned (februar)» 28/672/40.320, «En måned (april)» 30/720/43.200, «En måned (januar)» 31/744/44.640 og «Et år» 365/8.760/525.600, **12** månedsrækker + **1** summeringsrække i den anden tabel, eksempelrækken «2026 har 365 dage, som er 8.760 timer.», **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange timer er der på et år?», «Hvor mange timer er der på en uge?» og «Hvor mange timer er der på en måned?»; `beraknare.se/timmar-i-aret` skal have «8 760 timmar» og **0** «8.760», og **0** «hur mange»; `minberegner.dk/timmar-i-aret` + `beraknare.se/timer-i-aret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; `minberegner.dk/tidsberegner` skal have «timer i hvert tidsrum» med link til siden og `beraknare.se/tidsberegner» «timmar i varje tidsperiod»; **intet** `NaN`) ceo/timer-i-aret 3/10 07:55`
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
 

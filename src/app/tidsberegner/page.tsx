@@ -525,7 +525,9 @@ export default async function TidsberegnerPage() {
           altså {formatNumber(TIMER_I_SKUDAAR, "da")} timer, og det er præcis
           ét døgn mere end et normalt år. Skal du regne et bestemt tidsrum ud,
           bruger du værktøjet ovenfor, og vil du bare omregne, står omregningen
-          fra minutter til timer lige over denne tabel.
+          fra minutter til timer lige over denne tabel. Vil du se alle
+          perioderne samlet på én side — inklusive alle tolv måneder — står de i{" "}
+          <a href="/timer-i-aret">timer i hvert tidsrum</a>.
         </p>
 
         {/* C187: DA-autocomplete under "timer og minutter" har fire
@@ -838,6 +840,8 @@ export default async function TidsberegnerPage() {
           är exakt ett dygn mer än ett normalt år. Vill du räkna ut en viss
           tidsperiod använder du verktyget ovan, och vill du bara omräkna står
           omräkningen från minuter till timmar strax under den här tabellen.
+          Vill du se alla perioderna samlat på en sida — inklusive alla tolv
+          månaderna — står de i <a href="/timmar-i-aret">timmar i varje tidsperiod</a>.
         </p>
 
         {/* C187: SE-autocomplete under "timmar och minuter" har "addera

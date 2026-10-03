@@ -30,8 +30,9 @@ const MAX_TEGN = 160;
 
 /**
  * Sider der med vilje ikke har en description på den danske host: to svenske
- * alias-URL'er som middleware'en sender videre med 301 — her `/dagar-i-aret`
- * mod `/dage-i-aaret` på samme måde som `/dagar-mellan-datum` — embed-siderne og
+ * alias-URL'er som middleware'en sender videre med 301 — her `/dagar-i-aret` mod
+ * `/dage-i-aaret` og `/timmar-i-aret` mod `/timer-i-aret` på samme måde som
+ * `/dagar-mellan-datum` — embed-siderne og
  * design-systemet med `noindex`, `/locale-unavailable` som kalder `notFound()`,
  * og `/dagar-till/*`, der er `noindex` på minberegner.dk og først får en egen
  * description på beraknare.se. Alt andet skal have en — ellers kan en ny side
@@ -48,6 +49,7 @@ const SIDER_UDEN_DESCRIPTION = new Set([
   "/dagar-till/[dato]",
   "/dagar-mellan-datum",
   "/dagar-i-aret",
+  "/timmar-i-aret",
   "/klockan-i",
 ]);
 

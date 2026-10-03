@@ -9,6 +9,7 @@ import { getDageTilHubPath, getDageTilPrefix, getDageTilSlugs } from "@/lib/dage
 import { getKlokkenHubPath, getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klokken-i";
 import { getDageMellemPath } from "@/lib/dage-mellem-datoer";
 import { getDageIAaretPath } from "@/lib/dage-i-aaret";
+import { getTimerIAaretPath } from "@/lib/timer-i-aret";
 
 // The sitemap route is rendered per request (it resolves the host from
 // headers), so a wall-clock default would stamp every URL with the moment
@@ -144,6 +145,20 @@ export function buildSitemap(
       ]
     : [];
 
+  // «Hvor mange timer er der på et år» har en periodetabel og et «timer
+  // tilbage»-tal, og begge følger dagens dato, så siden re-crawles dagligt.
+  const timerIAaretPath = getTimerIAaretPath(locale);
+  const timerIAaretEntries: MetadataRoute.Sitemap = timerIAaretPath
+    ? [
+        {
+          url: `${baseUrl}${timerIAaretPath}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+      ]
+    : [];
+
   return [
     {
       url: baseUrl,
@@ -156,6 +171,7 @@ export function buildSitemap(
     ...dageTilEntries,
     ...dageMellemEntries,
     ...dageIAaretEntries,
+    ...timerIAaretEntries,
     ...klokkenEntries,
     ...infoEntries,
   ];
