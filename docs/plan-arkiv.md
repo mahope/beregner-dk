@@ -26119,3 +26119,74 @@ altså fra samme modul `/dato` bruger, ikke et antal i teksten.
 13/10, og en halv oversættelse af et værktøj der kalder en dansk
 adresseopslagstjeneste ville være værre end ingen. Siden er derfor `daOnly`, så
 den hverken dukker op i beraknare.ses sitemap eller i hreflang der.
+
+---
+
+## 3/10 02:40 — `efterloen-faq-tal-fra-modul` (F5b-slice 9)
+
+**Målt.** 5 håndskrevne talgrupper væk fra `page-data.ts` — `description`,
+`metaDescription` og 3 af sidens 8 FAQ-svar — så listen er **83 → 78** og
+`da/efterloen` er væk fra slug-køen. Egen AST-probe over `daPages`/`noPages`/
+`sePages` (samme mønster som portens `strengBelob`, kørt på ren HEAD).
+
+**Ingen reel fejl fundet — det skal siges rent op i planen.** Modulerne siger:
+- «20.057» = `Math.round(DAGPENGE_2026.fuldtid 22.041 × 0,91)` = 20.057,31 ✓
+- «5.772» = `SKATTEFRI_PRAEMIE_2026.timerPerPortion` 481 × `maxPortioner` 12 ✓
+- «15.870»/«10.580» = `SKATTEFRI_PRAEMIE_2026.portion.full/.part` ✓
+- «481 timer», «12 portioner», «2 år» = `timerPerPortion`, `maxPortioner`,
+  `udskydelseAar` ✓
+- Aldersvarets fem fødselsperioder = `EFTERLOEN_ALDER_2026`, alle fem ✓
+
+Så slicen er et **lås mod 2027-drift**, ikke en rettelse. Det er en ærlig
+forskel fra de otte foregående slices, hvor der hver gang var en reel fejl.
+
+**Den reelle fejl var et tredje sted, porten ikke så.** Satsen lå hårdkodet i
+`EfterloensBeregner.tsx` som `const MAX_EFTERLOEN_91 = 20057` (og
+`MAX_EFTERLOEN_100 = 22041`) — to tal, som hverken `HAARDKODEDE_BELOB` eller
+`HAARDKODEDE_BELOB_I_STRENGE` ser, fordi de er tal uden tusindtalsseparator i
+en `.tsx`. Beregnerens resultat og søgeresultatets løfte var dermed to
+uafhængige tal, og kun metadataen bar beløbet med separator. Ny blok i
+`efterloen.ts`:
+
+```
+EFTERLOEN_SATS_PROCENT = { udenUdskydelse: 0.91, medUdskydelse: 1 }
+EFTERLOEN_MAX_SATS = { udenUdskydelse: round(fuldtid × 0.91), medUdskydelse: round(fuldtid × 1) }
+```
+
+`EfterloensBeregner.tsx` og den nye `efterloen-eksempler.ts` læser begge den.
+Ingen cirkulær import: `satser-2026.ts` har ingen imports.
+
+**Aldersvaret.** «Hvornår kan jeg gå på efterløn?» har ingen beløb, så porten
+dømmer den ikke — men den nævner alle fødselsår og alle aldre, altså hele
+sidens løfte om *hvornår* man kan gå på. Den genereres nu række for række med
+tre dokumenterede skriveformer (hele fødselsår → «1963-1966», ét år delvist →
+«i 1959», start midt i et år → «1. juli 1956-31. december 1958»), og den er
+**byte-uændret**: kun `formatBelob(63.5, "da", 1)` → `63,5` → `63½` med et
+`.replace(/,5$/, "½")`.
+
+**Dansk: én reel skrivefejl.** «91%» → «91 %» i `description` og i FAQ-svaret.
+`metaDescription` på samme side skrev allerede «91 %», så de to beskrivelser
+modsagde hinanden, og resten af sitet (og `pension-eksempler`) skriver
+procenttal med mellemrum.
+
+**Port.** 7 nye tests (3898 → 3905): 6 i `efterloen-eksempler.test.ts` + 1 i
+`EfterloensBeregner.test.tsx`. Den adfærdsbaserede prøve dømmer *hvert* beløb i
+metadata og alle otte svar mod de tal `efterloen.ts` må skrive
+(`TILLADTE_BELOB`), så et håndskrevet beløb er rødt uden at nogen skal tælle.
+Mutation: «${kr(EFTERLOEN_MAX_SATS.udenUdskydelse)} kr.» → håndskrevet
+«19.500 kr.» i satssvaret → **2 røde af 6** (bindingsprøven og beløbsporten).
+Den nye komponenttest renderer `EfterloensBeregner` og kræver
+«20.057 kr.» i resultatblokkens «Månedlig efterløn» — så FAQ'ens løfte og
+beregnerens output er bundet sammen af én prøve.
+
+**Ny ❓ (ikke løst i denne slice).** Deltidsforsikret efterløn regnes som
+`MAX × 0.67` = 13.438 kr., mens `DAGPENGE_2026.deltid` er 22.041 × 2/3 = 14.694
+kr. for præcis samme forsikring, og beregnerens egen `portion.part` er 2/3 af
+`portion.full`. Koden er urørt: det er en **beregningsændring**, ikke en
+tekstfejl, og dagpengelovens deltidsregel skal i en kilde før den rettes
+(punkt 11).
+
+**Ikke lavet (bevidst).** `page-data.ts`-listen blev ikke udvidet til `.ts`.
+Portens egen docblock siger, at det ville gøre listen 152 lang og fundene til en
+tilladelsesliste — samme vurdering som før, og rækkefølgen (slugs først,
+portudvidelsen sidst) står uændret i planen.

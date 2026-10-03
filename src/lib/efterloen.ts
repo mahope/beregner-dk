@@ -18,6 +18,34 @@
  * værktøjet skal så bede om a-kassen.
  */
 
+import { DAGPENGE_2026 } from "./satser-2026";
+
+/**
+ * Efterlønnens sats er en procentdel af **max dagpenge**, så den følger
+ * dagpengesatsen og ikke sig selv. De to procenter er dagpengelovens: 91 % uden
+ * udskydelse og 100 % efter to års udskydelse.
+ *
+ * Før denne blok lå begge tal håndskrevet i `EfterloensBeregner.tsx`
+ * (`const MAX_EFTERLOEN_91 = 20057`) og endnu en gang i sidens metadata og FAQ
+ * som «20.057 kr.». Det er den drift, kvalitetsregel 11 beskriver: sænker
+ * dagpengesatsen 2027, flytter beregneren sig, og søgeresultatet lover stadig
+ * sidste års sats.
+ */
+export const EFTERLOEN_SATS_PROCENT = {
+  udenUdskydelse: 0.91,
+  medUdskydelse: 1,
+} as const;
+
+/** Månedens maksimale efterløn i kroner, fuldtidsforsikret, i 2026. */
+export const EFTERLOEN_MAX_SATS = {
+  udenUdskydelse: Math.round(
+    DAGPENGE_2026.fuldtid * EFTERLOEN_SATS_PROCENT.udenUdskydelse,
+  ),
+  medUdskydelse: Math.round(
+    DAGPENGE_2026.fuldtid * EFTERLOEN_SATS_PROCENT.medUdskydelse,
+  ),
+} as const;
+
 /** Én række i borger.dk's skema, med hele fødselsår for opslag på fødselsår. */
 export interface EfterloenAldersRække {
   /** Første fødselsår i rækken. */

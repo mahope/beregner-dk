@@ -51,6 +51,12 @@ import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 import {
+  efterloenAldersSvar,
+  efterloenDescription,
+  efterloenFaqSvar,
+  efterloenMetaDescription,
+} from "./efterloen-eksempler";
+import {
   rentefradragDescription,
   rentefradragMetaDescription,
   RENTEFRADRAG_FAQ_SVAR,
@@ -1871,9 +1877,9 @@ faqItems: kalorierFaqItems("da"),
     "efterloen": {
       slug: "efterloen",
       title: "Efterløn beregner 2026 - Se hvad du kan få udbetalt",
-      description: "Beregn efterløn 2026. Max sats: ca. 20.057 kr/md (91% af dagpenge). Se hvornår du kan gå på efterløn, betingelser og præcis sats ud fra din indkomst. Gratis beregner.",
+      description: efterloenDescription(),
       metaTitle: "Efterløn beregner 2026 - Se hvad du kan få udbetalt",
-      metaDescription: "Beregn efterløn 2026. Max sats: ca. 20.057 kr/md (91 % af dagpenge). Se hvornår du kan gå på efterløn, betingelser og præcis sats for din indkomst.",
+      metaDescription: efterloenMetaDescription(),
       keywords: ["efterløn", "efterløn beregner", "efterlønssats 2026", "beregn efterløn", "hvornår kan jeg gå på efterløn", "efterløn alder", "efterløn sats", "efterlønsbidrag", "tidlig pension"],
       ogTitle: "Efterløn beregner 2026",
       ogDescription: "Beregn hvad du kan få i efterløn. Gratis beregner med 2026 satser.",
@@ -1885,11 +1891,11 @@ faqItems: kalorierFaqItems("da"),
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Hvad er efterløn?", answer: "Efterløn er en frivillig tilbagetrækningsordning for ældre lønmodtagere og selvstændige. Du kan gå på efterløn nogle år før folkepensionsalderen, hvis du opfylder betingelserne." },
-      { question: "Hvad er efterlønssatsen i 2026?", answer: "I 2026 er den maksimale efterlønssats ca. 20.057 kr. om måneden (91% af dagpengesatsen) ved fuldtidsforsikring. Satsen afhænger af din tidligere indkomst og forsikringsstatus." },
-      { question: "Hvornår kan jeg gå på efterløn?", answer: "Efterlønsalderen afhænger af din fødselsdato: 63 år for født 1. juli 1956-31. december 1958, 63½-64 år for født i 1959, 64 år for født 1. juli 1959-31. december 1962, 65 år for født 1963-1966 og 66 år for født 1967-1970. Født efter 1970 stiger alderen løbende med middellevetiden, så spørg din a-kasse." },
+      { question: "Hvad er efterlønssatsen i 2026?", answer: efterloenFaqSvar["Hvad er efterlønssatsen i 2026?"] },
+      { question: "Hvornår kan jeg gå på efterløn?", answer: efterloenAldersSvar() },
       { question: "Hvad er betingelserne for efterløn?", answer: "Du skal have betalt efterlønsbidrag i mindst 30 år, være medlem af en a-kasse, være tilmeldt efterlønsordningen, og have ret til dagpenge på overgangstidspunktet." },
-      { question: "Kan jeg arbejde mens jeg er på efterløn?", answer: "Ja, du kan arbejde ved siden af efterlønnen, men din efterløn reduceres time for time. Som udgangspunkt udløser 481 arbejdstimer én skattefri præmieportion, og du kan optjene op til 12 portioner (5.772 timer)." },
-      { question: "Hvad er efterlønspræmien?", answer: "Én skattefri præmieportion er 15.870 kr. (2026) for fuldtidsforsikrede og 10.580 kr. for deltidsforsikrede. For at optjene præmie fra efterløn skal du have ventet 2 år med at gå på efterløn. Du kan også optjene præmie via et efterlønsbevis, inden du går på efterløn." },
+      { question: "Kan jeg arbejde mens jeg er på efterløn?", answer: efterloenFaqSvar["Kan jeg arbejde mens jeg er på efterløn?"] },
+      { question: "Hvad er efterlønspræmien?", answer: efterloenFaqSvar["Hvad er efterlønspræmien?"] },
       { question: "Kan jeg få efterløn hvis jeg bor i udlandet?", answer: "Du kan som udgangspunkt kun få efterløn, hvis du bor i Danmark eller et andet EØS-land. Der er særlige regler for ophold uden for EØS." },
       { question: "Hvad sker der med min pension hvis jeg vælger efterløn?", answer: "Din pensionsopsparing påvirker ikke din ret til efterløn, men store pensionsudbetalinger kan reducere din efterløn. Udbetaling fra pension tæller som indkomst." },
       ],

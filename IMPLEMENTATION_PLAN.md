@@ -1,15 +1,18 @@
-STATUS: 3/10 02:55. CI grøn ved start (`37078060779`). Sentry: ingen uløste
-     fejl 14 dage. **Gate:** `npm run lint` · `npm run typecheck` ·
-     `TZ=UTC npm run test` · `npm run build` — **grøn 3/10 02:54** (lint exit 0,
-     typecheck exit 0, **3898** tests i 243 filer, build exit 0).
-     **Denne iteration: `/afstand-mellem-adresser` — en ny side, bygget på
-     kode vi allerede havde.** «beregn afstand mellem to adresser» er nr. 3 i
-     googles danske autocomplete under «beregn», og `RuteAfstand` + `/api/rute`
-     lå som en skjult optrulle i `BefordringsfradragBeregner` — så ruten var
-     bygget, testet og målt, men ingen side fangede søgningen. Siden er dansk
-     (daOnly), fordi norsk trafik er 0 og opgave 187 ikke må flyttes.
-     **Næste iteration:** (1) mål de otte VERIFICÉR-noter i vinduet 3/10 07:30,
-     (2) F5b: næste slug er `/efterloen` (5) eller `/aktieskat` (5).
+STATUS: 3/10 02:45. CI grøn ved start (`37080772865`). Sentry: ingen uløste
+     fejl 14 dage — og SDK'en **er** sat op (`src/sentry-config.ts` +
+     `src/sentry.server.config.ts`, samme DSN som prompten, ingen PII, ingen
+     replay, ingen source maps), så det betyder rigtigvis ro. CEO-punktet om
+     Sentry-opsætning er dermed lukket.
+     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+     `npm run build` — **grøn 3/10 02:42** (lint exit 0, typecheck exit 0,
+     **3905** tests i 244 filer, build exit 0).
+     **Denne iteration: `/efterloen` — beløbene kommer fra modulet igen.**
+     De **5** fund var *ikke* forkerte (målt: 20.057 = 22.041 × 0,91,
+     5.772 = 481 × 12, 15.870/10.580 = `SKATTEFRI_PRAEMIE_2026.portion`), så
+     slicen er et lås mod 2027-drift, ikke en rettelse. Satsen lå dog på tre
+     steder: hårdkodet i komponenten, i `description` og i FAQ'en.
+     **Næste iteration:** (1) mål de ni VERIFICÉR-noter i vinduet 3/10 07:30,
+     (2) F5b: næste slug er `/aktieskat` (5), så `/loen-efter-skat` (4).
 
 ## Fase 3 — trafik-drevet
 
@@ -227,7 +230,7 @@ gennem `formatBelob`; `HAARDKODEDE_BELOB` for `konfirmation/page.tsx` **6 → 0*
 og listens målte sum **332 → 320**. Dansk byte-uændret.
 
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
-åbne er alle ❓-blokerede. **Otte filer er lukket**, se listen nedenfor.
+åbne er alle ❓-blokerede. **Ni filer er lukket**, se listen nedenfor.
 Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 →
 320**.
 
@@ -256,6 +259,27 @@ gamle strenge). `/vaegttab` se: 1.277 visninger.
 **Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
 `src/lib/*.ts` også, og listen opdateres i samme commit.
 
+**Lukket 3/10 02:40 — `efterloen-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **5** håndskrevne talgrupper væk fra
+`page-data.ts` (`description` + `metaDescription` + 3 af 8 FAQ-svar), så listen
+er **83 → 78** og `da/efterloen` er væk fra køen. **Ingen reel fejl fundet** —
+det skal siges rent: 20.057 = `Math.round(22.041 × 0,91)`, 5.772 = 481 × 12,
+15.870/10.580 = `SKATTEFRI_PRAEMIE_2026.portion`. Slicen er derfor et **lås mod
+2027-drift**, ikke en rettelse. **Den reelle fejl var et tredje sted:** satsen
+lå hårdkodet i `EfterloensBeregner.tsx` (`MAX_EFTERLOEN_91 = 20057`) *udenfor*
+portens rækkeevidde, så beregneren og søgeresultatet var to uafhængige tal.
+Ny `EFTERLOEN_SATS_PROCENT` + `EFTERLOEN_MAX_SATS` i `efterloen.ts` regner den
+af `DAGPENGE_2026.fuldtid`, og både komponenten og `efterloen-eksempler.ts`
+læser den. Aldersvaret («Hvornår kan jeg gå på efterløn?») havde ingen
+beløb, så porten dømmer det ikke — men det nævner alle fødselsår og aldre, så
+det er nu genereret række for række af `EFTERLOEN_ALDER_2026` **og** låst
+byte-uændret med `toBe`. Dansk ellers uændret, dog «91%» → «91 %» i to af
+fire sætninger, fordi `metaDescription` på samme side skrev «91 %» og de to
+beskrivelser modsagde hinanden. **Porten er adfærdsbaseret:** den dømmer
+*hvert* beløb i metadata og svar mod de tal modulerne må skrive. Mutation
+(«20.057» → håndskrevet «19.500» i satssvaret) → **2 røde** af 6. **7 nye
+tests** (3898 → 3905). ⛔ Se nyt ❓ om deltidsfaktoren 0,67 nedenfor.
+
 **Otte filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
 (`arveafgift-belob-fra-modul`), `/boligsalg` (`boligsalg-belob-fra-modul`),
 `/procent` (`procent-faq-tal-fra-modul`), `/renteberegner`
@@ -263,17 +287,19 @@ gamle strenge). `/vaegttab` se: 1.277 visninger.
 (`procentpoint-faq-tal-fra-modul`), `/kvadratmeter`
 (`kvadratmeter-faq-tal-fra-modul`) og `/konfirmation`
 (`konfirmation-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
+**`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende.**
 
 **Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
 portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
-Køen pr. slug (**86** efter kvadratmeter 3/10 00:45, målt med egen AST-probe):
-`moms` 15 (⛔) · `konfirmation` 6 → **0** 3/10 01:40 · `efterloen` 5 ·
-`aktieskat` 5 · `loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
-De øvrige tal er fra målingen 3/10 00:45 og kan være faldet siden — mål den
-slug, du tager, på ny. **Anbefalet rækkefølge:** `/efterloen` (5) →
-`/aktieskat` (5) → `/loen-efter-skatt` (4). `/moms` er ⛔ (de 3 lovgrænser).
+Køen pr. slug (**78** målt 3/10 02:38 med egen AST-probe efter `/efterloen`):
+`moms` 15 (⛔) · `konfirmation` 6 → **0** · `efterloen` 5 → **0** ·
+`aktieskat` 5 · `loen-efter-skat` 4 · `topskat` 4 · `boernepenge` 4 ·
+`flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
+være faldet siden — mål den slug, du tager, på ny. **Anbefalet rækkefølge:**
+`/aktieskat` (5) → `/loen-efter-skat` (4) → `/topskat` (4). `/moms` er ⛔ (de
+3 lovgrænser).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
 (12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
@@ -339,6 +365,8 @@ sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
 
 `VERIFICÉR DEPLOY: /afstand-mellem-adresser (dansk side med afstandsværktøj: `<title>` «Afstandsberegner: beregn kørselsafstand mellem to adresser», `<h1>` én gang, 3 FAQ-spørgsmål i `FAQPage`-JSON-LD med «Hvordan beregnes afstanden?», og «Adressevælger fra Klimadatastyrelsen» i brødteksten; `minberegner.dk/befordringsfradrag` skal linke til siden via «Relaterede beregnere»; `minberegner.dk/afstand-mellem-adresser` skal ligge i sitemap.xml. `beraknare.se/afstand-mellem-adresser` skal 404/e-redirecte, fordi siden er daOnly) ceo/afstand-mellem-adresser 3/10 02:55`
+
+`VERIFICÉR DEPLOY: /efterloen FAQ og metadata (procenten skal være «91 %» med mellemrum i BÅDE `description` og `metaDescription` og i FAQ-svaret «Hvad er efterlønssatsen i 2026?» — altså **0** × «91%»; satsen skal stå «20.057» i alle tre steder; «Hvad er efterlønspræmien?» skal have «15.870 kr.» og «10.580 kr.»; «Hvornår kan jeg gå på efterløn?» skal være byte-uændret med «63½-64 år for født i 1959» og «66 år for født 1967-1970»; **intet** `NaN`) ceo/efterloen-faq-tal-fra-modul 3/10 02:40`
 
 `VERIFICÉR DEPLOY: /konfirmation FAQ i alle tre sprog (beraknare.se skal have «mellan 10 000 och 25 000 kr», 0 × «10.000», 0 × «SEK», og fotografintervallet «1 000-3 000 kr») ceo/konfirmation-se-no-tal-fra-modul 3/10 01:40`
 
@@ -407,6 +435,16 @@ skøn: `getDageTilSlugs()` giver **22 / 19**, og live har 22 / 19.
 - ❓ **Kilde til svenske og norske frilanstimepriser.** Ét skærmbillede af et
   markedstal for Danmark, Sverige og Norge låser `/timepris` pr. `Locale` og den
   manglende norske brødtekst.
+- ❓ **Efterløn til deltidsforsikrede: 2/3 eller 0,67?** Målt 3/10 02:38 i
+  `EfterloensBeregner.tsx`: deltid regnes som `MAX × 0,67`, altså 20.057 × 0,67
+  = **13.438 kr.**, mens `DAGPENGE_2026.deltid` er 22.041 × 2/3 = **14.694 kr.**
+  for præcis samme deltidsforsikring — så efterlønsdelen er **67 kr. for høj**.
+  Beregnerens egen præmieportion bruger modsat `portion.part = 10.580`, som er
+  2/3 af 15.870, altså 2/3-reglen. Koden er bevidst urørt, fordi det er en
+  **beregningsændring** og ikke en tekstfejl (punkt 11): hvad dagpengeloven
+  siger om deltidsforsikret efterløn, skal stå i en kilde, ikke gættes. Ét
+  skærmbillede fra borger.dk eller dagpengeloven låser den, og rettelsen får
+  sin egen test i `EfterloensBeregner.test.tsx`.
 - ❓ **Elbilens vægtafgift 2026 (og Sveriges fordonsskatt).** `/bil` skrev «Elbil:
   0 kr (til 2026)» og «Afgifter kommer (2026+)»; `skat.dk` svarer 500. Teksten
   siger nu kun hvad beregneren regner med, og tallet ligger i
@@ -414,6 +452,6 @@ skøn: `getDageTilSlugs()` giver **22 / 19**, og live har 22 / 19.
 - ❓ **Fitnessfradrag, sommerhusudlejning, madvaretabel, grundskyld for Varde og
   Playwright.** Fem mindre kilder, alle noteret med detaljer i
   `docs/plan-arkiv.md` 2/10 14:20. Uden dem bygges intet, jf. punkt 11.
-## Arkiv-notat 3/10 01:50
+## Arkiv-notat 3/10 02:40
 
 Sidste måling før commit: se `docs/plan-arkiv.md` (append, kun grep).

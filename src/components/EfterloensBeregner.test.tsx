@@ -14,7 +14,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import EfterloensBeregner from "./EfterloensBeregner";
 import { LocaleProvider } from "./LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
-import { SKATTEFRI_PRAEMIE_2026 } from "@/lib/efterloen";
+import { EFTERLOEN_MAX_SATS, SKATTEFRI_PRAEMIE_2026 } from "@/lib/efterloen";
 
 vi.mock("@/lib/analytics", () => ({
   trackCalculation: vi.fn(),
@@ -45,6 +45,18 @@ describe("EfterloensBeregner", () => {
     expect(guide.textContent).toContain(`${part} kr. for deltidsforsikrede`);
     expect(guide.textContent).toContain(`${SKATTEFRI_PRAEMIE_2026.timerPerPortion} arbejdstimer`);
     expect(guide.textContent).toContain(`højst optjene ${SKATTEFRI_PRAEMIE_2026.maxPortioner} portioner`);
+  });
+
+  test("den viste månedsats er den, siden og FAQ'en lover", () => {
+    // De to tal lå hårdkodet her i komponenten (`MAX_EFTERLOEN_91 = 20057`) og
+    // endnu en gang i sidens metadata og FAQ. Nu læser begge steder
+    // `EFTERLOEN_MAX_SATS`, så beregnerens resultat og søgeresultatets løfte
+    // ikke kan glide fra hinanden. Standardvalget er fuldtid uden udskydelse.
+    visBeregner();
+    const resultat = screen.getByText("Månedlig efterløn").parentElement!;
+    expect(resultat.textContent).toContain(
+      `${num(EFTERLOEN_MAX_SATS.udenUdskydelse)} kr.`,
+    );
   });
 
   test("timerfeltets forklaring læser de tre tal fra modulet", () => {

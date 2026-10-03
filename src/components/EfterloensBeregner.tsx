@@ -9,15 +9,12 @@ import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { AffiliateBox } from "./AffiliateBox";
 import { adtractionLink } from "@/lib/adtraction";
 import {
+  EFTERLOEN_MAX_SATS,
   efterloenAlder,
   praemieManglerForudsætning,
   praemiePortioner,
   SKATTEFRI_PRAEMIE_2026,
 } from "@/lib/efterloen";
-
-// 2026 satser (kilde: bm.dk, borger.dk)
-const MAX_EFTERLOEN_91 = 20057;  // 91% af max dagpenge (22.041 × 0,91)
-const MAX_EFTERLOEN_100 = 22041; // 100% for 2 års udskydelse
 
 /** Ét års timers i den toårige udskydelse — det beløb timerfeltet er forudfyldt med. */
 const FORUDFYLDT_TIMER =
@@ -107,9 +104,9 @@ export default function EfterloensBeregner() {
     // Calculate monthly amount
     let monthlyAmount: number;
     if (postpone2Years) {
-      monthlyAmount = insurance === 'full' ? MAX_EFTERLOEN_100 : MAX_EFTERLOEN_100 * 0.67;
+      monthlyAmount = insurance === 'full' ? EFTERLOEN_MAX_SATS.medUdskydelse : EFTERLOEN_MAX_SATS.medUdskydelse * 0.67;
     } else {
-      monthlyAmount = insurance === 'full' ? MAX_EFTERLOEN_91 : MAX_EFTERLOEN_91 * 0.67;
+      monthlyAmount = insurance === 'full' ? EFTERLOEN_MAX_SATS.udenUdskydelse : EFTERLOEN_MAX_SATS.udenUdskydelse * 0.67;
     }
 
     // Calculate efterløn period
