@@ -60,10 +60,10 @@ export default async function LaaneberegnerPage() {
 
         <h3>Typer af lån</h3>
         <ul>
-          <li><strong>Forbrugslån:</strong> Til mindre køb, ofte 5-25% i rente</li>
-          <li><strong>Billån:</strong> Til køb af bil, typisk 4-12% i rente</li>
-          <li><strong>Boliglån:</strong> Til køb af bolig, lavest rente (1-5%)</li>
-          <li><strong>Kviklån:</strong> Små hurtige lån, meget høj rente (100%+)</li>
+          <li><strong>Forbrugslån:</strong> Til mindre køb, ofte 5-25 % i rente</li>
+          <li><strong>Billån:</strong> Til køb af bil, typisk 4-12 % i rente</li>
+          <li><strong>Boliglån:</strong> Til køb af bolig, lavest rente (1-5 %)</li>
+          <li><strong>Kviklån:</strong> Små hurtige lån, meget høj rente (100 %+)</li>
         </ul>
 
         <h3>Sådan får du det bedste lån</h3>
@@ -95,9 +95,9 @@ export default async function LaaneberegnerPage() {
 
         <h3>Olika typer av lån</h3>
         <ul>
-          <li><strong>Privatlån:</strong> Till mindre köp, ofta 5-15% i ränta</li>
-          <li><strong>Billån:</strong> Till köp av bil, vanligen 3-8% i ränta</li>
-          <li><strong>Bolån:</strong> Till köp av bostad, lägst ränta (2-5%)</li>
+          <li><strong>Privatlån:</strong> Till mindre köp, ofta 5-15 % i ränta</li>
+          <li><strong>Billån:</strong> Till köp av bil, vanligen 3-8 % i ränta</li>
+          <li><strong>Bolån:</strong> Till köp av bostad, lägst ränta (2-5 %)</li>
           <li><strong>Snabblån:</strong> Små snabba lån, mycket hög ränta</li>
         </ul>
 

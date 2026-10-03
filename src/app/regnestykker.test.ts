@@ -813,3 +813,136 @@ describe("beløb i strengliteraler", () => {
     expect(Object.keys(HAARDKODEDE_BELOB_I_STRENGE).length).toBeGreaterThan(20);
   });
 });
+
+/**
+ * Procenttegnet skrives med mellemrum: «8 %», «12,5 %», «3-8 %». Det er
+ * husets skrivemåde — `/pension` 2/10, `/boernepenge` 3/10 og `/aktieskat` 3/10
+ * fik den samme rettelse — og det er derfor en side, der skriver «8%» i
+ * brødteksten, modsiger sider, der skriver «8 %» i metadata.
+ *
+ * Målt 3/10 06:5x med scanneren nedenfor over de 462 `.ts`/`.tsx` under
+ * `src/app`, `src/components` og `src/lib` (minus testene): **570** forekomster i
+ * 73 filer efter denne diff. Før den var der **598** — de 28 var præcis de fem
+ * filer herunder.
+ * Det er altså ikke én side der skriver forkert — det er 72, så porten måler
+ * korpuset og tvinger den til at blive mindre, i stedet for at liste 569 fejl.
+ *
+ * Før scanneren fandt denne, var `procentAf`-reglen ovenfor blind for den:
+ * den læser «10 procent af 10.000 = 1.000» og «12,5 % af 35.000», altså
+ * regnestykker — ikke den løsne procent i løbende tekst, som er hele fundet.
+ */
+function procentUdenMellemrum(
+  kilde: string,
+  navn: string,
+  undtagelser: string[] = [],
+): string[] {
+  const kind = navn.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const fil = ts.createSourceFile(navn, kilde, ts.ScriptTarget.Latest, true, kind);
+  const fund: string[] = [];
+  const gaa = (node: ts.Node) => {
+    const tekst =
+      ts.isJsxText(node) ||
+      ts.isStringLiteral(node) ||
+      ts.isNoSubstitutionTemplateLiteral(node)
+        ? node.text
+        : "";
+    // CSS-værdier er kode, ikke tekst: `opengraph-image.tsx`s gradient
+    // «#eef2ff 100%» og `apple-icon.tsx`'s «100%» er slutpunkter på en
+    // farvebjærke og må ikke have et mellemrum.
+    const erCss = /#[0-9a-fA-F]{3,8}\b/.test(tekst) || /\b(?:linear-)?gradient\(/.test(tekst);
+    const lig = tekst.replace(/\s+/g, " ").trim();
+    if (tekst && /\d%/.test(tekst) && !erCss && !undtagelser.some((u) => lig.includes(u))) {
+      fund.push(`${navn}: ${tekst.replace(/\s+/g, " ").trim().slice(0, 90)}`);
+    }
+    ts.forEachChild(node, gaa);
+  };
+  gaa(fil);
+  return fund;
+}
+
+/** Alle `.ts`/`.tsx` i de tre kilder, som er tekst brugeren læser. */
+const procentfiler = execSync(
+  "find src/app src/components src/lib \\( -name '*.ts' -o -name '*.tsx' \\) ! -name '*.test.ts' ! -name '*.test.tsx'",
+  { encoding: "utf8", cwd: ROT },
+)
+  .toString()
+  .trim()
+  .split("\n");
+
+/**
+ * Filer der er skrevet om til «8 %» 3/10 — forsiden og navigationen, fordi de
+ * ses på hver eneste side, og de tre sider planen havde målt. Listen er de
+ * nulstillede filer, ikke de 569: en ny fil med «8%» skal gøre porten rød, og
+ * det gør loftet nedenfor.
+ */
+/**
+ * Ordet «30% reglen» er sitets *navn* på tommelfingerreglen: det står i
+ * blogindlæggets SEO-titel (`/blog/30-procent-reglen-husleje`) og i fire
+ * sidelinks, så det er en del af sitets egen terminologi og ikke en løs
+ * procent i løbende tekst. Det er derfor undtaget — og kun der.
+ */
+const PROCENT_UNDTAGELSER: Record<string, string[]> = {
+  "src/app/husleje/page.tsx": ["30% reglen forklaret"],
+};
+
+const PROCENT_UDEN_MELLEMRUM_LOFT = 570;
+
+const PROCENT_MED_MELLEMRUM = [
+  "src/app/feriepenge/page.tsx",
+  "src/app/husleje/page.tsx",
+  "src/app/laaneberegner/page.tsx",
+  "src/lib/categories.ts",
+  "src/lib/home-data.ts",
+];
+
+describe("procentnotation", () => {
+  test("scanneren ser «8%» og lader «8 %» være", () => {
+    const kilde = [
+      "<p>Vi trækker AM-bidrag (8%) først</p>",
+      "const da = { sats: '12,5% af lønnen' };",
+      "const se = `Bolån 5-15% i ränta`;",
+      'const gradient = "linear-gradient(135deg, #eef2ff 100%)";',
+      'const ok = "Vi trækker AM-bidrag (8 %) først";',
+      'const interpoleret = `Rente ${pct(rate)} er høj`;',
+    ].join("\n");
+    const fund = procentUdenMellemrum(kilde, "notation.tsx");
+    // Mutation: uden `erTekst`-grenen så scanneren ingen af strengene; uden
+    // `erCss` ville den tælle gradientens slutpunkt som tekst.
+    expect(fund).toHaveLength(3);
+    expect(fund[0]).toContain("8%");
+    expect(fund[1]).toContain("12,5%");
+    expect(fund[2]).toContain("5-15%");
+    expect(fund.some((f) => f.includes("100%"))).toBe(false);
+    // En interpolation er kode: dens procent skal komme fra en beregning.
+    expect(procentUdenMellemrum("const x = `Rente ${pct(r)} er høj`;", "i.ts")).toEqual([]);
+  });
+
+  test("forside, navigation og de tre omskrevne sider skriver «8 %»", () => {
+    // Mutation: sæt «8%» tilbage i en af filerne, porten skal blive rød.
+    const fund = procentfiler.flatMap((fil) =>
+      procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
+    );
+    const prFil = new Map<string, number>();
+    for (const f of fund) {
+      const fil = f.slice(0, f.indexOf(": "));
+      prFil.set(fil, (prFil.get(fil) ?? 0) + 1);
+    }
+    const mangler = PROCENT_MED_MELLEMRUM.filter((fil) => (prFil.get(fil) ?? 0) > 0);
+    expect(mangler).toEqual([]);
+    // Listen skal dække hele korpuset, ikke to håndplukkede filer — ellers ville
+    // porten være grøn, fordi den bare ikke kigger på resten.
+    expect(procentfiler.length).toBeGreaterThan(400);
+    for (const fil of PROCENT_MED_MELLEMRUM) expect(procentfiler).toContain(fil);
+  });
+
+  test("korpuset har ikke fået flere procenttal uden mellemrum", () => {
+    // Loftet er målt, ikke gættet: 598 → 570, da de 28 i de fem filer blev
+    // rettet. 570 er *med* den ene dokumenterede undtagelse («30% reglen»). Det må gerne falde; det må ikke stige i det stille, fordi så
+    // kommer den nye skrivemåde ind i en ny side ubemærket.
+    const fund = procentfiler.flatMap((fil) =>
+      procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
+    );
+    expect(fund.length).toBeLessThanOrEqual(PROCENT_UDEN_MELLEMRUM_LOFT);
+    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(570);
+  });
+});

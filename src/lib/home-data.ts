@@ -106,7 +106,7 @@ const daPageData: HomePageData = {
     whyUse: "Hvorfor bruge MinBeregner.dk?",
     features: {
       free: {
-        title: "100% Gratis",
+        title: "100 % Gratis",
         description:
           "Alle beregnere er gratis at bruge. Ingen skjulte gebyrer eller premium-funktioner.",
       },
@@ -126,7 +126,7 @@ const daPageData: HomePageData = {
     {
       question: "Er beregnerne gratis at bruge?",
       answer:
-        "Ja, alle beregnere på MinBeregner.dk er 100% gratis. Vi kræver ingen tilmelding eller betaling.",
+        "Ja, alle beregnere på MinBeregner.dk er 100 % gratis. Vi kræver ingen tilmelding eller betaling.",
     },
     {
       question: "Gemmer I mine data?",
@@ -181,7 +181,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Løn efter skat", description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension", href: "/loen-efter-skat", popular: true, category: "Økonomi" },
   // Non-popular
   { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", popular: false, category: "Lån" },
-  { title: "Momsberegner", description: "Tillæg eller fratræk 25% moms nemt og hurtigt", href: "/moms", popular: false, category: "Økonomi" },
+  { title: "Momsberegner", description: "Tillæg eller fratræk 25 % moms nemt og hurtigt", href: "/moms", popular: false, category: "Økonomi" },
   { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", popular: false, category: "Økonomi" },
   { title: "Procentberegner", description: "Beregn procent af et tal, stigning, fald og mere", href: "/procent", popular: false, category: "Matematik" },
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", popular: false, category: "Økonomi" },
@@ -309,7 +309,7 @@ const noPageData: HomePageData = {
     whyUse: "Hvorfor bruke Beregner.no?",
     features: {
       free: {
-        title: "100% Gratis",
+        title: "100 % Gratis",
         description:
           "Alle kalkulatorer er gratis å bruke. Ingen skjulte gebyrer eller premium-funksjoner.",
       },
@@ -329,7 +329,7 @@ const noPageData: HomePageData = {
     {
       question: "Er kalkulatorene gratis å bruke?",
       answer:
-        "Ja, alle kalkulatorer på Beregner.no er 100% gratis. Vi krever ingen registrering eller betaling.",
+        "Ja, alle kalkulatorer på Beregner.no er 100 % gratis. Vi krever ingen registrering eller betaling.",
     },
     {
       question: "Lagrer dere mine data?",
@@ -362,7 +362,7 @@ const noPageData: HomePageData = {
 const noCalculators: HomeCalculator[] = [
   // Popular
   { title: "BMI Kalkulator for voksne", description: "Beregn BMI for voksne ut fra vekt og høyde", href: "/bmi", popular: true, category: "Helse" },
-  { title: "Momskalkulator (MVA)", description: "Legg til eller trekk fra 25% moms enkelt og raskt", href: "/moms", popular: true, category: "Økonomi" },
+  { title: "Momskalkulator (MVA)", description: "Legg til eller trekk fra 25 % moms enkelt og raskt", href: "/moms", popular: true, category: "Økonomi" },
   { title: "Lånekalkulator", description: "Beregn månedlig betaling, sammenlign lån og se nedbetalingsplan", href: "/laaneberegner", popular: true, category: "Lån" },
   { title: "Valutakalkulator", description: "Regn om mellom NOK, EUR, USD og andre valutaer", href: "/valuta", popular: true, category: "Økonomi" },
   { title: "Prosentkalkulator", description: "Beregn prosent av et tall, økning, nedgang og mer", href: "/procent", popular: true, category: "Matematikk" },
@@ -435,7 +435,7 @@ const sePageData: HomePageData = {
     whyUse: "Varför använda Beräknare.se?",
     features: {
       free: {
-        title: "100% Gratis",
+        title: "100 % Gratis",
         description:
           "Alla kalkylatorer är gratis att använda. Inga dolda avgifter eller premiumfunktioner.",
       },
@@ -455,7 +455,7 @@ const sePageData: HomePageData = {
     {
       question: "Är kalkylatorerna gratis att använda?",
       answer:
-        "Ja, alla kalkylatorer på Beräknare.se är 100% gratis. Vi kräver ingen registrering eller betalning.",
+        "Ja, alla kalkylatorer på Beräknare.se är 100 % gratis. Vi kräver ingen registrering eller betalning.",
     },
     {
       question: "Sparar ni mina uppgifter?",
@@ -495,7 +495,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Lön efter skatt", description: "Beräkna din nettolön efter svensk skatt", href: "/lon-efter-skatt", popular: true, category: "Ekonomi" },
   // Non-popular
   { title: "BMI Kalkylator för vuxna", description: "Beräkna BMI för vuxna utifrån vikt och längd", href: "/bmi", popular: false, category: "Hälsa" },
-  { title: "Momskalkylator", description: "Lägg till eller dra av 25% moms enkelt och snabbt", href: "/moms", popular: false, category: "Ekonomi" },
+  { title: "Momskalkylator", description: "Lägg till eller dra av 25 % moms enkelt och snabbt", href: "/moms", popular: false, category: "Ekonomi" },
   { title: "Lånekalkylator", description: "Beräkna månadskostnad, jämför lån och se amorteringsplan", href: "/laaneberegner", popular: false, category: "Lån" },
   { title: "Valutakalkylator", description: "Räkna om mellan SEK, EUR, USD och andra valutor", href: "/valuta", popular: false, category: "Ekonomi" },
   { title: "Procentkalkylator", description: "Beräkna procent av ett tal, ökning, minskning och mer", href: "/procent", popular: false, category: "Matematik" },

@@ -42,14 +42,14 @@ export default async function FeriepengePage() {
         <h2>Sådan beregnes feriepenge i 2026</h2>
         <p>
           I Danmark optjener du{" "}
-          <strong>12,5% af din ferieberettigede løn</strong> i feriepenge. Denne sats er
+          <strong>12,5 % af din ferieberettigede løn</strong> i feriepenge. Denne sats er
           fastsat i <strong>ferieloven</strong> og gælder uændret i 2026. Det svarer til <strong>2,08 feriedage
           per måned</strong> eller <strong>25 dage om året</strong> (5 ugers ferie).
         </p>
         <p>
-          Ved udbetaling trækkes først <strong>AM-bidrag (8%)</strong>, derefter <strong>A-skat</strong> efter dit skattekort.
+          Ved udbetaling trækkes først <strong>AM-bidrag (8 %)</strong>, derefter <strong>A-skat</strong> efter dit skattekort.
           Eksempel: Med en månedsløn på <strong>35.000 kr</strong> optjener du <strong>52.500 kr</strong> i feriepenge om året
-          (35.000 &times; 12 &times; 12,5%). Det svarer til ca. <strong>2.100 kr brutto per feriedag</strong>.
+          (35.000 &times; 12 &times; 12,5 %). Det svarer til ca. <strong>2.100 kr brutto per feriedag</strong>.
         </p>
 
         <h3>Ferieåret 2025/2026</h3>
@@ -93,8 +93,8 @@ export default async function FeriepengePage() {
                 <td>Månedslønnede / funktionærer</td>
               </tr>
               <tr>
-                <td>12,5% af lønnen opspares</td>
-                <td>Normal løn + ferietillæg (1%)</td>
+                <td>12,5 % af lønnen opspares</td>
+                <td>Normal løn + ferietillæg (1 %)</td>
               </tr>
               <tr>
                 <td>Udbetales via FerieKonto</td>
@@ -107,7 +107,7 @@ export default async function FeriepengePage() {
         <h2>Skat af feriepenge</h2>
         <p>Feriepenge beskattes som almindelig indkomst:</p>
         <ol>
-          <li>AM-bidrag (8%) trækkes først</li>
+          <li>AM-bidrag (8 %) trækkes først</li>
           <li>Derefter beregnes A-skat efter dit skattekort</li>
           <li>Feriepengene indberettes automatisk til Skattestyrelsen</li>
         </ol>

@@ -61,7 +61,12 @@ describe("husleje side — nettoprisindeks", () => {
   test("beholder den eksisterende 30%-regel-tekst urørt", async () => {
     const html = renderToStaticMarkup(await HuslejePage());
     const tekst = norm(html.replace(/<[^>]*>/g, " ").replace(/<!-- -->/g, ""));
+    // 3/10: «30% reglen» er sitets *navn* på regelen — blogindlæggets SEO-titel
+    // og fire sidelinks skriver det samme ord — så det er undtaget fra
+    // procent-portens mellemrumskrav. Brødtekstens tal er derimod rettet.
     expect(tekst).toContain("30% reglen forklaret");
+    expect(tekst).toContain("30 % af din nettoindkomst");
+    expect(tekst).toContain("Nogle kilder siger 33 %");
     expect(tekst).toContain("Sammenlign husleje pr. m²");
   });
 

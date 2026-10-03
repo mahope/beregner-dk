@@ -23,7 +23,7 @@ const kr = (value: number) => value.toLocaleString("da-DK");
 
 export const beregnere: BeregnerItem[] = [
   { title: "Løn efter skat", description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension", href: "/loen-efter-skat", category: "Økonomi" },
-  { title: "Momsberegner", description: "Tillæg eller fratræk 25% moms nemt og hurtigt", href: "/moms", category: "Økonomi" },
+  { title: "Momsberegner", description: "Tillæg eller fratræk 25 % moms nemt og hurtigt", href: "/moms", category: "Økonomi" },
   { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", category: "Økonomi" },
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", category: "Økonomi" },
   { title: "Renteprognose", description: "Se hvad et boliglån koster om 5, 10 og 30 år", href: "/renteprognose", category: "Økonomi" },
@@ -166,11 +166,11 @@ export const categories: CategoryData[] = [
       },
       {
         question: "Hvad koster et billån?",
-        answer: "Et billån har typisk en rente på 3-8% afhængig af udbetaling, løbetid og din kreditværdighed. Brug vores billånberegner til at se din præcise månedlige ydelse.",
+        answer: "Et billån har typisk en rente på 3-8 % afhængig af udbetaling, løbetid og din kreditværdighed. Brug vores billånberegner til at se din præcise månedlige ydelse.",
       },
       {
         question: "Er forbrugslån dyrt?",
-        answer: "Forbrugslån har typisk højere renter end boliglån og billån. ÅOP kan ligge fra 5% til over 20%. Brug beregneren til at se de reelle omkostninger før du optager et lån.",
+        answer: "Forbrugslån har typisk højere renter end boliglån og billån. ÅOP kan ligge fra 5 % til over 20 %. Brug beregneren til at se de reelle omkostninger før du optager et lån.",
       },
     ],
   },
@@ -284,7 +284,7 @@ export const categories: CategoryData[] = [
     faqItems: [
       {
         question: "Hvordan beregner jeg procent?",
-        answer: "Vores procentberegner kan beregne procent af et tal, procentvis stigning/fald, og hvad en procentsats svarer til. Fx: 25% af 400 = 100.",
+        answer: "Vores procentberegner kan beregne procent af et tal, procentvis stigning/fald, og hvad en procentsats svarer til. Fx: 25 % af 400 = 100.",
       },
       {
         question: "Hvordan beregner jeg areal i kvadratmeter?",

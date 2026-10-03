@@ -26924,3 +26924,53 @@ beskrivelser modsagde hinanden. **Porten er adfærdsbaseret:** den dømmer
 *hvert* beløb i metadata og svar mod de tal modulerne må skrive. Mutation
 («20.057» → håndskrevet «19.500» i satssvaret) → **2 røde** af 6. **7 nye
 tests** (3898 → 3905). ⛔ Se nyt ❓ om deltidsfaktoren 0,67 nedenfor.
+
+---
+
+## 3/10 06:45 — `procent-med-mellemrum` (procentnotation, slice 1)
+
+**Målingen i planen var forkert.** Punkt 2 under «Målt 3/10 05:30» sagde «7
+steder», fund med `grep -E '[0-9]+%'` på tre filer. Målt med en AST-scanner
+(`ts.isJsxText` + `isStringLiteral` + `isNoSubstitutionTemplateLiteral`, minus
+CSS-strenge) over **462** `.ts`/`.tsx` i `src/app`, `src/components` og `src/lib`
+var der **598** forekomster af «8%» i **73 filer** — 24 `page.tsx` og 25
+beregnere. 21 af filerne *blander* begge skrivemåder i samme fil, altså
+modsigelser *inden i den samme side*.
+
+**Slice 1 rettede 28** i de fem filer med højest synlighed:
+`src/lib/home-data.ts` (forsiden + footeren i da/se/no — «100 % Gratis»,
+«100 % gratis», «25 % moms» ×3), `src/lib/categories.ts` (navigationens
+korttekster og to FAQ-svar), `src/app/feriepenge/page.tsx` (6),
+`src/app/laaneberegner/page.tsx` (7, heraf 3 svenske) og
+`src/app/husleje/page.tsx` (2).
+
+**Planens anden påstand var også forkert:** «svensk notation uden mellemrum er
+korrekt». Målt: `src/lib/moms-eu.ts` skriver «Böcker, tidningar och tidskrifter
+är 0 %» **med** mellemrum, og 97 svenske strenge i `page-data.ts` har 15 med
+og 2 uden. Svensk er altså husets egen skrivemåde med mellemrum, og de tre
+svenske linjer i `/laaneberegner` blev rettet med de danske.
+
+**Undtagelsen er ét ord, eksplicit listet:** «30% reglen» er sitets *navn* på
+tommelfingerreglen — det står i `/blog/30-procent-reglen-husleje`s SEO-titel og
+i fire sidelinks — så porten har `PROCENT_UNDTAGELSER` med præcis den sætning.
+Forsøget på også at rette `/husleje`s `<h3>` til «30 %-reglen» blev **taget
+tilbage** i samme time, fordi det ville gøre netop denne side uenig med
+blogindlæggets titel.
+
+**Porten.** Ny `procentUdenMellemrum()` i `regnestykker.test.ts` med tre tests:
+scanneren ser «8%» og lader «8 %» være (3 fund på en prøve, gradientens
+`#eef2ff 100%` og interpolationer springes over), de nulstillede filer skal være
+**0**, og korpuset må ikke stige over `PROCENT_UDEN_MELLEMRUM_LOFT = 570`.
+Den er bevidst **ikke** en liste på 570 — kun de fem nulstillede filer er
+navngivet, så resten tages som slices (F5c). `procentAf`-reglen ovenfor kunne
+ikke se nogen af fundene: den læser «10 procent af 10.000 = 1.000», altså
+regnestykker, ikke den løse procent i løbende tekst.
+
+**Mutation målt:** «8 %» tilbage i én feriepenge-linje → **2 røde** af de 3 nye
+tests. `husleje/page.test.tsx`s test «beholder den eksisterende 30%-regel-tekst
+urørt» låste «30% reglen forklaret» og dømmer nu de to rettede brødtekststal
+(«30 % af din nettoindkomst», «Nogle kilder siger 33 %») i stedet.
+
+**Gate:** lint · typecheck · `TZ=UTC npm run test` (**3984** i 251 filer) ·
+build — alle grønne 3/10 06:45. 3 nye tests (3981 → 3984). Punkt 13: 0
+forekomster af `$1` i diffen.

@@ -1,18 +1,15 @@
-STATUS: 3/10 04:45. CI grøn ved start (`37094498538`), ingen åbne PR'er
+STATUS: 3/10 06:45. CI grøn ved start (`37094498538`), ingen åbne PR'er
       (PR-TJEK: 2026-10-03). Sentry: ingen uløste fejl 14 dage, SDK'en er
       sat op. **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run
-      test` · `npm run build` — **grøn 3/10 04:44** (alle exit 0, **3981**
+      test` · `npm run build` — **grøn 3/10 06:45** (alle exit 0, **3984**
       tests i 251 filer).
-      **Denne iteration: review-fund MIDDEL på `/topskat` lukket** — kappen mod
-      «skatteloftet» fjernet, loftet afledt af `SATSER_2026`, formlen flyttet i
-      modulet. Målt: 3.000.000 kr. brutto gav **60,1 %** mod de faktiske
-      **61,1 %**. Se `docs/plan-arkiv.md`. **Næste iteration:** de 7 danske
-      procenttal i JSX-tekst (punkt 2 under «Målt 3/10 05:30») — så `/pension`
-      og `/boernepenge` ikke modsiges af `/feriepenge`, `/laaneberegner` og
-      `/husleje`. Derefter en ny målt feature.
-      BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden). Planen var
-      39.996 bytes og er skåret til **35.666** ved at flytte fire lukkede
-      blokke til `docs/plan-arkiv.md`.
+      **Denne iteration: procentnotationen er ensrettet og målt** — 28 «8%» er
+      nu «8 %» på forsiden, i navigationen og på feriepenge/laaneberegner/husleje,
+      og en ny port i `regnestykker.test.ts` tæller hele korpuset i stedet for
+      tre filer. Se `docs/plan-arkiv.md`. **Næste iteration:** fortsæt
+      procent-sweepet ned fra `page-data.ts` (76) → `/procent` (26) →
+      `/boliglaan` (26), så «8 %» bliver husets skrivemåde hele vejen.
+      BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -76,6 +73,13 @@ ved serverstart. Nøglefilen lå på `/api/indexnow-key/…` og er rettet 2/10
 
 **F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
 dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
+
+**F5c. [~] Procentnotationen «8 %» — 598 fund målt, 28 rettet 3/10.**
+*Hvad:* de største resterende er `page-data.ts` 76 (metadata + FAQ på tværs af
+alle slugs), `/procent` 26, `/boliglaan` 26 og blogindlægget om 30%-reglen 25.
+*Accept:* loftet i `regnestykker.test.ts` (`PROCENT_UDEN_MELLEMRUM_LOFT`) må
+kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 (3/10).
+Se punkt 2 under «Målt 3/10 05:30».
 
 **F9. [ ] `locale === "se" ? "se" : "da"` — 13 steder med dansk på
 norske domæner.** *Hvad:* mønstret er målt med grep efter `ceo/norsk-pace-side`
@@ -324,15 +328,18 @@ skrive. Rækkefølgen herunder er **målt voksende**, ikke gættet.
    **MÅL:** 0 (ny URL) → Plausible 17/10; GSC 14 dage: de fem målte søgninger.
    Datagrund: autocomplete 3/10 + `/dato` 1.119 besøgende/28d og 136.071
    GSC-visninger. ⛔ ikke: feriedatoer (❓ nedenfor).
-2. **Dansk procentnotation i JSX-tekst — 7 steder.** Målt med grep efter
-   `\d+%`: `feriepenge/page.tsx` «8%» ×2, «12,5%», «1%»; `laaneberegner/page.tsx`
-   «1-5%», «100%+»; `husleje/page.tsx` «33%». Dansk skriver «8 %» med mellemrum,
-   og `/pension` 2/10 + `/boernepenge` 3/10 netop fik den samme rettelse — så
-   siderne modsiger nu hinanden. *Accept:* de 7 steder bliver «8 %» / «12,5 %» /
-   «1 %» / «1-5 %» / «100 %+» / «33 %», og `regnestykker.test.ts`s
-   `procentAf`-port dømmer dem (den ser dem ikke nu — portens blinde spot er
-   præcis den her: JSX-tekst). Svensknotationen **uden** mellemrum er korrekt og
-   skal ikke røres (`/bolan`, `/laaneberegner`s svenske linjer).
+2. ~~**Dansk procentnotation i JSX-tekst.**~~ — ✅ **første slice 3/10 06:45**,
+   se `docs/plan-arkiv.md`. *Målingen i denne plan var forkert:* de «7 steder»
+   var fund med `grep` på tre filer. Målt med en AST-scanner over **462**
+   `.ts`/`.tsx` i `src/app`, `src/components` og `src/lib` var der **598**
+   forekomster af «8%» i **73 filer** — altså 24 sider og 25 beregnere, ikke 3
+   sider. Slice 1 rettede 28 (forside + navigation + feriepenge +
+   laaneberegner + husleje) og satte et **loft på 570** i
+   `regnestykker.test.ts`, så resten kan tages som slices. **Planens påstand om
+   svensk notation var også forkert:** `moms-eu.ts` og 97 svenske strenge i
+   `page-data.ts` skriver «0 %» **med** mellemrum, så svensk er rettet samme
+   vej. Undtagelsen er «30% reglen» — sitets *navn* på regelen (SEO-titel +
+   fire sidelinks), listet eksplicit i porten.
 3. **F5b-køen er tom i praksis.** De 3 fund på `/flyttebudget` er
    **markedsanslag uden kilde** (15.000-50.000 kr, 25.000-50.000 kr,
    5.000-15.000 kr for flyttemand) — at flytte dem til et modul ville gøre en
@@ -340,6 +347,8 @@ skrive. Rækkefølgen herunder er **målt voksende**, ikke gættet.
    (lovgrænser). *Accept:* F5b lukkes og næste opgave er altid en feature.
 
 `VERIFICÉR DEPLOY: /dage-i-aaret + /dagar-i-aret (nye sider med tolv-måneders-tabel: `minberegner.dk/dage-i-aaret` skal have `<title>` «Hvor mange dage er der på et år? Dage i alle 12 måneder», **1** `<h1>`, **12** månedsrækker + **1** summeringsrække i tabellen, og **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange dage er der på et år?», «Hvor mange dage er der i augusti?» og «Hvor mange dage er der i juli?» — svaret på augusti skal være «31 dage … 21 hverdage og 10 weekenddage» og på juli «31 dage … 23 hverdage og 8 weekenddage»; summeringen skal være 365 dage / 251 hverdage / 104 weekend; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar» og månedsnavnet «augusti», altså **0** «august»; `minberegner.dk/dagar-i-aret` + `beraknare.se/dage-i-aaret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; **intet** `NaN`) ceo/dage-i-aaret 3/10 06:20`
+
+`VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
 
 ## Åbne VERIFICÉR DEPLOY-noter
 

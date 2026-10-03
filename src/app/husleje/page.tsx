@@ -71,7 +71,7 @@ export default async function HuslejePage() {
         <h3>30% reglen forklaret</h3>
         <p>
           Den mest udbredte tommelfingerregel siger, at din husleje (inkl. forbrugsudgifter)
-          ikke bør overstige <strong>30% af din nettoindkomst</strong>. Nogle kilder siger 33%, men 30%
+          ikke bør overstige <strong>30 % af din nettoindkomst</strong>. Nogle kilder siger 33 %, men 30 %
           giver mere <strong>buffer til uforudsete udgifter</strong>.
         </p>
         <p>
