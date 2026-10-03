@@ -1,26 +1,26 @@
-STATUS: 3/10 13:0x. **CI grøn** ved start (`37116710590`), ingen åbne PR'er
-       (PR-TJEK 3/10), ingen uløste Sentry-fejl. CEO-køens otte fund er alle
-       rettet i koden. Planen er 36,1 KB.
+STATUS: 3/10 13:4x. **CI grøn** ved start (`37118390521`), ingen åbne PR'er
+       (PR-TJEK 3/10), ingen uløste Sentry-fejl. **Begge åbne review-fund er
+       nu rettet** — de lå begge i SU-værktøjet.
        **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-       `npm run build` — **grøn 13:0x** (exit 0, **4057** tests i 257 filer,
-       42,4 s, build exit 0).
-       **Denne iteration: `/dato`s nedtællingsliste står nærmeste dato først.**
-       Målt 3/10 12:47 på den live side: listen lå i `getDageTilEvents`-rækkefølge,
-       så Halloween (28 dage) var række 13, «1. december» (59 dage) række 6, og
-       «fra påske til pinse» (169) lå over «påskedag» (176) — ikke engang sorteret
-       efter tallet. Sidens to største søgninger er «hvor mange dage er der til 1
-       december» (1.219v, pos. 5) og «… til den 24 december» (1.001v, pos. 5), så
-       læseren rullede forbi tolv andre datoer for sit eget svar. Rækkerne kommer
-       nu fra `getDageTilHubRækker` — samme funktion som hubben og `/dage-til/*`,
-       så tallene kan ikke glide fra deres eget regnestykke. `<h2>` er nu «Hvor
-       mange dage er der til …?» / «Hur många dagar är det till …?», altså målens
-       spørgsmål og hubbens egen `<h1>`, frem for «Datoer folk oftest tæller ned
-       til». **Port:** læser rækkerne i den rækkefølge de står i HTML'en, i da og
-       se, og dømmer at tallene er de samme som `getDageTilAnswer` giver **og**
-       stiger. Mutation med omvendt rækkefølge giver rød med alle 23 tal.
-       **Deploy:** 12:30-vinduet rullede (mod 12:31 havde det ikke). To noter
-       lukket på indhold: `ceo/su-indtaegtsgraense` og `ceo/rettelse-tre-reviewfund`
-       (se `docs/plan-arkiv.md`). HTTP 200 er aldrig brugt som bevis.
+       `npm run build` — **grøn 13:3x** (exit 0, **4063** tests i 257 filer,
+       64,7 s, build exit 0).
+       **Denne iteration: «Før AM-bidrag pr. måned» lå under sit eget tal.**
+       Fund (HØJ): med 12 SU-måneder + 2 børn under 18 sat
+       `maanedGrænse = maanedMedSu`, så børnene faldt ud af måneden. Målt i den
+       renderede komponent før rettelsen: `Det svarer til pr. måned 26.437 kr.`
+       og `Før AM-bidrag pr. måned 22.553 kr.` lige under den — altså **under**
+       det tal, studenten ikke må gå over — og «hele årets grænse er det tal
+       gang 12» oven i en boks, der viser «Tillæg for børn under 18 +68.258
+       kr.». Nu er måneden hele året delt på 12, altid og uden undtagelse, og
+       `maanedGrænse` er væk: ét tal, ét sted, så de to rækker over hinanden
+       ikke kan glide fra hinanden igen. Sætningen er nu tregrenet, så
+       påstanden om satsen × 12 kun siges, når den gælder.
+       **Port:** lib-testen regner forventningen af `SU_2026` (22.553 mod 28.736
+       — rød før rettelsen), dømmer nedrundingen for 6 input-par og at de to
+       rækker er den samme måned; komponent-testen læser den synlige tekst.
+       Fund (MIDDEL): den eneste påstand om `maanedBrutto` dømte funktionen mod
+       sig selv gennem `maanedGrænse` og kunne derfor aldrig blive rød — den er
+       væk og erstattet af modregnestykkerne ovenfor.
        BRANCH-TJEK: ikke kørt (sidste 2/10).
 
 ## Fase 3 — trafik-drevet
@@ -314,8 +314,9 @@ med komma); `minberegner.dk/laaneberegner` skal have «Lån … er til 5 % - yde
 noters fulde tekst ligger i `docs/plan-arkiv.md`). HTTP 200 er aldrig brugt
 som bevis — kun curl på indhold.
 
-**10 åbne.** `ceo/procent-punkt-sweep-side-data` 08:20 er **en fejl, ikke et
+**12 åbne.** `ceo/procent-punkt-sweep-side-data` 08:20 er **en fejl, ikke et
 deploy-problem** (⛔ nedad). Resten dømmes på indhold efter 17:30:
+`ceo/dato-dage-til-rækker` 13:0x · `ceo/su-indtaegtsgraense-maaned` 13:4x ·
 `ceo/procent-punkt-sweeps` 08:00 · `ceo/procent-sweep-pension-boliglaan` 10:1x ·
 `ceo/boliglaan-procent` 10:5x (❓, umulige acceptkriterier) ·
 `ceo/procent-forside-feriepenge` 09:4x · `ceo/procent-interpolationer` 11:2x ·
@@ -345,6 +346,17 @@ fejl i deployet. Den bliver F5g.
 pinse» (169 dage) skal stå **før** «påskedag» (176 dage); alle 23 rækker skal stå
 med uændrede tal. `beraknare.se/dato` skal have «Hur många dagar är det till …?»
 og samme rækkefølge på svensk; **intet** `NaN`) ceo/dato-dage-til-rækker 3/10 13:0x`
+
+`VERIFICÉR DEPLOY: SU-værktøjets månedsgrænse på /su (hele HTML'en på
+`minberegner.dk/su` skal have «Du må højst tjene 248.988 kr.», «Det svarer til
+pr. måned 20.749 kr.», «Før AM-bidrag pr. måned 22.553 kr.»,
+«Før AM-bidrag for hele året 270.639 kr.» og «Alle 12 måneder bruger den samme
+sats på 20.749 kr., så hele årets grænse er det tal gang 12», **0** «hvert barn
+under 18 lægger», **0** «derfor er månedsgennemsnittet større end satsen» — det er
+udbyderens standardvalg (12 måneder, 0 børn), så de to sidste skal **ikke** stå;
+**0** `\d%`; **intet** `NaN`. **Bemærk:** børn-fasen er klient-state og kan
+ikke ses i HTML'en, så den er kun dømt i testene — deploy-noten dømmer, at siden
+ikke er brudt) ceo/su-indtaegtsgraense-maaned 3/10 13:4x`
 
 ## ❓ Til Mads
 

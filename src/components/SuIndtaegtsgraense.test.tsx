@@ -106,6 +106,27 @@ describe("SU-indtægtsgrænsen: valgene ændrer svaret", () => {
     expect(tekst(c)).toContain(da(12 * 20749 + 2 * 34129));
   });
 
+  test("de to månedsrækker er den samme måned, også når børnene hæver året", () => {
+    const c = renderVærktøj();
+    fireEvent.change(screen.getByLabelText("Børn under 18 år"), { target: { value: "2" } });
+    // 317.246 / 12 = 26.437,17 efter AM -> 28.736 før AM. Den gamle kode skrev
+    // satsen alene (20.749 -> 22.553) og fik den til at stå UNDER «Det svarer
+    // til pr. måned» lige over den — altså under det tal, studenten ikke må gå over.
+    expect(tekst(c)).toContain(`Det svarer til pr. måned${da(317246 / 12)}`);
+    expect(tekst(c)).toContain(`Før AM-bidrag pr. måned${da(Math.floor(317246 / 12 / 0.92))}`);
+    expect(tekst(c)).not.toContain(`Før AM-bidrag pr. måned${da(22553)}`);
+  });
+
+  test("siger ikke at hele året er satsen × 12, når børnene hæver årsgrænsen", () => {
+    const c = renderVærktøj();
+    fireEvent.change(screen.getByLabelText("Børn under 18 år"), { target: { value: "2" } });
+    // Boksen lige over sig viser «Tillæg for børn under 18 +68.258 kr.», så
+    // påstanden «hele årets grænse er det tal gang 12» ville modsige den.
+    expect(tekst(c)).toContain("Alle 12 måneder bruger den samme sats");
+    expect(tekst(c)).not.toContain("hele årets grænse er det tal gang 12");
+    expect(tekst(c)).toContain(`hvert barn under 18 lægger ${da(34129)} til året`);
+  });
+
   test("handicaptillæg sænker SU-månederne til det nedsatte fribeløb", () => {
     const c = renderVærktøj();
     fireEvent.click(screen.getByLabelText(/Jeg har handicaptillæg/));

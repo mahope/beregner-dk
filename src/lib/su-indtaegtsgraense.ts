@@ -20,8 +20,8 @@
  *   threshold on the year's income as a whole: one big month and one empty
  *   month can cancel out. That is su.dk's own wording ("det betyder ikke
  *   noget, at du en måned tjener et meget stort beløb og den næste måned
- *   slet ikke tjener noget"), so {@link maanedGrænse} is advisory, not a
- *   rule the student is measured against.
+ *   slet ikke tjener noget"), so {@link aarsGennemsnitPrMaaned} is advisory,
+ *   not a rule the student is measured against.
  * - The rates are **before tax, after AM-bidrag**. Every figure here is
  *   therefore an *after-AM* number, and the one conversion this module offers
  *   is back to a gross wage a student can recognise from a payslip.
@@ -68,15 +68,9 @@ export interface IndtaegtsgraenseResult {
   /** `aarsfribeloeb` spread over 12 — what an even monthly income may be. */
   aarsGennemsnitPrMaaned: number;
   /**
-   * The same year split as the rate each month actually uses. Advisory:
-   * su.dk measures the year as a whole, so a month over this is not by itself
-   * a problem as long as the year stays under {@link aarsfribeloeb}.
-   */
-  maanedGrænse: number;
-  /**
-   * The gross wage that leaves {@link maanedGrænse} after AM-bidrag, so the
-   * student can compare it with the figure on a payslip. Rounded down to a
-   * whole krone, so the number never promises a krone too much.
+   * The gross wage that leaves {@link aarsGennemsnitPrMaaned} after AM-bidrag,
+   * so the student can compare it with the figure on a payslip. Rounded down to
+   * a whole krone, so the number never promises a krone too much.
    */
   maanedBrutto: number;
   /** {@link maanedBrutto} over 12 months — the gross figure for the year. */
@@ -160,7 +154,11 @@ export function beregnIndtaegtsgraense(value: unknown): IndtaegtsgraenseResult |
   const barnTillaeg = barnUnder18Tillaeg();
   const aarsfribeloeb =
     maanedMedSu * suMonths + maanedUdenSu * maanederUdenSu + childUnder18 * barnTillaeg;
-  const maanedGrænse = maanederUdenSu > 0 ? aarsfribeloeb / 12 : maanedMedSu;
+  // The month is the whole year — SU months, months without SU and every child
+  // under 18 — divided by 12, and never the SU rate on its own. A month that
+  // ignored the children would print a *lower* gross figure than the
+  // "Det svarer til pr. måned" row directly above it, i.e. less than the
+  // student is actually allowed to earn.
   const aarsGennemsnitPrMaaned = aarsfribeloeb / 12;
 
   return {
@@ -168,8 +166,7 @@ export function beregnIndtaegtsgraense(value: unknown): IndtaegtsgraenseResult |
     maanedUdenSu,
     aarsfribeloeb,
     aarsGennemsnitPrMaaned,
-    maanedGrænse,
-    maanedBrutto: bruttoForEfterAM(maanedGrænse),
+    maanedBrutto: bruttoForEfterAM(aarsGennemsnitPrMaaned),
     aarsBrutto: bruttoForEfterAM(aarsfribeloeb),
     barnUnder18: barnTillaeg,
     maanederUdenSu,

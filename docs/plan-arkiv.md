@@ -27857,3 +27857,30 @@ om i planen.
 og «5,05 % p.a.», men de er interpolationer fra brugerens felter, så de ændrer
 sig med standardværdierne. Målt 3/10: «Typisk 0,5-1,5 %», «Over 80 % belåning»
 og «ca. 5,0-7,0 %» står, og `/boliglaan` har 0 `\d%`.
+
+## Arkiveret STATUS 3/10 13:0x (`/dato`s nedtællingsliste)
+
+STATUS: 3/10 13:0x. **CI grøn** ved start (`37116710590`), ingen åbne PR'er
+       (PR-TJEK 3/10), ingen uløste Sentry-fejl. CEO-køens otte fund er alle
+       rettet i koden. Planen er 36,1 KB.
+       **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+       `npm run build` — **grøn 13:0x** (exit 0, **4057** tests i 257 filer,
+       42,4 s, build exit 0).
+       **Denne iteration: `/dato`s nedtællingsliste står nærmeste dato først.**
+       Målt 3/10 12:47 på den live side: listen lå i `getDageTilEvents`-rækkefølge,
+       så Halloween (28 dage) var række 13, «1. december» (59 dage) række 6, og
+       «fra påske til pinse» (169) lå over «påskedag» (176) — ikke engang sorteret
+       efter tallet. Sidens to største søgninger er «hvor mange dage er der til 1
+       december» (1.219v, pos. 5) og «… til den 24 december» (1.001v, pos. 5), så
+       læseren rullede forbi tolv andre datoer for sit eget svar. Rækkerne kommer
+       nu fra `getDageTilHubRækker` — samme funktion som hubben og `/dage-til/*`,
+       så tallene kan ikke glide fra deres eget regnestykke. `<h2>` er nu «Hvor
+       mange dage er der til …?» / «Hur många dagar är det till …?», altså målens
+       spørgsmål og hubbens egen `<h1>`, frem for «Datoer folk oftest tæller ned
+       til». **Port:** læser rækkerne i den rækkefølge de står i HTML'en, i da og
+       se, og dømmer at tallene er de samme som `getDageTilAnswer` giver **og**
+       stiger. Mutation med omvendt rækkefølge giver rød med alle 23 tal.
+       **Deploy:** 12:30-vinduet rullede (mod 12:31 havde det ikke). To noter
+       lukket på indhold: `ceo/su-indtaegtsgraense` og `ceo/rettelse-tre-reviewfund`
+       (se `docs/plan-arkiv.md`). HTTP 200 er aldrig brugt som bevis.
+       BRANCH-TJEK: ikke kørt (sidste 2/10).

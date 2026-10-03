@@ -8,7 +8,28 @@ import {
   beregnIndtaegtsgraense,
   type FribeloeStatus,
   type IndtaegtsgraenseInput,
+  type IndtaegtsgraenseResult,
 } from "@/lib/su-indtaegtsgraense";
+
+/**
+ * Hvilken sats hver måned bruger. «Hele årets grænse er det tal gang 12» må
+ * aldrig siges, når børnene hæver året — børnene står i rækken lige over, og
+ * påstanden ville modsige den.
+ */
+function satsSætning(
+  result: IndtaegtsgraenseResult,
+  barnUnder18: number,
+  kr: (beloeb: number) => string,
+): string {
+  if (result.maanederUdenSu > 0) {
+    return `${result.maanederUdenSu} af de 12 måneder er uden SU og bruger den højere sats på ${kr(result.maanedUdenSu)}, så grænsen varierer med din situation måned for måned.`;
+  }
+  const sammeSats = `Alle 12 måneder bruger den samme sats på ${kr(result.maanedMedSu)}`;
+  if (barnUnder18 > 0) {
+    return `${sammeSats}, og hvert barn under 18 lægger ${kr(result.barnUnder18)} til året — derfor er månedsgennemsnittet større end satsen.`;
+  }
+  return `${sammeSats}, så hele årets grænse er det tal gang 12.`;
+}
 
 /**
  * "Hvor meget må jeg tjene ved siden af min SU?" — the income ceiling, as a
@@ -185,18 +206,7 @@ export default function SuIndtaegtsgraense() {
             )}
           </dl>
           <p className="mt-4 text-sm text-blue-900 dark:text-blue-100">
-            {result.maanederUdenSu === 0 ? (
-              <>
-                Alle 12 måneder bruger den samme sats på {kr(result.maanedMedSu)}, så hele
-                årets grænse er det tal gang 12.
-              </>
-            ) : (
-              <>
-                {result.maanederUdenSu} af de 12 måneder er uden SU og bruger den højere sats
-                på {kr(result.maanedUdenSu)}, så grænsen varierer med din situation måned for
-                måned.
-              </>
-            )}{" "}
+            {satsSætning(result, barnUnder18, kr)}{" "}
             Overstiger årets indkomst grænsen, kan en del af din SU og dit SU-lån blive
             nedsat eller tilbagebetalt — det endelige beløb beregnes af Udbetaling Danmark.
           </p>

@@ -108,10 +108,60 @@ describe("brutto-tallet er det en studerende kan genkende paa en lonblank", () =
     }
   });
 
-  it("giver brutto for bade maaned og aar", () => {
+  it("giver brutto for hele aaret", () => {
     const result = beregnIndtaegtsgraense(full({ suMonths: 12 }));
-    expect(result!.maanedBrutto).toBe(bruttoForEfterAM(result!.maanedGrænse));
     expect(result!.aarsBrutto).toBe(bruttoForEfterAM(result!.aarsfribeloeb));
+  });
+});
+
+describe("maanedstallet er hele aaret delt paa 12 — ogsaa naar der er born", () => {
+  // Forventningerne regnes her af SU_2026, ikke af vaerktøjets egen rundt: en
+  // paashand der sammenligner et tal med sig selv kan aldrig blive rod.
+  const lavest = SU_2026.freeAllowance.videregaaendeWithSu;
+  const mellemste = SU_2026.freeAllowance.enrolledWithoutSu;
+  const barn = SU_2026.freeAllowance.childUnder18Annual;
+
+  it("laegger børnene til i maaneden, naar alle 12 maaneder har SU", () => {
+    // Satsen er den samme i alle 12 maaneder, men bornene hæver AARSgrænsen, saa
+    // maaneden kan ikke vaere satsen alene: 12 x 20.749 + 2 x 34.129 = 317.246,
+    // delt paa 12 = 26.437,17 -> 28.736 kr. brutto.
+    const result = beregnIndtaegtsgraense(full({ suMonths: 12, childUnder18: 2 }));
+    expect(result).not.toBeNull();
+    expect(result!.aarsfribeloeb).toBe(12 * lavest + 2 * barn);
+    expect(result!.aarsGennemsnitPrMaaned).toBe((12 * lavest + 2 * barn) / 12);
+    expect(result!.maanedBrutto).toBe(bruttoForEfterAM((12 * lavest + 2 * barn) / 12));
+  });
+
+  it("deler de øvrige maaneder med ind i den maanedlige grænse", () => {
+    // 6 x 20.749 + 6 x 23.598 + 34.129 = 300.211 -> 25.017,58 -> 27.193 brutto.
+    const aar = 6 * lavest + 6 * mellemste + barn;
+    const result = beregnIndtaegtsgraense(full({ suMonths: 6, childUnder18: 1 }));
+    expect(result!.aarsfribeloeb).toBe(aar);
+    expect(result!.aarsGennemsnitPrMaaned).toBe(aar / 12);
+    expect(result!.maanedBrutto).toBe(bruttoForEfterAM(aar / 12));
+  });
+
+  it("runder ned, saa maaneden aldrig lover for meget — og aldrig understater", () => {
+    for (const suMonths of [0, 6, 12]) {
+      for (const childUnder18 of [0, 2]) {
+        const result = beregnIndtaegtsgraense(full({ suMonths, childUnder18 }));
+        const maaned = result!.aarsfribeloeb / 12;
+        expect(result!.maanedBrutto * (1 - SATSER_2026.amBidrag)).toBeLessThanOrEqual(maaned);
+        expect((result!.maanedBrutto + 1) * (1 - SATSER_2026.amBidrag)).toBeGreaterThan(maaned);
+      }
+    }
+  });
+
+  it("gør de to rækker over hinanden til den samme maaned", () => {
+    // «Det svarer til pr. maaned» er aaret delt paa 12, og «Foer AM-bidrag pr.
+    // maaned» er det samme tal foer AM-bidrag — den maa aldrig ligge under det
+    // tal, der staar lige over den.
+    for (const suMonths of [6, 12]) {
+      for (const childUnder18 of [0, 2]) {
+        const result = beregnIndtaegtsgraense(full({ suMonths, childUnder18 }));
+        expect(result!.maanedBrutto).toBe(bruttoForEfterAM(result!.aarsGennemsnitPrMaaned));
+      }
+    }
   });
 });
 
