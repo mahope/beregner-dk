@@ -28404,3 +28404,48 @@ ovenfor.
 
 ## Arkiveret 3/10 23:4x fra IMPLEMENTATION_PLAN.md
 
+### Lukkede VERIFICÉR DEPLOY-noter (3/10 15:0x–23:4x), arkiveret 4/10 00:1x
+
+**Dømt 3/10 21:5x på indhold (curl) — to noter lukket.**
+
+- ✅ `ceo/svensk-promille-grænse` 19:5x — beraknare.se/promille giver «nås alltså
+  efter **1** öl», `grep -c 'efter två öl'` = **0**. Dansk-ord-fejlen «og efter» er
+  rettet i samme note (**6ca2260**).
+- ✅ `ceo/klokken-titler` 19:2x — `<title>` på /klokken-i/japan = «Hvad er klokken
+  i Japan? 12 i Danmark = 19:00 i Tokyo», /klokken-i/usa = «… 12 i Danmark =
+  06:00 i New York», beraknare.se/klockan-i/japan = «Vad är klockan i Japan?
+  12 i Sverige = 19:00 i Tokyo». Ingen har rodlayoutets `| MinBeregner.dk`.
+
+**Dømt 3/10 18:0x–18:1x på indhold (curl) — tre noter lukket.**
+
+- ✅ `ceo/titler-renteberegner-arveafgift` 16:3x — `<title>` på `/renteberegner`
+  = «Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.» og på `/arveafgift` =
+  «Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr. boafgift».
+- ✅ `ceo/dage-levet-pr-alder` 17:0x — `<h2>Så mange dage har du levet som
+  10-årig?</h2>` findes, og rækkerne er `<td>10 år</td><td><strong>3.652</strong>`
+  og `<td>50 år</td><td><strong>18.262</strong>` på måledagen. Den svenske
+  tvilling har «Hur många dagar har du levat som 10-åring?».
+- ✅ `ceo/su-indtaegtsgraense-maaned` 13:4x — **kun på de nye labels.** Notens
+  streng «skriver den gamle "Du må højst tjene …"-sætning» kan ikke bruges:
+  den sætning står i den nuværende kode (`SuIndtaegtsgraense.tsx:174`) og er
+  ikke det, `0554456` ændrede. Dømt i stedet på «Før AM-bidrag pr. måned»,
+  «Før AM-bidrag for hele året» og «Fribeløb i de øvrige måneder», som er de
+  rækker `maanedBrutto`-rettelsen satte ind. Alle tre er live.
+
+**Ingen ny deploy-note 3/10 15:5x:** F0c rører kun `*.test.ts` og planen, så
+der er intet at verificere i produktion.
+
+**Dømt 3/10 15:1x–23:4x på indhold (curl) — lukkede noter:** fem
+procent-noter, `ceo/dato-dage-til-rækker`, `ceo/su-indtaegtsgraense-maaned`,
+`ceo/titler-med-regnet-eksempel`, `ceo/timer-i-aret` (⛔ noten var
+selv forkert) og de fem hub-URL'er.
+
+**Måling 4/10 00:0x — de fem åbne procent-noter er ikke deploy-fejl.**
+Live-målinger med curl: `/rentefradrag` giver **0** rå procenttal i den
+synlige tekst, `/billaan` **0** og `/kalorier` **0**. Noternes hårde strenge
+(`<td>33,6 %</td>`, `<strong>22 %</strong>`, `Boafgift (15 %)`, «Dagpenge = 80 %
+af løn efter 8 % AM-bidrag») gav alle **0**, fordi de er skrevet mod den
+konkrete markup fra en tidligere iteration — de er ikke længere gyldige
+forventninger. `/dagpenge` har derimod stadig **3× `8%` og 6× `90%`**, altså
+ægte rå procenttal, så den note er **ikke** lukket. Deploy-vinduet efter
+sidste commit (23:45) er 4/10 07:30.

@@ -1,24 +1,24 @@
-STATUS: 3/10 23:4x. ✅ **`/boernepenge` har nu et regnet eksempel i titlen** —
-        `ceo/boernepenge-titel`. *Hvem:* forældre der googler «børnepenge
-        2026», «børnepenge sats 2026», «børnepenge 2026 udbetaling» eller
-        «børnepenge oktober 2026». *Datagrund:* de fire søgninger summerer
-        **1.572 visninger** på pos. 7-11 (GSC 3/10–1/10), og **alle fire lå på
-        blogindlæget** — ikke på beregnersiden, der stod med den håndskrevne
-        titel «Børnepenge Beregner 2026 - Børne- og ungeydelse» og intet
-        regnestykke. *Accept:* summen læses med `satsForAlder`, altså samme
-        funktion værktøjet bruger (2 børn på 5 og 9 år = 4.248 + 3.342 =
-        **7.590 kr./kvartal**), og `/boernepenge` ligger nu i
-        `REGNETE_EKSEMPLER` i `meta-title-tal.test.ts`, der dømmer pr. sprog med
-        `toContain` og kræver samme regnestykke i `ogTitle`.
-        **Mutation målt:** med den gamle håndskrevne titel bliver 2 af 40
-        strenge røde. *MÅL:* `/boernepenge` (nyt tal fra GSC) +
-        `/blog/boernepenge-2026-satser-og-regler` 5.659 visninger / 43 klik /
-        0,8 % / pos. 8,6 → GSC 17/10.
-        Verify: typecheck, lint (757 filer), **4157 tests / 262 filer**, build.
-        Næste iteration skal fortsat være en **feature** — `/brok` (3/10) og
-        denne er to i træk; F5c/F5g/F5e er lukket.
+STATUS: 4/10 00:1x. ✅ **De tre review-fund på `/brok` er rettet** —
+        `ceo/brok-grupper-og-runding`. **Regelknapperne har nu egen legend**
+        («Vælg regel»/«Välj regel»), hver brøk har sit eget `fieldset` med
+        `firstFraction`/`secondFraction`, og `fælles nævner` er rettet til
+        **`fællesnævner`** begge steder. **Decimaler i et felt rundes nu ind i
+        feltet** — før stod `1.5` i «Første tæller» og regnedes som `1`, tavst.
+        *Verify:* typecheck, lint (758 filer), **4165 tests / 263 filer**, build;
+        de 8 nye tests er målt **røde 7/8** mod den gamle kode. Nye
+        `BrokBeregner.test.tsx` renderer komponenten i da/se og dømmer markupken,
+        fordi `label-a11y.test.tsx` kun tæller `input`/`label` — et `legend` er
+        hverken eller, så porten var grøn uanset hvad der stod i det.
+        ✅ 4/10 00:0x: **`TidszoneBeregner.test.tsx` var rød på master** — den
+        håndskrev «Sydney +8t», men Sydney skiftede til AEDT 4/10 (første søndag
+        i oktober), så porten går rød to gange om året. Nu regnes forventningen
+        fra `TIDSZONER_BEREGNER` + `erSommertid`, de samme kilder komponenten
+        bruger; mutation med fjernet vinterværdi giver **2 røde**. Målt i live:
+        `/rentefradrag` 0 rå procenter.
+        Næste iteration skal fortsat være en **feature** — `/brok` (3/10),
+        `/boernepenge`-titel (3/10) og de tre fund-rettelser er tre i træk.
         PR-TJEK: 3/10 23:4x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-        start (`b35c79c`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+        start (`b3cd282`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
 
 ## Fase 3 — trafik-drevet
 
@@ -365,6 +365,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
+**Åben note 4/10 00:1x:** `VERIFICÉR DEPLOY: <regelknapperne med egen legend + hver brøk i sit eget feltset + decimaler rundet ind i feltet + «fællesnævner» i ét ord på /brok> ceo/brok-grupper-og-runding 4/10 00:1x`.
+Døm på indhold: `curl -s https://minberegner.dk/brok | grep -oE '<legend[^>]*>[^<]*</legend>'` skal give **3** i rækkefølgen **«Vælg regel», «Det første brøk», «Den anden brøk»**, og `grep -c 'role="group"'` skal give **0** (den overflødige aria-label på knapperne er væk). `grep -c 'Fællesnævner'` **≥1** og `grep -c 'Fælles nævner'` **0**; samme i brødteksten: `grep -c 'fællesnævner'` ≥1. `beraknare.se/brok` skal have «Välj regel», «Det första bråket» og «Det andra bråket». Svarene skal være regnet: 1/2 + 1/3 = **5/6**, 2/3 ÷ 4/9 = **3/2**. Næste deploy-vindue 4/10 07:30.
+
 **Åben note 3/10 23:4x:** `VERIFICÉR DEPLOY: <regnet eksempel i titlen på /boernepenge: 2 børn (5 og 9 år) = 7.590 kr./kvartal> ceo/boernepenge-titel 3/10 23:4x`.
 Døm på indhold: `curl -s https://minberegner.dk/boernepenge | grep -c '<title>Børnepenge 2026: 2 børn (5 og 9 år) = 7.590 kr./kvartal</title>'` skal give **1**, og `grep -c 'og:title" content="Børnepenge 2026: 2 børn' **1**. `<h1>` skal fortsat være «Børnepenge Beregner 2026 - Børne- og ungeydelse» (kun Googles linje er ændret). Næste deploy-vindue 4/10 07:30.
 
@@ -386,40 +389,14 @@ Døm på indhold: `curl -s https://minberegner.dk/rentefradrag | grep -c '33,6%'
 **Åben note 3/10 17:4x (delvis live — se målingen 21:5x):** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
 Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. ⚠️ Målt 3/10 21:5x: **deltvist** — /arveafgift, /brutto-netto og /flyttebudget er 0, /billaan **6** (alle «6%» i alderstabellen), /kalorier **3** («10-15%»). De 9 er rå procenttal i `<td>`/brødtekst — en anden kodebane end `}%`, så committen dækkede dem ikke; de er **ikke** et deploy-problem. Tidligere måling 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. ⚠️ **3/10 23:0x — de 9 var aldrig fejl i `HEAD`.** Egen måling: `/billaan` har 0 rå procenter (rentesatsen går gennem `sats()`, `${formatNumber(...)} %`) og `/kalorier` har 0 (`${usikkerMin}-${usikkerMaks} %` i `kalorier-eksempler.ts:220,259,279`). Træfferne i live var **gammel kode fra før fixen**. Noten er derfor ikke længere en deploy-måling: de to strenge dømmes igen 4/10 07:30, og resten af klassen er rettet i `ceo/procent-mellemrum-bilsider`.
 
-**Dømt 3/10 21:5x på indhold (curl) — to noter lukket.**
-
-- ✅ `ceo/svensk-promille-grænse` 19:5x — beraknare.se/promille giver «nås alltså
-  efter **1** öl», `grep -c 'efter två öl'` = **0**. Dansk-ord-fejlen «og efter» er
-  rettet i samme note (**6ca2260**) og dømmes efter 3/11 07:30.
-- ✅ `ceo/klokken-titler` 19:2x — `<title>` på /klokken-i/japan = «Hvad er klokken
-  i Japan? 12 i Danmark = 19:00 i Tokyo», /klokken-i/usa = «… 12 i Danmark =
-  06:00 i New York», beraknare.se/klockan-i/japan = «Vad är klockan i Japan?
-  12 i Sverige = 19:00 i Tokyo». Ingen har rodlayoutets `| MinBeregner.dk`.
-
-**Dømt 3/10 18:0x–18:1x på indhold (curl) — tre noter lukket.**
-
-- ✅ `ceo/titler-renteberegner-arveafgift` 16:3x — `<title>` på `/renteberegner`
-  = «Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.» og på `/arveafgift` =
-  «Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr. boafgift».
-- ✅ `ceo/dage-levet-pr-alder` 17:0x — `<h2>Så mange dage har du levet som
-  10-årig?</h2>` findes, og rækkerne er `<td>10 år</td><td><strong>3.652</strong>`
-  og `<td>50 år</td><td><strong>18.262</strong>` på måledagen. Den svenske
-  tvilling har «Hur många dagar har du levat som 10-åring?».
-- ✅ `ceo/su-indtaegtsgraense-maaned` 13:4x — **kun på de nye labels.** Notens
-  streng «skriver den gamle “Du må højst tjene …”-sætning» kan ikke bruges:
-  den sætning står i den nuværende kode (`SuIndtaegtsgraense.tsx:174`) og er
-  ikke det, `0554456` ændrede. Dømt i stedet på «Før AM-bidrag pr. måned»,
-  «Før AM-bidrag for hele året» og «Fribeløb i de øvrige måneder», som er de
-  rækker `maanedBrutto`-rettelsen satte ind. Alle tre er live.
-
-**Ingen ny deploy-note 3/10 15:5x:** F0c rører kun `*.test.ts` og planen, så
-der er intet at verificere i produktion. Sidste åbne noter er dømt nedenfor.
-
-**Dømt 3/10 15:1x–23:4x på indhold (curl) — lukkede noter:** fem
-procent-noter, `ceo/dato-dage-til-rækker`, `ceo/su-indtaegtsgraense-maaned`,
-`ceo/titler-med-regnet-eksempel`, `ceo/timer-i-aret` (⛔ noten var
-selv forkert) og de fem hub-URL'er. Noternes fulde tekst og målinger
-står i `docs/plan-arkiv.md`.
+**Dømt 4/10 00:0x på indhold (curl) — de fem procent-noter er delvist forkerte
+og én er åben.** `/rentefradrag`, `/billaan` og `/kalorier` giver **0** rå
+procenttal i live, så de er rettet; men `⛔ /dagpenge` har stadig **3× `8%`** og
+**6× `90%`** og er derfor **ikke** lukket. Noternes hårde strenge (`<td>33,6 %`,
+`Boafgift (15 %)`, «Dagpenge = 80 % af løn efter 8 % AM-bidrag») gav **0** mod
+live: de er skrevet mod markup fra en tidligere iteration og er ikke længere
+gyldige forventninger — de skal dømmes på **0 rå procenter**, ikke på strenge.
+Målingerne og de lukkede noter: `docs/plan-arkiv.md`.
 
 ## ❓ Til Mads
 
