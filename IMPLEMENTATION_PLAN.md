@@ -1,25 +1,24 @@
-STATUS: 3/10 03:25. CI grøn ved start (`37084248300`). Sentry: ingen uløste
+STATUS: 3/10 04:58. CI grøn ved start (`37085981241`). Sentry: ingen uløste
       fejl 14 dage, og SDK'en **er** sat op, så Sentry-punktet er lukket.
       **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-      `npm run build` — **grøn 3/10 03:22** (alle exit 0, **3920** tests i 246
+      `npm run build` — **grøn 3/10 04:52** (alle exit 0, **3927** tests i 247
       filer). PR-TJEK: 2026-10-03 — ingen åbne PR'er.
-      **Denne iteration: F5b `/aktieskat`** (`aktieskat-faq-tal-fra-modul`).
-      Grænsen, de to satser, ASK-satsen og ASK-loftet lå håndskrevet i
-      metadata, i schema, i 4 af 6 FAQ-svar og i 5 beløb i brødteksten, mens
-      `AktieskatBeregner` læste `SATSER_2026` — søgeresultat og værktøj var to
-      uafhængige tal. Ny `aktieskat-eksempler.ts` læser samme modul.
-      **Deploy-diagnose: deploys er sunde, intet er faldet til.** Målt på
-      *indhold*: alt merged til og med 2/10 21:01 er live (`/su`, `/pension` har
-      0 × «kr. kr.»), alt fra 2/10 21:51 (`c4f376d`) er ikke. Sitemap
-      bekræfter samme snit: `/dage-til` (21:30) står i den, `/klokken-i`-hubben
-      (22:07) gør ikke, kun dens 12 landsider. Næste batch-vindue er
-      **3/10 07:30**, så de åbne VERIFICÉR-noter måles dér — og **0**
-      forgåede vinduer, altså ingen DEPLOY-MISSING. Den forrige notes «MÅLT
-      3/10 23:13 … ét vindue forgået» var en fejltagelse: klokken var 03:11,
-      og 23:13 kan ikke være sket endnu.
+      **CEO-kø punkt 0 er færdigt og afkrydset** — alle otte fund var rettet i
+      `aca17e5` (valborg 30. april, svensk påskafton lørdag, dansk sankthans fast
+      23./24. juni, påskeaften-FAQ slettet, `/husleje` på nettoprisindekset,
+      `toUtcMidnight` i `Europe/Copenhagen`, svensk promille fra egen formel,
+      `maneder: 12` + advent-teksten). Verificeret mod koden i denne iteration.
+      **Denne iteration: F5b `/loen-efter-skat`** (`loen-efter-skat-faq-tal-fra-modul`).
+      Seks talgrupper lå håndskrevet i `page-data.ts` mens
+      `BruttoNettoBeregner` læser `SATSER_2026`, og de to metadatafelter
+      modsagde hinanden om AM-bidrag («8%» mod «8 %»). **To reelle fejl fundet
+      i min egen nye hjælper, målt før commit:** `formatBelob` har nul
+      decimaler som standard, så mellemskattens 0,075 × 100 blev «8 %» i stedet
+      for «7,5 %», og «kr.»-suffixet plus et punktum gav «54.100 kr..».
+      Kommuneskattens yderste satser er nu **afledt** af `KOMMUNER`.
+      **Næste iteration:** F5b `/topskat` (4 fund, målt i samme probe), og
+      **den nye feature** `/dage-mellem-datoer` — se Feature-kø.
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
-      **Næste iteration:** mål de 13 VERIFICÉR-noter i vinduet 3/10 07:30,
-      derefter F5b: næste slug er `/loen-efter-skat` (4).
 
 ## Fase 3 — trafik-drevet
 
@@ -141,6 +140,18 @@ er blokeret af en ❓ og må ikke gættes.
   tre spørgsmål, forside-kort og interne links. **MÅL:** `/afstand-mellem-adresser`
   0 (ny URL 3/10) → Plausible 17/10; GSC 14 dage: «beregn afstand mellem to
   adresser» og «afstand mellem to adresser».
+- **`/dage-mellem-datoer` + `/dagar-mellan-datum`** — *Hvem:* alle der
+  spørger «dage mellem datoer» / «dagar mellan datum». *Datagrund:* GSC
+  2/10–30/30 lister «dage mellem datoer» (438v, **9.000 søgninger**, pos. 4) på
+  `/dato`, og tre svenske varianter — «dagar mellan datum» (888v, 2k, pos. 8),
+  «antal dagar mellan datum» (424v, 2k, pos. 8) og «räkna dagar mellan datum»
+  (399v, 1k, pos. 9) — på `beraknare.se/dato`, der har **105.188 visninger og
+  0,1 % CTR på pos. 8,1**. Værktøjet ligger i dag som ét `<h3>` dybt i `/dato`s
+  brødtekst, altså på en side der konkurrerer om 20 andre spørgsmål.
+  *Accept:* egen dansk og svensk side med eget slugsprog, egen `<h1>`/titel,
+  de tre spørgsmål som `FAQPage`, tovejs-links med `/dato` og `/ugenummer`,
+  canonical/hreflang, 301 mellem domænerne og daglig sitemap-entry.
+  **MÅL:** 0 (ny URL) → Plausible 18/10; GSC 14 dage: de fire søgninger ovenfor.
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -156,110 +167,27 @@ er blokeret af en ❓ og må ikke gættes.
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
-**Lukket 2/10 23:29 — `kalorier-faq-tal-fra-modul`.** Se `docs/plan-arkiv.md`.
-*Målt:* **17** fund væk fra `page-data.ts` (7 da, 3 no, 7 se), listen
-**131 → 114**. `/kalorier` er sitets syvende mest besøgte side (276/28d) og
-havde **samme synlige fejl som `/vaegttab`**: svenske strenge med «1.780» /
-«2.759» / «2.259» / «7.700» i metadata **og** i to FAQ-svar, som
-`FAQSchema` læser. Ny `kalorier-eksempler.ts` bygger 19 svar i tre sprog fra
-`makroer.ts`' egne `beregnBmr`/`beregnTdee`/`kalorierForMaal` plus
-`KALORIE_UNDERSKUD`, `PROTEIN_G_PER_KG` og `VAEGTTAB_KCAL_PR_KG` (genbrugt fra
-`vaegttab-eksempler`, ikke kopieret). Proteinintervallerne læses fra
-`PROTEIN_G_PER_KG`; «0,5 kg pr. uge» og «10-15 %» er deklareret i modulet med
-begrundelse, for de er allerede rundede tal. Porten låste fejlen fast på to
-steder og er rettet begge: `page-data.test.ts` krævede «1.780»/«2.259» med
-dansk punktum for alle tre sprog, `kalorier/page.test.tsx` «2.502 kcal» og
-«TDEE 2.759 kcal vid måttlig aktivitet» — de dømmer nu `formatBelob(…, locale)`
-og forbyder `\d\.\d{3}` i hvert svensk og norsk felt. **12 nye tests**
-(3856 mod 3844); dansk låst med `toEqual` mod de syv gamle strenge.
+**Åben række (strenglisten):** næste fil skal måles på ny. **Elleve filer er
+lukket** (se listen nedenfor og `docs/plan-arkiv.md`). Strenglistens loft er
+**70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 → 320 → 315** (uændret,
+for `/loen-efter-skat`s tal lå i `page-data.ts`, ikke i JSX).
 
-**Lukket 3/10 23:20 23:58 — `pension-belob-fra-modul`.** Se
-`docs/plan-arkiv.md`. *Målt:* **12** håndskrevne talgrupper væk fra
-`page-data.ts` (metadata + 11 FAQ-svar, alle publiceret som `FAQSchema`-JSON-LD),
-så listen er **131 → 119**. Ny `pension-eksempler.ts` læser `FOLKEPENSION_2026`
-og `SATSER_2026` gennem `formatBelob`. **Én reel fejl fundet og rettet:**
-«Hvornår kan jeg gå på folkepension?» sagde «65 år hvis du er født i 1953 eller
-før» og sprang så til 1956 — det modsiger `alderSkala` (65 fra 1/1 1954, 65 ½
-og 66/66 ½ i 1954-55) og lod 1954-55 stå uden svar. Svaret bygges nu trin for
-trin af skalaen. Dansk ellers byte-uændret (målt: kun de to linjer af
-aldersvaret adskiller sig fra `HEAD`). Porten er ny og **adfærdsbaseret**:
-den dømmer *hvert* beløb i metadata og svar mod de tal modulerne må skrive, så et
-håndskrevet beløb er rødt; mutation (8.500 i et svar + den gamle 1953-påstand)
-→ **2 røde** af 6. `gang`-reglen tabte ét fund 7 → 6 (Excel-svarets
-«40.000 × 0,15 = 6.000» er nu interpolationer), portens sum 26 → 25.
-
-**Lukket 3/10 00:45 — `kvadratmeter-faq-tal-fra-modul`.** Se
-`docs/plan-arkiv.md`. *Målt:* **9** håndskrevne talgrupper væk fra
-`page-data.ts` (6 svar + 6 metadatafelter i hvert sprog), så listen er
-**95 → 86**. **To reelle fejl fundet:** (1) svensk og norsk skrev «10.000 cm²»,
-«10.000 m²» og «3.000 kr» med dansk punktum, mens den svenske brødtekst i
-`page.tsx` stod med «3 000 kr» — modsagde altså sig selv, og `FAQSchema`
-publicerer svaret; (2) «Laminat 80-200 **SEK**/m²» / «**NOK**/m²» lovede svensk
-og norsk marked om de **samme danske tal**, uden kilde. Ny
-`kvadratmeter-eksempler.ts` bygger alle 18 strenge af `AREAL_EKSEAMPLER` (nu med
-regnestykkets led) + `PRIS_EKSEMPEL` + fire nye konstanter (`CM2_PR_M2`,
-`M2_PR_HAKTAR`, `SQ_FT_PR_M2`, `VAERELSE_EKSEMPLER`) gennem `formatBelob`;
-`SPILD_PCT` og `MATERIALEPRISER` er deklareret her med `omraade: "danmark"`, så
-de to andre svar siger det i sætningen. **Porten låste fejlen fast:**
-`page-data.test.ts` krævede «3.000 kr» for alle tre sprog; den kræver nu «3 000
-kr» for `se`/`no`, og `page.test.tsx` forbyder tre-cifre-punktum i hele den
-svævede sværde. **11 nye tests** (3870 → 3881); tre mutationer målt røde (1, 1
-og 3 røde). `HAARDKODEDE_BELOB` for `kvadratmeter/page.tsx` **1 → 0** og listens
-sum **333 → 332**.
-
-**Lukket 3/10 00:24 — `rentefradrag-faq-tal-fra-modul`.** Se
-`docs/plan-arkiv.md`. *Målt:* **7** håndskrevne talgrupper væk fra `page-data.ts`
-(`description` + `metaDescription` + 5 FAQ-svar), så listen er **102 → 95**.
-**Én reel fejl fundet:** «Skal par fordele rentefradraget mellem sig?» lød «et par
-med 80.000 kr. i renter får præcis samme besparelse» — men `hojFradragsgraense`
-giver parret 100.000 kr., så hele beløbet får 33,6 %: **26.880 kr. mod 24.480**,
-altså **2.400 kr. mere**, og de to tal stod i samme sætning. `page.tsx:189-191`
-havde hele tiden sagt det rigtige, så brødtekst og FAQ modsagde hinanden, og
-`FAQSchema` publicerer FAQ'en. Ny `rentefradrag-eksempler.ts` bygger de syv
-strenge af `RENTEFRADRAG_2026` + `beregnRentefradrag` gennem `formatBelob`;
-«uændret i en årrække» er erstattet af modulets egen kilde og `verifiedAt`, fordi
-den påstand ikke kan efterprøves. Dansk ellers uændret på nær «33,6%» → «33,6 %»
-(ét mellemrum før procent, som de øvrige svar allerede skrev). **6 nye tests**
-(3864 → 3870); mutation mod `page-data.ts` fra før rettelsen giver **1 rød** af 6
-(bindingsprøven), resten låser modulet.
-
-**Lukket 3/10 01:50 + 01:40 — `konfirmation-faq-tal-fra-modul` (halve 1 og 2).**
-Se `docs/plan-arkiv.md`. *Målt:* halve 1 fandt den danske fejl (FAQ'en lovede
-«8.000-25.000 **DKK**» som *samlet* beløb mod beregnerens 38.700 kr.);
-**halve 2 fandt den samme fejl to gange til, i de to andre sprog** — svensk
-«10.000-30.000 **SEK** beroende på antal gäster», norsk «10.000-30.000 **NOK**
-avhengig av antall gjester»: samme forveksling, dansk punktum i svensk og
-norsk sætning, og en valutaenhed ingen anden sted på siderne bruger. Norsk
-lovede desuden 3.000-8.000 kr. til forældre mod dansks 2.000-5.000, for én
-beregner der bruger 3.000 på alle domæner. Ny `konfirmation-eksempler.ts`
-bygger **alle otte** brødtekstbeløb og **alle seks** FAQ-beløb i tre sprog
-gennem `formatBelob`; `HAARDKODEDE_BELOB` for `konfirmation/page.tsx` **6 → 0**
-og listens målte sum **332 → 320**. Dansk byte-uændret.
-
-**Lukket 3/10 03:22 — `aktieskat-faq-tal-fra-modul`.** Se
-`docs/plan-arkiv.md`. *Målt:* **13** håndskrevne talgrupper væk — 4 metadata-
-/schemafelter + 4 af 6 FAQ-svar i `page-data.ts` og 5 beløb i `page.tsx` — så
-JSX-listens målte sum er **320 → 315** og `/aktieskat` står med **0**. **Ingen
-fejltal fundet, og det skal siges rent:** 79.400 = `SATSER_2026.
-aktieProgressionsgraense`, 27/42/17 % = `aktieSatsLav`/`Hoej`/`askSats`, 174.200
-= `askLoft`, og 158.800 er nøjagtigt 2 × 79.400. Slicen er et **lås mod
-2027-drift** — ændres en sats i `satser-2026.ts`, følger søgeresultat,
-`FAQPage`-JSON-LD og brødtekst med nu. Den eneste tekstændring er
-mellemrummet før procenttegnet («27%» → «27 %»), som er husets skrivemåde i
-`efterloen-eksempler`/`pension-eksempler`; beløbene er byte-uændret, og «kr.»
-kommer fra `getCurrencySuffix` som før. **Portens første udkast var cirkulær** —
-den læste modulets eget output og kunne derfor aldrig fange en håndskreven
-streng; den læser nu den publicerede `getPageData("aktieskat","da")`. Mutation
-(håndskrevet «79.500 kr.» + «27%» i `page-data.ts`) giver **2 røde** af 7.
-Dobbeltgrænsen for ægtepar fandtes kun i teksten — beregneren regner kun det
-enkelte depot — så den er nu **afledt** (`× 2`) med en docblock, der siger at
-reglen selv har ingen kilde i repoet og er bevaret uændret. **7 nye tests**
-(3913 → 3920).
-
-**Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
-åbne er alle ❓-blokerede. **Ni filer er lukket**, se listen nedenfor.
-Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 →
-320**.
+**Lukket 3/10 04:52 — `loen-efter-skat-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne talgrupper væk fra
+`page-data.ts` (`description` + `metaDescription` + `ogDescription` + 4 af 8
+FAQ-svar), så `loen-efter-skat` er **4 → 0** målt med portens egen
+`strengBelob`. Ny `loen-efter-skat-eksempler.ts` læser `SATSER_2026` og
+`KOMMUNER`. **Den reelle fejl lå i den nye hjælper, målt før commit:**
+`formatBelob` har nul decimaler som standard, så mellemskattens `0.075 × 100`
+skrev «8 %» — samme tal som AM-bidraget — og `getCurrencySuffix("da")` er «kr.»
+*med* punktum, så `${kr(belob)}.` gav «54.100 kr..». Derfor har modulet nu
+`loenBelob` (til sidens) og `loenBelobI` (til løbende tekst) og to decimaler i
+`pct`. Kommuneskattens «22,5 % (Rundersdal)»/«27,8 % (Langeland)» er **afledt**
+af `KOMMUNER` i stedet for håndskrevet — målt til de samme tal. En eksisterende
+test låste den gamle notation fast (`page-data.test.ts` krævede «7,5%») og er
+rettet til «7,5 %» med et `not.toContain("7,5%")`. **7 nye tests**
+(3920 → 3927). Mutationer målt: 2 røde af 7 (nul decimaler), 1 rød af 7
+(håndskrevet beløb + «8%» i `description`).
 
 **Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
 `strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
@@ -326,8 +254,9 @@ tests** (3898 → 3905). ⛔ Se nyt ❓ om deltidsfaktoren 0,67 nedenfor.
 (`procentpoint-faq-tal-fra-modul`), `/kvadratmeter`
 (`kvadratmeter-faq-tal-fra-modul`) og `/konfirmation`
 (`konfirmation-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
-**`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende, og
-`/aktieskat` (`aktieskat-faq-tal-fra-modul`) den tiende.**
+**`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende,
+`/aktieskat` (`aktieskat-faq-tal-fra-modul`) den tiende og `/loen-efter-skat`
+(`loen-efter-skat-faq-tal-fra-modul`) den **ellevte**.**
 
 **Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
@@ -335,8 +264,8 @@ portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
 Køen pr. slug (**78** målt 3/10 02:38 med egen AST-probe efter `/efterloen`):
 `moms` 15 (⛔) · `konfirmation` 6 → **0** · `efterloen` 5 → **0** ·
-`aktieskat` 5 → **0** · `loen-efter-skat` 4 · `topskat` 4 · `boernepenge` 4 ·
-`flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
+`aktieskat` 5 → **0** · `loen-efter-skat` 4 → **0** · `topskat` 4 ·
+`boernepenge` 4 · `flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
 være faldet siden — mål den slug, du tager, på ny. **Anbefalet rækkefølge:**
 `/loen-efter-skat` (4) → `/topskat` (4) → `/boernepenge` (4). `/moms` er ⛔ (de
 3 lovgrænser).
@@ -420,7 +349,7 @@ ingen regex på tal og tekst.
 
 `VERIFICÉR DEPLOY: svensk «Första maj» + «använda» på /dato og /nedtaelling ceo/svenska-tekstfejl 3/10 23:20`
 
-`VERIFICÉR DEPLOY: /leasing FAQ'ens retning (svensk skal sige 9 210 kr mindre) ceo/leasing-faq-retning 2/10 21:51 — MÅLT 3/10 23:13: IKKE live, ét vindue forgået, måles igen 3/10 07:30`
+`VERIFICÉR DEPLOY: /leasing FAQ'ens retning (svensk skal sige 9 210 kr mindre) ceo/leasing-faq-retning 2/10 21:51 — måles 3/10 07:30 (den gamle note «MÅLT 3/10 23:13» var en fejltagelse: klokken var 03:11)`
 
 `VERIFICÉR DEPLOY: /klokken-i + /klockan-i (hub med klokken i 12 lande) ceo/klokken-i-hub 2/10 22:07`
 
@@ -439,6 +368,8 @@ De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
 40 KB.
 
 `VERIFICÉR DEPLOY: /aktieskat henter grænse og satser fra sit eget modul (metadata, schema og FAQ skal have «79.400 kr.», «158.800 kr.» og «174.200 kr.», og procenttallene skal stå med mellemrum foran: **0** × «27%», «42%», «17%», mens «27 %» står i både `<title>`-beskrivelsen og FAQ-svaret «Hvad er progressionsgrænsen for aktieskat i 2026?» i `FAQPage`-JSON-LD; brødteksten skal skrive «27 % af de første 79.400 kr.» og «158.800 kr.» for ægtepar; **intet** `NaN`, ingen «kr. kr.» og ingen dobbelt-enhed) ceo/aktieskat-faq-tal-fra-modul 3/10 03:22`
+
+`VERIFICÉR DEPLOY: /loen-efter-skat henter satser og grænser fra sit eget modul (metadata og FAQ skal have «54.100 kr.», «641.200 kr,» og «777.900 kr,» med **kr** *uden* punktum midt i sætningen; procenttallene skal stå med mellemrum foran: **0** × «8%», «7,5%», «15%», mens «8 %», «7,5 %», «5 %» og «15 %» står i `description`, `metaDescription`, `ogDescription` og i FAQ-svaret «Hvornår skal jeg betale mellemskat eller topskat i 2026?» i `FAQPage`-JSON-LD; kommuneskats-svaret skal have «ca. 22,5 % (Rundersdal) til 27,8 % (Langeland)»; **intet** `NaN` og ingen «kr..» eller «kr. kr.») ceo/loen-efter-skat-faq-tal-fra-modul 3/10 04:52`
 
 ## ❓ Til Mads
 

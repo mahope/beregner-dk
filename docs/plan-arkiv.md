@@ -26395,3 +26395,105 @@ ellers matcher ingen regex på tal og tekst, og brug et **snit mellem to commits
 på hver side af et batch-vindue** frem for ét enkelt tegn: `/klokken-i` så
 falsk ud, fordi de 12 landsider *er* live (ældre commit) mens hubben fra samme
 commit ikke er — sitemap-grep alene ville givet et forkert svar.
+
+## F5b-slice: detaljer tilflyttet fra planen 3/10 04:58
+
+**Lukket 2/10 23:29 — `kalorier-faq-tal-fra-modul`.** Se `docs/plan-arkiv.md`.
+*Målt:* **17** fund væk fra `page-data.ts` (7 da, 3 no, 7 se), listen
+**131 → 114**. `/kalorier` er sitets syvende mest besøgte side (276/28d) og
+havde **samme synlige fejl som `/vaegttab`**: svenske strenge med «1.780» /
+«2.759» / «2.259» / «7.700» i metadata **og** i to FAQ-svar, som
+`FAQSchema` læser. Ny `kalorier-eksempler.ts` bygger 19 svar i tre sprog fra
+`makroer.ts`' egne `beregnBmr`/`beregnTdee`/`kalorierForMaal` plus
+`KALORIE_UNDERSKUD`, `PROTEIN_G_PER_KG` og `VAEGTTAB_KCAL_PR_KG` (genbrugt fra
+`vaegttab-eksempler`, ikke kopieret). Proteinintervallerne læses fra
+`PROTEIN_G_PER_KG`; «0,5 kg pr. uge» og «10-15 %» er deklareret i modulet med
+begrundelse, for de er allerede rundede tal. Porten låste fejlen fast på to
+steder og er rettet begge: `page-data.test.ts` krævede «1.780»/«2.259» med
+dansk punktum for alle tre sprog, `kalorier/page.test.tsx` «2.502 kcal» og
+«TDEE 2.759 kcal vid måttlig aktivitet» — de dømmer nu `formatBelob(…, locale)`
+og forbyder `\d\.\d{3}` i hvert svensk og norsk felt. **12 nye tests**
+(3856 mod 3844); dansk låst med `toEqual` mod de syv gamle strenge.
+
+**Lukket 3/10 23:20 23:58 — `pension-belob-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **12** håndskrevne talgrupper væk fra
+`page-data.ts` (metadata + 11 FAQ-svar, alle publiceret som `FAQSchema`-JSON-LD),
+så listen er **131 → 119**. Ny `pension-eksempler.ts` læser `FOLKEPENSION_2026`
+og `SATSER_2026` gennem `formatBelob`. **Én reel fejl fundet og rettet:**
+«Hvornår kan jeg gå på folkepension?» sagde «65 år hvis du er født i 1953 eller
+før» og sprang så til 1956 — det modsiger `alderSkala` (65 fra 1/1 1954, 65 ½
+og 66/66 ½ i 1954-55) og lod 1954-55 stå uden svar. Svaret bygges nu trin for
+trin af skalaen. Dansk ellers byte-uændret (målt: kun de to linjer af
+aldersvaret adskiller sig fra `HEAD`). Porten er ny og **adfærdsbaseret**:
+den dømmer *hvert* beløb i metadata og svar mod de tal modulerne må skrive, så et
+håndskrevet beløb er rødt; mutation (8.500 i et svar + den gamle 1953-påstand)
+→ **2 røde** af 6. `gang`-reglen tabte ét fund 7 → 6 (Excel-svarets
+«40.000 × 0,15 = 6.000» er nu interpolationer), portens sum 26 → 25.
+
+**Lukket 3/10 00:45 — `kvadratmeter-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **9** håndskrevne talgrupper væk fra
+`page-data.ts` (6 svar + 6 metadatafelter i hvert sprog), så listen er
+**95 → 86**. **To reelle fejl fundet:** (1) svensk og norsk skrev «10.000 cm²»,
+«10.000 m²» og «3.000 kr» med dansk punktum, mens den svenske brødtekst i
+`page.tsx` stod med «3 000 kr» — modsagde altså sig selv, og `FAQSchema`
+publicerer svaret; (2) «Laminat 80-200 **SEK**/m²» / «**NOK**/m²» lovede svensk
+og norsk marked om de **samme danske tal**, uden kilde. Ny
+`kvadratmeter-eksempler.ts` bygger alle 18 strenge af `AREAL_EKSEAMPLER` (nu med
+regnestykkets led) + `PRIS_EKSEMPEL` + fire nye konstanter (`CM2_PR_M2`,
+`M2_PR_HAKTAR`, `SQ_FT_PR_M2`, `VAERELSE_EKSEMPLER`) gennem `formatBelob`;
+`SPILD_PCT` og `MATERIALEPRISER` er deklareret her med `omraade: "danmark"`, så
+de to andre svar siger det i sætningen. **Porten låste fejlen fast:**
+`page-data.test.ts` krævede «3.000 kr» for alle tre sprog; den kræver nu «3 000
+kr» for `se`/`no`, og `page.test.tsx` forbyder tre-cifre-punktum i hele den
+svævede sværde. **11 nye tests** (3870 → 3881); tre mutationer målt røde (1, 1
+og 3 røde). `HAARDKODEDE_BELOB` for `kvadratmeter/page.tsx` **1 → 0** og listens
+sum **333 → 332**.
+
+**Lukket 3/10 00:24 — `rentefradrag-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **7** håndskrevne talgrupper væk fra `page-data.ts`
+(`description` + `metaDescription` + 5 FAQ-svar), så listen er **102 → 95**.
+**Én reel fejl fundet:** «Skal par fordele rentefradraget mellem sig?» lød «et par
+med 80.000 kr. i renter får præcis samme besparelse» — men `hojFradragsgraense`
+giver parret 100.000 kr., så hele beløbet får 33,6 %: **26.880 kr. mod 24.480**,
+altså **2.400 kr. mere**, og de to tal stod i samme sætning. `page.tsx:189-191`
+havde hele tiden sagt det rigtige, så brødtekst og FAQ modsagde hinanden, og
+`FAQSchema` publicerer FAQ'en. Ny `rentefradrag-eksempler.ts` bygger de syv
+strenge af `RENTEFRADRAG_2026` + `beregnRentefradrag` gennem `formatBelob`;
+«uændret i en årrække» er erstattet af modulets egen kilde og `verifiedAt`, fordi
+den påstand ikke kan efterprøves. Dansk ellers uændret på nær «33,6%» → «33,6 %»
+(ét mellemrum før procent, som de øvrige svar allerede skrev). **6 nye tests**
+(3864 → 3870); mutation mod `page-data.ts` fra før rettelsen giver **1 rød** af 6
+(bindingsprøven), resten låser modulet.
+
+**Lukket 3/10 01:50 + 01:40 — `konfirmation-faq-tal-fra-modul` (halve 1 og 2).**
+Se `docs/plan-arkiv.md`. *Målt:* halve 1 fandt den danske fejl (FAQ'en lovede
+«8.000-25.000 **DKK**» som *samlet* beløb mod beregnerens 38.700 kr.);
+**halve 2 fandt den samme fejl to gange til, i de to andre sprog** — svensk
+«10.000-30.000 **SEK** beroende på antal gäster», norsk «10.000-30.000 **NOK**
+avhengig av antall gjester»: samme forveksling, dansk punktum i svensk og
+norsk sætning, og en valutaenhed ingen anden sted på siderne bruger. Norsk
+lovede desuden 3.000-8.000 kr. til forældre mod dansks 2.000-5.000, for én
+beregner der bruger 3.000 på alle domæner. Ny `konfirmation-eksempler.ts`
+bygger **alle otte** brødtekstbeløb og **alle seks** FAQ-beløb i tre sprog
+gennem `formatBelob`; `HAARDKODEDE_BELOB` for `konfirmation/page.tsx` **6 → 0**
+og listens målte sum **332 → 320**. Dansk byte-uændret.
+
+**Lukket 3/10 03:22 — `aktieskat-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **13** håndskrevne talgrupper væk — 4 metadata-
+/schemafelter + 4 af 6 FAQ-svar i `page-data.ts` og 5 beløb i `page.tsx` — så
+JSX-listens målte sum er **320 → 315** og `/aktieskat` står med **0**. **Ingen
+fejltal fundet, og det skal siges rent:** 79.400 = `SATSER_2026.
+aktieProgressionsgraense`, 27/42/17 % = `aktieSatsLav`/`Hoej`/`askSats`, 174.200
+= `askLoft`, og 158.800 er nøjagtigt 2 × 79.400. Slicen er et **lås mod
+2027-drift** — ændres en sats i `satser-2026.ts`, følger søgeresultat,
+`FAQPage`-JSON-LD og brødtekst med nu. Den eneste tekstændring er
+mellemrummet før procenttegnet («27%» → «27 %»), som er husets skrivemåde i
+`efterloen-eksempler`/`pension-eksempler`; beløbene er byte-uændret, og «kr.»
+kommer fra `getCurrencySuffix` som før. **Portens første udkast var cirkulær** —
+den læste modulets eget output og kunne derfor aldrig fange en håndskreven
+streng; den læser nu den publicerede `getPageData("aktieskat","da")`. Mutation
+(håndskrevet «79.500 kr.» + «27%» i `page-data.ts`) giver **2 røde** af 7.
+Dobbeltgrænsen for ægtepar fandtes kun i teksten — beregneren regner kun det
+enkelte depot — så den er nu **afledt** (`× 2`) med en docblock, der siger at
+reglen selv har ingen kilde i repoet og er bevaret uændret. **7 nye tests**
+(3913 → 3920).

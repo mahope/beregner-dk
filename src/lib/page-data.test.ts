@@ -1110,7 +1110,10 @@ describe("2026-skattetall i lønsidernes FAQ", () => {
       item.question.includes("Hvordan beregnes min løn efter skat")
     );
 
-    expect(faq?.answer).toContain("7,5%");
+    // «7,5 %» med mellemrum: husets skrivemåde, og dennotation `formatBelob`
+    // afrunder 7,5 til «8 %» uden de to decimaler.
+    expect(faq?.answer).toContain("7,5 %");
+    expect(faq?.answer).not.toContain("7,5%");
     expect(faq?.answer).toContain("afskaffet");
   });
 });
