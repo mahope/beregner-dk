@@ -1,4 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
@@ -141,6 +143,39 @@ describe("promille page", () => {
     expect(medPromille.length).toBeGreaterThanOrEqual(15);
     for (const celle of medPromille) {
       expect(celle).toMatch(/^<td>[0-9],[0-9]{2} ‰<\/td>$/);
+    }
+  });
+
+  test("den svenska FAQ's gränser kommer fra modulet, ikke fra en håndskrevet 0,2", () => {
+    // CEO-kø punkt 0: fire svar på beraknare.se skrev «0,2» og «1,0» som
+    // almindelig tekst. De var rigtige den dag, de blev skrevet, og ville
+    // være forkerede den dag en lov eller en tabel ændrede sig — præcis den
+    // fejlklasse, `procentUdenMellemrum` og `locale-leak.mjs` er bygget på.
+    //
+    // Talværdien kan ikke bruges som port: 0,2 i koden og 0,2 i konstanten er
+    // det samme tal. Porten er derfor, at hver grænse i den svenska FAQ er et
+    // udtryk med en konstant i, så den flytter sig med modulet.
+    const src = readFileSync(resolve(__dirname, "..", "..", "lib", "page-data.ts"), "utf8");
+    // Samme nøgle findes i `daPages`, så søgningen skal starte i den svenska blok.
+    const seStart = src.indexOf("const sePages: Record<string, PageData> = {");
+    expect(seStart).toBeGreaterThan(-1);
+    const start = src.indexOf('"promille": {\n      slug: "promille",', seStart);
+    expect(start).toBeGreaterThan(-1);
+    // Kun `faqItems` — `schemaDescription` er en tabelrække med beregnede
+    // promilletal, som er beregnet i den og derfor ikke skal slås sammen med
+    // en håndskrevet *grænse*.
+    const faqStart = src.indexOf("faqItems: [", start);
+    const blok = src.slice(faqStart, src.indexOf("\n    ],", faqStart));
+    const haandskrevet = blok.match(/\b\d,\d\s*(promille|‰)/g) ?? [];
+    expect(haandskrevet).toEqual([]);
+    // Og de fire steder, der skal læse en grænse, gør det nu.
+    for (const udtryk of [
+      "pct(PROMILLEGRANSE.se)",
+      "pct(PROMILLEGRANSE.da)",
+      "pct(PROMILLEGROV_SE)",
+      "PROMILE_80_MAND(2)",
+    ]) {
+      expect(blok).toContain(udtryk);
     }
   });
 

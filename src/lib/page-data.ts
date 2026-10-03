@@ -8,6 +8,7 @@ import {
   FORBRUGERPRISINDEKS_2026M08,
   NETTOPRISINDELS_MAANED,
   beregnHuslejestigning,
+  nettoprisindeksUnderForbrugerprisindeks,
 } from "./nettoprisindeks";
 import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
 import { ruteCacheSætning } from "./rute-cache";
@@ -88,7 +89,7 @@ import {
   kvadratmeterFaqSvar,
 } from "./kvadratmeter-eksempler";
 import { konfirmationFaqSvar } from "./konfirmation-eksempler";
-import { PROMILLEGRANSE, PROMILLEGROV_SE } from "./promille";
+import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, PROMILLEGROV_SE } from "./promille";
 import { SVENSK_SKATT_2026 as SV_SKATT, SVENSK_SKATT_TAL } from "./svensk-skatt";
 import {
   PROMILLE_GENSTANDE_RAEKKER,
@@ -223,6 +224,13 @@ const huslejeSvaer = `Tjener du ${kr(HUSLEJE_STANDARD.maanedligNettoLoen)} kr ne
 // kan ikke holde, når Danmarks Statistik offentliggør en ny måned.
 const krH = (value: number) => value.toLocaleString("da-DK");
 const npiPct = (pct: number) => pct.toLocaleString("da-DK");
+
+// Nettoprisindekset og forbrugerprisindekset er to selvstændige tal, og
+// hvilket der stiger mest, afhænger af året — det er derfor sætningen læser
+// retningen fra tallene i stedet for at hævde den. Se `nettoprisindeks.ts`.
+const npiRetning = nettoprisindeksUnderForbrugerprisindeks()
+  ? "lavere end"
+  : "højere end";
 
 // ─── /braendstof — de tal, FAQ'en lover, udledt af de samme forudsætninger som
 // sammenligningstabellen. Den gamle "50-70 %" holdt kun mod benzin (52,8 %)
@@ -2097,7 +2105,7 @@ faqItems: kalorierFaqItems("da"),
       { question: "Er det bedre at leje eller købe?", answer: "Det afhænger af din situation. Leje giver fleksibilitet, køb opbygger formue. Som tommelfingerregel: Hvis du bliver 5+ år, kan køb ofte betale sig." },
       { question: "Hvad er typiske boligudgifter ud over husleje?", answer: "El (ca. 300-600 kr/md), internet (ca. 300 kr/md), indboforsikring (ca. 100-200 kr/md). Varme og vand er ofte a conto i huslejen." },
       { question: "Hvor kommer arealet fra?", answer: "I beregningen af husleje pr. m² kan du slå din adresse op, så henter vi boligens areal fra BBR (Bygnings- og Boligregistret) via Datafordeleren. For lejligheder bruges den konkrete lejligheds areal. Arealet i lejekontrakten kan afvige, så du kan altid rette tallet. Vi gemmer ikke adressen." },
-      { question: "Hvor meget stiger huslejen efter nettoprisindekset?", answer: `Nettoprisindekset steg ${npiPct(NETTOPRISINDEKS_2026M08.aarsVaeksningPct)} % i ${NETTOPRISINDELS_MAANED}, så en husleje på 8.000 kr stiger med ${krH(beregnHuslejestigning(8000, NETTOPRISINDEKS_2026M08.aarsVaeksningPct).stigning)} kr til ${krH(beregnHuslejestigning(8000, NETTOPRISINDEKS_2026M08.aarsVaeksningPct).efter)} kr om måneden. Nettoprisindekset er forbrugerprisindekset uden moms, told og afgifter — det er derfor tallet er lavere end forbrugerprisindeksets ${npiPct(FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct)} %. Skriv din egen husleje i feltet under "Hvor meget stiger huslejen efter nettoprisindekset?", så regner siden stigningen ud på dit beløb. Kilde: Danmarks Statistik PRIS04 og PRIS01, offentliggjort 10. september 2026.` },
+      { question: "Hvor meget stiger huslejen efter nettoprisindekset?", answer: `Nettoprisindekset steg ${npiPct(NETTOPRISINDEKS_2026M08.aarsVaeksningPct)} % i ${NETTOPRISINDELS_MAANED}, så en husleje på 8.000 kr stiger med ${krH(beregnHuslejestigning(8000, NETTOPRISINDEKS_2026M08.aarsVaeksningPct).stigning)} kr til ${krH(beregnHuslejestigning(8000, NETTOPRISINDEKS_2026M08.aarsVaeksningPct).efter)} kr om måneden. Nettoprisindekset er forbrugerprisindekset uden moms, told og afgifter, så de to kan stige hver for sig: i de samme 12 måneder steg nettoprisindekset ${npiRetning} forbrugerprisindeksets ${npiPct(FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct)} %. Skriv din egen husleje i feltet under "Hvor meget stiger huslejen efter nettoprisindekset?", så regner siden stigningen ud på dit beløb. Kilde: Danmarks Statistik PRIS04 og PRIS01, offentliggjort 10. september 2026.` },
       { question: "Hvad er forskellen på pristalsregulering og nettoprisindeks?", answer: `Nettoprisindekset er prisudviklingen uden moms, told og afgifter — ${npiPct(NETTOPRISINDEKS_2026M08.aarsVaeksningPct)} % i ${NETTOPRISINDELS_MAANED} — og det er grundlaget for huslejereguleringen: lejeloven § 5 justerer den eksisterende husleje efter nettoprisindekset. Forbrugerprisindekset er samme prisudvikling *med* de indirekte afgifter — ${npiPct(FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct)} % — så det også stiger, når en afgiftssats ændrer sig. Når lejeaftaler og aviser skriver "pristallet", er det ofte nettoprisindekset der menes.` },
       { question: "Hvem fastsætter huslejestigningen — huslejenævnet eller udlejeren?", answer: `Huslejestigningen for eksisterende lejemål fastsættes efter lejeloven § 5, som justerer huslejen efter nettoprisindekset. I kommuner med huslejenævnsvedtægt skal udlejeren indberette den påtænkte forhøjelse til huslejenævnet, som vurderer om den er urimelig — nævnet fastsætter altså ikke selv en sats pr. område. I øvrige kommuner afgør lejeaftalen alene, hvor meget huslejen må stige. Beregneren her kan derfor ikke sige, hvad din husleje bliver næste år — den viser, hvad du har til rådighed i dag. Er din husleje steget mere end din aftale tillader, kan du gøre ind på det over for udlejeren.` },
       ],
@@ -3281,11 +3289,11 @@ const sePages: Record<string, PageData> = {
         { question: "Hur beräknas promille?", answer: "Kalkylatorn använder Widmarks formel: promille = gram alkohol / (kroppsvikt × fördelningsfaktor) − 0,15 × timmar. Fördelningsfaktorn är cirka 0,68 för män och 0,55 för kvinnor. Kroppen bryter ner ungefär 0,15 ‰ per timme." },
         { question: "Vad är promillegränsen i Sverige?", answer: `Gränsen för rattfylleri är ${pct(PROMILLEGRANSE.se)} ‰. Vid ${pct(PROMILLEGROV_SE)} ‰ räknas det som grovt rattfylleri. Gränsen är betydligt lägre än i Danmark (${pct(PROMILLEGRANSE.da)} ‰).` },
         { question: "Hur mycket är ett standardglas?", answer: "Ett standardglas motsvarar 12 gram ren alkohol — ungefär en vanlig öl (33 cl), ett litet glas vin (12 cl) eller en snaps sprit (4 cl)." },
-        { question: "Hur många promille är 2 öl?", answer: `En vanlig öl på 33 cl är ca 12 gram alkohol, alltså ett standardglas. Två öl ger därför ca ${PROMILE_80_MAND(2)} promille hos en man på 80 kg och ${PROMILE_60_KVINDE(2)} hos en kvinna på 60 kg. Den svenska gränsen på 0,2 promille nås alltså efter två öl — och efter ytterligare en timme är det ungefär 0,15 promille mindre.` },
-        { question: "Hur många promille är farligt?", answer: `Promillen stiger kraftigt för varje standardglas: 4 öl på 80 kg är ${formatPromille(PROMILLE_4_OEL.promille)} promille, och 6 öl på 70 kg ger ${PROMILE_70_MAND(6)} promille. Det är inte promillet i sig som är farligt, utan vad du gör med bilen: från 0,2 promille är det redan rattfylleri, och vid 1,0 promille räknas det som grovt rattfylleri — den grad där du som utgångspunkt förlorar ditt körkort. Det gäller oavsett om du känner dig "lagom" eller inte.` },
-        { question: "Vad är promillegränsen i Danmark?", answer: "I Danmark går gränsen vid 0,5 promille — altså mer än dubbelt så hög som den svenska på 0,2. Det betyder att 2 öl till en man på 80 kg, som ger 0,44 promille, är lovligt i Danmark men rattonyktert i Sverige. Polen har också 0,2 promille, medan Storbritannien ligger på 0,8 (0,5 i Skottland)." },
+        { question: "Hur många promille är 2 öl?", answer: `En vanlig öl på 33 cl är ca 12 gram alkohol, alltså ett standardglas. Två öl ger därför ca ${PROMILE_80_MAND(2)} promille hos en man på 80 kg och ${PROMILE_60_KVINDE(2)} hos en kvinna på 60 kg. Den svenska gränsen på ${pct(PROMILLEGRANSE.se)} promille nås alltså efter två öl — och efter ytterligare en timme är det ungefär 0,15 promille mindre.` },
+        { question: "Hur många promille är farligt?", answer: `Promillen stiger kraftigt för varje standardglas: 4 öl på 80 kg är ${formatPromille(PROMILLE_4_OEL.promille)} promille, och 6 öl på 70 kg ger ${PROMILE_70_MAND(6)} promille. Det är inte promillet i sig som är farligt, utan vad du gör med bilen: från ${pct(PROMILLEGRANSE.se)} promille är det redan rattfylleri, och vid ${pct(PROMILLEGROV_SE)} promille räknas det som grovt rattfylleri — den grad där du som utgångspunkt förlorar ditt körkort. Det gäller oavsett om du känner dig "lagom" eller inte.` },
+        { question: "Vad är promillegränsen i Danmark?", answer: `I Danmark går gränsen vid ${pct(PROMILLEGRANSE.da)} promille — alltså mer än dubbelt så hög som den svenska på ${pct(PROMILLEGRANSE.se)}. Det betyder att 2 öl till en man på 80 kg, som ger ${PROMILE_80_MAND(2)} promille, är lovligt i Danmark men rattonyktert i Sverige. Polen har också ${pct(PROMILLEGRANSE_UDLAND.polen)} promille, medan Storbritannien ligger på ${pct(PROMILLEGRANSE_UDLAND.storbritannien)}.` },
         { question: "Är beräkningen exakt?", answer: "Nej, det är en uppskattning. Mat, ämnesomsättning, medicin och hälsa påverkar den faktiska promillen. Kör aldrig bil om du är osäker." },
-        { question: "När kan jag köra bil igen?", answer: `4 öl på 80 kg = ${PROMILLE_4_OEL_ER}. Det finns två olika tal, och det är det kortare som avgör: du får köra bil när promillen är under 0,2 ‰, och det tar ${formatTimer(PROMILLE_4_OEL.timerTilGraenseSe, "se")}. Helt nykter är du först efter ${formatTimer(PROMILLE_4_OEL.timerTilNul, "se")}, eftersom kroppen bara bryter ner ungefär 0,15 ‰ per timme. Tolv glas är alltså fullt lagliga kvar vid tre på natten och du är fortfarande berusad på morgonen. Morgonen efter är den farligaste, eftersom promillen ofta är högre än man tror.` },
+        { question: "När kan jag köra bil igen?", answer: `4 öl på 80 kg = ${PROMILLE_4_OEL_ER}. Det finns två olika tal, och det är det kortare som avgör: du får köra bil när promillen är under ${pct(PROMILLEGRANSE.se)} ‰, och det tar ${formatTimer(PROMILLE_4_OEL.timerTilGraenseSe, "se")}. Helt nykter är du först efter ${formatTimer(PROMILLE_4_OEL.timerTilNul, "se")}, eftersom kroppen bara bryter ner ungefär 0,15 ‰ per timme. Tolv glas är alltså fullt lagliga kvar vid tre på natten och du är fortfarande berusad på morgonen. Morgonen efter är den farligaste, eftersom promillen ofta är högre än man tror.` },
       ],
     },
     "del-regning": {

@@ -27266,3 +27266,61 @@ slice. Ny opgave **F5d** med de målte tal i planen.
 Metode: `curl` på de fire URL'er + `/sitemap.xml`, Python til at skære RSC-
 payloaden (`__next_f`) og `<script>`-blokkene fra, så kun den synlige markup
 tæller. Ingen skrivninger, ingen deploy-trigger.
+
+## 3/10 08:52 — CEO-kø punkt 0 lukket: /husleje's retning + svensk /promille-grænser
+
+**Baggrund.** CEO-køens punkt 0 meldte otte forkerede tal i `dage-til.ts`,
+`page-data.ts` og `dato-eksempler.ts`. Afklar på ren `HEAD` viste det, at
+**seks** allerede var rettet — de sidste iterationer havde lavet det, men
+punktet blev ikke afkrydset:
+
+| CEO-punkt | Kode | Status ved start |
+|---|---|---|
+| Valborg 30. april | `dage-til.ts:1269` `fixed month 4 day 30`, test `dage-til.test.ts:297` | ✅ rettet |
+| Svensk påskafton lørdag | test `:240` `se` → 2027-03-27 (lørdag) mod `da` 2027-03-26 | ✅ rettet |
+| Dansk sankthans fast 23./24. juni | `dage-til.ts:818`/`:883` `kind: "fixed"` — ikke midsummer | ✅ rettet, ingen «fri med løn» |
+| Påskeaften-FAQ «samme som langfredag» | ingen fund i korpuset | ✅ rettet |
+| `toUtcMidnight` i `Europe/Copenhagen` | `:1561` `Intl.DateTimeFormat` m. `DAGE_TIL_TIMEZONE` | ✅ rettet |
+| Svensk promille-FAQ | var svensk, ikke dansk | ⚠️ delvist — se nedenfor |
+| `dato-eksempler.ts:101` `maneder: 12` | `:101` med kommentar om 29. februar | ✅ rettet |
+| 1. advent 27/11–3/12 | `dage-til.test.ts:163` låser det for 1990–2050 | ✅ rettet |
+
+**De to ægte fejl.**
+
+**1. `/husleje` modsagde sit eget tal.** `page-data.ts:2100` skrev «Nettoprisindekset
+er forbrugerprisindekset uden moms, told og afgifter — **det er derfor tallet er
+lavere end** forbrugerprisindeksets 2,0 %», mens samme svar printede
+nettoprisindeksets **2,9 %**. Retningen er et facit om DST's to publicerede tal,
+ikke en følge af hvordan indekser defineres — i august 2026 er den anden
+vej end. Ny `nettoprisindeksUnderForbrugerprisindeks()` i `nettoprisindeks.ts`
+og `npiRetning` i `page-data.ts` gør sætningen til en aflæsning af tallene.
+
+**2. Den svenska `/promille`-FAQ havde fire håndskrevne grænser.** `0,2`/`1,0`/
+`0,5`/`0,8` stod som almindelig tekst i svenske svar. De var rigtige den dag de
+blev skrevet, og ville være forkerede den dag loven ændrede sig — samme
+fejlklasse som C84's metadata-drift. De læser nu `pct(PROMILLEGRANSE.se)`,
+`pct(PROMILLEGROV_SE)`, `pct(PROMILLEGRANSE.da)`,
+`pct(PROMILLEGRANSE_UDLAND.polen/.storbritannien)` og `PROMILE_80_MAND(2)`.
+Parentesen «(0,5 i Skottland)» er fjernet, fordi Skotland ikke står i
+`PROMILLEGRANSE_UDLAND` — tallet ville være ubundet igen.
+
+**Portene, målt.** `src/app/husleje/page.test.tsx` matcher
+`/(lavere|højere) end forbrugerprisindeksets/` og kræver, at retningen følger
+`aarsVaeksningPct`; porten fejler desuden hvis svaret slet ikke nævner en
+retning, så den næste skrivning ikke kan genindføre fejlen stille.
+`src/app/promille/page.test.tsx` skærer `faqItems` ud af den **svenska**
+`promille`-blok i `page-data.ts` (søgningen starter efter
+`const sePages`, fordi nøglen også findes i `daPages`) og fejler på ethvert
+`\d,\d (promille|‰)`. Mutationsmålt: genindsat «lavere end» → rød;
+genindsat `0,2`/`1,0` → rød.
+
+**Målt.** `npm run lint` (745 filer) · `npm run typecheck` (exit 0) ·
+`TZ=UTC npm run test` → **4012 tests i 253 filer, alle grønne** ·
+`npm run build` (exit 0). Bemærk: `locale-leak.mjs` skriver «1 ureviewet
+dansk streng» om `src/app/procent/page.tsx:621` («En lønsprocent kan du
+se:») — den er **før denne diff** og urørt her; gaten som helhed er grøn,
+for `locale-leak-gate.test.ts` passerer.
+
+**Ikke gjort.** Den danske `/promille`-FAQ (`page-data.ts:765`) har samme
+slags håndskrevne grænser for otte lande plus Skotland og «0,0 for
+nyansatte» — ikke rettet her, for opgaven holdt sig til de to punkt-0-fund.

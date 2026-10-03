@@ -167,6 +167,24 @@ export interface Huslejestigning {
 }
 
 /**
+ * Whether nettoprisindekset rose *less* than forbrugerprisindekset over the
+ * same twelve months.
+ *
+ * The direction is a fact about DST's two published figures, not about how
+ * price indexes are defined. `/husleje`'s FAQ used to assert it by hand —
+ * "det er derfor tallet er lavere end forbrugerprisindeksets 2,0 %" — while
+ * printing 2,9 % beside it, so the sentence contradicted the number in the
+ * same answer (CEO-kø punkt 0). The copy reads this verdict instead of
+ * claiming one, so it cannot drift away from `aarsVaeksningPct` again.
+ */
+export function nettoprisindeksUnderForbrugerprisindeks(
+  nettoprisindeksPct = NETTOPRISINDEKS_2026M08.aarsVaeksningPct,
+  forbrugerprisindeksPct = FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct
+): boolean {
+  return nettoprisindeksPct < forbrugerprisindeksPct;
+}
+
+/**
  * Applies a percentage increase to a rent and rounds the *increase* — not the
  * total — to whole kroner, which is how a rent notice is issued: the tenant
  * reads one number, "din husleje stiger X kr.", off a fixed starting rent.

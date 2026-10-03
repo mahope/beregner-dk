@@ -58,6 +58,32 @@ describe("husleje side — nettoprisindeks", () => {
     );
   });
 
+  test("siger kun den retning, tallene faktisk har", () => {
+    // FAQ'en renderes af `<FAQ>`, som er mocket væk i denne fil, så svaret
+    // læses fra de data siden faktisk serverer.
+    const svar = getPageData("husleje", "da")?.faqItems?.find((f) =>
+      f.question.startsWith("Hvor meget stiger huslejen")
+    );
+    expect(svar?.answer).toBeDefined();
+    const tekst = norm(svar?.answer ?? "");
+    // CEO-kø punkt 0: sætningen sagde «det er derfor tallet er lavere end
+    // forbrugerprisindeksets 2,0 %», mens den printede 2,9 % i samme svar.
+    // En læser kunne ikke finde ud af, hvilket af de to tal der var rigtigt.
+    const naevnt = /(lavere|højere) end forbrugerprisindeksets/;
+    const fundet = tekst.match(naevnt);
+    // Svaret skal overhovedet nævne en retning — ellers prøver denne test
+    // intet, og den næste skrivning kan genindføre den samme fejl.
+    expect(fundet).not.toBeNull();
+    const npiLavere =
+      NETTOPRISINDEKS_2026M08.aarsVaeksningPct < FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct;
+    const retning = fundet?.[1] ?? "";
+    expect(retning).not.toBe("");
+    expect(retning === "lavere").toBe(npiLavere);
+    // Og de to tal den sammenligner, skal stå i svaret begge.
+    expect(tekst).toContain(NETTOPRISINDEKS_2026M08.aarsVaeksningPct.toLocaleString("da-DK") + " %");
+    expect(tekst).toContain(FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct.toLocaleString("da-DK") + " %");
+  });
+
   test("beholder den eksisterende 30%-regel-tekst urørt", async () => {
     const html = renderToStaticMarkup(await HuslejePage());
     const tekst = norm(html.replace(/<[^>]*>/g, " ").replace(/<!-- -->/g, ""));

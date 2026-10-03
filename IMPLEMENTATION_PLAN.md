@@ -1,22 +1,25 @@
-STATUS: 3/10 08:35. CI grøn ved start (`37102093007`). **Gate:** `npm run lint` ·
-      `npm run typecheck` · `TZ=UTC npm run test` · `npm run build` — **grøn
-      3/10 08:33** (alle exit 0, **4010** tests i 253 filer, +4).
-      **Denne iteration:** de **3 åbne fund** fra sidste review (punkt 0, 2
-      MIDDEL + 1 LAV) er rettet og hver fik en port, der kan fejle: (1) `/topskat`
-      lovede «din marginalskat højst 52,06 %» medens værktøjet viste 55,9 %, så
-      sætningen læser nu begge tal fra `marginalSkatPct`; (2) `/timmar-i-aret`
-      havde danske rækkenavne i 7 af 7 rækker, så `perioderFor` nu tager et
-      sprog; (3) `/procent` havde et mellemrum FORAN pladsholderen, så den
-      renderede `span` hed « ? %». Alle tre mutationer målt røde. Se arkivet.
-      **Deploy:** 06:20-noten (`/dage-i-aaret`) verificeret på **indhold** —
-      ✅ 12 månedsrækker + summering 365/251/104, 3 FAQ-spørgsmål ordret, 301'er
-      begge veje, sitemap, **0** `NaN`; «0 «august»» var en naiv delstreng, fordi
-      «august**i**» indeholder «august» — dansk «august» er **0**. 06:45-noten er
-      **delvist** landet: 6 synlige `\d%` er tilbage → **F5d**.
-      **Næste iteration:** **F5d** (6 målte rester), så de 2 åbne VERIFICÉR-noter
-      fra 07:55/08:00/08:20 efter 12:30-vinduet; derefter CEO-køens punkt 0 (`dage-til.ts`: Valborg, svensk påskafton, dansk sankthans,
-      påskeaften-FAQ'en, `toUtcMidnight`).
-      BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
+STATUS: 3/10 08:52. CI grøn ved start (`37103671328`), ingen åbne PR'er.
+       **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+       `npm run build` — **grøn 3/10 08:51** (alle exit 0, **4012** tests i 253
+       filer, +2).
+       **Denne iteration:** CEO-køens **punkt 0 er lukket**. Seks af de otte
+       meldte fejl var allerede rettet i kode og test (verificeret i `git grep`:
+       Valborg 30/4, dansk langfredag 26/3-2027 mod svensk påskafton 27/3,
+       dansk sankthans fast 23./24. juni, ingen påskeaften-FAQ, `toUtcMidnight`
+       med `Intl` i `DAGE_TIL_TIMEZONE`, `maneder: 12` med kommentar,
+       1. advent låst mellem 27/11 og 3/12). De **to sidste** var ægte og er
+       rettet: (1) `/husleje` skrev «det er derfor tallet er **lavere** end
+       forbrugerprisindeksets 2,0 %» i samme svar som den printede **2,9 %** —
+       sætningen læser nu retningen fra `nettoprisindeksUnderForbrugerprisindeks()`;
+       (2) fire svar i **den svenska** `/promille`-FAQ skrev `0,2`/`1,0` som
+       håndskrevet tekst og læser nu `PROMILLEGRANSE`/`PROMILLEGROV_SE`/
+       `PROMILLEGRANSE_UDLAND`/`PROMILE_80_MAND`. Begge porte **målt røde** mod
+       den gamle tekst. Se arkivet.
+       **Næste iteration:** de 4 åbne VERIFICÉR-noter efter 12:30-vinduet
+       (sidste chance 12:30 — ellers `DEPLOY-MISSING`); derefter **F5d**
+       (6 målte rester) og en **feature** (senest sidste gang der var en:
+       `/timer-i-aret`), så kravet om én feature pr. tredje opgave holder.
+       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
 ## Fase 3 — trafik-drevet
 
