@@ -34,7 +34,7 @@ export default function HuslejeBudgetBeregner() {
       andreUdgifterHelp: "Tøj, hobby, etc.",
       oensketOpsparing: "Ønsket opsparing",
       maaned: "måned",
-      anbefaletMin: "10% (anbefalet min.)",
+      anbefaletMin: "10 % (anbefalet min.)",
       duKanBruge: "Du kan bruge på husleje",
       prMaaned: "pr. måned i husleje",
       iAltBolig: "I alt med el, vand og varme",
@@ -54,7 +54,7 @@ export default function HuslejeBudgetBeregner() {
       samletMaanedlig: "Samlet månedlig indkomst",
       tilgaengeligtHusleje: "Tilgængeligt til husleje",
       tipsTitle: "Tommelfingerregler for husleje",
-      tip30: "Husleje bør max være 30% af din nettoindkomst",
+      tip30: "Husleje bør max være 30 % af din nettoindkomst",
       tipInkluder: "Husleje + el + vand + varme + evt. internet",
       tipBuffer: "Hav altid 3-6 måneders udgifter i opsparing",
       tipDepositum: "Husk at spare op til 3 måneders husleje i depositum",
@@ -79,7 +79,7 @@ export default function HuslejeBudgetBeregner() {
       andreUdgifterHelp: "Kläder, hobby, etc.",
       oensketOpsparing: "Önskat sparande",
       maaned: "månad",
-      anbefaletMin: "10% (rekommenderat min.)",
+      anbefaletMin: "10 % (rekommenderat min.)",
       duKanBruge: "Du kan lägga på hyra",
       prMaaned: "per månad i hyra",
       iAltBolig: "Totalt med el, vatten och värme",
@@ -99,7 +99,7 @@ export default function HuslejeBudgetBeregner() {
       samletMaanedlig: "Total månadsinkomst",
       tilgaengeligtHusleje: "Tillgängligt för hyra",
       tipsTitle: "Tumregler för hyra",
-      tip30: "Hyran bör max vara 30% av din nettoinkomst",
+      tip30: "Hyran bör max vara 30 % av din nettoinkomst",
       tipInkluder: "Hyra + el + vatten + värme + ev. internet",
       tipBuffer: "Ha alltid 3–6 månaders utgifter i sparande",
       tipDepositum: "Kom ihåg att spara upp till 3 månaders hyra i deposition",
@@ -124,7 +124,7 @@ export default function HuslejeBudgetBeregner() {
       andreUdgifterHelp: "Klær, hobby, etc.",
       oensketOpsparing: "Ønsket sparing",
       maaned: "måned",
-      anbefaletMin: "10% (anbefalt min.)",
+      anbefaletMin: "10 % (anbefalt min.)",
       duKanBruge: "Du kan bruke på husleie",
       prMaaned: "per måned i husleie",
       iAltBolig: "Totalt med strøm, vann og varme",
@@ -144,7 +144,7 @@ export default function HuslejeBudgetBeregner() {
       samletMaanedlig: "Samlet månedlig inntekt",
       tilgaengeligtHusleje: "Tilgjengelig for husleie",
       tipsTitle: "Tommelfingerregler for husleie",
-      tip30: "Husleien bør maks være 30% av nettoinntekten din",
+      tip30: "Husleien bør maks være 30 % av nettoinntekten din",
       tipInkluder: "Husleie + strøm + vann + varme + evt. internett",
       tipBuffer: "Ha alltid 3–6 måneders utgifter i sparing",
       tipDepositum: "Husk å spare opp til 3 måneders husleie i depositum",
@@ -374,7 +374,7 @@ export default function HuslejeBudgetBeregner() {
       {/* Opsparing */}
       <div>
         <label htmlFor="huslejebudget-oensketopsparing" className="block text-sm font-medium mb-2 dark:text-gray-200">
-          {l.oensketOpsparing}: {opsparingProcent}% ({formatKr(beregning.opsparingBeloeb)}/{l.maaned})
+          {l.oensketOpsparing}: {opsparingProcent} % ({formatKr(beregning.opsparingBeloeb)}/{l.maaned})
         </label>
         <input id="huslejebudget-oensketopsparing"
           type="range"
@@ -385,9 +385,9 @@ export default function HuslejeBudgetBeregner() {
           className="w-full"
         />
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>0%</span>
+          <span>0 %</span>
           <span>{l.anbefaletMin}</span>
-          <span>30%</span>
+          <span>30 %</span>
         </div>
       </div>
 
@@ -488,7 +488,7 @@ export default function HuslejeBudgetBeregner() {
               <span>-{formatKr(andreUdgifter)}</span>
             </div>
             <div className="flex justify-between text-blue-600 dark:text-blue-400">
-              <span>{l.opsparing} ({opsparingProcent}%)</span>
+              <span>{l.opsparing} ({opsparingProcent} %)</span>
               <span>-{formatKr(beregning.opsparingBeloeb)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg border-t dark:border-gray-700 pt-3 dark:text-gray-200">

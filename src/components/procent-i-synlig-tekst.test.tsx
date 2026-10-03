@@ -25,24 +25,46 @@ import { describe, expect, test } from "vitest";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import type { Locale } from "@/lib/i18n";
+import AktieskatBeregner from "./AktieskatBeregner";
+import AndelsboligBeregner from "./AndelsboligBeregner";
+import ArveafgiftBeregner from "./ArveafgiftBeregner";
+import BarselBeregner from "./BarselBeregner";
+import BillaanBeregner from "./BillaanBeregner";
 import BolanBeregner from "./BolanBeregner";
 import BoliglaanBeregner from "./BoliglaanBeregner";
+import BruttoNettoBeregner from "./BruttoNettoBeregner";
+import BudgetBeregner from "./BudgetBeregner";
+import DagpengeBeregner from "./DagpengeBeregner";
+import DelRegningBeregner from "./DelRegningBeregner";
+import EnRepMaxBeregner from "./EnRepMaxBeregner";
 import FeriepengeBeregner from "./FeriepengeBeregner";
+import ForbrugslaanBeregner from "./ForbrugslaanBeregner";
 import { HomeContent } from "./HomeContent";
+import HuslejeBudgetBeregner from "./HuslejeBudgetBeregner";
 import KalorieBeregner from "./KalorieBeregner";
 import LaaneBeregner from "./LaaneBeregner";
 import LoenBeregner from "./LoenBeregner";
+import LonEfterSkattBeregner from "./LonEfterSkattBeregner";
+import MomsBeregner from "./MomsBeregner";
 import OpsparingsBeregner from "./OpsparingsBeregner";
 
 /** Samme mønster som `procentUdenMellemrum()` i `regnestykker.test.ts`. */
 const PROCENT_UDEN_MELLEMRUM = /[0-9]+(?:[.,][0-9]+)?%/g;
 
+/**
+ * Navne-undtagelser: «30 %-reglen» er **regelnavnet**, ikke en procent der er
+ * skrevet forkert — samme liste som i `regnestykker.test.ts`. De tre sprog
+ * skriver regelnavnet på hver sin måde, og de skal stå.
+ */
+const REGELNAVN = ["30% reglen", "30%-regeln", "30%-regelen"];
+
 function synligeProcenter(markup: string): string[] {
   // Fjern det, der ikke er synlig tekst: attributværdier og <script>/<style>.
-  const synlig = markup
+  let synlig = markup
     .replace(/<script[\s\S]*?<\/script>/g, " ")
     .replace(/<style[\s\S]*?<\/style>/g, " ")
     .replace(/="[^"]*"/g, '=""');
+  for (const navn of REGELNAVN) synlig = synlig.replaceAll(navn, " ");
   return [...new Set(synlig.match(PROCENT_UDEN_MELLEMRUM) ?? [])];
 }
 
@@ -86,6 +108,33 @@ const INTERPOLATIONSKOMPOENTER = [
   { navn: "laaneberegner", Component: LaaneBeregner },
 ] as const;
 
+/**
+ * F5c-slice 3/10 12:2x: de **næste** tretten beregnere med interpolationer.
+ * Målt med `grep -n '}%' src/components/*.tsx` og filtreret væk fra
+ * `style={{ width: "…" }}`, der ikke er synlig tekst. Rækken er taget i
+ * `/promille`-rækkefølge: den ældste fejlstype først.
+ *
+ * `BruttoNettoBeregner` kommer med, fordi `/brutto-netto` importerer **den** —
+ * `LoenBeregner` i listen ovenfor er en anden side. Dens linje 322 skrev
+ * desuden både «33.94%» og «33.94 kr.» råt, altså punktum i dansk markup.
+ */
+const INTERPOLATIONSKOMPOENTER_2 = [
+  { navn: "en-rep-max", Component: EnRepMaxBeregner },
+  { navn: "moms", Component: MomsBeregner },
+  { navn: "dagpenge", Component: DagpengeBeregner },
+  { navn: "budget", Component: BudgetBeregner },
+  { navn: "huslejebudget", Component: HuslejeBudgetBeregner },
+  { navn: "billaan", Component: BillaanBeregner },
+  { navn: "forbrugslaan", Component: ForbrugslaanBeregner },
+  { navn: "aktieskat", Component: AktieskatBeregner },
+  { navn: "andelsbolig", Component: AndelsboligBeregner },
+  { navn: "delregning", Component: DelRegningBeregner },
+  { navn: "lon-efter-skat", Component: LonEfterSkattBeregner },
+  { navn: "barsel", Component: BarselBeregner },
+  { navn: "arveafgift", Component: ArveafgiftBeregner },
+  { navn: "brutto-netto-gammel", Component: BruttoNettoBeregner },
+] as const;
+
 describe("procenttal i synlig markup", () => {
   test("forsidens brødtekst i da, se og no har 0 procenter uden mellemrum", () => {
     for (const locale of ["da", "se", "no"] as const) {
@@ -112,6 +161,16 @@ describe("procenttal i synlig markup", () => {
   test("de interpolerede procenter i de fem beregnere har 0 uden mellemrum", () => {
     // Mutation: sæt `{tal}%` tilbage i en af de fem, porten skal blive rød.
     for (const { navn, Component } of INTERPOLATIONSKOMPOENTER) {
+      for (const locale of ["da", "se", "no"] as const) {
+        const fund = synligeProcenter(renderMedLocale(locale, <Component />));
+        expect(fund, `${navn} (${locale})`).toEqual([]);
+      }
+    }
+  });
+
+  test("de interpolerede procenter i de næste tretten beregnere har 0 uden mellemrum", () => {
+    // Mutation: sæt `{row.pct}%` tilbage i `EnRepMaxBeregner`, porten skal blive rød.
+    for (const { navn, Component } of INTERPOLATIONSKOMPOENTER_2) {
       for (const locale of ["da", "se", "no"] as const) {
         const fund = synligeProcenter(renderMedLocale(locale, <Component />));
         expect(fund, `${navn} (${locale})`).toEqual([]);

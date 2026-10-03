@@ -39,31 +39,31 @@ const relationOptions: RelationOption[] = [
   {
     value: "barn",
     label: "Barn",
-    description: "15% boafgift",
+    description: "15 % boafgift",
     icon: Baby,
   },
   {
     value: "barnebarn",
     label: "Barnebarn",
-    description: "15% boafgift",
+    description: "15 % boafgift",
     icon: UserRound,
   },
   {
     value: "foraeldre",
     label: "Forældre",
-    description: "15% boafgift",
+    description: "15 % boafgift",
     icon: Users,
   },
   {
     value: "soeskende",
     label: "Søskende",
-    description: "15% boafgift + 25% tillægsafgift (op til 36,25%)",
+    description: "15 % boafgift + 25 % tillægsafgift (op til 36,25 %)",
     icon: UsersRound,
   },
   {
     value: "andre",
     label: "Andre (ven, fjern familie mv.)",
-    description: "15% boafgift + 25% tillægsafgift (op til 36,25%)",
+    description: "15 % boafgift + 25 % tillægsafgift (op til 36,25 %)",
     icon: Contact,
   },
 ];
@@ -307,7 +307,7 @@ export default function ArveafgiftBeregner() {
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-300">
-                  Boafgift (15%)
+                  Boafgift (15 %)
                 </span>
                 <span className="font-medium text-red-600 dark:text-red-400">
                   {formatKr(resultat.boafgift)}
@@ -317,7 +317,7 @@ export default function ArveafgiftBeregner() {
               {harTillaeg(relation) && (
                 <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                   <span className="text-gray-600 dark:text-gray-300">
-                    Tillægsafgift (25% af arv efter boafgift)
+                    Tillægsafgift (25 % af arv efter boafgift)
                   </span>
                   <span className="font-medium text-red-600 dark:text-red-400">
                     {formatKr(resultat.tillaegAfgift)}
@@ -350,7 +350,7 @@ export default function ArveafgiftBeregner() {
                 Effektiv afgiftssats
               </p>
               <p className="text-2xl font-bold dark:text-white">
-                {formatPct(resultat.effektivSats)}%
+                {formatPct(resultat.effektivSats)} %
               </p>
             </div>
 
@@ -360,7 +360,7 @@ export default function ArveafgiftBeregner() {
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
                   <strong>Bemærk:</strong> Som{" "}
                   {relation === "soeskende" ? "søskende" : "fjernere arving"}{" "}
-                  betales der både 15% boafgift og yderligere 25%
+                  betales der både 15 % boafgift og yderligere 25%
                   tillægsafgift. Tillægsafgiften beregnes af arven efter fradrag
                   af boafgiften (ikke af selve boafgiften). Der er intet
                   bundfradrag for tillægsafgiften.
@@ -376,13 +376,13 @@ export default function ArveafgiftBeregner() {
         <div className="flex justify-center gap-3">
           <CopyResultButton text={relation === "aegtefaelle"
             ? `Ingen afgift - ${formatKr(resultat.arvebeloeb)} arves afgiftsfrit`
-            : `Afgift: ${formatKr(resultat.samletAfgift)} (${formatPct(resultat.effektivSats)}%) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`} />
+            : `Afgift: ${formatKr(resultat.samletAfgift)} (${formatPct(resultat.effektivSats)} %) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`} />
           <ShareCalculation
             getShareableLink={getShareableLink}
             calculatorName="Arveafgiftberegner"
             resultSummary={relation === "aegtefaelle"
               ? `Ingen afgift - ${formatKr(resultat.arvebeloeb)} arves afgiftsfrit`
-              : `Afgift: ${formatKr(resultat.samletAfgift)} (${formatPct(resultat.effektivSats)}%) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`}
+              : `Afgift: ${formatKr(resultat.samletAfgift)} (${formatPct(resultat.effektivSats)} %) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`}
           />
         </div>
       )}

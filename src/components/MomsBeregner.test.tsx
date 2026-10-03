@@ -83,7 +83,7 @@ describe("MomsBeregner", () => {
   test("svensk opsummering følger den sats, brugeren valgte", async () => {
     renderMoms("se");
 
-    fireEvent.click(screen.getByRole("button", { name: /^6%/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^6 %/ }));
     fireEvent.click(screen.getByRole("button", { name: "Kopiera resultat" }));
 
     expect(sidsteKopieredeTekst()).toBe("1 000,00 kr utan moms + 60,00 kr moms (6 %) = 1 060,00 kr inkl. moms");
@@ -96,12 +96,12 @@ describe("MomsBeregner", () => {
   ])("viser $rate % i beregning, reference og formler", async ({ rate, factor, share, moms, total }) => {
     const { container } = renderMoms("se");
 
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${rate}%`) }));
+    fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${rate} %`) }));
 
     await waitFor(() => {
-      expect(screen.getByText(`Moms (${rate}%)`)).toBeVisible();
+      expect(screen.getByText(`Moms (${rate} %)`)).toBeVisible();
     });
-    expect(screen.getByRole("button", { name: new RegExp(`^${rate}%`) })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: new RegExp(`^${rate} %`) })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: /Lägg till moms/ })).toHaveAttribute("aria-pressed", "true");
     expect(getInfoItem(`Den valda momssatsen är ${rate} %`)).toBeVisible();
     expect(getInfoItem(`För att beräkna pris inkl. moms: Belopp × ${factor}`)).toBeInTheDocument();
@@ -134,16 +134,16 @@ describe("MomsBeregner", () => {
     renderMoms("da");
 
     await waitFor(() => {
-      expect(screen.getByText("Moms (25%)")).toBeInTheDocument();
+      expect(screen.getByText("Moms (25 %)")).toBeInTheDocument();
     });
-    expect(screen.queryByText("Moms (12%)")).not.toBeInTheDocument();
+    expect(screen.queryByText("Moms (12 %)")).not.toBeInTheDocument();
     expect(getInfoItem("For at beregne pris inkl. moms: Beløb × 1,25")).toBeInTheDocument();
   });
 
   test.each([12, 6])("deler svensk URL-state ved % %", async (rate) => {
     renderMoms("se");
 
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${rate}%`) }));
+    fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${rate} %`) }));
     fireEvent.click(screen.getByRole("button", { name: "Dela beräkning" }));
 
     const shareInput = screen.getByLabelText("Länk till beräkning") as HTMLInputElement;
@@ -163,9 +163,9 @@ describe("MomsBeregner", () => {
   test("beregner fratrækning med reduceret sats", async () => {
     const { container } = renderMoms("se");
 
-    fireEvent.click(screen.getByRole("button", { name: /^12%/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^12 %/ }));
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^12%/ })).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByRole("button", { name: /^12 %/ })).toHaveAttribute("aria-pressed", "true");
     });
     fireEvent.click(screen.getByRole("button", { name: /Dra av moms/ }));
     fireEvent.change(screen.getByLabelText("Belopp inkl. moms"), { target: { value: 1120 } });
@@ -193,7 +193,7 @@ describe("MomsBeregner", () => {
     const firstRender = renderMoms("se");
 
     await waitFor(() => {
-      expect(screen.getByText(`Moms (${rate}%)`)).toBeVisible();
+      expect(screen.getByText(`Moms (${rate} %)`)).toBeVisible();
     });
     expect(screen.getByLabelText("Belopp inkl. moms")).toHaveValue(1234.56);
     expect(screen.getByRole("button", { name: /Dra av moms/ })).toHaveAttribute("aria-pressed", "true");
@@ -209,7 +209,7 @@ describe("MomsBeregner", () => {
     renderMoms("se");
 
     await waitFor(() => {
-      expect(screen.getByText(`Moms (${rate}%)`)).toBeVisible();
+      expect(screen.getByText(`Moms (${rate} %)`)).toBeVisible();
     });
     expect(screen.getByLabelText("Belopp inkl. moms")).toHaveValue(1234.56);
     expect(screen.getByRole("button", { name: /Dra av moms/ })).toHaveAttribute("aria-pressed", "true");

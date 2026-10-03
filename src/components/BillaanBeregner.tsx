@@ -66,12 +66,12 @@ export default function BillaanBeregner() {
       carPrice: "Bilens pris",
       carPriceHelp: "Den samlede pris på bilen inkl. moms",
       downPayment: "Udbetaling",
-      downPaymentHelp: "Typisk 10-20% af bilens pris anbefales",
+      downPaymentHelp: "Typisk 10-20 % af bilens pris anbefales",
       term: "Løbetid",
       termUnit: "mdr.",
       termHelp: "Typisk 24-84 måneder (2-7 år)",
       interestRate: "Rentesats",
-      interestRateHelp: "Aktuelle billån renter: 5-8% (2026)",
+      interestRateHelp: "Aktuelle billån renter: 5-8 % (2026)",
       negativeRate: "Renten kan ikke være negativ",
       highRate: "Indtast en realistisk rentesats",
       monthlyPayment: "Månedlig ydelse",
@@ -89,7 +89,7 @@ export default function BillaanBeregner() {
       fullSummary: (payment: string, total: string) => `Månedlig ydelse: ${payment} | Samlet beløb: ${total}`,
       tipsTitle: "Sådan får du det bedste billån",
       tip1Title: "Sammenlign flere banker",
-      tip1: "renter varierer op til 3% mellem udbydere",
+      tip1: "renter varierer op til 3 % mellem udbydere",
       tip2Title: "Overvej udbetalingens størrelse",
       tip2: "større udbetaling = lavere månedlig ydelse",
       tip3Title: "Kort løbetid = mindre rente",
@@ -349,7 +349,7 @@ export default function BillaanBeregner() {
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-gray-600 dark:text-gray-400">{l.aprLabel}</span>
-                <span className="font-bold text-blue-600 dark:text-blue-400">{result.apr}%</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400">{result.apr} %</span>
               </div>
             </div>
           </div>

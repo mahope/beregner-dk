@@ -69,7 +69,7 @@ export default function BruttoNettoBeregner() {
       youNeedToEarn: "Du skal tjene",
       requiredGross: "Nødvendig bruttoløn",
       desiredPayoutResult: "Ønsket udbetaling",
-      amContribution: "AM-bidrag (8%)",
+      amContribution: "AM-bidrag (8 %)",
       baseTax: "Bundskat",
       municipalTaxLabel: "Kommuneskat",
       churchTax: "Kirkeskat",
@@ -96,7 +96,7 @@ export default function BruttoNettoBeregner() {
       youNeedToEarn: "Du behöver tjäna",
       requiredGross: "Nödvändig bruttolön",
       desiredPayoutResult: "Önskad utbetalning",
-      amContribution: "AM-bidrag (8%)",
+      amContribution: "AM-bidrag (8 %)",
       baseTax: "Grundskatt",
       municipalTaxLabel: "Kommunalskatt",
       churchTax: "Kyrkoskatt",
@@ -123,7 +123,7 @@ export default function BruttoNettoBeregner() {
       youNeedToEarn: "Du må tjene",
       requiredGross: "Nødvendig bruttolønn",
       desiredPayoutResult: "Ønsket utbetaling",
-      amContribution: "AM-bidrag (8%)",
+      amContribution: "AM-bidrag (8 %)",
       baseTax: "Bunnsskatt",
       municipalTaxLabel: "Kommuneskatt",
       churchTax: "Kirkeskatt",
@@ -234,6 +234,10 @@ export default function BruttoNettoBeregner() {
 
   const formatKr = (n: number) => n.toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK");
 
+  // F5c 3/10: den effektive sats er et kommatal (33,3), så den skal have
+  // decimalkomma — rå interpolation skrev «33.3%» og «33.3 kr.» i markup.
+  const formatPct = (n: number) => n.toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK", { maximumFractionDigits: 1 });
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
       <div className="grid md:grid-cols-2 gap-6">
@@ -319,7 +323,7 @@ export default function BruttoNettoBeregner() {
               </div>
 
               <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-400">
-                <strong>{l.effectiveTax}:</strong> {result.effektivSkat}% — {l.effectiveTaxDesc} {result.effektivSkat} kr.
+                <strong>{l.effectiveTax}:</strong> {formatPct(result.effektivSkat)} % — {l.effectiveTaxDesc} {formatPct(result.effektivSkat)} kr.
               </div>
             </div>
           ) : (

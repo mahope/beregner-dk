@@ -241,7 +241,7 @@ export default function MomsBeregner() {
                     : "border-gray-200 dark:border-gray-600 dark:text-gray-300"
                 }`}
               >
-                <div className="font-semibold">{o.sats}%</div>
+                <div className="font-semibold">{o.sats} %</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">{o.navn}</div>
               </button>
             ))}
@@ -285,7 +285,7 @@ export default function MomsBeregner() {
           </p>
         </div>
         <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{`${l.tblMoms} (${effectiveMomssats}%)`}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{`${l.tblMoms} (${effectiveMomssats} %)`}</p>
           <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             <AnimatedNumber value={beregning.momsBeloeb} formatFn={formatKr} />
           </p>

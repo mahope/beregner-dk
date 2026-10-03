@@ -124,7 +124,7 @@ export default function EnRepMaxBeregner() {
                 <div className="space-y-1">
                   {PROCENT_TABEL.map((row) => (
                     <div key={row.pct} className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">{row.pct}% · {row.reps} {l.repsLabel}</span>
+                      <span className="text-gray-600 dark:text-gray-400">{row.pct} % · {row.reps} {l.repsLabel}</span>
                       <span className="font-medium dark:text-gray-200">{fmt(vaegtVedProcent(r.oneRM, row.pct))} kg</span>
                     </div>
                   ))}

@@ -61,13 +61,13 @@ export default function DagpengeBeregner() {
       employmentSupplementSuffix: "kr/md hvis du opfylder kravene.",
       maxRateHit: "Du rammer maxsatsen på",
       calcBasis: "Din løn giver et beregningsgrundlag på",
-      afterAM: "(efter 8% AM-bidrag).",
+      afterAM: "(efter 8 % AM-bidrag).",
       benefitsEqual: "Dagpengene svarer til",
       ofGross: "af din bruttoløn.",
       calcExplain: "Beregning:",
-      salaryAfterAM: "(løn efter AM-bidrag) × 90% =",
+      salaryAfterAM: "(løn efter AM-bidrag) × 90 % =",
       infoTitle: "Officielle dagpenge-satser 2026",
-      info1: "Dagpenge = 90% af løn efter AM-bidrag (8%)",
+      info1: "Dagpenge = 90 % af løn efter AM-bidrag (8 %)",
       info2: "Max dagpengesats:",
       info3: "Med beskæftigelsestillæg (første 3 mdr): op til",
       info4: dagpengePeriodeTekst("da"),
@@ -95,13 +95,13 @@ export default function DagpengeBeregner() {
       employmentSupplementSuffix: "kr/mån om du uppfyller kraven.",
       maxRateHit: "Du når maxbeloppet på",
       calcBasis: "Din lön ger ett beräkningsunderlag på",
-      afterAM: "(efter 8% AM-bidrag).",
+      afterAM: "(efter 8 % AM-bidrag).",
       benefitsEqual: "Dagpenningen motsvarar",
       ofGross: "av din bruttolön.",
       calcExplain: "Beräkning:",
-      salaryAfterAM: "(lön efter AM-bidrag) × 90% =",
+      salaryAfterAM: "(lön efter AM-bidrag) × 90 % =",
       infoTitle: "Officiella dagpenningsatser 2026",
-      info1: "Dagpenning = 90% av lön efter AM-bidrag (8%)",
+      info1: "Dagpenning = 90 % av lön efter AM-bidrag (8 %)",
       info2: "Max dagpenningsats:",
       info3: "Med sysselsättningstillägg (första 3 mån): upp till",
       info4: dagpengePeriodeTekst("se"),
@@ -129,13 +129,13 @@ export default function DagpengeBeregner() {
       employmentSupplementSuffix: "kr/md hvis du oppfyller kravene.",
       maxRateHit: "Du treffer makssatsen på",
       calcBasis: "Lønnen din gir et beregningsgrunnlag på",
-      afterAM: "(etter 8% AM-bidrag).",
+      afterAM: "(etter 8 % AM-bidrag).",
       benefitsEqual: "Dagpengene tilsvarer",
       ofGross: "av bruttolønnen din.",
       calcExplain: "Beregning:",
-      salaryAfterAM: "(lønn etter AM-bidrag) × 90% =",
+      salaryAfterAM: "(lønn etter AM-bidrag) × 90 % =",
       infoTitle: "Offisielle dagpengesatser 2026",
-      info1: "Dagpenger = 90% av lønn etter AM-bidrag (8%)",
+      info1: "Dagpenger = 90 % av lønn etter AM-bidrag (8 %)",
       info2: "Maks dagpengesats:",
       info3: "Med sysselsettingstillegg (første 3 mnd): opptil",
       info4: dagpengePeriodeTekst("no"),
@@ -324,7 +324,7 @@ export default function DagpengeBeregner() {
 
             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               <p>
-                {l.benefitsEqual} <strong>{resultat.procentAfLoen}%</strong> {l.ofGross}{" "}
+                {l.benefitsEqual} <strong>{fmtNum(resultat.procentAfLoen)} %</strong> {l.ofGross}{" "}
                 {l.calcExplain} {fmtNum(resultat.beregningsgrundlag)} kr {l.salaryAfterAM} {fmtNum(Math.round(resultat.beregningsgrundlag * 0.9))} kr
               </p>
             </div>

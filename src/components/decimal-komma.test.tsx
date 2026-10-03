@@ -17,7 +17,9 @@
  */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import AktieskatBeregner from "./AktieskatBeregner";
 import ArveafgiftBeregner from "./ArveafgiftBeregner";
+import BruttoNettoBeregner from "./BruttoNettoBeregner";
 import LaaneBeregner from "./LaaneBeregner";
 import LoenBeregner from "./LoenBeregner";
 import BoliglaanBeregner from "./BoliglaanBeregner";
@@ -99,13 +101,13 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
       const tekst = helTekst(medArvebeloeb("da"));
       // Boafgiften er 15 %, men kun af arven *over* bundfradraget på
       // 392.300, så den effektive sats er 91155/1000000 = 9,1 %.
-      expect(tekst).toContain("9,1%");
+      expect(tekst).toContain("9,1 %");
       expect(tekst).not.toContain("9.1%");
     });
 
     test("se: den synlige sats skriver komma, ikke punktum", () => {
       const tekst = helTekst(medArvebeloeb("se"));
-      expect(tekst).toContain("9,1%");
+      expect(tekst).toContain("9,1 %");
       expect(tekst).not.toContain("9.1%");
     });
 
@@ -117,8 +119,55 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
       // findes nogen steder i repoet — listen var tom og testen grøn uden
       // at have set noget.
       const delt = await tekstIKlipbordet();
-      expect(delt).toContain("9,1%");
+      expect(delt).toContain("9,1 %");
       expect(delt).not.toContain("9.1%");
+    });
+  });
+
+  describe("/aktieskat (effektiv sats)", () => {
+    /**
+     * F5c 3/10 12:2x: `AktieskatBeregner.tsx` skrev den effektive sats råt, så
+     * en gevinst på 50.000 kr. gav «Effektiv skat: 17.5%» — punktum i dansk
+     * markup. `procent-i-synlig-tekst.test.tsx` kan ikke se den, fordi
+     * komponenten først regner når gevinstfeltet er udfyldt.
+     */
+    function medGevinst(locale: Locale) {
+      const { container } = renderIn(<AktieskatBeregner />, locale);
+      const felt = container.querySelector<HTMLInputElement>("#aktieskat-gevinst");
+      if (!felt) throw new Error("#aktieskat-gevinst ikke i DOM'en");
+      fireEvent.change(felt, { target: { value: "50000" } });
+      return container;
+    }
+
+    test("da: den effektive sats skriver komma og mellemrum", () => {
+      const tekst = helTekst(medGevinst("da"));
+      // 50.000 kr. giver præcis 27 %, så mønstret tillader en decimal —
+      // det er punktum-vs-komma og mellemrummet der dømmes. Den negative
+      // påstand fanger rå interpolation, som skrev «27%» og «36.045%».
+      expect(tekst).toMatch(/Effektiv skat: \d{1,2}(?:,\d)? %/);
+      expect(tekst).not.toMatch(/Effektiv skat: \d+(?:[.,]\d+)?%/);
+    });
+
+    test("se: den effektive sats skriver komma og mellemrum", () => {
+      const tekst = helTekst(medGevinst("se"));
+      expect(tekst).toMatch(/Effektiv skat: \d{1,2}(?:,\d)? %/);
+    });
+  });
+
+  describe("/brutto-netto (effektiv skat, også i tallet foran kr.)", () => {
+    test("da: satsen og beløbet skriver komma og mellemrum", () => {
+      const { container } = renderIn(<BruttoNettoBeregner />, "da");
+      const tekst = helTekst(container);
+      // 25.000 kr. netto giver ~33,3 % effektiv skat i 2026.
+      expect(tekst).toMatch(/Effektiv skat: \d{1,2},\d %/);
+      expect(tekst).toMatch(/For hver 100 kr\. du tjener, betaler du \d{1,2},\d kr\./);
+      expect(tekst).not.toMatch(/\d+\.\d%/);
+      expect(tekst).not.toMatch(/\d+\.\d kr\./);
+    });
+
+    test("se: satsen skriver komma og mellemrum", () => {
+      const { container } = renderIn(<BruttoNettoBeregner />, "se");
+      expect(helTekst(container)).toMatch(/Effektiv skatt: \d{1,2},\d %/);
     });
   });
 

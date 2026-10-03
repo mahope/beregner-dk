@@ -73,7 +73,7 @@ export default function ForbrugslaanBeregner() {
       termUnit: "mdr.",
       termHelp: "Typisk 12-120 måneder (1-10 år)",
       interestRate: "Rentesats",
-      interestRateHelp: "Forbrugslån: typisk 7-20% (2026)",
+      interestRateHelp: "Forbrugslån: typisk 7-20 % (2026)",
       negativeRate: "Renten kan ikke være negativ",
       highRate: "Indtast en realistisk rentesats",
       monthlyPayment: "Månedlig ydelse",
@@ -98,7 +98,7 @@ export default function ForbrugslaanBeregner() {
       tip4Title: "Overvej andre muligheder",
       tip4: "boliglån er ofte billigere hvis du har sikkerhed",
       tip5Title: "Lån kun hvad du har råd til",
-      tip5: "undgå at bruge mere end 30-40% af din rådighedsbeløb",
+      tip5: "undgå at bruge mere end 30-40 % af din rådighedsbeløb",
       affiliateTitle: "Sammenlign forbrugslån",
       affiliateSubtitle: "Find den bedste rente til dit behov",
       tableTitle: "Ydelsestabel",
@@ -348,7 +348,7 @@ export default function ForbrugslaanBeregner() {
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-gray-600 dark:text-gray-400">{l.aprLabel}</span>
-                <span className="font-bold text-green-600 dark:text-green-400">{result.apr}%</span>
+                <span className="font-bold text-green-600 dark:text-green-400">{result.apr} %</span>
               </div>
             </div>
           </div>

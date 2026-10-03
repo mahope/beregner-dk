@@ -172,7 +172,7 @@ export default function BudgetBeregner() {
                   <div className="text-xl font-bold text-gray-900 dark:text-white">{fmt(totalExpenses)} {currency}</div>
                 </div>
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{expenseShare}% {l.ofIncome}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{expenseShare} % {l.ofIncome}</div>
                   <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full mt-2 overflow-hidden">
                     <div className={`h-full rounded-full ${expenseShare > 100 ? "bg-red-500" : expenseShare > 80 ? "bg-yellow-500" : "bg-green-500"}`}
                       style={{ width: `${Math.min(expenseShare, 100)}%` }} />

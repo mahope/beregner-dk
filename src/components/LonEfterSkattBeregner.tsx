@@ -10,6 +10,10 @@ import { beregnSvenskSkatt, SVENSK_SKATT_2026 } from "@/lib/svensk-skatt";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("sv-SE");
 
+// F5c 3/10: procenterne er kommatal (32,38), så de må ikke gå gennom `fmt`
+// — den runder — men skal have svensk decimalkomma og et mellemrum.
+const fmtPct = (n: number) => n.toLocaleString("sv-SE", { maximumFractionDigits: 2 });
+
 export default function LonEfterSkattBeregner() {
   const [lon, setLon] = useState<number>(35000);
   const [periode, setPeriode] = useState<"manad" | "ar">("manad");
@@ -175,7 +179,7 @@ export default function LonEfterSkattBeregner() {
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
                   <div className="text-xs text-gray-500 dark:text-gray-400">Effektiv skatt</div>
                   <div className="text-xl font-bold text-gray-900 dark:text-white">
-                    {resultat.effektivSkattProcent}%
+                    {fmtPct(resultat.effektivSkattProcent)} %
                   </div>
                 </div>
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
@@ -192,12 +196,12 @@ export default function LonEfterSkattBeregner() {
                   <span className="dark:text-gray-200">−{fmt(resultat.grundavdrag)} kr</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Kommunalskatt ({kommunalskatt}%)</span>
+                  <span className="text-gray-600 dark:text-gray-400">Kommunalskatt ({fmtPct(kommunalskatt)} %)</span>
                   <span className="dark:text-gray-200">{fmt(resultat.kommunalSkatt)} kr</span>
                 </div>
                 {resultat.statligSkatt > 0 && (
                   <div className="flex justify-between text-red-600 dark:text-red-400">
-                    <span>Statlig inkomstskatt (20%)</span>
+                    <span>Statlig inkomstskatt (20 %)</span>
                     <span>{fmt(resultat.statligSkatt)} kr</span>
                   </div>
                 )}
@@ -244,7 +248,7 @@ export default function LonEfterSkattBeregner() {
 
       <div className="flex justify-center mt-6 gap-3">
         <CopyResultButton
-          text={resultat ? `Nettolön: ${fmt(resultat.nettoMaaned)} kr/mån (effektiv skatt ${resultat.effektivSkattProcent}%)` : ""}
+          text={resultat ? `Nettolön: ${fmt(resultat.nettoMaaned)} kr/mån (effektiv skatt ${fmtPct(resultat.effektivSkattProcent)} %)` : ""}
         />
         <ShareCalculation
           getShareableLink={getShareableLink}

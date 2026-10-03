@@ -4,6 +4,8 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
+import { useLocale } from '@/components/LocaleProvider';
+import { formatNumber } from '@/lib/format';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { SATSER_2026 } from "@/lib/satser-2026";
@@ -18,6 +20,7 @@ const ASK_MAX_DEPOSIT = SATSER_2026.askLoft;
 type DepotType = 'frit' | 'ask' | 'begge';
 
 export default function AktieskatBeregner() {
+  const { locale } = useLocale();
   const [depotType, setDepotType] = useState<DepotType>('begge');
   const [gevinst, setGevinst] = useState<string>('');
   const [tab, setTab] = useState<string>('');
@@ -103,6 +106,10 @@ export default function AktieskatBeregner() {
   }, [gevinst, tab]);
 
   const formatKr = (n: number) => n.toLocaleString('da-DK');
+
+  // F5c 3/10: den effektive sats er et kommatal (17,4), så den skal gå gennem
+  // `formatNumber` — ellers skriver den «17.4%» med punktum i dansk markup.
+  const formatPct = (n: number) => formatNumber(n, locale, { maximumFractionDigits: 1 });
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
@@ -203,12 +210,12 @@ export default function AktieskatBeregner() {
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 space-y-0.5">
                     {result.fritSkatLav > 0 && (
-                      <div>27% af {formatKr(Math.min(result.nettoGevinst, PROGRESSION_LIMIT))} kr. = {formatKr(result.fritSkatLav)} kr.</div>
+                      <div>27 % af {formatKr(Math.min(result.nettoGevinst, PROGRESSION_LIMIT))} kr. = {formatKr(result.fritSkatLav)} kr.</div>
                     )}
                     {result.fritSkatHoej > 0 && (
-                      <div>42% af {formatKr(result.nettoGevinst - PROGRESSION_LIMIT)} kr. = {formatKr(result.fritSkatHoej)} kr.</div>
+                      <div>42 % af {formatKr(result.nettoGevinst - PROGRESSION_LIMIT)} kr. = {formatKr(result.fritSkatHoej)} kr.</div>
                     )}
-                    <div className="text-gray-400">Effektiv skat: {result.fritEffektivSats}%</div>
+                    <div className="text-gray-400">Effektiv skat: {formatPct(result.fritEffektivSats)} %</div>
                   </div>
                 </div>
               )}
@@ -223,7 +230,7 @@ export default function AktieskatBeregner() {
                     {formatKr(result.askEfterSkat)} kr. efter skat
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    17% lagerbeskatning (max indskud: {formatKr(ASK_MAX_DEPOSIT)} kr.)
+                    17 % lagerbeskatning (max indskud: {formatKr(ASK_MAX_DEPOSIT)} kr.)
                   </div>
                 </div>
               )}
@@ -269,7 +276,7 @@ export default function AktieskatBeregner() {
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <h2 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Frit depot vs. ASK</h2>
           <p className="text-sm text-blue-700 dark:text-blue-400">
-            I et frit depot beskattes du 27/42% ved realisering. I en aktiesparekonto (ASK) beskattes du kun 17%, men der er lagerbeskatning og max indskud på {formatKr(ASK_MAX_DEPOSIT)} kr.
+            I et frit depot beskattes du 27/42 % ved realisering. I en aktiesparekonto (ASK) beskattes du kun 17 %, men der er lagerbeskatning og max indskud på {formatKr(ASK_MAX_DEPOSIT)} kr.
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
