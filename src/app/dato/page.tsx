@@ -10,7 +10,7 @@ import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
-import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm, getDageTilAnswer, formatTargetDate,
+import { dageTilbageIAaret, getDageTilHubRækker, isDageTilLocale, formatTargetDate,
 } from "@/lib/dage-til";
 import { denneMaanedEksempel, maanedEksempel } from "@/lib/dato-eksempler";
 import { helligdagsnavne } from "@/lib/helligdage";
@@ -25,29 +25,33 @@ export default async function DatoPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("dato", locale) || getPageData("dato", "da")!;
-  // Search Console (2026-08-27→09-24) har "hvor mange dage er der til 1 december"
-  // (996 visninger, pos. 5) og "hvor mange dage er der tilbage af 2026" (223, pos. 5)
-  // som to af sidens fire søgninger. `/dage-til/*`-siderne svarer på begge, men
-  // `/dato` linkede til ingen af dem: hele kæden lå kun den anden vej.
-  // Listen linkede til de 15 dage-til-sider uden at svare selv. GSC's to
-  // største søgninger på siden er "hvor mange dage er der til 1 december"
-  // (1.131 visninger, pos. 5) og "hvor mange dage er der til den 24 december"
-  // (1.013, pos. 5) — begge beskriver den side, der *linker*, men som hverken
-  // har tallet eller datoen stående. Derfor får hver række dagens antal fra
-  // `getDageTilAnswer` — samme funktion som `/dage-til/*` selv bruger, så et
-  // tal i listen kan ikke glide fra sit eget regnestykke.
+  // Search Console (2026-09-03→10-01) har "hvor mange dage er der til 1 december"
+  // (1.219 visninger, pos. 5) og "hvor mange dage er der til den 24 december"
+  // (1.001, pos. 5) som sidens to største søgninger, og 863 klik på 131.320
+  // visninger. `/dage-til/*` svarer på begge, men `/dato` linkede til ingen af
+  // dem først: hele kæden lå kun den anden vej. Listen svarer nu selv, og den
+  // henter rækkerne fra `getDageTilHubRækker` — samme funktion `/dage-til`-hubben
+  // og `/dage-til/*` selv bruger, så et tal i listen kan ikke glide fra sit eget
+  // regnestykke, og rækkerne kommer **nærmeste først**.
+  //
+  // Den sidste egenskab er rettelsen: listen lå i `getDageTilEvents`-rækkefølge,
+  // altså begivenhedernes rækkefølge og ikke datoernes, så Halloween (28 dage
+  // den 3. oktober) lå som række 13 og «1. december» (59 dage) som række 6.
+  // Den læser der spørger «hvor mange dage er der til 1 december» skulle rulle
+  // forbi tolv andre datoer for at finde sit eget svar, og «Hvor mange dage er
+  // der fra påske til pinse» (169 dage) lå oven i «påskedag» (176 dage) — de var
+  // ikke engang sorteret efter tallet. `getDageTilHubRækker` sorterer på
+  // `days`, og ved lige dag taler spørgsmålet, så rækkefølgen aldrig afhænger af
+  // rækkefølgen i begivenhedslisten.
   const dageTilLinks = isDageTilLocale(locale)
-    ? getDageTilEvents(locale).map((event) => {
-        const answer = getDageTilAnswer(event, locale, new Date());
-        return {
-          href: `${getDageTilPrefix(locale)}${dageTilArm(event, locale).slug}`,
-          question: dageTilArm(event, locale).copy.question,
-          days: answer.days,
-          target: formatTargetDate(answer.targetDate, locale),
-          weeks: answer.weeks,
-          daysLeft: answer.daysLeft,
-        };
-      })
+    ? getDageTilHubRækker(locale, new Date()).map((raekke) => ({
+        href: raekke.href,
+        question: raekke.question,
+        days: raekke.days,
+        target: formatTargetDate(raekke.targetDate, locale),
+        weeks: raekke.weeks,
+        daysLeft: raekke.daysLeft,
+      }))
     : [];
   // "hvor mange dage er der tilbage af 2026?" (227 visninger, pos. 5 i dansk
   // GSC) og "dagar till 31 dec" (367 visninger i svensk) er to søgninger om
@@ -760,8 +764,8 @@ export default async function DatoPage() {
       <div className="prose dark:prose-invert max-w-none mt-12">
         <h2>
           {locale === "se"
-            ? "Datum som folk oftast räknar ner till"
-            : "Datoer folk oftest tæller ned til"}
+            ? "Hur många dagar är det till …?"
+            : "Hvor mange dage er der til …?"}
         </h2>
         <p>
           {locale === "se"

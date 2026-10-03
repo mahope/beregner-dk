@@ -59,7 +59,7 @@ describe("dato page", () => {
   test("da linker til alle dage-til-sider og videre til /nedtaelling", async () => {
     const html = renderToStaticMarkup(await DatoPage());
 
-    expect(html).toContain("Datoer folk oftest tæller ned til");
+    expect(html).toContain("Hvor mange dage er der til …?");
     for (const slug of getDageTilSlugs("da")) {
       expect(html, slug).toContain(`href="/dage-til/${slug}"`);
     }
@@ -74,7 +74,7 @@ describe("dato page", () => {
 
     const html = renderToStaticMarkup(await DatoPage());
 
-    expect(html).toContain("Datum som folk oftast räknar ner till");
+    expect(html).toContain("Hur många dagar är det till …?");
     for (const slug of getDageTilSlugs("se")) {
       expect(html, slug).toContain(`href="/dagar-till/${slug}"`);
     }
@@ -557,14 +557,62 @@ describe("dato page — dage-til-listen svarer selv", () => {
     vi.mocked(getLocale).mockResolvedValue("se");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
     const svensk = renderToStaticMarkup(await DatoPage());
-    expect(svensk).toContain("Datum som folk oftast räknar ner till");
-    expect(svensk).not.toContain("Datum folk oftast räknar ner till");
+    expect(svensk).toContain("Hur många dagar är det till …?");
+    expect(svensk).not.toContain("Datum som folk oftast räknar ner till");
 
     vi.mocked(getLocale).mockResolvedValue("da");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
     const dansk = renderToStaticMarkup(await DatoPage());
-    expect(dansk).toContain("Datoer folk oftest tæller ned til");
+    expect(dansk).toContain("Hvor mange dage er der til …?");
+    expect(dansk).not.toContain("Datoer folk oftest tæller ned til");
     expect(dansk).not.toContain("Datum");
+  });
+
+  // Listen lå i `getDageTilEvents`-rækkefølge, altså begivenhedernes rækkefølge
+  // og ikke datoernes. Målt 3/10 på den live side: Halloween (28 dage) lå som
+  // række 13, «1. december» (59 dage) som række 6, og «fra påske til pinse»
+  // (169 dage) lå oven i «påskedag» (176 dage) — de var ikke engang sorteret
+  // efter tallet. Sidens to største søgninger er «hvor mange dage er der til
+  // 1 december» (1.219 visninger, pos. 5) og «… til den 24 december» (1.001,
+  // pos. 5), og læseren skulle rulle forbi tolv andre datoer for at se sit
+  // eget svar. Porten læser rækkerne i den rækkefølge de står i HTML'en og
+  // dømmer, at antallet falder, så den kan ikke gå fra den synlige tekst.
+  test("nedtællingslisten står med den nærmeste dato først", async () => {
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await DatoPage());
+
+      // Kun rækkerne i selve listen: de ligger efter overskriften og før
+      // afsnittet om ofte stillede spørgsmål, så de øvrige månedstal på
+      // siden ikke kan blande sig i.
+      const start = html.indexOf("<ul><li><a href=");
+      const slut = html.indexOf("</ul>", start);
+      expect(start, `${locale}: listen ikke fundet`).toBeGreaterThan(-1);
+      // React skriver `<!-- -->` mellem et interpoleret tal og den ordlyd der
+      // følger, så markeringen strippes før der læses. Hovedtallet er det
+      // **første** «… dage»/«… dagar» i rækken; det næste står i parentesen
+      // («59 dage (8 uger og 3 dage)»), og på dansk står det i `<strong>` mens
+      // den svenske række ikke har strong. Rækkerne læses derfor fra den
+      // synlige tekst, som er det læseren ser.
+      const liste = html.slice(start, slut).replaceAll("<!-- -->", "");
+      const dage = liste
+        .split("</li>")
+        .map((li) => li.match(/([\d.,]+)\s*(?:dage|dagar)/)?.[1])
+        .filter((n): n is string => n !== undefined)
+        .map((n) => Number(n.replace(/[.,]/g, "")));
+
+      expect(dage.length, `${locale}: ingen rækker`).toBeGreaterThan(10);
+      // Hver rækkes antal skal være det `getDageTilAnswer` giver den samme dag,
+      // så listen heller ikke kan ligge forude i forhold til sit eget regnestykke.
+      const forventet = getDageTilEvents(locale)
+        .map((event) => getDageTilAnswer(event, locale, new Date()).days)
+        .sort((a, b) => a - b);
+      expect(dage, `${locale}: rækkerne er ikke de samme tal`).toEqual(forventet);
+      expect(dage, `${locale}: listen er ikke sorteret stigende`).toEqual(
+        [...dage].sort((a, b) => a - b)
+      );
+    }
   });
 
   // Restdagen i parentesen var skrevet "dage"/"dagar" uden at føje et tal til,

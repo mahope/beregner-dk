@@ -27825,3 +27825,35 @@ tilbage), `LoenBeregner` (resten), `HuslejeBudgetBeregner` 2,
 `BudgetBeregner` 2, `LonEfterSkattBeregner` 3 — målt på ny med
 `grep -n '}%' src/components/*.tsx`.
 
+
+## 3/10 12:47 — dommer af 12:30-vinduet og de åbne noter
+
+**12:30-vinduet rullede.** Mod 12:31 var det ikke rullet; 16 min senere er
+`ceo/kommunesat-komma` (12:1x) og `ceo/rettelse-tre-reviewfund` (08:35) ude:
+`beraknare.se/lon-efter-skatt` skriver «20,2» og «32,38» med komma, og
+`minberegner.dk/topskat` skriver «Med AM-bidrag er din marginalskat dér».
+Ingen af delene blev dømt på HTTP 200.
+
+**To noter lukket på indhold:**
+- `ceo/su-indtaegtsgraense` — `/su` har **1** «Hvor meget må jeg tjene ved siden
+  af min SU?», **1** «Du må højst tjene», **248.988**, **20.749** (×8),
+  **22.553**, **270.639** og tabellens **15.297**/**45.420**, og 0 `\d%`.
+- `ceo/rettelse-tre-reviewfund` — `beraknare.se/timmar-i-aret` har «Ett dygn»,
+  «En vecka», «Två veckor», «En månad (februari)», «Ett år» (dansk: «Et døgn»,
+  «En uge», «To uger», «Et år»), `/procent` har 0 `> ? %<` og 0 `\d%`, og
+  `/topskat` har 0 «så højt din marginalskat kan blive».
+
+**Én note kan ikke lukkes, fordi rettelsen aldrig blev lavet.**
+`ceo/procent-punkt-sweep-side-data` (08:20) lover 0 `\d%` på `/opsparing`,
+`/konfirmation`, `/arveafgift`, `/dagpenge` og `/husleje`. Målt 3/10 12:47 på
+live: `/opsparing` **28**, `/arveafgift` **30**, `/husleje` **10**, `/dagpenge`
+**10**, `/konfirmation` **7** — og det er **koden**, der stadig har dem:
+`src/app/opsparing/page.tsx:116,121,126,131` skriver «0-1%», «2-4%», «4-6%»,
+«6-8%» i tabellen, `PensionBeregner.tsx:268` skriver «5-7% (aktier), 2-4%
+(obligationer)». Noten er altså en fejl, ikke et deploy-problem, og er skrevet
+om i planen.
+
+**Boliglaan-noten er også for snævert formuleret:** den kræver «95,0 % belåning»
+og «5,05 % p.a.», men de er interpolationer fra brugerens felter, så de ændrer
+sig med standardværdierne. Målt 3/10: «Typisk 0,5-1,5 %», «Over 80 % belåning»
+og «ca. 5,0-7,0 %» står, og `/boliglaan` har 0 `\d%`.
