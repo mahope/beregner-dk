@@ -445,8 +445,8 @@ export default async function MomsPage() {
         </ul>
         <p>
           Observera att momsandelen i ett pris <em>inklusive</em> 25% moms är {ANDEL_PCT_SE} (inte 25%), eftersom
-          momsen beräknas på priset utan moms: 25 / 125 = {ANDEL_FAKTOR_SE}. För 12% moms är andelen ca {andelSe(12)}% och för
-          6% moms ca {andelSe(6)}%.
+          momsen beräknas på priset utan moms: 25 / 125 = {ANDEL_FAKTOR_SE}. För 12% moms är andelen ca {andelSe(12)} % och för
+          6% moms ca {andelSe(6)} %.
         </p>
 
         <h3>Så räknar du ut moms baklänges</h3>

@@ -369,13 +369,13 @@ export default async function RenteberegnerPage() {
         <h2>Skattefradrag for renter</h2>
         <p>
           I Danmark kan du få <strong>fradrag for renteudgifter</strong> på private lån.
-          Fradraget svarer til <strong>{foersteProcent}%</strong> af de første{" "}
+          Fradraget svarer til <strong>{foersteProcent} %</strong> af de første{" "}
           {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. i
           renteudgifter ({RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString("da-DK")}{" "}
-          kr. for par) og <strong>{overProcent}%</strong> af beløbet over grænsen, hvilket
+          kr. for par) og <strong>{overProcent} %</strong> af beløbet over grænsen, hvilket
           reducerer din skattebetaling. Så længe du er under grænsen koster et lån med 5%
-          rente dig reelt kun ca. <strong>{foersteEfterSkat}% efter skat</strong> — over
-          grænsen er det ca. {overEfterSkat}%.
+          rente dig reelt kun ca. <strong>{foersteEfterSkat} % efter skat</strong> — over
+          grænsen er det ca. {overEfterSkat} %.
         </p>
         <p>
           Fradragsværdien afhænger af beløbsgrænsen og året — ikke af din kommune. Se

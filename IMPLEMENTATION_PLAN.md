@@ -1,33 +1,43 @@
-STATUS: 3/10 19:5x. ✅ **Den svenske promille-FAQ modsagde sidens egen tabel** —
-       `ceo/svensk-promille-grænse`. `curl` på beraknare.se/promille 19:4x fandt
-       i **FAQPage-JSON-LD**: «Den svenska gränsen på 0,2 promille nås alltsa
-       efter två öl», mens samme sides tabel siger 0,22 ‰ efter **én** øl, og
-       brødteksten to afsnit længere oppe siger `genstandeTilGraense(80,"mand",
-       PROMILLEGRANSE.se)` = **1**. Det er CEO-kø-punkt 0's egen fejltype: et
-       håndskrevet antal i FAQ'en, som også er Googles snippet. *Fix:* tallet
-       læses nu fra `genstandeTilGraense`, så FAQ, tabel og brødtekst ikke kan
-       glide fra hinanden. *Målt polaritet:* rettelsen tilbage i gammel kode →
-       1 rød på `page-data.test.ts` («expected … to contain 'nås alltså efter
-       1 öl'»), grøn HEAD 125/125 i filen. **Første skrivning skrev `øl` i den
-       svenske sætning** — repoets egen `locale-leak-gate.test.ts` og den nye
-       test dømte begge rød, så fejlen blev fundet af portene og ikke af mig.
-       **GATE:** typecheck 0, lint 0 (755 filer), build 0, **hele suiten
-       4131/4131** i 260 filer. ⚠️ `biome check --write` sorterede ved denne
-       iteration **hele import-blokken** i begge filer (134 linjers uro i
-       `page-data.ts`); gjort om i næste commit, så diffen er 32 linjer.
-       *Fremtidig regel: `biome lint` på filer med uvedkommende ændringer —
-       kun `check --write` på kode man selv netop har skrevet.*
-       **CEO-kø punkt 0 er gennemgået punkt for punkt 3/10 19:3x og alle otte
-       fejl er rettede i HEAD**: valborg `month: 4, day: 30`, svensk påskafton
-       lørdag (`dage-til.test.ts:246`), dansk sankthans fast 23./24. juni med 0
-       forekomster af «fri med løn», dansk påskeaften-FAQ siger nu at de er to
-       forskellige dage, `/husleje`s FAQ siger at lejeloven § 5 justerer efter
-       nettoprisindekset og at nævnet «ikke fastsætter en sats pr. område»,
-       `toUtcMidnight` læser `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`,
-       svensk promille-FAQ genererer fra `PROMILLEGRANSE.se`/`PROMILLEGROV_SE`,
-       `dato-eksempler.ts:111` `maneder: 12` og advent-teksten «mellem 27.
-       november og 3. december».
-       PR-TJEK: 3/10 19:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+STATUS: 3/10 22:0x. ✅ **Porten så ikke de fejl, den var skrevet til at se** —
+       `ceo/procent-mellemrum-rentefradrag-skattefradrag-topskat`.
+       *Målt:* den renderede port `procent-i-synlig-tekst.test.tsx` er **grøn**
+       med `{HOEJ_SATS_PCT}%` sat tilbage i `RentefradragBeregner:275`. Årsagen
+       er ikke en fejl i porten: `renderToStaticMarkup(<RentefradragBeregner/>)`
+       giver komponenten dens **tome** starttilstand, så alt under
+       `{result.lowRateAmount > 0 && …}` renderer aldrig. `regnestykker` så dem
+       heller ikke — dets scanner dømmer `JsxText` med `/\d%/`, og noden efter
+       `{HOEJ_SATS_PCT}` er kun `%`. De to porte var blinde for præcis den fejl,
+       de blev skrevet til at fange.
+       *Fix:* `interpolationUdenMellemrum()` dømmer **kilden** — en tekstnode
+       (JSX eller template) der begynner med `%` *og* følger efter en
+       interpolation. Mærket er `^%`, ikke `^\s*%`, fordi `{" "}` og
+       linjeskift giver et mellemrum i rå kilde som JSX kollapser bort.
+       Undtaget og målt: `style={{ width: `${pct}%` }}` er CSS (11 fund i
+       `Elberegner` alene), og `<span>%</span>` som badge på et talfelt
+       (`TopskatBeregner:181`, `RabatBeregner:149`) er en selvstændig pille —
+       derfor kræver reglen en interpolation som forgænger.
+       *Målt i korpuset:* 91 rå `}%` (grep) → 68 efter CSS-fradrag → **54
+       reelle** → **40** efter at denne slice rettede 14. Loftet står på 40.
+       Rettet: `/rentefradrag` (5, 442 besøgende/28d +207 %), `/renteberegner`
+       (4), `/pension` (3), `/moms` (2). Loftet i `regnestykker` 274 → **261**.
+       *Mutation:* `{HOEJ_SATS_PCT} % af` → `}% af` gør porten rød med
+       `RentefradragBeregner.tsx:275` i fejlteksten. Det kunne den
+       renderede port ikke.
+       ⚠️ *Fremtidig regel fra 3/10 19:5x:* `biome lint` på filer med
+       uvedkommende ændringer — kun `check --write` på egen kode.
+       CEO-kø punkt 0 gennemgået punkt for punkt 3/10 19:3x, alle otte fejl
+       rettet i HEAD. Begge review-fund står `RETTET 0a9b7bb`. CI grøn ved
+       start (`d286744`), ingen åbne PR'er, ingen uløste Sentry-fejl.
+       PR-TJEK: 3/10 21:0x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+
+## Åben opgave: de 40 resterende `}%`
+
+**Hvad:** 40 fund på 26 sider, bl.a. `/blog/arveafgift-regler-og-satser` (13),
+`src/lib/page-data.ts` (4 — `/procent`s **norske metaDescription** er med, så
+fejlen ligger i Googles snippet på sitets største side), `kalorier-eksempler.ts`
+(3) og 22 beregnerkomponenter.
+**Hvorfor:** samme fejlform som denne slice; porten tvinger dem kun ned.
+**Accept:** `INTERPOLATION_LOFT` 40 → 0, fil for fil med `MÅL:`-note pr. side.
 
 ## Fase 3 — trafik-drevet
 
@@ -366,6 +376,9 @@ skal give «Hvad er klokken i Japan? 12 i Danmark = 19:00 i Tokyo» (3/10 er Dan
 i **sommertid**, UTC+2, mens Tokyo er UTC+9 → 7 timer) og **ikke** indeholde
 «MinBeregner.dk». Samme måling på `/klokken-i/usa` (= 06:00 i New York) og på
 `beraknare.se/klockan-i/japan`. Næste deploy-vindue 21:30.
+
+**Åben note 3/10 22:0x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal i interpoleret tekst på /rentefradrag, /renteberegner, /pension, /moms + ny port der fanger }% i kilder> ceo/procent-mellemrum-rentefradrag-skattefradrag-topskat 3/10 22:0x`.
+Døm på indhold: `curl -s https://minberegner.dk/rentefradrag | grep -c '33,6%'` skal give **0**, og tabellen skal vise `<td>33,6 %</td>`. Samme på `/renteberegner` (`<strong>22 %</strong>`), `/pension` (`<td>11,3 %</td>`) og `/moms`. Næste deploy-vindue 3/11 07:30.
 
 **Åben note 3/10 17:4x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
 Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. Målt 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. Næste deploy-vindue 21:30.

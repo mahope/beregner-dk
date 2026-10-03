@@ -191,7 +191,7 @@ export default function TopskatBeregner() {
               className="w-4 h-4 text-blue-600 rounded"
             />
             <label htmlFor="kirkeskat" className="text-sm text-gray-700 dark:text-gray-200">
-              Betaler kirkeskat ({kirkeSkatPct}%)
+              Betaler kirkeskat ({kirkeSkatPct} %)
             </label>
           </div>
 
@@ -234,30 +234,30 @@ export default function TopskatBeregner() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
                   <div className="text-xs text-gray-500 dark:text-gray-400">Effektiv skat</div>
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">{result.effektivSkat}%</div>
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">{result.effektivSkat} %</div>
                 </div>
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
                   <div className="text-xs text-gray-500 dark:text-gray-400">Marginalskat</div>
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">{result.marginalPct}%</div>
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">{result.marginalPct} %</div>
                 </div>
               </div>
 
               {/* Breakdown */}
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-sm space-y-1.5">
-                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">AM-bidrag (8%)</span><span className="dark:text-gray-200">{formatKr(result.amBidrag)} kr.</span></div>
-                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Bundskat (12,01%)</span><span className="dark:text-gray-200">{formatKr(result.bundSkatBeloeb)} kr.</span></div>
-                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Kommuneskat ({kommuneSkat}%)</span><span className="dark:text-gray-200">{formatKr(result.kommuneSkatBeloeb)} kr.</span></div>
+                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">AM-bidrag (8 %)</span><span className="dark:text-gray-200">{formatKr(result.amBidrag)} kr.</span></div>
+                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Bundskat (12,01 %)</span><span className="dark:text-gray-200">{formatKr(result.bundSkatBeloeb)} kr.</span></div>
+                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Kommuneskat ({kommuneSkat} %)</span><span className="dark:text-gray-200">{formatKr(result.kommuneSkatBeloeb)} kr.</span></div>
                 {kirkeskat && (
-                  <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Kirkeskat ({kirkeSkatPct}%)</span><span className="dark:text-gray-200">{formatKr(result.kirkeSkatBeloeb)} kr.</span></div>
+                  <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Kirkeskat ({kirkeSkatPct} %)</span><span className="dark:text-gray-200">{formatKr(result.kirkeSkatBeloeb)} kr.</span></div>
                 )}
                 {result.betalerMellemskat && (
-                  <div className="flex justify-between text-yellow-700 dark:text-yellow-400"><span>Mellemskat (7,5%)</span><span>{formatKr(result.mellemSkatBeloeb)} kr.</span></div>
+                  <div className="flex justify-between text-yellow-700 dark:text-yellow-400"><span>Mellemskat (7,5 %)</span><span>{formatKr(result.mellemSkatBeloeb)} kr.</span></div>
                 )}
                 {result.betalerTopskat && (
-                  <div className="flex justify-between text-red-600 dark:text-red-400"><span>Topskat (7,5%)</span><span>{formatKr(result.topSkatBeloeb)} kr.</span></div>
+                  <div className="flex justify-between text-red-600 dark:text-red-400"><span>Topskat (7,5 %)</span><span>{formatKr(result.topSkatBeloeb)} kr.</span></div>
                 )}
                 {result.betalerTopTopskat && (
-                  <div className="flex justify-between text-red-700 dark:text-red-300"><span>Top-topskat (5%)</span><span>{formatKr(result.topTopSkatBeloeb)} kr.</span></div>
+                  <div className="flex justify-between text-red-700 dark:text-red-300"><span>Top-topskat (5 %)</span><span>{formatKr(result.topTopSkatBeloeb)} kr.</span></div>
                 )}
                 <div className="flex justify-between font-medium border-t pt-2 dark:border-gray-600"><span className="dark:text-gray-200">Samlet skat</span><span className="dark:text-gray-200">{formatKr(result.samletSkat)} kr.</span></div>
                 <div className="flex justify-between font-bold text-green-600 dark:text-green-400 border-t pt-2 dark:border-gray-600"><span>Netto (udbetalt)</span><span>{formatKr(result.nettoLoen)} kr./år</span></div>
@@ -280,11 +280,11 @@ export default function TopskatBeregner() {
 
       {/* Share */}
       <div className="flex justify-center mt-6 gap-3">
-        <CopyResultButton text={result ? `Skat: ${formatKr(result.samletSkat)} kr./år (effektiv ${result.effektivSkat}%, marginal ${result.marginalPct}%)` : ''} />
+        <CopyResultButton text={result ? `Skat: ${formatKr(result.samletSkat)} kr./år (effektiv ${result.effektivSkat} %, marginal ${result.marginalPct} %)` : ''} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Topskat Beregner"
-          resultSummary={result ? `Effektiv skat: ${result.effektivSkat}% — Netto: ${formatKr(result.nettoLoen)} kr./år` : ''}
+          resultSummary={result ? `Effektiv skat: ${result.effektivSkat} % — Netto: ${formatKr(result.nettoLoen)} kr./år` : ''}
         />
       </div>
 
@@ -293,7 +293,7 @@ export default function TopskatBeregner() {
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <h2 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Ny skattemodel 2026</h2>
           <p className="text-sm text-blue-700 dark:text-blue-400">
-            I 2026 er den gamle topskat erstattet af tre trin: mellemskat (7,5% over {formatKr(MELLEMSKAT_GRAENSE)} kr.), topskat (7,5% over {formatKr(TOPSKAT_GRAENSE)} kr.) og top-topskat (5% over {formatKr(TOP_TOPSKAT_GRAENSE)} kr.).
+            I 2026 er den gamle topskat erstattet af tre trin: mellemskat (7,5 % over {formatKr(MELLEMSKAT_GRAENSE)} kr.), topskat (7,5 % over {formatKr(TOPSKAT_GRAENSE)} kr.) og top-topskat (5 % over {formatKr(TOP_TOPSKAT_GRAENSE)} kr.).
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">

@@ -120,19 +120,19 @@ export default async function PensionPage() {
               <td>Enlig</td>
               <td>{folk.indkomstgraenser.enlig.nedsaetningOver.toLocaleString("da-DK")} kr</td>
               <td>{folk.indkomstgraenser.enlig.bortfaldOver.toLocaleString("da-DK")} kr</td>
-              <td>{folk.indkomstgraenser.enlig.pct * 100}%</td>
+              <td>{folk.indkomstgraenser.enlig.pct * 100} %</td>
             </tr>
             <tr>
               <td>Samlevende med pensionist</td>
               <td>{folk.indkomstgraenser.samlevendeMedPensionist.nedsaetningOver.toLocaleString("da-DK")} kr</td>
               <td>{folk.indkomstgraenser.samlevendeMedPensionist.bortfaldOver.toLocaleString("da-DK")} kr</td>
-              <td>{folk.indkomstgraenser.samlevendeMedPensionist.pct * 100}%</td>
+              <td>{folk.indkomstgraenser.samlevendeMedPensionist.pct * 100} %</td>
             </tr>
             <tr>
               <td>Samlevende uden pensionist</td>
               <td>{folk.indkomstgraenser.samlevendeUdenPensionist.nedsaetningOver.toLocaleString("da-DK")} kr</td>
               <td>{folk.indkomstgraenser.samlevendeUdenPensionist.bortfaldOver.toLocaleString("da-DK")} kr</td>
-              <td>{folk.indkomstgraenser.samlevendeUdenPensionist.pct * 100}%</td>
+              <td>{folk.indkomstgraenser.samlevendeUdenPensionist.pct * 100} %</td>
             </tr>
           </tbody>
         </table>

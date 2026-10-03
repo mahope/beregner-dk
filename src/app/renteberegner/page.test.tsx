@@ -64,13 +64,13 @@ describe("renteberegner page", () => {
     const html = renderToStaticMarkup(await RenteberegnerPage());
     const procent = (værdi: number) => (værdi * 100).toFixed(1).replace(".", ",");
 
-    expect(html).toContain(`<strong>${procent(RENTEFRADRAG_2026.highRate)}%</strong>`);
-    expect(html).toContain(`<strong>${procent(RENTEFRADRAG_2026.lowRate)}%</strong>`);
+    expect(html).toContain(`<strong>${procent(RENTEFRADRAG_2026.highRate)} %</strong>`);
+    expect(html).toContain(`<strong>${procent(RENTEFRADRAG_2026.lowRate)} %</strong>`);
     expect(html).toContain(`${RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr.`);
     // 5 % lån: 5 % × (1 − 33,6 %) = 3,32 % → 3,3 % under grænsen
-    expect(html).toContain(`<strong>${procent(0.05 * (1 - RENTEFRADRAG_2026.highRate))}% efter skat</strong>`);
+    expect(html).toContain(`<strong>${procent(0.05 * (1 - RENTEFRADRAG_2026.highRate))} % efter skat</strong>`);
     // …og 5 % × (1 − 25,6 %) = 3,72 % → 3,7 % over grænsen
-    expect(html).toContain(`over grænsen er det ca. ${procent(0.05 * (1 - RENTEFRADRAG_2026.lowRate))}%.`);
+    expect(html).toContain(`over grænsen er det ca. ${procent(0.05 * (1 - RENTEFRADRAG_2026.lowRate))} %.`);
   });
 
   test("svarer på formlen, Excel og nominel mod effektiv — de tre ting dansk autocomplete spørger om", async () => {

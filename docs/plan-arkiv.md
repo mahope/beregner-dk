@@ -28148,3 +28148,41 @@ skriver `ƒ /klokken-i/[land]`. **GATE:** typecheck 0, lint 0 (755 filer), build
 0, **hele suiten 4130/4130** i 260 filer. CI grøn ved start (c1a83dd), ingen
 åbne PR'er, ingen uløste Sentry-fejl, begge review-fund står `RETTET 0a9b7bb`.
 PR-TJEK: 3/10 19:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+
+## 3/10 21:3x — `ceo/procent-mellemrum-rentefradrag-skattefradrag-topskat`
+
+**F5c-slice: syv beregnere med interpolationer.** Målt med
+`grep -n '}%' src/components/*.tsx` (den kommando planen havde ligget som
+næste slice). 23 procenter i interpolationer + 13 i `JsxText`/strengliteraler
+blev rettet i `RentefradragBeregner` (6), `TopskatBeregner` (7 + 7 tekstnode),
+`SkattefradragBeregner` (4), `TerminBeregner` (2 + 1), `SygedagpengeBeregner`
+(1), `RabatBeregner` (2), `Elberegner` (1 + 4). CSS-bredderne
+(`style={{ width: "${pct}%" }}`) er uændrede — de er ikke synlig tekst.
+
+**Fundet undervejs, som de eksisterende porte ikke så:** «De første 50.000 kr.
+i renteudgifter (enlig) eller 100.000 kr. (par) giver**33,6 %** i
+skatteværdi» — JSX fjerner det linjeskift, der stod mellem «giver» og
+interpolationen, så der manglede mellemrum *foran* tallet også. Rettet med
+`{" "}` og dømt af `expect(rentefradrag).not.toMatch(/giver[\d]/)`.
+
+**Port:** `procent-i-synlig-tekst.test.tsx` fik `INTERPOLATIONSKOMPOENTER_3`
+med de syv komponenter, renderet i da/se/no og dømt med samme regex som F5c's
+scanner — den skal blive rød, hvis `{sats}%` sættes tilbage. Målt: 8/8 grøn
+på HEAD, rød på mutationen undervejs (gate fangede selv `8%`, `12,01%`,
+`7,5%`, `5%`, `25%` i `TopskatBeregner`/`Elberegner`, som jeg ikke havde set
+med grep'en, fordi de var tekstnoder). Loftet i `regnestykker.test.ts` er
+målt ned **274 → 261** (sat til 0 for at få tallet læst af porten).
+
+**MÅL:** `/rentefradrag` 442 besøgende/28d (+207 %), 5.082 GSC-visninger /
+296 klik / 5,8 % / pos. 5,6 → samme som F5c.
+
+**GATE:** typecheck 0, lint 0 (755 filer), build 0, hele suiten **4132/4132**
+i 260 filer.
+
+**Researchet der ikke blev bygget (kun plan, ingen kode):** «tid siden» er et
+helt ubevidst værktøj. Målt på Googles autocomplete 3/10 21:2x: da «tid
+siden» → **«tid siden dato»** som nr. 1 (og «lang tid siden» som nr. 3), se
+«tid sedan» → **«tid sedan datum»** som nr. 1, «hur lång tid sedan» → «hur
+lång tid sedan datum». `grep -rn "tid siden|sedan dato" src/` giver 0 træffere
+i beregnerne, og GSC har «hvor lang tid» 824 visninger pos. 6 på
+`/tidsberegner`. Ny feature-opgave i planen.

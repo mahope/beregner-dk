@@ -29,7 +29,7 @@ const labels = {
     youAreInWeek: "Du er i uge",
     trimester: "Trimester",
     daysToTermin: (n: number) => `${n} dage til termin`,
-    pctPregnancy: (n: number) => `${n}% af graviditeten`,
+    pctPregnancy: (n: number) => `${n} % af graviditeten`,
     conception: "Undfangelse (ca.)",
      maternityStart: `Barselstart (${BARSEL_2026.motherBeforeBirthWeeks} uger før)`,
     emptyState: "Vælg første dag i din sidste menstruation",
@@ -40,7 +40,7 @@ const labels = {
     calcName: "Terminsdato Beregner",
     info1Title: "Sådan beregnes terminen",
     info1Desc:
-      "Terminsdatoen beregnes som 280 dage (40 uger) fra første dag i din sidste menstruation. Kun 5% af børn fødes på den præcise terminsdato — de fleste fødes inden for 2 uger.",
+      "Terminsdatoen beregnes som 280 dage (40 uger) fra første dag i din sidste menstruation. Kun 5 % af børn fødes på den præcise terminsdato — de fleste fødes inden for 2 uger.",
     info2Title: "Barsel i Danmark",
     info2Desc:
       `Mor har ret til ${BARSEL_2026.motherBeforeBirthWeeks} uger før terminen. Efter fødslen har hver forælder ${BARSEL_2026.afterBirthWeeks} uger med barselsdagpenge, hvoraf ${BARSEL_2026.earmarkedWeeks} uger er øremærkede. Far/medmor kan fordele ${BARSEL_2026.fatherAtBirthWeeks} uger fleksibelt i de første ${BARSEL_2026.firstTenWeeksAfterBirth} uger efter aftale med arbejdsgiveren, og op til ${BARSEL_2026.maxTransferableWeeks} uger kan overdrages under særlige betingelser og som udgangspunkt inden for barnets første år. Brug vores barselsdagpenge-beregner for beløb.`,
@@ -66,7 +66,7 @@ const labels = {
     youAreInWeek: "Du är i vecka",
     trimester: "Trimester",
     daysToTermin: (n: number) => `${n} dagar till förlossning`,
-    pctPregnancy: (n: number) => `${n}% av graviditeten`,
+    pctPregnancy: (n: number) => `${n} % av graviditeten`,
     conception: "Befruktning (ca.)",
     maternityStart: "Föräldrapenning (60 dagar före)",
     emptyState: "Välj första dagen i din senaste menstruation",

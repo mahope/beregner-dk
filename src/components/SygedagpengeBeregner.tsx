@@ -265,7 +265,7 @@ export default function SygedagpengeBeregner() {
             )}
 
             <p className="mt-3 text-sm text-blue-700 dark:text-blue-300">
-              Svarer til {resultat.procentAfLoen}% af din bruttoløn
+              Svarer til {resultat.procentAfLoen} % af din bruttoløn
             </p>
           </div>
 

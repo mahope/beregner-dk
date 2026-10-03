@@ -105,7 +105,7 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
       spotpris: "Spotpris",
       transportLabel: "Transport",
       elafgift: "Elafgift",
-      momsLabel: "Moms (25%)",
+      momsLabel: "Moms (25 %)",
       andeleBeskrivelse: "Andele er baseret på gennemsnitlige priser. Din faktiske fordeling kan afvige.",
       unavngivet: "Unavngivet",
       lejlighed1: "1 pers. lejlighed",
@@ -135,7 +135,7 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
       spotpris: "Spotpris",
       transportLabel: "Elnät",
       elafgift: "Energiskatt",
-      momsLabel: "Moms (25%)",
+      momsLabel: "Moms (25 %)",
       andeleBeskrivelse: "Andelar baseras på genomsnittliga priser. Din faktiska fördelning kan avvika.",
       unavngivet: "Namnlös",
       lejlighed1: "1 pers. lägenhet",
@@ -165,7 +165,7 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
       spotpris: "Spotpris",
       transportLabel: "Transport",
       elafgift: "Elavgift",
-      momsLabel: "Mva (25%)",
+      momsLabel: "Mva (25 %)",
       andeleBeskrivelse: "Andeler er basert på gjennomsnittlige priser. Din faktiske fordeling kan avvike.",
       unavngivet: "Uten navn",
       lejlighed1: "1 pers. leilighet",
@@ -561,7 +561,7 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
             <p className={`text-lg font-bold ${
               beregninger.forskelPct > 10 ? "text-red-600 dark:text-red-400" : beregninger.forskelPct > 0 ? "text-yellow-600 dark:text-yellow-400" : "text-green-600 dark:text-green-400"
             }`}>
-              {beregninger.forskelPct > 0 ? "+" : ""}{beregninger.forskelPct.toFixed(0)}%
+              {beregninger.forskelPct > 0 ? "+" : ""}{beregninger.forskelPct.toFixed(0)} %
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">{l.vsGns} {beregninger.gennemsnitKwh} kWh</p>
           </div>
@@ -585,7 +585,7 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
               ["bg-yellow-500", `Nettarif (${live!.omraader[omraade].tariffer.netselskab}, gns.)`, liveGns.nettarif],
               ["bg-orange-400", "Energinet (transmission + system)", liveGns.energinet],
               ["bg-red-400", "Elafgift", liveGns.elafgift],
-              ["bg-purple-400", "Moms (25%)", liveGns.moms],
+              ["bg-purple-400", "Moms (25 %)", liveGns.moms],
             ].map(([farve, navn, v]) => (
               <div key={navn as string} className="flex items-center justify-between gap-2">
                 <dt className="flex items-center gap-1.5 dark:text-gray-300">

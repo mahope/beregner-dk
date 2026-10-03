@@ -149,9 +149,9 @@ export default function SkattefradragBeregner() {
           </div>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Rentefradrag har en skatteværdi på {RENTEFRADRAG_HOEJ_PCT}% af de første{" "}
+          Rentefradrag har en skatteværdi på {RENTEFRADRAG_HOEJ_PCT} % af de første{" "}
           {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. renteudgifter
-          (beregnet som enlig) og {RENTEFRADRAG_LAV_PCT}% af beløbet over.
+          (beregnet som enlig) og {RENTEFRADRAG_LAV_PCT} % af beløbet over.
         </p>
       </div>
 
@@ -301,9 +301,9 @@ export default function SkattefradragBeregner() {
               <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-1">Rentefradrag detalje</h3>
               <p className="text-sm text-blue-700 dark:text-blue-400">
                 Dine renteudgifter på {formatKr(resultat.renteFradrag)} giver en skattebesparelse
-                på {formatKr(resultat.renteBesparelse)} ({RENTEFRADRAG_HOEJ_PCT}% op til{" "}
+                på {formatKr(resultat.renteBesparelse)} ({RENTEFRADRAG_HOEJ_PCT} % op til{" "}
                 {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr., derefter{" "}
-                {RENTEFRADRAG_LAV_PCT}%).
+                {RENTEFRADRAG_LAV_PCT} %).
               </p>
             </div>
           )}

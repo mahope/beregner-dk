@@ -272,7 +272,7 @@ export default function RentefradragBeregner() {
                       {result.lowRateAmount > 0 && (
                         <div className="flex justify-between">
                           <span className="text-gray-600 dark:text-gray-400">
-                            Fradrag {HOEJ_SATS_PCT}% af {result.lowRateAmount.toLocaleString('da-DK')} kr.
+                            Fradrag {HOEJ_SATS_PCT} % af {result.lowRateAmount.toLocaleString('da-DK')} kr.
                           </span>
                           <span className="font-medium dark:text-gray-200">{result.lowRateDeduction.toLocaleString('da-DK')} kr.</span>
                         </div>
@@ -280,7 +280,7 @@ export default function RentefradragBeregner() {
                       {result.highRateAmount > 0 && (
                         <div className="flex justify-between">
                           <span className="text-gray-600 dark:text-gray-400">
-                            Fradrag {LAV_SATS_PCT}% af {result.highRateAmount.toLocaleString('da-DK')} kr.
+                            Fradrag {LAV_SATS_PCT} % af {result.highRateAmount.toLocaleString('da-DK')} kr.
                           </span>
                           <span className="font-medium dark:text-gray-200">{result.highRateDeduction.toLocaleString('da-DK')} kr.</span>
                         </div>
@@ -290,10 +290,10 @@ export default function RentefradragBeregner() {
 
                   <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-4">
                     <div className="text-sm text-blue-800 dark:text-blue-300">
-                      <strong>Effektiv fradragssats:</strong> {result.effectiveRate}%
+                      <strong>Effektiv fradragssats:</strong> {result.effectiveRate} %
                     </div>
                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                      Staten betaler reelt {result.effectiveRate}% af dine renteudgifter
+                      Staten betaler reelt {result.effectiveRate} % af dine renteudgifter
                     </p>
                   </div>
                 </>
@@ -338,9 +338,9 @@ export default function RentefradragBeregner() {
           <h2 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Bundfradrag 2026</h2>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             De første {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString('da-DK')} kr. i renteudgifter
-            (enlig) eller {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString('da-DK')} kr. (par) giver
-            {HOEJ_SATS_PCT}% i skatteværdi. Beløbet over grænsen giver
-            {LAV_SATS_PCT}%. Værdien afhænger af beløbsgrænsen — ikke af
+            (enlig) eller {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString('da-DK')} kr. (par) giver{" "}
+            {HOEJ_SATS_PCT} % i skatteværdi. Beløbet over grænsen giver{" "}
+            {LAV_SATS_PCT} %. Værdien afhænger af beløbsgrænsen — ikke af
             din kommune.
           </p>
         </div>

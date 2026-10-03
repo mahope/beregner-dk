@@ -190,7 +190,7 @@ export default function RabatBeregner() {
             </div>
           </div>
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-            {l.besparelse}: {fmt(resultat.besparelseProcent)}%
+            {l.besparelse}: {fmt(resultat.besparelseProcent)} %
           </p>
 
           <div className="flex justify-center mt-4 gap-3">
@@ -200,7 +200,7 @@ export default function RabatBeregner() {
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName={l.calcName}
-              resultSummary={`${l.besparelse}: ${fmt(resultat.besparelse)} kr (${fmt(resultat.besparelseProcent)}%)`}
+              resultSummary={`${l.besparelse}: ${fmt(resultat.besparelse)} kr (${fmt(resultat.besparelseProcent)} %)`}
             />
           </div>
         </div>

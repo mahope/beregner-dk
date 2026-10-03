@@ -101,11 +101,11 @@ export default async function RentefradragPage() {
                       De første {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. (enlig) /{" "}
                       {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString("da-DK")} kr. (par)
                     </td>
-                    <td className="border p-3">{HOEJ_SATS_PCT}%</td>
+                    <td className="border p-3">{HOEJ_SATS_PCT} %</td>
                   </tr>
                   <tr>
                     <td className="border p-3">Beløbet over grænsen</td>
-                    <td className="border p-3">{LAV_SATS_PCT}%</td>
+                    <td className="border p-3">{LAV_SATS_PCT} %</td>
                   </tr>
                 </tbody>
               </table>
@@ -229,13 +229,13 @@ export default async function RentefradragPage() {
                 <li>
                   De første {loftEksempel.hoejAndel.toLocaleString("da-DK")} kr. giver
                   fradrag: {loftEksempel.hoejAndel.toLocaleString("da-DK")} ×{" "}
-                  {HOEJ_SATS_PCT}% ={" "}
+                  {HOEJ_SATS_PCT} % ={" "}
                   {(loftEksempel.hoejAndel * RENTEFRADRAG_2026.highRate).toLocaleString("da-DK")} kr.
                 </li>
                 <li>
                   De næste {loftEksempel.lavAndel.toLocaleString("da-DK")} kr. giver
                   fradrag: {loftEksempel.lavAndel.toLocaleString("da-DK")} ×{" "}
-                  {LAV_SATS_PCT}% ={" "}
+                  {LAV_SATS_PCT} % ={" "}
                   {(loftEksempel.lavAndel * RENTEFRADRAG_2026.lowRate).toLocaleString("da-DK")} kr.
                 </li>
                 <li>
@@ -246,7 +246,7 @@ export default async function RentefradragPage() {
                 <li>
                   Er I gift eller samlevende med fælles økonomi, er grænsen{" "}
                   {loftEksempelPar.graense.toLocaleString("da-DK")} kr., så hele beløbet ville
-                  give {LOFT_EKSEMPEL_BELOEB.toLocaleString("da-DK")} × {HOEJ_SATS_PCT}% ={" "}
+                  give {LOFT_EKSEMPEL_BELOEB.toLocaleString("da-DK")} × {HOEJ_SATS_PCT} % ={" "}
                   {(LOFT_EKSEMPEL_BELOEB * RENTEFRADRAG_2026.highRate).toLocaleString("da-DK")} kr.
                 </li>
               </ul>
