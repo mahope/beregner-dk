@@ -146,7 +146,7 @@ const DAGPENGE_AM_PROCENT_TEKST = formatNumber(SATSER_2026.amBidrag * 100, "da",
   maximumFractionDigits: 0,
 });
 const DAGPENGE_PERIODE_TIMER_TEKST = dagpengeTimer(DAGPENGE_2026.dagpengeperiodeTimer);
-const DAGPENGE_BESKRIVELSE = `Beregn dagpenge 2026. Max sats: ${DAGPENGE_MAX_TEKST}/md (${DAGPENGE_PROCENT_TEKST}% af løn efter AM-bidrag). Med beskæftigelsestillæg op til ${DAGPENGE_TILLAEG_TEKST}/md. Beregn din dagpengesats ud fra din løn.`;
+const DAGPENGE_BESKRIVELSE = `Beregn dagpenge 2026. Max sats: ${DAGPENGE_MAX_TEKST}/md (${DAGPENGE_PROCENT_TEKST} % af løn efter AM-bidrag). Med beskæftigelsestillæg op til ${DAGPENGE_TILLAEG_TEKST}/md. Beregn din dagpengesats fra din løn.`;
 
 /**
  * Formateringen i de to momssvar, der laeser et tal ud af `MOMS_LANDE`. Den er
@@ -1863,7 +1863,7 @@ faqItems: kalorierFaqItems("da"),
       schemaDescription: "Beregn hvad du kan få i dagpenge baseret på din tidligere løn",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvordan beregnes dagpenge?", answer: `Dagpenge beregnes som ${DAGPENGE_PROCENT_TEKST}% af din løn efter fradrag af ${DAGPENGE_AM_PROCENT_TEKST}% AM-bidrag, dog højst maxsatsen på ${DAGPENGE_MAX_TEKST}/md i 2026. Din A-kasse ser på din gennemsnitlige indtægt de seneste 12 måneder.` },
+      { question: "Hvordan beregnes dagpenge?", answer: `Dagpenge beregnes som ${DAGPENGE_PROCENT_TEKST} % af din løn efter fradrag af ${DAGPENGE_AM_PROCENT_TEKST} % AM-bidrag, dog højst maxsatsen på ${DAGPENGE_MAX_TEKST}/md i 2026. Din A-kasse ser på din gennemsnitlige indtægt de seneste 12 måneder.` },
       { question: "Hvad er maxsatsen for dagpenge i 2026?", answer: `I 2026 er den maksimale dagpengesats ${DAGPENGE_MAX_TEKST}/md før skat for fuldtidsforsikrede. Med beskæftigelsestillæg kan satsen de første 3 måneder være op til ${DAGPENGE_TILLAEG_TEKST}/md.` },
       { question: "Hvad er beskæftigelsestillægget?", answer: `Beskæftigelsestillægget er et ekstra tillæg de første 3 måneders ledighed, som kan give op til ${DAGPENGE_TILLAEG_TEKST}/md i 2026. Tillægget kræver at du opfylder visse beskæftigelseskrav.` },
       { question: "Hvor længe kan jeg få dagpenge?", answer: `Dagpengeperioden er normalt 2 år (${DAGPENGE_PERIODE_TIMER_TEKST} timer) inden for ${DAGPENGE_2026.indkomstkravAar} år. Perioden kan forlænges ved arbejde eller uddannelse.` },
@@ -2487,7 +2487,7 @@ const noPages: Record<string, PageData> = {
       title: "Prosentkalkulator",
       description: "Beregn prosent av et tall, finn prosentvis økning eller nedgang, eller regn baklengs.",
       metaTitle: "Prosentkalkulator - Beregn prosent enkelt og gratis",
-      metaDescription: `Beregn prosent raskt. Eksempel: ${PROCENT_NO.sats}% av ${PROCENT_NO.belob} kr = ${PROCENT_NO.svar} kr. Finn prosent av et tall, beregn økning/nedgang. Gratis prosentkalkulator.`,
+      metaDescription: `Beregn prosent raskt. Eksempel: ${PROCENT_NO.sats} % av ${PROCENT_NO.belob} kr = ${PROCENT_NO.svar} kr. Finn prosent av et tall, beregn økning/nedgang. Gratis prosentkalkulator.`,
       keywords: ["prosentkalkulator", "beregn prosent", "prosent av", "prosentvis økning", "prosentvis endring", "prosentregning"],
       ogTitle: "Prosentkalkulator - Beregn prosent enkelt",
       ogDescription: "Beregn prosent av et tall, finn økning/nedgang. Gratis prosentkalkulator.",

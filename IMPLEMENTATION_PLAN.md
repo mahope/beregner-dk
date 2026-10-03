@@ -1,39 +1,35 @@
-STATUS: 3/10 21:5x. ✅ **Alle tre åbne review-fund rettet** — `ceo/review-fund-alder-tabel-og-sprog`.
-       *Målt, ikke troet:* `dagForAlderTabel`s begrundelse var **målt falsk** på
-       alle tre tal. Uden reglen er **8 af 26** rækker gyldige den 29. februar
-       (4, 8, 12, 16, 20, 40, 60, 80 — præcis dem hvis fødselsår er et skudår),
-       ikke «alle»; `beregnAlder(2008-02-29, 2024-02-29)` er 16 år **0 dage** og
-       5.844 dage = 16 × 365,25 helt, ikke «16 år og 1 dag»; og intervallet har 5
-       skuddage (3 strengt mellem), ikke otte. Beviset ligger nu i
-       `alder-levet.test.ts` som et mål på præcis de otte aldre, og docblock +
-       testkommentar skriver den sande begrundelse.
-       *Fix 2:* brødteksten på `/alder` lovede «den, der fylder alderen **i dag**»,
-       mens tabellen er regnet fra 28. februar — den modsagdes én dag hvert fjerde
-       år. Teksten skriver nu den dag, tallene er regnet fra (da + se).
-       *Fix 3:* **fem** danske ord i svensk brødtekst, synlige i dag på
-       beraknare.se: `og efter` (se /promille), `og ikke heller` (se /procent),
-       `Timmene er dage gange 24` + `minuter er det` (se /alder) og
-       `Antallet dagar` (se /dato) — de to sidste fandt porten, ikke mig.
-       *Ny port:* `se-tekst.test.ts` dømmer hele `sePages` for 32 ord der kun
-       findes på dansk, på ordgrænse, og springer slug/id/canonical over, fordi
-       beraknare.se bruger danske URL-slugs med vilje. Mutation: mod den gamle
-       kode giver den 7 fund på 4 sider.
-       ⚠️ *Målt fund:* `scripts/locale-leak.mjs` er **blind** for denne klasse.
-       Med alle fem fejl tilbage i `page-data.ts` giver `--gate` stadig **0
-       ureviewede** — R5 (rent ASCII-dansk) fanger dem ikke i `sePages`. Det er
-       grunden til at klassen er fundet igen og igen; se arkivet.
-       CEO-kø punkt 0 gennemgået 3/10 19:3x, alle otte fejl rettet i HEAD. CI
-       grøn ved start (`ca91b29`), ingen åbne PR'er, ingen uløste Sentry-fejl.
-       PR-TJEK: 3/10 21:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+STATUS: 3/10 22:2x. ✅ **Interpolationsklassen `}%` er lukket — 35 fund → 0.**
+       `ceo/procent-interpolation-til-nul`. Målt, ikke troet: planens «40 fund
+       på 26 sider» var **loftet**, ikke fundene — egen måling fandt **35** i 14
+       filer. Rettet: `/blog/arveafgift-regler-og-satser` (13), `page-data.ts`
+       (4), `kalorier-eksempler.ts` (3), `ejendomsvaerdiskat.ts` (2),
+       `pension-eksempler.ts` (2), `dagpenge/page.tsx` (2),
+       `ejendomsvaerdiskat/page.tsx` (2) og fem beregnere (1 hver).
+       `INTERPOLATION_LOFT` er nu **0** og asserten `toEqual([])`, så porten
+       rammer den næste `{tal}%` med fil og linje. Mutation målt: sæt
+       `{udbetalingProcent}%` tilbage, porten bliver rød med linjen i fejlen.
+       *Bivirkning fundet af porten:* `/dagpenge`s metaDescription blev **161**
+       tegn med den nye plads, så «ud fra din løn» er nu «fra din løn» (157).
+       7 testfiler dømte den gamle lim (f.eks. «Boafgift (15%): 45.000 kr») og
+       er opdateret — de er strenge for, de var ikke en fejl.
+       ⚠️ *Målt, ikke en deploy-fejl:* de rå procenttal i `<td>`/brødtekst er en
+       **anden kodebane** end `}%` (se F5g-noten) og ligger stadig i
+       `topskat/page.tsx`, `/bil`, `blog/biloekonomi` og `blog/boligsalg`.
+       CI grøn ved start (`6ca2260`), ingen åbne PR'er, ingen uløste Sentry-fejl,
+       Sentry er kodet (`instrumentation-client.ts` + `sentry.server.config.ts`).
+       PR-TJEK: 3/10 22:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
 
-## Åben opgave: de 40 resterende `}%`
+## Åben opgave: de rå procenttal i `<td>` og brødtekst (ikke `}%`)
 
-**Hvad:** 40 fund på 26 sider, bl.a. `/blog/arveafgift-regler-og-satser` (13),
-`src/lib/page-data.ts` (4 — `/procent`s **norske metaDescription** er med, så
-fejlen ligger i Googles snippet på sitets største side), `kalorier-eksempler.ts`
-(3) og 22 beregnerkomponenter.
-**Hvorfor:** samme fejlform som denne slice; porten tvinger dem kun ned.
-**Accept:** `INTERPOLATION_LOFT` 40 → 0, fil for fil med `MÅL:`-note pr. side.
+**Hvad:** sidste måling 3/10 21:5x fandt 9 på /billaan (alderstabellen) og
+/kalorier («10-15%») + 12 i fire filer: `topskat/page.tsx:72,80`,
+`/bil:107,291`, `blog/biloekonomi:252,265`, `blog/boligsalg:46,50,121,197,302`.
+**Hvorfor:** de er synlige for læseren lige så meget som de interpolerede, og
+F5c's `regnestykker.test.ts` tæller dem i et loft pr. korpus (319 noder), så
+ingen tvinger dem enkeltvis ned.
+**Accept:** hver fil til 0 synlige `\d%`, og de fem navne-undtagelser
+(«30% reglen» ×2, «4%-reglen») står uændret. **MÅL:** /billaan 24, /bil 24
+besøgende/28d; øvrige ikke i top-15.
 
 ## Fase 3 — trafik-drevet
 
@@ -362,24 +358,27 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
+**Åben note 3/10 22:2x:** `VERIFICÉR DEPLOY: <mellemrum i alle interpolerede procenttal (35 steder) + loftet INTERPOLATION_LOFT 40 → 0> ceo/procent-interpolation-til-nul 3/10 22:2x`.
+Døm på indhold: `curl -s https://minberegner.dk/blog/arveafgift-regler-og-satser | grep -c 'Boafgift (15 %)'` skal give **≥1** og `grep -c 'Boafgift (15%)'` **0**; `/dagpenge` skal have «Dagpenge = 80 % af løn efter 8 % AM-bidrag»; `/kalorier` FAQ «10-15 %»; `/ejendomsvaerdiskat` «80 % × 5,1‰»; `/billaan` skal have «5,95 %» i rentetabellen *og* «kontantinsats på minst 20 %» på beraknare.se (sidste er raw, fra før). Næste deploy-vindue 3/11 07:30.
+
 **Åben note 3/10 21:5x:** `VERIFICÉR DEPLOY: <29. februar-dagen i /alders tekst + fem danske ord i svensk FAQ + ny se-tekst-port> ceo/review-fund-alder-tabel-og-sprog 3/10 21:5x`.
 Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter ytterligare'` skal give **0** (og «— och efter ytterligare» = 1); `https://beraknare.se/procent` skal have «och inte heller», `beraknare.se/alder` «Timmarna är dagarna gånger 24 och aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas». `/alder`-teksten er daglig præcis den 29. februar, så den kan ikke dømmes før 2028-02-29 — døm da på «28. februar» i stedet for «i dag». Næste deploy-vindue 3/11 07:30.
-Døm på indhold: `curl -s https://beraknare.se/promille | grep -o 'nås alltså efter [0-9]* öl'`
-skal give **«nås alltså efter 1 öl»** (og `grep -c 'efter två öl'` = 0) i både
-den synlige FAQ og `FAQPage`-JSON-LD'en. Næste deploy-vindue 21:30.
-
-**Åben note 3/10 19:2x:** `VERIFICÉR DEPLOY: <regnet omregning i titlen på de 24 /klokken-i-og /klockan-i-landesider> ceo/klokken-titler 3/10 19:2x`.
-Døm på indhold: `curl -s https://minberegner.dk/klokken-i/japan | grep -oE '<title>[^<]*</title>'`
-skal give «Hvad er klokken i Japan? 12 i Danmark = 19:00 i Tokyo» (3/10 er Danmark
-i **sommertid**, UTC+2, mens Tokyo er UTC+9 → 7 timer) og **ikke** indeholde
-«MinBeregner.dk». Samme måling på `/klokken-i/usa` (= 06:00 i New York) og på
-`beraknare.se/klockan-i/japan`. Næste deploy-vindue 21:30.
 
 **Åben note 3/10 22:0x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal i interpoleret tekst på /rentefradrag, /renteberegner, /pension, /moms + ny port der fanger }% i kilder> ceo/procent-mellemrum-rentefradrag-skattefradrag-topskat 3/10 22:0x`.
 Døm på indhold: `curl -s https://minberegner.dk/rentefradrag | grep -c '33,6%'` skal give **0**, og tabellen skal vise `<td>33,6 %</td>`. Samme på `/renteberegner` (`<strong>22 %</strong>`), `/pension` (`<td>11,3 %</td>`) og `/moms`. Næste deploy-vindue 3/11 07:30.
 
-**Åben note 3/10 17:4x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
-Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. Målt 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. Næste deploy-vindue 21:30.
+**Åben note 3/10 17:4x (delvis live — se målingen 21:5x):** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
+Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. ⚠️ Målt 3/10 21:5x: **deltvist** — /arveafgift, /brutto-netto og /flyttebudget er 0, /billaan **6** (alle «6%» i alderstabellen), /kalorier **3** («10-15%»). De 9 er rå procenttal i `<td>`/brødtekst — en anden kodebane end `}%`, så committen dækkede dem ikke; de er **ikke** et deploy-problem. Samme klasse ligger i `topskat/page.tsx:72,80`, `/bil:107,291`, `blog/biloekonomi:252,265` og `blog/boligsalg:46,50,121,197,302`. Tidligere måling 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. Næste deploy-vindue 21:30.
+
+**Dømt 3/10 21:5x på indhold (curl) — to noter lukket.**
+
+- ✅ `ceo/svensk-promille-grænse` 19:5x — beraknare.se/promille giver «nås alltså
+  efter **1** öl», `grep -c 'efter två öl'` = **0**. Dansk-ord-fejlen «og efter» er
+  rettet i samme note (**6ca2260**) og dømmes efter 3/11 07:30.
+- ✅ `ceo/klokken-titler` 19:2x — `<title>` på /klokken-i/japan = «Hvad er klokken
+  i Japan? 12 i Danmark = 19:00 i Tokyo», /klokken-i/usa = «… 12 i Danmark =
+  06:00 i New York», beraknare.se/klockan-i/japan = «Vad är klockan i Japan?
+  12 i Sverige = 19:00 i Tokyo». Ingen har rodlayoutets `| MinBeregner.dk`.
 
 **Dømt 3/10 18:0x–18:1x på indhold (curl) — tre noter lukket.**
 

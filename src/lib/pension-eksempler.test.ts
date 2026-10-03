@@ -150,7 +150,7 @@ describe("pension-eksempler", () => {
   test("spareprocenten og ATP-intervallet er erklærede, ikke opdigtede i sætningen", () => {
     const svar = data.faqItems.find((i) => i.question === "Hvor meget skal jeg spare op til pension?")!;
     expect(svar.answer).toContain(
-      `spare ${PENSION_SPAREPROCENT.min}-${PENSION_SPAREPROCENT.maks}% af din bruttoløn`,
+      `spare ${PENSION_SPAREPROCENT.min}-${PENSION_SPAREPROCENT.maks} % af din bruttoløn`,
     );
     const atp = data.faqItems.find((i) => i.question === "Hvad er ATP pension?")!;
     expect(atp.answer).toContain(

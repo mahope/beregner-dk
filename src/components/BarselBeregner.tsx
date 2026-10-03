@@ -394,7 +394,7 @@ export default function BarselBeregner() {
                   <strong>{l.incomeDrop}</strong> ~{fmtNum(result.monthlyLoss)} kr./md
                 </div>
                 <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                  {l.benefitsCover} {result.coveragePercent}% {l.ofYourSalary}
+                  {l.benefitsCover} {result.coveragePercent} % {l.ofYourSalary}
                 </div>
               </div>
 

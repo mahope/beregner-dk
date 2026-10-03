@@ -289,7 +289,7 @@ export default function StudielaanBeregner() {
 
             {resultat.procentAfIndkomst > 0 && (
               <p className="mt-3 text-sm text-blue-700 dark:text-blue-300">
-                Ydelsen udgør <strong>{resultat.procentAfIndkomst}%</strong> af din månedlige indkomst
+                Ydelsen udgør <strong>{resultat.procentAfIndkomst} %</strong> af din månedlige indkomst
               </p>
             )}
           </div>

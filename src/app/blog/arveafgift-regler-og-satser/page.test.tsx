@@ -150,7 +150,7 @@ describe("arveafgift-regler-og-satser artiklen", () => {
       expect(markup).toContain("afgiftsgrundlaget er 500.000 kr");
       // Søskende-eksemplet: 800.000 − 500.000 = 300.000 grundlag, 45.000 boafgift.
       expect(markup).toContain("Afgiftspliktigt beløb: 300.000 kr");
-      expect(markup).toContain("Boafgift (15%): 45.000 kr");
+      expect(markup).toContain("Boafgift (15 %): 45.000 kr");
       expect(markup).not.toContain("392.300");
       expect(markup).not.toContain("407.700");
     } finally {

@@ -187,27 +187,27 @@ export default function ArveafgiftGuidePage() {
               </tr>
               <tr>
                 <td>Børn, børnebørn, forældre</td>
-                <td>{pct(BOAFGIFT_PCT)}%</td>
+                <td>{pct(BOAFGIFT_PCT)} %</td>
                 <td>0%</td>
-                <td>{pct(BOAFGIFT_PCT)}%</td>
+                <td>{pct(BOAFGIFT_PCT)} %</td>
               </tr>
               <tr>
                 <td>Stedbørn, svigerbørn</td>
-                <td>{pct(BOAFGIFT_PCT)}%</td>
+                <td>{pct(BOAFGIFT_PCT)} %</td>
                 <td>0%</td>
-                <td>{pct(BOAFGIFT_PCT)}%</td>
+                <td>{pct(BOAFGIFT_PCT)} %</td>
               </tr>
               <tr>
                 <td>Søskende, niecer, nevøer</td>
-                <td>{pct(BOAFGIFT_PCT)}%</td>
-                <td>{pct(TILLAEGS_PCT)}% af beløbet efter boafgift</td>
-                <td>{pct(EFFEKTIV_PCT)}%</td>
+                <td>{pct(BOAFGIFT_PCT)} %</td>
+                <td>{pct(TILLAEGS_PCT)} % af beløbet efter boafgift</td>
+                <td>{pct(EFFEKTIV_PCT)} %</td>
               </tr>
               <tr>
                 <td>Venner, andre</td>
-                <td>{pct(BOAFGIFT_PCT)}%</td>
-                <td>{pct(TILLAEGS_PCT)}% af beløbet efter boafgift</td>
-                <td>{pct(EFFEKTIV_PCT)}%</td>
+                <td>{pct(BOAFGIFT_PCT)} %</td>
+                <td>{pct(TILLAEGS_PCT)} % af beløbet efter boafgift</td>
+                <td>{pct(EFFEKTIV_PCT)} %</td>
               </tr>
             </tbody>
           </table>
@@ -229,7 +229,7 @@ export default function ArveafgiftGuidePage() {
           <li>Bobeholdning: {GUIDE_BARN_TEKST} kr</li>
           <li>Bundfradrag: −{BUND_FAEDRET} kr</li>
           <li>Afgiftspliktigt beløb: {kr(EKSEMPLER_GUIDE.barn.grundlag)} kr</li>
-          <li>Boafgift ({pct(BOAFGIFT_PCT)}%): {kr(EKSEMPLER_GUIDE.barn.boafgift)} kr</li>
+          <li>Boafgift ({pct(BOAFGIFT_PCT)} %): {kr(EKSEMPLER_GUIDE.barn.boafgift)} kr</li>
           <li>
             Til fordeling mellem børn: {kr(EKSEMPLER_GUIDE.barn.modtager)} kr (ca.{" "}
             {kr(EKSEMPLER_GUIDE.barn.modtager / 2)} kr hver)
@@ -246,9 +246,9 @@ export default function ArveafgiftGuidePage() {
           <li>Bobeholdning: {GUIDE_SOESKENDE_TEKST} kr</li>
           <li>Bundfradrag: −{BUND_FAEDRET} kr</li>
           <li>Afgiftspliktigt beløb: {kr(EKSEMPLER_GUIDE.soeskende.grundlag)} kr</li>
-          <li>Boafgift ({pct(BOAFGIFT_PCT)}%): {kr(EKSEMPLER_GUIDE.soeskende.boafgift)} kr</li>
+          <li>Boafgift ({pct(BOAFGIFT_PCT)} %): {kr(EKSEMPLER_GUIDE.soeskende.boafgift)} kr</li>
           <li>Beløb efter boafgift: {kr(SOESKENDE_EFTER_BOAFGIFT)} kr</li>
-          <li>Tillægsafgift ({pct(TILLAEGS_PCT)}%): {kr(EKSEMPLER_GUIDE.soeskende.tillaeg)} kr</li>
+          <li>Tillægsafgift ({pct(TILLAEGS_PCT)} %): {kr(EKSEMPLER_GUIDE.soeskende.tillaeg)} kr</li>
           <li>Samlet afgift: {kr(EKSEMPLER_GUIDE.soeskende.iAlt)} kr</li>
           <li>Arving modtager: {kr(EKSEMPLER_GUIDE.soeskende.modtager)} kr</li>
         </ol>

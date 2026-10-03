@@ -120,7 +120,7 @@ export default async function DagpengePage() {
 
         <h3>Hvad påvirker din dagpengesats?</h3>
         <ul>
-          <li><strong>Din tidligere løn:</strong> Dagpenge = {formatNumber(DAGPENGE_2026.dagpengeProcent * 100, locale, { maximumFractionDigits: 0 })}% af løn efter {formatNumber(SATSER_2026.amBidrag * 100, locale, { maximumFractionDigits: 0 })}% AM-bidrag</li>
+          <li><strong>Din tidligere løn:</strong> Dagpenge = {formatNumber(DAGPENGE_2026.dagpengeProcent * 100, locale, { maximumFractionDigits: 0 })} % af løn efter {formatNumber(SATSER_2026.amBidrag * 100, locale, { maximumFractionDigits: 0 })} % AM-bidrag</li>
           <li><strong>Maxsatsen:</strong> Uanset din løn kan du højst få {kr(DAGPENGE_2026.fuldtid)}/md i 2026</li>
           <li><strong>Beskæftigelsestillæg:</strong> Op til {kr(BESKAEFTIGELSESTILLAEG_2026)}/md de første 3 måneder</li>
           <li><strong>Arbejdstid:</strong> Deltidsforsikrede får {kr(DAGPENGE_2026.deltid)}/md — 2/3 af fuldtidssatsen</li>

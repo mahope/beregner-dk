@@ -277,7 +277,7 @@ export default function AndelsboligBeregner() {
                 <span className="font-medium dark:text-white">{formatKr(resultat.samletPris)}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Udbetaling ({udbetalingProcent}%)</span>
+                <span className="text-gray-600 dark:text-gray-400">Udbetaling ({udbetalingProcent} %)</span>
                 <span className="font-medium dark:text-white">{formatKr(resultat.udbetaling)}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b dark:border-gray-700">

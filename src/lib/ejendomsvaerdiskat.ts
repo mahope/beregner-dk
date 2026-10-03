@@ -186,7 +186,7 @@ export function satsTilProcent(andel: number): string {
 /** De tre regnestykker + indgangssætningen, med beløb fra `EKSEMPEL`. */
 export const EKSEMPEL_TEKST = {
   intro: `En bolig i ${GRUNDSKYLD_KOMMUNER.koebenhavn.navn} med ejendomsværdi ${kr(EKSEMPEL_INPUT.ejendomsvaerdi)} kr og grundværdi ${kr(EKSEMPEL_INPUT.grundvaerdi)} kr:`,
-  ejendomsvaerdiskat: `${kr(EKSEMPEL_INPUT.ejendomsvaerdi)} × ${helt.format(BESKATTET_ANDEL * 100)}% × ${satsTilPromille(EJENDOMSVAERDISKAT.lavSats * 1000)}‰ = ${kr(EKSEMPEL.ejendomsvaerdiskat)} kr/år`,
-  grundskyld: `${kr(EKSEMPEL_INPUT.grundvaerdi)} × ${helt.format(BESKATTET_ANDEL * 100)}% × ${satsTilPromille(EKSEMPEL_INPUT.grundskyldPromille)}‰ = ${kr(EKSEMPEL.grundskyld)} kr/år`,
+  ejendomsvaerdiskat: `${kr(EKSEMPEL_INPUT.ejendomsvaerdi)} × ${helt.format(BESKATTET_ANDEL * 100)} % × ${satsTilPromille(EJENDOMSVAERDISKAT.lavSats * 1000)}‰ = ${kr(EKSEMPEL.ejendomsvaerdiskat)} kr/år`,
+  grundskyld: `${kr(EKSEMPEL_INPUT.grundvaerdi)} × ${helt.format(BESKATTET_ANDEL * 100)} % × ${satsTilPromille(EKSEMPEL_INPUT.grundskyldPromille)}‰ = ${kr(EKSEMPEL.grundskyld)} kr/år`,
   samlet: `${kr(EKSEMPEL.samlet)} kr/år (${kr(EKSEMPEL.maanedligt)} kr/måned)`,
 };

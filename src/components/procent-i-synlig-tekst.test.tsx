@@ -358,12 +358,15 @@ describe("procenttal i interpoleret tekst", () => {
   /**
    * Målt 3/10 21:0x med `grep -rc '}%' src`: **91** forekomster i 37 filer.
    * Heraf er 15 CSS (`style={{ width: \`${pct}%\` }}`), som scanneren udelader,
-   * så de 76 er synlig tekst. Porten måler derfor et **loft**, ikke nul: de
-   * konkrete fejl på trafiksiderne er rettet i denne iteration, resten er
-   * køet op som F5d-slice med hver sin fil, så en ny `}%` ikke kan gemme sig
-   * i den gamle bunke.
+   * så de 76 er synlig tekst. Porten målte derfor et **loft** på 40, mens den
+   * egen måling 3/10 21:5x fandt **35** — planens «40 fund på 26 sider» var
+   * loftet, ikke fundene.
+   *
+   * 3/10 22:0x er alle 35 rettet i de 14 filer, de lå i, så loftet er **0**
+   * og klassen er lukket: en ny `{tal}%` kan ikke gemme sig i en gammel bunke,
+   * fordi der ikke længere er nogen.
    */
-  const INTERPOLATION_LOFT = 40;
+  const INTERPOLATION_LOFT = 0;
 
   test("scanneren ser en manglende plads og lader CSS være", () => {
     const fund = interpolationUdenMellemrum(
@@ -406,13 +409,14 @@ describe("procenttal i interpoleret tekst", () => {
   });
 
   test("korpuset har ikke fået flere manglende pladser", () => {
-    // Loftet er målt: 91 rå fund → 76 efter CSS-fradraget → **40** efter denne
-    // slice. Det må gerne falde; det må ikke stige i det stille, fordi så kommer
-    // den nye skrivemåde ind i en ny side ubemærket.
+    // Loftet er målt: 91 rå fund → 76 efter CSS-fradraget → 40 efter de tre
+    // første slices → **35** målt forfra → **0** efter 3/10 22:0x-slice'en.
+    // Det må ikke stige i det stille, fordi så kommer den nye skrivemåde ind i
+    // en ny side ubemærket — og der er ingen undtagelse længere, kun CSS.
     const fund = alleTekstfiler.flatMap((fil) =>
       interpolationUdenMellemrum(readFileSync(fil, "utf8"), fil),
     );
-    expect(fund.length).toBeLessThanOrEqual(INTERPOLATION_LOFT);
-    expect(INTERPOLATION_LOFT).toBe(40);
+    expect(fund).toEqual([]);
+    expect(INTERPOLATION_LOFT).toBe(0);
   });
 });

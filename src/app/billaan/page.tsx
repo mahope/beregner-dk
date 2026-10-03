@@ -27,7 +27,7 @@ export default async function BillaanPage() {
   // står for — med sidens egen tusindtalsseparator.
   const kr = (belob: number) =>
     formatNumber(Math.round(belob), locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
-  const sats = (rentesats: number) => `${formatNumber(rentesats, locale, { maximumFractionDigits: 1 })}%`;
+  const sats = (rentesats: number) => `${formatNumber(rentesats, locale, { maximumFractionDigits: 1 })} %`;
 
   return (
     <div>

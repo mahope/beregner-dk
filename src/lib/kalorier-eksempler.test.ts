@@ -65,7 +65,7 @@ describe("kalorierFaqItems", () => {
     },
     {
       question: "Er beregneren præcis?",
-      answer: "Bruger Mifflin-St Jeor formlen. Individuelle variationer kan være 10-15%.",
+      answer: "Bruger Mifflin-St Jeor formlen. Individuelle variationer kan være 10-15 %.",
     },
     {
       question: "Hvor mange kalorier skal jeg have?",
@@ -151,7 +151,7 @@ describe("kalorierFaqItems", () => {
       );
       expect(alle, locale).toContain(`${formatBelob(KALORIER_KG_PR_UGE, locale, 1)} kg`);
       expect(alle, locale).toContain(
-        `${formatBelob(KALORIER_USIKKERHED_PCT.min, locale)}-${formatBelob(KALORIER_USIKKERHED_PCT.maks, locale)}%`,
+        `${formatBelob(KALORIER_USIKKERHED_PCT.min, locale)}-${formatBelob(KALORIER_USIKKERHED_PCT.maks, locale)} %`,
       );
       // Og de tre spørgsmål, der bærer et tal, skal hver især bære sit eget.
       const tdeeSvar = svar.find((s) => s.answer.includes(formatBelob(mandTdee, locale)));

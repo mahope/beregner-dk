@@ -72,13 +72,13 @@ export default async function EjendomsvaerdiskatPage() {
         <ul>
           <li>
             <strong>
-              {satsTilPromille(EJENDOMSVAERDISKAT.lavSats * 1000)}&permil; ({satsTilProcent(EJENDOMSVAERDISKAT.lavSats)}%)
+              {satsTilPromille(EJENDOMSVAERDISKAT.lavSats * 1000)}&permil; ({satsTilProcent(EJENDOMSVAERDISKAT.lavSats)} %)
             </strong>{" "}
             af beskatningsgrundlaget op til progressionsgrænsen
           </li>
           <li>
             <strong>
-              {satsTilPromille(EJENDOMSVAERDISKAT.hoejSats * 1000)}&permil; ({satsTilProcent(EJENDOMSVAERDISKAT.hoejSats)}%)
+              {satsTilPromille(EJENDOMSVAERDISKAT.hoejSats * 1000)}&permil; ({satsTilProcent(EJENDOMSVAERDISKAT.hoejSats)} %)
             </strong>{" "}
             af beskatningsgrundlaget over progressionsgrænsen
           </li>

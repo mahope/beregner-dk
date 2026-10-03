@@ -263,7 +263,7 @@ export default function ElbilBenzinBeregner({ elprisData = null, nu }: Props = {
               <p className="text-sm text-green-900 dark:text-green-200">
                 {dagNavn(ladeVindue.startDate)} · gennemsnit {kr2(ladeVindue.gennemsnit)} kr/kWh
                 {liveGns !== null && liveGns > ladeVindue.gennemsnit && (
-                  <> ({Math.round((1 - ladeVindue.gennemsnit / liveGns) * 100)}% under dagens gennemsnit)</>
+                  <> ({Math.round((1 - ladeVindue.gennemsnit / liveGns) * 100)} % under dagens gennemsnit)</>
                 )}
                 . Det svarer til ca. {kr2((evUse * ladeVindue.gennemsnit))} kr pr. 100 km.
               </p>

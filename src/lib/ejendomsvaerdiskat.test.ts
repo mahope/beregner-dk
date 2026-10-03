@@ -125,10 +125,10 @@ describe("sidens eksempel", () => {
     // Hvis en sats ændres, skal denne test blive rød — den er erstatningen for
     // at have tallene håndskrevet i siden, hvor de ikke hang ved satsen.
     expect(EKSEMPEL_TEKST.ejendomsvaerdiskat).toBe(
-      "3.000.000 × 80% × 5,1‰ = 12.240 kr/år",
+      "3.000.000 × 80 % × 5,1‰ = 12.240 kr/år",
     );
     expect(EKSEMPEL_TEKST.grundskyld).toBe(
-      "1.000.000 × 80% × 5,1‰ = 4.080 kr/år",
+      "1.000.000 × 80 % × 5,1‰ = 4.080 kr/år",
     );
     expect(EKSEMPEL_TEKST.samlet).toBe("16.320 kr/år (1.360 kr/måned)");
   });

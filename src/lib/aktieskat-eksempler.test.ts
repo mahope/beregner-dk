@@ -108,7 +108,7 @@ describe("aktieskat-eksempler — port over alt tekstbeløb", () => {
     expect(AKTIE_SATS_LAV).toBe("27 %");
     expect(AKTIE_SATS_HOEJ).toBe("42 %");
     expect(ASK_SATS).toBe("17 %");
-    expect(AKTIE_SATS_KOMPAKT).toBe("27%");
+    expect(AKTIE_SATS_KOMPAKT).toBe("27 %");
   });
 });
 

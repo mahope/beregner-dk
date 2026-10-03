@@ -41,7 +41,7 @@ const kr = aktieBelob;
 const pct = (sats: number) => `${formatBelob(sats * 100, DA)} %`;
 
 /** «27/42%» — den korte form, to sætninger bruger. */
-const pctKompakt = (sats: number) => `${formatBelob(sats * 100, DA)}%`;
+const pctKompakt = (sats: number) => `${formatBelob(sats * 100, DA)} %`;
 
 /** Progressionsgrænsen for aktieindkomst i frit depot (2026). */
 export const AKTIE_GRAENSE = SATSER_2026.aktieProgressionsgraense;

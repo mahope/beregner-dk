@@ -1693,7 +1693,7 @@ describe("procentens egne eksempler i FAQ og metadata", () => {
   test("norsk: metaDescriptionens 15 %-eksempel læses fra PROCENT_15_AV_BELOEB", () => {
     const { sats, belob } = PROCENT_15_AV_BELOEB;
     expect(getPageData("procent", "no")!.metaDescription).toContain(
-      `Eksempel: ${sats}% av ${talDa(belob)} kr = ${talDa(procentAf(belob, sats))} kr.`,
+      `Eksempel: ${sats} % av ${talDa(belob)} kr = ${talDa(procentAf(belob, sats))} kr.`,
     );
   });
 

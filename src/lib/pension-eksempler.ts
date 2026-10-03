@@ -189,7 +189,7 @@ export function pensionFaqItems(): PensionFaqItem[] {
     },
     {
       question: "Hvor meget skal jeg spare op til pension?",
-      answer: `En tommelfingerregel er at spare ${spar.min}-${spar.maks}% af din bruttoløn til pension. De fleste har brug for ${leve.min}-${leve.maks}% af deres arbejdsindkomst som pensionist for at bevare deres levestandard.`,
+      answer: `En tommelfingerregel er at spare ${spar.min}-${spar.maks} % af din bruttoløn til pension. De fleste har brug for ${leve.min}-${leve.maks} % af deres arbejdsindkomst som pensionist for at bevare deres levestandard.`,
     },
     {
       question: "Hvad er forskellen på ratepension og aldersopsparing?",

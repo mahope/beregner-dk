@@ -28274,3 +28274,45 @@ templates og interpoleringer). **Anbefalet løsning:** find fejlen i scannerens
 blokgenkendelse og ret den, så `locale-leak.mjs` — ikke den nye port — er den ene
 port. Indtil da dækker `se-tekst.test.ts` `sePages`, og `locale-leak.mjs`
 dækker komponenterne.
+
+## 3/10 22:2x — `ceo/procent-interpolation-til-nul`: interpolationsklassen `}%` lukket (35 → 0)
+
+**Hvad opgaven egentlig var.** Planen havde «de 40 resterende `}%`» som sin eneste
+åbne opgave. Egen måling med scannerens egen logik (TypeScript-AST, samme som
+`interpolationUdenMellemrum()`) fandt **35** fund i **14** filer — «40» var
+loftet i testen, ikke fundene. De 35 lå i `/blog/arveafgift-regler-og-satser` (13),
+`src/lib/page-data.ts` (4), `src/lib/kalorier-eksempler.ts` (3),
+`src/lib/ejendomsvaerdiskat.ts` (2), `src/lib/pension-eksempler.ts` (2),
+`src/app/dagpenge/page.tsx` (2), `src/app/ejendomsvaerdiskat/page.tsx` (2) og fem
+beregnere (1 hver: Andelsbolig, Barsel, ElbilBenzin, Solcelle, Studielaan) samt
+`src/app/billaan/page.tsx` og `src/lib/aktieskat-eksempler.ts`.
+
+**Fælden ved en scriptet rettelse.** Første kørsel af fixer-scriptet satte pladsen
+**inde i** interpolationen: `${usikkerMaks }%` i stedet for `${usikkerMaks} %`.
+Årsagen er at `getStart()` på en `TemplateTail` peger på den afsluttende `}`
+(spanet meder ikke det efterfølgende `;`), ikke på teksten. Rettet ved at søge
+frem til det første `%` fra `getStart()` og kaste hvis der ikke står `%` — så kan
+scriptet ikke skrive noget andet. Efter rettelsen: 0 fund.
+
+**Bivirkninger fundet af porten, ikke af mig.**
+1. `/dagpenge`s `metaDescription` blev **161** tegn, fordi pladsen kom til. Rettet
+   ved «Beregn din dagpengesats ud fra din løn.» → «… fra din løn.» (157 tegn).
+2. Syv testfiler dømte den gamle lim: `blog/arveafgift…/page.test.tsx` («Boafgift
+   (15%): 45.000 kr»), `meta-description.test.ts`, `page-data.test.ts` (den norske
+   `/procent`-description), `aktieskat-eksempler.test.ts` («27%»),
+   `ejendomsvaerdiskat.test.ts` («× 80% ×»), `kalorier-eksempler.test.ts` (to
+   steder) og `pension-eksempler.test.ts`. Alle er strenge for det, de låser, så
+   de blev opdateret — ikke slækket.
+
+**Porten.** `INTERPOLATION_LOFT` 40 → **0**, og `toBeLessThanOrEqual(loft)` blev
+til `expect(fund).toEqual([])`, så en ny `{tal}%` giver fil **og linje** i
+fejlmeddelelsen. Mutation målt: `{udbetalingProcent}%` tilbage i
+`AndelsboligBeregner.tsx` → rød med
+`"src/components/AndelsboligBeregner.tsx:280 …%)"`.
+
+**Hvad der IKKE blev rettet, og hvorfor det ikke er en deploy-fejl.** De rå
+procenttal i `<td>` og brødtekst («0%», «10-15%») er en anden kodebane end `}%`:
+ingen interpolation, så hverken denne port eller `regnestykker.test.ts`'s
+JsxText-scanner kan knytte dem til porten. Målingen 3/10 21:5x fandt 6 i
+`/billaan`s alderstabel og 3 i `/kalorier` — de lå live, fordi de aldrig var
+interpolationer. De er den næste opgave i planen.

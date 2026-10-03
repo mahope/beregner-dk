@@ -548,7 +548,7 @@ export default function SolcelleBeregner({ spotGennemsnit = null }: Props = {}) 
             </div>
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-5 text-center">
               <p className="text-sm text-blue-700 dark:text-blue-400">{l.selvforsyningsgrad}</p>
-              <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">{resultat.selvforsyning}%</p>
+              <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">{resultat.selvforsyning} %</p>
             </div>
           </div>
 

@@ -217,7 +217,7 @@ export function kalorierFaqItems(
       },
       {
         question: "Är kalkylatorn korrekt?",
-        answer: `Använder Mifflin-St Jeor-formeln. Individuella variationer kan vara ${usikkerMin}-${usikkerMaks}%.`,
+        answer: `Använder Mifflin-St Jeor-formeln. Individuella variationer kan vara ${usikkerMin}-${usikkerMaks} %.`,
       },
       {
         question: "Hur många kalorier behöver jag?",
@@ -256,7 +256,7 @@ export function kalorierFaqItems(
       },
       {
         question: "Er kalkulatoren nøyaktig?",
-        answer: `Bruker Mifflin-St Jeor-formelen. Individuelle variasjoner kan være ${usikkerMin}-${usikkerMaks}%.`,
+        answer: `Bruker Mifflin-St Jeor-formelen. Individuelle variasjoner kan være ${usikkerMin}-${usikkerMaks} %.`,
       },
     ];
   }
@@ -276,7 +276,7 @@ export function kalorierFaqItems(
     },
     {
       question: "Er beregneren præcis?",
-      answer: `Bruger Mifflin-St Jeor formlen. Individuelle variationer kan være ${usikkerMin}-${usikkerMaks}%.`,
+      answer: `Bruger Mifflin-St Jeor formlen. Individuelle variationer kan være ${usikkerMin}-${usikkerMaks} %.`,
     },
     {
       question: "Hvor mange kalorier skal jeg have?",
