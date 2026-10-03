@@ -74,7 +74,7 @@ describe("boligsalg page", () => {
     // ingen kilde, så der er intet at læse dem fra.
     for (const interval of [
       "150.000-250.000",
-      "3-6%",
+      "3-6 %",
       "25.000-60.000",
       "6.900-8.700",
       "5.000-8.000",

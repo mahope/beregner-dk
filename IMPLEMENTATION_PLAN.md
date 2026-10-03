@@ -1,35 +1,41 @@
-STATUS: 3/10 22:2x. ✅ **Interpolationsklassen `}%` er lukket — 35 fund → 0.**
-       `ceo/procent-interpolation-til-nul`. Målt, ikke troet: planens «40 fund
-       på 26 sider» var **loftet**, ikke fundene — egen måling fandt **35** i 14
-       filer. Rettet: `/blog/arveafgift-regler-og-satser` (13), `page-data.ts`
-       (4), `kalorier-eksempler.ts` (3), `ejendomsvaerdiskat.ts` (2),
-       `pension-eksempler.ts` (2), `dagpenge/page.tsx` (2),
-       `ejendomsvaerdiskat/page.tsx` (2) og fem beregnere (1 hver).
-       `INTERPOLATION_LOFT` er nu **0** og asserten `toEqual([])`, så porten
-       rammer den næste `{tal}%` med fil og linje. Mutation målt: sæt
-       `{udbetalingProcent}%` tilbage, porten bliver rød med linjen i fejlen.
-       *Bivirkning fundet af porten:* `/dagpenge`s metaDescription blev **161**
-       tegn med den nye plads, så «ud fra din løn» er nu «fra din løn» (157).
-       7 testfiler dømte den gamle lim (f.eks. «Boafgift (15%): 45.000 kr») og
-       er opdateret — de er strenge for, de var ikke en fejl.
-       ⚠️ *Målt, ikke en deploy-fejl:* de rå procenttal i `<td>`/brødtekst er en
-       **anden kodebane** end `}%` (se F5g-noten) og ligger stadig i
-       `topskat/page.tsx`, `/bil`, `blog/biloekonomi` og `blog/boligsalg`.
-       CI grøn ved start (`6ca2260`), ingen åbne PR'er, ingen uløste Sentry-fejl,
-       Sentry er kodet (`instrumentation-client.ts` + `sentry.server.config.ts`).
-       PR-TJEK: 3/10 22:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+STATUS: 3/10 23:0x. ✅ **Begge procent-klasser er lukket — `}%` (35 fund) og de rå
+       `\d%` i `<td>`/brødtekst (30 fund).** `ceo/procent-mellemrum-bilsider`.
+       Målt, ikke troet: planens opgave talte 21 linjer i syv filer; egen måling
+       fandt **30 noder i fire filer**, og to af planens filer var **allerede
+       rene i `HEAD`** — `/billaan` skriver rentesatsen gennem `sats()` (`:30`,
+       `${formatNumber(...)} %`) og `/kalorier` gennom `${usikkerMin}-${usikkerMaks} %`.
+       De 6 + 3 træffere i live-målingen 3/10 21:5x var derfor **gammel kode fra
+       før fixen**, altså et deploy-vindue og ikke en fejl i koden — den fejltype
+       planen havde mistet tiden på at lede efter. Rettet: `/bil` (8 noder —
+       tabellen med værdiforringelsen står to gange, da+se), `blog/boligsalg` (11),
+       `blog/biloekonomi` (9), `/topskat` (2) og `BoligsalgBeregner`s disclaimer
+       (1, var ikke med i planens liste). Én dansk fejl i samme sætning:
+       «(total 297.000 kr)» → «totalt». Loftet **261 → 231**, målt ved at sætte
+       det til 0 og læse den faktiske længde i fejlmeldingen.
+       `boligsalg/page.test.tsx:77` så på «3-6%» i en *forbudt*-liste og ville
+       ikke have kunnet fange den igen — opdateret til «3-6 %».
+       ⚠️ *Målt, ikke gættet:* «30% reglen» og «4%-reglen» er **regelnavne**, ikke
+       procenter, og står uændret; de tre svenske momssatser på `/moms` er ⛔ ❓.
+       Verify: typecheck, lint (757 filer), **4141 tests / 262 filer**, build.
+       Næste iteration skal være en **feature** — de tre sidste var tekstporte.
+       PR-TJEK: 3/10 23:0x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
+       start (`f973a06`), ingen uløste Sentry-fejl, Sentry er kodet.
 
-## Åben opgave: de rå procenttal i `<td>` og brødtekst (ikke `}%`)
+## Arkiveret i denne blok
 
-**Hvad:** sidste måling 3/10 21:5x fandt 9 på /billaan (alderstabellen) og
-/kalorier («10-15%») + 12 i fire filer: `topskat/page.tsx:72,80`,
-`/bil:107,291`, `blog/biloekonomi:252,265`, `blog/boligsalg:46,50,121,197,302`.
-**Hvorfor:** de er synlige for læseren lige så meget som de interpolerede, og
-F5c's `regnestykker.test.ts` tæller dem i et loft pr. korpus (319 noder), så
-ingen tvinger dem enkeltvis ned.
-**Accept:** hver fil til 0 synlige `\d%`, og de fem navne-undtagelser
-(«30% reglen» ×2, «4%-reglen») står uændret. **MÅL:** /billaan 24, /bil 24
-besøgende/28d; øvrige ikke i top-15.
+- 3/10 22:2x — `ceo/procent-interpolation-til-nul`: `INTERPOLATION_LOFT` **0**,
+  35 fund i 14 filer (`/blog/arveafgift` 13, `page-data.ts` 4,
+  `kalorier-eksempler.ts` 3, …). Bivirkning: `/dagpenge`s metaDescription blev
+  161 tegn, så «ud fra din løn» → «fra din løn» (157); 7 testfiler dømte den
+  gamle lim. → `docs/plan-arkiv.md`
+- 3/10 23:0x — `ceo/procent-mellemrum-bilsider`: de 30 rå `\d%` → `docs/plan-arkiv.md`
+
+## Afsluttet: de rå procenttal i `<td>` og brødtekst (ikke `}%`)
+
+[x] ✅ 3/10 23:0x — se F5c og `docs/plan-arkiv.md`. Loftet 261 → 231; de fem
+navne-undtagelser («30% reglen» ×2, «4%-reglen») står uændret. **MÅL:** /bil 24,
+/billaan 24, /kalorier 273 besøgende/28d; øvrige ikke i top-15.
+
 
 ## Fase 3 — trafik-drevet
 
@@ -158,8 +164,10 @@ den **synlige** markup. Slice 10:5x (boliglån), 11:2x (fem beregnere) og
 (`/lon-efter-skatt` 20.2 %, `/brutto-netto` 33.3 %), og de to
 resultattilstande kan hverken scanneren eller markup-porten se, så de har fire
 egne tests i `decimal-komma.test.tsx`. Detaljer og målinger: `docs/plan-arkiv.md`.
-*Næste slice:* mål på ny med `grep -n '}%' src/components/*.tsx`; de
-sidste `title=`-attributter og CSS-højder er ikke synlig tekst.
+*Næste slice (målt på ny 3/10 23:0x):* de tre største filer er nu
+`blog/30-procent-reglen-husleje` (25, ⛔ de er regelnavnet), `/moms` (16, ⛔ de 3
+lovgrænser, ❓ nedenfor), `blog/koeb-af-bolig-2026-omkostninger` (15) og
+`AlkoholenhederBeregner.tsx` (10). Mål med `grep -cE '[0-9]%' <fil>`.
 
 **F5g. [~] Slice 3/10 18:4x: 45 noder i `/billaan` (da+se), `/arveafgift`,
 `/brutto-netto`, `/kalorier` og `/flyttebudget`.** Alle boede i `page.tsx` (brødtekst og
@@ -173,6 +181,11 @@ tekst i da/se/no, og de fem navne-undtagelser («30% reglen» ×2 pr. `/husleje`
 *MÅL:* `/billaan` 24 besøgende/28d, `/arveafgift` ikke i top-15 → samme som
 F5c. **Port:** `regnestykker.test.ts` (loft pr. korpus) +
 `arveafgift/page.test.tsx` på regnestykket.
+**[x] ✅ 3/10 23:0x — den anden kodebane er også lukket:** de rå `\d%` i `<td>` og
+brødtekst lå i `/bil`, `/topskat`, `blog/biloekonomi`, `blog/boligsalg` og
+`BoligsalgBeregner` (30 noder, loftet 261 → **231**). `/billaan` og `/kalorier`
+var **allerede rene** i `HEAD` — planens måling 3/10 21:5x så gammel kode fra
+før fixen, ikke en fejl. Se `docs/plan-arkiv.md`.
 
 - **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
   *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
@@ -358,6 +371,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
+**Åben note 3/10 23:0x:** `VERIFICÉR DEPLOY: <mellemrum i 30 rå procenttal på /bil (da+se), /topskat, blog/biloekonomi, blog/boligsalg + BoligsalgBeregner + «totalt 297.000 kr»> ceo/procent-mellemrum-bilsider 3/10 23:0x`.
+Døm på indhold: `curl -s https://minberegner.dk/bil | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%' | wc -l` skal give **0** (var 12), samme måling på `/topskat` (var 4) og på `minberegner.dk/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` + `…/biloekonomi-2026-hvad-koster-det-at-eje-bil` (hver 1-2). `beraknare.se/bil` skal have «20-25 %» i tabellen. Næste deploy-vindue 4/10 07:30.
+
 **Åben note 3/10 22:2x:** `VERIFICÉR DEPLOY: <mellemrum i alle interpolerede procenttal (35 steder) + loftet INTERPOLATION_LOFT 40 → 0> ceo/procent-interpolation-til-nul 3/10 22:2x`.
 Døm på indhold: `curl -s https://minberegner.dk/blog/arveafgift-regler-og-satser | grep -c 'Boafgift (15 %)'` skal give **≥1** og `grep -c 'Boafgift (15%)'` **0**; `/dagpenge` skal have «Dagpenge = 80 % af løn efter 8 % AM-bidrag»; `/kalorier` FAQ «10-15 %»; `/ejendomsvaerdiskat` «80 % × 5,1‰»; `/billaan` skal have «5,95 %» i rentetabellen *og* «kontantinsats på minst 20 %» på beraknare.se (sidste er raw, fra før). Næste deploy-vindue 3/11 07:30.
 
@@ -368,7 +384,7 @@ Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter
 Døm på indhold: `curl -s https://minberegner.dk/rentefradrag | grep -c '33,6%'` skal give **0**, og tabellen skal vise `<td>33,6 %</td>`. Samme på `/renteberegner` (`<strong>22 %</strong>`), `/pension` (`<td>11,3 %</td>`) og `/moms`. Næste deploy-vindue 3/11 07:30.
 
 **Åben note 3/10 17:4x (delvis live — se målingen 21:5x):** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
-Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. ⚠️ Målt 3/10 21:5x: **deltvist** — /arveafgift, /brutto-netto og /flyttebudget er 0, /billaan **6** (alle «6%» i alderstabellen), /kalorier **3** («10-15%»). De 9 er rå procenttal i `<td>`/brødtekst — en anden kodebane end `}%`, så committen dækkede dem ikke; de er **ikke** et deploy-problem. Samme klasse ligger i `topskat/page.tsx:72,80`, `/bil:107,291`, `blog/biloekonomi:252,265` og `blog/boligsalg:46,50,121,197,302`. Tidligere måling 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. Næste deploy-vindue 21:30.
+Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. ⚠️ Målt 3/10 21:5x: **deltvist** — /arveafgift, /brutto-netto og /flyttebudget er 0, /billaan **6** (alle «6%» i alderstabellen), /kalorier **3** («10-15%»). De 9 er rå procenttal i `<td>`/brødtekst — en anden kodebane end `}%`, så committen dækkede dem ikke; de er **ikke** et deploy-problem. Tidligere måling 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. ⚠️ **3/10 23:0x — de 9 var aldrig fejl i `HEAD`.** Egen måling: `/billaan` har 0 rå procenter (rentesatsen går gennem `sats()`, `${formatNumber(...)} %`) og `/kalorier` har 0 (`${usikkerMin}-${usikkerMaks} %` i `kalorier-eksempler.ts:220,259,279`). Træfferne i live var **gammel kode fra før fixen**. Noten er derfor ikke længere en deploy-måling: de to strenge dømmes igen 4/10 07:30, og resten af klassen er rettet i `ceo/procent-mellemrum-bilsider`.
 
 **Dømt 3/10 21:5x på indhold (curl) — to noter lukket.**
 
@@ -526,3 +542,4 @@ ovenfor.
 - ❓ **Fitnessfradrag, sommerhusudlejning, madvaretabel, grundskyld for Varde og
   Playwright.** Fem mindre kilder, alle noteret med detaljer i
   `docs/plan-arkiv.md` 2/10 14:20. Uden dem bygges intet, jf. punkt 11.
+

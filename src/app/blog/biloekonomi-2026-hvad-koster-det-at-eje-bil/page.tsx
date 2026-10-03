@@ -52,7 +52,7 @@ const faqItems = [
   },
   {
     question: "Hvor meget koster registreringsafgiften i 2026?",
-    answer: "Registreringsafgiften er progressiv: 0% af de første ca. 71.500 kr, ca. 20% af værdien fra 71.500-221.200 kr, og ca. 150% af værdien over 221.200 kr. Elbiler betaler en reduceret afgift, der gradvist stiger mod 100% i 2030. Benzindrevne biler med høj km/l kan få nedslag.",
+    answer: "Registreringsafgiften er progressiv: 0 % af de første ca. 71.500 kr, ca. 20 % af værdien fra 71.500-221.200 kr, og ca. 150 % af værdien over 221.200 kr. Elbiler betaler en reduceret afgift, der gradvist stiger mod 100 % i 2030. Benzindrevne biler med høj km/l kan få nedslag.",
   },
   {
     question: "Hvad er den grønne ejerafgift i 2026?",
@@ -178,9 +178,9 @@ export default function BiloekonomiPage() {
           Når du køber en ny bil i Danmark, skal du betale registreringsafgift. Den er progressiv, hvilket betyder at jo dyrere bilen er, jo højere er afgiftsprocenten. I 2026 er satserne <strong>(vejledende, baseret på gældende lovgivning)</strong>:
         </p>
         <ul>
-          <li><strong>0%</strong> af de første ca. 71.500 kr af bilens værdi (bundfradrag)</li>
-          <li><strong>Ca. 20%</strong> af værdien fra ca. 71.500 kr til ca. 221.200 kr</li>
-          <li><strong>Ca. 150%</strong> af værdien over ca. 221.200 kr</li>
+          <li><strong>0 %</strong> af de første ca. 71.500 kr af bilens værdi (bundfradrag)</li>
+          <li><strong>Ca. 20 %</strong> af værdien fra ca. 71.500 kr til ca. 221.200 kr</li>
+          <li><strong>Ca. 150 %</strong> af værdien over ca. 221.200 kr</li>
         </ul>
         <p>
           Det betyder, at en bil til 300.000 kr har en registreringsafgift på cirka 140.000-170.000 kr afhængigt af brændstoftype og energieffektivitet. Elbiler og brændstoføkonomiske biler har gunstigere afgiftsberegning.
@@ -247,10 +247,10 @@ export default function BiloekonomiPage() {
           Værditab (afskrivning) er ofte den <strong>største enkeltomkostning</strong> — især på nye biler. En ny bil mister typisk:
         </p>
         <ul>
-          <li><strong>År 1:</strong> 20-25% af værdien</li>
-          <li><strong>År 2-3:</strong> 15-20% pr. år</li>
-          <li><strong>År 4-5:</strong> 10-15% pr. år</li>
-          <li><strong>Efter 5+ år:</strong> 8-12% pr. år</li>
+          <li><strong>År 1:</strong> 20-25 % af værdien</li>
+          <li><strong>År 2-3:</strong> 15-20 % pr. år</li>
+          <li><strong>År 4-5:</strong> 10-15 % pr. år</li>
+          <li><strong>Efter 5+ år:</strong> 8-12 % pr. år</li>
         </ul>
         <p>
           Køber du en ny bil til 350.000 kr, har den tabt omkring 175.000-200.000 kr i værdi efter 5 år — svarende til 2.900-3.300 kr om måneden alene i værditab. Køber du i stedet en 3-4 år gammel brugt bil, er det største værditab allerede taget, og dine faste omkostninger falder markant.
@@ -262,7 +262,7 @@ export default function BiloekonomiPage() {
         </p>
         <h3>Billån (køb med pant i bilen)</h3>
         <p>
-          Renterne på billån ligger i 2026 på ca. 5-8% afhængigt af bank og din økonomi. Løbetiden er typisk 3-7 år, og du betaler ofte en udbetaling på 10-20%. Lån en bil til 250.000 kr over 6 år til 6%: ca. 4.100 kr/måned (total 297.000 kr).
+          Renterne på billån ligger i 2026 på ca. 5-8 % afhængigt af bank og din økonomi. Løbetiden er typisk 3-7 år, og du betaler ofte en udbetaling på 10-20 %. Lån en bil til 250.000 kr over 6 år til 6 %: ca. 4.100 kr/måned (totalt 297.000 kr).
         </p>
         <p>
           Brug vores <Link href="/billaan" className="text-blue-600 hover:underline">billånsberegner</Link> eller <Link href="/laaneberegner" className="text-blue-600 hover:underline">låneberegner</Link> til at regne på finansieringen.

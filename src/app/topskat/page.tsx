@@ -69,7 +69,7 @@ export default async function TopskatPage() {
             Omregnet til bruttoindkomst (før AM-bidrag) betaler du mellemskat fra ca. <strong>{kr(bruttoGraense(SATSER_2026.mellemskatGraense))}/år</strong> (ca. {kr(bruttoGraense(SATSER_2026.mellemskatGraense, 12))}/md) og topskat fra ca. <strong>{kr(bruttoGraense(SATSER_2026.topskatGraense))}/år</strong> (ca. {kr(bruttoGraense(SATSER_2026.topskatGraense, 12))}/md).
           </p>
           <p>
-            Ca. <strong>10-15% af alle danske lønmodtagere</strong> betaler topskat. Det inkluderer typisk ledere, specialister, læger og andre med <strong>høj indkomst</strong>.
+            Ca. <strong>10-15 % af alle danske lønmodtagere</strong> betaler topskat. Det inkluderer typisk ledere, specialister, læger og andre med <strong>høj indkomst</strong>.
           </p>
 
           <h2>Effektiv skat vs. marginalskat</h2>
@@ -77,7 +77,7 @@ export default async function TopskatPage() {
             Din <strong>effektive skatteprocent</strong> er den gennemsnitlige skat du betaler af hele din indkomst. Den er altid lavere end marginalskatten, fordi de første kroner du tjener beskattes med en lavere sats (pga. personfradrag).
           </p>
           <p>
-            Din <strong>marginalskat</strong> er skatten af den sidst tjente krone. Hvis du betaler topskat, er din marginalskat ca. 52-56% (inkl. AM-bidrag). Det betyder at af en lønforhøjelse på 1.000 kr. beholder du kun ca. 440-480 kr.
+            Din <strong>marginalskat</strong> er skatten af den sidst tjente krone. Hvis du betaler topskat, er din marginalskat ca. 52-56 % (inkl. AM-bidrag). Det betyder at af en lønforhøjelse på 1.000 kr. beholder du kun ca. 440-480 kr.
           </p>
 
           <h2>Sådan reducerer du din topskat</h2>

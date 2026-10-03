@@ -28316,3 +28316,40 @@ ingen interpolation, så hverken denne port eller `regnestykker.test.ts`'s
 JsxText-scanner kan knytte dem til porten. Målingen 3/10 21:5x fandt 6 i
 `/billaan`s alderstabel og 3 i `/kalorier` — de lå live, fordi de aldrig var
 interpolationer. De er den næste opgave i planen.
+
+## 3/10 23:0x — de rå procenttal i `<td>` og brødtekst (F5c, `ceo/procent-mellemrum-bilsider`)
+
+**Målt før:** planens opgave talte 21 linjer i syv filer. Egen måling i `HEAD`
+fandt **30 noder i fire filer** — og to af planens filer var allerede rene:
+
+- `src/app/billaan/page.tsx`: **0**. Rentekolonnen går gennem
+  `sats()` (linje 30), der skriver `${formatNumber(...)} %`, så de «6 %» er
+  kodet med mellemrum. Live-målingen 3/10 21:5x (6 træffere) var **gammel
+  kode** fra før fixen, altså et deploy-vindue, ikke en fejl i `HEAD`.
+- `src/app/kalorier/page.tsx`: **0**. «10-15 %» kommer fra
+  `kalorier-eksempler.ts:220,259,279` (`${usikkerMin}-${usikkerMaks} %`), også
+  allerede rettet; de 3 live-træffere er samme gamle kode.
+- `src/app/topskat/page.tsx`: 2 noder (»10-15 %«, »52-56 %«).
+- `src/app/bil/page.tsx`: 8 noder — tabellen med værdiforringelsen står
+  **to gange**, da+se (99-111 og 283-295).
+- `blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx`: 9 noder.
+- `blog/boligsalg-2026-guide-til-omkostninger-og-provenu/page.tsx`: 11 noder.
+- `src/components/BoligsalgBeregner.tsx`: 1 node i disclaimer-strengen
+  (»Tinglysningssatser 0,6 % + …«), som ikke var med i planens liste.
+
+**Rettelse:** `perl -i -pe 's/(\d)%/$1 %/g'` på de fem filer. Rækkevidden er
+også de svenske tabeller i `/bil` (svensk skriver også »20-25 %«). De to
+`{…}%`-interpolationer i samme komponent (`${post.procent}%` til en
+breddegrad og `<span>%</span>`) røres ikke, fordi regex'en kræver et tal
+umiddelbart før `%`. `git diff | grep -E '^\+.*\$[0-9]'` er tom, så der
+er ingen `$1`-rester.
+
+**Én dansk fejl fundet i samme sætning:** `(total 297.000 kr)` → `totalt`.
+
+**Port:** `regnestykker.test.ts`'s loft **261 → 231** målt ved at sætte det
+til 0 og læse den faktiske længde i fejlmeldingen (231). `boligsalg/page.test.tsx:77`
+så på strengen «3-6%» i en *forbudt*-liste; den er opdateret til «3-6 %», ellers
+ville porten ikke kunne fange den igen.
+
+**Verificeret:** `npm run typecheck`, `npm run lint` (757 filer), `npm run test`
+(**4141 tests, 262 filer — alle grønne**), `npm run build`.

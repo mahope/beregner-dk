@@ -49,7 +49,7 @@ export default function BoligsalgBeregner() {
       tinglysningSettings: "Tinglysning af ny bolig",
       tinglysningInclude: "Medtag tinglysning af ny bolig",
       breakdown: "Omkostningsfordeling",
-      disclaimer: `Estimater baseret på gennemsnitlige danske priser 2026. Faktiske omkostninger varierer. Mæglerhonorar forhandles individuelt. Tinglysningssatser 0,6% + ${kr(TINGLYSNING_SKOEDEBELOB)} (skøde) og 1,45% + ${kr(TINGLYSNING_PANTEBREVBELOB)} (pantebrev).`,
+      disclaimer: `Estimater baseret på gennemsnitlige danske priser 2026. Faktiske omkostninger varierer. Mæglerhonorar forhandles individuelt. Tinglysningssatser 0,6 % + ${kr(TINGLYSNING_SKOEDEBELOB)} (skøde) og 1,45 % + ${kr(TINGLYSNING_PANTEBREVBELOB)} (pantebrev).`,
       reset: "Nulstil",
       shareLabel: "Boligsalgsberegner",
       noMaegler: "Vælg honorartype",

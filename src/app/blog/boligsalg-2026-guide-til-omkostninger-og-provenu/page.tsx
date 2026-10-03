@@ -43,11 +43,11 @@ export async function generateMetadata(): Promise<Metadata> {
 const faqItems = [
   {
     question: "Hvad koster det at sælge en bolig i 2026?",
-    answer: "Salgsomkostningerne for en bolig til 3 mio. kr. er typisk 150.000-250.000 kr. De største poster er ejendomsmægler (3-6%), istandsættelse (20.000-50.000 kr) og energimærke (7.500-8.700 kr). Brug vores boligsalgsberegner til at se dit præcise nettoprovenu.",
+    answer: "Salgsomkostningerne for en bolig til 3 mio. kr. er typisk 150.000-250.000 kr. De største poster er ejendomsmægler (3-6 %), istandsættelse (20.000-50.000 kr) og energimærke (7.500-8.700 kr). Brug vores boligsalgsberegner til at se dit præcise nettoprovenu.",
   },
   {
     question: "Hvad er et typisk mæglersalær i 2026?",
-    answer: "Ejendomsmæglere tager typisk 3-6% af salgsprisen for huse, eller et fast salær på 25.000-60.000 kr. Mange mæglere er villige til at forhandle salæret, især ved høje salgspriser. Indhent altid 3-4 tilbud før du vælger mægler.",
+    answer: "Ejendomsmæglere tager typisk 3-6 % af salgsprisen for huse, eller et fast salær på 25.000-60.000 kr. Mange mæglere er villige til at forhandle salæret, især ved høje salgspriser. Indhent altid 3-4 tilbud før du vælger mægler.",
   },
   {
     question: "Skal jeg som sælger betale tinglysning?",
@@ -118,7 +118,7 @@ export default function Boligsalg2026GuidePage() {
             <tr>
               <td>Ejendomsmægler</td>
               <td>90.000-180.000 kr</td>
-              <td>3-6% af salgsprisen</td>
+              <td>3-6 % af salgsprisen</td>
             </tr>
             <tr>
               <td>Markedsføring</td>
@@ -194,8 +194,8 @@ export default function Boligsalg2026GuidePage() {
 
         <h3>Provisionssalær (procent)</h3>
         <p>
-          <strong>3-6% af salgsprisen</strong> er det mest almindelige. De fleste
-          mæglere ligger omkring 4-5% for huse og 3-4% for ejerlejligheder.
+          <strong>3-6 % af salgsprisen</strong> er det mest almindelige. De fleste
+          mæglere ligger omkring 4-5 % for huse og 3-4 % for ejerlejligheder.
           Provisionssalæret inkluderer ofte markedsføring, men læs det med småt før
           du skriver under.
         </p>
@@ -299,11 +299,11 @@ export default function Boligsalg2026GuidePage() {
           i 2026 er:
         </p>
         <ul>
-          <li><strong>Skøde:</strong> 0,6% af købesummen + ca. 1.850 kr i fast afgift</li>
-          <li><strong>Pantebrev (nyt lån):</strong> 1,45% af lånebeløbet + ca. 1.825 kr i fast afgift</li>
+          <li><strong>Skøde:</strong> 0,6 % af købesummen + ca. 1.850 kr i fast afgift</li>
+          <li><strong>Pantebrev (nyt lån):</strong> 1,45 % af lånebeløbet + ca. 1.825 kr i fast afgift</li>
         </ul>
         <p>
-          For en ny bolig til 3,5 mio. kr med 80% realkreditlån er tinglysnings-
+          For en ny bolig til 3,5 mio. kr med 80 % realkreditlån er tinglysnings-
           omkostningerne ca. <strong>60.000-65.000 kr</strong>.
           <br />
           <em>Kilde: Boligejer.dk, Erhvervsstyrelsen. 2026-estimat.</em>
@@ -328,7 +328,7 @@ export default function Boligsalg2026GuidePage() {
               <td><strong>3.000.000 kr</strong></td>
             </tr>
             <tr>
-              <td>Mæglerhonorar (4,5%)</td>
+              <td>Mæglerhonorar (4,5 %)</td>
               <td>-135.000 kr</td>
             </tr>
             <tr>
@@ -428,7 +428,7 @@ export default function Boligsalg2026GuidePage() {
         <p>
           Professionel home staging koster 5.000-15.000 kr, men kan ofte betale sig.
           Stagede boliger sælger <strong>hurtigere og til en højere pris</strong>
-          — typisk 5-15% over tilsvarende ustagede boliger.
+          — typisk 5-15 % over tilsvarende ustagede boliger.
         </p>
 
         <h3>4. Sælg overskydende møbler</h3>
@@ -441,7 +441,7 @@ export default function Boligsalg2026GuidePage() {
         <h3>5. Undersøg kurssikring</h3>
         <p>
           Har du et obligationslån, kan kursen svinge markant op til indfrielse.
-          <strong>Kurssikring</strong> koster 0,1-0,5% af lånebeløbet, men
+          <strong>Kurssikring</strong> koster 0,1-0,5 % af lånebeløbet, men
           fastlåser kursen så du kender dit præcise provenu. Det kan være en
           fordel i volatile markeder.
         </p>

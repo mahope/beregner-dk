@@ -96,19 +96,19 @@ export default async function BilPage() {
           <tbody>
             <tr>
               <td>Ny bil (år 1)</td>
-              <td>20-25%</td>
+              <td>20-25 %</td>
             </tr>
             <tr>
               <td>1-3 år</td>
-              <td>15-20%</td>
+              <td>15-20 %</td>
             </tr>
             <tr>
               <td>3-5 år</td>
-              <td>10-15%</td>
+              <td>10-15 %</td>
             </tr>
             <tr>
               <td>5+ år</td>
-              <td>8-12%</td>
+              <td>8-12 %</td>
             </tr>
           </tbody>
         </table>
@@ -280,19 +280,19 @@ export default async function BilPage() {
           <tbody>
             <tr>
               <td>Ny bil (år 1)</td>
-              <td>20-25%</td>
+              <td>20-25 %</td>
             </tr>
             <tr>
               <td>1-3 år</td>
-              <td>15-20%</td>
+              <td>15-20 %</td>
             </tr>
             <tr>
               <td>3-5 år</td>
-              <td>10-15%</td>
+              <td>10-15 %</td>
             </tr>
             <tr>
               <td>5+ år</td>
-              <td>8-12%</td>
+              <td>8-12 %</td>
             </tr>
           </tbody>
         </table>

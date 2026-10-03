@@ -921,7 +921,7 @@ const PROCENT_UNDTAGELSER: Record<string, string[]> = {
   "src/app/blog/pension-hvor-meget-skal-du-spare-op/page.tsx": ["4%-reglen"],
 };
 
-const PROCENT_UDEN_MELLEMRUM_LOFT = 261;
+const PROCENT_UDEN_MELLEMRUM_LOFT = 231;
 
 const PROCENT_MED_MELLEMRUM = [
   "src/app/boliglaan/page.tsx",
@@ -976,13 +976,15 @@ describe("procentnotation", () => {
 
   test("korpuset har ikke fået flere procenttal uden mellemrum", () => {
     // Loftet er målt, ikke gættet: 598 → 570 → 509 → 436 → 371 → 361 → 319
-    // → **261**, da de 28 i de fem filer, de 60 i `/procent`, `/boliglaan`,
+    // → 261 → **231**, da de 28 i de fem filer, de 60 i `/procent`, `/boliglaan`,
     // deres FAQ-svar og `ProcentBeregner`s hurtige reference, de 73 i
     // `page-data.ts`, de 58 i tre blogindlæg, de 42 i de tretten
     // beregnere med interpolationer, de 45 i fem siders brødtekst og
     // tabeller (`/billaan` da+se, `/arveafgift`, `/brutto-netto`, `/kalorier`,
-    // `/flyttebudget`) og de 13 i syv beregnerkomponenter blev rettet.
-    // 261 er *med* de fem dokumenterede
+    // `/flyttebudget`), de 13 i syv beregnerkomponenter og de 30 i bilsiderne
+    // (`/bil` da+se, `/topskat`, `BoligsalgBeregner`s disclaimer og de to
+    // blogindlæg) blev rettet.
+    // 231 er *med* de fem dokumenterede
     // undtagelser («30% reglen» ×3 og «4%-reglen» ×1).
     // Det må gerne falde; det må ikke stige i det stille, fordi så kommer den
     // nye skrivemåde ind i en ny side ubemærket.
@@ -990,6 +992,6 @@ describe("procentnotation", () => {
       procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
     );
     expect(fund.length).toBeLessThanOrEqual(PROCENT_UDEN_MELLEMRUM_LOFT);
-    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(261);
+    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(231);
   });
 });
