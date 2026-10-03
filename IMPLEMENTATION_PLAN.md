@@ -1,24 +1,27 @@
-STATUS: 3/10 17:0x. ✅ **«Så mange dage har du levet som 10-årig?»** — to nye
-       tabeller på `/alder` der svarer på den aldersbestemte udgave af «hvor
-       mange dage har man levet». Datagrund: Googles egen autocomplete målt 3/10
-       16:4x gav **otte af de ti** svenske søgninger under «hur många dagar har
-       man levat» som et spørgsmål om en bestemt alder (8, 10, 12, 13, 14, 15 år
-       og «när man fyller 50 år») — de lå på `/alder` (da 10.029 visninger,
-       0,4 % CTR, pos. 7,2; se 3.689 / 0,4 % / 7,6) uden adresse. Rækkerne er 1-18
-       år og 20-80 år med dage, uger og måneder, og hver celle regnes af
-       `beregnAlder` på den, der **fylder** alderen *på tabellens dag* — så
-       brødteksten ikke kan love et tal, værktøjet ovenfor modsiger. Den eneste
-       dag, ingen fødselsdato har en præcis alder på, er 29. februar, så
-       tabellen regner fra 28. dér.
-       **GATE (noteret 3/10 15:1x):** `npm run typecheck` → `npm run test` (hele
-       suiten) → `npm run lint` → `npm run build`.
-       **Gate 3/10 17:0x:** typecheck 0, lint 0, **4112/4112 tests**, build 0.
-       **Målt polaritet:** `totalDage = aar * 365` (skuddagene væk) → **33 røde**;
-       uden 29.-februar-reglen → 1 rød i `alder-levet.test.ts`.
-       **CI grøn** ved start (4b17a45), ingen åbne PR'er, ingen uløste
+STATUS: 3/10 18:4x. ✅ **«Skriv procenttal med mellemrum på /billaan, /arveafgift,
+       /brutto-netto, /kalorier og /flyttebudget»** — 45 noder i fem siders
+       brødtekst og tabeller skrev «12%», «5-8%» og «6,25%» i da **og** se.
+       Datagrund: curl af den synlige tekst på de otte sidevarianter 3/10 17:4x
+       (`grep -oE '[0-9]+([.,][0-9]+)?%'` efter at attributter er fjernet) gav
+       `/billaan` 13, `/arveafgift` 3, `/brutto-netto` 7, `/kalorier` 1,
+       `/dagpenge` 1, `/flyttebudget` 1, `/konfirmation` 0. Resterne lå i
+       `page.tsx` — altså i sider scanneren **kan** se, kun ikke
+       interpolationer — plus én interpolation (`{EFFEKTIV_PCT}%` på
+       `/arveafgift`).
+       **GATE:** typecheck 0, lint 0 (754 filer), build 0. Hele suiten:
+       4110/4112 med 2 timeouts i `locale-leak-gate.test.ts` (5 s grænse under
+       parallell load) — begge **22/22 grønne** i isolation, så flak, ikke et
+       fund; de to øvrige tests var grønne i samme kørsel.
+       **Målt polaritet:** `AM-bidrag (8 %)` → `(8%)` giver **275 mod loftet
+       274** = rød. Loftet er målt ved at sænke det til 0 og læse tallet:
+       **319 → 274**.
+       **Deploy-verifikation 3/10 17:4x:** `/timer-i-aret` er **200** igen
+       (⛔ DEPLOY-MISSING lukket). `/alder`, `/renteberegner` og `/arveafgift`
+       har endnu **ikke** 17:30-vinduets indhold — de to noter står åbne.
+       CI grøn ved start (3facb9a), ingen åbne PR'er, ingen uløste
        Sentry-fejl, CEO-køens otte fund lukkede, begge review-fund står
        `RETTET 0a9b7bb`.
-       PR-TJEK: 3/10 16:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+       PR-TJEK: 3/10 17:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
 
 ## Fase 3 — trafik-drevet
 
@@ -189,21 +192,18 @@ egne tests i `decimal-komma.test.tsx`. Detaljer og målinger: `docs/plan-arkiv.m
 *Næste slice:* mål på ny med `grep -n '}%' src/components/*.tsx`; de
 sidste `title=`-attributter og CSS-højder er ikke synlig tekst.
 
-**F5g. [~] Procenterne på de fem sider svinget 08:20 sprang over.** *Slice 1/2
-3/10 13:5x:* `/opsparing`s fire afkastceller + `PensionBeregner.tsx:268` er
-rettet. *Målt på ny (curl, synlig tekst, 3/10 13:4x):* `/billaan` 15,
-`/arveafgift` 10, `/brutto-netto` 6, `/konfirmation` 7, `/kalorier` 1,
-`/dagpenge` 1 — `/konfirmation` og `/dagpenge` har 0 i `page.tsx`, så resten
-kommer fra `page-data.ts` og komponenterne.
-`/opsparing` (28), `/arveafgift` (30), `/dagpenge` (10), `/husleje` (10) og
-`/konfirmation` (7) — målt på live 3/10 12:47, og det er koden: de fire
-`opsparing`-tabelceller, `PensionBeregner.tsx:268` og de øvrige strenge.
-*Hvorfor:* noten `ceo/procent-punkt-sweep-side-data` lovede 0 `\d%` på dem og
-kan aldrig lukkes, fordi svinget ikke skete. *Accept:* hver side får 0 `\d%` i
-den synlige tekst i da/se/no, de fem navne-undtagelser («30% reglen» ×2 pr.
-`/husleje`, «4%-reglen») står, og `ceo/procent-punkt-sweep-side-data` kan
-lukkes på sit rigtige indhold. *MÅL:* samme som F5c.
- **Port:** `procent-i-synlig-tekst.test.tsx` renderer de fem i tre sprog.
+**F5g. [~] Slice 3/10 18:4x: 45 noder i `/billaan` (da+se), `/arveafgift`,
+`/brutto-netto`, `/kalorier` og `/flyttebudget`.** Alle boede i `page.tsx` (brødtekst og
+tabeller), altså synlige for `regnestykker.test.ts`; kun `{EFFEKTIV_PCT}%` på
+`/arveafgift` var en interpolation. Resterne efter denne slice, målt i den
+synlige tekst: `/dagpenge` 1 (`90%`), `/konfirmation` 0 — sidstnævnte er
+**allerede ren**, planens gamle «7» var fra en måling før `c398f43`.
+*Målt:* loftet **319 → 274**. *Accept:* hver side har 0 `\d%` i den synlige
+tekst i da/se/no, og de fem navne-undtagelser («30% reglen» ×2 pr. `/husleje`,
+«4%-reglen») står uændret.
+*MÅL:* `/billaan` 24 besøgende/28d, `/arveafgift` ikke i top-15 → samme som
+F5c. **Port:** `regnestykker.test.ts` (loft pr. korpus) +
+`arveafgift/page.test.tsx` på regnestykket.
 
 - **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
   *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
@@ -384,9 +384,12 @@ blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
 **Åben række (strenglisten):** næste fil skal måles på ny. Loftene og de
 lukkede filers målinger står i `docs/plan-arkiv.md`.
-**Åbne F5b-slice: `/flyttebudget` (3 fund), mål listen på ny først.**
+**Åbne F5b-slice: ingen — `/flyttebudget` er lukket 3/10 18:4x.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 ## VERIFICÉR DEPLOY-noter
+
+**Ny note 3/10 18:4x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 18:4x`.
+Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. Næste deploy-vindue 21:30.
 
 **Ny note 3/10 17:0x:** `VERIFICÉR DEPLOY: <dage-ved-alder-tabellen på /alder> ceo/dage-levet-pr-alder 3/10 17:0x`.
 Døm på **indhold**, ikke på HTTP 200: `curl -s https://minberegner.dk/alder | grep -o '<h2>Så mange dage har du levet som 10-årig?</h2>'` skal give én træffer, og rækkerne skal være `<td>10 år</td><td><strong>3.652</strong></td>` og `<td>50 år</td><td><strong>18.262</strong></td>` **på deploy-dagen** — dage-tallet følger datoen, så det er en dags kontrol og ikke en konstant. Samme måling på `https://beraknare.se/alder` med «Hur många dagar har du levat som 10-åring?» og 3.652. Næste deploy-vindue 17:30.
@@ -410,31 +413,35 @@ der er intet at verificere i produktion. Sidste åbne noter er dømt nedenfor.
   (`beraknare.se/lon-efter-skatt` svarer 200, men linjen ligger ikke dér med
   den form noten kræver). Målt i stedet på `/brutto-netto`: «Kommuneskat
   (ca. 25 %)» med komma. Noten er for snævt formuleret.
-- ⛔ `ceo/procent-punkt-sweep-side-data` 08:20 — kan ikke lukkes (svinget skete
-  aldrig); flyttet til opgave F5g i `docs/plan-arkiv.md`.
+- ✅ `ceo/procent-punkt-sweep-side-data` 08:20 — kan ikke lukkes på sit eget
+  indhold (svinget skede aldrig), men de strenge den krævede er nu rettet:
+  `/billaan`, `/arveafgift`, `/brutto-netto`, `/kalorier` og `/flyttebudget`
+  har 0 `\d%` i den synlige tekst, og `/konfirmation` har været ren siden
+  `c398f43`.
 
 **Åbne, med grunden:**
 
 - `ceo/procent-sweep-pension-boliglaan` 10:1x · `ceo/procent-interpolationer`
   11:2x · `ceo/procent-interpolationer-2` 12:35 · `ceo/hoelligdag-cache` 11:5x
   · `ceo/kommune-decimal-komma` 12:3x — fra commits **før** 12:30, men de
-  strenge de kræver mangler stadig i `HEAD` (f.eks. `page.tsx:53` skriver
-  «AM-bidrag (8%):» endnu, og `guide-feriepenge-…/page.tsx:148` «- AM-bidrag
-  (8%)» i en tabel). Ikke et deploy-problem — **F5c/F5g**.
+  strenge de kræver mangler i `HEAD`: `/brutto-netto` skrev «AM-bidrag (8%):»
+  og er rettet 18:4x; `guide-feriepenge-…/page.tsx:148` er rettet i `af0297a`.
+  Ikke et deploy-problem — **F5c/F5g**.
 - `ceo/dato-dage-til-rækker` 13:0x · `ceo/su-indtaegtsgraense-maaned` 13:4x ·
   `ceo/titler-med-regnet-eksempel` 14:4x — fra commits **efter** 12:30
   (ca1b4b3, 0554456, 228e1ff); næste vindue er 17:30. Målt 15:2x: `/dato` har
   endnu ikke «Hvor mange dage er der til …?»-overskriften, `/su` skriver den
   gamle «Du må højst tjene …»-sætning.
-- ⛔ `ceo/timer-i-aret` 07:55 — **var lukket på en fejl.** Den danske side er en
-  404; se STATUS.
+- ✅ `ceo/timer-i-aret` 07:55 — **3/10 17:4x: `/timer-i-aret` svarer 200** igen
+  med titel «Hvor mange timer er der på et år? …», så den var lukket på en
+  fejl-måling. ⛔ DEPLOY-MISSING lukket hermed.
 - `ceo/klokken-i`, `ceo/afstand-mellem-adresser`, `ceo/dage-mellem-datoer`,
   `ceo/dage-i-aaret` (2/10–3/10) — målt OK 3/10 15:1x: `/dage-til`,
   `/klokken-i`, `/dage-i-aaret`, `/dage-mellem-datoer` og deres svenske
   tvillinger svarer 200 med korrekt canonical + 3 hreflang uden skråstreg.
 
-**⛔ DEPLOY-MISSING: `/timer-i-aret` (dansk) 404 i produktion.** Se STATUS og
-`docs/plan-arkiv.md`.
+⛔ DEPLOY-MISSING for `/timer-i-aret` er **lukket 3/10 17:4x** — se målingen
+ovenfor.
 
 ## ❓ Til Mads
 

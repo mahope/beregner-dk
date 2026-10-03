@@ -50,12 +50,12 @@ export default async function BruttoNettoPage() {
 
           <h2>Hvad trækkes fra din løn?</h2>
           <ul>
-            <li><strong>AM-bidrag (8%):</strong> Trækkes af bruttolønnen før skat</li>
-            <li><strong>Bundskat (12,01%):</strong> Betales af alle lønindkomster</li>
-            <li><strong>Kommuneskat (ca. 25%):</strong> Varierer fra 22,8% til 27,8% afhængigt af kommune</li>
-            <li><strong>Kirkeskat (ca. 0,7%):</strong> Valgfri — kun for medlemmer af folkekirken</li>
-            <li><strong>Mellemskat (7,5%):</strong> Over 641.200 kr./år efter AM-bidrag</li>
-            <li><strong>Topskat (7,5%):</strong> Over 777.900 kr./år efter AM-bidrag</li>
+            <li><strong>AM-bidrag (8 %):</strong> Trækkes af bruttolønnen før skat</li>
+            <li><strong>Bundskat (12,01 %):</strong> Betales af alle lønindkomster</li>
+            <li><strong>Kommuneskat (ca. 25 %):</strong> Varierer fra 22,8 % til 27,8 % afhængigt af kommune</li>
+            <li><strong>Kirkeskat (ca. 0,7 %):</strong> Valgfri — kun for medlemmer af folkekirken</li>
+            <li><strong>Mellemskat (7,5 %):</strong> Over 641.200 kr./år efter AM-bidrag</li>
+            <li><strong>Topskat (7,5 %):</strong> Over 777.900 kr./år efter AM-bidrag</li>
           </ul>
         </div>
         )}

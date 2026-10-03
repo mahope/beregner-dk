@@ -35,7 +35,7 @@ vi.mock("@/lib/get-locale", () => ({
 
 /**
  * F5b: `/arveafgift` skrev «392.300 kr» syv gange i brødteksten og et helt
- * regnestykke — «(1.000.000 − 392.300) × 15% = 91.155 kr» — som håndskreven
+ * regnestykke — «(1.000.000 − 392.300) × 15 % = 91.155 kr» — som håndskreven
  * tekst. Tallene var rigtige for 2026 og ville være stående for 2027, hvor
  * bundfradraget stiger, mens brødteksten læste det gamle tal syv steder.
  *
@@ -90,7 +90,7 @@ describe("/arveafgift — bundfradraget og eksemplerne læses fra modulet", () =
 
     // Mutation: et beløb, der ikke er EKSEMPEL_BARN.boafgift, gør porten rød.
     expect(html).toContain(
-      `(${kr(EKSEMPEL_BARN.arv)} − ${kr(BUNDFRADRAG)}) × 15% = ${kr(EKSEMPEL_BARN.boafgift)} kr i afgift`,
+      `(${kr(EKSEMPEL_BARN.arv)} − ${kr(BUNDFRADRAG)}) × 15 % = ${kr(EKSEMPEL_BARN.boafgift)} kr i afgift`,
     );
     expect(EKSEMPEL_BARN.grundlag).toBe(EKSEMPEL_BARN.arv - BUNDFRADRAG);
     expect(EKSEMPEL_BARN.boafgift).toBeCloseTo(91_155, 6);

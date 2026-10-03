@@ -60,11 +60,11 @@ export default async function BillaanPage() {
         <h3>Billån med pant i bilen</h3>
         <p>
           Det traditionelle billån hvor banken har <strong>pant i bilen</strong> som sikkerhed. Dette giver
-          typisk den <strong>laveste rente (5-8%)</strong>, men banken kan i værste fald tage bilen tilbage
+          typisk den <strong>laveste rente (5-8 %)</strong>, men banken kan i værste fald tage bilen tilbage
           ved betalingsproblemer.
         </p>
         <ul>
-          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Lav rente (5-8%)</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Lav rente (5-8 %)</li>
           <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Mulighed for større lånebeløb</li>
           <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Bilen kan bruges som udbetaling ved ny bil</li>
           <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Pant i bilen</li>
@@ -92,7 +92,7 @@ export default async function BillaanPage() {
           <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Ingen pant i bilen</li>
           <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Fleksibel brug af pengene</li>
           <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Ingen krav til bilens alder</li>
-          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Højere rente (8-15%)</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Højere rente (8-15 %)</li>
           <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Typisk lavere lånebeløb</li>
         </ul>
 
@@ -121,27 +121,27 @@ export default async function BillaanPage() {
           <tbody>
             <tr>
               <td>Nordea</td>
-              <td>5,95%</td>
-              <td>6,5%</td>
-              <td>10%</td>
+              <td>5,95 %</td>
+              <td>6,5 %</td>
+              <td>10 %</td>
             </tr>
             <tr>
               <td>Bank Norwegian</td>
-              <td>5,49%</td>
-              <td>6,0%</td>
-              <td>0%</td>
+              <td>5,49 %</td>
+              <td>6,0 %</td>
+              <td>0 %</td>
             </tr>
             <tr>
               <td>Basisbank</td>
-              <td>6,25%</td>
-              <td>7,0%</td>
-              <td>10%</td>
+              <td>6,25 %</td>
+              <td>7,0 %</td>
+              <td>10 %</td>
             </tr>
             <tr>
               <td>Santander</td>
-              <td>6,50%</td>
-              <td>7,2%</td>
-              <td>10%</td>
+              <td>6,50 %</td>
+              <td>7,2 %</td>
+              <td>10 %</td>
             </tr>
           </tbody>
         </table>
@@ -227,14 +227,14 @@ export default async function BillaanPage() {
         <p>
           Det klassiska billånet där långivaren har <strong>säkerhet i bilen</strong>. Det ger vanligtvis
           den <strong>lägsta räntan</strong>, men i värsta fall kan bilen återtas vid utebliven betalning.
-          Ett vanligt krav är en <strong>kontantinsats på minst 20%</strong> av bilens pris.
+          Ett vanligt krav är en <strong>kontantinsats på minst 20 %</strong> av bilens pris.
         </p>
         <ul>
           <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Lägre ränta tack vare säkerheten</li>
           <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Möjlighet till större lånebelopp</li>
           <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Inbytesbilen kan användas som kontantinsats</li>
           <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Bilen står som säkerhet</li>
-          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Krav på kontantinsats (ofta 20%)</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Krav på kontantinsats (ofta 20 %)</li>
         </ul>
 
         <h3>Billeasing (privatleasing)</h3>

@@ -70,26 +70,26 @@ export default async function ArveafgiftPage() {
           <tbody>
             <tr>
               <td>Ægtefælle</td>
-              <td>0% (fritaget)</td>
-              <td>0%</td>
+              <td>0 % (fritaget)</td>
+              <td>0 %</td>
               <td>Ubegrænset</td>
             </tr>
             <tr>
               <td>Børn, børnebørn, forældre</td>
-              <td>15%</td>
-              <td>0%</td>
+              <td>15 %</td>
+              <td>0 %</td>
               <td>{BUND_TEKST} kr</td>
             </tr>
             <tr>
               <td>Søskende</td>
-              <td>15%</td>
-              <td>25% af arv efter boafgift</td>
+              <td>15 %</td>
+              <td>25 % af arv efter boafgift</td>
               <td>{BUND_TEKST} kr</td>
             </tr>
             <tr>
               <td>Andre (venner, fjern familie)</td>
-              <td>15%</td>
-              <td>25% af arv efter boafgift</td>
+              <td>15 %</td>
+              <td>25 % af arv efter boafgift</td>
               <td>{BUND_TEKST} kr</td>
             </tr>
           </tbody>
@@ -106,7 +106,7 @@ export default async function ArveafgiftPage() {
 
         <h3>Børn, børnebørn og forældre</h3>
         <p>
-          Nærmeste familie betaler <strong>15% i boafgift</strong> af beløbet over bundfradraget
+          Nærmeste familie betaler <strong>15 % i boafgift</strong> af beløbet over bundfradraget
           på <strong>{BUND_TEKST} kr</strong>. Der er ingen <strong>tillægsafgift</strong> for denne gruppe.
         </p>
         <ul>
@@ -117,16 +117,16 @@ export default async function ArveafgiftPage() {
 
         <h3>Søskende</h3>
         <p>
-          Søskende betaler <strong>15% boafgift</strong> plus <strong>25% tillægsafgift</strong> af arven efter
-          boafgift. Den <strong>effektive marginale sats</strong> er for store arvebeløb <strong>{EFFEKTIV_PCT}%</strong>.
+          Søskende betaler <strong>15 % boafgift</strong> plus <strong>25 % tillægsafgift</strong> af arven efter
+          boafgift. Den <strong>effektive marginale sats</strong> er for store arvebeløb <strong>{EFFEKTIV_PCT} %</strong>.
           <strong>Bemærk:</strong> Fra 1. januar 2027 afskaffes tillægsafgiften for
-          søskende, så de fremover kun betaler 15% boafgift.
+          søskende, så de fremover kun betaler 15 % boafgift.
         </p>
 
         <h3>Andre arvinger</h3>
         <p>
           Venner, fjern familie og andre uden direkte familiemæssig tilknytning
-          betaler <strong>15% boafgift + 25% tillægsafgift</strong> af arven efter boafgift.
+          betaler <strong>15 % boafgift + 25 % tillægsafgift</strong> af arven efter boafgift.
           Der er <strong>intet bundfradrag</strong> for tillægsafgiften.
         </p>
 
@@ -139,7 +139,7 @@ export default async function ArveafgiftPage() {
         <p>
           <strong>Eksempel:</strong> Et barn arver {EKSEMPEL_BARN.arv.toLocaleString("da-DK")} kr.
           Arveafgiften beregnes således:{" "}
-          ({EKSEMPEL_BARN.arv.toLocaleString("da-DK")} − {BUND_TEKST}) × 15% ={" "}
+          ({EKSEMPEL_BARN.arv.toLocaleString("da-DK")} − {BUND_TEKST}) × 15 % ={" "}
           {EKSEMPEL_BARN.boafgift.toLocaleString("da-DK")} kr i afgift.
         </p>
 

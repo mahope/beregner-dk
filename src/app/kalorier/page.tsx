@@ -162,7 +162,7 @@ export default async function KalorierPage() {
         <h3>Fedt</h3>
         <p>
           <strong>Fedt</strong> er vigtigt for hormoner, vitaminoptagelse og cellestruktur.
-          Minimum <strong>20-25% af kalorier</strong> bør komme fra fedt.
+          Minimum <strong>20-25 % af kalorier</strong> bør komme fra fedt.
         </p>
         <p>1g fedt = 9 kalorier</p>
 
