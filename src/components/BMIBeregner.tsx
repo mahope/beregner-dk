@@ -21,6 +21,8 @@ const labels = {
     weightLbs: "Vægt (lbs)",
     heightCm: "Højde (cm)",
     heightInches: "Højde (inches)",
+    alderLabel: "Alder",
+    alderUnit: "år",
     measureMetric: "cm",
     measureImperial: "inches",
     unitLabel: "Vælg måleenhed",
@@ -71,6 +73,8 @@ const labels = {
     weightLbs: "Vikt (lbs)",
     heightCm: "Längd (cm)",
     heightInches: "Längd (tum)",
+    alderLabel: "Ålder",
+    alderUnit: "år",
     measureMetric: "cm",
     measureImperial: "tum",
     unitLabel: "Välj måtenhet",
@@ -121,6 +125,8 @@ const labels = {
     weightLbs: "Vekt (lbs)",
     heightCm: "Høyde (cm)",
     heightInches: "Høyde (tommer)",
+    alderLabel: "Alder",
+    alderUnit: "år",
     measureMetric: "cm",
     measureImperial: "tommer",
     unitLabel: "Velg måleenhet",
@@ -305,7 +311,7 @@ export default function BMIBeregner() {
   const [inputVersion, setInputVersion] = useState(0);
   const [taljemaal, setTaljemaal] = useState<number>(0);
   const [hoftemaal, setHoftemaal] = useState<number>(0);
-  const [harBarnestate, setHarBarnestate] = useState(false);
+  const [alder, setAlder] = useState<number>(40);
   const [urlStateKontrolleret, setUrlStateKontrolleret] = useState(false);
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
@@ -363,8 +369,8 @@ export default function BMIBeregner() {
           : hoejdeIMetriskeEnhed);
         if (inputs.enhed !== undefined || erGyldigtIImperial) setEnhed(indlaestEnhed);
       }
-      if (alder !== null && alder < 18) {
-        setHarBarnestate(true);
+      if (alder !== null && alder >= 0 && alder <= 120) {
+        setAlder(Math.round(alder));
       }
     }
     setUrlStateKontrolleret(true);
@@ -379,18 +385,18 @@ export default function BMIBeregner() {
     setInputVersion((version) => version + 1);
     setTaljemaal(0);
     setHoftemaal(0);
-    setHarBarnestate(false);
+    setAlder(40);
   }, []);
 
   // Get shareable link for current calculation
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'bmi',
-      inputs: { vaegt, hoejde, enhed, vaegtKg, hoejdeCm },
+      inputs: { vaegt, hoejde, enhed, vaegtKg, hoejdeCm, alder },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [vaegt, hoejde, enhed, vaegtKg, hoejdeCm]);
+  }, [vaegt, hoejde, enhed, vaegtKg, hoejdeCm, alder]);
 
   const inputLimits = ADULT_INPUT_LIMITS[enhed];
   const minWeight = inputLimits.weight;
@@ -409,6 +415,7 @@ export default function BMIBeregner() {
     || !Number.isFinite(hoejde)
     || hoejde < minHeight
     || hoejde > maxHeight;
+  const harBarnestate = alder < 18;
   const inputErUgyldigt = harBarnestate || inputUdenforGraenser;
 
   const handleVaegtAendring = (value: number) => {
@@ -610,6 +617,17 @@ export default function BMIBeregner() {
           step={0.01}
           unit={enhed === "metrisk" ? "cm" : "in"}
           required
+        />
+
+        <InputField
+          label={l.alderLabel}
+          value={alder}
+          valueSyncKey={inputVersion}
+          onChange={(value) => setAlder(Math.max(0, Math.min(120, Math.round(value))))}
+          min={0}
+          max={120}
+          step={1}
+          unit={l.alderUnit}
         />
       </div>
 

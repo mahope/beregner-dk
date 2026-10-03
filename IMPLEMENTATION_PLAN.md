@@ -1,4 +1,16 @@
-STATUS: 4/10 00:1x. ✅ **De tre review-fund på `/brok` er rettet** —
+STATUS: 4/10 00:5x. ✅ **/bmi spørger nu om alder** — `ceo/bmi-alder`.
+        Komponenten læste allerede `inputs.alder` fra delelinken, men ingen
+        sted i UI'et producerede en alder, så grenen var død kode. Målt 4/10:
+        «bmi beregner med alder», «bmi beregner med alder og køn», «bmi skala
+        ældre» og «beregn bmi formel» er danske autocomplete-træffere, og
+        `/bmi` er næststørste side (**938 besøgende/28d, −24 %** — missionen
+        siger «ret det, før der bygges nyt»). *Verify:* typecheck, lint (758
+        filer), **4145 tests / 263 filer**; de 6 nye tests renderer
+        `BMIBeregner` i da/se og kan ikke være grønne på den gamle kode, hvor
+        feltet ikke fandtes. **Ingen nye BMI-tal:** alderen bruges kun til
+        WHO's voksenbånd (18+) — børnepercentiler er bevidst ikke regnet, se
+        artiklen. Næste iteration skal fortsat være en **feature**.
+        ✅ 4/10 00:1x: **de tre review-fund på `/brok` er rettet** —
         `ceo/brok-grupper-og-runding`. **Regelknapperne har nu egen legend**
         («Vælg regel»/«Välj regel»), hver brøk har sit eget `fieldset` med
         `firstFraction`/`secondFraction`, og `fælles nævner` er rettet til
@@ -319,6 +331,21 @@ er blokeret af en ❓ og må ikke gættes.
   «60» i stedet for «1» — tynd, og tynde sider kan skade hele domænet. Bygges
   kun som **én** samlet sekund→minut→time-side der erstatter `/timer-i-aret`, og
   den skal måles mod den side først.
+- **[x] ✅ `/bmi` spørger om alder** — `ceo/bmi-alder` 4/10. *Hvem:* alle der
+  googler «bmi beregner med alder», «bmi beregner med alder og køn» eller
+  «bmi skala ældre» (autocomplete målt 4/10). *Datagrund:* `/bmi` er
+  næststørste side med 938 besøgende/28d og **falder 24 %**, og missionen siger
+  «ret `/bmi`, før der bygges nyt»; `inputs.alder` lå i delelinken som død
+  kode. *Accept:* alder med enhed på da/se/no, børnevarslet under 18,
+  alderen i delelinken, 6 nye render-tests. **MÅL:** `/bmi` 938
+  besøgende/28d (3/10) → Plausible 17/10.
+- **[ ] `/bmi` for børn (percentil) — målt, men ⛔ datakilde.** «bmi for børn»,
+  «bmi beregner børn», «beregn bmi børn» og «bmi skala børn» er danske
+  autocomplete-træffere, på svensk «bmi barn tabell», «bmi barn räkna ut» og
+  «beräkna bmi tonåring». WHO's BMI-for-alder-percentiler er **~150 tal pr. køn**
+  — for mange til at transkribere uden en uafhængig kontrol, og en fejltransskription
+  ville være en dårligere fejl end manglende side (punkt 11). Kræver en kilde Mads
+  kan hente (⛔ se ❓ Feriedatoer-mønstret: ét skærmbillede af WHO's tabel).
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -364,6 +391,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 4/10 00:5x:** `VERIFICÉR DEPLOY: <alderfelt på BMI-værktøjet med enhed, børnevarsel under 18 og alder i delelinken> ceo/bmi-alder 4/10 00:5x`.
+Døm på indhold: `curl -s https://minberegner.dk/bmi | grep -oE '<label[^>]*>Alder[^<]*</label>'` skal give **1** med `Alder (år)`, og `<input` for feltet skal have `value="40"` (eller den værdi kilden har). `grep -c 'Delelinken indeholder en alder under 18'` skal give **0** i den statiske markup (den vises kun efter valg) — døm i stedet på at feltet findes. `beraknare.se/bmi` skal have «Ålder (år)». Næste deploy-vindue 4/10 07:30.
 
 **Åben note 4/10 00:1x:** `VERIFICÉR DEPLOY: <regelknapperne med egen legend + hver brøk i sit eget feltset + decimaler rundet ind i feltet + «fællesnævner» i ét ord på /brok> ceo/brok-grupper-og-runding 4/10 00:1x`.
 Døm på indhold: `curl -s https://minberegner.dk/brok | grep -oE '<legend[^>]*>[^<]*</legend>'` skal give **3** i rækkefølgen **«Vælg regel», «Det første brøk», «Den anden brøk»**, og `grep -c 'role="group"'` skal give **0** (den overflødige aria-label på knapperne er væk). `grep -c 'Fællesnævner'` **≥1** og `grep -c 'Fælles nævner'` **0**; samme i brødteksten: `grep -c 'fællesnævner'` ≥1. `beraknare.se/brok` skal have «Välj regel», «Det första bråket» og «Det andra bråket». Svarene skal være regnet: 1/2 + 1/3 = **5/6**, 2/3 ÷ 4/9 = **3/2**. Næste deploy-vindue 4/10 07:30.
