@@ -27,6 +27,15 @@ STATUS: 3/10 11:4x. **CI var rød ved start** — kørsel `37112627105` («Skriv
        (3) F5c-slice på de næste interpolerede procenter (`Elberegner` 12,
        `HuslejeBudgetBeregner` 2, `BudgetBeregner` 2, `LonEfterSkattBeregner` 3).
        BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
+       ⚠️ **En anden proces committer i samme arbejdsmappe (12:1x).** Et commit
+       med besked fra et **fremmed projekt** («Markér hvilke emnefund i
+       søgningen der kan læses», `/emner/<slug>`, 2585 tests) lagde sig på
+       master og **swooped mine tre stagede filer med sig**. Jeg fandt det ved
+       at `git log` viste en besked, jeg ikke havde skrevet. Rettet med
+       `git commit --amend` (indholdet var 100 % mit, intet andres arbejde i
+       committen) og pushet som `42adddd`. **Næste iteration:** kør
+       `git branch --show-current && git status --short` i samme kommando som
+       committen, og læs `git log --oneline -1` med egne øjne før push.
 
 ## Fase 3 — trafik-drevet
 
