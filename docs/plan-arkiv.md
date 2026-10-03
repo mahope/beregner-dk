@@ -27895,3 +27895,76 @@ og det er **koden**: `src/app/opsparing/page.tsx:116,121,126,131` skriver
 «0-1%», «2-4%», «4-6%», «6-8%», og `PensionBeregner.tsx:268` skriver «5-7% (aktier),
 2-4% (obligationer)». Noten er skrevet over en rettelse, der ikke skete — ikke en
 fejl i deployet. Den bliver F5g.
+
+## 3/10 15:2x — lukkede deploy-noter (dømt på indhold, curl)
+
+Fuld tekst af de noter der er lukket her. Målingerne er `curl` mod live 3/10
+15:15–15:22; HTTP 200 er ikke brugt som bevis.
+
+- **`ceo/procent-punkt-sweeps` 08:00 → DEPLOY OK.** `minberegner.dk/procent` og
+  `beraknare.se/procent`: **0** `\d%` i hele HTML'en. Rettede strenge står:
+  «10 % af 250 = 25», «5 % af 250 = 12,5», «25 % af 200 = 50».
+  `minberegner.dk/boliglaan`: **0** `\d%` i den *synlige* tekst — de 22
+  `\d%`-træffere er alle `style="width:…%"` i inline-CSS på belåningsgraferne,
+  altså ikke tekst. «Minimum 5 % af boligens pris (anbefalet: 10-20 %)»,
+  «Op til 80 % af boligens værdi», «Typisk 0,5-1,5 %», «Over 80 % belåning»,
+  «ca. 5,0-7,0 %» står alle. 0 `NaN`.
+- **`ceo/boliglaan-procent` 10:5x → DEPLOY OK.** Samme side: 0 `\d%` i synlig
+  tekst og de statiske strenge står. Notens krav om «95,0 % belåning» og
+  «5,05 % p.a.» er **ikke** nået, og det er ikke en fejl: de er interpolationer
+  fra brugerens felter. ⛔ ❓ om notens formulering er lukket med dette.
+- **`ceo/procent-forside-feriepenge` 09:4x → DEPLOY OK.** `minberegner.dk/`,
+  `beraknare.se/` og `minberegner.dk/feriepenge`: **0** `\d%`. «Feriepenge
+  (12,5 %)», «- AM-bidrag (8 %)», «- Skat (estimat ~38 %)» og **2** × «100 %
+  Gratis» står.
+- **`ceo/kommunesat-komma` 12:1x → ⛔ kan ikke dømmes på den URL.** Noten kræver
+  «Kommuneskat (24,94 %)» på `beraknare.se/lon-efter-skatt`; siden er `seOnly`
+  og hedder `lon-efter-skatt` med to t'er. Målt 3/10 15:2x: siden svarer 200,
+  men «Kommuneskat (…)» findes ikke i markupken i den form (grep gav 0) — så
+  linjen ligger et andet sted. Noten er for snævt formuleret, ligesom
+  `ceo/boliglaan-procent`. Målt på `/brutto-netto` i stedet: «Kommuneskat (ca.
+  25 %)» står med **komma**.
+- **`ceo/kommune-decimal-komma` 12:3x → stadig åben.** `minberegner.dk/brutto-netto`
+  har «Kommuneskat (ca. 25 %)» og «Kirkeskat (ca. 0,7 %)» med komma, men
+  kommune-listen («Gentofte (22,8 %)») er ikke verificeret i denne iteration.
+- **`ceo/procent-sweep-pension-boliglaan` 10:1x, `ceo/procent-interpolationer`
+  11:2x, `ceo/procent-interpolationer-2` 12:35, `ceo/hoelligdag-cache` 11:5x,
+  `ceo/dato-dage-til-rækker` 13:0x, `ceo/su-indtaegtsgraense-maaned` 13:4x,
+  `ceo/titler-med-regnet-eksempel` 14:4x** → **åbne**, og det er *ikke* et
+  deploy-problem: de er alle fra commits efter 12:30 (11:18 er før vinduet, men
+  de sider har strenge der stadig mangler i `HEAD`). Målt 3/10 15:2x:
+  `/dato` mangler stadig «Hvor mange dage er der til …?»-overskriften (ca1b4b3,
+  13:02), og `/su` skriver endnu den gamle «Du må højst tjene …»-sætning
+  (0554456, 13:36).
+
+## 3/10 15:2x — DEPLOY-MISSING: den danske `/timer-i-aret` er en 404 i produktion
+
+**Målt (curl, 8/8 requests, 3/10 15:17–15:20):**
+`https://minberegner.dk/timer-i-aret` → **HTTP 404** med sidens egen
+«Siden blev ikke fundet». `https://beraknare.se/timmar-i-aret` → **200**.
+Samme asymmetri i sitemap og hreflang: `beraknare.se/timmar-i-aret` har
+`<link rel="alternate" hrefLang="da" href="https://minberegner.dk/timer-i-aret">`,
+altså peger den svenske side på en URL der giver 404, og `minberegner.dk`'s egen
+sitemap (164 URL'er) lister `/timer-i-aret`.
+
+**Bevis på at det ikke er koden.** Lokal produktionsbuild af `HEAD` (228e1ff)
+med `Host: minberegner.dk`:
+`minberegner.dk/timer-i-aaret` → **200** med `<h1>Hvor mange timer er der på et
+år?`, `beraknare.se/timmar-i-aret` → 200, `beraknare.se/timer-i-aret` → 301,
+og byggets ruterliste (log 3/10 15:1x) har **begge** ruter som `ƒ`. Porten
+`src/app/timer-i-aret.test.tsx` (17 tests) dømmer begge ruter og er grøn.
+Proxyen tillader requestet: 404-svaret har `x-locale: da` og
+`x-hostname: minberegner.dk`, og de to headere sættes **kun** i
+`NextResponse.next()`-grenen i `src/proxy.ts:58-61` — altså kom beslutningen
+aldrig til `not-found`-grenen. Ruten mangler i det **kørende image**.
+
+**Bevis på at billedet er nyt nok til at have den.** Live har `f87a196` (09:42,
+SU-værktøjet: «Det svarer til pr. måned», «Før AM-bidrag pr. måned»), `b9fad7e`
+(08:51, «steg nettoprisindekset højere end») og `7cc66e0` (09:10, «100 % Gratis»).
+Billedet er altså fra 12:30-vinduet, og `f3b3516` (07:14) tilføjede **begge**
+route-filer i samme commit. To deploy-vinduer er gået siden.
+
+**Hvad et menneske skal se:** billedet på Dokploy — om der er to containere
+(kun den ene har ruten), om `.next`-laget er cachet fra en ældre build, eller
+om der skal være en ren rebuild. **Ingen kodeændring retter det**, så loopet
+ merger ikke til `master` igen før det er set.
