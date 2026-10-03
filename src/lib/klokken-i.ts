@@ -289,6 +289,40 @@ export function slugForSprog(land: KlokkenLand, sprog: KlokkenSprog): string {
   return sprog === "da" ? land.slugDa : land.slugSe;
 }
 
+/** Klokkeslættet i titlen regnes fra midnat i læserens egen zone. */
+const TITEL_REFERENCE_MINUTTER = 12 * 60;
+
+/**
+ * Landesidens `<title>`: spørgsmålet plus den regnede omregning.
+ *
+ * Datagrunden er samme måling som brødteksten: 12 i Danmark er det samme
+ * klokkeslæt som `/tidszone`s egen titel, og forskellen læses fra
+ * `tidsforskelMinutter` på det øjeblik, siden serveres — altså kan den ikke stå
+ * som et håndskrevet tal, der bliver 6 timer hele året i et land, der skifter
+ * til sommertid på en anden dato end Danmark. Tokyo er 8 timer foran om
+ * vinteren og 7 om sommeren, og det er prøven på.
+ *
+ * Omregningen regnes fra **12 i læserens egen zone**, ikke fra klokkeslættet
+ * lige nu. Regnes den fra «nu», får titlen et tilfældigt tal, der kun er rigtigt
+ * i det øjeblik den blev skrevet.
+ */
+export function klokkenLandTitel(
+  land: KlokkenLand,
+  sprog: KlokkenSprog,
+  tidspunkt: Date
+): string {
+  const by = land.byer[0];
+  const forskel = tidsforskelMinutter(tidspunkt, by.zone);
+  const minutter =
+    (((TITEL_REFERENCE_MINUTTER + forskel) % 1440) + 1440) % 1440;
+  const tid = `${String(Math.floor(minutter / 60)).padStart(2, "0")}:${String(
+    minutter % 60
+  ).padStart(2, "0")}`;
+  return sprog === "da"
+    ? `Hvad er klokken i ${landetsNavn(land, "da")}? 12 i Danmark = ${tid} i ${byensNavn(by, "da")}`
+    : `Vad är klockan i ${landetsNavn(land, "se")}? 12 i Sverige = ${tid} i ${byensNavn(by, "se")}`;
+}
+
 /** Landet bag en slug, eller `null` hvis slugen ikke findes. */
 export function findKlokkenLand(slug: string, sprog: KlokkenSprog): KlokkenLand | null {
   return (

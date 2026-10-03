@@ -5,6 +5,7 @@ import {
   getKlokkenPrefix,
   getKlokkenSlugs,
   KLOKKEN_LANDE,
+  klokkenLandTitel,
   landetsNavn,
   tidsforskelMinutter,
 } from "./klokken-i";
@@ -152,6 +153,48 @@ describe("ruterne", () => {
     for (const sprog of ["da", "se"] as const) {
       const slugs = getKlokkenSlugs(sprog);
       expect(new Set(slugs).size).toBe(slugs.length);
+    }
+  });
+  /**
+   * Landstitlen skal regne om **12** fra læserens egen zone, og forventningerne
+   * er her skrevet fra `tzdb`-viden om den enkelte by — ikke genberegnet med den
+   * samme formel som koden. Tokyo står på UTC+9 hele året, så 12 i Danmark er
+   * 20:00 om vinteren (Danmark UTC+1) og 19:00 om sommeren (Danmark UTC+2):
+   * et håndskrevet «20:00» holder altså kun halve året og bliver rødt i juli.
+   */
+  test("landstitlen regner om 12 i Danmark til byens egen tid, vinter og sommer", () => {
+    const japan = findKlokkenLand("japan", "da");
+    const usa = findKlokkenLand("usa", "da");
+    if (!japan || !usa) throw new Error("japan/usa skal findes");
+    expect(klokkenLandTitel(japan, "da", VINTER)).toBe(
+      "Hvad er klokken i Japan? 12 i Danmark = 20:00 i Tokyo"
+    );
+    expect(klokkenLandTitel(japan, "da", SOMMER)).toBe(
+      "Hvad er klokken i Japan? 12 i Danmark = 19:00 i Tokyo"
+    );
+    // USA skifter til sommertid samme dag som Danmark, så forskellen er de
+    // samme 6 timer hele året. New York er UTC-5 / UTC-4 mod Danmarks UTC+1 /
+    // UTC+2 — det er grunden til at tallet ikke skifter her.
+    expect(klokkenLandTitel(usa, "da", VINTER)).toContain("= 06:00 i New York");
+    expect(klokkenLandTitel(usa, "da", SOMMER)).toContain("= 06:00 i New York");
+  });
+
+  test("alle landstitler har byen med og ingen arv fra rodlayoutets site-navn", () => {
+    for (const sprog of ["da", "se"] as const) {
+      const egetZone = sprog === "da" ? "Danmark" : "Sverige";
+      for (const slug of getKlokkenSlugs(sprog)) {
+        const land = findKlokkenLand(slug, sprog);
+        if (!land) throw new Error(`Ukendt land: ${sprog}/${slug}`);
+        const titel = klokkenLandTitel(land, sprog, VINTER);
+        const sporgsmaal =
+          sprog === "da" ? /^Hvad er klokken i / : /^Vad är klockan i /;
+        expect(titel, `${sprog}/${slug}`).toMatch(sporgsmaal);
+        expect(titel, `${sprog}/${slug}`).toMatch(/\d\d:\d\d/);
+        expect(titel, `${sprog}/${slug}`).toContain(`12 i ${egetZone} = `);
+        // `| MinBeregner.dk` lå i alle tolv titler før 3/10 19:1x.
+        expect(titel, `${sprog}/${slug}`).not.toContain("MinBeregner.dk");
+        expect(titel.length, `${sprog}/${slug}`).toBeLessThanOrEqual(70);
+      }
     }
   });
 });

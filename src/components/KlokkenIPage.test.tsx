@@ -206,6 +206,21 @@ describe("hreflang på /klokken-i peger på samme land i begge sprog", () => {
     }
   });
 
+  test("titlen er absolute, så den ikke arver rodlayoutets site-navn", async () => {
+    // Målt 3/10 19:0x: alle tolv sider endte på «Hvad er klokken i USA? |
+    // MinBeregner.dk» — 18 tegn brugt på et klokkeslæt der ikke stod i titlen.
+    for (const sprog of ["da", "se"] as const) {
+      for (const slug of getKlokkenSlugs(sprog)) {
+        const meta = await metadata(sprog, slug);
+        const titel = meta.title as { absolute?: string } | undefined;
+        expect(titel?.absolute, `${sprog}/${slug}`).toMatch(/\d\d:\d\d/);
+        expect(titel?.absolute, `${sprog}/${slug}`).not.toContain(
+          "MinBeregner.dk"
+        );
+      }
+    }
+  });
+
   test("hreflang peger på det samme land, ikke bare på en vilkårlig side", async () => {
     // Slugs er **sprogspecifikke** (`tyrkiet`/`turkiet`, `canada`/`kanada`), så
     // de læses fra modulet. Ellers kunne alle 24 sider pege på USA og porten

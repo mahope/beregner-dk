@@ -13,6 +13,7 @@ import {
   findKlokkenLand,
   getKlokkenPrefix,
   KLOKKEN_LANDE,
+  klokkenLandTitel,
   landetsNavn,
   slugForSprog,
   type KlokkenSprog,
@@ -87,7 +88,11 @@ export function buildKlokkenMetadata(
   const c = copy[sprog];
   const svar = beregnKlokkenNu(land.byer[0], sprog, tidspunkt);
   const landet = landetsNavn(land, sprog);
-  const title = c.question(landet);
+  // Titlen er `absolute`, så den ikke arver rodlayoutets `| MinBeregner.dk`
+  // (målt 3/10 19:0x: alle tolv sider endte på «Hvad er klokken i USA? |
+  // MinBeregner.dk», 18 tegn af et klokkeslæt der ikke stod i titlen). Den
+  // skrives fra `klokkenLandTitel`, altså fra samme måling som brødteksten.
+  const title = klokkenLandTitel(land, sprog, tidspunkt);
   // hreflang for hvert land i **begge** sprog. Slugene læses fra
   // `KLOKKEN_LANDE` — samme modul `getKlokkenSlugs` bygger ruterne af — så en
   // ny tid ikke kan få en dansk side uden sin svenske modpart. Uden disse tag
@@ -105,7 +110,7 @@ export function buildKlokkenMetadata(
   languages["x-default"] = languages[getDomainConfigByLocale("da").hreflangCode];
 
   return getCurrentDomainConfig().then((domainConfig) => ({
-    title,
+    title: { absolute: title },
     description: sprog === "da"
       ? `Det er ${svar.tid} i ${svar.by} lige nu, ${svar.forskel} Danmark. Se klokken i alle tidszoner i ${landet} og konverter til en hvilken som helst by.`
       : `Det är ${svar.tid} i ${svar.by} just nu, ${svar.forskel} Sverige. Se klockan i alla tidszoner i ${landet} och konvertera till vilken stad som helst.`,

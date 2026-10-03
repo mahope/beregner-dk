@@ -28080,3 +28080,53 @@ på 5 ms; grøn HEAD 15/15.
 (10 år = 3.652, 50 år = 18.262), `ceo/su-indtaegtsgraense-maaned` ✅ — den
 sidste kun på de nye labels, fordi notens «Du må højst tjene …» står i den
 nuværende kode (`SuIndtaegtsgraense.tsx:174`).
+
+## 3/10 19:1x — de 24 landesider under /klokken-i får svaret i titlen
+
+**Fundet ved at læse de live titler.** `curl` på alle tolv danske landesider gav
+**identisk** `<title>`-form: «Hvad er klokken i USA? | MinBeregner.dk» … samme
+for thailand, australien, japan, tyrkiet, canada, kina, indien, england, spanien,
+brasilien, portugal. To fejl i én:
+
+1. **Ingen regnet svar i titlen**, kun spørgsmålet — mens hele sidens værdi er
+   netop svaret, og mens de tre søskende tids-sider på sitet alle har et:
+   `/dage-til/1-december` = «…? 59 dage», `/timer-i-aaret` og hubben
+   `/klokken-i` bruger `title: { absolute }` med et regnet tal. De tolv
+   landesider var de eneste `title` (uden `absolute`) på hele sitet.
+2. **`| MinBeregner.dk`** var 18 af tegnene. Det kommer af, at `title` var en
+   ren streng, så rodlayoutets `template` (`layout.tsx:32`) satte sit
+   site-navn på. Ikke af en fejl i klokken-koden — den måler rigtigt i
+   brødteksten («Det er 06:35 i New York lige nu, 6 timer bagud Danmark»).
+
+**Rettelsen.** Ny `klokkenLandTitel(land, sprog, tidspunkt)` i
+`src/lib/klokken-i.ts` bygger titlen som spørgsmålet + **den regnede
+omregning**: «Hvad er klokken i Japan? 12 i Danmark = 20:00 i Tokyo».
+Samme 12-tal som `/tidszone`s egen titel («Tidszoner: 12 i Danmark = 06 i New
+York, USA»), og forskellen læses fra `tidsforskelMinutter` — altså den samme
+funktion brødteksten bruger, så tallet kan ikke blive 6 timer hele året i et
+land, der skifter sommertid på en anden dato end Danmark. Omregningen regnes fra
+**12 i læserens egen zone**, ikke fra klokkeslættet lige nu: en titel der
+skifter hvert minut ville få Google til at hente siden igen uden mening.
+
+**Punkt 1 ikke brudt.** Ruten er `dynamic = "force-dynamic"` (præcis af samme
+grund som brødteksten), og build-outputtet viser `ƒ /klokken-i/[land]` og
+`ƒ /klockan-i/[land]`. Titlen kan derfor ikke frosses ved `next build`; kun
+`generateStaticParams` køres.
+
+**Målt polaritet** (3 nye tests, 2 filer):
+- «hurtig forskel» (titlen skriver altid 12:00) → **1 rød** i
+  `klokken-i.test.ts`.
+- håndskrevet `06:00` for Japan → **1 rød** (sommeren skal være 19:00).
+- `title` sat tilbage til ren streng i stedet for `{ absolute }` → **1 rød** i
+  `KlokkenIPage.test.tsx`.
+- grøn HEAD → **26/26** i de to filer, **4130/4130** i hele suiten (260 filer).
+
+Forventningerne i testen er skrevet fra `tzdb`-viden om den enkelte by, ikke
+genberegnet med kodes egen formel — Tokyo er UTC+9 hele året, så 12 i Danmark er
+20:00 vinter (UTC+1) og 19:00 sommer (UTC+2), og New York er 06:00 begge
+sæsoner fordi USA skifter samme dag som Danmark.
+
+**Gate:** typecheck 0, lint 0 (755 filer), build 0, hele suiten 4130/4130.
+
+**Ikke gjort.** `landetsNavn` fordi `c.question(landet)` stadig er `<h1>` på
+siden (linje 147) — kun titlen ændrede sig, så overskriften er uændret.

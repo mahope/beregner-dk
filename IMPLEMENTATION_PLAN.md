@@ -1,37 +1,20 @@
-STATUS: 3/10 18:3x. ✅ **Port der dømmer en sproglagt sti mod både ruten og
-       sitemap** — `ceo/sprogstier-ruter` (F0f). Datagrund: en deploy-note, to
-       commit-beskeder og en fejl-måling har skrevet den danske timer-side som
-       `/timer-i-aaret` **med et `a` for meget** i tre dage. MÅLT 18:2x:
-       `curl https://minberegner.dk/timer-i-aret` → **200** med titel «Hvor
-       mange timer er der på et år? Timer i alle perioder» og canonical
-       `…/timer-i-aret`; `/timer-i-aaret` → 404, fordi den aldrig har
-       eksisteret. Koden er `TIMER_I_ARET_PATH.da = "/timer-i-aret"`
-       (`src/lib/timer-i-aret.ts:52`), og begge route-filer ligger på master
-       (bekræftet med `gh api …/contents/src/app/timer-i-aret`). **Der var ingen
-       404-fejl at rette** — en commit ville have lagt en dublet-rute på
-       typo-URL'en. *Accept:* alle seks sprogslagte stier skal have en mappe med
-       `page.tsx` **og** stå i sitemap for sit eget sprog.
-       **Målt polaritet:** `da: "/timer-i-aaret"` i stikortet giver **1 rød**
-       (`/timer-i-aaret (TIMER_I_ARET_PATH.da) har en page.tsx under src/app`),
-       14 øvrige grønne; grøn HEAD **15/15**. Det er **mappe-kontrollen** der
-       bliver rød — `sitemap`-kontrollen bliver grøn, fordi `buildSitemap`
-       læser samme konstant. En ekstra sti på `/ikke-en-reelle-rute` giver også
-       rød, så porten dømmer filsystemet og ikke en liste.
-       **GATE:** typecheck 0, lint 0 (755 filer), build 0, **hele suiten
-       4127/4127** i 260 filer.
-       **Deploy-verifikation 18:0x–18:1x på indhold (curl):**
-       `ceo/titler-renteberegner-arveafgift` ✅ («Renteberegner: 100.000 kr. i 5
-       år = 1.887 kr./md.» + «Arveafgift beregner: 1.000.000 kr. arv = 91.155
-       kr. boafgift»), `ceo/dage-levet-pr-alder` ✅ (`<h2>Så mange dage har du
-       levet som 10-årig?</h2>`, 10 år = 3.652, 50 år = 18.262), og
-       `ceo/su-indtaegtsgraense-maaned` ✅ — sidstnævnte kan **ikke** dømmes på
-       notens «Du må højst tjene …», fordi den sætning står i den nuværende kode
-       (`SuIndtaegtsgraense.tsx:174`); den er dømt på de nye labels «Før AM-bidrag
-       for hele året» og «Fribeløb i de øvrige måneder», som begge er live.
-       Kun `ceo/procent-mellemrum-billaan-arveafgift` står åben (næste vindue
-       21:30). CI grøn ved start (9ac7a77), ingen åbne PR'er, ingen uløste
-       Sentry-fejl, begge review-fund står `RETTET 0a9b7bb`.
-       PR-TJEK: 3/10 17:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+STATUS: 3/10 19:2x. ✅ **De 24 landesider under `/klokken-i` får svaret i
+       titlen** — `ceo/klokken-titler` (F0h). Datagrund: `curl` på alle tolv
+       danske sider 19:0x gav **identisk** `<title>`: «Hvad er klokken i USA? |
+       MinBeregner.dk» — altså kun spørgsmålet og 18 tegn site-navn, ingen
+       regning. De var de **eneste `title` uden `absolute`** på sitet, mens
+       `/dage-til/*`, `/timer-i-aaret` og hubben alle har et regnet tal. *Fix:*
+       `klokkenLandTitel()` bygger «Hvad er klokken i Japan? 12 i Danmark =
+       20:00 i Tokyo» fra `tidsforskelMinutter` — samme måling som brødteksten,
+       samme 12-tal som `/tidszone`s titel, og `absolute` fjerner site-navnet.
+       *Målt polaritet:* fast forskel → 1 rød, håndskrevet 06:00 for Japan → 1
+       rød, `title` som ren streng → 1 rød; grøn HEAD **26/26** i to filer.
+       Punkt 1 ikke brudt: ruten er `force-dynamic`, build skriver
+       `ƒ /klokken-i/[land]`. **GATE:** typecheck 0, lint 0 (755 filer),
+       build 0, **hele suiten 4130/4130** i 260 filer.
+       CI grøn ved start (c1a83dd), ingen åbne PR'er, ingen uløste Sentry-fejl,
+       begge review-fund står `RETTET 0a9b7bb`.
+       PR-TJEK: 3/10 19:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
 
 ## Fase 3 — trafik-drevet
 
@@ -76,82 +59,43 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 (`/dato` 1.617 mod 1.723 ord), så det er opgave 187's slugs og domæneautoritet.
 
 ### Prioriterede opgaver
-**F0. [~] hreflang-skråstreg på `/dato` — formodningen MÅLT MODBEVIST 3/10 15:1x.**
-   *Hvad:* planen hævdede at `/dato` og `/dage-i-aaret` gav `hrefLang` med
-   skråstreg (altså en 308). *Målt (curl, hele `<head>`, 15:1x):* **0 af 15**
-   sider har skråstreg i en `rel="alternate"` — `/`, `/dato`, `/procent`,
-   `/tidsberegner`, `/dage-mellem-datoer`, `/dage-i-aaret`, `/dage-til`,
-   `/klokken-i`, `/nedtaelling`, `/su`, `/tidszone` m.fl. Canonical er
-   korrekt overalt, og `page-helpers.ts:67` bygger `languages` som
-   `${baseUrl}/${slug}` — uden skråstreg. Lokal produktionsbuild af HEAD
-   bekræfter: ruterne og metadata er i overensstemmelse. *Konklusion:* enten
-   var målingen fra 14:2x taget mod en anden kørsel (lokalt dev-server-build),
-   eller fejlen er rettet siden. **F0 nedprioriteres**; den port, der blev
-   foreslået (hver `hrefLang` lig canonical), er værd at have, men først
-   når den kan finde en fejl. *MÅL:* `/dato` 131.320 visninger / 863 klik /
-   0,7 % / pos. 5,6 (da) og 102.316 / 97 / 0,1 % / pos. 8,1 (se).
+**F0. [x] ✅ hreflang-skråstreg på `/dato` — modbevist, lukket.** 0 af 15 sider
+   har skråstreg i `rel="alternate"`; `page-helpers.ts` bygger `${baseUrl}/${slug}`.
+   Målinger og ræsonnement: `docs/plan-arkiv.md`. *MÅL:* `/dato` 131.320/863/
+   0,7 %/5,6 (da), 102.316/97/0,1 %/8,1 (se).
 
-**F0c. [x] ✅ Titelsporten dømmer resultatet, ikke «der står et tal»** —
-   rettet 3/10 15:5x efter review-fund MIDDEL. *Hvad:* porten læste
-   `expect(data!.metaTitle).toMatch(/\d/)`, så enhver titel med et årstal var
-   grøn. Målt polaritet: `/kvadratmeter`s «5 x 4 m = 20 m²» erstattet af
-   «Kvadratmeterberegner 2026 - Beregn areal» gav 16/16 grønt. Nu står det
-   **forventede resultat** i en tabel pr. side **og pr. sprog** (da 9, se 8), og
-   hver række dømmer med `toContain`, så en titel der mister sin regning bliver
-   rød med det manglende resultat i testnavnet. `/kvadratmeter` og `/alder`
-   læser **samme funktion som siden bruger** (`kvadratmeterEksempelLignelse`,
-   `alderLevet(iDagISidensTidszone())`), så en frossen alder kan ikke gemme sig.
-   *Målt:* 32/32 grønt; mutation 1 (eksemplet væk fra `/kvadratmeter`) 2 røde,
-   mutation 2 (aldersalder frosset til 30) 1 rød. Docblockens tabel er
-   rettet, så den ikke længere påstår at `/rentefradrag` har et eksempel.
+**F0b/F0c/F0f. [x] ✅ Regnet eksempel i `metaTitle` + port.** `/alder`,
+   `/tidszone` (F0b), titelsporten dømmer **resultatet** pr. sprog og ikke «der
+   står et tal» (F0c, rettet efter review-fund), og alle sprogslagte stier dømmes
+   mod både ruten og sitemap (F0f). Se `docs/plan-arkiv.md`.
 
 **F0d. [~] Regnet eksempel i de tre titler, der kun har et årstal.**
-   *Rettet 3/10 16:3x for **to** af dem (`renteberegner`, `arveafgift` — de var
-   feature-køens sidste to ubeskyttede). De tre herunder er **danske-only** og
-   blev bevidst lagt tilbage: `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %)
-   er de to højeste CTR i GSC-uddraget, så deres titel skal måles i 14 dage —
-   og `/rentefradrag` er samtidig sitets bedst rangerende side («rentefradrag
-   2026», 63.000 søgninger, pos. 2), hvor «2026» ikke må forsvinde.*
-   *Hvem:* alle der googler «rentefradrag 2026» (63.000 søgninger, pos. 2),
-   «beregn boligstøtte» (36.000, pos. 10) og «dagpenge beregner».
-   *Datagrund:* målt 3/10 15:3x fra `getPageData(slug, "da")` —
-   `rentefradrag` = «Rentefradrag beregner 2026 - Se din skattebesparelse»,
-   `boligstoette` = «Beregn boligstøtte 2026: standardmaksima og formue»,
-   `dagpenge` = «Dagpengeberegner 2026 - Beregn dine dagpenge». Ingen af dem har
-   et regnestykke, og de tre er derfor **taget ud af titelsporten** — porten og
-   tabellen skal sige det samme (punkt 11). De er danske-only (ingen `se`/`no`).
-   *Accept:* hver får sit resultat fra den datafil siden selv regner med
-   (`rentefradrag`-satsen, boligstøttens standardmaksimum, `DAGPENGE_2026`) og
-   kommer tilbage i `REGNETE_EKSEMPLER`. ⚠️ `/rentefradrag` har **5,8 % CTR** på
-   pos. 5,6 — sitets bedste — så en ny titel skal måles, ikke antages at hjælpe.
-   **MÅL:** `/rentefradrag` 5.082 visninger / 296 klik / 5,8 % / 5,6,
-   `/boligstoette` 7.370 / 181 / 2,5 % / 8,6 → GSC 17/10.
+   *Udført 3/10 16:3x for to af dem (`renteberegner`, `arveafgift`).* De tre herunder
+   er **danske-only** og blev bevidst lagt tilbage: `/rentefradrag` (5,8 %) og
+   `/boligstoette` (2,5 %) er de to højeste CTR i GSC-uddraget, så deres titel
+   skal måles i 14 dage — og `/rentefradrag` er sitets bedst rangerende side
+   («rentefradrag 2026», 63.000 søgninger, pos. 2), hvor «2026» ikke må forsvinde.
+   Målt 3/10 15:3x: `rentefradrag`/«… 2026 - Se din skattebesparelse»,
+   `boligstoette`/«Beregn boligstøtte 2026: …», `dagpenge`/«Dagpengeberegner
+   2026 - …» — alle tre taget **ud af** titelsporten, så porten og tabellen siger
+   det samme. **MÅL:** `/rentefradrag` 5.082/296/5,8 %/5,6,
+   `/boligstoette` 7.370/181/2,5 %/8,6 → GSC 17/10.
 
-**F0f. [x] ✅ Port der dømmer en sproglagt sti mod både ruten og sitemap**
-   — `ceo/sprogstier-ruter`. Se STATUS for målinger. *Accept (opfyldt):* alle
-   seks stier fra `DAGE_I_AARET_PATH`, `DAGE_MELLEM_PATH` og `TIMER_I_ARET_PATH`
-   skal have en `page.tsx` under `src/app` **og** stå i `buildSitemap()` for
-   sit eget sprog. Mutation `da: "/timer-i-aaret"` = 1 rød. *Begrænsning:*
-   F0f bad om alle `/slug` i sitemap/canonical/`getPageData`; det er gjort for
-   de sprogslagte stier, mens de 130+ almindelige beregnersider dømmes af
-   `meta-description.test.ts` via `getAvailableSlugs`.
 **F0e. [~] Fire `no`-titler på de fire største sider har intet regnestykke.**
-   Målt 3/10 15:3x: `/procent|no` = «Prosentkalkulator - Beregn prosent enkelt og
-   gratis», `/dato|no` = «Datokalkulator - …», `/tidsberegner|no` = «Tidskalkulator
-   - …», `/tidszone|no` = «Tidssonekalkulator - …» — mod samme fire sider i `da`
-   og `se`, der alle har et. De er **danske-only-stoffer**: beregner.no er
-   lukket i `hiddenDomains` og ❓ nedenfor er ubesvaret, så det er 0
-   bruger-effekt nu. Noteret, fordi porten dømmer pr. sprog og ikke må få en
-   grøn række for `no` ved at springe den over.
+   `/procent|no`, `/dato|no`, `/tidsberegner|no`, `/tidszone|no` mod samme fire
+   sider i `da`/`se`, der alle har et. `beregner.no` er lukket i `hiddenDomains`
+   og ❓ nedenfor er ubesvaret, så det er 0 bruger-effekt nu.
 
-**F0b. [x] ✅ Regnet eksempel i `metaTitle` på `/alder` og `/tidszone`** —
-   `docs/plan-arkiv.md`. *Hvem:* alle der googler «aldersberegner» (27.000
-   søgninger, pos. 4) og «tidszoner» (4.000, pos. 10). *Accept:* begge titler
-   har et regnet eksempel, `ogTitle` er lig `metaTitle`, `{AAR}` er løst fra
-   `alderLevet` (aldrig frosset), og `meta-title-tal.test.ts` dømmer tallet.
-   **MÅL:** `/alder` 10.029 visninger / 43 klik / **0,4 %** / pos. 7,2 (da) og
-   3.689 / 14 / 0,4 % / 7,6 (se) mod `/kvadratmeter`s 1,5 % på pos. 4,9 →
-   GSC 17/10. `/tidszone` 23.351 / 101 / **0,4 %** / 7,6.
+**F0h. [x] ✅ Regnet svar i titlen på de 24 `/klokken-i`-landesider** —
+   `ceo/klokken-titler` 3/10 19:2x. Se STATUS og `docs/plan-arkiv.md`. *Hvem:*
+   alle der googler «hvad er klokken i <land>» — dansk autocomplete har 10 af 10
+   land/by under «hvad er klokken i» (målt 3/10 19:0x), og GSC har «hvad er
+   klokken i usa når den er 12 i danmark» 169v pos. 6 + «hvad er klokken i de
+   forskellige tidszoner» 89v pos. 5 på `/tidszone` (23.351 visninger, 0,4 %
+   CTR). *Accept (opfyldt):* hver titel har byens **regnede** klokkeslæt fra
+   `tidsforskelMinutter`, er `absolute`, og har ingen port på sig — men to nye
+   tests dømmer pr. sprog og pr. sæson. **MÅL:** de 24 URL'er har 0 GSC-ækker
+   endnu (nye 2/10) → GSC 17/10 mod `/tidszone` 23.351/101/0,4 %/7,6.
 
 **F1. [ ] Søgeniveau-data for `/procent`** — 150.470 visninger, 0,1 %, pos 7,4.
 GSC's tre søgninger summerer 364 visninger af 150.470. **Accept:** GSC-eksport
@@ -397,6 +341,13 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 **Åbne F5b-slice: ingen — `/flyttebudget` er lukket 3/10 18:4x.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 3/10 19:2x:** `VERIFICÉR DEPLOY: <regnet omregning i titlen på de 24 /klokken-i-og /klockan-i-landesider> ceo/klokken-titler 3/10 19:2x`.
+Døm på indhold: `curl -s https://minberegner.dk/klokken-i/japan | grep -oE '<title>[^<]*</title>'`
+skal give «Hvad er klokken i Japan? 12 i Danmark = 19:00 i Tokyo» (3/10 er Danmark
+i **sommertid**, UTC+2, mens Tokyo er UTC+9 → 7 timer) og **ikke** indeholde
+«MinBeregner.dk». Samme måling på `/klokken-i/usa` (= 06:00 i New York) og på
+`beraknare.se/klockan-i/japan`. Næste deploy-vindue 21:30.
 
 **Åben note 3/10 17:4x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
 Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. Målt 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. Næste deploy-vindue 21:30.
