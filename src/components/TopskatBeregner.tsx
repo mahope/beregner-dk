@@ -7,6 +7,7 @@ import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { SATSER_2026 } from "@/lib/satser-2026";
+import { SKATTELOFT, SKATTELOFT_PCT, bruttoGraense } from "@/lib/topskat-eksempler";
 
 // 2026-satser fra den fælles kilde (src/lib/satser-2026.ts)
 const AM_BIDRAG = SATSER_2026.amBidrag;
@@ -124,12 +125,14 @@ export default function TopskatBeregner() {
     if (betalerTopskat) indkomstSkat += TOPSKAT;
     if (betalerTopTopskat) indkomstSkat += TOP_TOPSKAT;
     const marginalSkat = AM_BIDRAG + (1 - AM_BIDRAG) * indkomstSkat;
-    // Skatteloft på indkomstskatterne (ekskl. AM og kirkeskat): ca. 52,07%
-    const marginalPct = Math.min(marginalSkat * 100, 52.07 + AM_BIDRAG * 100);
+    // Skatteloft på indkomstskatterne (ekskl. AM og kirkeskat): se SKATTELOFT.
+    const marginalPct = Math.min(marginalSkat * 100, SKATTELOFT * 100 + AM_BIDRAG * 100);
 
     // Hvad skal du tjene før topskat?
-    const topSkatBruttoGraense = Math.round(TOPSKAT_GRAENSE / (1 - AM_BIDRAG));
-    const mellemSkatBruttoGraense = Math.round(MELLEMSKAT_GRAENSE / (1 - AM_BIDRAG));
+    // Samme omregning som brødteksten og FAQ-svaret bruger, så værktøjet og
+    // teksten ikke kan vise to forskellige bruttoindkomster for samme grænse.
+    const topSkatBruttoGraense = bruttoGraense(TOPSKAT_GRAENSE);
+    const mellemSkatBruttoGraense = bruttoGraense(MELLEMSKAT_GRAENSE);
 
     return {
       brutto,
@@ -299,7 +302,7 @@ export default function TopskatBeregner() {
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <h2 className="font-semibold text-green-800 dark:text-green-300 mb-2">Skatteloft</h2>
           <p className="text-sm text-green-700 dark:text-green-400">
-            Der er et skatteloft på ca. 52,07% (ekskl. AM-bidrag og kirkeskat). Det sikrer at din samlede marginalskat aldrig overstiger dette niveau.
+            Der er et skatteloft på {SKATTELOFT_PCT} (ekskl. AM-bidrag og kirkeskat). Det sikrer at din samlede marginalskat aldrig overstiger dette niveau.
           </p>
         </div>
       </div>

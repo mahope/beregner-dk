@@ -1,17 +1,20 @@
-STATUS: 3/10 04:15. CI grøn ved start (`37085981241` + egen push). Sentry:
-      ingen uløste fejl 14 dage, og SDK'en **er** sat op, så Sentry-punktet er
-      lukket. **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run
-      test` · `npm run build` — **grøn 3/10 04:13** (alle exit 0, **3939** tests i
-      248 filer). PR-TJEK: 2026-10-03 — ingen åbne PR'er.
-      CEO-kø punkt 0 er færdigt og afkrydset (`aca17e5`).
-      **Denne iteration: den nye feature `/dage-mellem-datoer` + `/dagar-mellan-
-      datum`** (`ceo/dage-mellem-datoer`) — første feature i rækken, se
-      `docs/plan-arkiv.md`. 12 nye tests (3927 → 3939), tre mutationer målt
-      røde. **Én reel fejl fundet i min egen brødtekst før commit:**
-      «bytter beregneren dem, så svaret aldrig kan blive negativt» er
-      modsat af `DatoBeregner.tsx:494`, der renderer `resultat.dage` med
-      fortegn — rettet til at sige det, der sker.
-      **Næste iteration:** F5b `/topskat` (4 fund) eller F1.
+STATUS: 3/10 04:37. CI grøn ved start (`37089145729`). Sentry: ingen uløste fejl
+      14 dage, og SDK'en **er** sat op, så Sentry-punktet er lukket. **Gate:**
+      `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run
+      build` — **grøn 3/10 04:37** (alle exit 0, **3952** tests i 249 filer).
+      PR-TJEK: 2026-10-03 — ingen åbne PR'er. CEO-kø punkt 0 er færdigt
+      (`aca17e5`), og review-fundet fra 02:52 har ingen åbne fund (begge fund er
+      `RETTET 4ec1f2f`).
+      **Denne iteration: F5b-slice `topskat-faq-tal-fra-modul`** — se
+      `docs/plan-arkiv.md`. 13 nye tests (3939 → 3952), **syv mutationer målt
+      røde**. **Én reel fejl fundet:** FAQ-svaret skrev «58.000 kr./md» for
+      mellemskattens bruttoindkomst, mens sidens egen formel
+      (`grænse / (1 - AM) / 12`, rundet til hundrede) giver 58.100 — brødteksten
+      lige ovenfor skrev allerede «58.100». To tal for det samme beløb på den
+      samme side. Derudover lå skatteloftet «52,07» uafhængigt i komponenten
+      (kappeformel + brødtekst) og i FAQ-svaret; nu ét tal.
+      **Næste iteration:** F5b `/boernepenge` (4 fund) — og den efter en feature
+      (sidste feature var `/dage-mellem-datoer`).
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
 ## Fase 3 — trafik-drevet
@@ -168,6 +171,13 @@ lukket** (se listen nedenfor og `docs/plan-arkiv.md`). Strenglistens loft er
 **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 → 320 → 315** (uændret,
 for `/loen-efter-skat`s tal lå i `page-data.ts`, ikke i JSX).
 
+**Lukket 3/10 04:37 — `topskat-faq-tal-fra-modul` (den tolvte fil).** Se
+`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne strenge væk fra `page-data.ts`
+(`description` + `metaDescription` + 2 af 5 FAQ-svar), så `topskat` er **4 → 0**
+målt med egen AST-probe. Ny `topskat-eksempler.ts` læser `SATSER_2026`.
+**Reel fejl:** «58.000 kr./md» mod sidens egen formel (58.100). **13 nye tests**
+(3939 → 3952), **syv mutationer målt røde** (se arkivet for hver).
+
 **Lukket 3/10 04:52 — `loen-efter-skat-faq-tal-fra-modul`.** Se
 `docs/plan-arkiv.md`. *Målt:* **4** håndskrevne talgrupper væk fra
 `page-data.ts` (`description` + `metaDescription` + `ogDescription` + 4 af 8
@@ -251,8 +261,9 @@ tests** (3898 → 3905). ⛔ Se nyt ❓ om deltidsfaktoren 0,67 nedenfor.
 (`kvadratmeter-faq-tal-fra-modul`) og `/konfirmation`
 (`konfirmation-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
 **`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende,
-`/aktieskat` (`aktieskat-faq-tal-fra-modul`) den tiende og `/loen-efter-skat`
-(`loen-efter-skat-faq-tal-fra-modul`) den **ellevte**.**
+`/aktieskat` (`aktieskat-faq-tal-fra-modul`) den tiende, `/loen-efter-skat`
+(`loen-efter-skat-faq-tal-fra-modul`) den **ellevte** og `/topskat`
+(`topskat-faq-tal-fra-modul`) den **tolvte**.**
 
 **Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
@@ -260,11 +271,11 @@ portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
 Køen pr. slug (**78** målt 3/10 02:38 med egen AST-probe efter `/efterloen`):
 `moms` 15 (⛔) · `konfirmation` 6 → **0** · `efterloen` 5 → **0** ·
-`aktieskat` 5 → **0** · `loen-efter-skat` 4 → **0** · `topskat` 4 ·
+`aktieskat` 5 → **0** · `loen-efter-skat` 4 → **0** · `topskat` 4 → **0** ·
 `boernepenge` 4 · `flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
 være faldet siden — mål den slug, du tager, på ny. **Anbefalet rækkefølge:**
-`/loen-efter-skat` (4) → `/topskat` (4) → `/boernepenge` (4). `/moms` er ⛔ (de
-3 lovgrænser).
+`/loen-efter-skat` (4, lukket) → `/topskat` (4, lukket) → `/boernepenge` (4).
+`/moms` er ⛔ (de 3 lovgrænser).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
 (12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
@@ -368,6 +379,8 @@ De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
 `VERIFICÉR DEPLOY: /loen-efter-skat henter satser og grænser fra sit eget modul (metadata og FAQ skal have «54.100 kr.», «641.200 kr,» og «777.900 kr,» med **kr** *uden* punktum midt i sætningen; procenttallene skal stå med mellemrum foran: **0** × «8%», «7,5%», «15%», mens «8 %», «7,5 %», «5 %» og «15 %» står i `description`, `metaDescription`, `ogDescription` og i FAQ-svaret «Hvornår skal jeg betale mellemskat eller topskat i 2026?» i `FAQPage`-JSON-LD; kommuneskats-svaret skal have «ca. 22,5 % (Rundersdal) til 27,8 % (Langeland)»; **intet** `NaN` og ingen «kr..» eller «kr. kr.») ceo/loen-efter-skat-faq-tal-fra-modul 3/10 04:52`
 
 `VERIFICÉR DEPLOY: /dage-mellem-datoer + /dagar-mellan-datum (nye sider med eget slugsprog: `minberegner.dk/dage-mellem-datoer` skal have `<title>` «Dage mellem datoer: beregn antal dage mellem to datoer», **1** `<h1>`, **3** spørgsmål i `FAQPage`-JSON-LD («Hvor mange dage er der mellem to datoer?», «Er 2028 et skudår, og hvor mange dage er der i det?», «Hvorfor står der både dage og hele uger?»), eksempel-sætningen «Fra 1. januar 2026 til 1. januar 2027 går der 365 dage: 52 hele uger og 1 dag til.», og **0** «aldrig kan bli negativt»; `beraknare.se/dagar-mellan-datum` skal have `<title>` «Dagar mellan datum: räkna ut antal dagar mellan två datum» og eksemplet «… går det 365 dagar: 52 hela veckor och 1 dag till.», altså **0** «aldrig kan bli negativt»; **0** `NaN` på begge; begge URL'er skal ligge i hvert sit eget sitemap med `daily`, og `minberegner.dk/dagar-mellan-datum` + `beraknare.se/dage-mellem-datoer` skal 301'e til hver sin egen sti) ceo/dage-mellem-datoer 3/10 04:15`
+
+`VERIFICÉR DEPLOY: /topskat henter grænser, satser og bruttoindkomster fra sit eget modul (metadata og FAQ skal have «mellemskat fra 641.200 kr,» — **kr uden punktum** foran kommaet — og «topskat fra 777.900 kr.», altså **0** × «641.200 kr.,»; FAQ-svaret «Hvornår betaler man topskat i 2026?» skal have «(7,5 %)», «(yderligere 7,5 %)» og «ca. 697.000 kr./år (ca. 58.100 kr./md)» og «845.500 kr./år (ca. 70.500 kr./md)» — altså **0** × «58.000», **0** × «7,5%», **0** × «5%»; FAQ-svaret «Hvad er skatteloftet?» skal have «overstiger ca. 52,07 %» og «Med AM-bidrag (8 %)», altså **0** × «52,07%»; FAQ-svaret «Hvad er den nye top-topskat?» skal have «på 5 % for indkomster over 2.592.700 kr (efter AM-bidrag)», altså **0** × «2.592.700 kr.»; brødtekstens punktliste skal skrive «Mellemskat (7,5 %):» med mellemrum, altså **0** × «(7,5%):»; værktøjets «Grænser 2026» skal vise «Mellemskat fra 697.000 kr./år brutto. Topskat fra 845.500 kr./år brutto.» — altså **0** × «845.544»; **intet** `NaN`) ceo/topskat-faq-tal-fra-modul 3/10 04:37`
 
 ## ❓ Til Mads
 

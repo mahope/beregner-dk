@@ -26536,3 +26536,69 @@ er hele sætninger, så et håndskrevet tal rammer porten.
 krav er ikke efterprøvet visuelt; den nye side bruger kun eksisterende
 komponenter og tokens (DatoBeregner, FAQ, Breadcrumbs, blå boks som på
 `/dage-til`), og har ingen nye breakpoints.
+
+---
+
+## 3/10 04:37 — `topskat-faq-tal-fra-modul` (F5b-slice, den tolvte fil)
+
+**Hvorfor denne kø:** `/topskat` stod med 4 fund i planens egen AST-probe over
+`page-data.ts` (målt 3/10 00:45), dvs. 4 strengliteraler med håndskrevet beløb.
+Samme fejlklasse som de elleve foregående slices: `TopskatBeregner` læser
+`SATSER_2026`, så **søgeresultatet og værktøjet var to uafhængige tal**, og ingen
+port kan se det — en streng med et tal er gyldig JSX.
+
+**Filer:** ny `src/lib/topskat-eksempler.ts` (tal + de fem FAQ-svar + `brutto-
+Graense` + `SKATTELOFT`), `src/lib/page-data.ts` (import + `description` +
+`metaDescription` + `faqItems`), `src/app/topskat/page.tsx` (deler beløbsform og
+omregning med modulet), `src/components/TopskatBeregner.tsx` (skatteloft og
+bruttogrænser læser modulet), ny `src/lib/topskat-eksempler.test.ts` (13 tests).
+
+**Målt:** 3939 → **3952** tests. Porten dømmer hvert beløb og hver procent i
+`description`, `metaDescription`, `ogDescription`, `schemaDescription` og alle
+fem FAQ-svar mod tal, modulet må skrive — altså mod `SATSER_2026`'s egne tal,
+ikke mod en tilladelsesliste. Derudover: beløbsformen (ingen «kr. kr.», «kr..»,
+«kr.,»), at begge metadatafelter får præcis samme streng, at `bruttoGraense`
+låser 697.000 / 58.100 / 845.500 / 70.500, at månedsbeløbet ikke kan blive
+58.000 igen, at kommuneskat- og AM-bidrummet ikke kan miste `(1 - AM-bidrag)`,
+og at `SKATTELOFT_PCT` er ét tal i både komponenten og FAQ-svaret.
+
+**Den reelle fejl — den lå i de håndskrevne tal, ikke i portens rækkevidde.**
+FAQ-svaret «Hvornår betaler man topskat i 2026?» skrev «697.000 kr./år
+(**58.000** kr./md)». Sidens egen formel er `grænse / (1 - AM-bidrag)`, afrundet
+til hundrede: `641.200 / 0,92 / 12 = 58.079,7` → **58.100**. Brødteksten lige
+ovenfor skrev allerede «ca. 58.100 kr./md» (`page.tsx:65`), og årstallet 697.000
+var rigtigt i begge steder — så fejlen lå lige så stille i to tal af syv.
+Topskatgrænsen var derimod korrekt begge steder (845.500 / 70.500).
+
+**To steder mere, hvor samme tal lå i to kopier:**
+1. Komponentens `topSkatBruttoGraense`/`mellemSkatBruttoGraense` rundede til
+   kronepræcision (`845.544`), mens siden rundede til hundrede (`845.500`) —
+   altså værktøjet og brødteksten viste to tal for samme grænse. Nu én
+   `bruttoGraense` i modulet, som alle tre steder læser.
+2. Skatteloftet «52,07» lå hårdkodet to steder i komponenten (kappens
+   `Math.min(…, 52.07 + AM)` og sin egen brødtekst) og en tredje gang i
+   FAQ-svaret. Nu `SKATTELOFT` i modulet. **Det er ikke afledt:** summen af
+   `SATSER_2026`s indkomstskatter er 52,059 %, så 52,07 er sidens eksisterende
+   påstand, og den er ikke slået op (punkt 11). Den er *kun* flyttet, så de tre
+   steder ikke kan glide fra hinanden — tallet er ikke ændret.
+
+**Mutationer målt (7, alle røde):**
+1. glem `(1 - AM-bidrag)` i `bruttoGraense` → 3 røde
+2. håndskrevet bruttoindkomst i FAQ-svaret (845.600) → 2 røde
+3. den gamle «58.000 kr./md» tilbage → 2 røde
+4. `pct` uden to decimaler og uden mellemrum («7,5%») → 4 røde
+5. skatteloftet hårdkodet i komponenten igen → 1 rød
+6. komponentens egen `Math.round(… / (1 - AM_BIDRAG))` tilbage → 1 rød
+7. sidens egen `formatNumber`-procent tilbage i punktlisten → 1 rød
+
+**Ændringer i dansk tekst (fire, alle synlige i søgeresultatet):**
+- `641.200 kr.,` → `641.200 kr,` i begge metadatafelter (punktetum før komma er
+  dobbelt tegnsætning; samme form som `/loen-efter-skat` 3/10)
+- «7,5%» → «7,5 %» (tre steder), «5%» → «5 %», «52,07%» → «52,07 %», «(8%)» →
+  «(8 %)», og punktlisten «(7,5%):» → «(7,5 %):»
+- «2.592.700 kr. (efter» → «2.592.700 kr (efter»
+- «(58.000 kr./md)» → «(ca. 58.100 kr./md)» — den eneste talrettelse
+
+**Ikke kørt:** ingen Playwright/skærmbilleder (repoet har intet). Siden ændrer
+kun tal og mellemrum i eksisterende markup og tilføjer ingen nye elementer,
+tokens eller breakpoints, så layoutet kan ikke have flyttet sig.

@@ -75,6 +75,7 @@ import {
   rentefradragMetaDescription,
   RENTEFRADRAG_FAQ_SVAR,
 } from "./rentefradrag-eksempler";
+import { topskatBeskrivelse, topskatFaqItems } from "./topskat-eksempler";
 import {
   kvadratmeterEksempelAreal,
   kvadratmeterEksempelLignelse,
@@ -1908,9 +1909,9 @@ faqItems: kalorierFaqItems("da"),
     "topskat": {
       slug: "topskat",
       title: "Topskat Beregner 2026 - Betaler du topskat? | MinBeregner.dk",
-      description: "Beregn om du betaler topskat i 2026. Ny skattemodel: mellemskat fra 641.200 kr., topskat fra 777.900 kr. Se din effektive og marginale skatteprocent gratis.",
+      description: topskatBeskrivelse(),
       metaTitle: "Topskat Beregner 2026 - Betaler du topskat?",
-      metaDescription: "Beregn om du betaler topskat i 2026. Ny skattemodel: mellemskat fra 641.200 kr., topskat fra 777.900 kr. Se din effektive og marginale skatteprocent gratis.",
+      metaDescription: topskatBeskrivelse(),
       keywords: ["topskat beregner", "betaler jeg topskat", "topskat 2026", "topskattegrænse", "mellemskat 2026", "effektiv skat", "marginalskat", "skatteberegner"],
       ogTitle: "Topskat Beregner 2026",
       ogDescription: "Beregn om du betaler mellemskat eller topskat med 2026-satser.",
@@ -1920,13 +1921,7 @@ faqItems: kalorierFaqItems("da"),
       schemaName: "Topskat Beregner 2026",
       schemaDescription: "Beregn om du betaler mellemskat eller topskat med 2026-satser. Se effektiv og marginal skatteprocent.",
       schemaCategory: "FinanceApplication",
-      faqItems: [
-      { question: "Hvornår betaler man topskat i 2026?", answer: "I 2026 er den gamle topskat erstattet af tre trin. Du betaler mellemskat (7,5%) når din indkomst efter AM-bidrag overstiger 641.200 kr., og topskat (yderligere 7,5%) over 777.900 kr. Det svarer til en bruttoindkomst på ca. 697.000 kr./år (58.000 kr./md) for mellemskat og 845.500 kr./år (70.500 kr./md) for topskat." },
-      { question: "Hvad er forskellen på effektiv skat og marginalskat?", answer: "Effektiv skat er den gennemsnitlige skatteprocent du betaler af hele din indkomst. Marginalskat er skatten af den sidst tjente krone. Marginalskatten er altid højere end den effektive skat, fordi de første kroner beskattes lavere (pga. personfradrag og ingen mellemskat/topskat)." },
-      { question: "Hvad er skatteloftet?", answer: "Skatteloftet sikrer at din samlede marginalskat (ekskl. AM-bidrag og kirkeskat) ikke overstiger ca. 52,07%. Med AM-bidrag (8%) og kirkeskat kan den reelle marginalskat dog være højere." },
-      { question: "Hvad er den nye top-topskat?", answer: "I 2026 er der indført en top-topskat på 5% for indkomster over 2.592.700 kr. (efter AM-bidrag). Den rammer kun de allerhøjeste indkomster og er et nyt tredje skattetrin." },
-      { question: "Kan jeg undgå topskat?", answer: "Du kan reducere din skattepligtige indkomst via fradrag (rentefradrag, befordringsfradrag, pensionsindbetalinger). Ekstra pensionsindbetalinger er en populær måde at komme under topskattegrænsen." },
-      ],
+      faqItems: topskatFaqItems(),
     },
     "skattefradrag": {
       slug: "skattefradrag",
