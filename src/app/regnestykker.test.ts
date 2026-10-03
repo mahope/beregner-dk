@@ -827,6 +827,19 @@ describe("beløb i strengliteraler", () => {
  * Det er altså ikke én side der skriver forkert — det er 72, så porten måler
  * korpuset og tvinger den til at blive mindre, i stedet for at liste 569 fejl.
  *
+ * `/procent` og `/boliglaan` kom på listen 3/10 07:3x, så de **60** nye var
+ * dem (26 + 26 brødtekst + 3 FAQ-svar i `page-data.ts` + 5 i
+ * `ProcentBeregner`s hurtige reference).
+ *
+ * **Scannerens blinde plet, målt samme dag:** en procent der kommer fra en
+ * interpolation er kode, ikke tekst, så den er usynlig her — «{HVERDAG_MOMS
+ * .sats}% moms», «{formatNumber(n)}%» i resultattallet og «${pct}%» i
+ * forklaringerne skrev alle «25%», «12,50%» og «5%» i den *renderede* side
+ * længe efter at de to sider var skrevet om. De er derfor ikke her, men i
+ * to renderede porte: `procent-formler.test.tsx` (da + se på `/procent`) og
+ * `src/app/boliglaan/page.test.tsx`, som begge kræver nul `/\d%/` i markupken.
+ * Et nyt interpoleret procenttal på en af de to sider bliver rødt der.
+ *
  * Før scanneren fandt denne, var `procentAf`-reglen ovenfor blind for den:
  * den læser «10 procent af 10.000 = 1.000» og «12,5 % af 35.000», altså
  * regnestykker — ikke den løsne procent i løbende tekst, som er hele fundet.
@@ -871,8 +884,8 @@ const procentfiler = execSync(
 
 /**
  * Filer der er skrevet om til «8 %» 3/10 — forsiden og navigationen, fordi de
- * ses på hver eneste side, og de tre sider planen havde målt. Listen er de
- * nulstillede filer, ikke de 569: en ny fil med «8%» skal gøre porten rød, og
+ * ses på hver eneste side, plus de syv sider nedenfor. Listen er de
+ * nulstillede filer, ikke de 509: en ny fil med «8%» skal gøre porten rød, og
  * det gør loftet nedenfor.
  */
 /**
@@ -885,12 +898,14 @@ const PROCENT_UNDTAGELSER: Record<string, string[]> = {
   "src/app/husleje/page.tsx": ["30% reglen forklaret"],
 };
 
-const PROCENT_UDEN_MELLEMRUM_LOFT = 570;
+const PROCENT_UDEN_MELLEMRUM_LOFT = 509;
 
 const PROCENT_MED_MELLEMRUM = [
+  "src/app/boliglaan/page.tsx",
   "src/app/feriepenge/page.tsx",
   "src/app/husleje/page.tsx",
   "src/app/laaneberegner/page.tsx",
+  "src/app/procent/page.tsx",
   "src/lib/categories.ts",
   "src/lib/home-data.ts",
 ];
@@ -936,13 +951,16 @@ describe("procentnotation", () => {
   });
 
   test("korpuset har ikke fået flere procenttal uden mellemrum", () => {
-    // Loftet er målt, ikke gættet: 598 → 570, da de 28 i de fem filer blev
-    // rettet. 570 er *med* den ene dokumenterede undtagelse («30% reglen»). Det må gerne falde; det må ikke stige i det stille, fordi så
-    // kommer den nye skrivemåde ind i en ny side ubemærket.
+    // Loftet er målt, ikke gættet: 598 → 570 → 509, da de 28 i de fem filer
+    // og de 60 i `/procent`, `/boliglaan`, deres FAQ-svar og
+    // `ProcentBeregner`s hurtige reference blev rettet. 509 er *med* den ene
+    // dokumenterede undtagelse («30% reglen»). Det må gerne falde; det må ikke
+    // stige i det stille, fordi så kommer den nye skrivemåde ind i en ny side
+    // ubemærket.
     const fund = procentfiler.flatMap((fil) =>
       procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
     );
     expect(fund.length).toBeLessThanOrEqual(PROCENT_UDEN_MELLEMRUM_LOFT);
-    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(570);
+    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(509);
   });
 });

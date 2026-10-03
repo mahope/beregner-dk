@@ -125,7 +125,7 @@ describe("procent: formlerne har én ejer", () => {
       expect(html).toContain(">Formler</h2>");
       // Hurtig reference står side om side med Formler-boksen og er ikke
       // duplikeret nogen andet sted.
-      expect(html).toContain("10% = 1/10");
+      expect(html).toContain("10 % = 1/10");
       expect(html).toContain(hurtigReference);
     },
   );
@@ -133,11 +133,36 @@ describe("procent: formlerne har én ejer", () => {
   // Tip-boksen var eneste tekst i det slettede afsnit, der ikke var en
   // duplikat, så den skal stadig være med i begge sprog.
   test.each([
-    ["da", "50% af 40 er det samme som 40% af 50"],
-    ["se", "50% av 40 är samma sak som 40% av 50"],
+    ["da", "50 % af 40 er det samme som 40 % af 50"],
+    ["se", "50 % av 40 är samma sak som 40 % av 50"],
   ] as const)("tipboksen overlever i %s", async (locale, tip) => {
     const html = await render(locale);
 
     expect(html).toContain(tip);
   });
+});
+
+/**
+ * Procenttegnet skrives med mellemrum: «10 %», «12,5 %». `/procent` er GSC's
+ * største danske side (146.164 visninger, 90 klik, CTR 0,1 %, pos. 7,4), og de
+ * 26 forekomster i dens JSX-tekst skrev «10%», «25%» og «5%» i
+ * opslagstabellen, tipboksen og begge sprog — altså præcis den skrivemåde,
+ * `/pension` og `/boernepenge` fik rettet 2/10 og 3/10.
+ *
+ * Scannet på den *renderede* HTML, ikke på kilden, fordi læseren møder den
+ * der. Det er også en fordel: kilde-scanneren i `regnestykker.test.ts` er
+ * blind for en procent der kommer fra en interpolation, så «{HVERDAG_MOMS
+ * .sats}%», «{formatNumber(n)}%» og «${pct}%» overlevede den og skrev «25%» og
+ * «12,50%» i denne sides egen markup. Porten her tager dem.
+ */
+describe("procent: notationen på den renderede side", () => {
+  test.each(["da", "se"] as const)(
+    "ingen procent står uden mellemrum på den danske og svenske side (%s)",
+    async (locale) => {
+      const html = await render(locale);
+      const fund = html.match(/\d%/g) ?? [];
+
+      expect(fund, fund.join(" ")).toEqual([]);
+    },
+  );
 });

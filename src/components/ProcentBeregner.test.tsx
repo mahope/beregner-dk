@@ -54,7 +54,7 @@ describe("ProcentBeregner", () => {
     fireEvent.change(screen.getByLabelText("Heltal (nævneren)"), { target: { value: 9000 } });
     fireEvent.click(screen.getByRole("button", { name: "Kopiér resultat" }));
 
-    expect(sidsteKopieredeTekst(clipboardWrite)).toBe("1.125 er 12,50% af 9.000");
+    expect(sidsteKopieredeTekst(clipboardWrite)).toBe("1.125 er 12,50 % af 9.000");
   });
 
   test("find-resultat bruger komma i decimaler på begge domæner", async () => {
@@ -66,7 +66,7 @@ describe("ProcentBeregner", () => {
     fireEvent.change(screen.getByLabelText("Grundværdi"), { target: { value: 2500 } });
     fireEvent.click(screen.getByRole("button", { name: "Kopiér resultat" }));
 
-    expect(sidsteKopieredeTekst(clipboardWrite)).toBe("10% af 2.500 er 250,00");
+    expect(sidsteKopieredeTekst(clipboardWrite)).toBe("10 % af 2.500 er 250,00");
   });
 
   test("svensk forklaring bruger mellemrum som tusindtalsseparator", async () => {
@@ -76,7 +76,7 @@ describe("ProcentBeregner", () => {
     fireEvent.change(screen.getByLabelText("Heltal (nämnaren)"), { target: { value: 9000 } });
     fireEvent.click(screen.getByRole("button", { name: "Kopiera resultat" }));
 
-    expect(sidsteKopieredeTekst(clipboardWrite)).toBe("1 125 är 12,50% av 9 000");
+    expect(sidsteKopieredeTekst(clipboardWrite)).toBe("1 125 är 12,50 % av 9 000");
   });
 
   test("stigning-formateringen skriver begge værdier med separator", async () => {
@@ -87,7 +87,7 @@ describe("ProcentBeregner", () => {
     fireEvent.change(screen.getByLabelText("Slutværdi"), { target: { value: 50000 } });
     fireEvent.click(screen.getByRole("button", { name: "Kopiér resultat" }));
 
-    expect(sidsteKopieredeTekst(clipboardWrite)).toBe("Stigning fra 40.000 til 50.000 er 25,00%");
+    expect(sidsteKopieredeTekst(clipboardWrite)).toBe("Stigning fra 40.000 til 50.000 er 25,00 %");
   });
 
   test("hovedtallet og forklaringen bruger samme kommaformat", () => {

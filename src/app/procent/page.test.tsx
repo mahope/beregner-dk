@@ -474,7 +474,7 @@ describe("hverdags- og Excel-eksemplerne er regnet fra modulet", () => {
       // følger sætningen med i stedet for at sige 25 % ved siden af 1.000 kr.
       const momsSvar = (HVERDAG_MOMS.beloeb * HVERDAG_MOMS.sats) / 100;
       expect(html).toContain(
-        `${HVERDAG_MOMS.sats}% ${moms} ${tal(HVERDAG_MOMS.beloeb, locale)} kr = ${tal(
+        `${HVERDAG_MOMS.sats} % ${moms} ${tal(HVERDAG_MOMS.beloeb, locale)} kr = ${tal(
           momsSvar,
           locale,
         )} kr i moms (${tal(HVERDAG_MOMS.beloeb + momsSvar, locale)} kr`,
@@ -488,7 +488,7 @@ describe("hverdags- og Excel-eksemplerne er regnet fra modulet", () => {
         const svar = tal((eksempel.beloeb * eksempel.sats) / 100, locale);
         if (tekst) {
           expect(html).toContain(
-            `${eksempel.sats}% ${tekst} ${tal(eksempel.beloeb, locale)} kr = ${svar} kr`,
+            `${eksempel.sats} % ${tekst} ${tal(eksempel.beloeb, locale)} kr = ${svar} kr`,
           );
         } else {
           expect(html).toContain(`${tilPris} ${tal(eksempel.beloeb, locale)} kr`);

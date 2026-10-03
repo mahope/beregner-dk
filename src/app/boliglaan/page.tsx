@@ -46,9 +46,9 @@ export default async function BoliglaanPage() {
           Når du køber bolig i Danmark, finansierer du typisk købet med en kombination af:
         </p>
         <ul>
-          <li><strong>Udbetaling:</strong> Minimum 5% af boligens pris (anbefalet: 10-20%)</li>
-          <li><strong>Realkreditlån:</strong> Op til 80% af boligens værdi</li>
-          <li><strong>Banklån/tillægslån:</strong> De resterende 15% (mellem udbetaling og realkredit)</li>
+          <li><strong>Udbetaling:</strong> Minimum 5 % af boligens pris (anbefalet: 10-20 %)</li>
+          <li><strong>Realkreditlån:</strong> Op til 80 % af boligens værdi</li>
+          <li><strong>Banklån/tillægslån:</strong> De resterende 15 % (mellem udbetaling og realkredit)</li>
         </ul>
 
         <h2>Fastforrentet vs. variabel rente</h2>
@@ -100,19 +100,19 @@ export default async function BoliglaanPage() {
           </thead>
           <tbody>
             <tr>
-              <td>0-40%</td>
-              <td>0,45-0,65%</td>
-              <td>0,55-0,85%</td>
+              <td>0-40 %</td>
+              <td>0,45-0,65 %</td>
+              <td>0,55-0,85 %</td>
             </tr>
             <tr>
-              <td>40-60%</td>
-              <td>0,55-0,85%</td>
-              <td>0,75-1,15%</td>
+              <td>40-60 %</td>
+              <td>0,55-0,85 %</td>
+              <td>0,75-1,15 %</td>
             </tr>
             <tr>
-              <td>60-80%</td>
-              <td>0,75-1,25%</td>
-              <td>1,05-1,55%</td>
+              <td>60-80 %</td>
+              <td>0,75-1,25 %</td>
+              <td>1,05-1,55 %</td>
             </tr>
           </tbody>
         </table>
@@ -122,16 +122,16 @@ export default async function BoliglaanPage() {
           I Danmark kan du <strong>trække renteudgifter fra i skat</strong>. I 2024-2026 er <strong>fradragsværdien</strong>:
         </p>
         <ul>
-          <li><strong>Op til ca. 50.000 kr:</strong> ca. 33% fradrag</li>
-          <li><strong>Over 50.000 kr:</strong> ca. 25,6% fradrag</li>
+          <li><strong>Op til ca. 50.000 kr:</strong> ca. 33 % fradrag</li>
+          <li><strong>Over 50.000 kr:</strong> ca. 25,6 % fradrag</li>
         </ul>
         <p>
-          Vores beregner bruger en gennemsnitlig <strong>fradragsværdi på 25,6%</strong> som et konservativt estimat.
+          Vores beregner bruger en gennemsnitlig <strong>fradragsværdi på 25,6 %</strong> som et konservativt estimat.
         </p>
 
         <h2>Tips til boligkøb</h2>
         <ul>
-          <li><strong>Spar op til mindst 5% udbetaling</strong> - gerne mere for bedre vilkår</li>
+          <li><strong>Spar op til mindst 5 % udbetaling</strong> - gerne mere for bedre vilkår</li>
           <li><strong>Få flere tilbud</strong> - sammenlign realkredit og bank</li>
           <li><strong>Overvej din risikoprofil</strong> - fast rente = tryghed, variabel = risiko/gevinst</li>
           <li><strong>Regn på totaløkonomi</strong> - ikke kun den månedlige ydelse</li>
@@ -169,8 +169,8 @@ export default async function BoliglaanPage() {
           <strong>belåningsgrad</strong> och är avgörande för både räntan och kraven på amortering.
         </p>
         <ul>
-          <li><strong>Kontantinsats:</strong> Minst 10% av bostadens pris måste betalas med egna pengar</li>
-          <li><strong>Bolån:</strong> Får uppgå till högst 90% av bostadens värde (bolånetaket, höjt från 85% 2026)</li>
+          <li><strong>Kontantinsats:</strong> Minst 10 % av bostadens pris måste betalas med egna pengar</li>
+          <li><strong>Bolån:</strong> Får uppgå till högst 90 % av bostadens värde (bolånetaket, höjt från 85 % 2026)</li>
           <li><strong>Pantbrev och lagfart:</strong> Tillkommande kostnader vid köpet</li>
         </ul>
 
@@ -208,9 +208,9 @@ export default async function BoliglaanPage() {
           måste betala av på lånet varje år. Sedan 1 april 2026 beror kravet enbart på belåningsgraden:
         </p>
         <ul>
-          <li><strong>Belåningsgrad över 70%:</strong> minst 2% av lånebeloppet per år</li>
-          <li><strong>Belåningsgrad 50–70%:</strong> minst 1% av lånebeloppet per år</li>
-          <li><strong>Belåningsgrad under 50%:</strong> inget lagstadgat amorteringskrav</li>
+          <li><strong>Belåningsgrad över 70 %:</strong> minst 2 % av lånebeloppet per år</li>
+          <li><strong>Belåningsgrad 50–70 %:</strong> minst 1 % av lånebeloppet per år</li>
+          <li><strong>Belåningsgrad under 50 %:</strong> inget lagstadgat amorteringskrav</li>
         </ul>
 
         <h2>Ränteavdrag på räntekostnader</h2>
@@ -219,8 +219,8 @@ export default async function BoliglaanPage() {
           en del av dina räntekostnader minskar den skatt du betalar:
         </p>
         <ul>
-          <li><strong>Upp till 100 000 kr i ränteutgifter:</strong> 30% avdrag</li>
-          <li><strong>Över 100 000 kr:</strong> 21% avdrag på den överstigande delen</li>
+          <li><strong>Upp till 100 000 kr i ränteutgifter:</strong> 30 % avdrag</li>
+          <li><strong>Över 100 000 kr:</strong> 21 % avdrag på den överstigande delen</li>
         </ul>
         <p>
           Avdraget kräver att du har ett underskott av kapital, det vill säga att dina räntekostnader
@@ -229,7 +229,7 @@ export default async function BoliglaanPage() {
 
         <h2>Tips inför bostadsköpet</h2>
         <ul>
-          <li><strong>Spara till minst 10% kontantinsats</strong> – gärna mer för bättre villkor</li>
+          <li><strong>Spara till minst 10 % kontantinsats</strong> – gärna mer för bättre villkor</li>
           <li><strong>Begär ett lånelöfte</strong> innan du börjar buda på bostäder</li>
           <li><strong>Jämför flera banker</strong> – förhandla alltid om räntan</li>
           <li><strong>Tänk på räntekänsligheten</strong> – räkna på hur en högre ränta påverkar din ekonomi</li>

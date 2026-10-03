@@ -95,10 +95,10 @@ export default async function ProcentPage() {
             <strong>Find procent:</strong> Hvor mange procent er X af Y?
           </li>
           <li>
-            <strong>Find resultat:</strong> Hvad er X% af Y?
+            <strong>Find resultat:</strong> Hvad er X % af Y?
           </li>
           <li>
-            <strong>Find heltal:</strong> Hvis X er Y%, hvad er så 100%?
+            <strong>Find heltal:</strong> Hvis X er Y %, hvad er så 100 %?
           </li>
           <li>
             <strong>Procentvis ændring:</strong> Hvor mange procent er
@@ -179,25 +179,25 @@ export default async function ProcentPage() {
             {/* Alle fire regnes fra HVERDAG_* i src/lib/procent.ts. De 9.000/
                 1.125-tal stod her tidligere, men nu har rabatafsnittet dem
                 regnet — samme par, én ejer. */}
-            <strong>Rabatter:</strong> {HVERDAG_RABAT.sats}% rabat på en vare
+            <strong>Rabatter:</strong> {HVERDAG_RABAT.sats} % rabat på en vare
             til {num(HVERDAG_RABAT.beloeb)} kr = du sparer{" "}
             {num(procentAf(HVERDAG_RABAT.beloeb, HVERDAG_RABAT.sats))} kr
           </li>
           <li>
-            <strong>Moms:</strong> {HVERDAG_MOMS.sats}% moms på{" "}
+            <strong>Moms:</strong> {HVERDAG_MOMS.sats} % moms på{" "}
             {num(HVERDAG_MOMS.beloeb)} kr ={" "}
             {num(procentAf(HVERDAG_MOMS.beloeb, HVERDAG_MOMS.sats))} kr i moms
             ({num(HVERDAG_MOMS.beloeb + procentAf(HVERDAG_MOMS.beloeb, HVERDAG_MOMS.sats))}{" "}
             kr total)
           </li>
           <li>
-            <strong>Renter:</strong> {HVERDAG_RENTE.sats}% rente på{" "}
+            <strong>Renter:</strong> {HVERDAG_RENTE.sats} % rente på{" "}
             {num(HVERDAG_RENTE.beloeb)} kr ={" "}
             {num(procentAf(HVERDAG_RENTE.beloeb, HVERDAG_RENTE.sats))} kr i
             rente
           </li>
           <li>
-            <strong>Lønstigninger:</strong> {HVERDAG_LOENSTIGNING.sats}%
+            <strong>Lønstigninger:</strong> {HVERDAG_LOENSTIGNING.sats} %
             stigning på {num(HVERDAG_LOENSTIGNING.beloeb)} kr ={" "}
             {num(
               procentAf(HVERDAG_LOENSTIGNING.beloeb, HVERDAG_LOENSTIGNING.sats),
@@ -507,29 +507,29 @@ export default async function ProcentPage() {
             </thead>
             <tbody>
               <tr>
-                <td>10%</td>
+                <td>10 %</td>
                 <td>Flyt kommaet én plads til venstre</td>
-                <td>10% af 250 = 25</td>
+                <td>10 % af 250 = 25</td>
               </tr>
               <tr>
-                <td>5%</td>
-                <td>Find 10% og halver</td>
-                <td>5% af 250 = 12,5</td>
+                <td>5 %</td>
+                <td>Find 10 % og halver</td>
+                <td>5 % af 250 = 12,5</td>
               </tr>
               <tr>
-                <td>25%</td>
+                <td>25 %</td>
                 <td>Divider med 4</td>
-                <td>25% af 200 = 50</td>
+                <td>25 % af 200 = 50</td>
               </tr>
               <tr>
-                <td>50%</td>
+                <td>50 %</td>
                 <td>Halver tallet</td>
-                <td>50% af 180 = 90</td>
+                <td>50 % af 180 = 90</td>
               </tr>
               <tr>
-                <td>1%</td>
+                <td>1 %</td>
                 <td>Divider med 100</td>
-                <td>1% af 350 = 3,5</td>
+                <td>1 % af 350 = 3,5</td>
               </tr>
             </tbody>
           </table>
@@ -610,7 +610,7 @@ export default async function ProcentPage() {
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tip</p>
           <p className="text-blue-700">
-            Husk at 50% af 40 er det samme som 40% af 50 - begge giver 20. Dette
+            Husk at 50 % af 40 er det samme som 40 % af 50 - begge giver 20. Dette
             trick kan gøre hovedregning nemmere!
           </p>
         </div>
@@ -629,10 +629,10 @@ export default async function ProcentPage() {
             <strong>Hitta procent:</strong> Hur många procent är X av Y?
           </li>
           <li>
-            <strong>Hitta resultat:</strong> Vad är X% av Y?
+            <strong>Hitta resultat:</strong> Vad är X % av Y?
           </li>
           <li>
-            <strong>Hitta heltal:</strong> Om X är Y%, vad är då 100%?
+            <strong>Hitta heltal:</strong> Om X är Y %, vad är då 100 %?
           </li>
           <li>
             <strong>Procentuell förändring:</strong> Hur många procent är
@@ -705,25 +705,25 @@ export default async function ProcentPage() {
         <p>Procent används överallt i vardagen:</p>
         <ul>
           <li>
-            <strong>Rabatter:</strong> {HVERDAG_RABAT.sats}% rabatt på en
+            <strong>Rabatter:</strong> {HVERDAG_RABAT.sats} % rabatt på en
             vara för {num(HVERDAG_RABAT.beloeb)} kr = du sparar{" "}
             {num(procentAf(HVERDAG_RABAT.beloeb, HVERDAG_RABAT.sats))} kr
           </li>
           <li>
-            <strong>Moms:</strong> {HVERDAG_MOMS.sats}% moms på{" "}
+            <strong>Moms:</strong> {HVERDAG_MOMS.sats} % moms på{" "}
             {num(HVERDAG_MOMS.beloeb)} kr ={" "}
             {num(procentAf(HVERDAG_MOMS.beloeb, HVERDAG_MOMS.sats))} kr i moms
             ({num(HVERDAG_MOMS.beloeb + procentAf(HVERDAG_MOMS.beloeb, HVERDAG_MOMS.sats))}{" "}
             kr totalt)
           </li>
           <li>
-            <strong>Ränta:</strong> {HVERDAG_RENTE.sats}% ränta på{" "}
+            <strong>Ränta:</strong> {HVERDAG_RENTE.sats} % ränta på{" "}
             {num(HVERDAG_RENTE.beloeb)} kr ={" "}
             {num(procentAf(HVERDAG_RENTE.beloeb, HVERDAG_RENTE.sats))} kr i
             ränta
           </li>
           <li>
-            <strong>Löneökningar:</strong> {HVERDAG_LOENSTIGNING.sats}%
+            <strong>Löneökningar:</strong> {HVERDAG_LOENSTIGNING.sats} %
             ökning på {num(HVERDAG_LOENSTIGNING.beloeb)} kr ={" "}
             {num(
               procentAf(HVERDAG_LOENSTIGNING.beloeb, HVERDAG_LOENSTIGNING.sats),
@@ -790,29 +790,29 @@ export default async function ProcentPage() {
             </thead>
             <tbody>
               <tr>
-                <td>10%</td>
+                <td>10 %</td>
                 <td>Flytta kommat ett steg åt vänster</td>
-                <td>10% av 250 = 25</td>
+                <td>10 % av 250 = 25</td>
               </tr>
               <tr>
-                <td>5%</td>
-                <td>Hitta 10% och halvera</td>
-                <td>5% av 250 = 12,5</td>
+                <td>5 %</td>
+                <td>Hitta 10 % och halvera</td>
+                <td>5 % av 250 = 12,5</td>
               </tr>
               <tr>
-                <td>25%</td>
+                <td>25 %</td>
                 <td>Dividera med 4</td>
-                <td>25% av 200 = 50</td>
+                <td>25 % av 200 = 50</td>
               </tr>
               <tr>
-                <td>50%</td>
+                <td>50 %</td>
                 <td>Halvera talet</td>
-                <td>50% av 180 = 90</td>
+                <td>50 % av 180 = 90</td>
               </tr>
               <tr>
-                <td>1%</td>
+                <td>1 %</td>
                 <td>Dividera med 100</td>
-                <td>1% av 350 = 3,5</td>
+                <td>1 % av 350 = 3,5</td>
               </tr>
             </tbody>
           </table>
@@ -1123,7 +1123,7 @@ export default async function ProcentPage() {
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tips</p>
           <p className="text-blue-700">
-            Kom ihåg att 50% av 40 är samma sak som 40% av 50 - båda ger 20. Det
+            Kom ihåg att 50 % av 40 är samma sak som 40 % av 50 - båda ger 20. Det
             här knepet kan göra huvudräkning enklare!
           </p>
         </div>

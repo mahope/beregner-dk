@@ -1,14 +1,15 @@
-STATUS: 3/10 07:55. CI grøn ved start (`37097262776`), ingen åbne PR'er
+STATUS: 3/10 08:00. CI grøn ved start (`37099188256`), ingen åbne PR'er
       (PR-TJEK: 2026-10-03). Sentry: ingen uløste fejl 14 dage, SDK'en er
       sat op. **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run
-      test` · `npm run build` — **grøn 3/10 07:52** (alle exit 0, **4000**
-      tests i 252 filer).
-      **Denne iteration: `/timer-i-aret` + `/timmar-i-aret`** — «hvor mange
-      timer er der på et år» er dansk **og** svensk autocomplete **nr. 1**, og
-      svaret lå som ét afsnit blandt 24 på `/tidsberegner`. Se
-      `docs/plan-arkiv.md`. **Næste iteration:** procent-sweepet ned fra
-      `page-data.ts` (76) → `/procent` (26) → `/boliglaan` (26), så «8 %»
-      bliver husets skrivemåde hele vejen.
+      test` · `npm run build` — **grøn 3/10 07:47** (alle exit 0, **4006**
+      tests i 253 filer).
+      **Denne iteration: `/procent` + `/boliglaan` skriver «8 %»** — 71
+      forekomster rettet, heraf **11** som kilde-scanneren ikke kan se, fordi
+      procenten kommer fra en interpolation («{HVERDAG_MOMS.sats}%»,
+      «{formatNumber(n)}%», «${pct}%»). To nye *renderede* porte låser dem.
+      Se `docs/plan-arkiv.md`. **Næste iteration:** resten af F5c —
+      `page-data.ts` (73) → `/moms` (18) → blogindlæggene — eller en feature,
+      hvis feature-køen løses af en ❓.
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 ## Fase 3 — trafik-drevet
 
@@ -74,12 +75,22 @@ ved serverstart. Nøglefilen lå på `/api/indexnow-key/…` og er rettet 2/10
 **F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
 dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
 
-**F5c. [~] Procentnotationen «8 %» — 598 fund målt, 28 rettet 3/10.**
-*Hvad:* de største resterende er `page-data.ts` 76 (metadata + FAQ på tværs af
-alle slugs), `/procent` 26, `/boliglaan` 26 og blogindlægget om 30%-reglen 25.
+**F5c. [~] Procentnotationen «8 %» — 598 fund målt, 509 tilbage 3/10.**
+*Hvad:* de største resterende er `page-data.ts` 73 (metadata + FAQ på tværs af
+alle slugs), `/moms` 18, `blog/30-procent-reglen-husleje` 25 (⛔ de er
+regelnavnet, se portens undtagelse), `blog/pension-…` 20 og
+`blog/boliglaan-2026-renter-og-afdrag` 19.
 *Accept:* loftet i `regnestykker.test.ts` (`PROCENT_UDEN_MELLEMRUM_LOFT`) må
-kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 (3/10).
-Se punkt 2 under «Målt 3/10 05:30».
+kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 → **509** noder
+(3/10 07:47; scanneren tæller noder, så en linje med to procenter tælles én
+gang).
+**Målt 3/10 07:47 — den blinde plet er fundet:** scanneren læser kun
+`JsxText` og strengliteraler, så **en procent fra en interpolation er kode** og
+er usynlig for den. `/procent` havde 11 til i sin *renderede* HTML. To nye
+renderede porte dømmer markupken i da + se (`procent-formler.test.tsx` og
+`src/app/boliglaan/page.test.tsx`); **den næste slice skal greppe på `}%` og
+`}%»` i den fil den rører** — det er den fund, der ikke står i `/\d%/`.
+Se `docs/plan-arkiv.md`.
 
 **F9. [ ] `locale === "se" ? "se" : "da"` — 13 steder med dansk på
 norske domæner.** *Hvad:* mønstret er målt med grep efter `ceo/norsk-pace-side`
@@ -319,44 +330,14 @@ afsnit) — ❓ kilde til norske timepriser låser både brødteksten og tabelle
 indlæg er ikke samme fejlklasse som et beløb på en beregnerside. Beslut først,
 om de skal med; ellers skal de stå i portens undtagelsesliste som *blog*.
 
-## Målt 3/10 05:30 — research (ingen kode)
+## Research 3/10 05:30
 
-Tre fund fra **Googles egen autocomplete** (`suggestqueries.google.com`,
-`hl=da&gl=dk` / `hl=sv&gl=se`), altså søgninger folk faktisk begynder at
-skrive. Rækkefølgen herunder er **målt voksende**, ikke gættet.
+De tre målinger (Googles egen autocomplete for «hvor mange dage er der» og
+«hvor mange timer er der», og den AST-målte procenttelling på 598 fund i 73
+filer) ligger i `docs/plan-arkiv.md`. Alle tre er brugt: to førte til
+`/dage-i-aaret` og `/timer-i-aret`, den tredje til F5c.
 
-1. ~~**`/dage-i-aaret` + `/dagar-i-aret`**~~ — ✅ **færdig 3/10 06:20**, se
-   `docs/plan-arkiv.md`. Målingen er bevaret herunder, fordi den er
-   datagrunden og ikke en iterationsrapport. Dansk #1 under Dansk #1 under
-   «hvor mange dage er der» er «**hvor mange dage er der på et år**», og der er
-   to sider mere i samme klub uden egen URL: «**hvor mange dage er der i
-   augusti**» (#7) og «… i juli» (nr. 8); svensk har «**hur många dagar är det
-   på ett år**» (#3), «… i augusti» og «… i juli». *Accept:* egen side pr. sprog
-   med de tolv måneders længde (dage/hverdage/weekenddage) og «dage tilbage af
-   2026», tallene læst fra `dato-eksempler.ts`s `aarstal()`/`maanedEksempel()`
-   (de findes allerede — `/dato` bruger dem i brødteksten), canonical/hreflang,
-   301 mellem domænerne, daglig sitemap-entry, `FAQPage` med de tre målte
-   spørgsmål og tovejs-links med `/dato`, `/ugenummer` og `/dage-til`.
-   **MÅL:** 0 (ny URL) → Plausible 17/10; GSC 14 dage: de fem målte søgninger.
-   Datagrund: autocomplete 3/10 + `/dato` 1.119 besøgende/28d og 136.071
-   GSC-visninger. ⛔ ikke: feriedatoer (❓ nedenfor).
-2. ~~**Dansk procentnotation i JSX-tekst.**~~ — ✅ **første slice 3/10 06:45**,
-   se `docs/plan-arkiv.md`. *Målingen i denne plan var forkert:* de «7 steder»
-   var fund med `grep` på tre filer. Målt med en AST-scanner over **462**
-   `.ts`/`.tsx` i `src/app`, `src/components` og `src/lib` var der **598**
-   forekomster af «8%» i **73 filer** — altså 24 sider og 25 beregnere, ikke 3
-   sider. Slice 1 rettede 28 (forside + navigation + feriepenge +
-   laaneberegner + husleje) og satte et **loft på 570** i
-   `regnestykker.test.ts`, så resten kan tages som slices. **Planens påstand om
-   svensk notation var også forkert:** `moms-eu.ts` og 97 svenske strenge i
-   `page-data.ts` skriver «0 %» **med** mellemrum, så svensk er rettet samme
-   vej. Undtagelsen er «30% reglen» — sitets *navn* på regelen (SEO-titel +
-   fire sidelinks), listet eksplicit i porten.
-3. **F5b-køen er tom i praksis.** De 3 fund på `/flyttebudget` er
-   **markedsanslag uden kilde** (15.000-50.000 kr, 25.000-50.000 kr,
-   5.000-15.000 kr for flyttemand) — at flytte dem til et modul ville gøre en
-   opfundet sats *ligne* kildeført, så punkt 11 forbyder det. `/moms` er ⛔
-   (lovgrænser). *Accept:* F5b lukkes og næste opgave er altid en feature.
+`VERIFICÉR DEPLOY: procentnotationen «8 %» på /procent og /boliglaan (hele HTML'en på `minberegner.dk/procent` skal have **0** `\d%` — altså **0** «10%», «25%», «5%», «50%», «1%» — og opslagstabellen skal have «10 % af 250 = 25» og «5 % af 250 = 12,5», tipboksen «50 % af 40 er det samme som 40 % af 50», listen «25 % moms på 1.000 kr = 250 kr i moms», og FAQ-svarene «Eksempel: 25 % af 200 = 50.» og «Læg 20 % til 150»; `beraknare.se/procent` skal have «25 % av 250 = 25», «50 % av 40 är samma sak som 40 % av 50» og **0** «10%»/«25%»/«5%»; værktøjets egen resultatlinje skal skrive «25 %» og forklaringen «25 er 25,00 % af 100» (dvs. den interpolerede procent er rettet, ikke kun brødteksten); `minberegner.dk/boliglaan` skal have «Minimum 5 % af boligens pris (anbefalet: 10-20 %)», «Op til 80 % af boligens værdi», tabellen «0-40 %»/«0,45-0,65 %»/«1,05-1,55 %», «ca. 25,6 % fradrag» og **0** `\d%`; `beraknare.se/boliglaan` skal have «Minst 10 % av bostadens pris», «90 % av bostadens värde (bolånetaket, höjt från 85 % 2026)», «30 % avdrag» og **0** `\d%`; **intet** `NaN`) ceo/procent-punkt-sweeps 3/10 08:00`
 
 `VERIFICÉR DEPLOY: /dage-i-aaret + /dagar-i-aret (nye sider med tolv-måneders-tabel: `minberegner.dk/dage-i-aaret` skal have `<title>` «Hvor mange dage er der på et år? Dage i alle 12 måneder», **1** `<h1>`, **12** månedsrækker + **1** summeringsrække i tabellen, og **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange dage er der på et år?», «Hvor mange dage er der i augusti?» og «Hvor mange dage er der i juli?» — svaret på augusti skal være «31 dage … 21 hverdage og 10 weekenddage» og på juli «31 dage … 23 hverdage og 8 weekenddage»; summeringen skal være 365 dage / 251 hverdage / 104 weekend; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar» og månedsnavnet «augusti», altså **0** «august»; `minberegner.dk/dagar-i-aret` + `beraknare.se/dage-i-aaret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; **intet** `NaN`) ceo/dage-i-aaret 3/10 06:20`
 

@@ -27014,3 +27014,72 @@ regel som `/dagar-i-aret`.
 (37-timers ugen og den svenske månedsnorm på 173 timer mangler en kilde i
 repoet — jf. ❓ i planen), og «hvor mange timer er der til juleaften», som er en
 tredje slags spørgsmål (nedtælling i time) og hører hjemme i `/dage-til`.
+
+---
+
+## 3/10 07:35 — `procent-punkt-sweeps`: /procent + /boliglaan skriver «8 %»
+
+**Målt før:** 569 forekomster af «8%» i 72 filer (egn AST-scanner, samme
+mønster som `regnestykker.test.ts`s `procentUdenMellemrum`). De største var
+`page-data.ts` 76, `/procent` 26 og `/boliglaan` 26.
+
+**Rettet 61 noder** i de fire filer (26 + 26 + 3 + 5 + 1; scanneren tæller
+noder, ikke forekomster) — plus **11** til, som scanneren ikke kan se, se
+nedenfor:
+- `/procent` 26: opslagstabellen «10% af 250 = 25», rækkerne «5%», «25%»,
+  «50%», «1%», «Find 10% og halver», tipboksen «50% af 40 … 40% af 50» og
+  «X% af Y?» / «Y%, hvad er så 100%?» — i **begge** sprog.
+- `/boliglaan` 26: renteafsnittet («5-25%» lå i `BoliglaanBeregner` som
+  intervaler uden mellemrum), afdragsordningens tabeller («0-40%»,
+  «0,45-0,65%», «1,05-1,55%»), fradragssatsen («ca. 25,6%»), hele den
+  svenske udgave («10% av», «90% av», «85% 2026», «30% avdrag», «21%»).
+- `page-data.ts` 3: `/procent`s tre FAQ-svar («25% af 200 = 50», «25%
+  stigning», «20% til 150»).
+- `ProcentBeregner.tsx` 5 i «Hurtig reference» («10% = 1/10» … «75% = 3/4»).
+
+**Målt efter:** **509** i 69 filer. Loftet i `regnestykker.test.ts` sat
+570 → 509, og `/procent` + `/boliglaan` lagt i `PROCENT_MED_MELLEMRUM`, så et
+nyt «8%» i dem gør porten rød med det samme.
+
+**Den blinde plet (værd at huske).** Scanneren læser kun `JsxText` og
+strengliteraler, så **en procent fra en interpolation er kode, ikke tekst** og
+er usynlig for den. Den renderede `/procent` havde derfor **11** til, som lå
+lige så længe brødteksten var skrevet om:
+- `{HVERDAG_MOMS.sats}% moms` (+ rabat/rente/lønstigning, da + se = 8 steder)
+- `{formatNumber(n, …)}%` i resultatets hovedtal
+- «${pct}%» / «${procent}%» i de fire `explain*`-forklaringer (da + se = 8)
+- «X er Y% af ?» og «Fra X til Y = ?%» i værktojets tilstandstekster, og «?%»
+  i de to tomme-resultat-pladsholdere.
+
+**To nye renderede porte** — de dømmer markupken i da + se, ikke kilden:
+- `procent-formler.test.tsx`: «ingen procent står uden mellemrum» (nyt
+  describe, 2 tests).
+- `src/app/boliglaan/page.test.tsx` (ny fil, 4 tests): samme port plus en
+  «indholdet overlever»-test, der kræver «0,45-0,65 %», «Minimum 5 % af
+  boligens pris», «ca. 25,6 % fradrag» (da) og «Minst 10 % av bostadens
+  pris», «30 % avdrag», «minst 2 % av lånebeloppet» (se) — så «0 fund» ikke
+  kan opfyldes ved at slette tabellen.
+
+**Mutationer målt røde:** `page.tsx` for `/boliglaan` tilbage på HEAD →
+4 røde; `ProcentBeregner.tsx` tilbage på HEAD → 4 røde (heraf de to nye
+notationstests). Fire eksisterende tests låste de gamle strenge
+(`ProcentBeregner.test.tsx` × 4, `procent-formler.test.tsx` × 2,
+`page.test.tsx` × 2) og er rettet. **6 nye tests** (4000 → 4006).
+
+**Gate:** lint + typecheck + 4006 tests i 253 filer + build, alle exit 0.
+Punkt 13: 0 forekomster af `$[0-9]` i diffen.
+
+**Research 3/10 05:30 (flyttet ud af planen 3/10 08:00).** Målt med Googles
+egen autocomplete (`suggestqueries.google.com`, `hl=da&gl=dk` / `hl=sv&gl=se`):
+1. Dansk **#1** under «hvor mange dage er der» er «hvor mange dage er der på
+   et år» (→ `/dage-i-aaret`, færdig 06:20); samme klub uden egen URL:
+   «… i augusti» (#7) og «… i juli» (#8). Svensk: «hur många dagar är det på
+   ett år» (#3) plus «… i augusti»/«… i juli». Datagrund: autocomplete 3/10 +
+   `/dato` 1.119 besøgende/28d og 136.071 GSC-visninger.
+2. Procentnotation: planens påstand om «7 steder» var fund med `grep` på tre
+   filer. AST-scanneren over 462 `.ts`/`.tsx` fandt **598** i **73 filer**.
+   Planens påstand om svensk notation var også forkert — `moms-eu.ts` og 97
+   svenske strenge i `page-data.ts` skriver «0 %» med mellemrum.
+3. F5b-køen er tom i praksis: de 3 fund på `/flyttebudget` er markedsanslag
+   uden kilde (15.000-50.000 kr, 25.000-50.000 kr, 5.000-15.000 kr), så
+   punkt 11 forbyder at flytte dem til et modul. `/moms` er ⛔ (lovgrænser).

@@ -21,9 +21,9 @@ const labels = {
     modeFindResultatLabel: "Find resultat",
     modeFindResultatDesc: "X % af Y = ?",
     modeFindHeltalLabel: "Find heltal",
-    modeFindHeltalDesc: "X er Y% af ?",
+    modeFindHeltalDesc: "X er Y % af ?",
     modeStigningLabel: "Procentvis ændring",
-    modeStigningDesc: "Fra X til Y = ?%",
+    modeStigningDesc: "Fra X til Y = ? %",
     modeSelectorName: "Beregningstype",
     ariaDeltalTael: "Del-tal (tælleren)",
     ariaHeltalNaev: "Heltal (nævneren)",
@@ -50,11 +50,11 @@ const labels = {
     formulaHeltal: "Heltal = Del × (100 / Procent)",
     formulaAendring: "Ændring = ((Ny - Gammel) / Gammel) × 100",
     calcName: "Procentberegner",
-    explainFindProcent: (deltal: string, pct: string, heltal: string) => `${deltal} er ${pct}% af ${heltal}`,
-    explainFindResultat: (procent: string, baseVal: string, val: string) => `${procent}% af ${baseVal} er ${val}`,
-    explainFindHeltal: (deltal: string, procent: string, val: string) => `Hvis ${deltal} er ${procent}%, så er 100% = ${val}`,
+    explainFindProcent: (deltal: string, pct: string, heltal: string) => `${deltal} er ${pct} % af ${heltal}`,
+    explainFindResultat: (procent: string, baseVal: string, val: string) => `${procent} % af ${baseVal} er ${val}`,
+    explainFindHeltal: (deltal: string, procent: string, val: string) => `Hvis ${deltal} er ${procent} %, så er 100 % = ${val}`,
     explainStigning: (erStigning: boolean, fra: string, til: string, pct: string) =>
-      `${erStigning ? "Stigning" : "Fald"} fra ${fra} til ${til} er ${pct}%`,
+      `${erStigning ? "Stigning" : "Fald"} fra ${fra} til ${til} er ${pct} %`,
   },
   se: {
     modeFindProcentLabel: "Hitta procent",
@@ -62,9 +62,9 @@ const labels = {
     modeFindResultatLabel: "Hitta resultat",
     modeFindResultatDesc: "X % av Y = ?",
     modeFindHeltalLabel: "Hitta heltal",
-    modeFindHeltalDesc: "X är Y% av ?",
+    modeFindHeltalDesc: "X är Y % av ?",
     modeStigningLabel: "Procentuell förändring",
-    modeStigningDesc: "Från X till Y = ?%",
+    modeStigningDesc: "Från X till Y = ? %",
     modeSelectorName: "Beräkningstyp",
     ariaDeltalTael: "Deltal (täljaren)",
     ariaHeltalNaev: "Heltal (nämnaren)",
@@ -91,11 +91,11 @@ const labels = {
     formulaHeltal: "Heltal = Del × (100 / Procent)",
     formulaAendring: "Förändring = ((Ny - Gammal) / Gammal) × 100",
     calcName: "Procentkalkylator",
-    explainFindProcent: (deltal: string, pct: string, heltal: string) => `${deltal} är ${pct}% av ${heltal}`,
-    explainFindResultat: (procent: string, baseVal: string, val: string) => `${procent}% av ${baseVal} är ${val}`,
-    explainFindHeltal: (deltal: string, procent: string, val: string) => `Om ${deltal} är ${procent}%, så är 100% = ${val}`,
+    explainFindProcent: (deltal: string, pct: string, heltal: string) => `${deltal} är ${pct} % av ${heltal}`,
+    explainFindResultat: (procent: string, baseVal: string, val: string) => `${procent} % av ${baseVal} är ${val}`,
+    explainFindHeltal: (deltal: string, procent: string, val: string) => `Om ${deltal} är ${procent} %, så är 100 % = ${val}`,
     explainStigning: (erStigning: boolean, fra: string, til: string, pct: string) =>
-      `${erStigning ? "Ökning" : "Minskning"} från ${fra} till ${til} är ${pct}%`,
+      `${erStigning ? "Ökning" : "Minskning"} från ${fra} till ${til} är ${pct} %`,
   },
 } as const;
 
@@ -262,7 +262,7 @@ export default function ProcentBeregner() {
               inline
             />
             <span className="text-gray-600 dark:text-gray-400">{l.wordEr}</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaResultProcent}>?%</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaResultProcent}> ? %</span>
             <span className="text-gray-600 dark:text-gray-400">{l.wordAf}</span>
             <InputField
               value={heltal}
@@ -335,7 +335,7 @@ export default function ProcentBeregner() {
               inline
             />
             <span className="text-gray-600 dark:text-gray-400">=</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaProcentvis}>?%</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaProcentvis}> ? %</span>
           </div>
         )}
       </div>
@@ -361,7 +361,7 @@ export default function ProcentBeregner() {
               value={resultat.resultat}
               formatFn={(n) =>
                 resultat.type === "find-procent" || resultat.type === "stigning"
-                  ? `${formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })}%`
+                  ? `${formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })} %`
                   : formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })
               }
             />
@@ -389,11 +389,11 @@ export default function ProcentBeregner() {
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
           <h2 className="font-medium mb-2 dark:text-gray-100">{l.quickReference}</h2>
           <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-            <li>10% = 1/10</li>
-            <li>25% = 1/4</li>
-            <li>33% ≈ 1/3</li>
-            <li>50% = 1/2</li>
-            <li>75% = 3/4</li>
+            <li>10 % = 1/10</li>
+            <li>25 % = 1/4</li>
+            <li>33 % ≈ 1/3</li>
+            <li>50 % = 1/2</li>
+            <li>75 % = 3/4</li>
           </ul>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
