@@ -27324,3 +27324,166 @@ for `locale-leak-gate.test.ts` passerer.
 **Ikke gjort.** Den danske `/promille`-FAQ (`page-data.ts:765`) har samme
 slags håndskrevne grænser for otte lande plus Skotland og «0,0 for
 nyansatte» — ikke rettet her, for opgaven holdt sig til de to punkt-0-fund.
+
+
+# Arkiv (append) — 3/10 09:5x
+
+## F5d lukket, og F5b-historik flyttet
+
+**Lukket 3/10 04:37 — `topskat-faq-tal-fra-modul` (den tolvte fil).** Se
+`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne strenge væk fra `page-data.ts`
+(`description` + `metaDescription` + 2 af 5 FAQ-svar), så `topskat` er **4 → 0**
+målt med egen AST-probe. Ny `topskat-eksempler.ts` læser `SATSER_2026`.
+**Reel fejl:** «58.000 kr./md» mod sidens egen formel (58.100). **13 nye tests**
+(3939 → 3952), **syv mutationer målt røde** (se arkivet for hver).
+
+**Lukket 3/10 04:52 — `loen-efter-skat-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne talgrupper væk fra
+`page-data.ts` (`description` + `metaDescription` + `ogDescription` + 4 af 8
+FAQ-svar), så `loen-efter-skat` er **4 → 0** målt med portens egen
+`strengBelob`. Ny `loen-efter-skat-eksempler.ts` læser `SATSER_2026` og
+`KOMMUNER`. **Den reelle fejl lå i den nye hjælper, målt før commit:**
+`formatBelob` har nul decimaler som standard, så mellemskattens `0.075 × 100`
+skrev «8 %» — samme tal som AM-bidraget — og `getCurrencySuffix("da")` er «kr.»
+*med* punktum, så `${kr(belob)}.` gav «54.100 kr..». Derfor har modulet nu
+`loenBelob` (til sidens) og `loenBelobI` (til løbende tekst) og to decimaler i
+`pct`. Kommuneskattens «22,5 % (Rundersdal)»/«27,8 % (Langeland)» er **afledt**
+af `KOMMUNER` i stedet for håndskrevet — målt til de samme tal. En eksisterende
+test låste den gamle notation fast (`page-data.test.ts` krævede «7,5%») og er
+rettet til «7,5 %» med et `not.toContain("7,5%")`. **7 nye tests**
+(3920 → 3927). Mutationer målt: 2 røde af 7 (nul decimaler), 1 rød af 7
+(håndskrevet beløb + «8%» i `description`).
+
+**Lukket 3/10 05:05 — `boernepenge-faq-tal-fra-modul` (den trettende fil).** Se
+`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne talgrupper væk fra
+`page-data.ts` (`description` + `metaDescription` + 2 af 8 FAQ-svar), så
+`boernepenge` er **4 → 0** målt med portens egen `strengBelob`. Ny
+`boernepenge-eksempler.ts` læser `BOERNE_SATSER_2026` +
+`BOERNEUNGEYDELSE_2026` og regner begge aftrappingseksempler med
+`beregnAftrapning`. **Ingen reel satsfejl:** 5.370 × 4 = 21.480, 4.248 × 4 =
+16.992, 3.342 × 4 = 13.368, 1.114 × 12 = 13.368 og 2 % af 38.900 = 778 — alle
+rigtige. **Den reelle fejl lå i brødteksten, målet ved at gennemgå min egen
+diff:** «Tjener du 1.100.000 **kr.,**» — punktum foran kommaet, den dobbelte
+sætningstegning som `pension-dobbelt-valuta` 2/10 fjernede i `formatKr(…)} kr.`
+-kaldene, og «**2%**» mod «2 %» i FAQ-svaret på samme side. Begge steder lå i
+JSX-tekst, som hverken `regnestykker`-porten eller `page-data`-målingen så.
+JSX-listen **315 → 313** (`boernepenge/page.tsx` 2 → **0**), og `procentAf`
+dækning 13 → 12 + summen 25 → 24, fordi eksemplet nu er interpolationer.
+**14 nye tests** (3952 → 3966), **seks mutationer målt røde** (arkivet har hver).
+
+**Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
+`src/lib/*.ts` også, og listen opdateres i samme commit.
+
+**Otte filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
+(`arveafgift-belob-fra-modul`), `/boligsalg` (`boligsalg-belob-fra-modul`),
+`/procent` (`procent-faq-tal-fra-modul`), `/renteberegner`
+(`renteberegner-belob-fra-modul`), `/procent`s procentpoint-svar
+(`procentpoint-faq-tal-fra-modul`), `/kvadratmeter`
+(`kvadratmeter-faq-tal-fra-modul`) og `/konfirmation`
+(`konfirmation-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
+**`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende,
+`/aktieskat` (`aktieskat-faq-tal-fra-modul`) den tiende, `/loen-efter-skat`
+(`loen-efter-skat-faq-tal-fra-modul`) den **ellevte**, `/topskat`
+(`topskat-faq-tal-fra-modul`) den **tolvte** og `/boernepenge`
+(`boernepenge-faq-tal-fra-modul`) den **trettende** — den sidste målte i
+rækken, så næste iteration bør være en feature.**
+
+**Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
+alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
+portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
+iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
+Køen pr. slug (**74** målt 3/10 05:05 med egen AST-probe efter `/boernepenge`):
+`moms` 15 (⛔) · `flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
+være faldet siden — mål den slug, du tager, på ny. **Anbefalet rækkefølge:**
+`/flyttebudget` (3) → derefter måles listen på ny. De otte lukkede før denne var
+`/moms` slet ikke rørt (⛔ de 3 lovgrænser), så **næste F5b-slice er
+`/flyttebudget`**, medmindre en feature prioriteres højere.
+`/moms` er ⛔ (de 3 lovgrænser).
+*Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
+eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
+(12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
+bliver listen 152 lang og de 152 tal bliver en tilladelsesliste** — det er
+måske nok det, men en tilladelsesliste over fejl er dyrere end porten er bred.
+Derfor: fix slugs først, portudvidelsen som sidste skridt når de er nede mod 0.
+
+**Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
+50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
+
+**Delvis lukket 2/10 20:53 — `pension-dobbelt-valuta`.** Se
+`docs/plan-arkiv.md`. *Målt:* «8.729 kr. kr.» er væk fra den rene HTML på
+`minberegner.dk/pension`. **De fire øvrige påstande i den gamle note var
+forkerte:** `GaeldsfriBeregner`, `BruttoNettoBeregner`, `TopskatBeregner` og
+`AktieskatBeregner` bruger `toLocaleString` (ingen valutaenhed) og har aldrig
+skrevet dobbelt enhed. `formatNumber` + `getCurrencySuffix` er rigtigere for
+de to, men det er en anden opgave.
+
+**Lukket 2/10 20:57 — `leasing-dobbelt-valuta`.** *Målt:* alle **20**
+`formatKr(…)} kr.` i `LeasingBeregner` er væk, så hele resultatblokken for
+leasing, billån og kontant koster «4.121 kr.», «178.350 kr.», «28.350 kr.» —
+og på beraknare.se «4 121 kr» (én enhed, Intls «kr» for sv-SE). Ny
+`LeasingBeregner.test.tsx` (3 tests) dømmer den **rendrede** side i begge
+sprog og låser månedsydelsen til `beregnLeasingSammenlign`-værdien med én enhed.
+Mutation: « kr.» tilbage i alle 20 kald giver **2 røde** af 3.
+`/leasing` se: 2.923 visninger / 33 klik / 1,1 % / pos. 12,2.
+
+**Lukket 2/10 21:01 — `su-dobbelt-valuta` (sidste i klassen).** Alle **7**
+`formatKr(…)} kr.` i `SUBeregner` er væk, så «Inkl. 3.799 kr. forældrelån» og
+de fire grænsetal i brødteksten har én enhed. Den nye test dømmer den
+**rendrede** side (ingen «kr. kr.») **og** læser kilden, så de sætninger der
+kun vises i legacy- og ungdomsordningen heller ikke kan få den dobbelte enhed
+tilbage. Mutation: « kr.» tilbage i alle 7 kald → **1 rød** af 15.
+**Hele dobbelt-enheds-fejlen er nu lukket** i de tre komponenter der havde den
+(3 målt, ikke 7 som den gamle note sagde).
+
+⚠️ **Flake målt 2/10 21:00:** én fuld kørsel gav «1 failed | 3806 passed» uden
+at loggen fangede filnavnet; de to næste fulde kørsler er grønne (3807/3807).
+Hvis den dukker op igen, er det ikke denne opgave — ingen af de tre berørte
+filer blev ændret i den kørsel.
+
+**Åben: norske tusindtalsseparatorer.** `/renteberegner` skriver nu «1 887»
+med mellemrum, mens resten af `noPages` skriver «2.500» med punktum («BMR
+1.780 kcal» på `/kalorier»). Mellemrum er den rigtige bokmålsskrivemåde, så
+fejlen er den anden slags. *Accept:* hele `noPages`-blokken går gennem
+`formatBelob(…, "no", …)`, så der kun er én skrivemåde. ⛔ Lav prioritet:
+`beregner.no` serverer et andet site (❓ nedenfor), så brugerpåvirkningen er
+0 indtil den er besvaret.
+
+**Åben:** `/timepris` mangler **norsk brødtekst** (kun `da` og `se` har et
+afsnit) — ❓ kilde til norske timepriser låser både brødteksten og tabellen.
+
+**Åben:** blogindlæg generelt (19 filer, 273 fund). Redaktionelle beløb i et
+indlæg er ikke samme fejlklasse som et beløb på en beregnerside. Beslut først,
+om de skal med; ellers skal de stå i portens undtagelsesliste som *blog*.
+
+
+
+**F5d-noten som den læst 3/10 08:5x:**
+
+**F5d. [ ] `DEPLOY-MISSING` — de sidste synlige «25%» på to sider (3/10 08:5x).**
+Alt hvad `ceo/procent-med-mellemrum` rørte er live og korrekt: forsiden har **0**
+«100%», navigationens momskort siger «25 % moms», `/feriepenge` har «12,5 % af
+din ferieberettigede løn» og «AM-bidrag (8 %)», `/laaneberegner` har «5-25 %»,
+«4-12 %», «(1-5 %)», «(100 %+)» og svensk «5-15 %»/«3-8 %»/«(2-5 %)»,
+`/husleje` har «30 % af din nettoindkomst» og «30% reglen forklaret» stadig.
+**MÅLT** på de to sider (kun synlig markup, JSON-LD og RSC-payload taget fra)
+er der tilbage: **3** på forsiden — «tillæg eller fratræk **25%** moms» og
+«boafgift (**15%**) og tillægsafgift (**25%**)», alle i
+`src/lib/footer-data.ts` — og **3** i `/feriepenge`s tabellabels «Feriepenge
+(**12,5%**)», «AM-bidrag (**8%**)» og «Skat (estimat ~**38%**»)», plus **3** i
+sidens FAQ-svar («**12,5%** af lønnen», «AM-bidrag (**8%**)», «typisk **1%**»).
+Acceptkriterium: **0** `\d%` i den synlige markup på begge sider, samme
+AST-scanner som F5b/F5c, og en port der renderer de to sider.
+
+## F5d-resultatet
+
+De 9 strenge lå i `HomeContent.tsx` (4: to danske, to svenske) og
+`FeriepengeBeregner.tsx` (3) — ikke i `footer-data.ts`, som noten antog, og
+planen havde set de to svenske. Ny port `src/components/procent-i-synlig-tekst.test.tsx`
+renderer begge komponenter direkte (FeriepengeBeregner i `LocaleProvider`) og
+dømmer den synlige markup med `[0-9]+(?:[.,][0-9]+)?%` efter at skrive- og
+attributstykker er fjernet. 3 tests; mutation (to strenge tilbage) giver 3 røde.
+Første regex var `(?<![0-9])[0-9]…`, som **aldrig** matchede «25%» fordi
+lookbehindet blokkerede multi-cifre tal — mutationen afslørede det.
+Første mutationstest viste også at kun 1 af 3 tests blev rød, altså at porten
+tilså det forkerte regex som grønt. Lært: ratchet-tests skal have deres egen
+mutation, ellers dømmer de en fejl som grøn.

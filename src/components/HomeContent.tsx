@@ -28,10 +28,10 @@ function HomeContentDA() {
       </p>
       <h3>Populære økonomi-beregnere</h3>
       <ul>
-        <li><Link href="/moms"><strong>Momsberegner</strong></Link> — tillæg eller fratræk 25% moms</li>
+        <li><Link href="/moms"><strong>Momsberegner</strong></Link> — tillæg eller fratræk 25 % moms</li>
         <li><Link href="/procent"><strong>Procentberegner</strong></Link> — beregn procent af et tal, stigning og fald</li>
         <li><Link href="/rentefradrag"><strong>Rentefradrag</strong></Link> — se din skattebesparelse på renteudgifter</li>
-        <li><Link href="/arveafgift"><strong>Arveafgift</strong></Link> — beregn boafgift (15%) og tillægsafgift (25%)</li>
+        <li><Link href="/arveafgift"><strong>Arveafgift</strong></Link> — beregn boafgift (15 %) og tillægsafgift (25 %)</li>
         <li><Link href="/aktieskat"><strong>Aktieskat</strong></Link> — beregn skat på aktiegevinst</li>
         <li><Link href="/topskat"><strong>Topskat</strong></Link> — tjek om du betaler mellemskat eller topskat</li>
       </ul>
@@ -127,7 +127,7 @@ function HomeContentNO({ siteName }: { siteName: string }) {
         sparepengene dine vokser med <Link href="/opsparing">sparekalkulator</Link>.
       </p>
       <ul>
-        <li><Link href="/moms"><strong>MVA-kalkulator</strong></Link> — legg til eller trekk fra 25% MVA</li>
+        <li><Link href="/moms"><strong>MVA-kalkulator</strong></Link> — legg til eller trekk fra 25 % MVA</li>
         <li><Link href="/valuta"><strong>Valutakalkulator</strong></Link> — regn om mellom NOK, EUR, USD og andre valutaer</li>
         <li><Link href="/renteberegner"><strong>Rentekalkulator</strong></Link> — beregn renter og avdrag på lån</li>
         <li><Link href="/procent"><strong>Prosentkalkulator</strong></Link> — beregn prosent av et tall</li>
@@ -180,7 +180,7 @@ function HomeContentSE({ siteName }: { siteName: string }) {
         ditt sparande växer med <Link href="/opsparing">sparberäknaren</Link>.
       </p>
       <ul>
-        <li><Link href="/moms"><strong>Momsberäknare</strong></Link> — lägg till eller dra av 25% moms</li>
+        <li><Link href="/moms"><strong>Momsberäknare</strong></Link> — lägg till eller dra av 25 % moms</li>
         <li><Link href="/valuta"><strong>Valutaberäknare</strong></Link> — räkna om mellan SEK, EUR, USD och andra valutor</li>
         <li><Link href="/renteberegner"><strong>Ränteberäknare</strong></Link> — beräkna ränta och amortering</li>
         <li><Link href="/procent"><strong>Procentberäknare</strong></Link> — beräkna procent av ett tal</li>

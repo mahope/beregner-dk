@@ -250,11 +250,11 @@ export default function FeriepengeBeregner() {
             <span>{formatKr(beregning.ferieberettigetLoen)}</span>
           </div>
           <div className="flex justify-between font-medium border-t pt-2 dark:border-gray-700">
-            <span>Feriepenge (12,5%)</span>
+            <span>Feriepenge (12,5 %)</span>
             <span>{formatKr(beregning.feriepengeTotal)}</span>
           </div>
           <div className="flex justify-between text-gray-600 dark:text-gray-400">
-            <span>- AM-bidrag (8%)</span>
+            <span>- AM-bidrag (8 %)</span>
             <span>{formatKr(beregning.amBidrag)}</span>
           </div>
           <div className="flex justify-between">
@@ -262,7 +262,7 @@ export default function FeriepengeBeregner() {
             <span>{formatKr(beregning.feriepengeEfterAM)}</span>
           </div>
           <div className="flex justify-between text-gray-600 dark:text-gray-400">
-            <span>- Skat (estimat ~38%)</span>
+            <span>- Skat (estimat ~38 %)</span>
             <span>{formatKr(beregning.skat)}</span>
           </div>
           <div className="flex justify-between font-bold text-lg border-t pt-2 text-green-700 dark:border-gray-700 dark:text-green-400">

@@ -1,24 +1,19 @@
-STATUS: 3/10 08:52. CI grøn ved start (`37103671328`), ingen åbne PR'er.
+STATUS: 3/10 09:5x. CI grøn ved start (`37104447259`), ingen åbne PR'er.
        **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-       `npm run build` — **grøn 3/10 08:51** (alle exit 0, **4012** tests i 253
-       filer, +2).
-       **Denne iteration:** CEO-køens **punkt 0 er lukket**. Seks af de otte
-       meldte fejl var allerede rettet i kode og test (verificeret i `git grep`:
-       Valborg 30/4, dansk langfredag 26/3-2027 mod svensk påskafton 27/3,
-       dansk sankthans fast 23./24. juni, ingen påskeaften-FAQ, `toUtcMidnight`
-       med `Intl` i `DAGE_TIL_TIMEZONE`, `maneder: 12` med kommentar,
-       1. advent låst mellem 27/11 og 3/12). De **to sidste** var ægte og er
-       rettet: (1) `/husleje` skrev «det er derfor tallet er **lavere** end
-       forbrugerprisindeksets 2,0 %» i samme svar som den printede **2,9 %** —
-       sætningen læser nu retningen fra `nettoprisindeksUnderForbrugerprisindeks()`;
-       (2) fire svar i **den svenska** `/promille`-FAQ skrev `0,2`/`1,0` som
-       håndskrevet tekst og læser nu `PROMILLEGRANSE`/`PROMILLEGROV_SE`/
-       `PROMILLEGRANSE_UDLAND`/`PROMILE_80_MAND`. Begge porte **målt røde** mod
-       den gamle tekst. Se arkivet.
-       **Næste iteration:** de 4 åbne VERIFICÉR-noter efter 12:30-vinduet
-       (sidste chance 12:30 — ellers `DEPLOY-MISSING`); derefter **F5d**
-       (6 målte rester) og en **feature** (senest sidste gang der var en:
-       `/timer-i-aret`), så kravet om én feature pr. tredje opgave holder.
+       `npm run build` — **grøn 3/10 09:4x** (alle exit 0, **4015** tests i 254
+       filer, +3).
+       **Denne iteration:** **F5d lukket** — de 9 sidste synlige «25%», «15%»,
+       «12,5%», «8%» og «38%» er væk fra forsidens brødtekst (da + se) og
+       feriepengetabellen. De lå i **`HomeContent.tsx` og
+       `FeriepengeBeregner.tsx`**, ikke i `footer-data.ts` som F5d-noten
+       antog, og planen havde heller ikke set de **to svenske** strenge. Ny
+       port `procent-i-synlig-tekst.test.tsx` renderer de to komponenter
+       direkte og dømmer markupken med samme regex som F5c's scanner; den er
+       målt rød 3/3 ved mutation. De to gamle porte kunne ikke se fejlen:
+       `forside.test.tsx` mockerer `HomeContent` med vilje, og
+       `regnestykker.test.ts`s loft på 436 nåede længe før de to filer.
+       **Næste iteration:** en **feature** (senest `/timer-i-aaret`), og
+       først de åbne VERIFICÉR-noter efter 12:30-vinduet.
        BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
 ## Fase 3 — trafik-drevet
@@ -102,6 +97,19 @@ renderede porte dømmer markupken i da + se (`procent-formler.test.tsx` og
 `}%»` i den fil den rører** — det er den fund, der ikke står i `/\d%/`.
 Se `docs/plan-arkiv.md`.
 
+- **SU-fælleshold: «hvor meget må man tjene ved siden af SU»** — *Hvem:*
+  studerende på 1. års SU og deres forældre, hver august–december. *Datagrund:*
+  dansk autocomplete **nr. 1** under «hvor meget» målt 3/10 09:2x, og
+  `/su` **falder** (201 → 127 besøgende/28d) selv om spørgsmålet er helt
+  sæsonbetonet. `grep -rn "fælleshold" src/` giver **0 træffere**, så
+  indkomstgrænsen for fællesøkonomi findes ikke på sitet i dag, selv om
+  `su.ts` allerede regner på månedsløn. *Accept:* fællesholdsgrænse læst fra
+  ét modul med kilde, værktøj der finder «din indtægt kan højst være X kr.»
+  for dig + din partner, og tal fra samme modul i brødteksten.
+  ⛔ **`su.dk/su/naar-du-faar-su/saa-meget-maa-du-tjene/satser-for-fribeloeb`
+  svarer 404 (målt 3/10 09:24)** — find den rigtige fællesholdsside før der
+  skrives ét tal. Gæt ikke grænsen.
+
 **F9. [ ] `locale === "se" ? "se" : "da"` — 13 steder med dansk på
 norske domæner.** *Hvad:* mønstret er målt med grep efter `ceo/norsk-pace-side`
 (2/10): 18 træffere i 15 filer, hvoraf **13 er bruger-synlige** —
@@ -117,20 +125,9 @@ eller en `Record<Locale, …>`, og en port (samme som `DANSKE_ORD`-listen i
 `beregner.no` serverer et andet site, så rettelsen har 0 bruger-effekt indtil
 den er besvaret — og norsk trafik er 0 i Plausible.
 
-**F5d. [ ] `DEPLOY-MISSING` — de sidste synlige «25%» på to sider (3/10 08:5x).**
-Alt hvad `ceo/procent-med-mellemrum` rørte er live og korrekt: forsiden har **0**
-«100%», navigationens momskort siger «25 % moms», `/feriepenge` har «12,5 % af
-din ferieberettigede løn» og «AM-bidrag (8 %)», `/laaneberegner` har «5-25 %»,
-«4-12 %», «(1-5 %)», «(100 %+)» og svensk «5-15 %»/«3-8 %»/«(2-5 %)»,
-`/husleje` har «30 % af din nettoindkomst» og «30% reglen forklaret» stadig.
-**MÅLT** på de to sider (kun synlig markup, JSON-LD og RSC-payload taget fra)
-er der tilbage: **3** på forsiden — «tillæg eller fratræk **25%** moms» og
-«boafgift (**15%**) og tillægsafgift (**25%**)», alle i
-`src/lib/footer-data.ts` — og **3** i `/feriepenge`s tabellabels «Feriepenge
-(**12,5%**)», «AM-bidrag (**8%**)» og «Skat (estimat ~**38%**»)», plus **3** i
-sidens FAQ-svar («**12,5%** af lønnen», «AM-bidrag (**8%**)», «typisk **1%**»).
-Acceptkriterium: **0** `\d%` i den synlige markup på begge sider, samme
-AST-scanner som F5b/F5c, og en port der renderer de to sider.
+**F5d. [x] ✅ `procent-forside-feriepenge` — de 9 sidste synlige procenter.**
+*Accept:* **0** `\d%` i markupken på forsiden og /feriepenge — nået, målt i
+den renderede komponent i da/se/no. Se `docs/plan-arkiv.md`.
 
 ## Feature-kø
 
@@ -244,130 +241,13 @@ lukket** (se listen nedenfor og `docs/plan-arkiv.md`). Strenglistens loft er
 **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 → 320 → 315 → 313**
 (`/boernepenge` 3/10 05:05).
 
-**Lukket 3/10 04:37 — `topskat-faq-tal-fra-modul` (den tolvte fil).** Se
-`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne strenge væk fra `page-data.ts`
-(`description` + `metaDescription` + 2 af 5 FAQ-svar), så `topskat` er **4 → 0**
-målt med egen AST-probe. Ny `topskat-eksempler.ts` læser `SATSER_2026`.
-**Reel fejl:** «58.000 kr./md» mod sidens egen formel (58.100). **13 nye tests**
-(3939 → 3952), **syv mutationer målt røde** (se arkivet for hver).
+**Tretten filer er lukket** (`su`, `arveafgift`, `/boligsalg`, `/procent`,
+`/renteberegner`, `/procentpoint`, `/kvadratmeter`, `/konfirmation`,
+`/efterloen`, `/aktieskat`, `/loen-efter-skat`, `/topskat`, `/boernepenge`) —
+målinger, mutationer og reelle fejl står i `docs/plan-arkiv.md`.
 
-**Lukket 3/10 04:52 — `loen-efter-skat-faq-tal-fra-modul`.** Se
-`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne talgrupper væk fra
-`page-data.ts` (`description` + `metaDescription` + `ogDescription` + 4 af 8
-FAQ-svar), så `loen-efter-skat` er **4 → 0** målt med portens egen
-`strengBelob`. Ny `loen-efter-skat-eksempler.ts` læser `SATSER_2026` og
-`KOMMUNER`. **Den reelle fejl lå i den nye hjælper, målt før commit:**
-`formatBelob` har nul decimaler som standard, så mellemskattens `0.075 × 100`
-skrev «8 %» — samme tal som AM-bidraget — og `getCurrencySuffix("da")` er «kr.»
-*med* punktum, så `${kr(belob)}.` gav «54.100 kr..». Derfor har modulet nu
-`loenBelob` (til sidens) og `loenBelobI` (til løbende tekst) og to decimaler i
-`pct`. Kommuneskattens «22,5 % (Rundersdal)»/«27,8 % (Langeland)» er **afledt**
-af `KOMMUNER` i stedet for håndskrevet — målt til de samme tal. En eksisterende
-test låste den gamle notation fast (`page-data.test.ts` krævede «7,5%») og er
-rettet til «7,5 %» med et `not.toContain("7,5%")`. **7 nye tests**
-(3920 → 3927). Mutationer målt: 2 røde af 7 (nul decimaler), 1 rød af 7
-(håndskrevet beløb + «8%» i `description`).
-
-**Lukket 3/10 05:05 — `boernepenge-faq-tal-fra-modul` (den trettende fil).** Se
-`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne talgrupper væk fra
-`page-data.ts` (`description` + `metaDescription` + 2 af 8 FAQ-svar), så
-`boernepenge` er **4 → 0** målt med portens egen `strengBelob`. Ny
-`boernepenge-eksempler.ts` læser `BOERNE_SATSER_2026` +
-`BOERNEUNGEYDELSE_2026` og regner begge aftrappingseksempler med
-`beregnAftrapning`. **Ingen reel satsfejl:** 5.370 × 4 = 21.480, 4.248 × 4 =
-16.992, 3.342 × 4 = 13.368, 1.114 × 12 = 13.368 og 2 % af 38.900 = 778 — alle
-rigtige. **Den reelle fejl lå i brødteksten, målet ved at gennemgå min egen
-diff:** «Tjener du 1.100.000 **kr.,**» — punktum foran kommaet, den dobbelte
-sætningstegning som `pension-dobbelt-valuta` 2/10 fjernede i `formatKr(…)} kr.`
--kaldene, og «**2%**» mod «2 %» i FAQ-svaret på samme side. Begge steder lå i
-JSX-tekst, som hverken `regnestykker`-porten eller `page-data`-målingen så.
-JSX-listen **315 → 313** (`boernepenge/page.tsx` 2 → **0**), og `procentAf`
-dækning 13 → 12 + summen 25 → 24, fordi eksemplet nu er interpolationer.
-**14 nye tests** (3952 → 3966), **seks mutationer målt røde** (arkivet har hver).
-
-**Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
-`src/lib/*.ts` også, og listen opdateres i samme commit.
-
-**Otte filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
-(`arveafgift-belob-fra-modul`), `/boligsalg` (`boligsalg-belob-fra-modul`),
-`/procent` (`procent-faq-tal-fra-modul`), `/renteberegner`
-(`renteberegner-belob-fra-modul`), `/procent`s procentpoint-svar
-(`procentpoint-faq-tal-fra-modul`), `/kvadratmeter`
-(`kvadratmeter-faq-tal-fra-modul`) og `/konfirmation`
-(`konfirmation-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
-**`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende,
-`/aktieskat` (`aktieskat-faq-tal-fra-modul`) den tiende, `/loen-efter-skat`
-(`loen-efter-skat-faq-tal-fra-modul`) den **ellevte**, `/topskat`
-(`topskat-faq-tal-fra-modul`) den **tolvte** og `/boernepenge`
-(`boernepenge-faq-tal-fra-modul`) den **trettende** — den sidste målte i
-rækken, så næste iteration bør være en feature.**
-
-**Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
-alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
-portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
-iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
-Køen pr. slug (**74** målt 3/10 05:05 med egen AST-probe efter `/boernepenge`):
-`moms` 15 (⛔) · `flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
-være faldet siden — mål den slug, du tager, på ny. **Anbefalet rækkefølge:**
-`/flyttebudget` (3) → derefter måles listen på ny. De otte lukkede før denne var
-`/moms` slet ikke rørt (⛔ de 3 lovgrænser), så **næste F5b-slice er
-`/flyttebudget`**, medmindre en feature prioriteres højere.
-`/moms` er ⛔ (de 3 lovgrænser).
-*Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
-eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
-(12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
-bliver listen 152 lang og de 152 tal bliver en tilladelsesliste** — det er
-måske nok det, men en tilladelsesliste over fejl er dyrere end porten er bred.
-Derfor: fix slugs først, portudvidelsen som sidste skridt når de er nede mod 0.
-
-**Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
-50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
-
-**Delvis lukket 2/10 20:53 — `pension-dobbelt-valuta`.** Se
-`docs/plan-arkiv.md`. *Målt:* «8.729 kr. kr.» er væk fra den rene HTML på
-`minberegner.dk/pension`. **De fire øvrige påstande i den gamle note var
-forkerte:** `GaeldsfriBeregner`, `BruttoNettoBeregner`, `TopskatBeregner` og
-`AktieskatBeregner` bruger `toLocaleString` (ingen valutaenhed) og har aldrig
-skrevet dobbelt enhed. `formatNumber` + `getCurrencySuffix` er rigtigere for
-de to, men det er en anden opgave.
-
-**Lukket 2/10 20:57 — `leasing-dobbelt-valuta`.** *Målt:* alle **20**
-`formatKr(…)} kr.` i `LeasingBeregner` er væk, så hele resultatblokken for
-leasing, billån og kontant koster «4.121 kr.», «178.350 kr.», «28.350 kr.» —
-og på beraknare.se «4 121 kr» (én enhed, Intls «kr» for sv-SE). Ny
-`LeasingBeregner.test.tsx` (3 tests) dømmer den **rendrede** side i begge
-sprog og låser månedsydelsen til `beregnLeasingSammenlign`-værdien med én enhed.
-Mutation: « kr.» tilbage i alle 20 kald giver **2 røde** af 3.
-`/leasing` se: 2.923 visninger / 33 klik / 1,1 % / pos. 12,2.
-
-**Lukket 2/10 21:01 — `su-dobbelt-valuta` (sidste i klassen).** Alle **7**
-`formatKr(…)} kr.` i `SUBeregner` er væk, så «Inkl. 3.799 kr. forældrelån» og
-de fire grænsetal i brødteksten har én enhed. Den nye test dømmer den
-**rendrede** side (ingen «kr. kr.») **og** læser kilden, så de sætninger der
-kun vises i legacy- og ungdomsordningen heller ikke kan få den dobbelte enhed
-tilbage. Mutation: « kr.» tilbage i alle 7 kald → **1 rød** af 15.
-**Hele dobbelt-enheds-fejlen er nu lukket** i de tre komponenter der havde den
-(3 målt, ikke 7 som den gamle note sagde).
-
-⚠️ **Flake målt 2/10 21:00:** én fuld kørsel gav «1 failed | 3806 passed» uden
-at loggen fangede filnavnet; de to næste fulde kørsler er grønne (3807/3807).
-Hvis den dukker op igen, er det ikke denne opgave — ingen af de tre berørte
-filer blev ændret i den kørsel.
-
-**Åben: norske tusindtalsseparatorer.** `/renteberegner` skriver nu «1 887»
-med mellemrum, mens resten af `noPages` skriver «2.500» med punktum («BMR
-1.780 kcal» på `/kalorier»). Mellemrum er den rigtige bokmålsskrivemåde, så
-fejlen er den anden slags. *Accept:* hele `noPages`-blokken går gennem
-`formatBelob(…, "no", …)`, så der kun er én skrivemåde. ⛔ Lav prioritet:
-`beregner.no` serverer et andet site (❓ nedenfor), så brugerpåvirkningen er
-0 indtil den er besvaret.
-
-**Åben:** `/timepris` mangler **norsk brødtekst** (kun `da` og `se` har et
-afsnit) — ❓ kilde til norske timepriser låser både brødteksten og tabellen.
-
-**Åben:** blogindlæg generelt (19 filer, 273 fund). Redaktionelle beløb i et
-indlæg er ikke samme fejlklasse som et beløb på en beregnerside. Beslut først,
-om de skal med; ellers skal de stå i portens undtagelsesliste som *blog*.
+**Åbne F5b-slice: `/flyttebudget` (3 fund), mål listen på ny først.**
+`/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 
 `VERIFICÉR DEPLOY: de tre review-fund fra 3/10 09:1x (`minberegner.dk/topskat` skal have **1** «Med AM-bidrag er din marginalskat dér 55,9 %» i værktøjets skatteloft-boks og **0** «så højt din marginalskat kan blive», og samme sætning i `FAQPage`-JSON-LD'en skal være «… (ekskl. AM-bidrag og kirkeskat). Med AM-bidrag (8 %) er din marginalskat dér 55,9 %, og over top-topskat-grænsen lægges yderligere 5 % oveni.»; `beraknare.se/timmar-i-aret` skal have «Ett dygn», «En vecka», «Två veckor», «En månad (februari)», «En månad (april)», «En månad (januari)» og «Ett år» i hovedtabellens `<th scope="row">` — altså **0** «Et døgn», **0** «To uger» og **0** «En måned (»; `minberegner.dk/procent` skal have `>? %<` i begge resultatfelter — altså **0** `> ? %<`; **intet** `NaN`) ceo/rettelse-tre-reviewfund 3/10 08:35`
 
@@ -384,7 +264,11 @@ filer) ligger i `docs/plan-arkiv.md`. Alle tre er brugt: to førte til
 
 `VERIFICÉR DEPLOY: /timer-i-aret + /timmar-i-aret (nye sider med periode- og måneds-tabel i time: `minberegner.dk/timer-i-aret` skal have `<title>` «Hvor mange timer er der på et år? Timer i alle perioder», **1** `<h1>`, perioderækkerne «Et døgn» 1/24/1.440, «En uge» 7/168/10.080, «To uger» 14/336/20.160, «En måned (februar)» 28/672/40.320, «En måned (april)» 30/720/43.200, «En måned (januar)» 31/744/44.640 og «Et år» 365/8.760/525.600, **12** månedsrækker + **1** summeringsrække i den anden tabel, eksempelrækken «2026 har 365 dage, som er 8.760 timer.», **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange timer er der på et år?», «Hvor mange timer er der på en uge?» og «Hvor mange timer er der på en måned?»; `beraknare.se/timmar-i-aret` skal have «8 760 timmar» og **0** «8.760», og **0** «hur mange»; `minberegner.dk/timmar-i-aret` + `beraknare.se/timer-i-aret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; `minberegner.dk/tidsberegner` skal have «timer i hvert tidsrum» med link til siden og `beraknare.se/tidsberegner» «timmar i varje tidsperiod»; **intet** `NaN`) ceo/timer-i-aret 3/10 07:55`
 
-`DEPLOY-MISSING 3/10 08:5x (delvist, se F5d nedenfor)` — VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
+**MÅLT 3/10 09:0x: 8 af 9 krav er live** (forsiden 0 × «100%» og 2 × «100 % Gratis», navigation «25 % moms», /feriepenge «12,5 % af din ferieberettigede løn», /laaneberegner «5-25 %»/«4-12 %»/«(1-5 %)», /husleje «30 %» + «33 %, men 30 %» og «30% reglen» stadig) — og den 9. var F5d-arbejde, ikke en deploy-fejl: `ceo/procent-med-mellemrum`.
+
+`VERIFICÉR DEPLOY: procentnotationen «8 %» på forside, navigation og tre sider (hele HTML'en på `minberegner.dk/` skal have **1** «100 % Gratis» og **1** «100 % gratis» og **0** «100%», og navigationens momskort skal sige «25 % moms» med **0** «25%»; `minberegner.dk/feriepenge` skal have «12,5 % af din ferieberettigede løn», «AM-bidrag (8 %)» og «(35.000 × 12 × 12,5 %)» med **0** «8%»/«12,5%»; `minberegner.dk/laaneberegner` skal have «5-25 %», «4-12 %», «(1-5 %)» og «(100 %+)»; `minberegner.dk/husleje` skal have «30 % af din nettoindkomst» og «Nogle kilder siger 33 %, men 30 %» — og «30% reglen forklaret» skal ** stadig stå, fordi det er regelnavnet; `beraknare.se/laaneberegner` skal have «5-15 %», «3-8 %» og «(2-5 %)»; **intet** `NaN`) ceo/procent-med-mellemrum 3/10 06:45`
+
+`VERIFICÉR DEPLOY: procenttal i forsidens brødtekst og feriepengetabellen (hele HTML'en på `minberegner.dk/` skal have **0** `\d%` — altså **0** «25%», «15%» — og stadig **2** × «100 % Gratis»; `minberegner.dk/feriepenge` skal have «Feriepenge (12,5 %)», «- AM-bidrag (8 %)» og «- Skat (estimat ~38 %)» med **0** `\d%`; `beraknare.se/` skal have «lägg till eller dra av 25 % moms», «legg til eller trekk fra 25 % MVA», «tillæg eller fratræk 25 % moms» og «boafgift (15 %) og tillægsafgift (25 %)»; **intet** `NaN`) ceo/procent-forside-feriepenge 3/10 09:4x`
 
 ## VERIFICÉR DEPLOY-noter — lukket 3/10 08:0x på indhold
 
