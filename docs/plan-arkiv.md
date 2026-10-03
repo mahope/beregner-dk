@@ -28040,3 +28040,43 @@ Polaritet målt: en frossen boafgift (91.155 → 88.500) giver 1 rød, den gamle
 suiten. `page-data.test.ts:273` havde den gamle titel håndskrevet og fulgte med.
 
 **MÅL:** `/renteberegner` 12.610 / 107 / 0,8 % / pos. 7,4 → GSC 17/10.
+
+## 3/10 18:2x — `/timer-i-aret` var aldrig 404; noten havde et `a` for meget
+
+**Målt (curl + `gh api`, 18:0x–18:2x):**
+
+- `https://minberegner.dk/timer-i-aret` → **200**, `<title>` «Hvor mange timer
+  er der på et år? Timer i alle perioder», canonical
+  `https://minberegner.dk/timer-i-aret`.
+- `https://minberegner.dk/timer-i-aaret` → **404** (to `a`), og den har aldrig
+  eksisteret.
+- `gh api repos/mahope/beregner-dk/contents/src/app/timer-i-aret?ref=master` →
+  `page.tsx` findes på master. `…/contents/src/app/timer-i-aaret` → 404.
+- `TIMER_I_ARET_PATH.da = "/timer-i-aret"` (`src/lib/timer-i-aret.ts:52`),
+  `se: "/timmar-i-aret"`. Sitemap skriver `…/timer-i-aret`.
+
+**Hvad der gik galt:** deploy-noten `ceo/timer-i-aret` (oprettet 3/10 07:55)
+skrev URL'en med to `a`, og `0c54b02` («Stop med at merge: den danske
+`/timer-i-aaret` er 404 i produktion») gentog den. En efterfølgende måling
+på den samme fejl-URL fandt en 404 og lukkede ⛔ DEPLOY-MISSING hermed. Tre
+dages iterationer og to commits har brugt på en fejl, der lå i beskrivelsen
+og ikke i koden — præcis den fejlform F0f blev skrevet for.
+
+**Forsøgt rettelse, som blev kasseret:** en ny `src/app/timer-i-aaret/page.tsx`
+med den svenske routes `buildTimerIAaretMetadata("/timer-i-aaret", …)` ville
+have ligget 200, men komponentens egen guard
+(`if (!isTimerLocale(locale) || TIMER_I_ARET_PATH[locale] !== prefix)`)
+sender den til `robots: noindex` — altså en dublet på en typo-URL, ikke en
+reparation. `meta-description.test.ts` fangede det som
+`"mangler": ["da /timer-i-aret"]`.
+
+**Løst med F0f-porten** (`src/lib/sprogstier-ruter.test.ts`): alle seks
+sprogslagte stier skal have en mappe med `page.tsx` under `src/app` og stå i
+`buildSitemap()` for sit eget sprog. Mutation `da: "/timer-i-aaret"` → 1 rød
+på 5 ms; grøn HEAD 15/15.
+
+**Deploy-noter lukket samme aften (curl på indhold):**
+`ceo/titler-renteberegner-arveafgift` ✅, `ceo/dage-levet-pr-alder` ✅
+(10 år = 3.652, 50 år = 18.262), `ceo/su-indtaegtsgraense-maaned` ✅ — den
+sidste kun på de nye labels, fordi notens «Du må højst tjene …» står i den
+nuværende kode (`SuIndtaegtsgraense.tsx:174`).

@@ -1,26 +1,36 @@
-STATUS: 3/10 18:4x. ✅ **«Skriv procenttal med mellemrum på /billaan, /arveafgift,
-       /brutto-netto, /kalorier og /flyttebudget»** — 45 noder i fem siders
-       brødtekst og tabeller skrev «12%», «5-8%» og «6,25%» i da **og** se.
-       Datagrund: curl af den synlige tekst på de otte sidevarianter 3/10 17:4x
-       (`grep -oE '[0-9]+([.,][0-9]+)?%'` efter at attributter er fjernet) gav
-       `/billaan` 13, `/arveafgift` 3, `/brutto-netto` 7, `/kalorier` 1,
-       `/dagpenge` 1, `/flyttebudget` 1, `/konfirmation` 0. Resterne lå i
-       `page.tsx` — altså i sider scanneren **kan** se, kun ikke
-       interpolationer — plus én interpolation (`{EFFEKTIV_PCT}%` på
-       `/arveafgift`).
-       **GATE:** typecheck 0, lint 0 (754 filer), build 0. Hele suiten:
-       4110/4112 med 2 timeouts i `locale-leak-gate.test.ts` (5 s grænse under
-       parallell load) — begge **22/22 grønne** i isolation, så flak, ikke et
-       fund; de to øvrige tests var grønne i samme kørsel.
-       **Målt polaritet:** `AM-bidrag (8 %)` → `(8%)` giver **275 mod loftet
-       274** = rød. Loftet er målt ved at sænke det til 0 og læse tallet:
-       **319 → 274**.
-       **Deploy-verifikation 3/10 17:4x:** `/timer-i-aret` er **200** igen
-       (⛔ DEPLOY-MISSING lukket). `/alder`, `/renteberegner` og `/arveafgift`
-       har endnu **ikke** 17:30-vinduets indhold — de to noter står åbne.
-       CI grøn ved start (3facb9a), ingen åbne PR'er, ingen uløste
-       Sentry-fejl, CEO-køens otte fund lukkede, begge review-fund står
-       `RETTET 0a9b7bb`.
+STATUS: 3/10 18:3x. ✅ **Port der dømmer en sproglagt sti mod både ruten og
+       sitemap** — `ceo/sprogstier-ruter` (F0f). Datagrund: en deploy-note, to
+       commit-beskeder og en fejl-måling har skrevet den danske timer-side som
+       `/timer-i-aaret` **med et `a` for meget** i tre dage. MÅLT 18:2x:
+       `curl https://minberegner.dk/timer-i-aret` → **200** med titel «Hvor
+       mange timer er der på et år? Timer i alle perioder» og canonical
+       `…/timer-i-aret`; `/timer-i-aaret` → 404, fordi den aldrig har
+       eksisteret. Koden er `TIMER_I_ARET_PATH.da = "/timer-i-aret"`
+       (`src/lib/timer-i-aret.ts:52`), og begge route-filer ligger på master
+       (bekræftet med `gh api …/contents/src/app/timer-i-aret`). **Der var ingen
+       404-fejl at rette** — en commit ville have lagt en dublet-rute på
+       typo-URL'en. *Accept:* alle seks sprogslagte stier skal have en mappe med
+       `page.tsx` **og** stå i sitemap for sit eget sprog.
+       **Målt polaritet:** `da: "/timer-i-aaret"` i stikortet giver **1 rød**
+       (`/timer-i-aaret (TIMER_I_ARET_PATH.da) har en page.tsx under src/app`),
+       14 øvrige grønne; grøn HEAD **15/15**. Det er **mappe-kontrollen** der
+       bliver rød — `sitemap`-kontrollen bliver grøn, fordi `buildSitemap`
+       læser samme konstant. En ekstra sti på `/ikke-en-reelle-rute` giver også
+       rød, så porten dømmer filsystemet og ikke en liste.
+       **GATE:** typecheck 0, lint 0 (755 filer), build 0, **hele suiten
+       4127/4127** i 260 filer.
+       **Deploy-verifikation 18:0x–18:1x på indhold (curl):**
+       `ceo/titler-renteberegner-arveafgift` ✅ («Renteberegner: 100.000 kr. i 5
+       år = 1.887 kr./md.» + «Arveafgift beregner: 1.000.000 kr. arv = 91.155
+       kr. boafgift»), `ceo/dage-levet-pr-alder` ✅ (`<h2>Så mange dage har du
+       levet som 10-årig?</h2>`, 10 år = 3.652, 50 år = 18.262), og
+       `ceo/su-indtaegtsgraense-maaned` ✅ — sidstnævnte kan **ikke** dømmes på
+       notens «Du må højst tjene …», fordi den sætning står i den nuværende kode
+       (`SuIndtaegtsgraense.tsx:174`); den er dømt på de nye labels «Før AM-bidrag
+       for hele året» og «Fribeløb i de øvrige måneder», som begge er live.
+       Kun `ceo/procent-mellemrum-billaan-arveafgift` står åben (næste vindue
+       21:30). CI grøn ved start (9ac7a77), ingen åbne PR'er, ingen uløste
+       Sentry-fejl, begge review-fund står `RETTET 0a9b7bb`.
        PR-TJEK: 3/10 17:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
 
 ## Fase 3 — trafik-drevet
@@ -117,14 +127,14 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
    **MÅL:** `/rentefradrag` 5.082 visninger / 296 klik / 5,8 % / 5,6,
    `/boligstoette` 7.370 / 181 / 2,5 % / 8,6 → GSC 17/10.
 
-**F0f. [ ] Port der dømmer rutenavn mod den URL, der skrives i copy og
-   deploy-noter.** *Hvad:* fejlen var ikke en fejl i koden, men en URL med et
-   ekstra `a` skrevet i en deploy-note og curl'et 8 gange. Samme fejlform
-   dræber `/procent`-noten ovenfor, der kræver to tal der flytter sig.
-   *Accept:* en test læser routemapperne under `src/app` og dømmer at hver
-   `/slug` i sitemap, canonical og `getPageData(slug).slug` findes som
-   **mappe** — så en opfundet URL ikke kan overleve i en note. Lille opgave.
-
+**F0f. [x] ✅ Port der dømmer en sproglagt sti mod både ruten og sitemap**
+   — `ceo/sprogstier-ruter`. Se STATUS for målinger. *Accept (opfyldt):* alle
+   seks stier fra `DAGE_I_AARET_PATH`, `DAGE_MELLEM_PATH` og `TIMER_I_ARET_PATH`
+   skal have en `page.tsx` under `src/app` **og** stå i `buildSitemap()` for
+   sit eget sprog. Mutation `da: "/timer-i-aaret"` = 1 rød. *Begrænsning:*
+   F0f bad om alle `/slug` i sitemap/canonical/`getPageData`; det er gjort for
+   de sprogslagte stier, mens de 130+ almindelige beregnersider dømmes af
+   `meta-description.test.ts` via `getAvailableSlugs`.
 **F0e. [~] Fire `no`-titler på de fire største sider har intet regnestykke.**
    Målt 3/10 15:3x: `/procent|no` = «Prosentkalkulator - Beregn prosent enkelt og
    gratis», `/dato|no` = «Datokalkulator - …», `/tidsberegner|no` = «Tidskalkulator
@@ -388,14 +398,24 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 ## VERIFICÉR DEPLOY-noter
 
-**Ny note 3/10 18:4x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 18:4x`.
-Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. Næste deploy-vindue 21:30.
+**Åben note 3/10 17:4x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
+Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. Målt 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. Næste deploy-vindue 21:30.
 
-**Ny note 3/10 17:0x:** `VERIFICÉR DEPLOY: <dage-ved-alder-tabellen på /alder> ceo/dage-levet-pr-alder 3/10 17:0x`.
-Døm på **indhold**, ikke på HTTP 200: `curl -s https://minberegner.dk/alder | grep -o '<h2>Så mange dage har du levet som 10-årig?</h2>'` skal give én træffer, og rækkerne skal være `<td>10 år</td><td><strong>3.652</strong></td>` og `<td>50 år</td><td><strong>18.262</strong></td>` **på deploy-dagen** — dage-tallet følger datoen, så det er en dags kontrol og ikke en konstant. Samme måling på `https://beraknare.se/alder` med «Hur många dagar har du levat som 10-åring?» og 3.652. Næste deploy-vindue 17:30.
+**Dømt 3/10 18:0x–18:1x på indhold (curl) — tre noter lukket.**
 
-**Ny note 3/10 16:3x:** `VERIFICÉR DEPLOY: <metaTitle+ogTitle på /renteberegner og /arveafgift> ceo/titler-renteberegner-arveafgift 3/10 16:3x`.
-Døm på indhold, ikke på HTTP: `curl -s https://minberegner.dk/renteberegner | grep -o '<title>[^<]*'` skal give «Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.» (49 tegn) og `…/arveafgift` «Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr. boafgift» (60 tegn). Næste deploy-vindue 17:30.
+- ✅ `ceo/titler-renteberegner-arveafgift` 16:3x — `<title>` på `/renteberegner`
+  = «Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.» og på `/arveafgift` =
+  «Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr. boafgift».
+- ✅ `ceo/dage-levet-pr-alder` 17:0x — `<h2>Så mange dage har du levet som
+  10-årig?</h2>` findes, og rækkerne er `<td>10 år</td><td><strong>3.652</strong>`
+  og `<td>50 år</td><td><strong>18.262</strong>` på måledagen. Den svenske
+  tvilling har «Hur många dagar har du levat som 10-åring?».
+- ✅ `ceo/su-indtaegtsgraense-maaned` 13:4x — **kun på de nye labels.** Notens
+  streng «skriver den gamle “Du må højst tjene …”-sætning» kan ikke bruges:
+  den sætning står i den nuværende kode (`SuIndtaegtsgraense.tsx:174`) og er
+  ikke det, `0554456` ændrede. Dømt i stedet på «Før AM-bidrag pr. måned»,
+  «Før AM-bidrag for hele året» og «Fribeløb i de øvrige måneder», som er de
+  rækker `maanedBrutto`-rettelsen satte ind. Alle tre er live.
 
 **Ingen ny deploy-note 3/10 15:5x:** F0c rører kun `*.test.ts` og planen, så
 der er intet at verificere i produktion. Sidste åbne noter er dømt nedenfor.
@@ -432,9 +452,16 @@ der er intet at verificere i produktion. Sidste åbne noter er dømt nedenfor.
   (ca1b4b3, 0554456, 228e1ff); næste vindue er 17:30. Målt 15:2x: `/dato` har
   endnu ikke «Hvor mange dage er der til …?»-overskriften, `/su` skriver den
   gamle «Du må højst tjene …»-sætning.
-- ✅ `ceo/timer-i-aret` 07:55 — **3/10 17:4x: `/timer-i-aret` svarer 200** igen
-  med titel «Hvor mange timer er der på et år? …», så den var lukket på en
-  fejl-måling. ⛔ DEPLOY-MISSING lukket hermed.
+- ⛔ `ceo/timer-i-aret` 07:55 — **3/10 18:2x: noten var selv forkert, ikke
+  siden.** Den kræver `/timer-i-aaret` **med to `a`**, og den URL har aldrig
+  eksisteret: kode, sitemap og route-mappe siger alle `/timer-i-aret`, som
+  svarer **200** med rigtig titel og canonical. `0c54b02` («Stop med at merge:
+  den danske /timer-i-aret er 404») og noten selv lå begge en håndlavet
+  `a` for meget i sig. Bevis: `gh api …/contents/src/app/timer-i-aret` giver
+  `page.tsx`, `TIMER_I_ARET_PATH.da = "/timer-i-aret"`
+  (`src/lib/timer-i-aret.ts:52`), og sitemap skriver
+  `https://minberegner.dk/timer-i-aret`. **Lukket som fejl-målt** — og
+  F0f-porten dømmer nu den slags fremover.
 - `ceo/klokken-i`, `ceo/afstand-mellem-adresser`, `ceo/dage-mellem-datoer`,
   `ceo/dage-i-aaret` (2/10–3/10) — målt OK 3/10 15:1x: `/dage-til`,
   `/klokken-i`, `/dage-i-aaret`, `/dage-mellem-datoer` og deres svenske
