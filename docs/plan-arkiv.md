@@ -28449,3 +28449,31 @@ konkrete markup fra en tidligere iteration — de er ikke længere gyldige
 forventninger. `/dagpenge` har derimod stadig **3× `8%` og 6× `90%`**, altså
 ægte rå procenttal, så den note er **ikke** lukket. Deploy-vinduet efter
 sidste commit (23:45) er 4/10 07:30.
+
+## 4/10 01:0x — to deploy-noter fra 3/10 flyttet herhen (4/10 01:0x)
+
+Begge er delvis overlappet af `ceo/procent-mellemrum-bilsider` (3/10 23:0x), der
+målte de samme sider og fandt 0 rå procenter i `HEAD`. De står her, fordi næste
+iteration skal dømme dem live 4/10 07:30 med de brede strenge.
+
+**Note 3/10 21:5x — `ceo/procent-mellemrum-billaan-arveafgift`:**
+`curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'`
+skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på
+`beraknare.se/billaan` («kontantinsats på mindst 20 %») og på `/arveafgift`,
+`/brutto-netto`, `/kalorier`, `/flyttebudget`. Målt 3/10 21:5x: **deltvist** —
+/arveafgift, /brutto-netto og /flyttebudget 0, /billaan **6** («6%» i
+alderstabellen), /kalorier **3** («10-15%»). Målt 3/10 23:0x: de 9 rå procenter
+er **aldrig** fejl i `HEAD` — `/billaan` har 0 (satsen går gennem `sats()`), og
+`/kalorier` har 0 (`${usikkerMin}-${usikkerMaks} %`). Træfferne i live var gammel
+kode fra før fixen.
+
+**Note 3/10 22:0x — `ceo/procent-mellemrum-rentefradrag-skattefradrag-topskat`:**
+`curl -s https://minberegner.dk/rentefradrag | grep -c '33,6%'` skal give **0**,
+og tabellen skal vise `<td>33,6 %</td>`. Samme på `/renteberegner`
+(`<strong>22 %</strong>`), `/pension` (`<td>11,3 %</td>`) og `/moms`.
+Dømt 4/10 00:0x på indhold: `/rentefradrag` 0 rå procenter, altså rettet.
+
+**⛔ `/dagpenge` (fra noten 3/10 23:0x) er rettet i `HEAD`:** `grep -rn '8%\|90%'`
+på `src/app/dagpenge/page.tsx`, `src/components/DagpengeBeregner.tsx` og
+`src/lib/dagpenge*.ts` giver **0** — de 9 rå procenter var gammel kode i live.
+Genmåles 4/10 07:30 med `0` som eneste streng.

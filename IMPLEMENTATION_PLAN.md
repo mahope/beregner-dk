@@ -1,36 +1,46 @@
-STATUS: 4/10 00:5x. ✅ **/bmi spørger nu om alder** — `ceo/bmi-alder`.
-        Komponenten læste allerede `inputs.alder` fra delelinken, men ingen
-        sted i UI'et producerede en alder, så grenen var død kode. Målt 4/10:
-        «bmi beregner med alder», «bmi beregner med alder og køn», «bmi skala
-        ældre» og «beregn bmi formel» er danske autocomplete-træffere, og
-        `/bmi` er næststørste side (**938 besøgende/28d, −24 %** — missionen
-        siger «ret det, før der bygges nyt»). *Verify:* typecheck, lint (758
-        filer), **4145 tests / 263 filer**; de 6 nye tests renderer
-        `BMIBeregner` i da/se og kan ikke være grønne på den gamle kode, hvor
-        feltet ikke fandtes. **Ingen nye BMI-tal:** alderen bruges kun til
-        WHO's voksenbånd (18+) — børnepercentiler er bevidst ikke regnet, se
-        artiklen. Næste iteration skal fortsat være en **feature**.
+STATUS: 4/10 01:0x. ✅ **BMI-porten er genskabt med alle 30 tests** —
+        `ceo/bmi-testport`. `10c012a` (alderfeltet) **erstattede** hele
+        `BMIBeregner.test.tsx`: 473 linjer / 25 tests blev til 60 linjer / 6,
+        så 19 tests om enhedsskift, delelinks og WHR-grænser forsvandt med
+        den. Filen er nu 543 linjer / 30 tests: de 25 gamle plus alderens fire
+        (enhed i etiketten, børnevarslet under 18, ingen varsel fra 18, alderen
+        i delelinken). *Verify:* typecheck, lint (758 filer), **4173 tests /
+        263 filer**; de 25 genskabte dømmer delelinks, gentaget enhedsskift og
+        WHR-grænserne, de 4 nye dømmer alderen i da/se/no.
+        ✅ 4/10 00:5x: **`/bmi` spørger nu om alder** — `ceo/bmi-alder`.
+        `inputs.alder` lå i delelinken som død kode; målt 4/10 er «bmi beregner
+        med alder», «bmi beregner med alder og køn», «bmi skala ældre» og
+        «beregn bmi formel» danske autocomplete-træffere, og `/bmi` er
+        næststørste side (**938 besøgende/28d, −24 %**). Alderen bruges kun
+        til WHO's voksenbånd (18+) — børnepercentiler er bevidst ikke regnet.
+        → Se `docs/plan-arkiv.md`.
         ✅ 4/10 00:1x: **de tre review-fund på `/brok` er rettet** —
-        `ceo/brok-grupper-og-runding`. **Regelknapperne har nu egen legend**
-        («Vælg regel»/«Välj regel»), hver brøk har sit eget `fieldset` med
-        `firstFraction`/`secondFraction`, og `fælles nævner` er rettet til
-        **`fællesnævner`** begge steder. **Decimaler i et felt rundes nu ind i
-        feltet** — før stod `1.5` i «Første tæller» og regnedes som `1`, tavst.
-        *Verify:* typecheck, lint (758 filer), **4165 tests / 263 filer**, build;
-        de 8 nye tests er målt **røde 7/8** mod den gamle kode. Nye
-        `BrokBeregner.test.tsx` renderer komponenten i da/se og dømmer markupken,
-        fordi `label-a11y.test.tsx` kun tæller `input`/`label` — et `legend` er
-        hverken eller, så porten var grøn uanset hvad der stod i det.
-        ✅ 4/10 00:0x: **`TidszoneBeregner.test.tsx` var rød på master** — den
-        håndskrev «Sydney +8t», men Sydney skiftede til AEDT 4/10 (første søndag
-        i oktober), så porten går rød to gange om året. Nu regnes forventningen
-        fra `TIDSZONER_BEREGNER` + `erSommertid`, de samme kilder komponenten
-        bruger; mutation med fjernet vinterværdi giver **2 røde**. Målt i live:
-        `/rentefradrag` 0 rå procenter.
-        Næste iteration skal fortsat være en **feature** — `/brok` (3/10),
-        `/boernepenge`-titel (3/10) og de tre fund-rettelser er tre i træk.
+        `ceo/brok-grupper-og-runding`. Regelknapperne har egen legend
+        («Vælg regel»/«Välj regel»), hver brøk sit eget `fieldset`, og
+        `fælles nævner` er rettet til **`fællesnævner`**. Decimaler i et felt
+        rundes nu ind i feltet (før stod `1.5` i «Første tæller» og regnedes
+        som `1`, tavst). Nye 8 tests er målt **røde 7/8** mod den gamle kode.
+        ✅ 4/10 00:0x: `TidszoneBeregner.test.tsx` håndskrev «Sydney +8t», men
+        Sydney skiftede til AEDT 4/10, så porten gik rød to gange om året.
+        Nu regnes forventningen fra `TIDSZONER_BEREGNER` + `erSommertid`.
+        **Næste iteration skal være en feature** (seneste: 3/10 `/brok` +
+        `/boernepenge`-titel, 4/10 `/bmi`-alder — altså to features i træk).
         PR-TJEK: 3/10 23:4x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-        start (`b3cd282`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+        start (`20260a8`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+
+## CEO-kø punkt 0 — verificeret i koden 4/10 01:0x (alle otte lukket)
+
+Læst i `HEAD` før denne iteration, så listen ikke kan genkøres. **Valborg** er
+`month: 4, day: 30` i da og se (`dage-til.ts:1269-1270`); **svensk påskafton**
+er `offsetDays: -1` mod dansk `-2` (`:1015-1016`); **dansk sankthans** er fast
+23./24. juni med en FAQ, der siger «ikke en helligdag» (`:818`, `:838-846`) og
+ingen «fri med løn»; **«samme som langfredag»** findes ikke i `src`; **husleje**
+bygger FAQ'en på nettoprisindekset og siger at nævnet «ikke selv fastsætter en
+sats pr. område» (`page-data.ts:2130-2132`), og «2,9 %» findes ikke;
+**`toUtcMidnight`** læser `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`
+(`:1545`, `:1561-1573`); **`maneder: 12`** med kommentar om skudår
+(`dato-eksempler.ts:96-110`); **1. advent** «mellem 27. november og
+3. december» (`:1343`). ⛔ `/dagpenge`s 9 rå procenter er væk i `HEAD`.
 
 ## Fase 3 — trafik-drevet
 
@@ -412,9 +422,6 @@ Døm på indhold: `curl -s https://minberegner.dk/blog/arveafgift-regler-og-sats
 
 **Åben note 3/10 21:5x:** `VERIFICÉR DEPLOY: <29. februar-dagen i /alders tekst + fem danske ord i svensk FAQ + ny se-tekst-port> ceo/review-fund-alder-tabel-og-sprog 3/10 21:5x`.
 Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter ytterligare'` skal give **0** (og «— och efter ytterligare» = 1); `https://beraknare.se/procent` skal have «och inte heller», `beraknare.se/alder` «Timmarna är dagarna gånger 24 och aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas». `/alder`-teksten er daglig præcis den 29. februar, så den kan ikke dømmes før 2028-02-29 — døm da på «28. februar» i stedet for «i dag». Næste deploy-vindue 3/11 07:30.
-
-**Åben note 3/10 22:0x:** `VERIFICÉR DEPLOY: <mellemrum i procenttal i interpoleret tekst på /rentefradrag, /renteberegner, /pension, /moms + ny port der fanger }% i kilder> ceo/procent-mellemrum-rentefradrag-skattefradrag-topskat 3/10 22:0x`.
-Døm på indhold: `curl -s https://minberegner.dk/rentefradrag | grep -c '33,6%'` skal give **0**, og tabellen skal vise `<td>33,6 %</td>`. Samme på `/renteberegner` (`<strong>22 %</strong>`), `/pension` (`<td>11,3 %</td>`) og `/moms`. Næste deploy-vindue 3/11 07:30.
 
 **Åben note 3/10 17:4x (delvis live — se målingen 21:5x):** `VERIFICÉR DEPLOY: <mellemrum i procenttal på /billaan, /arveafgift, /brutto-netto, /kalorier, /flyttebudget> ceo/procent-mellemrum-billaan-arveafgift 3/10 17:4x`.
 Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%'` skal give **0** træffere, og «5,95 %» skal stå i rentetabellen. Samme måling på `beraknare.se/billaan` («kontantinsats på minst 20 %») og på `/arveafgift`, `/brutto-netto`, `/kalorier`, `/flyttebudget`. ⚠️ Målt 3/10 21:5x: **deltvist** — /arveafgift, /brutto-netto og /flyttebudget er 0, /billaan **6** (alle «6%» i alderstabellen), /kalorier **3** («10-15%»). De 9 er rå procenttal i `<td>`/brødtekst — en anden kodebane end `}%`, så committen dækkede dem ikke; de er **ikke** et deploy-problem. Tidligere måling 3/10 18:0x: **12 træffere** («0%» ×2, «10%» ×6, «15%» ×2, «5,49%», «5,95%», «6,0%», «6,25%», «6,5%», «6,50%», «6%» ×6), altså endnu det gamle indhold. ⚠️ **3/10 23:0x — de 9 var aldrig fejl i `HEAD`.** Egen måling: `/billaan` har 0 rå procenter (rentesatsen går gennem `sats()`, `${formatNumber(...)} %`) og `/kalorier` har 0 (`${usikkerMin}-${usikkerMaks} %` i `kalorier-eksempler.ts:220,259,279`). Træfferne i live var **gammel kode fra før fixen**. Noten er derfor ikke længere en deploy-måling: de to strenge dømmes igen 4/10 07:30, og resten af klassen er rettet i `ceo/procent-mellemrum-bilsider`.
