@@ -1,21 +1,16 @@
-STATUS: 3/10 05:05. CI grøn ved start (`37089145729`). Sentry: ingen uløste fejl
+STATUS: 3/10 05:45. CI grøn ved start (`37091789272`). Sentry: ingen uløste fejl
       14 dage, og SDK'en **er** sat op, så Sentry-punktet er lukket. **Gate:**
       `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run
       build` — **grøn 3/10 05:05** (alle exit 0, **3966** tests i 250 filer).
       PR-TJEK: 2026-10-03 — ingen åbne PR'er. CEO-kø punkt 0 er færdigt
       (`aca17e5`), og review-fundet fra 02:52 har ingen åbne fund (begge fund er
-      `RETTET 4ec1f2f`).
-      **Denne iteration: F5b-slice `boernepenge-faq-tal-fra-modul`** (den
-      tredje og **sidste** målte F5b-slice i denne række) — se
-      `docs/plan-arkiv.md`. 14 nye tests (3952 → 3966), **seks mutationer målt
-      røde**. **Ingen reel forkert sats fundet** — alle ni beløb var rigtige, så
-      slicen er et lås mod 2027-drift. **Én reel fejl fundet, to steder samme
-      klasse som `/pension` 2/10:** brødteksten skrev «Tjener du 1.100.000 kr.»,
-      altså **«kr.,»** foran kommaet, og «2%» uden mellemrum mod «2 %» i
-      FAQ-svaret på præcis samme side. Sidens egen port så ingen af delene,
-      fordi beløbet står i JSX-tekst.
-      **Næste iteration: en FEATURE** — sidste feature var `/dage-mellem-datoer`
-      (3/10 04:15), og de to F5b-slices herefter gør det til 1 feature i 3.
+      `RETTET 4ec1f2f`). Alle åbne VERIFICÉR-noter er fra 3/10 00:30-05:05 og
+      ligger **før** næste batch-vindue (07:30), så intet at hente endnu.
+      **Denne iteration: research, ingen kode** (den 45-min-grænse nåede, før en
+      feature kunne landes grønt). Målt: **Googles danske autocomplete** under
+      «hvor mange dage er der» og «dage til» + svensk under «hur många dagar är
+      det» / «dagar till». Se `docs/plan-arkiv.md`.
+      **Næste iteration: FEATURE `dage-i-aaret`** — målt datagrund, klar.
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
 ## Fase 3 — trafik-drevet
@@ -358,6 +353,40 @@ afsnit) — ❓ kilde til norske timepriser låser både brødteksten og tabelle
 indlæg er ikke samme fejlklasse som et beløb på en beregnerside. Beslut først,
 om de skal med; ellers skal de stå i portens undtagelsesliste som *blog*.
 
+## Målt 3/10 05:30 — research (ingen kode)
+
+Tre fund fra **Googles egen autocomplete** (`suggestqueries.google.com`,
+`hl=da&gl=dk` / `hl=sv&gl=se`), altså søgninger folk faktisk begynder at
+skrive. Rækkefølgen herunder er **målt voksende**, ikke gættet.
+
+1. **`/dage-i-aaret` + `/dagar-i-aret`** — **NÆSTE ITERATION.** Dansk #1 under
+   «hvor mange dage er der» er «**hvor mange dage er der på et år**», og der er
+   to sider mere i samme klub uden egen URL: «**hvor mange dage er der i
+   augusti**» (#7) og «… i juli» (nr. 8); svensk har «**hur många dagar är det
+   på ett år**» (#3), «… i augusti» og «… i juli». *Accept:* egen side pr. sprog
+   med de tolv måneders længde (dage/hverdage/weekenddage) og «dage tilbage af
+   2026», tallene læst fra `dato-eksempler.ts`s `aarstal()`/`maanedEksempel()`
+   (de findes allerede — `/dato` bruger dem i brødteksten), canonical/hreflang,
+   301 mellem domænerne, daglig sitemap-entry, `FAQPage` med de tre målte
+   spørgsmål og tovejs-links med `/dato`, `/ugenummer` og `/dage-til`.
+   **MÅL:** 0 (ny URL) → Plausible 17/10; GSC 14 dage: de fem målte søgninger.
+   Datagrund: autocomplete 3/10 + `/dato` 1.119 besøgende/28d og 136.071
+   GSC-visninger. ⛔ ikke: feriedatoer (❓ nedenfor).
+2. **Dansk procentnotation i JSX-tekst — 7 steder.** Målt med grep efter
+   `\d+%`: `feriepenge/page.tsx` «8%» ×2, «12,5%», «1%»; `laaneberegner/page.tsx`
+   «1-5%», «100%+»; `husleje/page.tsx` «33%». Dansk skriver «8 %» med mellemrum,
+   og `/pension` 2/10 + `/boernepenge` 3/10 netop fik den samme rettelse — så
+   siderne modsiger nu hinanden. *Accept:* de 7 steder bliver «8 %» / «12,5 %» /
+   «1 %» / «1-5 %» / «100 %+» / «33 %», og `regnestykker.test.ts`s
+   `procentAf`-port dømmer dem (den ser dem ikke nu — portens blinde spot er
+   præcis den her: JSX-tekst). Svensknotationen **uden** mellemrum er korrekt og
+   skal ikke røres (`/bolan`, `/laaneberegner`s svenske linjer).
+3. **F5b-køen er tom i praksis.** De 3 fund på `/flyttebudget` er
+   **markedsanslag uden kilde** (15.000-50.000 kr, 25.000-50.000 kr,
+   5.000-15.000 kr for flyttemand) — at flytte dem til et modul ville gøre en
+   opfundet sats *ligne* kildeført, så punkt 11 forbyder det. `/moms` er ⛔
+   (lovgrænser). *Accept:* F5b lukkes og næste opgave er altid en feature.
+
 ## Åbne VERIFICÉR DEPLOY-noter
 
 Batch-deployeren kører 07:30/12:30/17:30/21:30. Prøverne er på **indhold**,
@@ -425,6 +454,16 @@ De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
   er de tre tilsammen **364 visninger**. **Et skærmbillede af Search Console →
   Effektivitet → Søgninger, filtreret på `/procent`, plus de 20 største søgninger
   for hele domænet, låser F1-F3.** GSC-data kan ikke hentes fra en agent.
+- ❓ **Feriedatoer uden lovkilde (ny, 3/10 05:30 — lukker ferie-feature-køen
+  midlertidigt).** Feature-køens «Feriesider: vinterferie og påskeferie» er
+  **ikke bygbar uden en menneskekilde**, og det er målt, ikke antaget:
+  da.wikipedia `Ferie` siger «Vinterferie (**typisk** i uge 7 eller 8)» og
+  «Efterårsferie (typisk uge 42)» — altså ingen fast uge for vinterferien, kun
+  en tommelse, og intet om påskeferiens startdato. `efteraarsferien` på sitet er
+  skrevet til uge 42 som en fast regel, så samme kildegrund mangler også der.
+  **Ét skærmbillede fra en kommunes ferieplan 2026/2027 (helst to kommuner)
+  låser vinterferie, påskeferie og efterårsferie på én gang**, og er derfor
+  mere værd end ❓ 201 alene. Uden det bygges ingen ferieside.
 - ❓ **Ferielovens regel for sommerferiens startdato (opgave 201).**
   `/dage-til/summerferien` siger «sommerferien begynder altid den **sidste lørdag
   i juni**», og hævder det står i folkeskoleloven (2024). retsinformation.dk er en

@@ -26695,3 +26695,70 @@ forårsaget af denne slice. Samme mønster som den flake planen noterede 2/10 21
 «0-2 år 5.370, 3-6 år 4.248 og 7-14 år 3.342 kr/kvartal, 15-17 år 1.114 kr/md» **1**,
 `NaN` **0**. Svaret skal have `<title>` «Børnepenge Beregner 2026 - Børne- og
 ungeydelse».
+
+## 3/10 05:30 — research-iteration (ingen kode)
+
+**Hvorfor ingen kode.** Den 45-min-grænse nåede under feature-research: fundet
+var stærkt nok til at kræve en hel iteration, og en halvbygget side ville være
+tabt. Efter kontrakten er det her en research-iteration, så planen er
+opdateret med *målt* tal i stedet for gæt.
+
+**Målt: Googles autocomplete (offentlig læsning).**
+`https://suggestqueries.google.com/complete/search?client=firefox&hl=da&gl=dk`
+og `…hl=sv&gl=se`:
+
+```
+da  "hvor mange dage er der"     da  "hvor mange dage er der til"   da  "dage til"
+ - hvor mange dage er der på et år - hvor mange dage er der til juleaften - dage til jul
+ - hvor mange dage er der til 1. december - hvor mange dage er der til 1. december - dage til 1. december
+ - hvor mange dage er der til jul - hvor mange dage er der til den 24. december - dage tilbage af 2026
+ - hvor mange dage er der til den 24. december - hvor mange dage er der til halloween - dage til løn
+ - hvor mange dage er der til halloween - hvor mange dage er der til sommerferie - dage til 1. oktober
+ - hvor mange dage er der til sommerferie - hvor mange dage er der til efterårsferien - dage til 19. november
+ - hvor mange dage er der i augusti
+ - hvor mange dage er der i juli
+ - hvor mange dage er der tilbage af 2026
+
+se  "hur många dagar är det"     se  "dagar till"
+ - hur många dagar är det kvar till julafton - dagar till julafton
+ - hur många dagar är det på ett år - dagar till jul
+ - hur många dagar är det till julafton - dagar till valet
+ - hur många dagar är det kvar till halloween - dagar till julafton 2026
+ - hur många dagar är det kvar till jul - dagar till nyår
+ - hur många dagar är det mellan två datum - dagar till 19. november
+ - hur många dagar är det i augusti
+ - hur många dagar är det i juli
+```
+
+**Læsningen.** De ferie- og dato-spor, vi allerede har sider til, ligger
+**først** i begge sprog og på begge domæner — det bekræfter arbejdet. De tre
+klynger **uden egen URL** er «på **ett år**», «i **augusti/juli**» (dage i en
+måned) og «**tilbage af 2026**», og de ligger i dansk *og* svensk. Det er den
+næste feature: `/dage-i-aaret` + `/dagar-i-aret`, bygget på tal, der allerede
+findes i `dato-eksempler.ts` (`aarstal`, `maanedEksempel`) — altså ingen ny
+lov, ingen ny kilde, ingen gætning.
+
+**Ferie-feature-køen er lukket midlertidigt, målt.** da.wikipedia `Ferie`
+(udgave fra 9. august 2026) skriver «Vinterferie (**typisk** i uge 7 eller 8)»,
+«Efterårsferie (typisk uge 42)», «Sommerferie (typisk uge 29, 30 og 31)» og
+intet om påskeferiens start. Altså: ingen fast regel for vinterferien, og
+uge-42-påstanden i `efteraarsferien` har ikke samme kildegrund. Det er ikke en
+mangel, jeg kan løse ved at læse mere — det er en retslig kilde. Ny ❓.
+
+**Fejlklasse målt: dansk procentnotation i JSX-tekst.** `grep -rnE "[0-9]+%"`
+over `src/**` (minus tests) giver 7 **danske** steder uden mellemrum:
+`feriepenge/page.tsx:50` «8%», `:52` «12,5%», `:97` «1%», `:110` «8%»;
+`laaneberegner/page.tsx:65` «1-5%», `:66` «100%+»; `husleje/page.tsx:74` «33%».
+Det er samme fejl som `/pension` 2/10 og `/boernepenge` 3/10 fik rettet, så
+sitet modsiger sig selv. Svensk **uden** mellemrum er korrekt (`/bolan`s «30 %»,
+«10 %», «21 %» er dansk; svensk derimod «2-5%», «100%+») og røres ikke.
+`regnestykker.test.ts`s `procentAf`-port ser dem ikke — portens blinde spot er
+præcis denne: tal i ren JSX-tekst.
+
+**F5b-køen målt tom i praksis.** `/flyttebudget`s 3 fund er markedsanslag uden
+kilde («15.000-50.000 kr», «25.000-50.000 kr», «5.000-15.000 kr for en
+flyttemand»). At flytte dem til et modul ville give dem en fil, der ligner en
+kilde — det er præcis det punkt 11 forbyder. F5b bør lukkes.
+
+**Ikke kørt:** ingen kode, ingen ændringer i `src/`, ingen gate-kørsel (kun
+planen + arkivet ændret, så portene er urørt). Sidste grønne gate er 3/10 05:05.
