@@ -1,17 +1,67 @@
-import type { Locale } from "./i18n";
-import { BARSEL_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
-import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
-import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
-import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
 import {
-  NETTOPRISINDEKS_2026M08,
+  aktieskatBeskrivelse,
+  aktieskatFaqItems,
+  aktieskatOgBeskrivelse,
+  aktieskatSchemaBeskrivelse,
+} from "./aktieskat-eksempler";
+import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
+import { EKSEMPEL_BARN } from "./arveafgift";
+import { estimerNettoMaaned } from "./barsel/netto";
+import {
+  boerneBeskrivelse,
+  boerneMetaBeskrivelse,
+  boernepengeFaqItems,
+} from "./boernepenge-eksempler";
+import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
+import {
+  BESKAEFTIGELSESTILLAEG_2026,
+  INDKOMSTKRAV_2026,
+  dagpengeEfterSkatFaqSvar,
+  dagpengeKroner,
+  dagpengeNyuddannetFaqSvar,
+  dagpengeNyuddannetPeriodeFaqSvar,
+  dagpengeTimer,
+} from "./dagpenge-satser";
+import {
+  efterloenAldersSvar,
+  efterloenDescription,
+  efterloenFaqSvar,
+  efterloenMetaDescription,
+} from "./efterloen-eksempler";
+import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
+import { formatBelob, formatNumber, formatSvenskText } from "./format";
+import { getHelligdage, helligdagsnavne } from "./helligdage";
+import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
+import type { Locale } from "./i18n";
+import { kalorierFaqItems, kalorierOverskrifter } from "./kalorier-eksempler";
+import { konfirmationFaqSvar } from "./konfirmation-eksempler";
+import {
+  kvadratmeterEksempelAreal,
+  kvadratmeterEksempelLignelse,
+  kvadratmeterEksempelProdukt,
+  kvadratmeterFaqSvar,
+} from "./kvadratmeter-eksempler";
+import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
+import { leasingSeEksempelTekster } from "./leasing-eksempler";
+import {
+  AM_BIDRAG,
+  PERSONFRADRAG_2026,
+  loenBelob,
+  loenEfterSkatFaqItems,
+  loenEfterSkatOgBeskrivelse,
+} from "./loen-efter-skat-eksempler";
+import { iDagPaSiden } from "./lokal-dato";
+import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
+import {
   FORBRUGERPRISINDEKS_2026M08,
+  NETTOPRISINDEKS_2026M08,
   NETTOPRISINDELS_MAANED,
   beregnHuslejestigning,
   nettoprisindeksUnderForbrugerprisindeks,
 } from "./nettoprisindeks";
-import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
-import { ruteCacheSætning } from "./rute-cache";
+import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
+import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
+import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
 import {
   EXCEL_ANDEL,
   PROCENT_10_AF_FAQ,
@@ -25,78 +75,29 @@ import {
   procentForskel,
   rabatProcent,
 } from "./procent";
-import { formatBelob, formatNumber, formatSvenskText } from "./format";
-import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
-import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
-import {
-  BESKAEFTIGELSESTILLAEG_2026,
-  INDKOMSTKRAV_2026,
-  dagpengeEfterSkatFaqSvar,
-  dagpengeKroner,
-  dagpengeNyuddannetFaqSvar,
-  dagpengeNyuddannetPeriodeFaqSvar,
-  dagpengeTimer,
-} from "./dagpenge-satser";
-import { markedsprisFaqSvar } from "./timepris-markedspriser";
-import { timerIPeriodeFaqSvar } from "./timer-periode";
-import { ugeDatoerFaqSvar } from "./ugenummer";
-import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
-import { kalorierFaqItems, kalorierOverskrifter } from "./kalorier-eksempler";
-import {
-  aktieskatBeskrivelse,
-  aktieskatFaqItems,
-  aktieskatOgBeskrivelse,
-  aktieskatSchemaBeskrivelse,
-} from "./aktieskat-eksempler";
-import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
-import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
-import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
-import { EKSEMPEL_BARN } from "./arveafgift";
-import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
-import { iDagPaSiden } from "./lokal-dato";
-import { getHelligdage, helligdagsnavne } from "./helligdage";
-import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
-import { estimerNettoMaaned } from "./barsel/netto";
-import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
-import {
-  efterloenAldersSvar,
-  efterloenDescription,
-  efterloenFaqSvar,
-  efterloenMetaDescription,
-} from "./efterloen-eksempler";
-import {
-  AM_BIDRAG,
-  PERSONFRADRAG_2026,
-  loenBelob,
-  loenEfterSkatFaqItems,
-  loenEfterSkatOgBeskrivelse,
-} from "./loen-efter-skat-eksempler";
-import {
-  rentefradragDescription,
-  rentefradragMetaDescription,
-  RENTEFRADRAG_FAQ_SVAR,
-} from "./rentefradrag-eksempler";
-import { topskatBeskrivelse, topskatFaqItems } from "./topskat-eksempler";
-import {
-  boerneBeskrivelse,
-  boerneMetaBeskrivelse,
-  boernepengeFaqItems,
-} from "./boernepenge-eksempler";
-import {
-  kvadratmeterEksempelAreal,
-  kvadratmeterEksempelLignelse,
-  kvadratmeterEksempelProdukt,
-  kvadratmeterFaqSvar,
-} from "./kvadratmeter-eksempler";
-import { konfirmationFaqSvar } from "./konfirmation-eksempler";
 import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, PROMILLEGROV_SE } from "./promille";
-import { SVENSK_SKATT_2026 as SV_SKATT, SVENSK_SKATT_TAL } from "./svensk-skatt";
+import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 import {
   PROMILLE_GENSTANDE_RAEKKER,
   formatPromilleTabel,
+  genstandeTilGraense,
   vaegtNogle,
 } from "./promille-genstande";
+import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
+import {
+  RENTEFRADRAG_FAQ_SVAR,
+  rentefradragDescription,
+  rentefradragMetaDescription,
+} from "./rentefradrag-eksempler";
+import { ruteCacheSætning } from "./rute-cache";
+import { BARSEL_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
+import { SVENSK_SKATT_TAL, SVENSK_SKATT_2026 as SV_SKATT } from "./svensk-skatt";
+import { markedsprisFaqSvar } from "./timepris-markedspriser";
+import { timerIPeriodeFaqSvar } from "./timer-periode";
+import { topskatBeskrivelse, topskatFaqItems } from "./topskat-eksempler";
+import { ugeDatoerFaqSvar } from "./ugenummer";
+import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
 
 /**
  * svmn.dk's 2026-gennemsnit for kommuneskat, skrevet som procent. Det er
@@ -188,6 +189,16 @@ const PROMILE_60_KVINDE = (genstande: number) =>
   formatPromilleTabel(PROMILE_RAEKKE(genstande).promille[vaegtNogle(60, "kvinde")]);
 const PROMILE_70_MAND = (genstande: number) =>
   formatPromilleTabel(PROMILE_RAEKKE(genstande).promille[vaegtNogle(70, "mand")]);
+
+/**
+ * Hvor mange øl der skal til for den svenske grænse hos en 80 kg mand.
+ *
+ * FAQ'en påstod tidligere "nås alltså efter två öl", mens tabellen på samme
+ * side viser 0,22 ‰ efter *én* øl, brødteksten ovenfor siger 1, og
+ * `genstandeTilGraense` regner 1. Antallet læses derfra nu i stedet for at
+ * være håndskrevet — punkt 11: et tal i teksten skal kunne verificeres.
+ */
+const PROMILE_GRAENSE_80_MAND_SE = genstandeTilGraense(80, "mand", PROMILLEGRANSE.se)!;
 
 /**
  * `/pace`'s distance answers. Before this they were hand-typed sentences in
@@ -3299,7 +3310,7 @@ const sePages: Record<string, PageData> = {
         { question: "Hur beräknas promille?", answer: "Kalkylatorn använder Widmarks formel: promille = gram alkohol / (kroppsvikt × fördelningsfaktor) − 0,15 × timmar. Fördelningsfaktorn är cirka 0,68 för män och 0,55 för kvinnor. Kroppen bryter ner ungefär 0,15 ‰ per timme." },
         { question: "Vad är promillegränsen i Sverige?", answer: `Gränsen för rattfylleri är ${pct(PROMILLEGRANSE.se)} ‰. Vid ${pct(PROMILLEGROV_SE)} ‰ räknas det som grovt rattfylleri. Gränsen är betydligt lägre än i Danmark (${pct(PROMILLEGRANSE.da)} ‰).` },
         { question: "Hur mycket är ett standardglas?", answer: "Ett standardglas motsvarar 12 gram ren alkohol — ungefär en vanlig öl (33 cl), ett litet glas vin (12 cl) eller en snaps sprit (4 cl)." },
-        { question: "Hur många promille är 2 öl?", answer: `En vanlig öl på 33 cl är ca 12 gram alkohol, alltså ett standardglas. Två öl ger därför ca ${PROMILE_80_MAND(2)} promille hos en man på 80 kg och ${PROMILE_60_KVINDE(2)} hos en kvinna på 60 kg. Den svenska gränsen på ${pct(PROMILLEGRANSE.se)} promille nås alltså efter två öl — och efter ytterligare en timme är det ungefär 0,15 promille mindre.` },
+        { question: "Hur många promille är 2 öl?", answer: `En vanlig öl på 33 cl är ca 12 gram alkohol, alltså ett standardglas. Två öl ger därför ca ${PROMILE_80_MAND(2)} promille hos en man på 80 kg och ${PROMILE_60_KVINDE(2)} hos en kvinna på 60 kg. Den svenska gränsen på ${pct(PROMILLEGRANSE.se)} promille nås alltså efter ${PROMILE_GRAENSE_80_MAND_SE} öl hos en man på 80 kg — og efter ytterligare en timme är det ungefär 0,15 promille mindre.` },
         { question: "Hur många promille är farligt?", answer: `Promillen stiger kraftigt för varje standardglas: 4 öl på 80 kg är ${formatPromille(PROMILLE_4_OEL.promille)} promille, och 6 öl på 70 kg ger ${PROMILE_70_MAND(6)} promille. Det är inte promillet i sig som är farligt, utan vad du gör med bilen: från ${pct(PROMILLEGRANSE.se)} promille är det redan rattfylleri, och vid ${pct(PROMILLEGROV_SE)} promille räknas det som grovt rattfylleri — den grad där du som utgångspunkt förlorar ditt körkort. Det gäller oavsett om du känner dig "lagom" eller inte.` },
         { question: "Vad är promillegränsen i Danmark?", answer: `I Danmark går gränsen vid ${pct(PROMILLEGRANSE.da)} promille — alltså mer än dubbelt så hög som den svenska på ${pct(PROMILLEGRANSE.se)}. Det betyder att 2 öl till en man på 80 kg, som ger ${PROMILE_80_MAND(2)} promille, är lovligt i Danmark men rattonyktert i Sverige. Polen har också ${pct(PROMILLEGRANSE_UDLAND.polen)} promille, medan Storbritannien ligger på ${pct(PROMILLEGRANSE_UDLAND.storbritannien)}.` },
         { question: "Är beräkningen exakt?", answer: "Nej, det är en uppskattning. Mat, ämnesomsättning, medicin och hälsa påverkar den faktiska promillen. Kör aldrig bil om du är osäker." },

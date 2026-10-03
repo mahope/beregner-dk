@@ -1,15 +1,12 @@
-import { describe, test, expect } from "vitest";
-import { getPageData, getAvailableSlugs } from "./page-data";
-import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
-import { beregnPromille, PROMILLEGRANSE_UDLAND } from "./promille";
-import { sammenlignEnhedspris } from "./enhedspris";
-import { TIDSZONER } from "./tidszone-reference";
-import { forkortBrok } from "./brok";
-import { alderLevet, formatDageLived } from "./alder-levet";
+import { describe, expect, test } from "vitest";
 import { formatAlder } from "./alder-eksempler";
+import { alderLevet, formatDageLived } from "./alder-levet";
+import { forkortBrok } from "./brok";
+import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
+import { sammenlignEnhedspris } from "./enhedspris";
 import { formatBelob, formatNumber, getIntlLocale } from "./format";
 import { iDagISidensTidszone } from "./lokal-dato";
-import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
+import { getAvailableSlugs, getPageData } from "./page-data";
 import {
   EXCEL_ANDEL,
   PROCENT_10_AF_FAQ,
@@ -29,6 +26,10 @@ import {
   procentpointForskelFaqSvar,
   procentpointRelativ,
 } from "./procentpoint";
+import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, beregnPromille } from "./promille";
+import { genstandeTilGraense } from "./promille-genstande";
+import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
+import { TIDSZONER } from "./tidszone-reference";
 
 // ─── /procent's rabat-FAQ. Forventningerne i de to nedenstående porte er
 // *regnet* af de samme konstanter, som FAQ'en selv bygger sine svar af, så
@@ -1409,6 +1410,23 @@ describe("/promille — svar på udlandsklyngen", () => {
       if (!andet) continue;
       expect(andet.faqItems.map((f) => f.question).join(" ")).not.toContain("udlandet");
     }
+  });
+  test("den svenske «efter N øl»-påstand er regnet, ikke håndskrevet", () => {
+    // Målt 3/10 på beraknare.se/promille: FAQ'en sagde «nås alltså efter två
+    // öl», mens sidens egen tabel viser 0,22 ‰ efter *én* øl, brødteksten
+    // ovenfor siger 1, og `genstandeTilGraense` regner 1. Svaret ligger i
+    // FAQPage-JSON-LD, så det er den modsigelse Google læser.
+    const se = getPageData("promille", "se")!;
+    const svar = se.faqItems.find((f) => f.question === "Hur många promille är 2 öl?")!;
+    const antal = genstandeTilGraense(80, "mand", PROMILLEGRANSE.se)!;
+    expect(svar.answer).toContain(`nås alltså efter ${antal} öl`);
+    // Mutationen der lå bag fundet er den håndskrevne «efter två öl» — den
+    // overlever kun, hvis porten ikke dømmer det rigtige antal.
+    expect(svar.answer).not.toContain("efter två öl");
+    // Og antallet skal være det, tabellen faktisk viser for det antal øl.
+    expect(beregnPromille(antal, 80, "mand", 0)!.promille).toBeGreaterThanOrEqual(
+      PROMILLEGRANSE.se
+    );
   });
 });
 

@@ -28130,3 +28130,21 @@ sæsoner fordi USA skifter samme dag som Danmark.
 
 **Ikke gjort.** `landetsNavn` fordi `c.question(landet)` stadig er `<h1>` på
 siden (linje 147) — kun titlen ændrede sig, så overskriften er uændret.
+
+## 3/10 19:2x — STATUS fra før `ceo/svensk-promille-grænse`
+
+✅ **De 24 landesider under `/klokken-i` får svaret i titlen** —
+`ceo/klokken-titler` (F0h). Datagrund: `curl` på alle tolv danske sider 19:0x
+gav **identisk** `<title>`: «Hvad er klokken i USA? | MinBeregner.dk» — altså
+kun spørgsmålet og 18 tegn site-navn, ingen regning. De var de **eneste
+`title` uden `absolute`** på sitet, mens `/dage-til/*`, `/timer-i-aaret` og
+hubben alle har et regnet tal. *Fix:* `klokkenLandTitel()` bygger «Hvad er
+klokken i Japan? 12 i Danmark = 20:00 i Tokyo» fra `tidsforskelMinutter» —
+samme måling som brødteksten, samme 12-tal som `/tidszone`s titel, og
+`absolute` fjerner site-navnet. *Målt polaritet:* fast forskel → 1 rød,
+håndskrevet 06:00 for Japan → 1 rød, `title` som ren streng → 1 rød; grøn
+HEAD **26/26** i to filer. Punkt 1 ikke brudt: ruten er `force-dynamic`, build
+skriver `ƒ /klokken-i/[land]`. **GATE:** typecheck 0, lint 0 (755 filer), build
+0, **hele suiten 4130/4130** i 260 filer. CI grøn ved start (c1a83dd), ingen
+åbne PR'er, ingen uløste Sentry-fejl, begge review-fund står `RETTET 0a9b7bb`.
+PR-TJEK: 3/10 19:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.

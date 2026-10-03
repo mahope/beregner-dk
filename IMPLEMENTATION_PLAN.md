@@ -1,20 +1,29 @@
-STATUS: 3/10 19:2x. ✅ **De 24 landesider under `/klokken-i` får svaret i
-       titlen** — `ceo/klokken-titler` (F0h). Datagrund: `curl` på alle tolv
-       danske sider 19:0x gav **identisk** `<title>`: «Hvad er klokken i USA? |
-       MinBeregner.dk» — altså kun spørgsmålet og 18 tegn site-navn, ingen
-       regning. De var de **eneste `title` uden `absolute`** på sitet, mens
-       `/dage-til/*`, `/timer-i-aaret` og hubben alle har et regnet tal. *Fix:*
-       `klokkenLandTitel()` bygger «Hvad er klokken i Japan? 12 i Danmark =
-       20:00 i Tokyo» fra `tidsforskelMinutter` — samme måling som brødteksten,
-       samme 12-tal som `/tidszone`s titel, og `absolute` fjerner site-navnet.
-       *Målt polaritet:* fast forskel → 1 rød, håndskrevet 06:00 for Japan → 1
-       rød, `title` som ren streng → 1 rød; grøn HEAD **26/26** i to filer.
-       Punkt 1 ikke brudt: ruten er `force-dynamic`, build skriver
-       `ƒ /klokken-i/[land]`. **GATE:** typecheck 0, lint 0 (755 filer),
-       build 0, **hele suiten 4130/4130** i 260 filer.
-       CI grøn ved start (c1a83dd), ingen åbne PR'er, ingen uløste Sentry-fejl,
-       begge review-fund står `RETTET 0a9b7bb`.
-       PR-TJEK: 3/10 19:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
+STATUS: 3/10 19:5x. ✅ **Den svenske promille-FAQ modsagde sidens egen tabel** —
+       `ceo/svensk-promille-grænse`. `curl` på beraknare.se/promille 19:4x fandt
+       i **FAQPage-JSON-LD**: «Den svenska gränsen på 0,2 promille nås alltsa
+       efter två öl», mens samme sides tabel siger 0,22 ‰ efter **én** øl, og
+       brødteksten to afsnit længere oppe siger `genstandeTilGraense(80,"mand",
+       PROMILLEGRANSE.se)` = **1**. Det er CEO-kø-punkt 0's egen fejltype: et
+       håndskrevet antal i FAQ'en, som også er Googles snippet. *Fix:* tallet
+       læses nu fra `genstandeTilGraense`, så FAQ, tabel og brødtekst ikke kan
+       glide fra hinanden. *Målt polaritet:* rettelsen tilbage i gammel kode →
+       1 rød på `page-data.test.ts` («expected … to contain 'nås alltså efter
+       1 öl'»), grøn HEAD 125/125 i filen. **Første skrivning skrev `øl` i den
+       svenske sætning** — repoets egen `locale-leak-gate.test.ts` og den nye
+       test dømte begge rød, så fejlen blev fundet af portene og ikke af mig.
+       **GATE:** typecheck 0, lint 0 (755 filer), build 0, **hele suiten
+       4131/4131** i 260 filer.
+       **CEO-kø punkt 0 er gennemgået punkt for punkt 3/10 19:3x og alle otte
+       fejl er rettede i HEAD**: valborg `month: 4, day: 30`, svensk påskafton
+       lørdag (`dage-til.test.ts:246`), dansk sankthans fast 23./24. juni med 0
+       forekomster af «fri med løn», dansk påskeaften-FAQ siger nu at de er to
+       forskellige dage, `/husleje`s FAQ siger at lejeloven § 5 justerer efter
+       nettoprisindekset og at nævnet «ikke fastsætter en sats pr. område»,
+       `toUtcMidnight` læser `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`,
+       svensk promille-FAQ genererer fra `PROMILLEGRANSE.se`/`PROMILLEGROV_SE`,
+       `dato-eksempler.ts:111` `maneder: 12` og advent-teksten «mellem 27.
+       november og 3. december».
+       PR-TJEK: 3/10 19:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
 
 ## Fase 3 — trafik-drevet
 
@@ -341,6 +350,11 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 **Åbne F5b-slice: ingen — `/flyttebudget` er lukket 3/10 18:4x.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 3/10 19:5x:** `VERIFICÉR DEPLOY: <genereret grænse-påstand i den svenske promille-FAQ> ceo/svensk-promille-grænse 3/10 19:5x`.
+Døm på indhold: `curl -s https://beraknare.se/promille | grep -o 'nås alltså efter [0-9]* öl'`
+skal give **«nås alltså efter 1 öl»** (og `grep -c 'efter två öl'` = 0) i både
+den synlige FAQ og `FAQPage`-JSON-LD'en. Næste deploy-vindue 21:30.
 
 **Åben note 3/10 19:2x:** `VERIFICÉR DEPLOY: <regnet omregning i titlen på de 24 /klokken-i-og /klockan-i-landesider> ceo/klokken-titler 3/10 19:2x`.
 Døm på indhold: `curl -s https://minberegner.dk/klokken-i/japan | grep -oE '<title>[^<]*</title>'`
