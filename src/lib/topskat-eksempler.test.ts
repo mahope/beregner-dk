@@ -10,6 +10,7 @@ import {
   MELLEMSKAT_GRAENSE,
   SKATTELOFT,
   SKATTELOFT_PCT,
+  marginalSkatPct,
   TOPSKAT,
   TOPSKAT_GRAENSE,
   TOPTOPSKAT,
@@ -53,9 +54,9 @@ const TILLADTE_BELOB = new Set(
 /**
  * Procenter, porten accepterer — uden mellemrum, så «7,5 %» og «7,5%» er ét.
  *
- * `SKATTELOFT` er **ikke** en sats fra `SATSER_2026`, men sidens egen påstand om
- * skatteloftet (se modulens docblock), så den tages med her fordi den står i to
- * sætninger — brødteksten og FAQ-svaret — der begge skal kunne dømmes.
+ * `SKATTELOFT` er summen af fire satser fra `SATSER_2026`, så den følger dem og
+ * tages med her fordi den står i to sætninger — brødteksten og FAQ-svaret —
+ * der begge skal kunne dømmes.
  */
 const TILLADTE_PROCENTER = new Set(
   [
@@ -66,6 +67,9 @@ const TILLADTE_PROCENTER = new Set(
     SKATTELOFT,
   ].map((sats) => `${formatBelob(sats * 100, "da", 2).replace(/\s/g, "")}%`)
 );
+
+/** Én decimal, som værktøjet viser den. */
+const rund = (pct: number) => Math.round(pct * 10) / 10;
 
 const ROT = join(__dirname, "..", "..");
 const las = (sti: string) => readFileSync(join(ROT, sti), "utf8");
@@ -199,20 +203,88 @@ describe("/topskat — beløbsform", () => {
     expect(topskatBeskrivelse()).toContain("topskat fra 777.900 kr.");
   });
 
-  test("skatteloftet står ét sted, og værktøjet læser samme tal", () => {
-    expect(SKATTELOFT).toBe(0.5207);
-    expect(SKATTELOFT_PCT).toBe("ca. 52,07 %");
+  test("skatteloftet er summen af de fire indkomstskatter, ikke et håndskrevet tal", () => {
+    // Loftet var 0,5207 i hånden, altså bevaret fordi det stod der, og det lå
+    // lavere end summen af sit eget modul, fordi optællingen i docblocken
+    // sprang top-topskattens 5 % over. Nu er det de fire satser, og porten
+    // dømmer summen — ikke en streng.
+    expect(SKATTELOFT).toBe(
+      SATSER_2026.bundskat +
+        SATSER_2026.kommuneskatSnit +
+        SATSER_2026.mellemskat +
+        SATSER_2026.topskat,
+    );
+    expect(SKATTELOFT_PCT).toBe("ca. 52,06 %");
+
     const svar = topskatFaqItems().find((f) =>
       f.question.startsWith("Hvad er skatteloftet")
     );
-    expect(svar?.answer).toContain(`overstiger ${SKATTELOFT_PCT}`);
+    expect(svar?.answer).toContain(`tilsammen ${SKATTELOFT_PCT}`);
     expect(svar?.answer).toContain(`Med AM-bidrag (${AM_BIDRAG})`);
     // Kilden læses, fordi komponenten skrev «52,07» i to steder — i kappens
     // formel og i sin brødtekst — uafhængigt af FAQ-svaret.
     const komponent = las("src/components/TopskatBeregner.tsx");
-    expect(komponent).toContain("SKATTELOFT * 100");
+    expect(komponent).toContain("marginalSkatPct(indkomstEfterAm");
     expect(komponent).toContain("{SKATTELOFT_PCT}");
     expect(komponent).not.toMatch(/52[,.]07/);
+    // «aldrig overstiger» var den påstand, fundet dømte: over top-topskat-
+    // grænsen er marginalskatten reelt højere end loftet.
+    expect(komponent).not.toContain("aldrig overstiger");
+  });
+
+  test("kappen mod loftet er væk, fordi beløbet i kortet aldrig var kappet", () => {
+    // Kappen var ubetinget, så den bandt i det eneste interval hvor den kunne
+    // binde — over top-topskat-grænsen — og gjorde det 1,01 procentpoint for
+    // lavt. Målt med modulens egne tal: 3 mio brutto er 61,08 %, og kappen
+    // ved 60,07 % skrev den som 60,07 %.
+    const kap = SKATTELOFT * 100 + SATSER_2026.amBidrag * 100;
+    const efterAm = (brutto: number) => brutto * (1 - SATSER_2026.amBidrag);
+    const kc = SATSER_2026.kommuneskatSnit;
+    const ki = SATSER_2026.kirkeskatSnit;
+    const alleSatser =
+      SATSER_2026.bundskat +
+      kc +
+      ki +
+      SATSER_2026.mellemskat +
+      SATSER_2026.topskat +
+      SATSER_2026.topTopskat;
+    const udenKappe =
+      (SATSER_2026.amBidrag + (1 - SATSER_2026.amBidrag) * alleSatser) * 100;
+
+    // Mutation: sæt kappen tilbage i modulet, så er dette det eneste sted,
+    // hvor prøven kan se den.
+    expect(rund(Math.min(udenKappe, kap))).toBe(60.1);
+    expect(udenKappe).toBeGreaterThan(kap);
+
+    expect(marginalSkatPct(efterAm(3_000_000), kc, ki)).toBe(61.1);
+    expect(marginalSkatPct(efterAm(5_000_000), kc, ki)).toBe(61.1);
+    // Kommunefeltet kan tastes til vilje, så kappen ville også have under-
+    // rapporteret en høj kommuneskat: 40 % giver 70,24 %, ikke 60,1 %.
+    expect(marginalSkatPct(efterAm(1_500_000), 0.4, ki)).toBe(70.2);
+  });
+
+  test("marginalskatten følger de tre trin over hele skalaen", () => {
+    const efterAm = (brutto: number) => brutto * (1 - SATSER_2026.amBidrag);
+    const kc = SATSER_2026.kommuneskatSnit;
+    const ki = SATSER_2026.kirkeskatSnit;
+    // Under mellemskat, over mellemskat, over topskat og over top-topskat.
+    expect(marginalSkatPct(efterAm(400_000), kc, ki)).toBe(42.7);
+    expect(marginalSkatPct(efterAm(800_000), kc, ki)).toBe(49.6);
+    expect(marginalSkatPct(efterAm(1_500_000), kc, ki)).toBe(56.5);
+    expect(marginalSkatPct(efterAm(5_000_000), kc, ki)).toBe(61.1);
+    // Kirkeskatten kan slås fra i værktøjet, så den skal kunne forsvinde:
+    // 0,639 % af indkomsten efter AM-bidrag er 0,59 procentpoint, og det
+    // runder 49,6 % ned til 49 %.
+    expect(marginalSkatPct(efterAm(800_000), kc, 0)).toBe(49);
+    // Grænsen gælder fra det første beløb over den: lige over top-topskat-
+    // grænsen stiger procenten med netop satsen efter AM-bidrag.
+    const trin = SATSER_2026.topTopskat * (1 - SATSER_2026.amBidrag) * 100;
+    expect(
+      rund(
+        marginalSkatPct(TOPTOPSKAT_GRAENSE + 1, kc, ki) -
+          marginalSkatPct(TOPTOPSKAT_GRAENSE, kc, ki),
+      ),
+    ).toBe(rund(trin));
   });
 
   test("værktøjet og siden bruger samme omregning fra grænsen", () => {
@@ -263,10 +335,15 @@ describe("/topskat — dansk tekst", () => {
     const skatteloft = side?.faqItems?.find((f) =>
       f.question.startsWith("Hvad er skatteloftet")
     );
+    // Ikke «skatteloftet sikrer at din samlede marginalskat aldrig overstiger»:
+    // over top-topskat-grænsen lægger de 5 % oveni, så tallet gælder de fire
+    // indkomstskatter under den grænse.
     expect(skatteloft?.answer).toBe(
-      "Skatteloftet sikrer at din samlede marginalskat (ekskl. AM-bidrag og " +
-        "kirkeskat) ikke overstiger ca. 52,07 %. Med AM-bidrag (8 %) og " +
-        "kirkeskat kan den reelle marginalskat dog være højere."
+      "Under top-topskat-grænsen er de fire indkomstskatter — bundskat, " +
+        "kommuneskat, mellemskat og topskat — tilsammen ca. 52,06 % (ekskl. " +
+        "AM-bidrag og kirkeskat), og det er så højt din marginalskat kan blive " +
+        "dér. Med AM-bidrag (8 %) og kirkeskat kan den reelle marginalskat dog " +
+        "være højere, og over top-topskat-grænsen lægges 5 % oveni."
     );
   });
 });

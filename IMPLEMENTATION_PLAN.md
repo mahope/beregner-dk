@@ -1,18 +1,18 @@
-STATUS: 3/10 06:20. CI grøn ved start (`37092658019`). Sentry: ingen uløste fejl
-      14 dage, og SDK'en **er** sat op, så Sentry-punktet er lukket. **Gate:**
-      `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run
-      build` — **grøn 3/10 06:19** (alle exit 0, **3979** tests i 251 filer).
-      PR-TJEK: 2026-10-03 — ingen åbne PR'er. CEO-kø punkt 0 er færdigt
-      (`aca17e5`), og review-fundet fra 02:52 har ingen åbne fund (begge fund er
-      `RETTET 4ec1f2f`).
-      **Denne iteration: FEATURE `/dage-i-aaret` + `/dagar-i-aret`** — målt
-      datagrund, 13 nye tests, 5 mutationer målt røde. Se `docs/plan-arkiv.md`.
-      **Næste iteration:** de 7 danske procenttal i JSX-tekst (punkt 2 under
-      «Målt 3/10 05:30»), så `/pension` og `/boernepenge` ikke modsiges af
-      `/feriepenge`, `/laaneberegner` og `/husleje`. Derefter en ny målt feature.
-      BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden). De fire
-      2/10-VERIFICÉR-noter er flyttet til `docs/plan-arkiv.md` (planen skal under
-      40 KB) — de har haft mere end ét batch-vindue uden at blive tjekket.
+STATUS: 3/10 04:45. CI grøn ved start (`37094498538`), ingen åbne PR'er
+      (PR-TJEK: 2026-10-03). Sentry: ingen uløste fejl 14 dage, SDK'en er
+      sat op. **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run
+      test` · `npm run build` — **grøn 3/10 04:44** (alle exit 0, **3981**
+      tests i 251 filer).
+      **Denne iteration: review-fund MIDDEL på `/topskat` lukket** — kappen mod
+      «skatteloftet» fjernet, loftet afledt af `SATSER_2026`, formlen flyttet i
+      modulet. Målt: 3.000.000 kr. brutto gav **60,1 %** mod de faktiske
+      **61,1 %**. Se `docs/plan-arkiv.md`. **Næste iteration:** de 7 danske
+      procenttal i JSX-tekst (punkt 2 under «Målt 3/10 05:30») — så `/pension`
+      og `/boernepenge` ikke modsiges af `/feriepenge`, `/laaneberegner` og
+      `/husleje`. Derefter en ny målt feature.
+      BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden). Planen var
+      39.996 bytes og er skåret til **35.666** ved at flytte fire lukkede
+      blokke til `docs/plan-arkiv.md`.
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -219,69 +219,8 @@ JSX-listen **315 → 313** (`boernepenge/page.tsx` 2 → **0**), og `procentAf`
 dækning 13 → 12 + summen 25 → 24, fordi eksemplet nu er interpolationer.
 **14 nye tests** (3952 → 3966), **seks mutationer målt røde** (arkivet har hver).
 
-**Målt fejl — min egen port havde et blindt spot, som jeg lukkede samme
-commit.** `kr.,`-løkken dømte kun metadata og FAQ-svar, fordi beløbet i
-brødteksten står i en interpolation, så «kr.,» findes aldrig i kilden. Prøven
-binder derfor beløbet foran kommaet til `boerneBelobI` i stedet for at søge
-på en streng, der ikke kan rammes.
-
-**Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
-`strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
-`/boligsalg`s `faqItems` blev **publiceret som JSON-LD** (`FAQSchema` læser
-præcis `faqItems`). Det er den samme fejl som JSX-teksten, bare usynlig for
-porten.
-
-**Lukket 3/10 22:33 — `vaegttab-faq-fra-modul` (halve 2).** Se
-`docs/plan-arkiv.md`. *Målt:* **21** håndskrevne talgrupper væk fra
-`page-data.ts` (7 pr. sprog: 1.000, 7.700, 1.500, 1.200, 2.759, 1.780, 2.209),
-så listen er **152 → 131**. Fundet ved deploy-målingen: `beraknare.se/vaegttab`
-havde stadig 3 × «2.209» i synlig FAQ-tekst, i `FAQSchema`-JSON-LD **og** i
-RSC-payloaden, fordi halve 1 kun flyttede metadata-felterne. Ny
-`vaegttabFaqItems(locale)` bygger alle fem svar i alle tre sprog fra
-`vaegttabEksempelTal()` + `VAEGTTAB_KCAL_PR_KG` + `KALORIE_UNDERSKUD` +
-`AKTIVITETS_FAKTORER`; de to nye konstanter `VAEGTTAB_MIN_MAEND`/`_KVINDER` er
-flyttet fra brødteksten, ikke opdigtet. **Porten låste fejlen fast:**
-`page-data.test.ts` krævede «2.759»/«2.209» med dansk punktum for *alle tre*
-sprog; den dømmer nu `formatBelob(…, locale)` og forbyder `\d\.\d{3}` i hvert
-svar for `se`/`no`. Mutation: regexen rammer **4 af 4** gamle svenske svar, så
-prøven er rød mod den gamle kode. Dansk byte-uændret (`toEqual` mod de fem
-gamle strenge). `/vaegttab` se: 1.277 visninger.
-
 **Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
 `src/lib/*.ts` også, og listen opdateres i samme commit.
-
-**Lukket 3/10 03:00 — `rettelse-lofter-i-privatlivs`** (review-fund 29/9, punkt 0,
-ikke en F5b-slice). Se `docs/plan-arkiv.md`. *Målt:* begge fund var **ægte** —
-`/afstand-mellem-adresser` lovede om lagring to gange (brødtekst + `FAQSchema`),
-mens `rute.ts` skriver ruten i hukommelsen i 7 dage under koordinatnøglen, og
-`5m x 4m` stod i `/kvadratmeter`s korte FAQ-svar i tre sprog. Ny `rute-cache.ts`
-er det ene sted for både TTL'en og sætningen om den, så koden, brødteksten,
-FAQ'en og privatlivspolitikken ikke kan glide fra hinanden; nye
-`lagrings-paastand-gate.test.ts` (4 tests) forbyder løftet i hele `src/`, og
-`rute.test.ts` **måler** TTL'en i stedet for at læse den. **+8 tests**
-(3905 → 3913). Mutationer målt: 3 røde af 4 (sætningen), 1 rød (TTL'en),
-2 røde (målnotationen).
-
-**Lukket 3/10 02:40 — `efterloen-faq-tal-fra-modul`.** Se
-`docs/plan-arkiv.md`. *Målt:* **5** håndskrevne talgrupper væk fra
-`page-data.ts` (`description` + `metaDescription` + 3 af 8 FAQ-svar), så listen
-er **83 → 78** og `da/efterloen` er væk fra køen. **Ingen reel fejl fundet** —
-det skal siges rent: 20.057 = `Math.round(22.041 × 0,91)`, 5.772 = 481 × 12,
-15.870/10.580 = `SKATTEFRI_PRAEMIE_2026.portion`. Slicen er derfor et **lås mod
-2027-drift**, ikke en rettelse. **Den reelle fejl var et tredje sted:** satsen
-lå hårdkodet i `EfterloensBeregner.tsx` (`MAX_EFTERLOEN_91 = 20057`) *udenfor*
-portens rækkeevidde, så beregneren og søgeresultatet var to uafhængige tal.
-Ny `EFTERLOEN_SATS_PROCENT` + `EFTERLOEN_MAX_SATS` i `efterloen.ts` regner den
-af `DAGPENGE_2026.fuldtid`, og både komponenten og `efterloen-eksempler.ts`
-læser den. Aldersvaret («Hvornår kan jeg gå på efterløn?») havde ingen
-beløb, så porten dømmer det ikke — men det nævner alle fødselsår og aldre, så
-det er nu genereret række for række af `EFTERLOEN_ALDER_2026` **og** låst
-byte-uændret med `toBe`. Dansk ellers uændret, dog «91%» → «91 %» i to af
-fire sætninger, fordi `metaDescription` på samme side skrev «91 %» og de to
-beskrivelser modsagde hinanden. **Porten er adfærdsbaseret:** den dømmer
-*hvert* beløb i metadata og svar mod de tal modulerne må skrive. Mutation
-(«20.057» → håndskrevet «19.500» i satssvaret) → **2 røde** af 6. **7 nye
-tests** (3898 → 3905). ⛔ Se nyt ❓ om deltidsfaktoren 0,67 nedenfor.
 
 **Otte filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
 (`arveafgift-belob-fra-modul`), `/boligsalg` (`boligsalg-belob-fra-modul`),
@@ -446,9 +385,10 @@ De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
 
 `VERIFICÉR DEPLOY: /dage-mellem-datoer + /dagar-mellan-datum (nye sider med eget slugsprog: `minberegner.dk/dage-mellem-datoer` skal have `<title>` «Dage mellem datoer: beregn antal dage mellem to datoer», **1** `<h1>`, **3** spørgsmål i `FAQPage`-JSON-LD («Hvor mange dage er der mellem to datoer?», «Er 2028 et skudår, og hvor mange dage er der i det?», «Hvorfor står der både dage og hele uger?»), eksempel-sætningen «Fra 1. januar 2026 til 1. januar 2027 går der 365 dage: 52 hele uger og 1 dag til.», og **0** «aldrig kan bli negativt»; `beraknare.se/dagar-mellan-datum` skal have `<title>` «Dagar mellan datum: räkna ut antal dagar mellan två datum» og eksemplet «… går det 365 dagar: 52 hela veckor och 1 dag till.», altså **0** «aldrig kan bli negativt»; **0** `NaN` på begge; begge URL'er skal ligge i hvert sit eget sitemap med `daily`, og `minberegner.dk/dagar-mellan-datum` + `beraknare.se/dage-mellem-datoer` skal 301'e til hver sin egen sti) ceo/dage-mellem-datoer 3/10 04:15`
 
-`VERIFICÉR DEPLOY: /topskat henter grænser, satser og bruttoindkomster fra sit eget modul (metadata og FAQ skal have «mellemskat fra 641.200 kr,» — **kr uden punktum** foran kommaet — og «topskat fra 777.900 kr.», altså **0** × «641.200 kr.,»; FAQ-svaret «Hvornår betaler man topskat i 2026?» skal have «(7,5 %)», «(yderligere 7,5 %)» og «ca. 697.000 kr./år (ca. 58.100 kr./md)» og «845.500 kr./år (ca. 70.500 kr./md)» — altså **0** × «58.000», **0** × «7,5%», **0** × «5%»; FAQ-svaret «Hvad er skatteloftet?» skal have «overstiger ca. 52,07 %» og «Med AM-bidrag (8 %)», altså **0** × «52,07%»; FAQ-svaret «Hvad er den nye top-topskat?» skal have «på 5 % for indkomster over 2.592.700 kr (efter AM-bidrag)», altså **0** × «2.592.700 kr.»; brødtekstens punktliste skal skrive «Mellemskat (7,5 %):» med mellemrum, altså **0** × «(7,5%):»; værktøjets «Grænser 2026» skal vise «Mellemskat fra 697.000 kr./år brutto. Topskat fra 845.500 kr./år brutto.» — altså **0** × «845.544»; **intet** `NaN`) ceo/topskat-faq-tal-fra-modul 3/10 04:37`
 
 `VERIFICÉR DEPLOY: /boernepenge henter satser, årstal og aftrapping fra sit eget modul (`minberegner.dk/boernepenge`: `description` skal have «0-2 år: 5.370 kr/kvartal, 3-6 år: 4.248 kr/kvartal, 7-14 år: 3.342 kr/kvartal, 15-17 år: 1.114 kr/md»; `metaDescription` skal have «0-2 år 5.370, 3-6 år 4.248 og 7-14 år 3.342 kr/kvartal, 15-17 år 1.114 kr/md» — altså **0** × «kr.,» på hele siden og **0** × «2%»; brødteksten skal skrive «Hvis din indkomst overstiger 961.100 kr. i 2026, nedsættes ydelsen med 2 % af beløbet over grænsen.» og «Tjener du 1.100.000 kr, er du 138.900 kr. over grænsen.» med **kr uden punktum** foran kommaet; FAQ-svaret «Hvor meget får jeg i børnepenge 2026?» skal have «5.370 kr/kvartal (21.480 kr/år)», «4.248 kr/kvartal (16.992 kr/år)», «3.342 kr/kvartal (13.368 kr/år)» og «1.114 kr/måned (13.368 kr/år)»; FAQ-svaret «Bliver børnepenge modregnet ved høj indkomst?» skal have «overstiger 961.100 kr. i 2026», «1.000.000 kr. giver 2 % af 38.900 kr. = 778 kr. årligt»; **intet** `NaN`) ceo/boernepenge-faq-tal-fra-modul 3/10 05:05`
+
+`VERIFICÉR DEPLOY: /topskat henter grænser, satser, bruttoindkomster **og marginalskat** fra sit eget modul (begge commits fra 3/10 deployer sammen): metadata og FAQ skal have «mellemskat fra 641.200 kr,» — **kr uden punktum** foran kommaet — og «topskat fra 777.900 kr.», altså **0** × «641.200 kr.,»; FAQ-svaret «Hvornår betaler man topskat i 2026?» skal have «(7,5 %)», «(yderligere 7,5 %)» og «ca. 697.000 kr./år (ca. 58.100 kr./md)» og «845.500 kr./år (ca. 70.500 kr./md)» — altså **0** × «58.000»; FAQ-svaret «Hvad er skatteloftet?» skal være «Under top-topskat-grænsen er de fire indkomstskatter … tilsammen **ca. 52,06 %** …» og **ikke** «Skatteloftet sikrer», altså **0** × «52,07», **0** × «aldrig overstiger» på hele siden; værktøjet skal vise **61,1 %** marginalskat ved 3.000.000 kr. brutto (ikke 60,1) — kontroller ved at sætte feltet til 3000000 og læse resultatkortets «Marginal skat»-linje; **intet** `NaN`) ceo/topskat-loft-ved-satser 3/10 04:45`
 
 ## ❓ Til Mads
 

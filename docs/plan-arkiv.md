@@ -26849,3 +26849,78 @@ bevist deployede — hold dem i øjnene ved næste live-måling.
 `VERIFICÉR DEPLOY: /klokken-i + /klockan-i (hub med klokken i 12 lande) ceo/klokken-i-hub 2/10 22:07`
 `VERIFICÉR DEPLOY: /vaegttab FAQ tal fra modulet (svensk 2 209, ikke 2.209) ceo/vaegttab-faq-fra-modul 2/10 22:33`
 `VERIFICÉR DEPLOY: /kalorier eksempel fra modulet (svensk 1 780, ikke 1.780) ceo/kalorier-faq-tal-fra-modul 2/10 22:56`
+
+
+## 3/10 04:45 — lukkede blokke flyttet ud af planen (40 KB-loftet)
+
+Planen må kun holde åbne opgaver, åbne VERIFICÉR-noter og ❓. Disse er
+lukkede, så deres fulde målinger ligger herfra nu.
+
+
+
+## 3/10 04:45 — lukkede blokke flyttet ud af planen (40 KB-loftet)
+
+Planen må kun holde åbne opgaver, åbne VERIFICÉR-noter og ❓. Disse er
+lukkede, så deres fulde målinger ligger herfra nu. Bemærk at
+**Åben: beløbs-porten scanner kun `*.tsx`** blev ikke flyttet.
+
+**Målt fejl — min egen port havde et blindt spot, som jeg lukkede samme
+commit.** `kr.,`-løkken dømte kun metadata og FAQ-svar, fordi beløbet i
+brødteksten står i en interpolation, så «kr.,» findes aldrig i kilden. Prøven
+binder derfor beløbet foran kommaet til `boerneBelobI` i stedet for at søge
+på en streng, der ikke kan rammes.
+
+**Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
+`strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
+`/boligsalg`s `faqItems` blev **publiceret som JSON-LD** (`FAQSchema` læser
+præcis `faqItems`). Det er den samme fejl som JSX-teksten, bare usynlig for
+porten.
+
+**Lukket 3/10 22:33 — `vaegttab-faq-fra-modul` (halve 2).** Se
+`docs/plan-arkiv.md`. *Målt:* **21** håndskrevne talgrupper væk fra
+`page-data.ts` (7 pr. sprog: 1.000, 7.700, 1.500, 1.200, 2.759, 1.780, 2.209),
+så listen er **152 → 131**. Fundet ved deploy-målingen: `beraknare.se/vaegttab`
+havde stadig 3 × «2.209» i synlig FAQ-tekst, i `FAQSchema`-JSON-LD **og** i
+RSC-payloaden, fordi halve 1 kun flyttede metadata-felterne. Ny
+`vaegttabFaqItems(locale)` bygger alle fem svar i alle tre sprog fra
+`vaegttabEksempelTal()` + `VAEGTTAB_KCAL_PR_KG` + `KALORIE_UNDERSKUD` +
+`AKTIVITETS_FAKTORER`; de to nye konstanter `VAEGTTAB_MIN_MAEND`/`_KVINDER` er
+flyttet fra brødteksten, ikke opdigtet. **Porten låste fejlen fast:**
+`page-data.test.ts` krævede «2.759»/«2.209» med dansk punktum for *alle tre*
+sprog; den dømmer nu `formatBelob(…, locale)` og forbyder `\d\.\d{3}` i hvert
+svar for `se`/`no`. Mutation: regexen rammer **4 af 4** gamle svenske svar, så
+prøven er rød mod den gamle kode. Dansk byte-uændret (`toEqual` mod de fem
+gamle strenge). `/vaegttab` se: 1.277 visninger.
+
+**Lukket 3/10 03:00 — `rettelse-lofter-i-privatlivs`** (review-fund 29/9, punkt 0,
+ikke en F5b-slice). Se `docs/plan-arkiv.md`. *Målt:* begge fund var **ægte** —
+`/afstand-mellem-adresser` lovede om lagring to gange (brødtekst + `FAQSchema`),
+mens `rute.ts` skriver ruten i hukommelsen i 7 dage under koordinatnøglen, og
+`5m x 4m` stod i `/kvadratmeter`s korte FAQ-svar i tre sprog. Ny `rute-cache.ts`
+er det ene sted for både TTL'en og sætningen om den, så koden, brødteksten,
+FAQ'en og privatlivspolitikken ikke kan glide fra hinanden; nye
+`lagrings-paastand-gate.test.ts` (4 tests) forbyder løftet i hele `src/`, og
+`rute.test.ts` **måler** TTL'en i stedet for at læse den. **+8 tests**
+(3905 → 3913). Mutationer målt: 3 røde af 4 (sætningen), 1 rød (TTL'en),
+2 røde (målnotationen).
+
+**Lukket 3/10 02:40 — `efterloen-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **5** håndskrevne talgrupper væk fra
+`page-data.ts` (`description` + `metaDescription` + 3 af 8 FAQ-svar), så listen
+er **83 → 78** og `da/efterloen` er væk fra køen. **Ingen reel fejl fundet** —
+det skal siges rent: 20.057 = `Math.round(22.041 × 0,91)`, 5.772 = 481 × 12,
+15.870/10.580 = `SKATTEFRI_PRAEMIE_2026.portion`. Slicen er derfor et **lås mod
+2027-drift**, ikke en rettelse. **Den reelle fejl var et tredje sted:** satsen
+lå hårdkodet i `EfterloensBeregner.tsx` (`MAX_EFTERLOEN_91 = 20057`) *udenfor*
+portens rækkeevidde, så beregneren og søgeresultatet var to uafhængige tal.
+Ny `EFTERLOEN_SATS_PROCENT` + `EFTERLOEN_MAX_SATS` i `efterloen.ts` regner den
+af `DAGPENGE_2026.fuldtid`, og både komponenten og `efterloen-eksempler.ts`
+læser den. Aldersvaret («Hvornår kan jeg gå på efterløn?») havde ingen
+beløb, så porten dømmer det ikke — men det nævner alle fødselsår og aldre, så
+det er nu genereret række for række af `EFTERLOEN_ALDER_2026` **og** låst
+byte-uændret med `toBe`. Dansk ellers uændret, dog «91%» → «91 %» i to af
+fire sætninger, fordi `metaDescription` på samme side skrev «91 %» og de to
+beskrivelser modsagde hinanden. **Porten er adfærdsbaseret:** den dømmer
+*hvert* beløb i metadata og svar mod de tal modulerne må skrive. Mutation
+(«20.057» → håndskrevet «19.500» i satssvaret) → **2 røde** af 6. **7 nye
+tests** (3898 → 3905). ⛔ Se nyt ❓ om deltidsfaktoren 0,67 nedenfor.

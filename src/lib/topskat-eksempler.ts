@@ -30,11 +30,10 @@
  * `/loen-efter-skat` 3/10 — de to metadatafelter lå her oven i hinanden og
  * skrev begge «641.200 kr.,».
  *
- * {@link SKATTELOFT} er **ikke** afledt af satserne: summen af `SATSER_2026`s
- * indkomstskatter er 52,059 % (12,01 + 25,049 + 7,5 + 7,5), så 52,07 er sidens
- * eksisterende påstand, og den er heller ikke slået op (punkt 11). Den står
- * alligevel her, fordi `TopskatBeregner` og FAQ-svaret begge skriver den — som
- * to uafhængige tal. Se {@link SKATTELOFT_PCT}.
+ * {@link SKATTELOFT} er nu afledt af satserne. Det var **ikke** afledt: tallet
+ * 52,07 var bevaret, fordi det stod der, og det lå lavere end summen af sit eget
+ * modul (12,01 + 25,049 + 7,5 + 7,5 = 52,059 %), fordi optællingen sprang
+ * top-topskattens 5 % over. Se {@link SKATTELOFT} og {@link marginalSkatPct}.
  */
 
 import { formatBelob, getCurrencySuffix } from "./format";
@@ -90,16 +89,62 @@ export const TOPSKAT_GRAENSE = SATSER_2026.topskatGraense;
 export const TOPTOPSKAT_GRAENSE = SATSER_2026.topTopskatGraense;
 
 /**
- * Skatteloftet på indkomstskatterne (ekskl. AM-bidrag og kirkeskat), som brødteksten
- * og FAQ-svaret begge skriver. ** ikke afledt** — se modulens docblock.
+ * Loftet for de fire statslige indkomstskatter — bundskat, kommuneskat,
+ * mellemskat og topskat — som summerer til 52,059 %. Det er det højeste
+ * marginalniveau **under top-topskat-grænsen**; over grænsen lægges
+ * top-topskattens 5 % oveni. Navnet er sidens egen — «skatteloft» er
+ * spørgsmålet i FAQ'en og overskriften i brødteksten — men tallet **er summen
+ * af satser**, ikke en regel der kapper noget: se {@link marginalSkatPct}.
  *
- * Værktøjet bruger tallet til at kappe marginalskatten ved
- * `SKATTELOFT + AM-bidrag`, så det er samme sats i begge steder.
+ * Afledt af `SATSER_2026`, så en satsændring flytter tallet med. Tallet var
+ * håndskrevet som 0,5207, altså «bevaret fordi det stod der» — og sin egen
+ * docblock begrundede det med en optælling, der sprang top-topskattens 5 % over.
+ * Kommuneskatten er gennemsnittet fra `satser-2026.ts`, fordi det er det samme
+ * tal `TopskatBeregner` viser i sit resultatkort.
  */
-export const SKATTELOFT = 0.5207;
+export const SKATTELOFT =
+  SATSER_2026.bundskat +
+  SATSER_2026.kommuneskatSnit +
+  SATSER_2026.mellemskat +
+  SATSER_2026.topskat;
 
-/** «ca. 52,07 %» */
+/** «ca. 52,06 %» */
 export const SKATTELOFT_PCT = `ca. ${formatBelob(SKATTELOFT * 100, DA, 2)} %`;
+
+/**
+ * Den marginale skatteprocent — skatten af den sidst tjente krone — for en
+ * indkomst **efter AM-bidrag**. AM-bidraget tages først, og resten af kronen
+ * beskattes med indkomstskatterne. `kommuneskat` og `kirkeskat` er argumenter,
+ * fordi de er kommunespecifikke; `TopskatBeregner` lægger begge ind i
+ * indkomstskatterne, altså i det tal værktøjet viser.
+ *
+ * **Der kappes ikke.** Værktøjet havde før `Math.min(marginal, SKATTELOFT +
+ * AM-bidrag)`, og det var forkert på to måder. For det første: `samletSkat`
+ * beregnes trin for trin på hvert sit eget grundlag og blev aldrig kappet, så en
+ * kappet procent kunne umulig være rigtig samtidig med beløbet i samme
+ * resultatkort. For det andet: kappen kunne netop kun binde over
+ * top-topskat-grænsen, fordi de fire satser under den er lavere end loftet —
+ * så den gjorde skade netop ét sted: 1,01 procentpoint for lavt, idet den skrev
+ * 60,07 % der de faktiske 61,08 % hørte hjemme. 2026-modellen har heller ingen
+ * samlet grænse for marginalskatten at kappe ved: top-topskattens 5 % over
+ * {@link TOPTOPSKAT_GRAENSE} er det nye mekanisme i stedet for et loft.
+ *
+ * Resultatet er rundet til én decimal, fordi det er det tal værktøjet viser.
+ */
+export function marginalSkatPct(
+  indkomstEfterAm: number,
+  kommuneskat: number,
+  kirkeskat: number,
+): number {
+  let indkomstSkat = SATSER_2026.bundskat + kommuneskat + kirkeskat;
+  if (indkomstEfterAm > MELLEMSKAT_GRAENSE) indkomstSkat += SATSER_2026.mellemskat;
+  if (indkomstEfterAm > TOPSKAT_GRAENSE) indkomstSkat += SATSER_2026.topskat;
+  if (indkomstEfterAm > TOPTOPSKAT_GRAENSE) indkomstSkat += SATSER_2026.topTopskat;
+
+  const marginalSkat =
+    SATSER_2026.amBidrag + (1 - SATSER_2026.amBidrag) * indkomstSkat;
+  return Math.round(marginalSkat * 1000) / 10;
+}
 
 /**
  * Den bruttoindkomst, hvor grænsen nås: mellem- og topskat beregnes af indkomsten
@@ -152,9 +197,12 @@ export function topskatFaqItems(): { question: string; answer: string }[] {
     {
       question: "Hvad er skatteloftet?",
       answer:
-        `Skatteloftet sikrer at din samlede marginalskat (ekskl. AM-bidrag og ` +
-        `kirkeskat) ikke overstiger ${SKATTELOFT_PCT}. Med AM-bidrag (${AM_BIDRAG}) ` +
-        `og kirkeskat kan den reelle marginalskat dog være højere.`,
+        `Under top-topskat-grænsen er de fire indkomstskatter — bundskat, ` +
+        `kommuneskat, mellemskat og topskat — tilsammen ${SKATTELOFT_PCT} ` +
+        `(ekskl. AM-bidrag og kirkeskat), og det er så højt din marginalskat ` +
+        `kan blive dér. Med AM-bidrag (${AM_BIDRAG}) og kirkeskat kan den ` +
+        `reelle marginalskat dog være højere, og over top-topskat-grænsen ` +
+        `lægges ${TOPTOPSKAT} oveni.`,
     },
     {
       question: "Hvad er den nye top-topskat?",

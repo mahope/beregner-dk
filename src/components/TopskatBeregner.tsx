@@ -7,7 +7,7 @@ import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { SATSER_2026 } from "@/lib/satser-2026";
-import { SKATTELOFT, SKATTELOFT_PCT, bruttoGraense } from "@/lib/topskat-eksempler";
+import { SKATTELOFT_PCT, TOPTOPSKAT as TOP_TOPSKAT_PCT, bruttoGraense, marginalSkatPct } from "@/lib/topskat-eksempler";
 
 // 2026-satser fra den fælles kilde (src/lib/satser-2026.ts)
 const AM_BIDRAG = SATSER_2026.amBidrag;
@@ -120,13 +120,10 @@ export default function TopskatBeregner() {
 
     // Marginal skatteprocent (skat af den sidst tjente krone). AM-bidraget
     // tages først, og resten af kronen beskattes med indkomstskatterne.
-    let indkomstSkat = BUNDSKAT + komPct + kirPct;
-    if (betalerMellemskat) indkomstSkat += MELLEMSKAT;
-    if (betalerTopskat) indkomstSkat += TOPSKAT;
-    if (betalerTopTopskat) indkomstSkat += TOP_TOPSKAT;
-    const marginalSkat = AM_BIDRAG + (1 - AM_BIDRAG) * indkomstSkat;
-    // Skatteloft på indkomstskatterne (ekskl. AM og kirkeskat): se SKATTELOFT.
-    const marginalPct = Math.min(marginalSkat * 100, SKATTELOFT * 100 + AM_BIDRAG * 100);
+    // Formlen har sin egen forfatter i modulet, fordi `samletSkat` regnes trin
+    // for trin ovenfor og derfor ikke må kappes — en kappet procent ville
+    // modsige beløbet i samme kort.
+    const marginalPct = marginalSkatPct(indkomstEfterAm, komPct, kirPct);
 
     // Hvad skal du tjene før topskat?
     // Samme omregning som brødteksten og FAQ-svaret bruger, så værktøjet og
@@ -151,7 +148,7 @@ export default function TopskatBeregner() {
       samletSkat: Math.round(samletSkat),
       nettoLoen: Math.round(nettoLoen),
       effektivSkat: Math.round(effektivSkat * 10) / 10,
-      marginalPct: Math.round(marginalPct * 10) / 10,
+      marginalPct,
       topSkatBruttoGraense,
       mellemSkatBruttoGraense,
       overMellemskat: Math.max(0, Math.round(indkomstEfterAm - MELLEMSKAT_GRAENSE)),
@@ -302,7 +299,7 @@ export default function TopskatBeregner() {
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <h2 className="font-semibold text-green-800 dark:text-green-300 mb-2">Skatteloft</h2>
           <p className="text-sm text-green-700 dark:text-green-400">
-            Der er et skatteloft på {SKATTELOFT_PCT} (ekskl. AM-bidrag og kirkeskat). Det sikrer at din samlede marginalskat aldrig overstiger dette niveau.
+            Under top-topskat-grænsen er bundskat, kommuneskat, mellemskat og topskat tilsammen {SKATTELOFT_PCT} (ekskl. AM-bidrag og kirkeskat), og det er så højt din marginalskat kan blive dér. Over top-topskat-grænsen lægges yderligere {TOP_TOPSKAT_PCT} oveni.
           </p>
         </div>
       </div>
