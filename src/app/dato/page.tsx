@@ -163,6 +163,14 @@ export default async function DatoPage() {
           <Link href="/alder">aldersberegneren</Link>.
         </p>
 
+        <h2>Hvor mange dage er der på et år?</h2>
+        <p>
+          Et kalenderår har 365 dage, men de tolv måneder er ikke lige lange.
+          Alle 12 med dage, hverdage og weekenddage står på en{" "}
+          <Link href="/dage-i-aaret">egen side med hele årets oversigt</Link>,
+          sammen med hvor mange dage der er tilbage af året.
+        </p>
+
         <h2>Sådan tæller du dage mellem to datoer i Excel</h2>
         <p>
           Vil du kun have det ene spørgsmål, så ligger der en{" "}
@@ -476,6 +484,14 @@ export default async function DatoPage() {
         <p>
           Beräkna din <strong>exakta ålder</strong> i år, månader och dagar. Se också hur många
           dagar du har levt, och när du fyller år.
+        </p>
+
+        <h2>Hur många dagar är det på ett år?</h2>
+        <p>
+          Ett kalenderår har 365 dagar, men de tolv månaderna är inte lika långa.
+          Alla 12 med dagar, vardagar och helvdagar står på en{" "}
+          <Link href="/dagar-i-aret">egen sida med hela årets översikt</Link>,
+          tillsammans med hur många dagar som är kvar av året.
         </p>
 
         <h2>Så räknar du ut dagar mellan två datum i Excel</h2>

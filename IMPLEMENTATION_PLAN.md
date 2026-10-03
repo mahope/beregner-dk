@@ -1,18 +1,18 @@
-STATUS: 3/10 05:45. CI grøn ved start (`37091789272`). Sentry: ingen uløste fejl
+STATUS: 3/10 06:20. CI grøn ved start (`37092658019`). Sentry: ingen uløste fejl
       14 dage, og SDK'en **er** sat op, så Sentry-punktet er lukket. **Gate:**
       `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run
-      build` — **grøn 3/10 05:05** (alle exit 0, **3966** tests i 250 filer).
+      build` — **grøn 3/10 06:19** (alle exit 0, **3979** tests i 251 filer).
       PR-TJEK: 2026-10-03 — ingen åbne PR'er. CEO-kø punkt 0 er færdigt
       (`aca17e5`), og review-fundet fra 02:52 har ingen åbne fund (begge fund er
-      `RETTET 4ec1f2f`). Alle åbne VERIFICÉR-noter er fra 3/10 00:30-05:05 og
-      ligger **før** næste batch-vindue (07:30), så intet at hente endnu.
-      **Denne iteration: research, ingen kode** (den 45-min-grænse nåede, før en
-      feature kunne landes grønt). Målt: **Googles danske autocomplete** under
-      «hvor mange dage er der» og «dage til» + svensk under «hur många dagar är
-      det» / «dagar till». Se `docs/plan-arkiv.md`.
-      **Næste iteration: FEATURE `dage-i-aaret`** — målt datagrund, klar.
-      BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
-
+      `RETTET 4ec1f2f`).
+      **Denne iteration: FEATURE `/dage-i-aaret` + `/dagar-i-aret`** — målt
+      datagrund, 13 nye tests, 5 mutationer målt røde. Se `docs/plan-arkiv.md`.
+      **Næste iteration:** de 7 danske procenttal i JSX-tekst (punkt 2 under
+      «Målt 3/10 05:30»), så `/pension` og `/boernepenge` ikke modsiges af
+      `/feriepenge`, `/laaneberegner` og `/husleje`. Derefter en ny målt feature.
+      BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden). De fire
+      2/10-VERIFICÉR-noter er flyttet til `docs/plan-arkiv.md` (planen skal under
+      40 KB) — de har haft mere end ét batch-vindue uden at blive tjekket.
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -147,6 +147,17 @@ er blokeret af en ❓ og må ikke gættes.
   de tre spørgsmål som `FAQPage`, tovejs-links med `/dato` og `/ugenummer`,
   canonical/hreflang, 301 mellem domænerne og daglig sitemap-entry.
   **MÅL:** 0 (ny URL) → Plausible 18/10; GSC 14 dage: de fire søgninger ovenfor.
+- **[x] ✅ `/dage-i-aaret` + `/dagar-i-aret`** — se `docs/plan-arkiv.md`.
+  *Hvem:* alle der spørger «hvor mange dage er der på et år» — dansk
+  autocomplete **nr. 1** under «hvor mange dage er der», målt 3/10 — plus de to
+  spørgsmål uden egen adresse, «… i augusti» (nr. 7) og «… i juli» (nr. 8).
+  *Accept:* dansk og svensk side med de tolv måneders længde (dage, hverdage,
+  weekenddage), summeringsrække, «dage tilbage af året» og de tre målte
+  spørgsmål som `FAQPage`; **alle tal** læst fra `dato-eksempler.ts`s
+  `aarstal()`/`maanederITaar()`; canonical/hreflang, 301 mellem domænerne,
+  daglig sitemap-entry og tovejs-links med `/dato` og `/ugenummer`.
+  **MÅL:** 0 (nye URL'er 3/10) → Plausible 17/10; GSC 14 dage mod
+  `/dato` 136.071 visninger / 0,7 % / pos. 5,6 (da) og 105.188 / 0,1 % / 8,1 (se).
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -359,7 +370,9 @@ Tre fund fra **Googles egen autocomplete** (`suggestqueries.google.com`,
 `hl=da&gl=dk` / `hl=sv&gl=se`), altså søgninger folk faktisk begynder at
 skrive. Rækkefølgen herunder er **målt voksende**, ikke gættet.
 
-1. **`/dage-i-aaret` + `/dagar-i-aret`** — **NÆSTE ITERATION.** Dansk #1 under
+1. ~~**`/dage-i-aaret` + `/dagar-i-aret`**~~ — ✅ **færdig 3/10 06:20**, se
+   `docs/plan-arkiv.md`. Målingen er bevaret herunder, fordi den er
+   datagrunden og ikke en iterationsrapport. Dansk #1 under Dansk #1 under
    «hvor mange dage er der» er «**hvor mange dage er der på et år**», og der er
    to sider mere i samme klub uden egen URL: «**hvor mange dage er der i
    augusti**» (#7) og «… i juli» (nr. 8); svensk har «**hur många dagar är det
@@ -387,6 +400,8 @@ skrive. Rækkefølgen herunder er **målt voksende**, ikke gættet.
    opfundet sats *ligne* kildeført, så punkt 11 forbyder det. `/moms` er ⛔
    (lovgrænser). *Accept:* F5b lukkes og næste opgave er altid en feature.
 
+`VERIFICÉR DEPLOY: /dage-i-aaret + /dagar-i-aret (nye sider med tolv-måneders-tabel: `minberegner.dk/dage-i-aaret` skal have `<title>` «Hvor mange dage er der på et år? Dage i alle 12 måneder», **1** `<h1>`, **12** månedsrækker + **1** summeringsrække i tabellen, og **3** spørgsmål i `FAQPage`-JSON-LD med præcis «Hvor mange dage er der på et år?», «Hvor mange dage er der i augusti?» og «Hvor mange dage er der i juli?» — svaret på augusti skal være «31 dage … 21 hverdage og 10 weekenddage» og på juli «31 dage … 23 hverdage og 8 weekenddage»; summeringen skal være 365 dage / 251 hverdage / 104 weekend; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar» og månedsnavnet «augusti», altså **0** «august»; `minberegner.dk/dagar-i-aret` + `beraknare.se/dage-i-aaret` skal 301'e til hver sin egen sti; begge URL'er skal ligge i hvert sit eget sitemap med `daily`; **intet** `NaN`) ceo/dage-i-aaret 3/10 06:20`
+
 ## Åbne VERIFICÉR DEPLOY-noter
 
 Batch-deployeren kører 07:30/12:30/17:30/21:30. Prøverne er på **indhold**,
@@ -411,13 +426,9 @@ ingen regex på tal og tekst.
 
 `VERIFICÉR DEPLOY: svensk «Första maj» + «använda» på /dato og /nedtaelling ceo/svenska-tekstfejl 3/10 23:20`
 
-`VERIFICÉR DEPLOY: /leasing FAQ'ens retning (svensk skal sige 9 210 kr mindre) ceo/leasing-faq-retning 2/10 21:51 — måles 3/10 07:30 (den gamle note «MÅLT 3/10 23:13» var en fejltagelse: klokken var 03:11)`
 
-`VERIFICÉR DEPLOY: /klokken-i + /klockan-i (hub med klokken i 12 lande) ceo/klokken-i-hub 2/10 22:07`
 
-`VERIFICÉR DEPLOY: /vaegttab FAQ tal fra modulet (svensk 2 209, ikke 2.209) ceo/vaegttab-faq-fra-modul 2/10 22:33`
 
-`VERIFICÉR DEPLOY: /kalorier eksempel fra modulet (svensk 1 780, ikke 1.780) ceo/kalorier-faq-tal-fra-modul 2/10 22:56`
 
 Lukket 3/10 23:13 på indhold: `pension-dobbelt-valuta`, `leasing-dobbelt-valuta`,
 `su-dobbelt-valuta` og `dage-til-hub` — målingerne står i
@@ -499,6 +510,3 @@ De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
 - ❓ **Fitnessfradrag, sommerhusudlejning, madvaretabel, grundskyld for Varde og
   Playwright.** Fem mindre kilder, alle noteret med detaljer i
   `docs/plan-arkiv.md` 2/10 14:20. Uden dem bygges intet, jf. punkt 11.
-## Arkiv-notat 3/10 02:40
-
-Sidste måling før commit: se `docs/plan-arkiv.md` (append, kun grep).

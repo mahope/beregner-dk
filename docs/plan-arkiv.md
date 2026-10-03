@@ -26762,3 +26762,90 @@ kilde — det er præcis det punkt 11 forbyder. F5b bør lukkes.
 
 **Ikke kørt:** ingen kode, ingen ændringer i `src/`, ingen gate-kørsel (kun
 planen + arkivet ændret, så portene er urørt). Sidste grønne gate er 3/10 05:05.
+
+## 3/10 06:20 — `dage-i-aaret` (feature)
+
+**Datagrund.** Målt 3/10 i Googles egen autocomplete (`suggestqueries.google.com`,
+`hl=da&gl=dk`) er «hvor mange dage er der på et år» **nr. 1** under «hvor mange
+dage er der», og to spørgsmål mere i samme klub havde ingen egen adresse:
+«hvor mange dage er der i augusti» (nr. 7) og «hvor mange dage er der i juli»
+(nr. 8). Svensk spørger det samme: «hur många dagar är det på ett år» (nr. 3),
+«… i augusti» og «… i juli». Svaret lå som brødtekst inde på `/dato` — siden med
+136.071 GSC-visninger, 1.119 besøgende/28 dage og hele 24 spørgsmål i
+konkurrence — så de tre spørgsmål fik hverken egen titel, adresse eller `<h1>`.
+
+**Målt (ikke antaget).** `aarsoversigt("da", 2026-10-02)`:
+`aar 2026, dage 365, skudaar false, arbejdsdage 251, weekenddage 104,
+tilbage 90 (12 uger + 6), naesteSkudaar 2028/366`. Sum af de tolv måneder =
+365 dage og 251 hverdage. **251 er uafhængigt bekræftet mod kalenderen**: 261
+hverdage i 2026 minus de 10 helligdage der faldt på en hverdag (1.1, 2.4, 3.4,
+6.4, 14.5, 25.5, 5.6, 24.12, 25.12, 31.12) = 251 — samme procedure som den
+eksterne review 02:52 brugte på `/afstand-mellem-adresser`. Og
+251 + 104 + 10 = 365, altså ingen hverdage talt to gange. Juli 2026: 31 dage,
+23 hverdage, 8 weekenddage (1. juli er en onsdag). Augusti 2026: 31 dage,
+**21** hverdage, **10** weekenddage (1. august er en lørdag) — de to har samme
+dagantal men forskellige hverdage, hvilket er præcis derfor «hvor mange dage er
+der i augusti» ikke kan besvares af «august har 31 dage» alene.
+
+**Ingen tal i teksten (punkt 11).** Alle dagtal, hverdage, weekenddage,
+skudårs-påstande og «dage tilbage» læses fra `dato-eksempler.ts`s
+`aarstal()`/`maanederITaar()`/`erSkudaar()` — altså af de samme funktioner
+`/dato` skriver sin egen brødtekst med. Dagens dato læses med `iDagPaSiden()`,
+altså i `Europe/Copenhagen`/`Europe/Stockholm` og aldrig med serverens
+`getUTC*`, så «dage tilbage» ikke er en dag forkeret kl. 00-02.
+
+**Den reelle fejl i min egen første udkast, målt før commit.** FAQ-svaret på «hvor
+mange dage er der på et år» lød «Et normalt kalenderår har 365 dage, og 2026 har
+365 dage» — altså samme sats to gange, fordi jeg havde skrevet årets længde
+uden at kigge på `skudaar`. Nu er svaret en gren på `o.skudaar` («2026 er ikke
+et skudår og har derfor 365 dage» / «2028 er et skudår med 366 dage»), så det er
+en følge af kalenderen og ikke en gentaget påstand.
+
+**Nye filer:** `src/lib/dage-i-aaret.ts` (copy + tal), `src/components/DageIAaret.tsx`,
+`src/app/dage-i-aaret/page.tsx`, `src/app/dagar-i-aret/page.tsx`,
+`src/app/dage-i-aaret.test.tsx` (**13 tests**). **Rørt:** `routing.ts` (301
+mellem domænerne), `sitemap.ts` (`daily`), `dato/page.tsx` + `ugenummer/page.tsx`
+(tovejs-links), `meta-description.test.ts` (`/dagar-i-aret` er 301 på dansk host).
+
+**Porten dømmer det siden *lover*.** Egen sti/titel/`<h1>` pr. sprog med ordene
+fra den målte søgning, de tre spørgsmål i både synlig tekst og `FAQPage`-JSON-LD
+(read tilbage og sammenlignet med kopien), canonical/hreflang/x-default, 301
+mellem domænerne + 404 i norsk, `daily` i begge sitemapme, korslinks, og **alle
+tal** mod `aarsoversigt`/`maanederITaar` — summen af månederne mod
+summeringsrækken, 251/104/10 = 365, dansk «august» mod svensk «augusti»,
+juli 23/8 mod augusti 21/10, og at `tilbage` er 90 den 2. oktober 2026 og **0
+nytårsaften** (samme konvention som `dageTilbageIAaret`, så de to sider ikke kan
+svare forskelligt). Copy-porten forbyder et frosset `\b20\d{2}\b` i titel og
+description, fordi de ikke følger dagens dato.
+
+**13 nye tests (3966 → 3979), 5 mutationer målt røde:**
+
+| mutation | rød |
+|---|---|
+| håndskrevet «Augusti har **30** dage» i FAQ'en | ja |
+| 301-reglen for `DAGE_I_AARET_SIDER` fjernet fra `routing.ts` | ja |
+| `...dageIAaretEntries` fjernet fra `sitemap.ts` | ja |
+| svensk titel skrevet om til «Dagar i ett år: se alla månader» | ja |
+| tovejs-linket i `/ugenummer` fjernet | ja |
+
+**Gate grøn 3/10 06:19:** `npm run lint` (739 filer) · `npm run typecheck` ·
+`TZ=UTC npm run test` (**3979** i 251 filer) · `npm run build` (171 sider,
+begge nye ruter `ƒ` = `force-dynamic`).
+
+**MÅL:** `/dage-i-aaret` + `/dagar-i-aret` 0 (nye URL'er 3/10) → Plausible
+17/10. GSC 14 dage: «hvor mange dage er der på et år», «hvor mange dage er der
+i augusti», «hvor mange dage er der i juli» + de tre svenske. Baselines fra
+`docs/plan-arkiv.md` 3/10 05:30: `/dato` 136.071 visninger / 893 klik / 0,7 % /
+pos. 5,6 (da) og 105.188 / 100 / 0,1 % / 8,1 (se).
+
+
+## 3/10 06:22 — VERIFICÉR-noter fra 2/10 flyttet til arkivet
+
+De fire 2/10-noter har haft mere end ét batch-vindue (07:30/12:30/17:30/21:30)
+uden at de blev verificeret, så de løber videre i denne tekstfil. De er **ikke**
+bevist deployede — hold dem i øjnene ved næste live-måling.
+
+`VERIFICÉR DEPLOY: /leasing FAQ'ens retning (svensk skal sige 9 210 kr mindre) ceo/leasing-faq-retning 2/10 21:51 — måles 3/10 07:30 (den gamle note «MÅLT 3/10 23:13» var en fejltagelse: klokken var 03:11)`
+`VERIFICÉR DEPLOY: /klokken-i + /klockan-i (hub med klokken i 12 lande) ceo/klokken-i-hub 2/10 22:07`
+`VERIFICÉR DEPLOY: /vaegttab FAQ tal fra modulet (svensk 2 209, ikke 2.209) ceo/vaegttab-faq-fra-modul 2/10 22:33`
+`VERIFICÉR DEPLOY: /kalorier eksempel fra modulet (svensk 1 780, ikke 1.780) ceo/kalorier-faq-tal-fra-modul 2/10 22:56`

@@ -9,6 +9,7 @@ import {
 } from "./dage-til";
 import { getKlokkenHubPath } from "./klokken-i";
 import { getDageMellemPath } from "./dage-mellem-datoer";
+import { getDageIAaretPath } from "./dage-i-aaret";
 
 /** The section's own path in each language. Kept here, next to the rule. */
 const DAGE_TIL_HUBS = ["/dage-til", "/dagar-till"] as const;
@@ -25,6 +26,14 @@ const DAGE_MELLEM_SIDER = [
   "/dage-mellem-datoer",
   "/dagar-mellan-datum",
 ] as const;
+
+/**
+ * Samme regel for «hvor mange dage er der på et år»: den danske og den svenske
+ * side viser den samme tolv-måneders-tabel, så stien der ikke er dette
+ * domænes er en 301. Uden den ville beraknare.se/dage-i-aaret servere danske
+ * månedsnavne på et svensk domæne, og samme tabel ville ligge på to URL'er.
+ */
+const DAGE_I_AARET_SIDER = ["/dage-i-aaret", "/dagar-i-aret"] as const;
 
 export type RouteDecision =
   | { type: "allow" }
@@ -107,6 +116,18 @@ export function getRouteDecision(
     DAGE_MELLEM_SIDER.includes(normalizedPath as (typeof DAGE_MELLEM_SIDER)[number])
   ) {
     const egenSti = getDageMellemPath(domainConfig.locale);
+    if (!egenSti) return { type: "not-found" };
+    if (egenSti !== normalizedPath) {
+      return { type: "redirect", destination: egenSti, status: 301 };
+    }
+  }
+
+  // Samme regel for «hvor mange dage er der på et år»: `/dage-i-aaret` og
+  // `/dagar-i-aret` er den samme tolv-måneders-tabel i to sprog.
+  if (
+    DAGE_I_AARET_SIDER.includes(normalizedPath as (typeof DAGE_I_AARET_SIDER)[number])
+  ) {
+    const egenSti = getDageIAaretPath(domainConfig.locale);
     if (!egenSti) return { type: "not-found" };
     if (egenSti !== normalizedPath) {
       return { type: "redirect", destination: egenSti, status: 301 };

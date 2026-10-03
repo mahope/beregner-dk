@@ -8,6 +8,7 @@ import { getAvailableSlugs } from "@/lib/page-data";
 import { getDageTilHubPath, getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
 import { getKlokkenHubPath, getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klokken-i";
 import { getDageMellemPath } from "@/lib/dage-mellem-datoer";
+import { getDageIAaretPath } from "@/lib/dage-i-aaret";
 
 // The sitemap route is rendered per request (it resolves the host from
 // headers), so a wall-clock default would stamp every URL with the moment
@@ -128,6 +129,21 @@ export function buildSitemap(
       ]
     : [];
 
+  // «Hvor mange dage er der på et år» har både en tolv-måneders-tabel og et
+  // «dage tilbage»-tal, og begge følger dagens dato, så siden re-crawles
+  // dagligt lige som dage-til- og dage-mellem-siderne.
+  const dageIAaretPath = getDageIAaretPath(locale);
+  const dageIAaretEntries: MetadataRoute.Sitemap = dageIAaretPath
+    ? [
+        {
+          url: `${baseUrl}${dageIAaretPath}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+      ]
+    : [];
+
   return [
     {
       url: baseUrl,
@@ -139,6 +155,7 @@ export function buildSitemap(
     ...blogEntries,
     ...dageTilEntries,
     ...dageMellemEntries,
+    ...dageIAaretEntries,
     ...klokkenEntries,
     ...infoEntries,
   ];
