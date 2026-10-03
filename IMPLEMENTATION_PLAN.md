@@ -1,4 +1,27 @@
-STATUS: 3/10 13:4x. **CI grøn** ved start (`37118390521`), ingen åbne PR'er
+STATUS: 3/10 13:5x. **CI grøn** ved start (`37120187756`), ingen åbne PR'er
+       (PR-TJEK 3/10), ingen uløste Sentry-fejl. **Deploy-verifikation 13:4x:**
+       6 af de åbne noter er **live og dømt på indhold** (`/procent`,
+       `/boliglaan`, `/`, `/feriepenge` har 0 `\d%` i den synlige tekst).
+       `ceo/procent-interpolationer-2` (12:29) er ** stadig ikke live** —
+       1 vindue, ikke DEPLOY-MISSING endnu.
+       **Denne iteration: `/opsparing`s afkastbånd.** Målt live 13:4x: fire
+       celler skrev «0-1%», «2-4%», «4-6%», «6-8%» + `PensionBeregner.tsx:268`
+       «5-7% (aktier), 2-4% (obligationer)». Nu «0-1 %» … «6-8 %».
+       **Målte restfund på de samme sider** (curl, synlig tekst): `/billaan` 15,
+       `/arveafgift` 10, `/brutto-netto` 6, `/husleje` 4 (regelnavne),
+       `/konfirmation` 7, `/dagpenge` 1, `/kalorier` 1 («Minimum 20-25%»).
+       `/konfirmation` og `/dagpenge`s `page.tsx` har **0** `\d%` — resten
+       kommer fra `page-data.ts` og komponenterne, så F5g er **større** end
+       de fem sider den nævner.
+       **⛔ Porten dømmer det ikke endnu:** `procent-i-synlig-tekst.test.tsx`
+       renderer 16 *beregnere*, ikke sidernes statiske tabeller, så de fem
+       strenge er kun dømt ved source + live-måling. Næste iteration skal
+       lægge `/opsparing` og `/pension` ind i porten.
+       **Ingen feature denne iteration** — de tre sidste var procent-hygiejne
+       og en rettelse, så næste opgave SKAL være en feature.
+       BRANCH-TJEK: ikke kørt (sidste 2/10).
+
+STATUS (forrige): 3/10 13:4x. **CI grøn** ved start (`37118390521`), ingen åbne PR'er
        (PR-TJEK 3/10), ingen uløste Sentry-fejl. **Begge åbne review-fund er
        nu rettet** — de lå begge i SU-værktøjet.
        **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
@@ -113,7 +136,12 @@ egne tests i `decimal-komma.test.tsx`. Detaljer og målinger: `docs/plan-arkiv.m
 *Næste slice:* mål på ny med `grep -n '}%' src/components/*.tsx`; de
 sidste `title=`-attributter og CSS-højder er ikke synlig tekst.
 
-**F5g. [ ] Procenterne på de fem sider svinget 08:20 sprang over.** *Hvad:*
+**F5g. [~] Procenterne på de fem sider svinget 08:20 sprang over.** *Slice 1/2
+3/10 13:5x:* `/opsparing`s fire afkastceller + `PensionBeregner.tsx:268` er
+rettet. *Målt på ny (curl, synlig tekst, 3/10 13:4x):* `/billaan` 15,
+`/arveafgift` 10, `/brutto-netto` 6, `/konfirmation` 7, `/kalorier` 1,
+`/dagpenge` 1 — `/konfirmation` og `/dagpenge` har 0 i `page.tsx`, så resten
+kommer fra `page-data.ts` og komponenterne.
 `/opsparing` (28), `/arveafgift` (30), `/dagpenge` (10), `/husleje` (10) og
 `/konfirmation` (7) — målt på live 3/10 12:47, og det er koden: de fire
 `opsparing`-tabelceller, `PensionBeregner.tsx:268` og de øvrige strenge.

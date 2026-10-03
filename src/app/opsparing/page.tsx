@@ -113,22 +113,22 @@ export default async function OpsparingPage() {
             <tbody>
               <tr>
                 <td>Bankkonto</td>
-                <td>0-1%</td>
+                <td>0-1 %</td>
                 <td>Ingen</td>
               </tr>
               <tr>
                 <td>Obligationer</td>
-                <td>2-4%</td>
+                <td>2-4 %</td>
                 <td>Lav</td>
               </tr>
               <tr>
                 <td>Blandede fonde</td>
-                <td>4-6%</td>
+                <td>4-6 %</td>
                 <td>Medium</td>
               </tr>
               <tr>
                 <td>Aktiefonde</td>
-                <td>6-8%</td>
+                <td>6-8 %</td>
                 <td>Høj</td>
               </tr>
               <tr>

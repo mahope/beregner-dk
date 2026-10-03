@@ -265,7 +265,7 @@ export default function PensionBeregner() {
             min={0}
             max={15}
             step={0.5}
-            helpText="Historisk gennemsnit: 5-7% (aktier), 2-4% (obligationer)"
+            helpText="Historisk gennemsnit: 5-7 % (aktier), 2-4 % (obligationer)"
           />
           <InputField
             label="Forventet inflation (%)"
