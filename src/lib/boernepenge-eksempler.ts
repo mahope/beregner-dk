@@ -44,6 +44,7 @@ import {
   BOERNEUNGEYDELSE_2026,
   aarligBelob,
   beregnAftrapning,
+  satsForAlder,
   type BoernSats,
 } from "./borneungeydelse";
 import { formatBelob } from "./format";
@@ -195,6 +196,26 @@ export function boerneBeskrivelse(): string {
     `Beregn børnepenge 2026. Officielle satser: ${boerneSatslisteKort()}. ` +
     `Beregn ud fra antal børn og indkomst.`
   );
+}
+
+/**
+ * Regnestykket i `metaTitle`/`ogTitle`: to børn på 5 og 9 år.
+ *
+ * Aldrene er valgt, fordi de rammer to forskellige satsgrupper (3-6 år og
+ * 7-14 år) — så eksemplet viser, at beløbet **summerer** flere børn, og ikke
+ * bare gentager én sats. Beløbet læses med `satsForAlder`, altså samme
+ * funktion værktøjet bruger, så en satsændring i `borneungeydelse.ts` ikke kan
+ * efterlade en gammel sum i Googles titellinje.
+ */
+export const BOERNE_TITEL_ALDRE = [5, 9] as const;
+
+export function boerneTitelEksempel(): string {
+  const summer = BOERNE_TITEL_ALDRE.reduce((sum, alder) => {
+    const sats = satsForAlder(alder);
+    return sats ? sum + sats.hel : sum;
+  }, 0);
+  const aldre = BOERNE_TITEL_ALDRE.join(" og ");
+  return `${BOERNE_TITEL_ALDRE.length} børn (${aldre} år) = ${boerneBelob(summer)}/kvartal`;
 }
 
 /** Den kortere beskrivelse til metadaten. */

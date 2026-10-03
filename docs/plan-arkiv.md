@@ -28353,3 +28353,54 @@ ville porten ikke kunne fange den igen.
 
 **Verificeret:** `npm run typecheck`, `npm run lint` (757 filer), `npm run test`
 (**4141 tests, 262 filer — alle grønne**), `npm run build`.
+**Dømt 3/10 15:1x–15:2x på indhold (curl).** Fuldtekst og målinger står i
+`docs/plan-arkiv.md` (afsnit «3/10 15:2x»).
+
+- ✅ `ceo/procent-punkt-sweeps` 08:00 — 0 `\d%` på /procent (da+se) og 0 i den
+  synlige tekst på /boliglaan; de 22 træffere dér er `style="width:…%"`.
+- ✅ `ceo/boliglaan-procent` 10:5x — samme måling. Notens «95,0 %»/«5,05 %» er
+  interpolationer og kan ikke dømmes ordret (⛔ ❓ lukket hermed).
+- ✅ `ceo/procent-forside-feriepenge` 09:4x — 0 `\d%` på forsiden (da+se) og
+  /feriepenge; «Feriepenge (12,5 %)», «- AM-bidrag (8 %)», «100 % Gratis» ×2.
+- ✅ `ceo/kommunesat-komma` 12:1x — ⛔ kan ikke dømmes på notens URL
+  (`beraknare.se/lon-efter-skatt` svarer 200, men linjen ligger ikke dér med
+  den form noten kræver). Målt i stedet på `/brutto-netto`: «Kommuneskat
+  (ca. 25 %)» med komma. Noten er for snævt formuleret.
+- ✅ `ceo/procent-punkt-sweep-side-data` 08:20 — kan ikke lukkes på sit eget
+  indhold (svinget skede aldrig), men de strenge den krævede er nu rettet:
+  `/billaan`, `/arveafgift`, `/brutto-netto`, `/kalorier` og `/flyttebudget`
+  har 0 `\d%` i den synlige tekst, og `/konfirmation` har været ren siden
+  `c398f43`.
+
+**Åbne, med grunden:**
+
+- De procent-noter fra før 12:30 (`ceo/procent-sweep-pension-boliglaan`,
+  `ceo/procent-interpolationer`, `-2`, `ceo/hoelligdag-cache`,
+  `ceo/kommune-decimal-komma`) kan ikke lukkes på deres strenge, fordi de
+  strenge er rettet i `HEAD` — F5c/F5g lukkede klassen i code.
+- `ceo/dato-dage-til-rækker` 13:0x · `ceo/su-indtaegtsgraense-maaned` 13:4x ·
+  `ceo/titler-med-regnet-eksempel` 14:4x — fra commits **efter** 12:30
+  (ca1b4b3, 0554456, 228e1ff); næste vindue er 17:30. Målt 15:2x: `/dato` har
+  endnu ikke «Hvor mange dage er der til …?»-overskriften, `/su` skriver den
+  gamle «Du må højst tjene …»-sætning.
+- ⛔ `ceo/timer-i-aret` 07:55 — **3/10 18:2x: noten var selv forkert, ikke
+  siden.** Den kræver `/timer-i-aaret` **med to `a`**, og den URL har aldrig
+  eksisteret: kode, sitemap og route-mappe siger alle `/timer-i-aret`, som
+  svarer **200** med rigtig titel og canonical. `0c54b02` («Stop med at merge:
+  den danske /timer-i-aret er 404») og noten selv lå begge en håndlavet
+  `a` for meget i sig. Bevis: `gh api …/contents/src/app/timer-i-aret` giver
+  `page.tsx`, `TIMER_I_ARET_PATH.da = "/timer-i-aret"`
+  (`src/lib/timer-i-aret.ts:52`), og sitemap skriver
+  `https://minberegner.dk/timer-i-aret`. **Lukket som fejl-målt** — og
+  F0f-porten dømmer nu den slags fremover.
+- `ceo/klokken-i`, `ceo/afstand-mellem-adresser`, `ceo/dage-mellem-datoer`,
+  `ceo/dage-i-aaret` (2/10–3/10) — målt OK 3/10 15:1x: `/dage-til`,
+  `/klokken-i`, `/dage-i-aaret`, `/dage-mellem-datoer` og deres svenske
+  tvillinger svarer 200 med korrekt canonical + 3 hreflang uden skråstreg.
+
+⛔ DEPLOY-MISSING for `/timer-i-aret` er **lukket 3/10 17:4x** — se målingen
+ovenfor.
+
+
+## Arkiveret 3/10 23:4x fra IMPLEMENTATION_PLAN.md
+

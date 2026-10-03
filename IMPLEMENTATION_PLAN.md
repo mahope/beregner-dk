@@ -1,30 +1,24 @@
-STATUS: 3/10 23:2x. ✅ **`/brok` har nu de fire regneregler som værktøj** —
-        `ceo/brok-fire-regneregler`. *Hvem:* alle der googler «brøk udregner»
-        (pos. 4) og «brøkregning»; siden lå på pos. 5,1 med **0,7 % CTR**,
-        mens `/rentefradrag` på pos. 5,6 har **5,8 %** — 8x gap på næsten
-        samme placering. *Datagrund:* `/brok` 4.865 visninger / 34 klik / 0,7 %
-        / pos. 5,1 (GSC 3/10–1/10). *Målt fund:* siden skrev selv «Beregneren
-        forkorter **én** brøk», og de fire regler stod kun som regnestykker i
-        brødteksten — et løftet uden værktøj. *Accept:* plus/minus ganger
-        mindste fælles nævner og melder det, gange og dele gør ikke, dele
-        vender den anden brøk, altid forkortet med decimaltal og procent, da +
-        se, med **unike feltnavne**. **MÅL:** 4.865/34/0,7 %/5,1 → GSC 17/10.
-        ⚠️ *Porten blev stærkere, ikke svagere:* `label-a11y.test.ts` krævede
-        **præcis 2** felter på `/brok` — et fast tal, som lod to par af felter
-        hedde «Tæller (øverst)». Den tæller nu 6 **og** kræver at alle
-        feltnavne er unikke. *Målt undervejs:* min egen test troede 3/4 : 6/8
-        = 1/2; den rigtige er 1/1 (18/12 før reduktion) — testen var forkert,
-        ikke koden.
-        ❌ **Ingen fejl fundet:** `/dage-til/nytaarsaften` svarede **404** på
-        minberegner.dk, men genmålt 30 s senere **200**, og lokalt prod-build
-        giver 200. Det var Dokploys container-genbrug under et deploy-vindue,
-        ikke kode — samme fejltype som de procent-noter, der kostede tid.
-        *Læring: én 404-måling er ingen måling.*
-        Verify: typecheck, lint (757 filer), **4155 tests / 262 filer**, build.
-        Næste iteration skal fortsat være en **feature** (dette er den første
-        af tre efter tre tekstporte).
-        PR-TJEK: 3/10 23:0x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-        start (`cb45bd0`), ingen uløste Sentry-fejl.
+STATUS: 3/10 23:4x. ✅ **`/boernepenge` har nu et regnet eksempel i titlen** —
+        `ceo/boernepenge-titel`. *Hvem:* forældre der googler «børnepenge
+        2026», «børnepenge sats 2026», «børnepenge 2026 udbetaling» eller
+        «børnepenge oktober 2026». *Datagrund:* de fire søgninger summerer
+        **1.572 visninger** på pos. 7-11 (GSC 3/10–1/10), og **alle fire lå på
+        blogindlæget** — ikke på beregnersiden, der stod med den håndskrevne
+        titel «Børnepenge Beregner 2026 - Børne- og ungeydelse» og intet
+        regnestykke. *Accept:* summen læses med `satsForAlder`, altså samme
+        funktion værktøjet bruger (2 børn på 5 og 9 år = 4.248 + 3.342 =
+        **7.590 kr./kvartal**), og `/boernepenge` ligger nu i
+        `REGNETE_EKSEMPLER` i `meta-title-tal.test.ts`, der dømmer pr. sprog med
+        `toContain` og kræver samme regnestykke i `ogTitle`.
+        **Mutation målt:** med den gamle håndskrevne titel bliver 2 af 40
+        strenge røde. *MÅL:* `/boernepenge` (nyt tal fra GSC) +
+        `/blog/boernepenge-2026-satser-og-regler` 5.659 visninger / 43 klik /
+        0,8 % / pos. 8,6 → GSC 17/10.
+        Verify: typecheck, lint (757 filer), **4157 tests / 262 filer**, build.
+        Næste iteration skal fortsat være en **feature** — `/brok` (3/10) og
+        denne er to i træk; F5c/F5g/F5e er lukket.
+        PR-TJEK: 3/10 23:4x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
+        start (`b35c79c`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
 
 ## Fase 3 — trafik-drevet
 
@@ -85,6 +79,9 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
    `/boligstoette` (2,5 %) er de to højeste CTR i GSC-uddraget, så deres titel
    skal måles i 14 dage — og `/rentefradrag` er sitets bedst rangerende side
    («rentefradrag 2026», 63.000 søgninger, pos. 2), hvor «2026» ikke må forsvinde.
+   ✅ 3/10 23:4x: **`/boernepenge` er fjerde titel med regnet eksempel**
+   (`ceo/boernepenge-titel`) — den stod som «Børnepenge Beregner 2026 -
+   Børne- og ungeydelse», mens de fire familiesøgninger lå på bloggen.
    Målt 3/10 15:3x: `rentefradrag`/«… 2026 - Se din skattebesparelse»,
    `boligstoette`/«Beregn boligstøtte 2026: …», `dagpenge`/«Dagpengeberegner
    2026 - …» — alle tre taget **ud af** titelsporten, så porten og tabellen siger
@@ -368,6 +365,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
+**Åben note 3/10 23:4x:** `VERIFICÉR DEPLOY: <regnet eksempel i titlen på /boernepenge: 2 børn (5 og 9 år) = 7.590 kr./kvartal> ceo/boernepenge-titel 3/10 23:4x`.
+Døm på indhold: `curl -s https://minberegner.dk/boernepenge | grep -c '<title>Børnepenge 2026: 2 børn (5 og 9 år) = 7.590 kr./kvartal</title>'` skal give **1**, og `grep -c 'og:title" content="Børnepenge 2026: 2 børn' **1**. `<h1>` skal fortsat være «Børnepenge Beregner 2026 - Børne- og ungeydelse» (kun Googles linje er ændret). Næste deploy-vindue 4/10 07:30.
+
 **Åben note 3/10 23:2x:** `VERIFICÉR DEPLOY: <de fire regneregler som værktøj på /brok + unike feltnavne> ceo/brok-fire-regneregler 3/10 23:2x`.
 Døm på indhold: `curl -s https://minberegner.dk/brok | grep -c 'Regn med de fire regler'` skal give **1**, `grep -c 'Anden nævner'` **1**, `grep -c 'Fælles nævner'` **≥1**, og `grep -oE 'id="brok-t[12]"|id="brok-n[12]"' | wc -l` skal give **4** med hvert id kun én gang. `beraknare.se/brok` skal have «Räkna med de fyra reglerna», «Andra nämnare» og «Gemensam nämnare». Svarene skal være regnet, ikke hardkodet: 1/2 + 1/3 skal vise **5/6**, 2/3 ÷ 4/9 **3/2**. Næste deploy-vindue 4/10 07:30.
 
@@ -415,53 +415,11 @@ Døm på indhold: `curl -s https://minberegner.dk/billaan | sed -e 's/="[^"]*"/=
 **Ingen ny deploy-note 3/10 15:5x:** F0c rører kun `*.test.ts` og planen, så
 der er intet at verificere i produktion. Sidste åbne noter er dømt nedenfor.
 
-**Dømt 3/10 15:1x–15:2x på indhold (curl).** Fuldtekst og målinger står i
-`docs/plan-arkiv.md` (afsnit «3/10 15:2x»).
-
-- ✅ `ceo/procent-punkt-sweeps` 08:00 — 0 `\d%` på /procent (da+se) og 0 i den
-  synlige tekst på /boliglaan; de 22 træffere dér er `style="width:…%"`.
-- ✅ `ceo/boliglaan-procent` 10:5x — samme måling. Notens «95,0 %»/«5,05 %» er
-  interpolationer og kan ikke dømmes ordret (⛔ ❓ lukket hermed).
-- ✅ `ceo/procent-forside-feriepenge` 09:4x — 0 `\d%` på forsiden (da+se) og
-  /feriepenge; «Feriepenge (12,5 %)», «- AM-bidrag (8 %)», «100 % Gratis» ×2.
-- ✅ `ceo/kommunesat-komma` 12:1x — ⛔ kan ikke dømmes på notens URL
-  (`beraknare.se/lon-efter-skatt` svarer 200, men linjen ligger ikke dér med
-  den form noten kræver). Målt i stedet på `/brutto-netto`: «Kommuneskat
-  (ca. 25 %)» med komma. Noten er for snævt formuleret.
-- ✅ `ceo/procent-punkt-sweep-side-data` 08:20 — kan ikke lukkes på sit eget
-  indhold (svinget skede aldrig), men de strenge den krævede er nu rettet:
-  `/billaan`, `/arveafgift`, `/brutto-netto`, `/kalorier` og `/flyttebudget`
-  har 0 `\d%` i den synlige tekst, og `/konfirmation` har været ren siden
-  `c398f43`.
-
-**Åbne, med grunden:**
-
-- De procent-noter fra før 12:30 (`ceo/procent-sweep-pension-boliglaan`,
-  `ceo/procent-interpolationer`, `-2`, `ceo/hoelligdag-cache`,
-  `ceo/kommune-decimal-komma`) kan ikke lukkes på deres strenge, fordi de
-  strenge er rettet i `HEAD` — F5c/F5g lukkede klassen i code.
-- `ceo/dato-dage-til-rækker` 13:0x · `ceo/su-indtaegtsgraense-maaned` 13:4x ·
-  `ceo/titler-med-regnet-eksempel` 14:4x — fra commits **efter** 12:30
-  (ca1b4b3, 0554456, 228e1ff); næste vindue er 17:30. Målt 15:2x: `/dato` har
-  endnu ikke «Hvor mange dage er der til …?»-overskriften, `/su` skriver den
-  gamle «Du må højst tjene …»-sætning.
-- ⛔ `ceo/timer-i-aret` 07:55 — **3/10 18:2x: noten var selv forkert, ikke
-  siden.** Den kræver `/timer-i-aaret` **med to `a`**, og den URL har aldrig
-  eksisteret: kode, sitemap og route-mappe siger alle `/timer-i-aret`, som
-  svarer **200** med rigtig titel og canonical. `0c54b02` («Stop med at merge:
-  den danske /timer-i-aret er 404») og noten selv lå begge en håndlavet
-  `a` for meget i sig. Bevis: `gh api …/contents/src/app/timer-i-aret` giver
-  `page.tsx`, `TIMER_I_ARET_PATH.da = "/timer-i-aret"`
-  (`src/lib/timer-i-aret.ts:52`), og sitemap skriver
-  `https://minberegner.dk/timer-i-aret`. **Lukket som fejl-målt** — og
-  F0f-porten dømmer nu den slags fremover.
-- `ceo/klokken-i`, `ceo/afstand-mellem-adresser`, `ceo/dage-mellem-datoer`,
-  `ceo/dage-i-aaret` (2/10–3/10) — målt OK 3/10 15:1x: `/dage-til`,
-  `/klokken-i`, `/dage-i-aaret`, `/dage-mellem-datoer` og deres svenske
-  tvillinger svarer 200 med korrekt canonical + 3 hreflang uden skråstreg.
-
-⛔ DEPLOY-MISSING for `/timer-i-aret` er **lukket 3/10 17:4x** — se målingen
-ovenfor.
+**Dømt 3/10 15:1x–23:4x på indhold (curl) — lukkede noter:** fem
+procent-noter, `ceo/dato-dage-til-rækker`, `ceo/su-indtaegtsgraense-maaned`,
+`ceo/titler-med-regnet-eksempel`, `ceo/timer-i-aret` (⛔ noten var
+selv forkert) og de fem hub-URL'er. Noternes fulde tekst og målinger
+står i `docs/plan-arkiv.md`.
 
 ## ❓ Til Mads
 

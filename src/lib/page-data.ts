@@ -81,6 +81,7 @@ import { topskatBeskrivelse, topskatFaqItems } from "./topskat-eksempler";
 import {
   boerneBeskrivelse,
   boerneMetaBeskrivelse,
+  boerneTitelEksempel,
   boernepengeFaqItems,
 } from "./boernepenge-eksempler";
 import {
@@ -2184,10 +2185,10 @@ faqItems: kalorierFaqItems("da"),
       slug: "boernepenge",
       title: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
       description: boerneBeskrivelse(),
-      metaTitle: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
+      metaTitle: `Børnepenge 2026: ${boerneTitelEksempel()}`,
       metaDescription: boerneMetaBeskrivelse(),
       keywords: ["børnepenge", "børnepenge beregner", "børne- og ungeydelse", "børnecheck", "børnepenge 2026", "børnetilskud", "hvad får jeg i børnepenge", "børneydelse beregner", "børnepenge satser", "børnepenge satser 2026", "ungeydelse 2026"],
-      ogTitle: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
+      ogTitle: `Børnepenge 2026: ${boerneTitelEksempel()}`,
       ogDescription: "Beregn din børne- og ungeydelse med officielle 2026-satser. Se hvad du får udbetalt med ny deling mellem forældre.",
       category: "Familie",
       breadcrumbCategory: "Familie",

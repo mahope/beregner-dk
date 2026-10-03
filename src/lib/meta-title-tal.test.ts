@@ -85,6 +85,12 @@ const REGNETE_EKSEMPLER: {
   // `EKSEMPEL_BARN` — så titlen ikke kan love en anden ydelse end beregneren.
   { slug: "renteberegner", resulter: { da: "100.000 kr. i 5 år = 1.887 kr./md.", se: "100 000 kr i 5 år = 1 887 kr/mån", no: "100 000 kr i 5 år = 1 887 kr/md" } },
   { slug: "arveafgift", resulter: { da: "Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr. boafgift" } },
+  // `/boernepenge` summed to 1.572 visninger fordelt på fire brandsøgninger
+  // («børnepenge 2026» pos. 11, «børnepenge sats 2026» pos. 7, «børnepenge
+  // 2026 udbetaling» pos. 10, «børnepenge oktober 2026» pos. 10), og hele
+  // blogindlæget lå over beregnersiden. Summen kommer fra `satsForAlder` — samme
+  // funktion værktøjet bruger — så titlen ikke kan love en anden sum.
+  { slug: "boernepenge", resulter: { da: "2 børn (5 og 9 år) = 7.590 kr./kvartal" } },
 ];
 
 type SprogOgResultat = { slug: string; locale: Locale; resultat: string };
