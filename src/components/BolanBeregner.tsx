@@ -91,7 +91,7 @@ export default function BolanBeregner() {
             </div>
             {r && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Kontantinsats: {fmt(r.kontantinsats)} kr ({Math.round((1 - r.belaningsgrad) * 100)}%)
+                Kontantinsats: {fmt(r.kontantinsats)} kr ({Math.round((1 - r.belaningsgrad) * 100)} %)
               </p>
             )}
           </div>
@@ -123,11 +123,11 @@ export default function BolanBeregner() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
                   <div className="text-xs text-gray-500 dark:text-gray-400">Belåningsgrad</div>
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">{Math.round(r.belaningsgrad * 100)}%</div>
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">{Math.round(r.belaningsgrad * 100)} %</div>
                 </div>
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
                   <div className="text-xs text-gray-500 dark:text-gray-400">Amorteringskrav</div>
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">{Math.round(r.amorteringstakt * 100)}%/år</div>
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">{Math.round(r.amorteringstakt * 100)} %/år</div>
                 </div>
               </div>
 
@@ -158,9 +158,9 @@ export default function BolanBeregner() {
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Amorteringskravet följer reglerna från 1 april 2026 (baseras på
-                belåningsgrad, max {amorteringHogPct}%). Ränteavdraget är{" "}
-                {ranteavdragPct}% upp till {fmt(SVENSK_BOLAN_2026.ranteavdragBrytpunkt)}{" "}
-                kr, sedan {ranteavdragHogPct}%.
+                belåningsgrad, max {amorteringHogPct} %). Ränteavdraget är{" "}
+                {ranteavdragPct} % upp till {fmt(SVENSK_BOLAN_2026.ranteavdragBrytpunkt)}{" "}
+                kr, sedan {ranteavdragHogPct} %.
               </p>
             </div>
           ) : (
@@ -175,7 +175,7 @@ export default function BolanBeregner() {
       </div>
 
       <div className="flex justify-center mt-6 gap-3">
-        <CopyResultButton text={r ? `Bolån: ${fmt(r.manadskostnadBrutto)} kr/mån (${Math.round(r.belaningsgrad * 100)}% belåningsgrad)` : ""} />
+        <CopyResultButton text={r ? `Bolån: ${fmt(r.manadskostnadBrutto)} kr/mån (${Math.round(r.belaningsgrad * 100)} % belåningsgrad)` : ""} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Bolånekalkylator"

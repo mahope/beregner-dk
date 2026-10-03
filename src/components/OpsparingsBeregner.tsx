@@ -95,7 +95,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
       inflationLabel: "% inflation",
       calculating: "Beregner din opsparing...",
       savingsAfter: (years: number) => `Din opsparing efter ${years} \u00e5r`,
-      realValue: (inflPct: number) => `Real v\u00e6rdi (efter ${inflPct}% inflation):`,
+      realValue: (inflPct: number) => `Real v\u00e6rdi (efter ${inflPct} % inflation):`,
       totalDeposit: "Samlet indskud",
       totalInterest: "Samlet rente",
       gain: "Gevinst",
@@ -141,7 +141,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
       inflationLabel: "% inflation",
       calculating: "Ber\u00e4knar ditt sparande...",
       savingsAfter: (years: number) => `Ditt sparande efter ${years} \u00e5r`,
-      realValue: (inflPct: number) => `Realt v\u00e4rde (efter ${inflPct}% inflation):`,
+      realValue: (inflPct: number) => `Realt v\u00e4rde (efter ${inflPct} % inflation):`,
       totalDeposit: "Totala ins\u00e4ttningar",
       totalInterest: "Total r\u00e4nta",
       gain: "Vinst",
@@ -187,7 +187,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
       inflationLabel: "% inflasjon",
       calculating: "Beregner din sparing...",
       savingsAfter: (years: number) => `Din sparing etter ${years} \u00e5r`,
-      realValue: (inflPct: number) => `Reell verdi (etter ${inflPct}% inflasjon):`,
+      realValue: (inflPct: number) => `Reell verdi (etter ${inflPct} % inflasjon):`,
       totalDeposit: "Samlet innskudd",
       totalInterest: "Samlet rente",
       gain: "Gevinst",
@@ -451,7 +451,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
                   <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.gain}</p>
                     <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                      +{beregning.samletIndskud > 0 ? formatPct((beregning.samletRente / beregning.samletIndskud) * 100) : formatPct(0)}%
+                      +{beregning.samletIndskud > 0 ? formatPct((beregning.samletRente / beregning.samletIndskud) * 100) : formatPct(0)} %
                     </p>
                   </div>
                 </div>
@@ -471,7 +471,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
                               : "bg-white dark:bg-gray-700"
                           }`}
                         >
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{s.rente}% p.a.</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{s.rente} % p.a.</p>
                           <p className={`text-lg font-bold ${i === 0 ? "text-blue-700 dark:text-blue-400" : "dark:text-white"}`}>
                             {formatKr(s.slutSaldo)}
                           </p>

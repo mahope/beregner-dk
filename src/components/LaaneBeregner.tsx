@@ -47,7 +47,7 @@ export default function LaaneBeregner() {
       installment: "Afdrag",
       remainingDebt: "Restg\u00e6ld",
       loanSummary: (amount: string, years: number, rate: number, payment: string) =>
-        `L\u00e5n ${amount} i ${years} \u00e5r til ${rate}% - ydelse ${payment}/md`,
+        `L\u00e5n ${amount} i ${years} \u00e5r til ${rate} % - ydelse ${payment}/md`,
       calcName: "L\u00e5neberegner",
       importantTitle: "Vigtigt om l\u00e5n",
       importantItems: [
@@ -90,7 +90,7 @@ export default function LaaneBeregner() {
       installment: "Amortering",
       remainingDebt: "\u00c5terst\u00e5ende skuld",
       loanSummary: (amount: string, years: number, rate: number, payment: string) =>
-        `L\u00e5n ${amount} i ${years} \u00e5r till ${rate}% - betalning ${payment}/m\u00e5n`,
+        `L\u00e5n ${amount} i ${years} \u00e5r till ${rate} % - betalning ${payment}/m\u00e5n`,
       calcName: "L\u00e5nekalkylator",
       importantTitle: "Viktigt om l\u00e5n",
       importantItems: [
@@ -133,7 +133,7 @@ export default function LaaneBeregner() {
       installment: "Avdrag",
       remainingDebt: "Restgjeld",
       loanSummary: (amount: string, years: number, rate: number, payment: string) =>
-        `L\u00e5n ${amount} i ${years} \u00e5r til ${rate}% - betaling ${payment}/md`,
+        `L\u00e5n ${amount} i ${years} \u00e5r til ${rate} % - betaling ${payment}/md`,
       calcName: "L\u00e5nekalkulator",
       importantTitle: "Viktig om l\u00e5n",
       importantItems: [
@@ -447,7 +447,7 @@ export default function LaaneBeregner() {
               <p className="text-sm text-gray-500 dark:text-gray-400">{l.totalRepayment}</p>
             </div>
             <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
-              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatPct(beregning.aopAnnuitet)}%</p>
+              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatPct(beregning.aopAnnuitet)} %</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">{l.aprApprox}</p>
             </div>
           </div>
@@ -492,7 +492,7 @@ export default function LaaneBeregner() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-6 bg-white border-2 border-blue-500 rounded-xl dark:bg-gray-800">
-              <h3 className="font-medium text-blue-600 mb-4 dark:text-blue-400">{l.loan1Label}: {renteSats}% i {loebetidAar} {l.termUnit}</h3>
+              <h3 className="font-medium text-blue-600 mb-4 dark:text-blue-400">{l.loan1Label}: {renteSats} % i {loebetidAar} {l.termUnit}</h3>
               <div className="space-y-2 dark:text-gray-300">
                 <div className="flex justify-between">
                   <span>{l.monthlyPayment}</span>
@@ -509,7 +509,7 @@ export default function LaaneBeregner() {
               </div>
             </div>
             <div className="p-6 bg-white border-2 border-green-500 rounded-xl dark:bg-gray-800">
-              <h3 className="font-medium text-green-600 mb-4 dark:text-green-400">{l.loan2Label}: {rente2}% i {loebetid2} {l.termUnit}</h3>
+              <h3 className="font-medium text-green-600 mb-4 dark:text-green-400">{l.loan2Label}: {rente2} % i {loebetid2} {l.termUnit}</h3>
               <div className="space-y-2 dark:text-gray-300">
                 <div className="flex justify-between">
                   <span>{l.monthlyPayment}</span>

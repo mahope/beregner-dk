@@ -27658,3 +27658,25 @@ grøn. Flake, ikke gate.
 
 **Ikke kørt.** Ingen browser ved 360/390/768/1280 (repoet har intet Playwright),
 så de rettede strenge er verificeret i markup og DOM, ikke set i pixels.
+
+## 3/10 11:2x — ceo/procent-interpolationer (F5c-slice: interpolerede procenter)
+
+Scannerens blinde plet blev målt og lukket for de fem beregnere med mest
+trafik: `LoenBeregner` 10 fund (`/brutto-netto`), `BolanBeregner` 7
+(`/bolan`), `KalorieBeregner` 6 (`/kalorier`), `LaaneBeregner` 6
+(`/laaneberegner`) og `OpsparingsBeregner` 5 (`/opsparing`). `LaaneBeregner`
+havde **0** fund i `regnestykker.test.ts` og 6 i den renderede markup — den
+største enkeltstående forskel i hele korpuset.
+
+Målt: loftet 361 → **356** noder. Porten i `procent-i-synlig-tekst.test.tsx`
+renderer de fem komponenter i da/se/no og dømmer 0 procenter uden mellemrum i
+den synlige markup; mutation på **én** interpolation (`KalorieBeregner:412`)
+gav 2 røde tests. `bolan-loen-sater.test.tsx:45-47` låste
+`max 7%` / `1,5%` / `1,1%` fast, og `decimal-komma.test.tsx` låste
+`/\d,\d%/` og `/Effektiv skatteprocent: \d+,\d%/` — begge opdateret til at
+tåle mellemrummet.
+
+Punkt 13: en `perl -pi`-erstatning spiste `${rate}` i de tre `loanSummary`-
+strenge i `LaaneBeregner` (perl interpolerede `$rate` som sin egen variabel).
+Fundet ved at sammenligne `git diff -U0 | grep '${'` og rettet med `edit`;
+commit-diffen er verificeret: kun ét mellemrum tilføjet pr. linje.

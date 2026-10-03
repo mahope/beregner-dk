@@ -273,13 +273,13 @@ export default function LoenBeregner() {
               <option value="">Manuel indtastning (gennemsnit)</option>
               {KOMMUNER.map(k => (
                 <option key={k.navn} value={k.navn}>
-                  {k.navn} ({k.kommuneskat}%)
+                  {k.navn} ({k.kommuneskat} %)
                 </option>
               ))}
             </select>
             {valgtKommune && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Kirkeskat: {KOMMUNER.find(k => k.navn === valgtKommune)?.kirkeskat}%
+                Kirkeskat: {KOMMUNER.find(k => k.navn === valgtKommune)?.kirkeskat} %
               </p>
             )}
             {!valgtKommune && (
@@ -354,7 +354,7 @@ export default function LoenBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Effektiv skatteprocent: <strong className="dark:text-white">{formatPct(beregning.effektivSkat)}%</strong>
+            Effektiv skatteprocent: <strong className="dark:text-white">{formatPct(beregning.effektivSkat)} %</strong>
           </p>
         </div>
         {ekstraBeregning !== null && (
@@ -399,7 +399,7 @@ export default function LoenBeregner() {
             </div>
           )}
           <div className="flex justify-between text-gray-600 dark:text-gray-400">
-            <span>- AM-bidrag (8%)</span>
+            <span>- AM-bidrag (8 %)</span>
             <span>{formatKr(beregning.amBidrag)}</span>
           </div>
           <div className="flex justify-between font-medium border-t dark:border-gray-600 pt-2">
@@ -419,34 +419,34 @@ export default function LoenBeregner() {
             <span>{formatKr(beregning.skattepligtigIndkomst)}</span>
           </div>
           <div className="flex justify-between text-red-600 dark:text-red-400">
-            <span>Bundskat (12,01%)</span>
+            <span>Bundskat (12,01 %)</span>
             <span>{formatKr(beregning.bundSkat)}</span>
           </div>
           <div className="flex justify-between text-red-600 dark:text-red-400">
-            <span>Kommuneskat ({kommuneSkat}%)</span>
+            <span>Kommuneskat ({kommuneSkat} %)</span>
             <span>{formatKr(beregning.kommuneSkatBeloeb)}</span>
           </div>
           {medKirkeskat && (
             <div className="flex justify-between text-red-600 dark:text-red-400">
-              <span>Kirkeskat ({(beregning.kirkeSkatPct * 100).toFixed(2).replace('.', ',')}%)</span>
+              <span>Kirkeskat ({(beregning.kirkeSkatPct * 100).toFixed(2).replace('.', ',')} %)</span>
               <span>{formatKr(beregning.kirkeSkatBeloeb)}</span>
             </div>
           )}
           {beregning.mellemSkat > 0 && (
             <div className="flex justify-between text-red-600 dark:text-red-400">
-              <span>Mellemskat (7,5%)</span>
+              <span>Mellemskat (7,5 %)</span>
               <span>{formatKr(beregning.mellemSkat)}</span>
             </div>
           )}
           {beregning.topSkat > 0 && (
             <div className="flex justify-between text-red-600 dark:text-red-400">
-              <span>Topskat (7,5%)</span>
+              <span>Topskat (7,5 %)</span>
               <span>{formatKr(beregning.topSkat)}</span>
             </div>
           )}
           {beregning.topTopSkat > 0 && (
             <div className="flex justify-between text-red-600 dark:text-red-400">
-              <span>Top-topskat (5%)</span>
+              <span>Top-topskat (5 %)</span>
               <span>{formatKr(beregning.topTopSkat)}</span>
             </div>
           )}

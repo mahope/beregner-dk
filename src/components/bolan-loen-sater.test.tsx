@@ -42,9 +42,9 @@ describe("BolanBeregner", () => {
     medLocale(<BolanBeregner />);
     const b = SVENSK_BOLAN_2026;
     const tekst = screen.getByText(/Amorteringskravet följer/).textContent ?? "";
-    expect(tekst).toContain(`max ${b.amorteringHog * 100}%`);
-    expect(tekst).toContain(`Ränteavdraget är ${b.ranteavdrag * 100}% upp till`);
-    expect(tekst).toContain(`${b.ranteavdragBrytpunkt.toLocaleString("sv-SE")} kr, sedan ${b.ranteavdragHog * 100}%`);
+    expect(tekst).toContain(`max ${b.amorteringHog * 100} %`);
+    expect(tekst).toContain(`Ränteavdraget är ${b.ranteavdrag * 100} % upp till`);
+    expect(tekst).toContain(`${b.ranteavdragBrytpunkt.toLocaleString("sv-SE")} kr, sedan ${b.ranteavdragHog * 100} %`);
   });
 });
 

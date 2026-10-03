@@ -400,16 +400,16 @@ export default function KalorieBeregner() {
 
           {/* Visuel bar */}
           <div className="flex h-6 rounded-full overflow-hidden mb-4">
-            <div className="bg-red-400" style={{ width: `${resultat.proteinPct}%` }} title={`${l.protein}: ${resultat.proteinPct.toFixed(0)}%`} />
-            <div className="bg-yellow-400" style={{ width: `${resultat.fedtPct}%` }} title={`${l.fedt}: ${resultat.fedtPct.toFixed(0)}%`} />
-            <div className="bg-blue-400" style={{ width: `${resultat.kulhPct}%` }} title={`${l.kulhydrater}: ${resultat.kulhPct.toFixed(0)}%`} />
+            <div className="bg-red-400" style={{ width: `${resultat.proteinPct}%` }} title={`${l.protein}: ${resultat.proteinPct.toFixed(0)} %`} />
+            <div className="bg-yellow-400" style={{ width: `${resultat.fedtPct}%` }} title={`${l.fedt}: ${resultat.fedtPct.toFixed(0)} %`} />
+            <div className="bg-blue-400" style={{ width: `${resultat.kulhPct}%` }} title={`${l.kulhydrater}: ${resultat.kulhPct.toFixed(0)} %`} />
           </div>
 
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400">{l.protein}</p>
               <p className="font-bold text-xl dark:text-white">{num(resultat.protein)}g</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.protein * 4)} kcal ({resultat.proteinPct.toFixed(0)}%)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.protein * 4)} kcal ({resultat.proteinPct.toFixed(0)} %)</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {dec(resultat.proteinGPerKg)} {l.proteinPrKg} ({l.proteinInterval} {dec(resultat.proteinGPerKgMin)}-{dec(resultat.proteinGPerKgMax)})
               </p>
@@ -417,12 +417,12 @@ export default function KalorieBeregner() {
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
               <p className="text-sm text-yellow-600 dark:text-yellow-400">{l.fedt}</p>
               <p className="font-bold text-xl dark:text-white">{num(resultat.fedt)}g</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.fedt * 9)} kcal ({resultat.fedtPct.toFixed(0)}%)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.fedt * 9)} kcal ({resultat.fedtPct.toFixed(0)} %)</p>
             </div>
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <p className="text-sm text-blue-600 dark:text-blue-400">{l.kulhydrater}</p>
               <p className="font-bold text-xl dark:text-white">{num(resultat.kulhydrater)}g</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.kulhydrater * 4)} kcal ({resultat.kulhPct.toFixed(0)}%)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.kulhydrater * 4)} kcal ({resultat.kulhPct.toFixed(0)} %)</p>
             </div>
           </div>
         </div>

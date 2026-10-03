@@ -125,9 +125,9 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
   describe("/laane (aop-annuitet)", () => {
     test("da: 100.000 kr. over 5 år til 8 % skriver komma", () => {
       const tekst = helTekst(renderIn(<LaaneBeregner />, "da").container);
-      // Den effektive årlige rente ligger mellem 8 % og 8 %,5 %.
-      expect(tekst).toMatch(/\d,\d%/);
-      expect(tekst).not.toMatch(/\d\.\d%/);
+      // Den effektive årlige rente ligger mellem 8 % og 8,5 %.
+      expect(tekst).toMatch(/\d,\d ?%/);
+      expect(tekst).not.toMatch(/\d\.\d ?%/);
     });
 
     test("se: samme side skriver komma", () => {
@@ -140,7 +140,7 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
   describe("/lon-efter-skat (effektiv skatteprocent)", () => {
     test("da: skatteprocenten skriver komma", () => {
       const tekst = helTekst(renderIn(<LoenBeregner />, "da").container);
-      expect(tekst).toMatch(/Effektiv skatteprocent: \d+,\d%/);
+      expect(tekst).toMatch(/Effektiv skatteprocent: \d+,\d ?%/);
     });
 
     test("se: samme side skriver komma", () => {

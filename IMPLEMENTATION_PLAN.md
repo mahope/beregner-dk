@@ -1,39 +1,32 @@
-STATUS: 3/10 10:5x. CI grøn ved start (`37108884012`), ingen åbne PR'er, ingen
-       uløste Sentry-fejl. **Gate:** `npm run lint` · `npm run typecheck` ·
-       `TZ=UTC npm run test` · `npm run build` — **grøn 10:5x** (alle exit 0,
-       **4046** tests i 257 filer, build med de samme 10 warnings som før; på
-       ren master 4045/257 uden fejl, så den ene «error» i første kørsel var
-       en flake i `label-a11y.test.tsx` og kom ikke igen).
-       Review-fundene fra 09:10 stod alle med `RETTET 8cf72dd`, og CEO-køens
-       pkt. 0 er efterprøvet i koden — ingen åbne fund.
-       **Denne iteration:** F5c-slice på hele `BoliglaanBeregner.tsx` — 10
-       literaler + **3 interpolationer** (belåningsgrad-boksen, udbetalings-
-       hjælpeteksten, totalrente-kortet). `/boliglaan` har 20.768 GSC-visninger
-       og 391 besøgende/28d. Den synlige tekst på den danske side var den
-       eneste af de store sider, der stadig skrev «5%», «80%» og «ca.
-       3,5-4,0%»; svensk og norsk skrev allerede «8 %». **Målt:** loftet i
-       `regnestykker.test.ts` 371 → **361** noder. Ny rendered port i
-       `procent-i-synlig-tekst.test.tsx` renderer hele komponenten i da/se/no
-       og dømmer 0 procenter uden mellemrum; mutation på **en** literal og
-       **en** interpolation gav røde med fund `['95,0%', '7,0%']`, så porten
-       ser begge fejltyper. `decimal-komma.test.tsx` låste «ca. 3,5-4,0%» og
-       «5,0%» fast — de påstande er rettet, de var ikke porten. Punkt 13: 0
-       `$[0]`-rester.
-       **Deploy-verifikation:** `ceo/procent-med-mellemrum` (06:45) og
-       `ceo/timer-i-aret` (07:55) er hentet og **lukket på indhold**. Fire
-       noter er efter 07:30-vinduet og venter 12:30 — se listen nedenfor.
-       **Næste iteration:** (1) døm de fire ventende noter efter 12:30-vinduet,
-       især `ceo/procent-punkt-sweeps`, hvor `beraknare.se/procent` stadig har 3
-       `\d%`; (2) F5c-slice på de næste komponenter med `%` efter en
-       interpolation.
+STATUS: 3/10 11:2x. CI grøn ved start (`37110580468`), ingen åbne PR'er, ingen
+       uløste Sentry-fejl (SDK'en er sat op: `src/instrumentation.ts` +
+       `instrumentation-client.ts`). **Gate:** `npm run lint` · `npm run
+       typecheck` · `TZ=UTC npm run test` · `npm run build` — **grøn 11:2x**
+       (alle exit 0, **4048** tests i 257 filer, build exit 0). CEO-køens
+       pkt. 0 efterprøvet i koden 11:0x (Valborg 30. april, dansk sankthans
+       23./24. juni, svensk påskafton egen linje) — ingen åbne fund.
+       **Denne iteration:** F5c-slice på de **interpolerede** procenter, den
+       blinde plet scanneren ikke kan se. `regnestykker.test.ts` scanner
+       `JsxText` og strengliteraler, så `{tal}%` i JSX er usynlig for den —
+       planen havde den som sin næste slice. **Målt:** 24 steder i fem
+       beregnere (`LoenBeregner` 10, `LaaneBeregner` 6, `BolanBeregner` 7,
+       `OpsparingsBeregner` 5, `KalorieBeregner` 6 minus dobbeltstrøg) på
+       `/brutto-netto`, `/laaneberegner`, `/bolan`, `/opsparing` og
+       `/kalorier` (273 besøgende/28d, 11.178 GSC-visninger). Loftet
+       **361 → 356** noder. Ny port i `procent-i-synlig-tekst.test.tsx`
+       renderer de fem komponenter i da/se/no og dømmer den synlige markup
+       på 0 procenter uden mellemrum; mutation på **én** interpolation
+       (`KalorieBeregner:412`) gav **2** røde tests. `bolan-loen-sater` og
+       `decimal-komma` låste den gamle skrivemåde fast og er opdateret.
+       Punkt 13: 0 `$[0]`-rester — men perl spiste `\${rate}` i
+       `LaaneBeregner` undervejs (rettet og verificeret i diffen).
+       **Deploy-verifikation:** de fem noter fra før 07:30 er **stadig åbne**
+       og dømmes efter 12:30-vinduet — HTTP 200 er ikke bevis.
+       **Næste iteration:** (1) døm de fem ventende noter på indhold efter
+       12:30; (2) den nye decimal-komma-opgave nedenfor; (3) F5c-slice på de
+       næste interpolerede procenter (`Elberegner` 12, `BudgetBeregner` 2,
+       `LonEfterSkattBeregner` 3, `HuslejeBudgetBeregner` 2).
        BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
-       ⚠️ **Fælde fundet:** `src/lib/locale-leak-gate.test.ts` **skriver
-       plantede danske strenge ind i rigtige kildefiler** og gendanner dem i en
-       `finally`. Bliver processen dræbt (fx af et timeout), bliver fælden
-       **liggende i filen**, og både porten og næste kørsel fejler. Sket én
-       gang her i `src/app/procent/page.tsx`. **Efter enhver afbrudt
-       `vitest`-kørsel: `git status` og kassér alt ud over den opgaves egne
-       filer.**
 
 ## Fase 3 — trafik-drevet
 
@@ -100,7 +93,7 @@ ved serverstart. Nøglefilen lå på `/api/indexnow-key/…` og er rettet 2/10
 **F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
 dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
 
-**F5c. [~] Procentnotationen «8 %» — 361 noder målt 3/10 10:5x.**
+**F5c. [~] Procentnotationen «8 %» — 356 noder målt 3/10 11:2x.**
 *Hvad:* de største resterende er `blog/30-procent-reglen-husleje` 25 (⛔ de er
 regelnavnet — de **skal** have en undtagelse, nogen må tage stilling til om
 sitets eget navn «30% reglen» skal skrives «30 %-reglen»), `/moms` 18 (⛔ de 3
@@ -108,7 +101,7 @@ lovgrænser, ❓ nedenfor), `billaan` 17, `blog/koeb-af-bolig-…` 15,
 `arveafgift` 14, `blog/guide-feriepenge-…` 13.
 *Accept:* loftet i `regnestykker.test.ts` (`PROCENT_UDEN_MELLEMRUM_LOFT`) må
 kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 → 509 →
-436 → 371 → **361** noder (3/10 10:5x; scanneren tæller noder, så en linje med
+436 → 371 → 361 → **356** noder (3/10 11:2x; scanneren tæller noder, så en linje med
 to procenter tælles én gang). Rækken af navne-undtagelser er nu fem, ikke to:
 «30% reglen» i `husleje/page.tsx`, `page-data.ts` og de to blogindlægs
 sidelinks, plus «4%-reglen» i pensionsindlægget. Scannerens øvrige blinde
@@ -120,10 +113,19 @@ da/se/no og dømmer den synlige markup på 0, så **begge** fejltyper er lukket 
 denne side: `rangeBankLoan: "ca. 5,0-7,0%"` **og** `{belaaningsgrad}%` gav røde
 med fund `['95,0%', '7,0%']`. `decimal-komma.test.tsx` låste «ca. 3,5-4,0%» og
 «5,0%» fast — de to påstande er opdateret, de er ikke længere porten.
-*Næste slice:* samme mønster for de 12 komponenter med `%` efter en
-interpolation (`grep -n '}%' src/components/*.tsx`): `Aktieskat` 211,
-`Andelsbolig` 280, `Arveafgift` 353/379/385, `Barsel` 397, `Billaan` 352,
-`Bolan` 94/126/130/161-163/178.
+**Slice 3/10 11:2x — de interpolerede procenter i fem beregnere.** Det var
+planens egen næste slice og scannerens blinde plet: `regnestykker.test.ts`
+kan kun se `JsxText` og strengliteraler, så `{tal}%` er usynlig for den.
+`LoenBeregner` 10, `BolanBeregner` 7, `KalorieBeregner` 6, `LaaneBeregner` 6
+og `OpsparingsBeregner` 5 er rettet, og porten i
+`procent-i-synlig-tekst.test.tsx` renderer dem i da/se/no.
+`LaaneBeregner` havde **0** fund i scanneren og 6 i markupken — altså 6
+interpolationer, porten så dem alle. `KalorieBeregner`s `title=`-attributter
+er også rettet («Protein: 11 %»), de er synlige ved hover.
+*Næste slice:* `Elberegner` 12, `OpsparingsBeregner` (kun CSS-højder
+tilbage), `LoenBeregner` (resten), `HuslejeBudgetBeregner` 2,
+`BudgetBeregner` 2, `LonEfterSkattBeregner` 3 — målt på ny med
+`grep -n '}%' src/components/*.tsx`.
 
 - **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
   *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
@@ -140,6 +142,19 @@ interpolation (`grep -n '}%' src/components/*.tsx`): `Aktieskat` 211,
   «fællesøkonomi»/«partner», og reglen er «Din egenindkomst må ikke være
   større end dit årsfribeløb». Uden den var opgaven ubyggelig, så den er
   erstattet af værktøjet ovenfor i stedet for at blive gættet.
+
+**F5e. [ ] Målte decimaler med punktum i dansk tekst (ny, 3/10 11:2x —
+fundet af den nye port).** *Hvad:* den renderede `/brutto-netto` skriver
+«Kommuneskat (**24.94** %)» med **punktum** i den danske markup, fordi
+`LoenBeregner.tsx:426` interpolerer kommunesatsprocenten råt fra
+input-feltet; `Kirkeskat (0,64 %)` bruger derimod komma. Samme mønster
+findes på `/kalorier`: «(interval 0,8-1,2)» er ok, men `LaaneBeregner`
+_input-felter_ viser `value="24.94"` og `step="0.01"`. *Hvorfor:* dansk
+decimalkomma er en del af Retskrivningsordbogen, og det er den samme
+fejltype som F5b. *Accept:* den interpolerede kommunesatsprocent går
+gennem samme `formatPct` som resten, så «Kommuneskat (24,94 %)» og «(0,64 %)»
+— og `decimal-komma.test.tsx` får en assert på kommunesatslinjen, ikke kun
+på aop-annuiteten.
 
 **F9. [ ] `locale === "se" ? "se" : "da"` — 13 steder med dansk på
 norske domæner.** *Hvad:* mønstret er målt med grep efter `ceo/norsk-pace-side`
@@ -297,6 +312,8 @@ målinger, mutationer og reelle fejl står i `docs/plan-arkiv.md`.
 `VERIFICÉR DEPLOY: /su's fribeløbs-værktøj (hele HTML'en på `minberegner.dk/su` skal have **1** `<h2>` «Hvor meget må jeg tjene ved siden af min SU?» og **1** «Du må højst tjene» med **248.988** i `<strong class="text-lg">` (12 × 20.749), og i samme boks «Det svarer til pr. måned» **20.749**, «Før AM-bidrag pr. måned» **22.553** og «Før AM-bidrag for hele året» **270.639** (= 248.988 / 0,92, nedrundet), «Alle 12 måneder bruger den samme sats», **0** «12 måneder uden SU», **0** «laveste sats», **0** «Tillæg for børn under 18» (kun vises når der vælges børn) og **0** «kr..»; fribeløbs-tabellen i samme side skal stadig have **15.297**, **23.598**, **45.420**, **3.921** og **34.129**; `beraknare.se/su` og `beregner.no/su` skal have **0** «Hvor meget må jeg tjene ved siden af min SU?»; **intet** `NaN`) ceo/su-indtaegtsgraense 3/10 10:1x`
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i tre blogindlæg (hele HTML'en skal have **0** `\d%` i den løse tekst: `minberegner.dk/blog/pension-hvor-meget-skal-du-spare-op` skal have «12-17 %», «8-12 %», «4-5 %», «~38 %», «(70 %)», «60-80 %», «10-12 %» … «22-30 %», «*Med 5 % årligt afkast» og «30-årig = 70 % aktier, 30 % obligationer»; `minberegner.dk/blog/boliglaan-2026-renter-og-afdrag` skal have «3,5-4,5 %», «2-3 %», «2,5-3,5 %», «4-7 %», «Finansierer over 80 %», «Udbetaling (5 %)», «op til 80 %», «Banklån (5-15 %)», «150.000 kr (5 %)», «2.400.000 kr (80 %)», «450.000 kr (15 %)», «30-33 %», «0,5-1,2 %», «25-33 %», «Sæt 2-3 % af boligprisen»; `minberegner.dk/blog/maanedsbudget-2026-komplet-guide` skal have «30-35 %», «50 % til nødvendigheder», «30 % til personlige ønsker», «20 % til opsparing og gæld», «10-20 %», «15-25 %», «25.000-35.000 kr/måned», «30-40 %», «12-18 %», «8-12 %», «5-10 %» og alle otte tabel-celler «33 %», «20 %», «12 %», «8 %», «7 %», «12 %», «8 %», «100 %». **Undtagelserne er de tre regelnavne og skal STÅ:** «30% reglen» i de to blogindlægs sidelinks og «4%-reglen» i pensionsindlægget, så **2** «30% reglen» på tværs og **1** «4%-reglen»; altså **0** «30 % reglen» og **0** «4 %-reglen»; **intet** `NaN`) ceo/procent-sweep-pension-boliglaan 3/10 10:1x`
+
+`VERIFICÉR DEPLOY: procentnotationen «8 %» i de fem interpolerede beregnere (hele HTML'en skal have **0** `\d%` i den synlige tekst på `minberegner.dk/kalorier` — altså **0** «(11%)», «(25%)» og **0** «(25 %)» mangler, men «300 kcal (11 %)», «657 kcal (25 %)» og «1.676 kcal (64 %)» skal stå, og `title`-attributterne skal sige «Protein: 11 %», «Fedt: 25 %» og «Kulhydrater: 64 %»; `minberegner.dk/brutto-netto` skal have «- AM-bidrag (8 %)», «Bundskat (12,01 %)», «Mellemskat (7,5 %)», «Topskat (7,5 %)», «Top-topskat (5 %)», «Effektiv skatteprocent: 33,9 %», «Kommuneskat (24.94 %)» og «Kirkeskat (0,64 %)», og kommune-listen skal have «Gentofte (22.8 %)» med **0** «(22.8%)»; `minberegner.dk/laaneberegner` skal have «Lån … er til 5 % - ydelse» og **0** `\d%` i loanSummary; `minberegner.dk/bolan` skal have «Kontantinsats: … kr (20 %), «85 %», «2 %/år» og «max 7 %). Ränteavdraget är 1,5 % upp till … kr, sedan 1,1 %.»; `minberegner.dk/opsparing` skal have «Real værdi (efter 2 % inflation):», «+5,2 %» og «2 % p.a.»; **intet** `NaN`) ceo/procent-interpolationer 3/10 11:2x`
 
 ## VERIFICÉR DEPLOY-noter
 
