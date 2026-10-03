@@ -28001,3 +28001,42 @@ sitemap. Der var ingen produktionsfejl.
 
 Målemetoden var fejlen: otte curls af samme URL er ikke otte beviser, når ingen af
 dem er sammenholdt med den rute, koden faktisk definerer. Noteret som F0f.
+
+## 3/10 16:3x — regnet eksempel i titlen på `/renteberegner` og `/arveafgift`
+
+Feature-køens sidste to ubeskyttede poster. Målt 3/10 15:3x fra GSC-uddraget
+(28 dage) var de **eneste to** af top-15 der stadig skrev en spørgsmålstitel.
+
+**Datagrund.** `/renteberegner` 12.610 visninger / 107 klik / **0,8 %** / pos. 7,4
+og søgningerne «annuitetslån beregner» (331v, pos. 8) og «renteberegner»
+(264v, 6k, pos. 8). `/arveafgift` har ingen række i top-15, men fangede
+105 → 70 besøgende/28d på sit blogindlæg, så spørgsmålet «arveafgift beregner»
+er reelt. Mønsteret i sitets egne data: sider med regnestykke har 0,9-1,6 %
+CTR på pos. 4,9-7,8, sider med spørgsmålstitel 0,4-0,8 % på pos. 7,2-7,4.
+
+**Sprogasymmetrien på `/renteberegner`.** `page-data.ts` skrev allerede det
+samme regnestykke i `se` («Räntekalkylator: 100 000 kr i 5 år = 1 887 kr/mån»)
+og `no`, mens `da` skrev «Renteberegner: beregn månedsydelse på annuitetslån» —
+præcis den fejl F0e fandt på de fire største sider, kun på en side med 12.610
+visninger. Den danske titel fik nu præcis samme opbygning som sine søskende:
+`Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.` (49 tegn).
+
+**Ingen ny matematik.** Begge tal læses fra de funktioner siderne allerede
+regner med: `hovedEksempel()` i `rente-eksempler.ts` (100.000 kr, 5 %, 5 år →
+1.887 kr./md, 13.227 kr. i rente) og `EKSEMPEL_BARN` i `arveafgift.ts`
+(1.000.000 kr → grundlag 607.700 kr → 91.155 kr. boafgift). Den nye konstant
+`ARVE_EKSEMPEL_TEKST` er interpolation, ikke et håndskrevet tal, så et nyt
+bundfradrag flytter titlen med (punkt 11).
+
+**Eftersyn i min egen diff før squashen:** den første version af
+`ARVE_EKSEMPEL_TEKST` var «Arveafgift: 1.000.000 kr. arv = …», som smed
+hovedordet «beregner» ud af «arveafgift beregner». Rettet til «Arveafgift
+beregner: …» — 60 tegn, lige på portens grænse, og grænsen er målt ovenfor.
+
+**Port.** Begge rækker ligger i `REGNETE_EKSEMPLER` i `meta-title-tal.test.ts`,
+som dømmer med `toContain` pr. sprog og kræver `ogTitle === metaTitle`.
+Polaritet målt: en frossen boafgift (91.155 → 88.500) giver 1 rød, den gamle
+`/renteberegner`-titel giver 2 røde, HEAD 38/38 grønt i porten og 4101/4101 i
+suiten. `page-data.test.ts:273` havde den gamle titel håndskrevet og fulgte med.
+
+**MÅL:** `/renteberegner` 12.610 / 107 / 0,8 % / pos. 7,4 → GSC 17/10.

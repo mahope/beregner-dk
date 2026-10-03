@@ -52,6 +52,7 @@ import {
 import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
 import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
+import { EKSEMPEL_BARN } from "./arveafgift";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
@@ -117,6 +118,15 @@ const KOMMUNESKAT_SNIT_PCT = formatNumber(
  * naar satsen stiger (punkt 11).
  */
 const ARVE_BUNDFRADRAG_TEKST = formatNumber(SATSER_2026.arveBundfradrag, "da");
+
+/**
+ * Boafgiften på `/arveafgift`s arveeksempel: 1.000.000 kr til et barn.
+ *
+ * Regnet af `beregnArveafgift` — samme funktion som `ArveafgiftBeregner` — så
+ * bundfradraget stiger og regnestykket i Googles titellinje flytter sig med.
+ * Håndskrevet holdt den boafgiften stående ved et nyt bundfradrag (punkt 11).
+ */
+const ARVE_EKSEMPEL_TEKST = `Arveafgift beregner: 1.000.000 kr. arv = ${formatNumber(EKSEMPEL_BARN.boafgift, "da")} kr. boafgift`;
 
 /**
  * Dagpengens egne tal, skrevet ét sted for `/dagpenge`s beskrivelse, FAQ og
@@ -1464,10 +1474,10 @@ faqItems: kalorierFaqItems("da"),
       slug: "renteberegner",
       title: "Renteberegner",
       description: `${formatBelob(renteHoved.hovedstol, "da")} kr. i ${renteHoved.loebetid} år til ${renteHoved.aarsrente} % rente koster ${formatBelob(renteHoved.maanedligBetalning, "da")} kr. om måneden i et annuitetslån. Samlet rente: ${formatBelob(renteHoved.samletRante, "da")} kr.`,
-      metaTitle: "Renteberegner: beregn månedsydelse på annuitetslån",
+      metaTitle: `Renteberegner: ${formatBelob(renteHoved.hovedstol, "da")} kr. i ${renteHoved.loebetid} år = ${formatBelob(renteHoved.maanedligBetalning, "da")} kr./md.`,
       metaDescription: `Annuitetslån på ${formatBelob(renteHoved.hovedstol, "da")} kr. med ${renteHoved.aarsrente} % rente i ${renteHoved.loebetid} år: ${formatBelob(renteHoved.maanedligBetalning, "da")} kr. i måneden og ${formatBelob(renteHoved.samletRante, "da")} kr. i samlet rente. Beregn også serielån.`,
       keywords: ["renteberegner", "lånberegner", "beregn lån", "månedlig ydelse", "annuitetslån", "rente beregning"],
-      ogTitle: "Renteberegner: beregn månedsydelse på annuitetslån",
+      ogTitle: `Renteberegner: ${formatBelob(renteHoved.hovedstol, "da")} kr. i ${renteHoved.loebetid} år = ${formatBelob(renteHoved.maanedligBetalning, "da")} kr./md.`,
       ogDescription: `${formatBelob(renteHoved.hovedstol, "da")} kr. i ${renteHoved.loebetid} år til ${renteHoved.aarsrente} %: ${formatBelob(renteHoved.maanedligBetalning, "da")} kr. i måneden og ${formatBelob(renteHoved.samletRante, "da")} kr. i samlet rente.`,
       category: "Økonomi",
       breadcrumbCategory: "Økonomi",
@@ -1980,10 +1990,10 @@ faqItems: kalorierFaqItems("da"),
       slug: "arveafgift",
       title: "Arveafgift beregner - Beregn arveafgift i Danmark | MinBeregner.dk",
       description: "Beregn arveafgift i Danmark. Se hvor meget du skal betale i boafgift baseret på din relation til afdøde. Gratis beregner med 2026 satser og regler.",
-      metaTitle: "Arveafgift beregner - Beregn arveafgift i Danmark",
+      metaTitle: ARVE_EKSEMPEL_TEKST,
       metaDescription: "Beregn arveafgift i Danmark. Se hvor meget du skal betale i boafgift baseret på din relation til afdøde. Gratis beregner med 2026 satser og regler.",
       keywords: ["arveafgift"],
-      ogTitle: "Arveafgift beregner - Beregn arveafgift i Danmark",
+      ogTitle: ARVE_EKSEMPEL_TEKST,
       ogDescription: "Beregn arveafgift i Danmark. Se hvor meget du skal betale i boafgift baseret på din relation til afdøde. Gratis beregner",
       category: "Økonomi",
       breadcrumbCategory: "Økonomi",

@@ -15,9 +15,16 @@ import type { Locale } from "./i18n";
  * | `/kvadratmeter` |    20.768 |  310 | 1,5 % |  4,9 | ja — 5 x 4 m = 20 m² |
  * | `/promille`     |     6.003 |   97 | 1,6 % |  7,8 | ja — 4 øl på 80 kg = 0,88 ‰ |
  * | `/braendstof`   |    16.518 |  174 | 1,1 % |  5,9 | ja — 500 km benzin koster 450 kr. |
- * | `/renteberegner`|    12.610 |  107 | 0,8 % |  7,4 | **nej** |
+ * | `/renteberegner`|    12.610 |  107 | 0,8 % |  7,4 | nej → rettet 3/10 16:1x |
  * | `/alder`        |    10.029 |   43 | 0,4 % |  7,2 | **nej → rettet 3/10** |
  * | `/tidszone`     |    23.351 |  101 | 0,4 % |  7,6 | **nej → rettet 3/10** |
+ *
+ * `/arveafgift` og `/renteberegner` blev lagt til 3/10 16:1x. De var de to
+ * eneste af GSC-top-15 med en spørgsmålstitel, og på `/renteberegner` stod der
+ * desuden en **sprogasymmetri**: `page-data.ts` skrev det samme regnestykke i
+ * `se` («100 000 kr i 5 år = 1 887 kr/mån») og `no`, mens `da` skrev
+ * «beregn månedsydelse på annuitetslån» — altså den sprogfejl, F0e også
+ * fandt på de fire største sider.
  *
  * Mønsteret er et brud på positionen: de to sider med eksempel på pos. 7,6-7,8
  * har 1,1-1,6 % CTR, og de to sider med spørgsmålstitel på pos. 7,2-7,6 har
@@ -44,8 +51,12 @@ import type { Locale } from "./i18n";
  * `/rentefradrag`, `/boligstoette` og `/dagpenge` skriver «… 2026 - …» og intet
  * regnet. De er **taget ud** af tabellen i stedet for at blive dømt som om de
  * havde et eksempel — porten og tabellen skal sige det samme (punkt 11). De er
- * danske-only sider, så de har hverken `se` eller `no`. Der ligger en opgave på
- * dem i planens feature-kø; de kommer tilbage i porten når de har et eksempel.
+ * danske-only sider, så de har hverken `se` eller `no`. De **blev ikke** rettet
+ * 3/10 16:1x: `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er de to
+ * sider med højest CTR i GSC-uddraget, så deres titel skal måles efter 14 dage
+ * — ikke antages at hjælpe. `/dagpenge` har slet ingen GSC-række, så den venter
+ * på de to. Opgaven ligger i planens feature-kø; de kommer tilbage i porten,
+ * når de har et eksempel.
  */
 const KVADRATMETER_EKSEMPEL = kvadratmeterEksempelLignelse("da");
 
@@ -69,6 +80,11 @@ const REGNETE_EKSEMPLER: {
   { slug: "tidszone", resulter: { da: "12 i Danmark = 06 i New York, USA", se: "12 i Sverige = 06 i New York, USA" } },
   { slug: "moms", resulter: { da: "1.000 kr. ekskl. moms + 25 % = 1.250 kr.", se: "1 000 kr. exkl. moms + 25 % = 1 250 kr." } },
   { slug: "kalorier", resulter: { da: "80 kg, 180 cm, 30 år, moderat = 2.759 kcal", se: "man 80 kg, 180 cm = 2 759 kcal/dag" } },
+  // De to sider fra feature-køen, der manglede et regnestykke. Tallene kommer
+  // fra de funktioner siden selv regner med — `hovedEksempel()` og
+  // `EKSEMPEL_BARN` — så titlen ikke kan love en anden ydelse end beregneren.
+  { slug: "renteberegner", resulter: { da: "100.000 kr. i 5 år = 1.887 kr./md.", se: "100 000 kr i 5 år = 1 887 kr/mån", no: "100 000 kr i 5 år = 1 887 kr/md" } },
+  { slug: "arveafgift", resulter: { da: "Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr. boafgift" } },
 ];
 
 type SprogOgResultat = { slug: string; locale: Locale; resultat: string };

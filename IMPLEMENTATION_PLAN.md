@@ -1,21 +1,29 @@
-STATUS: 3/10 15:5x. **⛔ DEN DANSKE `/timer-i-aaret` ER OK — løst op.**
-       Jeg målte i sidste iteration `minberegner.dk/timer-i-aaret` (8/8 curl,
-       404) og satte hele loopet på pause. **URL'en findes ikke:** den danske
-       side hedder `/timer-i-aret` — ét `a` mindre. Målt 3/10 15:3x: `/timer-i-aret`
-       → **200**, titel «Hvor mange timer er der på et år? Timer i alle perioder»,
-       canonical `https://minberegner.dk/timer-i-aret`, `hrefLang` da/se/x-default
-       uden skråstreg; `beraknare.se/timmar-i-aret` → 200. Der var ingen
-       produktionsfejl, og ingen skal se på Dokploy. **Læren er endnu ikke
-       gjort permanent** — se F0f.
-       **Denne iteration leverer kode:** review-fund MIDDEL om
-       `meta-title-tal.test.ts` er rettet (se F0c).
+STATUS: 3/10 16:3x. ✅ **Regnet eksempel i titlen på `/renteberegner` og
+       `/arveafgift`** — de to eneste af GSC-top-15 med en spørgsmålstitel.
+       `/renteberegner` havde desuden en **sprogasymmetri**: `se` og `no`
+       skrev «100 000 kr i 5 år = 1 887 kr/mån», mens `da` skrev «beregn
+       månedsydelse på annuitetslån». Nu: «Renteberegner: 100.000 kr. i 5 år =
+       1.887 kr./md.» og «Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr.
+       boafgift». Begge tal regnes af de funktioner siden selv bruger
+       (`hovedEksempel()`, `EKSEMPEL_BARN`), og begge er under titelsporten.
+       **`/rentefradrag` og `/boligstoette` er bevidst IKKE rørt** — de har
+       hhv. 5,8 % og 2,5 % CTR, de to højeste i uddraget, så deres titel skal
+       måles i 14 dage, ikke gættes. Se F0d.
+       ⛔ Den danske `/timer-i-aaret` er OK — løst op. URL'en findes ikke: den
+       danske side hedder `/timer-i-aret` — ét `a` mindre. Målt 3/10 15:3x:
+       `/timer-i-aret` → **200**, canonical + `hrefLang` da/se/x-default uden
+       skråstreg; `beraknare.se/timmar-i-aret` → 200. Læren er endnu ikke gjort
+       permanent — se F0f.
        **GATE (noteret 3/10 15:1x):** `npm run typecheck` → `npm run test`
        (hele suiten) → `npm run lint` → `npm run build`. Alle fire skal være
        grønne; rækkefølgen er build-fejl → tests → lint.
-       **Gate 3/10 15:5x:** typecheck 0, lint 0, **4095/4095 tests**, build 0.
-       **CI grøn** ved start (0c54b02, 4m17s), ingen åbne PR'er, ingen uløste
-       Sentry-fejl, CEO-køens otte fund lukkede.
-       PR-TJEK: 3/10 15:3x (ingen åbne). BRANCH-TJEK: 3/10 15:3x (kun
+       **Gate 3/10 16:3x:** typecheck 0, lint 0, **4101/4101 tests**, build 0.
+       **Målt polaritet:** frosset boafgift (91.155 → 88.500) giver 1 rød;
+       gammel `/renteberegner`-titel giver 2 røde.
+       **CI grøn** ved start (0a9b7bb, 3m59s), ingen åbne PR'er, ingen uløste
+       Sentry-fejl, CEO-køens otte fund lukkede. Begge review-fund er
+       markeret `RETTET 0a9b7bb`.
+       PR-TJEK: 3/10 16:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x (kun
        `bevaret/*` + `master` + 11 `data/*`/`claude/*`-standby på origin).
 
 ## Fase 3 — trafik-drevet
@@ -90,7 +98,13 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
    mutation 2 (aldersalder frosset til 30) 1 rød. Docblockens tabel er
    rettet, så den ikke længere påstår at `/rentefradrag` har et eksempel.
 
-**F0d. [ ] Regnet eksempel i de tre titler, der kun har et årstal.**
+**F0d. [~] Regnet eksempel i de tre titler, der kun har et årstal.**
+   *Rettet 3/10 16:3x for **to** af dem (`renteberegner`, `arveafgift` — de var
+   feature-køens sidste to ubeskyttede). De tre herunder er **danske-only** og
+   blev bevidst lagt tilbage: `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %)
+   er de to højeste CTR i GSC-uddraget, så deres titel skal måles i 14 dage —
+   og `/rentefradrag` er samtidig sitets bedst rangerende side («rentefradrag
+   2026», 63.000 søgninger, pos. 2), hvor «2026» ikke må forsvinde.*
    *Hvem:* alle der googler «rentefradrag 2026» (63.000 søgninger, pos. 2),
    «beregn boligstøtte» (36.000, pos. 10) og «dagpenge beregner».
    *Datagrund:* målt 3/10 15:3x fra `getPageData(slug, "da")` —
@@ -350,14 +364,15 @@ er blokeret af en ❓ og må ikke gættes.
   sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og
   `/boernepenge`. ⛔ Oppgave 187, 13/10 — må ikke flyttes.
 
-- **`/renteberegner` og `/arveafgift` mangler et regnet eksempel i titlen** —
-  *Hvem:* alle der googler «renteberegner» (6.000 søgninger, pos. 8) og
-  «arveafgift beregner». *Datagrund:* målt 3/10 — de er de **eneste to** af
-  GSC-top-15 der stadig har spørgsmålstitel; `/renteberegner` har 12.610
-  visninger og **0,8 %** CTR på pos. 7,4. *Accept:* begge titler får et regnet
-  eksempel fra `rente-eksempler.ts` / arveafgiftens egen datakilde, og de lægges
-  i `MALTE_SIDER` i `meta-title-tal.test.ts`. **MÅL:** `/renteberegner`
-  12.610 visninger / 107 klik / 0,8 % / pos. 7,4 → GSC 17/10.
+- **[x] ✅ `/renteberegner` og `/arveafgift` har et regnet eksempel i titlen** —
+   se `docs/plan-arkiv.md`. *Hvem:* «renteberegner» (6.000 søgninger, pos. 8)
+   og «arveafgift beregner». *Datagrund:* målt 3/10 — de var de **eneste to**
+   af GSC-top-15 med en spørgsmålstitel; `/renteberegner` har 12.610 visninger og
+   **0,8 %** CTR på pos. 7,4. *Accept:* begge titler har et regnet eksempel fra
+   `hovedEksempel()` / `EKSEMPEL_BARN` — de samme funktioner beregneren bruger —
+   og de ligger i `REGNETE_EKSEMPLER` i `meta-title-tal.test.ts`, der dømmer med
+   `toContain` pr. sprog. **MÅL:** `/renteberegner` 12.610 visninger / 107 klik /
+   0,8 % / pos. 7,4 → GSC 17/10.
 
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
@@ -369,6 +384,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 **Åbne F5b-slice: `/flyttebudget` (3 fund), mål listen på ny først.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 ## VERIFICÉR DEPLOY-noter
+
+**Ny note 3/10 16:3x:** `VERIFICÉR DEPLOY: <metaTitle+ogTitle på /renteberegner og /arveafgift> ceo/titler-renteberegner-arveafgift 3/10 16:3x`.
+Døm på indhold, ikke på HTTP: `curl -s https://minberegner.dk/renteberegner | grep -o '<title>[^<]*'` skal give «Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.» (49 tegn) og `…/arveafgift` «Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr. boafgift» (60 tegn). Næste deploy-vindue 17:30.
 
 **Ingen ny deploy-note 3/10 15:5x:** F0c rører kun `*.test.ts` og planen, så
 der er intet at verificere i produktion. Sidste åbne noter er dømt nedenfor.
