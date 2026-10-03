@@ -1,4 +1,14 @@
-STATUS: 4/10 01:3x. ✅ **de 25 sidste rå procenter i boligkøbsguiden og
+STATUS: 4/10 01:5x. ✅ **/pension har et folkepensionsalder-værktøj** —
+        `ceo/folkepensionsalder-vaerktoj`. Fødselsdato ind → «Du kan gå på
+        folkepension 15. marts 2060», «Søg senest 15. september 2059» og «Det
+        er 33 år, 5 måneder og 11 dage». Alt læst fra den `alderSkala` som
+        sidens egen tabel bruger, så de to ikke kan sige hver deres alder.
+        ⚠️ **Fire scanner-tests er flakiness**: en fuld suite-kørsel 4/10 01:47
+        gav 11 røde i de fil-scannende porte, og de to køringer før og efter var
+        grønne (4176-4187 tests). `vitest.config.ts` har ingen `testTimeout`, så
+        portene rammer 5 s når maskinen er belæst. Gate-definition: typecheck,
+        `biome lint ./src`, hele suiten. Se `docs/plan-arkiv.md`.
+        ✅ 4/10 01:3x. ✅ **de 25 sidste rå procenter i boligkøbsguiden og
         drikkelisten er væk** — `ceo/procent-koeb-af-bolig-alkohol`. Loftet i
         `regnestykker.test.ts` **231 → 206**, begge filer står nu i
         `PROCENT_MED_MELLEMRUM`, og en ny render-test dømmer
@@ -25,19 +35,9 @@ STATUS: 4/10 01:3x. ✅ **de 25 sidste rå procenter i boligkøbsguiden og
         PR-TJEK: 3/10 23:4x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
         start (`e551435`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
 
-## CEO-kø punkt 0 — verificeret i koden 4/10 01:0x (alle otte lukket)
+## CEO-kø punkt 0 — [x] ✅ alle otte lukket (verificeret i koden 4/10 01:0x)
 
-Læst i `HEAD` før denne iteration, så listen ikke kan genkøres. **Valborg** er
-`month: 4, day: 30` i da og se (`dage-til.ts:1269-1270`); **svensk påskafton**
-er `offsetDays: -1` mod dansk `-2` (`:1015-1016`); **dansk sankthans** er fast
-23./24. juni med en FAQ, der siger «ikke en helligdag» (`:818`, `:838-846`) og
-ingen «fri med løn»; **«samme som langfredag»** findes ikke i `src`; **husleje**
-bygger FAQ'en på nettoprisindekset og siger at nævnet «ikke selv fastsætter en
-sats pr. område» (`page-data.ts:2130-2132`), og «2,9 %» findes ikke;
-**`toUtcMidnight`** læser `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`
-(`:1545`, `:1561-1573`); **`maneder: 12`** med kommentar om skudår
-(`dato-eksempler.ts:96-110`); **1. advent** «mellem 27. november og
-3. december» (`:1343`). ⛔ `/dagpenge`s 9 rå procenter er væk i `HEAD`.
+Målt i `HEAD`, punkt for punkt: `docs/plan-arkiv.md`.
 
 ## Fase 3 — trafik-drevet
 
@@ -177,23 +177,14 @@ render-test på drikkelisten. *Målt:* `grep -cE '[0-9]+([.,][0-9]+)?%'` giver
 reglen-husleje` (25, ⛔ regelnavn) og `/moms` (16, ⛔ lovgrænser, ❓), så resten
 af F5c er kun filer under 15 og kræver en ny måling.
 
-**F5g. [~] Slice 3/10 18:4x: 45 noder i `/billaan` (da+se), `/arveafgift`,
-`/brutto-netto`, `/kalorier` og `/flyttebudget`.** Alle boede i `page.tsx` (brødtekst og
-tabeller), altså synlige for `regnestykker.test.ts`; kun `{EFFEKTIV_PCT}%` på
-`/arveafgift` var en interpolation. Resterne efter denne slice, målt i den
-synlige tekst: `/dagpenge` 1 (`90%`), `/konfirmation` 0 — sidstnævnte er
-**allerede ren**, planens gamle «7» var fra en måling før `c398f43`.
-*Målt:* loftet **319 → 274**. *Accept:* hver side har 0 `\d%` i den synlige
-tekst i da/se/no, og de fem navne-undtagelser («30% reglen» ×2 pr. `/husleje`,
-«4%-reglen») står uændret.
-*MÅL:* `/billaan` 24 besøgende/28d, `/arveafgift` ikke i top-15 → samme som
-F5c. **Port:** `regnestykker.test.ts` (loft pr. korpus) +
-`arveafgift/page.test.tsx` på regnestykket.
-**[x] ✅ 3/10 23:0x — den anden kodebane er også lukket:** de rå `\d%` i `<td>` og
-brødtekst lå i `/bil`, `/topskat`, `blog/biloekonomi`, `blog/boligsalg` og
-`BoligsalgBeregner` (30 noder, loftet 261 → **231**). `/billaan` og `/kalorier`
-var **allerede rene** i `HEAD` — planens måling 3/10 21:5x så gammel kode fra
-før fixen, ikke en fejl. Se `docs/plan-arkiv.md`.
+**F5g. [x] ✅ Lukket 3/10 23:0x.** 45 noder i `/billaan` (da+se), `/arveafgift`,
+`/brutto-netto`, `/kalorier`, `/flyttebudget` og `/bil` (da+se) var de sidste
+uundtagede; alle boede i `page.tsx` plus to komponenter, og porten
+(`regnestykker.test.ts` + `procent-i-synlig-tekst.test.tsx` + `decimal-komma`)
+dømmer nu både `JsxText` og interpoleret markup. Loftet: 319 → 274 → 261 → 231.
+De fem navne-undtagelser («30% reglen» ×2, «4%-reglen») står uændret. Detaljer
+og målinger: `docs/plan-arkiv.md`. *MÅL:* `/bil` 24 besøgende/28d,
+`/arveafgift` ikke i top-15 → Plausible 18/10.
 
 - **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
   *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
@@ -380,6 +371,16 @@ er blokeret af en ❓ og må ikke gættes.
   fælles nævner, dele vender den anden brøk, altid forkortet + decimaltal +
   procent, da+se, **unike feltnavne**. **MÅL:** 4.865/34/0,7 %/5,1 → GSC 17/10.
 
+- **[x] ✅ Folkepensionsalder-værktøj på `/pension`** — `ceo/folkepensionsalder-vaerktoj`
+  4/10. *Hvem:* alle der googler «hvad er min pensionsalder», «beregn min
+  pensionsalder» eller «hvornår kan jeg gå på pension» — alle tre er danske
+  autocomplete-træffere målt 4/10 under «hvad er min» og «beregn min».
+  *Datagrund:* siden havde **kun** en statisk tabel over folkepensionsalderen pr.
+  fødselsår, altså «65 ½ år» uden en dato — spørgsmålet er en dato. *Accept:*
+  alder + dato + søgdato + tid til i da (dansk lov, ikke oversat til svensk —
+  punkt 11), `folkepensionsdatoer` læser samme `alderSkala` som tabellen,
+  månedens sidste dag ved skudår, 8 nye lib-tests + 5 render-tests.
+  **MÅL:** `/pension` 142 besøgende/28d (3/10) → Plausible 18/10.
 - **[x] ✅ `/renteberegner` og `/arveafgift` har et regnet eksempel i titlen** —
    se `docs/plan-arkiv.md`. *Hvem:* «renteberegner» (6.000 søgninger, pos. 8)
    og «arveafgift beregner». *Datagrund:* målt 3/10 — de var de **eneste to**
@@ -402,6 +403,9 @@ sidste uundtagede slice er lukket 4/10 01:3x. `/moms` er ⛔ (de 3 lovgrænser,
 ❓ nedenfor), og de to største F5c-filer er ⛔ regelnavne.
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 4/10 01:5x:** `VERIFICÉR DEPLOY: <folkepensionsalder-værktøj på /pension: fødselsdato → alder, dato, søgdato og tid til> ceo/folkepensionsalder-vaerktoj 4/10 01:5x`.
+Døm på indhold: `curl -s https://minberegner.dk/pension | grep -c 'folkepensionsalder-foedselsdato'` skal give **1** (værktøjet er klient-komponeret, så feltet findes i den statiske markup), og `grep -c 'Indtast din fødselsdato for at se, hvornår du kan gå på folkepension'` **1**. Brødteksten skal stadig have tabellen med rækkerne «31. december 1953 eller tidligere / 65 år», så værktøjet ikke har spiset den. `beraknare.se/pension` skal **ikke** have værktøjet — alderskalaen er dansk lov. Næste deploy-vindue 4/10 07:30.
 
 **Åben note 4/10 01:3x:** `VERIFICÉR DEPLOY: <mellemrum i de 25 rå procenter i boligkøbsguiden (FAQ, tabeller, brødtekst) og i de ti drikke-knapper på /alkoholenheder> ceo/procent-koeb-af-bolig-alkohol 4/10 01:3x`.
 Døm på **indhold**: `curl -s https://minberegner.dk/blog/koeb-af-bolig-2026-omkostninger | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%' | wc -l` skal give **0** (var 18), og «Udbetaling (5 %)», «Tinglysning skøde (0,6 % + 1.850 kr)», «forsigtighedsfradrag på 20 %» skal stå i markup. `curl -s https://minberegner.dk/alkoholenheder | grep -c '4,6 %'` skal give **≥1** for «Almindelig øl (33 cl, 4,6 %)» og `grep -c '4,6%'` **0**; samme for «0,5 %», «40 %», «24 %». Sidens brødtekst har allerede «4,6 %» i `HEAD`, så den skal ikke bruges som bevis. Næste deploy-vindue 4/10 07:30.

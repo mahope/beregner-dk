@@ -3,6 +3,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import dynamic from "next/dynamic";
 const PensionBeregner = dynamic(() => import("@/components/PensionBeregner"));
+const FolkepensionsalderBeregner = dynamic(() => import("@/components/FolkepensionsalderBeregner"));
 import FAQ from "@/components/FAQ";
 import {
   CalculatorSchema,
@@ -158,6 +159,7 @@ export default async function PensionPage() {
           Folkepensionsalderen afhænger af dit fødselsår. Du kan søge om folkepension
           6 måneder inden, du har ret til den, og du skal selv søge — den udbetales ikke automatisk.
         </p>
+        <FolkepensionsalderBeregner />
         <table>
           <thead>
             <tr>

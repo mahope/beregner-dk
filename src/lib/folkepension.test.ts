@@ -6,8 +6,10 @@ import {
   folkepensionsalder,
   folkepensionsalderForAlder,
   folkepensionsalderRækker,
+  folkepensionsdatoer,
   formatFolkepensionsalder,
 } from "./folkepension";
+import { parseIsoDato } from "./lokal-dato";
 
 describe("FOLKEPENSION_2026", () => {
   it("har beløbene fra borger.dk (2026, før skat)", () => {
@@ -287,3 +289,87 @@ describe("folkepensionsalderForAlder", () => {
   });
 });
 
+
+describe("folkepensionsdatoer", () => {
+  it("regner alderdatoen som fødselsdatoen plus folkepensionsalderen", () => {
+    // Født 15. marts 1990 → 70 år i skalaen → 15. marts 2060.
+    expect(folkepensionsdatoer("1990-03-15")).toEqual({
+      alder: 70,
+      foedselsdato: "1990-03-15",
+      alderDato: "2060-03-15",
+      soegDato: "2059-09-15",
+    });
+  });
+
+  it("regner en halv alder som seks måneder", () => {
+    // 1954 er det eneste år med to trin: 65 år til 1. juli, 65½ år efter.
+    expect(folkepensionsdatoer("1954-01-01")).toMatchObject({
+      alder: 65,
+      alderDato: "2019-01-01",
+      soegDato: "2018-07-01",
+    });
+    expect(folkepensionsdatoer("1954-08-01")).toMatchObject({
+      alder: 65.5,
+      alderDato: "2020-02-01",
+      soegDato: "2019-08-01",
+    });
+    expect(folkepensionsdatoer("1955-08-01")).toMatchObject({
+      alder: 66.5,
+      alderDato: "2022-02-01",
+    });
+  });
+
+  it("lægger de seks måneder før alderdatoen, så søgdatoen ikke kan ligge forude", () => {
+    for (const foedselsdato of ["1953-12-31", "1954-01-01", "1963-06-15", "1971-01-01"]) {
+      const d = folkepensionsdatoer(foedselsdato);
+      expect(d).not.toBeNull();
+      expect(d!.soegDato < d!.alderDato).toBe(true);
+    }
+  });
+
+  it("lægger en fødselsdag på månedens sidste dag i stedet for at rulle en måned frem", () => {
+    // 31. august 1954 plus 65½ år er månedens sidste dag i februar 2020 —
+    // altså 29. februar, fordi 2020 er et skudår, og ikke 3. marts.
+    expect(folkepensionsdatoer("1954-08-31")).toMatchObject({
+      alder: 65.5,
+      alderDato: "2020-02-29",
+      soegDato: "2019-08-29",
+    });
+    // 31. december 1955 plus 66½ år er 30. juni 2022 — juni har 30 dage.
+    expect(folkepensionsdatoer("1955-12-31")).toMatchObject({
+      alder: 66.5,
+      alderDato: "2022-06-30",
+      soegDato: "2021-12-30",
+    });
+    // 31. januar 1955 er før 1. juli 1955, så skalaen giver 66 år, ikke 66½.
+    expect(folkepensionsdatoer("1955-01-31")).toMatchObject({
+      alder: 66,
+      alderDato: "2021-01-31",
+      soegDato: "2020-07-31",
+    });
+  });
+
+  it("regner 29. februar som 28. februar, så værktøjet ikke lover en dato der ikke findes", () => {
+    const d = folkepensionsdatoer("1956-02-29");
+    expect(d).not.toBeNull();
+    expect(d!.alderDato.endsWith("-02-28")).toBe(true);
+    expect(parseIsoDato(d!.alderDato)).not.toBeNull();
+  });
+
+  it("giver 65 år til alle født i 1953 eller tidligere", () => {
+    expect(folkepensionsdatoer("1953-12-31")).toMatchObject({ alder: 65, alderDato: "2018-12-31" });
+    expect(folkepensionsdatoer("1940-06-01")).toMatchObject({ alder: 65, alderDato: "2005-06-01" });
+  });
+
+  it("afviser en fødselsdato der ikke findes", () => {
+    expect(folkepensionsdatoer("1990-13-01")).toBeNull();
+    expect(folkepensionsdatoer("1990-02-30")).toBeNull();
+    expect(folkepensionsdatoer("")).toBeNull();
+    expect(folkepensionsdatoer("ikke-en-dato")).toBeNull();
+  });
+
+  it("går aldrig forude: søgdatoen ligger seks måneder før alderdatoen, aldrig efter", () => {
+    expect(folkepensionsdatoer("1990-03-15")!.soegDato).toBe("2059-09-15");
+    expect(folkepensionsdatoer("1954-08-31")!.soegDato).toBe("2019-08-29");
+  });
+});

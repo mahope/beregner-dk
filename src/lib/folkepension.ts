@@ -5,6 +5,8 @@
  * Verificeret: 2026-09-25
  */
 
+import { parseIsoDato, plusIsoMaaneder } from "./lokal-dato";
+
 export const FOLKEPENSION_2026 = {
   source:
     "https://www.borger.dk/pension-og-efterloen/folkepension/foer-du-gaar-paa-folkepension",
@@ -190,6 +192,46 @@ export function folkepensionsalder(fodselsdato: Date | string): number {
     else break;
   }
   return alder;
+}
+
+export interface Folkepensionsdatoer {
+  /** Folkepensionsalderen for fødselsdatoen — 65, 65½, 66 … 70 år. */
+  alder: number;
+  /** Fødselsdatoen, som "YYYY-MM-DD". */
+  foedselsdato: string;
+  /** Den dag fødselsdatoen bliver folkepensionsalder. */
+  alderDato: string;
+  /**
+   * Man skal selv søge, og ansøgningen kan sendes seks måneder før
+   * folkepensionsalderen — samme regel som brødteksten på /pension.
+   */
+  soegDato: string;
+}
+
+/**
+ * De tre datoer, der svarer på "hvornår kan jeg gå på folkepension?".
+ *
+ * `folkepensionsalder` giver alderen som et tal; spørgsmålet ude hos læseren
+ * er en *dato*, og det er den halvdel af svaret der manglede på siden — den
+ * havde kun en statisk tabel over fødselsår. Alderen læses af samme
+ * `alderSkala` som tabellen, så de to ikke kan sige hver deres, og datoerne
+ * læses fra fødselsdatoen med kalendermåneder, så en halv alder (65½) bliver
+ * seks måneder frem.
+ *
+ * En fødselsdag der ikke findes i måneden lander på månedens sidste dag: født
+ * 31. august 1954 og 65½ år bliver 29. februar 2020 — 2020 er et skudår — og
+ * ikke 3. marts. Samme konvention som resten af repoet (`foedselsdatoVedAlder`
+ * på /alder, `plusIsoMaaneder`).
+ */
+export function folkepensionsdatoer(foedselsdatoIso: string): Folkepensionsdatoer | null {
+  if (!parseIsoDato(foedselsdatoIso)) return null;
+  const foedselsdato = foedselsdatoIso.slice(0, 10);
+  const alder = folkepensionsalder(foedselsdato);
+  const alderDato = plusIsoMaaneder(foedselsdato, Math.round(alder * 12));
+  if (!alderDato) return null;
+  const soegDato = plusIsoMaaneder(alderDato, -6);
+  if (!soegDato) return null;
+  return { alder, foedselsdato, alderDato, soegDato };
 }
 
 export interface FolkepensionsalderForAlder {

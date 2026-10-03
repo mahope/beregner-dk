@@ -28541,3 +28541,67 @@ alderstabel, 3 i `/kalorier`), og 3/10 23:0x som **fuldstændig fejl i målingen
 egen måling viste 0 rå procenter i begge filer, fordi rentesatsen går gennem
 `sats()` og kalorierne gennem `${usikkerMin}-${usikkerMaks} %`. Resterne i den
 anden kodebane blev rettet i `ceo/procent-mellemrum-bilsider`.
+
+## 4/10 01:5x — `ceo/folkepensionsalder-vaerktoj`
+
+### Folkepensionsalder-værktøj på `/pension`
+
+**Datagrund.** Dansk autocomplete målt 4/10 01:4x: «hvad er min pensionsalder»
+og «beregn min pensionsalder» under «hvad er min»/«beregn min». Siden havde
+kun en statisk tabel over folkepensionsalderen pr. fødselsår — altså «65 ½
+år» uden en dato, mens spørgsmålet er en dato. `/pension` har 142
+besøgende/28d (3/10) og er ikke i GSC-top-15.
+
+**Valg.** Værktøjet er **dansk**. `FOLKEPENSION_2026.alderSkala` er dansk lov
+(borger.dk, verificert 25.9.2026), så en svensk udgave af de samme tal ville
+være opfundet — punkt 11. En tidligere version af komponenten havde da/se-tekster
+med svensk sprogbrug på danske satser; de blev fjernet i samme opgave, fordi
+svensk holdes ude på /pension (hele brødteksten og tabellen er da-only).
+
+**Ny logik.** `folkepensionsdatoer(fodselsdatoIso)` i `src/lib/folkepension.ts`
+læser samme `alderSkala` som tabellen og lægger alderen på med kalendermåneder
+via `plusIsoMaaneder`, så 65½ og 66½ bliver seks måneder. `soegDato` er
+alderdatoen minus seks måneder — samme regel som sidens egen brødtekst. En
+fødselsdag der ikke findes i måneden lander på månedens sidste dag: født
+31. august 1954 → 29. februar 2020 (2020 er skudår), født 31. december 1955 →
+30. juni 2022. Tiden til pensionen kommer fra `beregnAlder({foedselsdato: iDag,
+beregningsdato: alderDato})` — samme funktion /alder bruger — så formateringen
+er den samme.
+
+**Målt.** 8 nye lib-tests + 5 render-tests. To mutationer målt **røde**:
+`soegDato -6 → -5` giver 6 røde, `alderDato +1 måned` giver 8 røde. Første
+mutation var `Math.round(alder * 12) → Math.floor(...)`, som gav **0 røde** —
+65,5 × 12 er et heltal, så de to er ens her; mutationen var ubrugelig, ikke
+porten.
+
+**Port-fælde.** `intl-locale-tag.test.ts` fangede
+`locale === "se" ? "sv-SE" : "da-DK"` i komponentens `toLocaleDateString` —
+kæden skal have en `no`-arm. Løst med `getIntlLocale("da")`.
+
+**Flakiness målt 4/10 01:47.** En fuld suite-kørsel gav 11 røde i de
+fil-scannende porte (`locale-leak-gate`, `intl-locale-tag` og lignende, der
+går hele `src/` igennem); kørslene 01:46 og 01:48 var grønne med 4187
+tests. `vitest.config.ts` har ingen `testTimeout`, så portene rammer
+5 s når maskinen er belæst. Ikke rettet her — det er en config-opgave.
+
+### CEO-kø punkt 0 — verificeret i koden 4/10 01:0x (alle otte lukket)
+
+Læst i `HEAD` før den iteration, så listen ikke kan genkøres. **Valborg** er
+`month: 4, day: 30` i da og se (`dage-til.ts:1269-1270`); **svensk påskafton**
+er `offsetDays: -1` mod dansk `-2` (`:1015-1016`); **dansk sankthans** er fast
+23./24. juni med en FAQ, der siger «ikke en helligdag» (`:818`, `:838-846`) og
+ingen «fri med løn»; **«samme som langfredag»** findes ikke i `src`; **husleje**
+bygger FAQ'en på nettoprisindekset og siger at nævnet «ikke selv fastsætter en
+sats pr. område» (`page-data.ts:2130-2132`), og «2,9 %» findes ikke;
+**`toUtcMidnight`** læser `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`
+(`:1545`, `:1561-1573`); **`maneder: 12`** med kommentar om skudår
+(`dato-eksempler.ts:96-110`); **1. advent** «mellem 27. november og
+3. december» (`:1343`). ⛔ `/dagpenge`s 9 rå procenter er væk i `HEAD`.
+
+### F5g-slice (fra planens åbne række)
+
+45 noder i `/billaan` (da+se), `/arveafgift`, `/brutto-netto`, `/kalorier` og
+`/flyttebudget` blev lukket 3/10 18:4x (loft 319 → 274), og `/bil` (da+se),
+`/topskat`, `blog/biloekonomi`, `blog/boligsalg` + `BoligsalgBeregner` 3/10
+23:0x (loft 274 → 261 → 231). `/billaan` og `/kalorier` viste sig **allerede
+rene** i `HEAD` — planens måling 3/10 21:5x så gammel kode fra før fixen.
