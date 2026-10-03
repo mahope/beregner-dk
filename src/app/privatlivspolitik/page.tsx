@@ -2,6 +2,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import type { Metadata } from "next";
 import { OG_IMAGE } from "@/lib/page-helpers";
+import { ruteCacheSætning } from "@/lib/rute-cache";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -95,10 +96,9 @@ function DaContent() {
             privatlivspolitik.
           </li>
           <li>
-            <strong>Intet gemmes:</strong> Vi gemmer hverken adresser, koordinater eller svaret
-            fra BBR, og de står ikke i vores logfiler. Køreafstanden holdes kun kortvarigt i
-            serverens hukommelse, så samme opslag ikke skal beregnes igen. Analytics registrerer kun, at et opslag er
-            foretaget, og om det lykkedes, aldrig selve adressen.
+            <strong>Ingen adresser gemmes:</strong> Vi gemmer hverken dine adresser eller svaret
+            fra BBR, og de står ikke i vores logfiler. {ruteCacheSætning()} Analytics registrerer
+            kun, at et opslag er foretaget, og om det lykkedes, aldrig selve adressen.
           </li>
         </ul>
         <p>

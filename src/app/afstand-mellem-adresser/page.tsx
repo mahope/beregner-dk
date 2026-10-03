@@ -8,6 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+import { ruteCacheSætning } from "@/lib/rute-cache";
 
 const SLUG = "afstand-mellem-adresser";
 
@@ -66,8 +67,8 @@ export default async function AfstandMellemAdresserPage() {
             </ol>
             <p>
               Adresserne slås op hos <strong>Adressevælger fra Klimadatastyrelsen</strong>, og ruten
-              hentes fra en OpenStreetMap-baseret ruteberegner. Vi gemmer hverken dine adresser
-              eller din rute, og der skal ikke logges ind for at bruge værktøjet.
+              hentes fra en OpenStreetMap-baseret ruteberegner. Vi gemmer hverken dine adresser.
+              {ruteCacheSætning()} Der skal ikke logges ind for at bruge værktøjet.
             </p>
 
             <h2>Kørselsafstand er ikke luftlinje</h2>

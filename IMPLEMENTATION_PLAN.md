@@ -1,17 +1,21 @@
-STATUS: 3/10 02:45. CI grøn ved start (`37080772865`). Sentry: ingen uløste
-     fejl 14 dage — og SDK'en **er** sat op (`src/sentry-config.ts` +
-     `src/sentry.server.config.ts`, samme DSN som prompten, ingen PII, ingen
-     replay, ingen source maps), så det betyder rigtigvis ro. CEO-punktet om
-     Sentry-opsætning er dermed lukket.
+STATUS: 3/10 03:00. CI grøn ved start (`37082955811`). Sentry: ingen uløste
+     fejl 14 dage, og SDK'en **er** sat op (`src/sentry-config.ts` +
+     `src/sentry.server.config.ts`, samme DSN, ingen PII, ingen replay), så
+     det betyder rigtigvis ro. Sentry-punktet er lukket.
      **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-     `npm run build` — **grøn 3/10 02:42** (lint exit 0, typecheck exit 0,
-     **3905** tests i 244 filer, build exit 0).
-     **Denne iteration: `/efterloen` — beløbene kommer fra modulet igen.**
-     De **5** fund var *ikke* forkerte (målt: 20.057 = 22.041 × 0,91,
-     5.772 = 481 × 12, 15.870/10.580 = `SKATTEFRI_PRAEMIE_2026.portion`), så
-     slicen er et lås mod 2027-drift, ikke en rettelse. Satsen lå dog på tre
-     steder: hårdkodet i komponenten, i `description` og i FAQ'en.
-     **Næste iteration:** (1) mål de ni VERIFICÉR-noter i vinduet 3/10 07:30,
+     `npm run build` — **grøn 3/10 02:58** (lint exit 0, typecheck exit 0,
+     **3913** tests i 245 filer, build exit 0).
+     **Denne iteration: review-fund 29/9, punkt 0 — begge fund rettet**
+     (`rettelse-lofter-i-privatlivs`). (1) [HØJ] `/afstand-mellem-adresser`
+     lovede **to gange** at hverken adresse eller rute gemmes, mens `rute.ts`
+     skriver ruten i hukommelsen i 7 dage under nøglen med de to koordinater;
+     privatlivspolitikken sagde det rigtigt. Ny `rute-cache.ts` rummer den ene
+     konstant og den ene sætning, som kode, brødtekst, FAQ og politik læser.
+     (2) [LAV] `5m x 4m` i `/kvadratmeter` → `5 m × 4 m`, én skrivemåde.
+     Se `docs/plan-arkiv.md`. Egen diff-review fandt desuden, at sætningen
+     måtte **ikke** begynde med «Vi gemmer hverken dine adresser» — den fik
+     politikken til at modsige sig selv tre sætninger inde.
+     **Næste iteration:** (1) mål de ti VERIFICÉR-noter i vinduet 3/10 07:30,
      (2) F5b: næste slug er `/aktieskat` (5), så `/loen-efter-skat` (4).
 
 ## Fase 3 — trafik-drevet
@@ -259,6 +263,18 @@ gamle strenge). `/vaegttab` se: 1.277 visninger.
 **Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
 `src/lib/*.ts` også, og listen opdateres i samme commit.
 
+**Lukket 3/10 03:00 — `rettelse-lofter-i-privatlivs`** (review-fund 29/9, punkt 0,
+ikke en F5b-slice). Se `docs/plan-arkiv.md`. *Målt:* begge fund var **ægte** —
+`/afstand-mellem-adresser` lovede om lagring to gange (brødtekst + `FAQSchema`),
+mens `rute.ts` skriver ruten i hukommelsen i 7 dage under koordinatnøglen, og
+`5m x 4m` stod i `/kvadratmeter`s korte FAQ-svar i tre sprog. Ny `rute-cache.ts`
+er det ene sted for både TTL'en og sætningen om den, så koden, brødteksten,
+FAQ'en og privatlivspolitikken ikke kan glide fra hinanden; nye
+`lagrings-paastand-gate.test.ts` (4 tests) forbyder løftet i hele `src/`, og
+`rute.test.ts` **måler** TTL'en i stedet for at læse den. **+8 tests**
+(3905 → 3913). Mutationer målt: 3 røde af 4 (sætningen), 1 rød (TTL'en),
+2 røde (målnotationen).
+
 **Lukket 3/10 02:40 — `efterloen-faq-tal-fra-modul`.** Se
 `docs/plan-arkiv.md`. *Målt:* **5** håndskrevne talgrupper væk fra
 `page-data.ts` (`description` + `metaDescription` + 3 af 8 FAQ-svar), så listen
@@ -364,6 +380,8 @@ kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` un
 sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
 
+`VERIFICÉR DEPLOY: ruten gemmes i 7 dage, ikke slet ikke (`minberegner.dk/afstand-mellem-adresser`: hele HTML'en skal have **0** `hverken dine adresser eller din rute` og **0** `hverken adresse eller rute`, og **1** `Ruten og de to koordinater gemmes i serverens hukommelse i 7 dage, så samme opslag ikke skal beregnes to gange.` i både den synlige brødtekst og `FAQPage`-JSON-LD; `minberegner.dk/privatlivspolitik`: samme sætning skal stå, overskriften skal være «Ingen adresser gemmes:», **0** `kortvarigt i serverens hukommelse` og **0** `hverken adresser, koordinater`. `/kvadratmeter`: FAQ-svaret på «Gang længde med bredde» skal være «Gang længde med bredde. **5 m × 4 m** = 20 m².» i alle tre sprog, altså **0** `5m x 4m` på alle tre domæner. **Intet** `NaN`) ceo/rettelse-lofter-i-privatlivs 3/10 03:00`
+
 `VERIFICÉR DEPLOY: /afstand-mellem-adresser (dansk side med afstandsværktøj: `<title>` «Afstandsberegner: beregn kørselsafstand mellem to adresser», `<h1>` én gang, 3 FAQ-spørgsmål i `FAQPage`-JSON-LD med «Hvordan beregnes afstanden?», og «Adressevælger fra Klimadatastyrelsen» i brødteksten; `minberegner.dk/befordringsfradrag` skal linke til siden via «Relaterede beregnere»; `minberegner.dk/afstand-mellem-adresser` skal ligge i sitemap.xml. `beraknare.se/afstand-mellem-adresser` skal 404/e-redirecte, fordi siden er daOnly) ceo/afstand-mellem-adresser 3/10 02:55`
 
 `VERIFICÉR DEPLOY: /efterloen FAQ og metadata (procenten skal være «91 %» med mellemrum i BÅDE `description` og `metaDescription` og i FAQ-svaret «Hvad er efterlønssatsen i 2026?» — altså **0** × «91%»; satsen skal stå «20.057» i alle tre steder; «Hvad er efterlønspræmien?» skal have «15.870 kr.» og «10.580 kr.»; «Hvornår kan jeg gå på efterløn?» skal være byte-uændret med «63½-64 år for født i 1959» og «66 år for født 1967-1970»; **intet** `NaN`) ceo/efterloen-faq-tal-fra-modul 3/10 02:40`
@@ -391,17 +409,11 @@ Lukket 3/10 23:13 på indhold: `pension-dobbelt-valuta`, `leasing-dobbelt-valuta
 `docs/plan-arkiv.md`. Bemærk at planens «23 danske / 20 svenske» datoer var et
 skøn: `getDageTilSlugs()` giver **22 / 19**, og live har 22 / 19.
 
-| Slug | Prøv på indhold |
-|---|---|
-| `konfirmation-se-no-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/konfirmation`: hele HTML'en skal have **0** `10\.000`, **0** `30\.000` og **0** `\bSEK\b` — altså ingen danske tal og ingen valutaenhed. `FAQPage`-JSON-LD skal have de **fire** spørgsmål, hvor «Vad kostar en konfirmation?» svarer «Presenterna ligger typiskt mellan **10 000 och 25 000 kr** ovanpå festens egna utgifter. Kalkylatorn lägger ihop mat, lokalhyra, konfirmationskläder och fotograf med presenterna, så du ser det totala beloppet för din egen konfirmation.» og «Gåvobelopp?» svarer «Föräldrar: **2 000-5 000 kr**. Mor-/farföräldrar: **1 000-2 000 kr**.». Brødteksten skal have «**150-200** kr/person hemma till **400-700** kr/person på restaurang», «**1 500-4 000** kr» og fotograf «kring **1 000-3 000** kr» (ikke 1 500-4 000), plus «mellan **10 000 och 25 000 kr** i presenter». Hele HTML'en skal have **0** `kr\.\.`. `minberegner.dk/konfirmation`: FAQ'en skal have de **fire** danske spørgsmål **byte-uændret** med dansk punktum («10.000 og 25.000 kr.», «Forældre: 2.000-5.000 kr. Bedsteforældre: 1.000-2.000 kr.»), brødteksten uændret («150-200 kr./person», «1.000-3.000 kr.»), og `0` `kr\.\.`. **Intet** `NaN`. |
-| `konfirmation-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `minberegner.dk/konfirmation`: hele HTML'en skal have **0** `8.000-25.000` og **0** `DKK`. `FAQPage`-JSON-LD skal have **4** spørgsmål, hvor «Hvad koster en konfirmation?» svarer «Gaverne ligger typisk mellem **10.000 og 25.000 kr.** oveni festens egne udgifter.», og «Gavebeløb?» svarer «Forældre: 2.000-5.000 kr. Bedsteforældre: 1.000-2.000 kr.». Brødteksten skal stadig have «10.000 og 25.000 kr.» (uændret). **Intet** `NaN`. |
-| `kvadratmeter-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/kvadratmeter` og norsk `/kvadratmeter`: **0** `\d\.\d{3}` i hele HTML'en — altså **intet** «10.000 cm²» / «10.000 m²» / «3.000 kr». **2** `10 000 cm²` og **2** `3 000 kr` skal stå (ét i synlig FAQ-tekst, ét i `FAQPage`-JSON-LD). FAQ'en skal have de **syv** svenske spørgsmål, hvor «Vad kostar 20 m² golv?» svarer «… blir det **3 000** kr för 20 m².» og «Omvandling?» svarer «1 m² = **10 000** cm². **10 000** m² = 1 hektar. 1 m² ≈ 10,76 sq ft.», og «Vad kostar golv per m²?» svarer «Laminat 80-200 kr/m², trägolv 300-800 kr/m², kakel 200-500 kr/m². **Nivåerna är danska — vi saknar en källa till svenska materialpriser.**». Norsk skal have de **fem** spørgsmål med «Nivåene er danske — vi mangler en kilde til norske materialpriser.». **0** `SEK/m²` og **0** `NOK/m²`. `minberegner.dk/kvadratmeter`: FAQ'en skal have de **otte** danske spørgsmål **byte-uændret** (dansk skriver «10.000 cm²» og «3.000 kr.»), og `<meta name="description">` skal starte med «Et rum på 5 x 4 m er 20 m².». **Intet** `NaN`. |
-| `vaegttab-faq-fra-modul` (**ny**, vindue 3/10 21:30) | `beraknare.se/vaegttab`: **0** `2\.209` i hele HTML'en — synlig FAQ-tekst, `FAQSchema`-JSON-LD og RSC-payloaden skal alle skrive «2 209», «1 780», «2 759», «7 700», «1 000», «1 500», «1 200» med **mellemrum**. FAQ'en skal stadig have **fem** spørgsmål, hvor «Hur många kalorier ska jag äta för att gå ner 6 kg på 12 veckor?» svarer «… förbrukar **2 759** kcal per dag (BMR **1 780** kcal × aktivitetsfaktor **1,55**) … så du behöver äta **2 209** kcal per dag.». `minberegner.dk/vaegttab`: FAQ'en skal have de **samme fem** spørgsmål **byte-uændret** med dansk punktum («2.759», «1.780», «550 kcal», «2.209»), og `0` `2 209`. **Intet** `NaN`. |
-| `kalorier-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/kalorier`: hele HTML'en skal have **0** `\d\.\d{3}` på tal — altså **intet** «1.780» / «2.759» / «2.259» / «7.700». `<meta name="description">` skal være «Hur många kalorier behöver du per dag? Man, 80 kg, 180 cm och 30 år: BMR **1 780** kcal och TDEE **2 759** kcal vid måttlig aktivitet.», `metaDescription` «… BMR **1 780** kcal, TDEE **2 759** kcal. Beräkna BMR, TDEE och makrofördelning.», `metaTitle`/`ogTitle` uændret «Kalorikalkylator: man 80 kg, 180 cm = **2 759** kcal/dag». FAQ'en skal have de **otte** svenske spørgsmål, hvor «Hur många kalorier behöver jag?» svarer «… dagligt behov på **2 759** kcal. En kvinna med samma mått har **2 502** kcal.» og «Hur många kalorier behöver jag för att gå ner 1 kg?» svarer «… cirka **7 700** kcal per kilo fatt … underskott på **7 700** kcal …». Brødteksten skal have «2 259 kcal» og «2 759 kcal» i tabellerne (allerede sådan). **Intet** `NaN`. `minberegner.dk/kalorier`: FAQ'en skal have de **syv** danske spørgsmål **byte-uændret** med dansk punktum («1.780», «2.759», «2.259», «7.700»), og `0` `1 780`. |
-| `svenska-tekstfejl` (**ny**, vindue 3/10 07:30) | `beraknare.se/dato`: **0** `Første maj` i hele HTML'en — den svenske helligdagsliste skal skrive «**Första maj**» (synlig liste, `helligdagsnavne`, RSC). `beraknare.se/nedtaelling`: **0** `använna` og sætningen skal være «… kan du **använda** `datokalkylatorn`». `minberegner.dk/dato` + `/nedtaelling`: uændret (dansk skriver «Første maj» korrekt, og den danske blok sagde «kan du bruge»). **Intet** `NaN`. |
-| `leasing-faq-retning` (**målt 3/10 23:13: ikke live**, vindue 3/10 07:30) | `beraknare.se/leasing`: hele HTML'en skal have **0** `9 210 kr mer` og **3** `9 210 kr mindre` (synlig FAQ-tekst, `FAQPage`-JSON-LD, RSC) — sætningen «kostar leasingen 178 350 kr. Ett billån … kostar 169 140 kr, alltså 9 210 kr **mindre**». **0** `kr..` og **0** `kr.,` i hele HTML'en. Bemærk: **6** spørgsmål i live, ikke 7. |
-| `klokken-i-hub` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/klokken-i`: `<title>` skal være «Hvad er klokken i …? Klokken i 12 lande lige nu», `<meta name="description">` skal starte med «Det er HH:MM i <første land på siden>» og slutte med «Se klokken i alle 12 lande og tidsforskellen til Danmark.». `<h1>` «Hvad er klokken i …?» **én** gang. Siden skal have **12** links til `/klokken-i/*` plus ét til `/tidszone`. Rækkerne er sorteret på \|minutter\|, så rækkefølgen skifter med sommer-/vintertid: **første** række skal være det land der ligger tættest på Danmark (0 eller 60 minutter) og **sidste** det fjerneste (Australien/New York, 8-9 timer) — mål det på de to yderste, ikke på hele rækkefølgen. `beraknare.se/klockan-i`: samme **12** links med svenske slugs (`/klockan-i/spanien` …) og **intet** dansk: hverken «Tyrkiet» eller bogstaverne æ/ø. `minberegner.dk/klockan-i` skal **301** til `/klokken-i`, og `beraknare.se/klokken-i` 301 til `/klockan-i`. Sitemap på begge domæner skal have `…/klokken-i` og `…/klockan-i` som `daily`. `minberegner.dk/tidszone` skal have teksten «klokken i tolv lande» med link til hubben, `beraknare.se/tidszone` «klockan i tolv länder». **Intet** `NaN` |
-| `leasing-svenske-tal-fra-modul` (**ny**, vindue 3/10 07:30**) | `beraknare.se/leasing`: `<title>` skal være «Leasingkalkylator: bil på **300 000** kr = **4 121** kr/mån» og `metaDescription` «Bil på **300 000** kr med **150 000** kr i restvärde, **4,5** % ränta, **30 000** kr i kontantinsats och **36** mån: **4 121** kr i leasingkostnad per månad.». `schemaDescription` skal have «**4 121** kr per månad över **36** månader». FAQ'en skal have **syv** spørgsmål, hvor «Vad kostar leasing av en bil på **300 000** kr?» svarer «… blir månadskostnaden **4 121** kr, vilket är **178 350** kr totalt inklusive **28 350** kr i ränta.», «Vad är värdetabet på en leasingbil?» svarer «… är det **150 000** kr. Det är det belopp du betalar …» (~~belöp~~ → **belopp**, svensk stavemåde) og «Vad är fåretagsleasing och vad kostar det?» svarer «… ger **4 121** kr i leasingkostnad per månad.». **Hele HTML'en skal have 0** `\d\.\d{3}` på beløb — altså **intet** «4.121» / «300.000» / «178.350» / «28.350». **Intet** `NaN`. `minberegner.dk/leasing`: uændret (dansk og norsk blok har ingen beløb) |
+De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
+`docs/plan-arkiv.md` under overskriften «VERIFICÉR DEPLOY-prøver», slug for slug
+— de blev 3/10 03:00 flyttet ud herfra, fordi de alene skubbede planen over
+40 KB.
+
 ## ❓ Til Mads
 
 - ❓ **Hvor deployes den norske udgave? (ny, 2/10 14:15, højst prioriteret.)**

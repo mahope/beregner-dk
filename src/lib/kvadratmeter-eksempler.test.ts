@@ -27,7 +27,7 @@ describe("kvadratmeter FAQ-svar", () => {
   test("dansk er byte-uændret, så rettelsen ikke er en SEO-regression", () => {
     const da = kvadratmeterFaqSvar("da");
 
-    expect(da.grundregel).toBe("Gang længde med bredde. 5m x 4m = 20 m².");
+    expect(da.grundregel).toBe("Gang længde med bredde. 5 m × 4 m = 20 m².");
     expect(da.metode).toBe(
       "Arealet er længde × bredde. 5 m × 4 m er 20 m². En cirkel med radius 3 m er 3,14 × 3 × 3 = 28,3 m², en trekant med grundlinje 6 m og højde 4 m er (6 × 4) / 2 = 12 m², og et trapez med siderne 4 m og 6 m og højden 3 m er ((4 + 6) / 2) × 3 = 15 m².",
     );
@@ -57,6 +57,45 @@ describe("kvadratmeter FAQ-svar", () => {
     expect(kvadratmeterFaqSvar("se").gulvpris).toContain("blir det 3 000 kr för 20 m²");
     expect(kvadratmeterFaqSvar("no").gulvpris).toContain("blir det 3 000 kr for 20 m²");
     expect(kvadratmeterFaqSvar("no").omregning).toContain("1 m² = 10 000 cm²");
+  });
+
+  test("hver skrivemåde af målet har mellemrum og rigtigt gangetegn", () => {
+    // «5m x 4m» lå i det korte FAQ-svar i alle tre sprog, to linjer under
+    // «5 m × 4 m» i det lange — samme mål publiceret i to skrivemåder, modsat
+    // sig selv, og `FAQSchema` læser svaret. Der er nu én skrivemåde i hele
+    // modulet. Mutation: `grundregel` tilbage på den korte form gør prøven
+    // rød for alle tre sprog.
+    const KORT_FORM = /\d+m x \d+m/;
+    for (const locale of ["da", "se", "no"] as const) {
+      for (const [navn, sætning] of Object.entries(kvadratmeterFaqSvar(locale))) {
+        expect(`${locale}/${navn}: ${sætning}`).not.toMatch(KORT_FORM);
+      }
+    }
+
+    for (const maal of [
+      kvadratmeterEksempelMaal("da"),
+      kvadratmeterEksempelMaal("se"),
+      kvadratmeterEksempelMaal("no"),
+      kvadratmeterEksempelAreal("da"),
+      kvadratmeterEksempelAreal("se"),
+      kvadratmeterEksempelAreal("no"),
+      kvadratmeterEksempelLignelse("da"),
+      kvadratmeterEksempelLignelse("se"),
+      kvadratmeterEksempelLignelse("no"),
+    ]) {
+      expect(maal).not.toMatch(KORT_FORM);
+    }
+
+    // Det korte og det lange svar bruger nu samme mål, kun med lighedstegn
+    // imellem: «5 m × 4 m» i begge steder i alle tre sprog.
+    expect(kvadratmeterFaqSvar("da").grundregel).toBe("Gang længde med bredde. 5 m × 4 m = 20 m².");
+    expect(kvadratmeterFaqSvar("se").grundregel).toBe("Multiplicera längd med bredd. 5 m × 4 m = 20 m².");
+    expect(kvadratmeterFaqSvar("no").grundregel).toBe("Gang lengde med bredde. 5 m × 4 m = 20 m².");
+    for (const locale of ["da", "se"] as const) {
+      const svar = kvadratmeterFaqSvar(locale);
+      expect(svar.metode).toContain(`5 m × 4 m ${locale === "se" ? "är" : "er"} 20 m²`);
+      expect(svar.grundregel).toContain("5 m × 4 m");
+    }
   });
 
   test("beløbet og arealet i prissvaret er dem fra PRIS_EKSEMPEL", () => {

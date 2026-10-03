@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import osrmKbhAarhus from "./__fixtures__/osrm-kbh-aarhus.json";
 import valhallaKbhAarhus from "./__fixtures__/valhalla-kbh-aarhus.json";
 import valhallaUdenFaerge from "./__fixtures__/valhalla-kbh-aarhus-uden-faerge.json";
 import {
   _nulstilRuteState,
   ROUTING_USER_AGENT,
+  cacheNoegle,
   erIDanmark,
   findRute,
   parseKoordinat,
@@ -12,6 +13,7 @@ import {
   parseValhalla,
   valhallaUrl,
 } from "./rute";
+import { RUTE_CACHE_DAGE } from "./rute-cache";
 
 const KBH = { lat: 55.6756275, lon: 12.5695777 }; // Rådhuspladsen 1, 1550 København V
 const AARHUS = { lat: 56.1526305, lon: 10.2032063 }; // Rådhuspladsen 2, 8000 Aarhus C
@@ -78,6 +80,56 @@ describe("findRute", () => {
   test("kaster når begge tjenester fejler", async () => {
     const fetchImpl = vi.fn(async () => svar({}, 500)) as unknown as typeof fetch;
     await expect(findRute(KBH, AARHUS, fetchImpl)).rejects.toThrow();
+  });
+});
+
+/**
+ * Levetiden er en lovlig oplysning: `/afstand-mellem-adresser` lovede i både
+ * brødtekst og FAQ (uden omkring URL'en) at hverken adresse eller rute blev
+ * gemt, mens `findRute` skriver ruten i hukommelsen under nøglen med de to
+ * koordinater. Sætningen i `rute-cache.ts` siger derfor et konkret antal
+ * dage — og den skal være det samme tal som koden faktisk bruger, ellers har
+ * vi bare flyttet løftet. Derfor måles TTL'en her i stedet for at læses.
+ */
+describe("cache-levetid", () => {
+  beforeEach(() => {
+    _nulstilRuteState();
+    // Kun Date forfalskes: throttlen i `reserverSlot` skal stadig vente sit
+    // eget interval på rigtige timere, ellers bruger hver kald et sekund.
+    vi.useFakeTimers({ toFake: ["Date"] });
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  const kald = (fetchImpl: unknown) => (fetchImpl as { mock: { calls: unknown[] } }).mock.calls.length;
+
+  test("samme koordinater rammer cachen, og efter RUTE_CACHE_DAGE dage gør de ikke", async () => {
+    const fetchImpl = vi.fn(async () => svar(valhallaKbhAarhus)) as unknown as typeof fetch;
+    await findRute(KBH, AARHUS, fetchImpl);
+    const efterFoerste = kald(fetchImpl);
+    expect(efterFoerste).toBeGreaterThan(0);
+
+    // Samme nøgle: ingen ny tur til ruteberegneren.
+    await findRute(KBH, AARHUS, fetchImpl);
+    expect(kald(fetchImpl)).toBe(efterFoerste);
+
+    // Én dag før udløb: stadig cachet.
+    vi.setSystemTime(Date.now() + (RUTE_CACHE_DAGE - 1) * 24 * 60 * 60 * 1000);
+    await findRute(KBH, AARHUS, fetchImpl);
+    expect(kald(fetchImpl)).toBe(efterFoerste);
+
+    // På selve udløbsdagen: beregnet igen.
+    vi.setSystemTime(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    await findRute(KBH, AARHUS, fetchImpl);
+    expect(kald(fetchImpl)).toBeGreaterThan(efterFoerste);
+  });
+
+  test("nøglen er de to koordinater, så den kan pege på én bestemt bygning", () => {
+    // Mutation: hvis `cacheNoegle` rundede til hele grader, ville en flytning på
+    // 4,5 m give en anden nøgle, og prøven er rød.
+    const noegle = cacheNoegle({ lat: 55.6761, lon: 12.5683 }, { lat: 55.7304, lon: 12.55 });
+    expect(noegle).toBe("55.6761,12.5683;55.7304,12.5500");
+    expect(cacheNoegle({ lat: 55.6761 + 0.00004, lon: 12.5683 }, { lat: 55.7304, lon: 12.55 })).toBe(noegle);
   });
 });
 

@@ -156,7 +156,7 @@ export type KvadratmeterFaqSvar = Partial<
 export function kvadratmeterFaqSvar(locale: Locale): KvadratmeterFaqSvar {
   if (locale === "se") {
     return {
-      grundregel: `Multiplicera längd med bredd. ${kvadratmeterEksempelKort("se")} = ${facit("rektangel", "se")} m².`,
+      grundregel: `Multiplicera längd med bredd. ${udtrykMedEnhed("rektangel", "se")} = ${facit("rektangel", "se")} m².`,
       metode: `Area = längd × bredd. ${udtrykMedEnhed("rektangel", "se")} är ${facit("rektangel", "se")} m². En cirkel med radien ${led("cirkel", 1, "se")} m är ${udtryk("cirkel", "se")} = ${facit("cirkel", "se")} m², en triangel med grundlinje ${led("trekant", 0, "se")} m och höjd ${led("trekant", 1, "se")} m är ${udtryk("trekant", "se")} = ${facit("trekant", "se")} m², och ett trapets med sidorna ${led("trapez", 0, "se")} m och ${led("trapez", 1, "se")} m och höjden ${led("trapez", 2, "se")} m är ${udtryk("trapez", "se")} = ${facit("trapez", "se")} m².`,
       vaerelse: `${vaerelseMaalMedEnhed(0, "se")} = ${vaerelseAreal(0, "se")} m². Ett rum på ${vaerelseMaal(1, "se")} är ${vaerelseAreal(1, "se")} m². Kom ihåg att lägga ${SPILD("se")} till om du ska köpa golv eller målning till det.`,
       gulvpris: `Golvet kostar ${AREAL20("se")} × pris per m². Vid ${PRIS_M2("se")} blir det ${PRIS_BELOEB("se")} för ${AREAL20("se")}. Lägg ${SPILD("se")} till för kapning och spill.`,
@@ -167,7 +167,7 @@ export function kvadratmeterFaqSvar(locale: Locale): KvadratmeterFaqSvar {
 
   if (locale === "no") {
     return {
-      grundregel: `Gang lengde med bredde. ${kvadratmeterEksempelKort("no")} = ${facit("rektangel", "no")} m².`,
+      grundregel: `Gang lengde med bredde. ${udtrykMedEnhed("rektangel", "no")} = ${facit("rektangel", "no")} m².`,
       gulvpris: `Gulvet koster ${AREAL20("no")} × pris pr. m². Ved ${PRIS_M2("no")} blir det ${PRIS_BELOEB("no")} for ${AREAL20("no")}. Legg ${SPILD("no")} til for kapping og spill.`,
       omregning: `1 m² = ${n(CM2_PR_M2, "no")} cm². ${n(M2_PR_HAKTAR, "no")} m² = 1 hektar. 1 m² ≈ ${n(SQ_FT_PR_M2, "no", 2)} sq ft.`,
       materialer: `${materialeliste("no")}. Nivåene er danske — vi mangler en kilde til norske materialpriser.`,
@@ -175,7 +175,7 @@ export function kvadratmeterFaqSvar(locale: Locale): KvadratmeterFaqSvar {
   }
 
   return {
-    grundregel: `Gang længde med bredde. ${kvadratmeterEksempelKort("da")} = ${facit("rektangel", "da")} m².`,
+    grundregel: `Gang længde med bredde. ${udtrykMedEnhed("rektangel", "da")} = ${facit("rektangel", "da")} m².`,
     metode: `Arealet er længde × bredde. ${udtrykMedEnhed("rektangel", "da")} er ${facit("rektangel", "da")} m². En cirkel med radius ${led("cirkel", 1, "da")} m er ${udtryk("cirkel", "da")} = ${facit("cirkel", "da")} m², en trekant med grundlinje ${led("trekant", 0, "da")} m og højde ${led("trekant", 1, "da")} m er ${udtryk("trekant", "da")} = ${facit("trekant", "da")} m², og et trapez med siderne ${led("trapez", 0, "da")} m og ${led("trapez", 1, "da")} m og højden ${led("trapez", 2, "da")} m er ${udtryk("trapez", "da")} = ${facit("trapez", "da")} m².`,
     vaerelse: `${vaerelseMaalMedEnhed(0, "da")} = ${vaerelseAreal(0, "da")} m². Et værelse på ${vaerelseMaal(1, "da")} er ${vaerelseAreal(1, "da")} m². Husk at lægge ${SPILD("da")} til, hvis du skal købe gulv eller maling til det.`,
     gulvpris: `Gulvet koster ${AREAL20("da")} × pris pr. m². Ved ${PRIS_M2("da")} bliver det ${PRIS_BELOEB("da")} for ${AREAL20("da")}. Læg ${SPILD("da")} til for tilskæring og spild.`,
@@ -186,8 +186,8 @@ export function kvadratmeterFaqSvar(locale: Locale): KvadratmeterFaqSvar {
 
 /**
  * Som {@link udtryk}, men med enheden på hvert led: «5 m × 4 m». Det er den
- * form FAQ'en bruger inde i sætningen, mens brødteksten skriver «5 × 4» i det
- * fede og «5 m × 4 m» i løbeteksten.
+ * form både FAQ-svarene og brødteksten bruger, så målet kun findes i én
+ * skrivemåde: brødteksten skriver «5 × 4» i det fede og denne i løbeteksten.
  */
 function udtrykMedEnhed(id: ArealEksempelId, locale: Locale): string {
   return udtryk(id, locale)
@@ -214,15 +214,6 @@ export function kvadratmeterUdtryk(locale: Locale): Record<ArealEksempelId, stri
     trekant: udtryk("trekant", locale),
     trapez: udtryk("trapez", locale),
   };
-}
-
-/**
- * «5m x 4m» — eksemplets mål i den korte form, metadata og det korte FAQ-svar
- * bruger. Tallet kommer fra {@link AREAL_EKSEAMPLER}, så det ikke kan glide fra
- * facit.
- */
-export function kvadratmeterEksempelKort(locale: Locale): string {
-  return `${led("rektangel", 0, locale)}m x ${led("rektangel", 1, locale)}m`;
 }
 
 /** «5 x 4 m» — samme mål med mellemrum omkring x, som metadata skriver dem. */

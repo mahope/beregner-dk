@@ -8,6 +8,7 @@
 // 1 request/second, an identifying User-Agent + Referer, and visible OSM attribution.
 // Server-side only: called from /api/rute, never from the browser.
 import type { LatLon } from "./utm";
+import { RUTE_CACHE_DAGE } from "./rute-cache";
 
 export type RuteKilde = "valhalla" | "osrm";
 
@@ -105,7 +106,8 @@ async function reserverSlot(now = Date.now()): Promise<boolean> {
 }
 
 // ── Result cache (routes change rarely; keyed on ~10 m rounded coordinates) ────────────────
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+// The TTL is declared in `rute-cache.ts`, next to the sentence that tells the user about it.
+const CACHE_TTL_MS = RUTE_CACHE_DAGE * 24 * 60 * 60 * 1000;
 const CACHE_MAX = 2000;
 const cache = new Map<string, { rute: Rute; udloeber: number }>();
 

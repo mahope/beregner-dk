@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getPageData } from "@/lib/page-data";
+import { RUTE_CACHE_DAGE, ruteCacheSætning } from "@/lib/rute-cache";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import AfstandMellemAdresserPage from "./page";
 
@@ -63,5 +64,18 @@ describe("afstand mellem to adresser", () => {
     // RuteAfstand, så brødteksten må ikke finde på en anden kilde.
     expect(markup).toContain("Adressevælger fra Klimadatastyrelsen");
     expect(markup).not.toContain("Google Maps");
+  });
+
+  test("fortæller at ruten gemmes midlertidigt, som privatlivspolitikken gør", async () => {
+    // Siden lovede tidligere «Vi gemmer hverken dine adresser eller din rute»,
+    // mens `rute.ts` skrev ruten i hukommelsen i syv dage under nøglen med de
+    // to koordinater. Sætningen kommer nu fra `rute-cache.ts`, som også
+    // privatlivspolitikken læser, så de to ikke kan glide fra hinanden.
+    const markup = await html();
+    const sætning = ruteCacheSætning();
+
+    expect(markup).toContain(sætning);
+    expect(markup).toContain(`${RUTE_CACHE_DAGE} dage`);
+    expect(markup).not.toMatch(/gemmer hverken[^.]*ruten?/i);
   });
 });

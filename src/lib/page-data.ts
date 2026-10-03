@@ -10,6 +10,7 @@ import {
   beregnHuslejestigning,
 } from "./nettoprisindeks";
 import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
+import { ruteCacheSætning } from "./rute-cache";
 import {
   EXCEL_ANDEL,
   PROCENT_10_AF_FAQ,
@@ -1282,7 +1283,7 @@ faqItems: kalorierFaqItems("da"),
       faqItems: [
         {
           question: "Hvordan beregnes afstanden?",
-          answer: "Vi spørger en kortberegner om den korteste bilrute mellem de to adresser. Adresserne slås op hos Adressevælger fra Klimadatastyrelsen, og ruten hentes fra en OpenStreetMap-baseret ruteberegner. Vi gemmer hverken adresse eller rute.",
+          answer: `Vi spørger en kortberegner om den korteste bilrute mellem de to adresser. Adresserne slås op hos Adressevælger fra Klimadatastyrelsen, og ruten hentes fra en OpenStreetMap-baseret ruteberegner. Vi gemmer hverken dine adresser. ${ruteCacheSætning()}`,
         },
         {
           question: "Hvorfor får jeg to afstande, når ruten krydser en færge?",
