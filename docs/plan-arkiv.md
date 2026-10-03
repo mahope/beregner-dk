@@ -27680,3 +27680,38 @@ Punkt 13: en `perl -pi`-erstatning spiste `${rate}` i de tre `loanSummary`-
 strenge i `LaaneBeregner` (perl interpolerede `$rate` som sin egen variabel).
 Fundet ved at sammenligne `git diff -U0 | grep '${'` og rettet med `edit`;
 commit-diffen er verificeret: kun ét mellemrum tilføjet pr. linje.
+
+## 3/10 11:5x — rød CI: memoiserede helligdage og måneder
+
+Kørsel `37112627105` («Skriv procenttal med mellemrum i fem beregnere») faldt
+med én fejl: `dato-eksempler.test.ts:175` løb ud af tid (5000 ms). Målt
+lokalt: den test tog **2,11 s** af budget på 5 s (42 %), altså én langsom
+CI-runner fra rød. Rodårsagen var dobbeltarbejde, ikke en flækket test:
+
+- `erHelligdag()` byggede hele årets helligdagsliste — påskeberegning og
+  sortering med — for **hver eneste kalenderdag**, fordi `taellArbejdsdage()`
+  kalder den én dag ad gangen. `maanederITaar()` gør det for de tolv måneder,
+  altså ~365 opbygninger pr. kald.
+- `denneMaanedEksempel()` byggede så hele tolvmåneders-tabellen for at læse
+  **én** række med `.find()`. Den dagudtømmende test kalder den 744 gange
+  (2 år × 31 dage × 12 måneder) — dvs. 744 fulde årstabeller.
+
+Rettelse: `helligdagsdage(year, locale)` i `helligdage.ts` memoiserer årets
+helligdage som `Set<number>` af UTC-dagenumre (pr. år **og** sprog), og
+`erHelligdag()` slår op i den. `maanedRaekke(year, month, locale)` er den nye
+fælles måned-række, som både `maanederITaar()` og `denneMaanedEksempel()`
+læser, så tallene fortsat har én kilde. `hasSameDay()` er væk — `toUtcDayNumber`
+er den samme sammenligning på (år, måned, dag).
+
+Målt: testen 2,11 s → **0,25 s** (8x), hele filen 2,16 s → 0,28 s, suiten
+167 s → **42 s** lokalt. Oracle-test: 144 måneder (2025-2030, da + se) er
+identiske med den gamle algoritme, dvs. 0 afvigelser. Mutation: cache der
+ignorerer `locale` → 2 røde tests i `helligdage.test.ts`; `skudaar: false` →
+2 røde i `dato-eksempler.test.ts`. Gate grøn 11:4x (4048 tests, build exit 0).
+
+Historik fra F5b-planen, flyttet herfra for at holde planen under 40 KB:
+strenglistens loft **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 →
+320 → 315 → 313** (`/boernepenge` 3/10 05:05), og de tretten lukkede filer
+`su`, `arveafgift`, `/boligsalg`, `/procent`, `/renteberegner`,
+`/procentpoint`, `/kvadratmeter`, `/konfirmation`, `/efterloen`, `/aktieskat`,
+`/loen-efter-skat`, `/topskat`, `/boernepenge`.

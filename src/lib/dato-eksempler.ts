@@ -51,29 +51,37 @@ export function erSkudaar(year: number): boolean {
 }
 
 /**
- * The twelve months of `year`, each with its length, working days and weekend
- * days. Built from `daysBetween` and `taellArbejdsdage` so the figures are the
- * same ones `DatoBeregner` produces for a range covering the same month.
+ * One month of `year`, with its length, working days and weekend days. Built
+ * from `daysBetween` and `taellArbejdsdage` so the figures are the same ones
+ * `DatoBeregner` produces for a range covering the same month. Exported so a
+ * caller that needs a single month — `denneMaanedEksempel` — reads it here
+ * instead of building the other eleven as well.
  */
+export function maanedRaekke(
+  year: number,
+  month: number,
+  locale: HelligdagLocale
+): MaanedRække {
+  const foerste = new Date(year, month - 1, 1);
+  const sidste = new Date(year, month, 0);
+  return {
+    month,
+    name: maanedNavn(month, locale),
+    dage: daysBetween(foerste, sidste) + 1,
+    arbejdsdage: taellArbejdsdage(foerste, sidste, locale),
+    weekenddage: taellWeekender(foerste, sidste),
+    skudaar: month === 2 && erSkudaar(year),
+  };
+}
+
+/** The twelve months of `year`, in calendar order. */
 export function maanederITaar(
   year: number,
   locale: HelligdagLocale
 ): MaanedRække[] {
-  const skudaar = erSkudaar(year);
-  return Array.from({ length: 12 }, (_, i) => {
-    const month = i + 1;
-    const foerste = new Date(year, i, 1);
-    const sidste = new Date(year, i + 1, 0);
-    const dage = daysBetween(foerste, sidste) + 1;
-    return {
-      month,
-      name: maanedNavn(month, locale),
-      dage,
-      arbejdsdage: taellArbejdsdage(foerste, sidste, locale),
-      weekenddage: taellWeekender(foerste, sidste),
-      skudaar: month === 2 && skudaar,
-    };
-  });
+  return Array.from({ length: 12 }, (_, i) =>
+    maanedRaekke(year, i + 1, locale)
+  );
 }
 
 /** The Gregorian mean year of 365,2425 days over 12 months. */
@@ -226,7 +234,7 @@ export function denneMaanedEksempel(
   const month = nu.getUTCMonth() + 1;
   const foerste = new Date(year, month - 1, 1);
   const efterFoelgende = new Date(year, month, 1);
-  const raekke = maanederITaar(year, locale).find((r) => r.month === month)!;
+  const raekke = maanedRaekke(year, month, locale);
   const dage = daysBetween(foerste, efterFoelgende);
   return {
     year,

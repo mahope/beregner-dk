@@ -142,21 +142,6 @@ export function helligdagsnavne(
     .join(", ");
 }
 
-function hasSameDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-/** True when `date` is an official public holiday in `locale`. */
-export function erHelligdag(date: Date, locale: HelligdagLocale): boolean {
-  return getHelligdage(date.getFullYear(), locale).some((h) =>
-    hasSameDay(h.date, date)
-  );
-}
-
 /**
  * Nytårsaften is not an official public holiday, but it is a non-working day in
  * both Denmark and Sweden, so it is excluded from working-day counts without
@@ -184,6 +169,36 @@ function toUtcDayNumber(date: Date): number {
 function fromUtcDayNumber(dayNumber: number): Date {
   const d = new Date(dayNumber);
   return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
+/**
+ * The holidays of one year as UTC day numbers, built once per year and locale.
+ *
+ * `erHelligdag` is called once per calendar day by `taellArbejdsdage`, so
+ * counting the working days of a year used to rebuild and re-sort that year's
+ * whole holiday list — Easter included — once for every single day. Counting
+ * the same year twelve times over, as `maanederITaar` does, did it about 370
+ * times, and the day-exhaustive test in `dato-eksempler.test.ts` ran out of
+ * time in CI because of it. The set stays private to this module, so no caller
+ * can mutate it, and a year only ever picks fixed dates and Easter offsets, so
+ * a cached list can never go stale. The keys are the calendar years actually
+ * asked for, which is a handful.
+ */
+const helligdagNogleDage = new Map<string, Set<number>>();
+
+function helligdagsdage(year: number, locale: HelligdagLocale): Set<number> {
+  const nogle = `${year}|${locale}`;
+  let dage = helligdagNogleDage.get(nogle);
+  if (!dage) {
+    dage = new Set(getHelligdage(year, locale).map((h) => toUtcDayNumber(h.date)));
+    helligdagNogleDage.set(nogle, dage);
+  }
+  return dage;
+}
+
+/** True when `date` is an official public holiday in `locale`. */
+export function erHelligdag(date: Date, locale: HelligdagLocale): boolean {
+  return helligdagsdage(date.getFullYear(), locale).has(toUtcDayNumber(date));
 }
 
 /**

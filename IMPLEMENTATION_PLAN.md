@@ -1,31 +1,31 @@
-STATUS: 3/10 11:2x. CI grøn ved start (`37110580468`), ingen åbne PR'er, ingen
-       uløste Sentry-fejl (SDK'en er sat op: `src/instrumentation.ts` +
-       `instrumentation-client.ts`). **Gate:** `npm run lint` · `npm run
-       typecheck` · `TZ=UTC npm run test` · `npm run build` — **grøn 11:2x**
-       (alle exit 0, **4048** tests i 257 filer, build exit 0). CEO-køens
-       pkt. 0 efterprøvet i koden 11:0x (Valborg 30. april, dansk sankthans
-       23./24. juni, svensk påskafton egen linje) — ingen åbne fund.
-       **Denne iteration:** F5c-slice på de **interpolerede** procenter, den
-       blinde plet scanneren ikke kan se. `regnestykker.test.ts` scanner
-       `JsxText` og strengliteraler, så `{tal}%` i JSX er usynlig for den —
-       planen havde den som sin næste slice. **Målt:** 24 steder i fem
-       beregnere (`LoenBeregner` 10, `LaaneBeregner` 6, `BolanBeregner` 7,
-       `OpsparingsBeregner` 5, `KalorieBeregner` 6 minus dobbeltstrøg) på
-       `/brutto-netto`, `/laaneberegner`, `/bolan`, `/opsparing` og
-       `/kalorier` (273 besøgende/28d, 11.178 GSC-visninger). Loftet
-       **361 → 356** noder. Ny port i `procent-i-synlig-tekst.test.tsx`
-       renderer de fem komponenter i da/se/no og dømmer den synlige markup
-       på 0 procenter uden mellemrum; mutation på **én** interpolation
-       (`KalorieBeregner:412`) gav **2** røde tests. `bolan-loen-sater` og
-       `decimal-komma` låste den gamle skrivemåde fast og er opdateret.
-       Punkt 13: 0 `$[0]`-rester — men perl spiste `\${rate}` i
-       `LaaneBeregner` undervejs (rettet og verificeret i diffen).
-       **Deploy-verifikation:** de fem noter fra før 07:30 er **stadig åbne**
-       og dømmes efter 12:30-vinduet — HTTP 200 er ikke bevis.
-       **Næste iteration:** (1) døm de fem ventende noter på indhold efter
-       12:30; (2) den nye decimal-komma-opgave nedenfor; (3) F5c-slice på de
-       næste interpolerede procenter (`Elberegner` 12, `BudgetBeregner` 2,
-       `LonEfterSkattBeregner` 3, `HuslejeBudgetBeregner` 2).
+STATUS: 3/10 11:4x. **CI var rød ved start** — kørsel `37112627105` («Skriv
+       procenttal med mellemrum i fem beregnere») faldt med én fejl:
+       `dato-eksempler.test.ts:175` løb ud af tid (5000 ms). Lokalt tog
+       den test **2,11 s** af et budget på 5 s, altså 42 % — den var én langsom
+       CI-runner fra rød. **Rettet i denne iteration** (se nedenfor).
+       **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+       `npm run build` — **grøn 11:4x** (alle exit 0, **4048** tests i 257
+       filer, build exit 0). Ingen åbne PR'er, ingen uløste Sentry-fejl
+       (SDK'en er sat op: `src/instrumentation.ts` +
+       `instrumentation-client.ts`).
+       **Denne iteration: rød CI som første opgave.** Rodårsagen var
+       dobbeltarbejde, ikke en flækket test. `erHelligdag()` byggede hele
+       årets helligdagsliste — påske med — for **hver eneste kalenderdag**,
+       og `maanederITaar()` gør det for de tolv måneder; `denneMaanedEksempel()`
+       byggede så alle tolv måneder for at læse ** én** række, og den
+       dagudtømmende test kalder den 744 gange. To rettelser: en memoiseret
+       `Set<number>` pr. år+i `helligdage.ts` (`helligdagsdage()`), og den nye
+       `maanedRaekke()` som `maanederITaar()` og `denneMaanedEksempel()`
+       begge læser, så tallene har **én** kilde. **Målt:** testen 2,11 s →
+       0,25 s (8x), hele filen 2,16 s → 0,28 s, suiten 167 s → **42 s**
+       lokalt. Mutation: cache der ignorerer `locale` → 2 røde tests;
+       `skudaar: false` → 2 røde. Punkt 13: 0 `$[0]`-rester.
+       **Deploy-verifikation:** de seks ventende noter fra før 12:30 er
+       **stadig åbne** og dømmes efter 12:30-vinduet — HTTP 200 er ikke bevis.
+       **Næste iteration:** (1) døm de seks noter på indhold efter 12:30;
+       (2) F5e decimal-komma (`Kommuneskat (24.94 %)` på `/brutto-netto`);
+       (3) F5c-slice på de næste interpolerede procenter (`Elberegner` 12,
+       `HuslejeBudgetBeregner` 2, `BudgetBeregner` 2, `LonEfterSkattBeregner` 3).
        BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
 ## Fase 3 — trafik-drevet
@@ -282,16 +282,8 @@ er blokeret af en ❓ og må ikke gættes.
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
-**Åben række (strenglisten):** næste fil skal måles på ny. **Tretten filer er
-lukket** (se listen nedenfor og `docs/plan-arkiv.md`). Strenglistens loft er
-**70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 → 320 → 315 → 313**
-(`/boernepenge` 3/10 05:05).
-
-**Tretten filer er lukket** (`su`, `arveafgift`, `/boligsalg`, `/procent`,
-`/renteberegner`, `/procentpoint`, `/kvadratmeter`, `/konfirmation`,
-`/efterloen`, `/aktieskat`, `/loen-efter-skat`, `/topskat`, `/boernepenge`) —
-målinger, mutationer og reelle fejl står i `docs/plan-arkiv.md`.
-
+**Åben række (strenglisten):** næste fil skal måles på ny. Loftene og de
+lukkede filers målinger står i `docs/plan-arkiv.md`.
 **Åbne F5b-slice: `/flyttebudget` (3 fund), mål listen på ny først.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 
@@ -314,6 +306,8 @@ målinger, mutationer og reelle fejl står i `docs/plan-arkiv.md`.
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i tre blogindlæg (hele HTML'en skal have **0** `\d%` i den løse tekst: `minberegner.dk/blog/pension-hvor-meget-skal-du-spare-op` skal have «12-17 %», «8-12 %», «4-5 %», «~38 %», «(70 %)», «60-80 %», «10-12 %» … «22-30 %», «*Med 5 % årligt afkast» og «30-årig = 70 % aktier, 30 % obligationer»; `minberegner.dk/blog/boliglaan-2026-renter-og-afdrag` skal have «3,5-4,5 %», «2-3 %», «2,5-3,5 %», «4-7 %», «Finansierer over 80 %», «Udbetaling (5 %)», «op til 80 %», «Banklån (5-15 %)», «150.000 kr (5 %)», «2.400.000 kr (80 %)», «450.000 kr (15 %)», «30-33 %», «0,5-1,2 %», «25-33 %», «Sæt 2-3 % af boligprisen»; `minberegner.dk/blog/maanedsbudget-2026-komplet-guide` skal have «30-35 %», «50 % til nødvendigheder», «30 % til personlige ønsker», «20 % til opsparing og gæld», «10-20 %», «15-25 %», «25.000-35.000 kr/måned», «30-40 %», «12-18 %», «8-12 %», «5-10 %» og alle otte tabel-celler «33 %», «20 %», «12 %», «8 %», «7 %», «12 %», «8 %», «100 %». **Undtagelserne er de tre regelnavne og skal STÅ:** «30% reglen» i de to blogindlægs sidelinks og «4%-reglen» i pensionsindlægget, så **2** «30% reglen» på tværs og **1** «4%-reglen»; altså **0** «30 % reglen» og **0** «4 %-reglen»; **intet** `NaN`) ceo/procent-sweep-pension-boliglaan 3/10 10:1x`
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i de fem interpolerede beregnere (hele HTML'en skal have **0** `\d%` i den synlige tekst på `minberegner.dk/kalorier` — altså **0** «(11%)», «(25%)» og **0** «(25 %)» mangler, men «300 kcal (11 %)», «657 kcal (25 %)» og «1.676 kcal (64 %)» skal stå, og `title`-attributterne skal sige «Protein: 11 %», «Fedt: 25 %» og «Kulhydrater: 64 %»; `minberegner.dk/brutto-netto` skal have «- AM-bidrag (8 %)», «Bundskat (12,01 %)», «Mellemskat (7,5 %)», «Topskat (7,5 %)», «Top-topskat (5 %)», «Effektiv skatteprocent: 33,9 %», «Kommuneskat (24.94 %)» og «Kirkeskat (0,64 %)», og kommune-listen skal have «Gentofte (22.8 %)» med **0** «(22.8%)»; `minberegner.dk/laaneberegner` skal have «Lån … er til 5 % - ydelse» og **0** `\d%` i loanSummary; `minberegner.dk/bolan` skal have «Kontantinsats: … kr (20 %), «85 %», «2 %/år» og «max 7 %). Ränteavdraget är 1,5 % upp till … kr, sedan 1,1 %.»; `minberegner.dk/opsparing` skal have «Real værdi (efter 2 % inflation):», «+5,2 %» og «2 % p.a.»; **intet** `NaN`) ceo/procent-interpolationer 3/10 11:2x`
+
+`VERIFICÉR DEPLOY: memoiserede helligdage og måneder (tallene skal være **uændrede**, så dommen er tallene og ikke HTTP 200: `minberegner.dk/dage-i-aaret` skal stadig have summeringsrækken **365** dage / **251** hverdage / **104** weekenddage og månedsrækkerne juli **23** hverdage / **8** weekenddage og augusti **21** / **10**; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar»; `minberegner.dk/dato` skal have helligdagslisten med «5. april» (påskedag), «14. maj» (kristi himmelfartsdag) og «24. maj» (pinsedag) 2026 og en måneds-række med de samme **251** hverdage for hele året; `minberegner.dk/timer-i-aaret` skal have alle **12** månedsrækker plus summeringen; **intet** `NaN`) ceo/hoelligdag-cache 3/10 11:5x`
 
 ## VERIFICÉR DEPLOY-noter
 
