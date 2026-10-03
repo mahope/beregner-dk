@@ -147,6 +147,15 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
       const tekst = helTekst(renderIn(<LoenBeregner />, "se").container);
       expect(tekst).not.toMatch(/Effektiv skatteprocent: \d+\.\d%/);
     });
+
+    test("da: kommunesatslinjen skriver komma, ikke punktum", () => {
+      // Procenten kommer fra et input-felt, så den bliver interpoleret råt.
+      // Uden formatNumber skrev linjen «Kommuneskat (24.94 %)» lige under
+      // «Kirkeskat (0,64 %)» på samme side.
+      const tekst = helTekst(renderIn(<LoenBeregner />, "da").container);
+      expect(tekst).toContain("Kommuneskat (24,94 %)");
+      expect(tekst).not.toContain("24.94 %");
+    });
   });
 
   describe("/boliglaan (belåningsgrad og rentespænd)", () => {

@@ -423,7 +423,7 @@ export default function LoenBeregner() {
             <span>{formatKr(beregning.bundSkat)}</span>
           </div>
           <div className="flex justify-between text-red-600 dark:text-red-400">
-            <span>Kommuneskat ({kommuneSkat} %)</span>
+            <span>Kommuneskat ({formatNumber(kommuneSkat, "da")} %)</span>
             <span>{formatKr(beregning.kommuneSkatBeloeb)}</span>
           </div>
           {medKirkeskat && (

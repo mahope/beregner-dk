@@ -143,18 +143,21 @@ tilbage), `LoenBeregner` (resten), `HuslejeBudgetBeregner` 2,
   større end dit årsfribeløb». Uden den var opgaven ubyggelig, så den er
   erstattet af værktøjet ovenfor i stedet for at blive gættet.
 
-**F5e. [ ] Målte decimaler med punktum i dansk tekst (ny, 3/10 11:2x —
-fundet af den nye port).** *Hvad:* den renderede `/brutto-netto` skriver
-«Kommuneskat (**24.94** %)» med **punktum** i den danske markup, fordi
+**F5e. [x] ✅ Målte decimaler med punktum i dansk tekst (3/10 11:2x — fundet af
+den nye port; delvist lukket 12:1x).** *Hvad:* den renderede `/brutto-netto`
+skrev «Kommuneskat (**24.94** %)» med **punktum** i den danske markup, fordi
 `LoenBeregner.tsx:426` interpolerer kommunesatsprocenten råt fra
-input-feltet; `Kirkeskat (0,64 %)` bruger derimod komma. Samme mønster
-findes på `/kalorier`: «(interval 0,8-1,2)» er ok, men `LaaneBeregner`
-_input-felter_ viser `value="24.94"` og `step="0.01"`. *Hvorfor:* dansk
-decimalkomma er en del af Retskrivningsordbogen, og det er den samme
-fejltype som F5b. *Accept:* den interpolerede kommunesatsprocent går
-gennem samme `formatPct` som resten, så «Kommuneskat (24,94 %)» og «(0,64 %)»
-— og `decimal-komma.test.tsx` får en assert på kommunesatslinjen, ikke kun
-på aop-annuiteten.
+input-feltet; `Kirkeskat (0,64 %)` bruger derimod komma.
+*Hvorfor:* dansk decimalkomma er en del af Retskrivningsordbogen, og det er den
+samme fejltype som F5b. *Accept:* den interpolerede kommunesatsprocent går
+gennem `formatNumber(kommuneSkat, "da")`, så «Kommuneskat (24,94 %)» — og
+`decimal-komma.test.tsx` har **en** assert på kommunesatslinjen, ikke kun på
+aop-annuiteten. **Målt:** mutation med den gamle interpolation giver rød med
+hele den synlige tekst som bevis («Kommuneskat (24.94 %)» lige under
+«Kirkeskat (0,64 %)»). **⛔ Resten er den samme fejl ét sted længere ned på
+siden:** kommune-listen skriver stadig «Gentofte (22.8 %)» med punktum — den
+går gennem `KOMMUNER`-dataene og ikke gennem `LoenBeregner`. Tages først
+når en port dømmer den.
 
 **F9. [ ] `locale === "se" ? "se" : "da"` — 13 steder med dansk på
 norske domæner.** *Hvad:* mønstret er målt med grep efter `ceo/norsk-pace-side`
@@ -308,6 +311,8 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i de fem interpolerede beregnere (hele HTML'en skal have **0** `\d%` i den synlige tekst på `minberegner.dk/kalorier` — altså **0** «(11%)», «(25%)» og **0** «(25 %)» mangler, men «300 kcal (11 %)», «657 kcal (25 %)» og «1.676 kcal (64 %)» skal stå, og `title`-attributterne skal sige «Protein: 11 %», «Fedt: 25 %» og «Kulhydrater: 64 %»; `minberegner.dk/brutto-netto` skal have «- AM-bidrag (8 %)», «Bundskat (12,01 %)», «Mellemskat (7,5 %)», «Topskat (7,5 %)», «Top-topskat (5 %)», «Effektiv skatteprocent: 33,9 %», «Kommuneskat (24.94 %)» og «Kirkeskat (0,64 %)», og kommune-listen skal have «Gentofte (22.8 %)» med **0** «(22.8%)»; `minberegner.dk/laaneberegner` skal have «Lån … er til 5 % - ydelse» og **0** `\d%` i loanSummary; `minberegner.dk/bolan` skal have «Kontantinsats: … kr (20 %), «85 %», «2 %/år» og «max 7 %). Ränteavdraget är 1,5 % upp till … kr, sedan 1,1 %.»; `minberegner.dk/opsparing` skal have «Real værdi (efter 2 % inflation):», «+5,2 %» og «2 % p.a.»; **intet** `NaN`) ceo/procent-interpolationer 3/10 11:2x`
 
 `VERIFICÉR DEPLOY: memoiserede helligdage og måneder (tallene skal være **uændrede**, så dommen er tallene og ikke HTTP 200: `minberegner.dk/dage-i-aaret` skal stadig have summeringsrækken **365** dage / **251** hverdage / **104** weekenddage og månedsrækkerne juli **23** hverdage / **8** weekenddage og augusti **21** / **10**; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar»; `minberegner.dk/dato` skal have helligdagslisten med «5. april» (påskedag), «14. maj» (kristi himmelfartsdag) og «24. maj» (pinsedag) 2026 og en måneds-række med de samme **251** hverdage for hele året; `minberegner.dk/timer-i-aaret` skal have alle **12** månedsrækker plus summeringen; **intet** `NaN`) ceo/hoelligdag-cache 3/10 11:5x`
+
+`VERIFICÉR DEPLOY: kommunesatsprocenten med dansk komma (hele HTML'en på `minberegner.dk/lon-efter-skat` skal have **1** «Kommuneskat (24,94 %)» og **0** «24.94 %», lige under «Kirkeskat (0,64 %)»; `beraknare.se/lon-efter-skat` skal have samme tegn; **intet** `NaN`) ceo/kommunesat-komma 3/10 12:1x`
 
 ## VERIFICÉR DEPLOY-noter
 
