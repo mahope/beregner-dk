@@ -26602,3 +26602,96 @@ Topskatgrænsen var derimod korrekt begge steder (845.500 / 70.500).
 **Ikke kørt:** ingen Playwright/skærmbilleder (repoet har intet). Siden ændrer
 kun tal og mellemrum i eksisterende markup og tilføjer ingen nye elementer,
 tokens eller breakpoints, så layoutet kan ikke have flyttet sig.
+
+---
+
+## boernepenge-faq-tal-fra-modul (F5b-slice 3/10 05:05, den trettende fil)
+
+**Baggrund.** `/boernepenge` skrev de fire satser, de fire årstal,
+aftrappingsgrænsen og de to eksempelbeløb i hånden — i `description`,
+`metaDescription`, i to af sine otte FAQ-svar og i brødtekstens
+aftrappingseksempel. `BoernepengBeregner` læser allerede `BOERNE_SATSER_2026`,
+så **søgeresultatet og værktøjet var to uafhængige tal**: ændrede man en sats i
+`borneungeydelse.ts`, ville værktøjet vise den nye, mens metadata og
+`FAQPage`-JSON-LD stod med den gamle.
+
+**Målt.** 4 fund i `page-data.ts` med portens egen `strengBelob`:
+`description`, `metaDescription` og 2 af 8 FAQ-svar. Slug: **4 → 0**.
+Derudover 2 fund i JSX-teksten i `boernepenge/page.tsx` (aftrappingsgrænsen og
+eksemplet) — de lå i den eksisterende port, så de er **2 → 0** med listen
+**315 → 313**.
+
+**Ingen reel satsfejl.** Alle ni beløb var rigtige — 5.370 × 4 = 21.480,
+4.248 × 4 = 16.992, 3.342 × 4 = 13.368, 1.114 × 12 = 13.368, 2 % af 38.900 = 778
+og 2 % af 138.900 = 2.778. Slicen er derfor et **lås mod 2027-drift**.
+
+**Den reelle fejl lå i brødteksten, fundet ved at gennemgå min egen diff som
+reviewer:**
+
+1. **«Tjener du 1.100.000 kr., er du 138.900 kr. over grænsen.»** — punktum foran
+   et komma. Det er den dobbelte sætningstegning, `pension-dobbelt-valuta` 2/10
+   fjernede i `formatKr(…)} kr.`-kaldene, og den lå i denne linje fordi porten
+   kun dømte JSX-tekst og strenge, altså aldrig den *renderede* sætning. Rettet
+   til `boerneBelobI`, der er formen uden punktum.
+2. **«nedsættes ydelsen med 2%»** i brødteksten mod «2 %» i FAQ-svaret på
+   præcis samme side. Rettet til husets skrivemåde med mellemrum.
+
+**Blindt spot i min egen port, lukket samme commit.** Først skrev `kr.,`-løkken
+kun `alleTekster()` (metadata + svar). Den ville aldrig kunne fange fejlen, fordi
+beløbet i brødteksten står i en interpolation, så «kr.,» findes ikke i kilden.
+Løkken er derfor ikke udvidet til kilden med en søgning på «kr.,» — den ville
+være grøn uden at teste noget. I stedet binder prøven beløbet foran kommaet til
+`boerneBelobI` med `not.toMatch(/\{\s*boerneBelob\(AFTRAPNING_EKSEMPEL_HOEJ\)\s*\}/)`.
+Læren er den samme som i `/moms` 2/10: en port skal dømme den *rendererede* tekst
+eller den *binding*, ikke et mønster der ikke kan ramme.
+
+**Notation i `metaDescription`.** Den skrev «3-6 år 4.248 kr» og «7-14 år 3.342 kr»
+**uden udbetalingsinterval**, mens `description` lige over den skrev
+«4.248 kr/kvartal». Da intervallet skrives på alle fire grupper bliver
+metabeskrivelsen **174 tegn**, og husets to porte
+(`page-data.test.ts` + `meta-description.test.ts`) dømmer den ved 160. Derfor
+er intervallet nu skrevet **én gang for den gruppe, det gælder for**, grupperet
+efter modulets egen `interval`-nøgle: «0-2 år 5.370, 3-6 år 4.248 og 7-14 år
+3.342 kr/kvartal, 15-17 år 1.114 kr/md» = **147 tegn**. Kortere *og* alle fire
+grupper dækket. `description` har ingen tegngrænse og beholder formen pr. gruppe.
+
+**Nye tests: 14** (3952 → 3966). `regnestykker.test.ts`s to dækningskonstanter
+blev opdateret i samme commit: `procentAf` 13 → **12** og summen 25 → **24**,
+fordi eksemplet «2% × 138.900 kr. = 2.778 kr.» nu er interpolationer omkring
+portens mønster. Det er samme greb som `/pensions` 3/10.
+
+**Seks mutationer målt røde:**
+
+| # | Mutation | Rød |
+|---|---|---|
+| M1 | håndskrevet beløb i FAQ-svaret (778 → 750) | 1 |
+| M2 | `2 %` → `2%` | 3 |
+| M3 | interval fjernet fra meta-listen | 1 |
+| M4 | «961.100 kr.» tilbage som literal i `page.tsx` | 1 |
+| M5 | årstal for 7-14 år gjort til 13.369 | 2 |
+| M6 | `boerneBelobI` → `boerneBelob` foran kommaet | 1 |
+
+**To fejl i min egen nye kode, fanget af porten inden commit:**
+
+1. `boerneInterval` skrev «5.370 **kr kr/**kvartal», fordi den brugte
+   `boerneBelobI` og så satte «kr/» til. Samme dobbelte enhed som punkt 11.
+2. `TILLADTE_BELOB` havde glemt eksempelindkomsten «1.000.000», så porten blev
+   rød på min egen nye tekst. Ret med vilje: de to eksempelindkomster er
+   modulkonstanter og hører derfor med i det, modulet må skrive.
+
+**Bemærk om et flake.** Første fulde kørsel gav 4 fejl, hvoraf to var
+`locale-leak-gate.test.ts`s selvprøver («still flags a dispatcher…», «flags a
+Danish value inside the se: block»). Begge passerer i isolation (22/22) og
+passed igen i de to følgende fulde kørsler, så de er belastningsafhængige, ikke
+forårsaget af denne slice. Samme mønster som den flake planen noterede 2/10 21:00.
+
+**VERIFICÉR DEPLOY-prøve:**
+`curl -fs https://minberegner.dk/boernepenge | sed 's/<!-- -->//g'` og tæl:
+`kr.,` skal være **0** (og «1.100.000 kr,» skal være **1**), `2%` skal være
+**0** (og «2 %» skal være **3**), «5.370 kr/kvartal (21.480 kr/år)» **1**,
+«4.248 kr/kvartal (16.992 kr/år)» **1**, «3.342 kr/kvartal (13.368 kr/år)» **1**,
+«1.114 kr/måned (13.368 kr/år)» **1**, «overstiger 961.100 kr. i 2026» **1**,
+«1.000.000 kr. giver 2 % af 38.900 kr. = 778 kr. årligt» **1**,
+«0-2 år 5.370, 3-6 år 4.248 og 7-14 år 3.342 kr/kvartal, 15-17 år 1.114 kr/md» **1**,
+`NaN` **0**. Svaret skal have `<title>` «Børnepenge Beregner 2026 - Børne- og
+ungeydelse».

@@ -212,7 +212,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx": 5,
   "src/app/blog/skat-2026-alt-du-skal-vide/page.tsx": 5,
   "src/app/blog/spar-penge-paa-braendstof/page.tsx": 2,
-  "src/app/boernepenge/page.tsx": 2,
+  "src/app/boernepenge/page.tsx": 0,
   "src/app/bolan/page.tsx": 1,
   "src/app/boliglaan/page.tsx": 4,
   "src/app/boligsalg/page.tsx": 0,
@@ -318,8 +318,15 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * opdateret august 2025», et år før siden siger 2026. De læses nu fra
  * `DEFAULT_VALUES` og tinglysningens eksporterede satser. **Ingen** er bevaret
  * som interval: de har ingen kilde, så de må ikke gættes (punkt 11).
+ *
+ * 315 → 313 den 3/10: `/boernepenge` stod med 2 fund i JSX-teksten —
+ * aftrappingsgrænsen «961.100 kr.» og eksemplet «1.100.000 kr. … 138.900 kr.
+ * over grænsen … 2.778 kr. årligt». De læses nu fra `boernepenge-eksempler`,
+ * som tager grænsen fra `BOERNEUNGEYDELSE_2026` og regner eksemplet med
+ * `beregnAftrapning`. **Ingen** er bevaret: de var rigtige, så slicen er et lås
+ * mod 2027-drift.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 315;
+const HAARDKODEDE_BELOB_I_LISTEN = 313;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -579,7 +586,13 @@ const FORVENTEDE_FUND: Record<string, number> = {
   // rigtig ved konstruktion i stedet for dømt af porten. Summen gik 7 → 6.
   gang: 6,
   del: 6,
-  procentAf: 13,
+  // 3/10: `boernepenge` skrev «2% × 138.900 kr. = 2.778 kr.» i brødteksten, og
+  // den ligger nu i interpolationer omkring portens mønster, fordi beløbet,
+  // satsen og produktet kommer fra `boernepenge-eksempler`. Sætningen er
+  // rigtig ved konstruktion i stedet for dømt af porten, og
+  // `boernepenge-eksempler.test.ts` dømmer de tre tal hver for sig. Summen gik
+  // 13 → 12.
+  procentAf: 12,
   stigning: 0,
   andel: 0,
 };
@@ -625,8 +638,11 @@ describe("regnestykker i brødteksten", () => {
     // læst fra modulet i stedet for at være håndskrevet, og til 26 da
     // børnepenge-indlæggets «21.480 kr × 2 = 42.960 kr» blev interpolationer,
     // og 3/10 faldt den til 25 da /pensions «40.000 kr × 0,15 = 6.000 kr» blev
-    // interpolationer omkring `pension-eksempler`s beløb, sats og produktsum.
-    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(25);
+    // interpolationer omkring `pension-eksempler`s beløb, sats og produktsum, og
+    // til 24 da /boernepenges «2% × 138.900 kr. = 2.778 kr.» blev
+    // interpolationer omkring `boernepenge-eksempler`s indkomst, sats og
+    // nedsættelse.
+    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(24);
   });
 
   test("alle regnestykker på sitet er regnet rigtigt", () => {
@@ -688,7 +704,9 @@ describe("beløb i JSX-tekst på siderne", () => {
     // (Listen lå 6 over det målte tal, så de 6 er ikke hele faldet.)
     // 3/10: 320 → 315, målt med portens egen `jsxBelob`, da `/aktieskat`s 5
     // brødtekstbeløb læses fra `aktieskat-eksempler`.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(315);
+    // 3/10: 315 → 313, målt med portens egen `jsxBelob`, da `/boernepenge`s 2
+    // brødtekstbeløb læses fra `boernepenge-eksempler`.
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(313);
   });
 });
 

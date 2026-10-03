@@ -77,6 +77,11 @@ import {
 } from "./rentefradrag-eksempler";
 import { topskatBeskrivelse, topskatFaqItems } from "./topskat-eksempler";
 import {
+  boerneBeskrivelse,
+  boerneMetaBeskrivelse,
+  boernepengeFaqItems,
+} from "./boernepenge-eksempler";
+import {
   kvadratmeterEksempelAreal,
   kvadratmeterEksempelLignelse,
   kvadratmeterEksempelProdukt,
@@ -2149,9 +2154,9 @@ faqItems: kalorierFaqItems("da"),
     "boernepenge": {
       slug: "boernepenge",
       title: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
-      description: "Beregn børnepenge 2026. Officielle satser: 0-2 år: 5.370 kr/kvartal, 3-6 år: 4.248 kr/kvartal, 7-14 år: 3.342 kr/kvartal, 15-17 år: 1.114 kr/md. Beregn ud fra antal børn og indkomst.",
+      description: boerneBeskrivelse(),
       metaTitle: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
-      metaDescription: "Beregn børnepenge 2026. Satser: 0-2 år 5.370 kr/kvartal, 3-6 år 4.248 kr, 7-14 år 3.342 kr, 15-17 år 1.114 kr/md. Beregn ud fra antal børn og indkomst.",
+      metaDescription: boerneMetaBeskrivelse(),
       keywords: ["børnepenge", "børnepenge beregner", "børne- og ungeydelse", "børnecheck", "børnepenge 2026", "børnetilskud", "hvad får jeg i børnepenge", "børneydelse beregner", "børnepenge satser", "børnepenge satser 2026", "ungeydelse 2026"],
       ogTitle: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
       ogDescription: "Beregn din børne- og ungeydelse med officielle 2026-satser. Se hvad du får udbetalt med ny deling mellem forældre.",
@@ -2161,16 +2166,7 @@ faqItems: kalorierFaqItems("da"),
       schemaName: "Børnepenge Beregner - Børne- og ungeydelse",
       schemaDescription: "Gratis børnepenge beregner. Beregn din børne- og ungeydelse for 2026.",
       schemaCategory: "FinanceApplication",
-      faqItems: [
-      { question: "Hvem kan få børne- og ungeydelse?", answer: "Forældre med børn under 18 år, hvor barnet bor i Danmark, og mindst én forælder er dansk statsborger eller har haft bopæl i DK i min. 2 år. Siden 2022 deles ydelsen som standard mellem forældre med fælles forældremyndighed." },
-      { question: "Hvor meget får jeg i børnepenge 2026?", answer: "De officielle 2026-satser er: 0-2 år: 5.370 kr/kvartal (21.480 kr/år), 3-6 år: 4.248 kr/kvartal (16.992 kr/år), 7-14 år: 3.342 kr/kvartal (13.368 kr/år), 15-17 år: 1.114 kr/måned (13.368 kr/år). Ved fælles forældremyndighed modtager hver forælder halvdelen." },
-      { question: "Hvornår udbetales børnepenge?", answer: "Børneydelsen (0-14 år) udbetales kvartalsvis forud den 20. i januar, april, juli og oktober. Ungeydelsen (15-17 år) udbetales månedligt den 20. i hver måned direkte til den unge." },
-      { question: "Bliver børnepenge modregnet ved høj indkomst?", answer: "Ja, hvis dit indtægtsgrundlag overstiger 961.100 kr. i 2026, nedsættes ydelsen med 2 % af beløbet over grænsen. Eksempel: 1.000.000 kr. giver 2 % af 38.900 kr. = 778 kr. årligt. Siden 2022 regnes kun med din egen indkomst, også hvis I bor sammen." },
-      { question: "Hvordan deles børnepenge mellem forældre?", answer: "Siden januar 2022 deles børne- og ungeydelsen som standard ligeligt mellem forældre med fælles forældremyndighed. Hver forælder modtager halvdelen af ydelsen. Bor barnet kun hos den ene forælder, kan man søge om at få hele ydelsen." },
-      { question: "Hvad får enlige forsørgere ekstra?", answer: "Enlige forsørgere kan udover børne- og ungeydelsen få: ordinært børnetilskud (pr. barn), ekstra børnetilskud (kun én gang uanset antal børn) og evt. særligt børnetilskud. Børnetilskuddene udbetales særskilt — beløbene står på borger.dk under Børnetilskud." },
-      { question: "Er børnepenge skattefrie?", answer: "Ja, børne- og ungeydelsen er skattefri. Du skal ikke betale skat af beløbet, og det påvirker ikke din skattepligtige indkomst eller offentlige ydelser som boligstøtte." },
-      { question: "Hvordan søger jeg om børnepenge?", answer: "Børneydelsen udbetales automatisk når dit barn får et CPR-nummer. Du behøver ikke søge. Ved særlige forhold som eneforældremyndighed, delt bopæl eller høj indkomst kan du administrere ydelsen via borger.dk eller Digital Post til Udbetaling Danmark." },
-      ],
+      faqItems: boernepengeFaqItems(),
     },
     "barselsdagpenge": {
       slug: "barselsdagpenge",

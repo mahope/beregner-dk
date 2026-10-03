@@ -1,20 +1,21 @@
-STATUS: 3/10 04:37. CI grøn ved start (`37089145729`). Sentry: ingen uløste fejl
+STATUS: 3/10 05:05. CI grøn ved start (`37089145729`). Sentry: ingen uløste fejl
       14 dage, og SDK'en **er** sat op, så Sentry-punktet er lukket. **Gate:**
       `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run
-      build` — **grøn 3/10 04:37** (alle exit 0, **3952** tests i 249 filer).
+      build` — **grøn 3/10 05:05** (alle exit 0, **3966** tests i 250 filer).
       PR-TJEK: 2026-10-03 — ingen åbne PR'er. CEO-kø punkt 0 er færdigt
       (`aca17e5`), og review-fundet fra 02:52 har ingen åbne fund (begge fund er
       `RETTET 4ec1f2f`).
-      **Denne iteration: F5b-slice `topskat-faq-tal-fra-modul`** — se
-      `docs/plan-arkiv.md`. 13 nye tests (3939 → 3952), **syv mutationer målt
-      røde**. **Én reel fejl fundet:** FAQ-svaret skrev «58.000 kr./md» for
-      mellemskattens bruttoindkomst, mens sidens egen formel
-      (`grænse / (1 - AM) / 12`, rundet til hundrede) giver 58.100 — brødteksten
-      lige ovenfor skrev allerede «58.100». To tal for det samme beløb på den
-      samme side. Derudover lå skatteloftet «52,07» uafhængigt i komponenten
-      (kappeformel + brødtekst) og i FAQ-svaret; nu ét tal.
-      **Næste iteration:** F5b `/boernepenge` (4 fund) — og den efter en feature
-      (sidste feature var `/dage-mellem-datoer`).
+      **Denne iteration: F5b-slice `boernepenge-faq-tal-fra-modul`** (den
+      tredje og **sidste** målte F5b-slice i denne række) — se
+      `docs/plan-arkiv.md`. 14 nye tests (3952 → 3966), **seks mutationer målt
+      røde**. **Ingen reel forkert sats fundet** — alle ni beløb var rigtige, så
+      slicen er et lås mod 2027-drift. **Én reel fejl fundet, to steder samme
+      klasse som `/pension` 2/10:** brødteksten skrev «Tjener du 1.100.000 kr.»,
+      altså **«kr.,»** foran kommaet, og «2%» uden mellemrum mod «2 %» i
+      FAQ-svaret på præcis samme side. Sidens egen port så ingen af delene,
+      fordi beløbet står i JSX-tekst.
+      **Næste iteration: en FEATURE** — sidste feature var `/dage-mellem-datoer`
+      (3/10 04:15), og de to F5b-slices herefter gør det til 1 feature i 3.
       BRANCH-TJEK: ikke kørt (sidste 2/10 — ikke en uge siden).
 
 ## Fase 3 — trafik-drevet
@@ -166,10 +167,10 @@ er blokeret af en ❓ og må ikke gættes.
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
-**Åben række (strenglisten):** næste fil skal måles på ny. **Elleve filer er
+**Åben række (strenglisten):** næste fil skal måles på ny. **Tretten filer er
 lukket** (se listen nedenfor og `docs/plan-arkiv.md`). Strenglistens loft er
-**70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 → 320 → 315** (uændret,
-for `/loen-efter-skat`s tal lå i `page-data.ts`, ikke i JSX).
+**70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 → 320 → 315 → 313**
+(`/boernepenge` 3/10 05:05).
 
 **Lukket 3/10 04:37 — `topskat-faq-tal-fra-modul` (den tolvte fil).** Se
 `docs/plan-arkiv.md`. *Målt:* **4** håndskrevne strenge væk fra `page-data.ts`
@@ -194,6 +195,29 @@ test låste den gamle notation fast (`page-data.test.ts` krævede «7,5%») og e
 rettet til «7,5 %» med et `not.toContain("7,5%")`. **7 nye tests**
 (3920 → 3927). Mutationer målt: 2 røde af 7 (nul decimaler), 1 rød af 7
 (håndskrevet beløb + «8%» i `description`).
+
+**Lukket 3/10 05:05 — `boernepenge-faq-tal-fra-modul` (den trettende fil).** Se
+`docs/plan-arkiv.md`. *Målt:* **4** håndskrevne talgrupper væk fra
+`page-data.ts` (`description` + `metaDescription` + 2 af 8 FAQ-svar), så
+`boernepenge` er **4 → 0** målt med portens egen `strengBelob`. Ny
+`boernepenge-eksempler.ts` læser `BOERNE_SATSER_2026` +
+`BOERNEUNGEYDELSE_2026` og regner begge aftrappingseksempler med
+`beregnAftrapning`. **Ingen reel satsfejl:** 5.370 × 4 = 21.480, 4.248 × 4 =
+16.992, 3.342 × 4 = 13.368, 1.114 × 12 = 13.368 og 2 % af 38.900 = 778 — alle
+rigtige. **Den reelle fejl lå i brødteksten, målet ved at gennemgå min egen
+diff:** «Tjener du 1.100.000 **kr.,**» — punktum foran kommaet, den dobbelte
+sætningstegning som `pension-dobbelt-valuta` 2/10 fjernede i `formatKr(…)} kr.`
+-kaldene, og «**2%**» mod «2 %» i FAQ-svaret på samme side. Begge steder lå i
+JSX-tekst, som hverken `regnestykker`-porten eller `page-data`-målingen så.
+JSX-listen **315 → 313** (`boernepenge/page.tsx` 2 → **0**), og `procentAf`
+dækning 13 → 12 + summen 25 → 24, fordi eksemplet nu er interpolationer.
+**14 nye tests** (3952 → 3966), **seks mutationer målt røde** (arkivet har hver).
+
+**Målt fejl — min egen port havde et blindt spot, som jeg lukkede samme
+commit.** `kr.,`-løkken dømte kun metadata og FAQ-svar, fordi beløbet i
+brødteksten står i en interpolation, så «kr.,» findes aldrig i kilden. Prøven
+binder derfor beløbet foran kommaet til `boerneBelobI` i stedet for at søge
+på en streng, der ikke kan rammes.
 
 **Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
 `strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
@@ -262,19 +286,21 @@ tests** (3898 → 3905). ⛔ Se nyt ❓ om deltidsfaktoren 0,67 nedenfor.
 (`konfirmation-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
 **`/efterloen` (`efterloen-faq-tal-fra-modul`) er den niende,
 `/aktieskat` (`aktieskat-faq-tal-fra-modul`) den tiende, `/loen-efter-skat`
-(`loen-efter-skat-faq-tal-fra-modul`) den **ellevte** og `/topskat`
-(`topskat-faq-tal-fra-modul`) den **tolvte**.**
+(`loen-efter-skat-faq-tal-fra-modul`) den **ellevte**, `/topskat`
+(`topskat-faq-tal-fra-modul`) den **tolvte** og `/boernepenge`
+(`boernepenge-faq-tal-fra-modul`) den **trettende** — den sidste målte i
+rækken, så næste iteration bør være en feature.**
 
 **Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
 portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
-Køen pr. slug (**78** målt 3/10 02:38 med egen AST-probe efter `/efterloen`):
-`moms` 15 (⛔) · `konfirmation` 6 → **0** · `efterloen` 5 → **0** ·
-`aktieskat` 5 → **0** · `loen-efter-skat` 4 → **0** · `topskat` 4 → **0** ·
-`boernepenge` 4 · `flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
+Køen pr. slug (**74** målt 3/10 05:05 med egen AST-probe efter `/boernepenge`):
+`moms` 15 (⛔) · `flyttebudget` 3 · resten ≤2. De øvrige tal er fra målingen 3/10 00:45 og kan
 være faldet siden — mål den slug, du tager, på ny. **Anbefalet rækkefølge:**
-`/loen-efter-skat` (4, lukket) → `/topskat` (4, lukket) → `/boernepenge` (4).
+`/flyttebudget` (3) → derefter måles listen på ny. De otte lukkede før denne var
+`/moms` slet ikke rørt (⛔ de 3 lovgrænser), så **næste F5b-slice er
+`/flyttebudget`**, medmindre en feature prioriteres højere.
 `/moms` er ⛔ (de 3 lovgrænser).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
@@ -381,6 +407,8 @@ De **fulde** prøvekommandoer til de åbne noter ovenfor ligger i
 `VERIFICÉR DEPLOY: /dage-mellem-datoer + /dagar-mellan-datum (nye sider med eget slugsprog: `minberegner.dk/dage-mellem-datoer` skal have `<title>` «Dage mellem datoer: beregn antal dage mellem to datoer», **1** `<h1>`, **3** spørgsmål i `FAQPage`-JSON-LD («Hvor mange dage er der mellem to datoer?», «Er 2028 et skudår, og hvor mange dage er der i det?», «Hvorfor står der både dage og hele uger?»), eksempel-sætningen «Fra 1. januar 2026 til 1. januar 2027 går der 365 dage: 52 hele uger og 1 dag til.», og **0** «aldrig kan bli negativt»; `beraknare.se/dagar-mellan-datum` skal have `<title>` «Dagar mellan datum: räkna ut antal dagar mellan två datum» og eksemplet «… går det 365 dagar: 52 hela veckor och 1 dag till.», altså **0** «aldrig kan bli negativt»; **0** `NaN` på begge; begge URL'er skal ligge i hvert sit eget sitemap med `daily`, og `minberegner.dk/dagar-mellan-datum` + `beraknare.se/dage-mellem-datoer` skal 301'e til hver sin egen sti) ceo/dage-mellem-datoer 3/10 04:15`
 
 `VERIFICÉR DEPLOY: /topskat henter grænser, satser og bruttoindkomster fra sit eget modul (metadata og FAQ skal have «mellemskat fra 641.200 kr,» — **kr uden punktum** foran kommaet — og «topskat fra 777.900 kr.», altså **0** × «641.200 kr.,»; FAQ-svaret «Hvornår betaler man topskat i 2026?» skal have «(7,5 %)», «(yderligere 7,5 %)» og «ca. 697.000 kr./år (ca. 58.100 kr./md)» og «845.500 kr./år (ca. 70.500 kr./md)» — altså **0** × «58.000», **0** × «7,5%», **0** × «5%»; FAQ-svaret «Hvad er skatteloftet?» skal have «overstiger ca. 52,07 %» og «Med AM-bidrag (8 %)», altså **0** × «52,07%»; FAQ-svaret «Hvad er den nye top-topskat?» skal have «på 5 % for indkomster over 2.592.700 kr (efter AM-bidrag)», altså **0** × «2.592.700 kr.»; brødtekstens punktliste skal skrive «Mellemskat (7,5 %):» med mellemrum, altså **0** × «(7,5%):»; værktøjets «Grænser 2026» skal vise «Mellemskat fra 697.000 kr./år brutto. Topskat fra 845.500 kr./år brutto.» — altså **0** × «845.544»; **intet** `NaN`) ceo/topskat-faq-tal-fra-modul 3/10 04:37`
+
+`VERIFICÉR DEPLOY: /boernepenge henter satser, årstal og aftrapping fra sit eget modul (`minberegner.dk/boernepenge`: `description` skal have «0-2 år: 5.370 kr/kvartal, 3-6 år: 4.248 kr/kvartal, 7-14 år: 3.342 kr/kvartal, 15-17 år: 1.114 kr/md»; `metaDescription` skal have «0-2 år 5.370, 3-6 år 4.248 og 7-14 år 3.342 kr/kvartal, 15-17 år 1.114 kr/md» — altså **0** × «kr.,» på hele siden og **0** × «2%»; brødteksten skal skrive «Hvis din indkomst overstiger 961.100 kr. i 2026, nedsættes ydelsen med 2 % af beløbet over grænsen.» og «Tjener du 1.100.000 kr, er du 138.900 kr. over grænsen.» med **kr uden punktum** foran kommaet; FAQ-svaret «Hvor meget får jeg i børnepenge 2026?» skal have «5.370 kr/kvartal (21.480 kr/år)», «4.248 kr/kvartal (16.992 kr/år)», «3.342 kr/kvartal (13.368 kr/år)» og «1.114 kr/måned (13.368 kr/år)»; FAQ-svaret «Bliver børnepenge modregnet ved høj indkomst?» skal have «overstiger 961.100 kr. i 2026», «1.000.000 kr. giver 2 % af 38.900 kr. = 778 kr. årligt»; **intet** `NaN`) ceo/boernepenge-faq-tal-fra-modul 3/10 05:05`
 
 ## ❓ Til Mads
 

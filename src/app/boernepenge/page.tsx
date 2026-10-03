@@ -10,6 +10,15 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
 import { formatNumber } from "@/lib/format";
 import { BOERNE_SATSER_2026, aarligBelob } from "@/lib/borneungeydelse";
+import {
+  AFTRAPNING_EKSEMPEL_HOEJ,
+  AFTRAPNING_GRAENSE,
+  AFTRAPNING_PCT,
+  belobOverGraensen,
+  boerneBelob,
+  boerneBelobI,
+  boerneNedaettelse,
+} from "@/lib/boernepenge-eksempler";
 import { BARNETILSKUD_2026_KILDE, barnetilskudSats } from "@/lib/barnetilskud";
 import { iDagPaSiden } from "@/lib/lokal-dato";
 
@@ -96,12 +105,12 @@ export default async function BoernepengePage() {
 
         <h2>Aftrapning for høje indkomster</h2>
         <p>
-          Hvis din indkomst overstiger <strong>961.100 kr.</strong> i 2026,
-          nedsættes ydelsen med 2% af beløbet over grænsen.
+          Hvis din indkomst overstiger <strong>{boerneBelob(AFTRAPNING_GRAENSE)}</strong> i 2026,
+          nedsættes ydelsen med {AFTRAPNING_PCT} af beløbet over grænsen.
         </p>
         <p>
-          <strong>Eksempel:</strong> Tjener du 1.100.000 kr., er du 138.900 kr. over grænsen.
-          Aftrapningen bliver 2% × 138.900 kr. = 2.778 kr. årligt.
+          <strong>Eksempel:</strong> Tjener du {boerneBelobI(AFTRAPNING_EKSEMPEL_HOEJ)}, er du {boerneBelob(belobOverGraensen(AFTRAPNING_EKSEMPEL_HOEJ))} over grænsen.
+          Aftrapningen bliver {AFTRAPNING_PCT} × {boerneBelob(belobOverGraensen(AFTRAPNING_EKSEMPEL_HOEJ))} = {boerneBelob(boerneNedaettelse(AFTRAPNING_EKSEMPEL_HOEJ))} årligt.
         </p>
 
         <h2>Deling mellem forældre</h2>
