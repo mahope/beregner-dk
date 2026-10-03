@@ -1,31 +1,14 @@
-STATUS: 3/10 01:40. CI grøn ved start (`37075771219`). Sentry: ingen uløste
+STATUS: 3/10 02:55. CI grøn ved start (`37078060779`). Sentry: ingen uløste
      fejl 14 dage. **Gate:** `npm run lint` · `npm run typecheck` ·
-     `TZ=UTC npm run test` · `npm run build` — **grøn 3/10 01:31** (lint exit 0,
-     typecheck exit 0, **3894** tests i 242 filer, build exit 0).
-     **Denne iteration: /konfirmation halve 2 — de svenske og norske FAQ-svar
-     havde den fejl, den danske fik rettet i går.** Målt: svensk svarede
-     «10.000-30.000 **SEK** beroende på antal gäster» og norsk «10.000-30.000
-     **NOK** avhengig av antall gjester» på «hvad koster en konfirmation?» —
-     altså et *samlet* beløb på under halvdelen af beregnerens egne 38.700 kr.
-     (30 gæster, forsamlingshus, fotograf med: 19.600 + 19.100), med **dansk
-     punktum** i en svensk og en norsk sætning, i en valutaenhed ingen anden
-     sted på siderne bruger. Brødteksten lige ovenfor sagde «mellan **10 000
-     och 25 000 kr** i presenter», så FAQ'en modsagde brødteksten på den
-     samme side — og `FAQSchema` publicerede den. Norsk lovede desuden
-     3.000-8.000 kr. til forældre, dansk 2.000-5.000, for én beregner der bruger
-     3.000 på alle domæner. Ny `konfirmation-eksempler.ts` bygger alle otte
-     brødtekstbeløb og alle seks FAQ-beløb i tre sprog gennem `formatBelob`.
-     Dansk **byte-uændret** (de to strenge låste med `toEqual`).
-     *Valg uden kilde, begrundet:* fotografintervallet var 1.000-3.000 på dansk
-     og 1.500-4.000 på svensk for samme konstant; valgt er det danske, fordi
-     beregneren har én pristabel for alle domæner (1.500 kr.), så det snævreste
-     interval er det, alle tre kan indfri. ❓ for et svensk markedstal står
-     uændret.
-     **13 nye tests** (3884 → 3894), hvoraf 5 er røde mod den gamle kode;
-     mutation «kr.» + punktum → «kr..» er fanget af en egen port.
-     `HAARDKODEDE_BELOB` for `konfirmation/page.tsx` **6 → 0** og listens målte
-     sum **332 → 320** (målt med portens egen `jsxBelob`).
-     **Næste iteration:** (1) mål de otte noter i vinduet 3/10 07:30 på indhold,
+     `TZ=UTC npm run test` · `npm run build` — **grøn 3/10 02:54** (lint exit 0,
+     typecheck exit 0, **3898** tests i 243 filer, build exit 0).
+     **Denne iteration: `/afstand-mellem-adresser` — en ny side, bygget på
+     kode vi allerede havde.** «beregn afstand mellem to adresser» er nr. 3 i
+     googles danske autocomplete under «beregn», og `RuteAfstand` + `/api/rute`
+     lå som en skjult optrulle i `BefordringsfradragBeregner` — så ruten var
+     bygget, testet og målt, men ingen side fangede søgningen. Siden er dansk
+     (daOnly), fordi norsk trafik er 0 og opgave 187 ikke må flyttes.
+     **Næste iteration:** (1) mål de otte VERIFICÉR-noter i vinduet 3/10 07:30,
      (2) F5b: næste slug er `/efterloen` (5) eller `/aktieskat` (5).
 
 ## Fase 3 — trafik-drevet
@@ -139,6 +122,15 @@ er blokeret af en ❓ og må ikke gættes.
   **MÅL:** `/klokken-i` 0 (ny URL 2/10) → Plausible 16/10; GSC: «hvad er
   klokken i usa når den er 12 i danmark» (178v) og «hvad er klokken i de
   forskellige tidszoner» (89v), begge på pos. 5-6.
+- **[x] ✅ `/afstand-mellem-adresser`** — se `docs/plan-arkiv.md`. *Hvem:* alle
+  danske pendlere, sommerhusrejsende og bilister. *Datagrund:* «beregn afstand
+  mellem to adresser» er **nr. 3** i googles danske autocomplete under «beregn»,
+  og ruten (`RuteAfstand` + `/api/rute`) lå kun som skjult optrulle i
+  `BefordringsfradragBeregner`. *Accept:* egen dansk side med korteste bilrute,
+  færge/betalingsbro, tur/retur og årlig kørsel på `aarstal(2026).arbejdsdage`,
+  tre spørgsmål, forside-kort og interne links. **MÅL:** `/afstand-mellem-adresser`
+  0 (ny URL 3/10) → Plausible 17/10; GSC 14 dage: «beregn afstand mellem to
+  adresser» og «afstand mellem to adresser».
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -345,6 +337,8 @@ aldrig på HTTP 200: en 200 beviser at svaret serveres, ikke at det er den nye
 kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` under
 sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
+
+`VERIFICÉR DEPLOY: /afstand-mellem-adresser (dansk side med afstandsværktøj: `<title>` «Afstandsberegner: beregn kørselsafstand mellem to adresser», `<h1>` én gang, 3 FAQ-spørgsmål i `FAQPage`-JSON-LD med «Hvordan beregnes afstanden?», og «Adressevælger fra Klimadatastyrelsen» i brødteksten; `minberegner.dk/befordringsfradrag` skal linke til siden via «Relaterede beregnere»; `minberegner.dk/afstand-mellem-adresser` skal ligge i sitemap.xml. `beraknare.se/afstand-mellem-adresser` skal 404/e-redirecte, fordi siden er daOnly) ceo/afstand-mellem-adresser 3/10 02:55`
 
 `VERIFICÉR DEPLOY: /konfirmation FAQ i alle tre sprog (beraknare.se skal have «mellan 10 000 och 25 000 kr», 0 × «10.000», 0 × «SEK», og fotografintervallet «1 000-3 000 kr») ceo/konfirmation-se-no-tal-fra-modul 3/10 01:40`
 

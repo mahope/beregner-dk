@@ -204,6 +204,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Vægttab Beregner", description: "Beregn kalorieunderskud for vægttab", href: "/vaegttab", popular: false, category: "Sundhed" },
   { title: "Andelsbolig Beregner", description: "Beregn omkostninger ved køb af andelsbolig", href: "/andelsbolig", popular: false, category: "Bolig" },
   { title: "Rejsebudget", description: "Beregn rejsebudget til populære destinationer", href: "/rejsebudget", popular: false, category: "Hverdag" },
+  { title: "Afstand mellem adresser", description: "Beregn kørselsafstanden mellem to adresser", href: "/afstand-mellem-adresser", popular: false, category: "Hverdag" },
   { title: "Studielån", description: "Beregn tilbagebetaling af SU-lån", href: "/studielaan", popular: false, category: "Uddannelse" },
   { title: "Solcelle Beregner", description: "Beregn besparelse og tilbagebetalingstid for solceller", href: "/solceller", popular: false, category: "Bolig" },
   { title: "Bryllupsbudget", description: "Beregn komplet bryllupsbudget", href: "/bryllup", popular: false, category: "Familie" },

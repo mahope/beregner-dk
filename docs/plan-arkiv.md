@@ -26080,3 +26080,42 @@ portens egen `jsxBelob`. `HAARDKODEDE_BELOB_I_LISTEN` **332 → 320** — *målt
 samme scanner (loftet lå 6 over det målte tal, så de 6 er ikke hele faldet).
 `/konfirmation` er dermed lukket på hele linien: 0 fund i JSX, 0 fund i
 `page-data.ts`, 0 håndskrevne beløb i brødteksten.
+
+## 3/10 02:55 — `afstand-mellem-adresser` (ny side)
+
+**Datagrund.** «beregn afstand mellem to adresser» er nr. 3 i googles danske
+autocomplete under «beregn» (målt 3/10 02:08 med suggestqueries.google.com,
+`client=firefox&hl=da&gl=dk`). Ruten var allerede bygget og testet:
+`src/components/RuteAfstand.tsx` (166 linjer) + `src/lib/rute.ts` +
+`src/app/api/rute/route.ts`, men komponenten hang som en skjult optrulle
+(`{visRute && <RuteAfstand …/>}`) i `BefordringsfradragBeregner`, så ingen URL
+fangede søgningen.
+
+**Første måling fandt ingen fejl i den eksisterende kode.** Adressevælger-tokenet
+er offentligt og tilladt (CORS: *), ruten kommer fra Valhalla/OSRM via FOSSGIS,
+og kilden er krediteret i komponentens egen footer. BEMÆRK: `src/lib/adresse.ts`
+skal ifølge sin egen kommentar aldrig bruge DAWA/api.dataforsyningen.dk —
+Adressevælger erstatter den 1. oktober 2026. Det er ikke rørt.
+
+**Føjet til:** `src/app/afstand-mellem-adresser/page.tsx` (server-side, dansk
+brødtekst), `src/components/AfstandsBeregner.tsx` (klient, kun et nyt årstal
+og et link videre), `page-data.ts` (da), `calculator-list.ts` (daOnly + fem
+relaterede + det modsatte link fra `/befordringsfradrag`), `icons.ts` (MapPin),
+`home-data.ts` (forside-kort — `home-data.test.ts` kræver et kort pr. domæne).
+
+**Ingen nye tal i brødteksten.** Ruten afhænger af to adresser, så alle tal
+kommer fra brugerens egne valg. Den ene afledte størrelse — årlig kørsel —
+tælles af `aarstal(2026, "da").arbejdsdage` (mandag–fredag minus helligdage),
+altså fra samme modul `/dato` bruger, ikke et antal i teksten.
+
+**Port.** 4 nye tests (3894 → 3898): 3 i `afstand-mellem-adresser/page.test.tsx`
+(værktøjet er på plads, præcis tre `<h2>` og tre FAQ-sporgsmål i side-data, og
+«Google Maps» må ikke stå som kilde når koden bruger Adressevælger) og 1 fra
+`home-data.test.ts`, som blev rød af den nye side. Døjer: mutation —
+`AfstandsBeregner` slettet fra siden giver rød i test 1.
+
+**Ikke lavet (bevidst):** svensk og norsk udgave. `se` har 89 sitemap-URL mod
+158 på dansk, men de manglende svenske kalkulatorer er opgave 187, fastsat til
+13/10, og en halv oversættelse af et værktøj der kalder en dansk
+adresseopslagstjeneste ville være værre end ingen. Siden er derfor `daOnly`, så
+den hverken dukker op i beraknare.ses sitemap eller i hreflang der.

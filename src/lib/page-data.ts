@@ -1251,6 +1251,43 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvorfor ligger Phoenix en time bagud Denver om sommeren?", answer: "Phoenix ligger i Mountain Time som Denver, men Arizona undtaget fra sommertid siden 1967. Når Danmark går på sommertid flytter Denver sig med og står på 04 hele året, mens Phoenix står på 04 vinter og 03 sommer. Det er den eneste af de ni stater i tabellen, hvor de to kolonner ikke er ens." },
       ],
     },
+    "afstand-mellem-adresser": {
+      slug: "afstand-mellem-adresser",
+      title: "Afstand mellem to adresser",
+      description: "Find kørselsafstanden mellem to danske adresser i km.",
+      metaTitle: "Afstandsberegner: beregn kørselsafstand mellem to adresser",
+      metaDescription:
+        "Beregn afstanden mellem to danske adresser. Værktøjet finder den korteste bilrute, viser færge og betalingsbro og giver tur/retur og årlig kørsel.",
+      keywords: [
+        "afstand mellem to adresser",
+        "beregn afstand mellem adresser",
+        "kørselsafstand beregner",
+        "afstand beregner adresse",
+        "hvor langt er der mellem",
+      ],
+      ogTitle: "Afstand mellem to adresser",
+      ogDescription: "Find kørselsafstanden mellem to danske adresser i km.",
+      category: "Praktisk",
+      breadcrumbCategory: "Praktisk",
+      breadcrumbCategoryHref: "/kategori/praktisk",
+      schemaName: "Afstandsberegner",
+      schemaDescription: "Beregn kørselsafstanden mellem to danske adresser.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        {
+          question: "Hvordan beregnes afstanden?",
+          answer: "Vi spørger en kortberegner om den korteste bilrute mellem de to adresser. Adresserne slås op hos Adressevælger fra Klimadatastyrelsen, og ruten hentes fra en OpenStreetMap-baseret ruteberegner. Vi gemmer hverken adresse eller rute.",
+        },
+        {
+          question: "Hvorfor får jeg to afstande, når ruten krydser en færge?",
+          answer: "Så findes der to veje: den korte uden færge og den med færge. Værktøjet viser dem begge, fordi en bil uden bil på trailer ikke kan vælge frit. Vælg den med færge, hvis du faktisk skal sejles.",
+        },
+        {
+          question: "Kan jeg bruge afstanden til kørselsfradraget?",
+          answer: "Ja. Kørselsfradrag-beregneren bruger præcis samme afstand, så du kan lægge den videre ind i dit fradrag. Skat bruger den normale transportvej, så vælg den kortere rute, hvis din vej ikke kræver en færge.",
+        },
+      ],
+    },
     "rejsebudget": {
       slug: "rejsebudget",
       title: "Rejsebudget Beregner",

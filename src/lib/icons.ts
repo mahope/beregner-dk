@@ -81,6 +81,7 @@ import {
   Utensils,
   Wallet,
   Wrench,
+  MapPin,
   Zap,
   type LucideIcon,
 } from "lucide-react";export interface CategoryVisual {
@@ -157,6 +158,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/enheder": Ruler,
   "/enhedspris": Tag,
   "/fart": Gauge,
+  "/afstand-mellem-adresser": MapPin,
   "/feriepenge": Palmtree,
   "/forbrugslaan": CreditCard,
   "/gaeldsfri": Flag,
