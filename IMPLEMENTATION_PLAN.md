@@ -1,30 +1,24 @@
-STATUS: 3/10 16:3x. ✅ **Regnet eksempel i titlen på `/renteberegner` og
-       `/arveafgift`** — de to eneste af GSC-top-15 med en spørgsmålstitel.
-       `/renteberegner` havde desuden en **sprogasymmetri**: `se` og `no`
-       skrev «100 000 kr i 5 år = 1 887 kr/mån», mens `da` skrev «beregn
-       månedsydelse på annuitetslån». Nu: «Renteberegner: 100.000 kr. i 5 år =
-       1.887 kr./md.» og «Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr.
-       boafgift». Begge tal regnes af de funktioner siden selv bruger
-       (`hovedEksempel()`, `EKSEMPEL_BARN`), og begge er under titelsporten.
-       **`/rentefradrag` og `/boligstoette` er bevidst IKKE rørt** — de har
-       hhv. 5,8 % og 2,5 % CTR, de to højeste i uddraget, så deres titel skal
-       måles i 14 dage, ikke gættes. Se F0d.
-       ⛔ Den danske `/timer-i-aaret` er OK — løst op. URL'en findes ikke: den
-       danske side hedder `/timer-i-aret` — ét `a` mindre. Målt 3/10 15:3x:
-       `/timer-i-aret` → **200**, canonical + `hrefLang` da/se/x-default uden
-       skråstreg; `beraknare.se/timmar-i-aret` → 200. Læren er endnu ikke gjort
-       permanent — se F0f.
-       **GATE (noteret 3/10 15:1x):** `npm run typecheck` → `npm run test`
-       (hele suiten) → `npm run lint` → `npm run build`. Alle fire skal være
-       grønne; rækkefølgen er build-fejl → tests → lint.
-       **Gate 3/10 16:3x:** typecheck 0, lint 0, **4101/4101 tests**, build 0.
-       **Målt polaritet:** frosset boafgift (91.155 → 88.500) giver 1 rød;
-       gammel `/renteberegner`-titel giver 2 røde.
-       **CI grøn** ved start (0a9b7bb, 3m59s), ingen åbne PR'er, ingen uløste
-       Sentry-fejl, CEO-køens otte fund lukkede. Begge review-fund er
-       markeret `RETTET 0a9b7bb`.
-       PR-TJEK: 3/10 16:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x (kun
-       `bevaret/*` + `master` + 11 `data/*`/`claude/*`-standby på origin).
+STATUS: 3/10 17:0x. ✅ **«Så mange dage har du levet som 10-årig?»** — to nye
+       tabeller på `/alder` der svarer på den aldersbestemte udgave af «hvor
+       mange dage har man levet». Datagrund: Googles egen autocomplete målt 3/10
+       16:4x gav **otte af de ti** svenske søgninger under «hur många dagar har
+       man levat» som et spørgsmål om en bestemt alder (8, 10, 12, 13, 14, 15 år
+       og «när man fyller 50 år») — de lå på `/alder` (da 10.029 visninger,
+       0,4 % CTR, pos. 7,2; se 3.689 / 0,4 % / 7,6) uden adresse. Rækkerne er 1-18
+       år og 20-80 år med dage, uger og måneder, og hver celle regnes af
+       `beregnAlder` på den, der **fylder** alderen *på tabellens dag* — så
+       brødteksten ikke kan love et tal, værktøjet ovenfor modsiger. Den eneste
+       dag, ingen fødselsdato har en præcis alder på, er 29. februar, så
+       tabellen regner fra 28. dér.
+       **GATE (noteret 3/10 15:1x):** `npm run typecheck` → `npm run test` (hele
+       suiten) → `npm run lint` → `npm run build`.
+       **Gate 3/10 17:0x:** typecheck 0, lint 0, **4112/4112 tests**, build 0.
+       **Målt polaritet:** `totalDage = aar * 365` (skuddagene væk) → **33 røde**;
+       uden 29.-februar-reglen → 1 rød i `alder-levet.test.ts`.
+       **CI grøn** ved start (4b17a45), ingen åbne PR'er, ingen uløste
+       Sentry-fejl, CEO-køens otte fund lukkede, begge review-fund står
+       `RETTET 0a9b7bb`.
+       PR-TJEK: 3/10 16:1x (ingen åbne). BRANCH-TJEK: 3/10 15:3x.
 
 ## Fase 3 — trafik-drevet
 
@@ -267,6 +261,15 @@ den renderede komponent i da/se/no. Se `docs/plan-arkiv.md`.
 Fire kandidater, i rækkefølge efter hvor ren intentionen er. Alt med ⛔
 er blokeret af en ❓ og må ikke gættes.
 
+- **[x] ✅ «Så mange dage har du levet som 10-årig?» på `/alder`** —
+  `ceo/dage-levet-pr-alder` 3/10. *Hvem:* alle der googler «hur många dagar har
+  man levat om man är 12 år» — otte af de ti svenske autocomplete-træffere under
+  «hur många dagar har man levat», målt 3/10 16:4x. *Accept:* to tabeller (1-18
+  år, 20-80 år) med dage/uger/måneder i da og se, hver celle fra `levetVedAlder`
+  → `beregnAlder`, og en tekst der siger at rækkerne er den, der *fylder*
+  alderen på tabellens dag. **MÅL:** `/alder` 10.029 visninger / 43 klik / 0,4 %
+  / pos. 7,2 (da) og 3.689 / 14 / 0,4 % / 7,6 (se) → Plausible 17/10.
+
 - **[x] ✅ Ironman-total i `/pace`** — tre tidsfelter → samlet tid + tempo pr. ben,
   bygget på `beregnTriatlon`, da+se+no (`3720dea`). MÅL: `/pace` 2 af 10
   danske completioner under «tid beregner» (27k visninger, pos. 5) konverterer
@@ -384,6 +387,9 @@ lukkede filers målinger står i `docs/plan-arkiv.md`.
 **Åbne F5b-slice: `/flyttebudget` (3 fund), mål listen på ny først.**
 `/moms` er ⛔ (de 3 lovgrænser, ❓ nedenfor).
 ## VERIFICÉR DEPLOY-noter
+
+**Ny note 3/10 17:0x:** `VERIFICÉR DEPLOY: <dage-ved-alder-tabellen på /alder> ceo/dage-levet-pr-alder 3/10 17:0x`.
+Døm på **indhold**, ikke på HTTP 200: `curl -s https://minberegner.dk/alder | grep -o '<h2>Så mange dage har du levet som 10-årig?</h2>'` skal give én træffer, og rækkerne skal være `<td>10 år</td><td><strong>3.652</strong></td>` og `<td>50 år</td><td><strong>18.262</strong></td>` **på deploy-dagen** — dage-tallet følger datoen, så det er en dags kontrol og ikke en konstant. Samme måling på `https://beraknare.se/alder` med «Hur många dagar har du levat som 10-åring?» og 3.652. Næste deploy-vindue 17:30.
 
 **Ny note 3/10 16:3x:** `VERIFICÉR DEPLOY: <metaTitle+ogTitle på /renteberegner og /arveafgift> ceo/titler-renteberegner-arveafgift 3/10 16:3x`.
 Døm på indhold, ikke på HTTP: `curl -s https://minberegner.dk/renteberegner | grep -o '<title>[^<]*'` skal give «Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.» (49 tegn) og `…/arveafgift` «Arveafgift beregner: 1.000.000 kr. arv = 91.155 kr. boafgift» (60 tegn). Næste deploy-vindue 17:30.

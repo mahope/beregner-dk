@@ -11,7 +11,15 @@ import {
   foedselsaarRaekker,
 } from "@/lib/alder-eksempler";
 import { beregnAlder } from "@/lib/alder";
-import { LEVET_FOEDSELSDATO, alderLevet, formatDageTal } from "@/lib/alder-levet";
+import {
+  BARN_ALDRER,
+  LEVET_FOEDSELSDATO,
+  VOKSNE_ALDRER,
+  alderLevet,
+  dagForAlderTabel,
+  formatDageTal,
+  levetVedAlder,
+} from "@/lib/alder-levet";
 import { iDagPaSiden, tilIsoDato } from "@/lib/lokal-dato";
 import { getPageData } from "@/lib/page-data";
 import AlderPage from "./page";
@@ -272,7 +280,11 @@ describe("alder page", () => {
     // tilbage til den gamle "60 år"-forklaringen, som ikke findes hos Skatteverket.
     expect(html).toContain("plustecken");
     expect(html).toMatch(/100 år|100/);
-    expect(html).not.toContain("60 år");
+    // Nålen lå på hele strengen "60 år", som aldrig måtte stå som *årsalder*
+    // for plustegnet. Da alders-tabellen kom, er "60 år" en gyldig række dér
+    // (den, der fylder 60), så nålen skal pege på den gamle forklaring og ikke
+    // på tallet: "60 år" som en alder i denne sætning.
+    expect(html).not.toMatch(/60 år[^<]*byte|byte[^<]*60 år|fyller du 60 år/);
   });
 
   test("den svenska Excel-tabel har samma formler som den danske, med svensk IDAG()", async () => {
@@ -422,6 +434,48 @@ describe("alder page", () => {
     expect(punkt?.answer).toContain(formatDageTal(levet.totalDage, locale));
     expect(punkt?.answer).toContain(formatDageTal(levet.totalTimer, locale));
     expect(punkt?.answer).not.toContain("13.342");
+  });
+
+  // Otte af de ti svenske autocomplete-søgninger under "hur många dagar har man
+  // levet" spørger om en bestemt alder (8, 10, 12, 13, 14, 15 år og "när man
+  // fyller 50 år"), målt 3/10 16:4x. Klyngen havde ingen adresse, og
+  // `/alder` er det eneste værktøj, der kender fødselsdatoen.
+  test.each([
+    { locale: "da" as const, overskrift: "Så mange dage har du levet som 10-årig?" },
+    { locale: "se" as const, overskrift: "Hur många dagar har du levat som 10-åring?" },
+  ])("svarer på 'hvor mange dage har man levet som 10-årig' i $locale", async ({ locale, overskrift }) => {
+    vi.mocked(getLocale).mockResolvedValue(locale);
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+    const html = renderToStaticMarkup(await AlderPage());
+    const iso = dagForAlderTabel(iDag(locale));
+
+    expect(html).toContain(`<h2>${overskrift}</h2>`);
+    // Hver celle skriver sig selv fra `levetVedAlder`, så tabellen ikke kan
+    // love et dage-tal, beregneren ovenfor ikke er enig i.
+    for (const aar of [8, 10, 12, 13, 14, 15, 50]) {
+      const r = levetVedAlder(aar, iso);
+      expect(r).not.toBeNull();
+      expect(html).toContain(`<strong>${formatDageTal(r?.totalDage ?? 0, locale)}</strong>`);
+    }
+    // Rækkerne skal dække de aldre, søgningen spørger om — og kun dem, der er
+    // målt som autocomplete. En tom tabel ville også "indeholde" tallene for
+    // de otte, så antallet af rækker tælles med.
+    for (const aar of [...BARN_ALDRER, ...VOKSNE_ALDRER]) {
+      expect(html).toContain(`<td>${aar} år</td>`);
+    }
+    // Skal den dag, siden viser: præcis den fulde alder, ikke "16 år og 1 dag".
+    for (const aar of BARN_ALDRER) {
+      expect(levetVedAlder(aar, iso)?.totalDage).toBeGreaterThanOrEqual(aar * 365);
+    }
+  });
+
+  test("tabellen med aldre findes ikke på norsk", async () => {
+    vi.mocked(getLocale).mockResolvedValue("no");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("no"));
+    const html = renderToStaticMarkup(await AlderPage());
+
+    expect(html).not.toContain("Så mange dage har du levet som 10-årig?");
+    expect(html).not.toContain("10-åring?");
   });
 
   // `no`-sproget serverer ikke (domænet er hidden, jf. C79), så den nye blok

@@ -10,6 +10,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { ALDER_EKSEEMPLER, formatAlder, formatAlderRaekke, foedselsaarRaekker } from "@/lib/alder-eksempler";
 import AlderSeSvar from "@/components/AlderSeSvar";
 import AlderLevetSvar from "@/components/AlderLevetSvar";
+import AlderDageVedAlder from "@/components/AlderDageVedAlder";
 import { iDagPaSiden } from "@/lib/lokal-dato";
 import { getIntlLocale } from "@/lib/format";
 
@@ -241,6 +242,12 @@ export default async function AlderPage() {
           GSC har den som nr. 3 på beraknare.se's /dato med 385 visninger.
           Målt på begge live-sider: 0 forekomster af spørgsmålsteksten. */}
       <AlderLevetSvar locale={locale} />
+
+      {/* "Så mange dage har du levet som 10-årig?" — otte af de ti svenske
+          autocomplete-søgninger under "hur många dagar har man levt" spørger om
+          en bestemt alder (8, 10, 12, 13, 14, 15 år og "när man fyller 50
+          år"), målt 3/10 16:4x, og klyngen har ingen adresse. */}
+      <AlderDageVedAlder locale={locale} />
 
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
