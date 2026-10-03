@@ -1,12 +1,16 @@
-import { describe, expect, test } from "vitest";
-import { formatAlder } from "./alder-eksempler";
-import { alderLevet, formatDageLived } from "./alder-levet";
-import { forkortBrok } from "./brok";
+import { describe, test, expect } from "vitest";
+import { getPageData, getAvailableSlugs } from "./page-data";
 import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
+import { beregnPromille, PROMILLEGRANSE, PROMILLEGRANSE_UDLAND } from "./promille";
+import { genstandeTilGraense } from "./promille-genstande";
 import { sammenlignEnhedspris } from "./enhedspris";
+import { TIDSZONER } from "./tidszone-reference";
+import { forkortBrok } from "./brok";
+import { alderLevet, formatDageLived } from "./alder-levet";
+import { formatAlder } from "./alder-eksempler";
 import { formatBelob, formatNumber, getIntlLocale } from "./format";
 import { iDagISidensTidszone } from "./lokal-dato";
-import { getAvailableSlugs, getPageData } from "./page-data";
+import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import {
   EXCEL_ANDEL,
   PROCENT_10_AF_FAQ,
@@ -26,10 +30,6 @@ import {
   procentpointForskelFaqSvar,
   procentpointRelativ,
 } from "./procentpoint";
-import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, beregnPromille } from "./promille";
-import { genstandeTilGraense } from "./promille-genstande";
-import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
-import { TIDSZONER } from "./tidszone-reference";
 
 // ─── /procent's rabat-FAQ. Forventningerne i de to nedenstående porte er
 // *regnet* af de samme konstanter, som FAQ'en selv bygger sine svar af, så
@@ -1411,6 +1411,7 @@ describe("/promille — svar på udlandsklyngen", () => {
       expect(andet.faqItems.map((f) => f.question).join(" ")).not.toContain("udlandet");
     }
   });
+
   test("den svenske «efter N øl»-påstand er regnet, ikke håndskrevet", () => {
     // Målt 3/10 på beraknare.se/promille: FAQ'en sagde «nås alltså efter två
     // öl», mens sidens egen tabel viser 0,22 ‰ efter *én* øl, brødteksten

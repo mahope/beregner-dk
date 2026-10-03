@@ -1,67 +1,17 @@
-import {
-  aktieskatBeskrivelse,
-  aktieskatFaqItems,
-  aktieskatOgBeskrivelse,
-  aktieskatSchemaBeskrivelse,
-} from "./aktieskat-eksempler";
-import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
-import { EKSEMPEL_BARN } from "./arveafgift";
-import { estimerNettoMaaned } from "./barsel/netto";
-import {
-  boerneBeskrivelse,
-  boerneMetaBeskrivelse,
-  boernepengeFaqItems,
-} from "./boernepenge-eksempler";
-import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
-import {
-  BESKAEFTIGELSESTILLAEG_2026,
-  INDKOMSTKRAV_2026,
-  dagpengeEfterSkatFaqSvar,
-  dagpengeKroner,
-  dagpengeNyuddannetFaqSvar,
-  dagpengeNyuddannetPeriodeFaqSvar,
-  dagpengeTimer,
-} from "./dagpenge-satser";
-import {
-  efterloenAldersSvar,
-  efterloenDescription,
-  efterloenFaqSvar,
-  efterloenMetaDescription,
-} from "./efterloen-eksempler";
-import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
-import { formatBelob, formatNumber, formatSvenskText } from "./format";
-import { getHelligdage, helligdagsnavne } from "./helligdage";
-import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
 import type { Locale } from "./i18n";
-import { kalorierFaqItems, kalorierOverskrifter } from "./kalorier-eksempler";
-import { konfirmationFaqSvar } from "./konfirmation-eksempler";
+import { BARSEL_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
+import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
+import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
+import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
 import {
-  kvadratmeterEksempelAreal,
-  kvadratmeterEksempelLignelse,
-  kvadratmeterEksempelProdukt,
-  kvadratmeterFaqSvar,
-} from "./kvadratmeter-eksempler";
-import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
-import { leasingSeEksempelTekster } from "./leasing-eksempler";
-import {
-  AM_BIDRAG,
-  PERSONFRADRAG_2026,
-  loenBelob,
-  loenEfterSkatFaqItems,
-  loenEfterSkatOgBeskrivelse,
-} from "./loen-efter-skat-eksempler";
-import { iDagPaSiden } from "./lokal-dato";
-import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
-import {
-  FORBRUGERPRISINDEKS_2026M08,
   NETTOPRISINDEKS_2026M08,
+  FORBRUGERPRISINDEKS_2026M08,
   NETTOPRISINDELS_MAANED,
   beregnHuslejestigning,
   nettoprisindeksUnderForbrugerprisindeks,
 } from "./nettoprisindeks";
-import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
-import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
-import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
+import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
+import { ruteCacheSætning } from "./rute-cache";
 import {
   EXCEL_ANDEL,
   PROCENT_10_AF_FAQ,
@@ -75,29 +25,79 @@ import {
   procentForskel,
   rabatProcent,
 } from "./procent";
+import { formatBelob, formatNumber, formatSvenskText } from "./format";
+import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
+import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
-import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, PROMILLEGROV_SE } from "./promille";
+import {
+  BESKAEFTIGELSESTILLAEG_2026,
+  INDKOMSTKRAV_2026,
+  dagpengeEfterSkatFaqSvar,
+  dagpengeKroner,
+  dagpengeNyuddannetFaqSvar,
+  dagpengeNyuddannetPeriodeFaqSvar,
+  dagpengeTimer,
+} from "./dagpenge-satser";
+import { markedsprisFaqSvar } from "./timepris-markedspriser";
+import { timerIPeriodeFaqSvar } from "./timer-periode";
+import { ugeDatoerFaqSvar } from "./ugenummer";
+import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
+import { kalorierFaqItems, kalorierOverskrifter } from "./kalorier-eksempler";
+import {
+  aktieskatBeskrivelse,
+  aktieskatFaqItems,
+  aktieskatOgBeskrivelse,
+  aktieskatSchemaBeskrivelse,
+} from "./aktieskat-eksempler";
+import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
+import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
+import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
+import { EKSEMPEL_BARN } from "./arveafgift";
+import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
+import { iDagPaSiden } from "./lokal-dato";
+import { getHelligdage, helligdagsnavne } from "./helligdage";
+import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
+import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
+import {
+  efterloenAldersSvar,
+  efterloenDescription,
+  efterloenFaqSvar,
+  efterloenMetaDescription,
+} from "./efterloen-eksempler";
+import {
+  AM_BIDRAG,
+  PERSONFRADRAG_2026,
+  loenBelob,
+  loenEfterSkatFaqItems,
+  loenEfterSkatOgBeskrivelse,
+} from "./loen-efter-skat-eksempler";
+import {
+  rentefradragDescription,
+  rentefradragMetaDescription,
+  RENTEFRADRAG_FAQ_SVAR,
+} from "./rentefradrag-eksempler";
+import { topskatBeskrivelse, topskatFaqItems } from "./topskat-eksempler";
+import {
+  boerneBeskrivelse,
+  boerneMetaBeskrivelse,
+  boernepengeFaqItems,
+} from "./boernepenge-eksempler";
+import {
+  kvadratmeterEksempelAreal,
+  kvadratmeterEksempelLignelse,
+  kvadratmeterEksempelProdukt,
+  kvadratmeterFaqSvar,
+} from "./kvadratmeter-eksempler";
+import { konfirmationFaqSvar } from "./konfirmation-eksempler";
+import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, PROMILLEGROV_SE } from "./promille";
+import { SVENSK_SKATT_2026 as SV_SKATT, SVENSK_SKATT_TAL } from "./svensk-skatt";
 import {
   PROMILLE_GENSTANDE_RAEKKER,
   formatPromilleTabel,
   genstandeTilGraense,
   vaegtNogle,
 } from "./promille-genstande";
-import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
-import {
-  RENTEFRADRAG_FAQ_SVAR,
-  rentefradragDescription,
-  rentefradragMetaDescription,
-} from "./rentefradrag-eksempler";
-import { ruteCacheSætning } from "./rute-cache";
-import { BARSEL_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
-import { SVENSK_SKATT_TAL, SVENSK_SKATT_2026 as SV_SKATT } from "./svensk-skatt";
-import { markedsprisFaqSvar } from "./timepris-markedspriser";
-import { timerIPeriodeFaqSvar } from "./timer-periode";
-import { topskatBeskrivelse, topskatFaqItems } from "./topskat-eksempler";
-import { ugeDatoerFaqSvar } from "./ugenummer";
-import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
 
 /**
  * svmn.dk's 2026-gennemsnit for kommuneskat, skrevet som procent. Det er

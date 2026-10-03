@@ -12,7 +12,11 @@ STATUS: 3/10 19:5x. ✅ **Den svenske promille-FAQ modsagde sidens egen tabel** 
        svenske sætning** — repoets egen `locale-leak-gate.test.ts` og den nye
        test dømte begge rød, så fejlen blev fundet af portene og ikke af mig.
        **GATE:** typecheck 0, lint 0 (755 filer), build 0, **hele suiten
-       4131/4131** i 260 filer.
+       4131/4131** i 260 filer. ⚠️ `biome check --write` sorterede ved denne
+       iteration **hele import-blokken** i begge filer (134 linjers uro i
+       `page-data.ts`); gjort om i næste commit, så diffen er 32 linjer.
+       *Fremtidig regel: `biome lint` på filer med uvedkommende ændringer —
+       kun `check --write` på kode man selv netop har skrevet.*
        **CEO-kø punkt 0 er gennemgået punkt for punkt 3/10 19:3x og alle otte
        fejl er rettede i HEAD**: valborg `month: 4, day: 30`, svensk påskafton
        lørdag (`dage-til.test.ts:246`), dansk sankthans fast 23./24. juni med 0
