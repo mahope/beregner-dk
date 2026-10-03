@@ -11,9 +11,9 @@ STATUS: 3/10 12:3x. **CI grøn** ved start (`37115471480`), ingen åbne PR'er,
        `style={{ width: … }}`) og dømt i den **renderede** markup i da/se/no:
        42 procenter uden mellemrum på 13 sider — `/1rm` (alle syv rækker),
        `/moms`, `/dagpenge`, `/budget`, `/husleje`, `/billaan`,
-       `/forbrugslaan`, `/aktieskat`, `/del-regning`, `/lon-efter-skat`,
+       `/forbrugslaan`, `/aktieskat`, `/del-regning`, `/lon-efter-skatt`,
        `/arveafgift`, `/brutto-netto`. To af dem skrev desuden **punktum**:
-       `/lon-efter-skat` («Effektiv skatt 32.38%», «Kommunalskatt (20.2%)») og
+       `/lon-efter-skatt` («Effektiv skatt 20.2%», «Kommunalskatt (32.38%)») og
        `/brutto-netto` («Effektiv skat: 33.3%» og «33.3 kr.»). Alt er rettet,
        og porten `procent-i-synlig-tekst.test.tsx` renderer nu de tretten i
        tre sprog; `decimal-komma.test.tsx` fik fire nye tests for de to
@@ -113,8 +113,8 @@ to procenter tælles én gang). Fem navne-undtagelser: «30% reglen» i
 den **synlige** markup. Slice 10:5x (boliglån), 11:2x (fem beregnere) og
 12:3x (**tretten** beregnere: `/1rm`, `/moms`, `/dagpenge`, `/budget`,
 `/husleje`, `/billaan`, `/forbrugslaan`, `/aktieskat`, `/del-regning`,
-`/lon-efter-skat`, `/arveafgift`, `/brutto-netto`). To af dem skrev **punktum**
-(`/lon-efter-skat` 32.38 %, `/brutto-netto` 33.3 %), og de to
+`/lon-efter-skatt`, `/arveafgift`, `/brutto-netto`). To af dem skrev **punktum**
+(`/lon-efter-skatt` 20.2 %, `/brutto-netto` 33.3 %), og de to
 resultattilstande kan hverken scanneren eller markup-porten se, så de har fire
 egne tests i `decimal-komma.test.tsx`. Detaljer og målinger: `docs/plan-arkiv.md`.
 *Næste slice:* mål på ny med `grep -n '}%' src/components/*.tsx`; de
@@ -301,9 +301,9 @@ med komma); `minberegner.dk/laaneberegner` skal have «Lån … er til 5 % - yde
 
 `VERIFICÉR DEPLOY: memoiserede helligdage og måneder (tallene skal være **uændrede**, så dommen er tallene og ikke HTTP 200: `minberegner.dk/dage-i-aaret` skal stadig have summeringsrækken **365** dage / **251** hverdage / **104** weekenddage og månedsrækkerne juli **23** hverdage / **8** weekenddage og augusti **21** / **10**; `beraknare.se/dagar-i-aret` skal have «Augusti har 31 dagar, och det är 21 vardagar och 10 helgdagar»; `minberegner.dk/dato` skal have helligdagslisten med «5. april» (påskedag), «14. maj» (kristi himmelfartsdag) og «24. maj» (pinsedag) 2026 og en måneds-række med de samme **251** hverdage for hele året; `minberegner.dk/timer-i-aaret` skal have alle **12** månedsrækker plus summeringen; **intet** `NaN`) ceo/hoelligdag-cache 3/10 11:5x`
 
-`VERIFICÉR DEPLOY: kommunesatsprocenten med dansk komma (hele HTML'en på `minberegner.dk/lon-efter-skat` skal have **1** «Kommuneskat (24,94 %)» og **0** «24.94 %», lige under «Kirkeskat (0,64 %)»; `beraknare.se/lon-efter-skat` skal have samme tegn; **intet** `NaN`) ceo/kommunesat-komma 3/10 12:1x`
+`VERIFICÉR DEPLOY: kommunesatsprocenten med dansk komma (hele HTML'en på `beraknare.se/lon-efter-skatt` skal have **1** «Kommuneskat (24,94 %)» og **0** «24.94 %», lige under «Kirkeskat (0,64 %)»; **MÅL PÅ RIGTIG URL** — slugs er `lon-efter-skatt` med to t'er, og siden er `seOnly`, så `minberegner.dk/lon-efter-skat` giver 404; **intet** `NaN`) ceo/kommunesat-komma 3/10 12:1x`
 
-`VERIFICÉR DEPLOY: procenter med mellemrum og dansk komma i tretten beregnere (hele HTML'en skal have **0** `\d%` i den synlige tekst, altså **0** «70%», «25%», «8%», «90%», «15%», «6,91%», «10,47%», «36,25%» på `minberegner.dk/1rm`, `/moms`, `/dagpenge`, `/budget`, `/husleje`, `/billaan`, `/forbrugslaan`, `/aktieskat`, `/del-regning`, `/lon-efter-skat`, `/arveafgift` og `/brutto-netto`, og de rettede strenge skal stå: «En uge (70 %)»-rækkerne på /1rm, «(25 %)» i /moms' resultatboks, «Dagpenge = 90 % af løn efter AM-bidrag (8 %)», «30 %»-tippen på /husleje, «6,91 %» og «20 %» på /billaan og /forbrugslaan, «27 % af 50.000 kr.» + «Effektiv skat: 27 %» på /aktieskat, «5 %»-knapperne på /del-regning, «15 % boafgift + 25 % tillægsafgift (op til 36,25 %)» på /arveafgift; **og med komma**: `minberegner.dk/lon-efter-skat` skal have «Effektiv skatt 32,38 %» og «Kommunalskatt (32,38 %)» med **0** «32.38%»/«20.2%», `minberegner.dk/brutto-netto` skal have «Effektiv skat: 33,3 %» og «33,3 kr.» med **0** «33.3%»/«33.3 kr.»; «30% reglen» skal ** stadig stå som regelnavn; samme tegn på `beraknare.se` og `beregner.no`; **intet** `NaN`) ceo/procent-interpolationer-2 3/10 12:35`
+`VERIFICÉR DEPLOY: procenter med mellemrum og dansk komma i tretten beregnere (hele HTML'en skal have **0** `\d%` i den synlige tekst, altså **0** «70%», «25%», «8%», «90%», «15%», «6,91%», «10,47%», «36,25%» på `minberegner.dk/1rm`, `/moms`, `/dagpenge`, `/budget`, `/husleje`, `/billaan`, `/forbrugslaan`, `/aktieskat`, `/del-regning`, `/lon-efter-skatt`, `/arveafgift` og `/brutto-netto`, og de rettede strenge skal stå: «En uge (70 %)»-rækkerne på /1rm, «(25 %)» i /moms' resultatboks, «Dagpenge = 90 % af løn efter AM-bidrag (8 %)», «30 %»-tippen på /husleje, «6,91 %» og «20 %» på /billaan og /forbrugslaan, «27 % af 50.000 kr.» + «Effektiv skat: 27 %» på /aktieskat, «5 %»-knapperne på /del-regning, «15 % boafgift + 25 % tillægsafgift (op til 36,25 %)» på /arveafgift; **og med komma**: `beraknare.se/lon-efter-skatt` (siden er `seOnly` og giver 404 på `minberegner.dk` og `beregner.no`) skal have «Effektiv skatt 20,2 %» og «Kommunalskatt (32,38 %)» med **0** «20.2»/«32.38», `minberegner.dk/brutto-netto` skal have «Effektiv skat: 33,3 %» og «33,3 kr.» med **0** «33.3%»/«33.3 kr.»; «30% reglen» skal ** stadig stå som regelnavn; samme tegn på `beraknare.se` og `beregner.no`; **intet** `NaN`) ceo/procent-interpolationer-2 3/10 12:35`
 
 ## VERIFICÉR DEPLOY-noter
 
@@ -321,6 +321,14 @@ som bevis — kun curl på indhold.
  åbne noter dømmes på ny efter 17:30-vinduet; det samme gælder
  `ceo/procent-punkt-sweep-side-data`, hvis `/brutto-netto` er dens
  undtagelse.
+
+**Målt 12:31 — to ting en domene-note har overset.** `lon-efter-skat` er den
+slugs **ikke** `lon-efter-skatt`, og siden er `seOnly` i `calculator-list.ts`,
+så `minberegner.dk/lon-efter-skatt` giver 404 — de to noter med den URL er
+rettet her. Samme måling: `beraknare.se/lon-efter-skatt` skriver stadig
+«20.2<!-- -->%», altså gammel kode 22 min efter `365a2be` blev merget; 12:30-
+vinduet var altså ikke rullet, da det blev målt. Ikke `DEPLOY-MISSING` endnu —
+vinduet efter merge-tidspunktet skal dømmes først.
 
 **12 åbne.** Fem mergede efter 07:30-vinduet og dømmes på indhold efter
 17:30: `ceo/procent-punkt-sweeps` 08:00 · `ceo/procent-punkt-sweep-side-data`
@@ -344,7 +352,7 @@ review-rettelsen `8cf72dd` (08:34) og **endnu ikke live** — den venter 12:30.
 
 `VERIFICÉR DEPLOY: procentnotationen «8 %» i metadata og FAQ på tværs af alle slugs (helt korpuset i `page-data.ts` er skrevet om, så **hele HTML'en** på de berørte sider skal have **0** `\d%` — altså **0** «25%», «12,5%», «8%», «5%», «100%» — undtagen **1** «30% reglen» pr. `/husleje` (regelnavnet). Prøv især `minberegner.dk/boernepenge` («12,5 %», «2 %», «AM-bidrag (8 %)», 0 × «kr.,»), `minberegner.dk/feriepenge` («12,5 %»), `minberegner.dk/rentefradrag` («33,6 %», «25,6 %»), `minberegner.dk/su` («100 %», «80 %»), `minberegner.dk/arveafgift` («15 %», «25 %»), `minberegner.dk/husleje` («30 %», «33 %», **1** «30% reglen»), `minberegner.dk/opsparing` («5 %», «10-20 %», «~7 %», «2-4 %», «under 1 %»), `minberegner.dk/konfirmation` («40-50 %», «20-30 %», «20-25 %»), `minberegner.dk/arvestigning` («20 %», «80 %», «0,51 %», «5,1‰» — promillen skal **beholde** sin skrivemåde), `minberegner.dk/dagpenge` («90 %», «100 %», «80 %»), `minberegner.dk/brutto-netto` («25,049 %», «AM-bidrag (8 %)»), `minberegner.dk/promille` og `minberegner.dk/procent`; `beraknare.se/procent` («25 %», «20 %», «2 %», «3 %»), `beraknare.se/leasing` («85 %», «15 %», «30 %», «21 %», «20 %»), `beraknare.se/moms` («25 %», «15 %», «12 %», «20 %»), `beraknare.se/boernepenge` («100 %», «80 %») og `beraknare.se/dagpenge` («5 %»); **intet** `NaN`) ceo/procent-punkt-sweep-side-data 3/10 08:20`
 
-`VERIFICÉR DEPLOY: kommune-listen på /lon-efter-skat og /brutto-netto (hele HTML'en skal have **0** `\d+.\d+ %` i parantes — altså **0** «Gentofte (22.8 %)» og **0** «Kirkeskat: 0.43 %» — mens kommune-listen skal have «Gentofte (22,8 %)», «København (23,8 %)», «Aarhus (25,1 %)» og «Brønderslev (27 %)»; `beraknare.se/lon-efter-skat` skal have de samme tal med komma; **intet** `NaN`) ceo/kommune-decimal-komma 3/10 12:3x`
+`VERIFICÉR DEPLOY: kommune-listen på /lon-efter-skatt (kun beraknare.se) og /brutto-netto (hele HTML'en skal have **0** `\d+.\d+ %` i parantes — altså **0** «Gentofte (22.8 %)» og **0** «Kirkeskat: 0.43 %» — mens kommune-listen skal have «Gentofte (22,8 %)», «København (23,8 %)», «Aarhus (25,1 %)» og «Brønderslev (27 %)»; `minberegner.dk/brutto-netto` skal have dem også, og `beraknare.se/lon-efter-skatt` de samme tal med komma; **intet** `NaN`) ceo/kommune-decimal-komma 3/10 12:3x`
 
 ## ❓ Til Mads
 
