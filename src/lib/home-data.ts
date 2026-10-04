@@ -159,11 +159,12 @@ const daPageData: HomePageData = {
 };
 
 const daCalculators: HomeCalculator[] = [
-  // Popular — de mest besøgte danske beregnere pr. Plausible 2026-09-28 (28 dage):
-  // /dato 1057, /bmi 954, /boligstoette 527, /kvadratmeter 375, /rentefradrag 319,
-  // /kalorier 293, /tidsberegner 288, /braendstof 267, /barselsdagpenge 198,
-  // /husleje 170, /renteberegner 148, /boernepenge 141 og /pension 139 — efterfulgt
-  // af lønberegneren, som er sidens brandværktøj.
+  // Popular — de mest besøgte danske beregnere pr. Plausible 2026-10-04 (28 dage):
+  // /dato 1104, /bmi 950, /boligstoette 528, /rentefradrag 456, /kvadratmeter 393,
+  // /tidsberegner 277, /kalorier 272, /braendstof 256, /barselsdagpenge 236,
+  // /husleje 169, /promille 157, /renteberegner 137, /pension 140 og
+  // /boernepenge — efterfulgt af lønberegneren, som er sidens brandværktøj.
+  // Listen er målt i den rækkefølge, læserne kommer i.
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", popular: true, category: "Praktisk" },
   { title: "BMI Beregner for voksne", description: "Beregn BMI for voksne ud fra vægt og højde", href: "/bmi", popular: true, category: "Sundhed" },
   { title: "Boligstøtte", description: "Se standardmaksima og formuegrænser for boligstøtte", href: "/boligstoette", popular: true, category: "Bolig" },
@@ -175,6 +176,11 @@ const daCalculators: HomeCalculator[] = [
   { title: "Brændstofberegner", description: "Beregn pris for benzin, diesel eller el-bil", href: "/braendstof", popular: true, category: "Hverdag" },
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", popular: true, category: "Familie" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", popular: true, category: "Bolig" },
+  // /promille stod i den ikke-populære halvdel, selv om den 4/10 var den
+  // hurtigst voksende danske side (+1327 %, 157 besøgende/28d). Uden den stod
+  // den ottende mest besøgte side uden et enkelt link fra forsiden og uden
+  // sidebar-plads på de ~120 kalkulatorsider.
+  { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", popular: true, category: "Sundhed" },
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", popular: true, category: "Økonomi" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: true, category: "Familie" },
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: true, category: "Økonomi" },
@@ -217,10 +223,11 @@ const daCalculators: HomeCalculator[] = [
   { title: "Brutto/Netto Beregner", description: "Find bruttoløn ud fra ønsket udbetaling", href: "/brutto-netto", popular: false, category: "Økonomi" },
   { title: "Bil Værdtab", description: "Beregn værdtab og omkostninger for din bil", href: "/bil", popular: false, category: "Hverdag" },
   // Resten af sitets egen katalog (`categories.ts`), der pr. 2026-09-28 ikke var
-  // linked fra forsiden. /promille (4.968 visninger), /brok (4.913) og /fart
-  // (4.570) ligger alle på Google-sides første side, så de havde nul interne
-  // links fra sitets mest linkede side. Titler, beskrivelser og kategorier er
-  // kopieret ordret fra `categories.ts`, så de to lister ikke kan glide fra hinanden.
+  // linked fra forsiden. /brok (4.913 visninger) og /fart (4.570) ligger begge
+  // på Google-sides første side, så de havde nul interne links fra sitets mest
+  // linkede side. /promille stod også her og er 4/10 flyttet op i den populære
+  // række, fordi den målte 157 besøgende/28d. Titler, beskrivelser og kategorier
+  // er kopieret ordret fra `categories.ts`, så de to lister ikke kan glide fra hinanden.
 
   // Økonomi
   { title: "Rådighedsbeløb", description: "Beregn dit månedlige rådighedsbeløb", href: "/budget", popular: false, category: "Økonomi" },
@@ -234,7 +241,6 @@ const daCalculators: HomeCalculator[] = [
   { title: "Boligsalg Beregner", description: "Beregn nettoprovenu ved salg af bolig — alle omkostninger", href: "/boligsalg", popular: false, category: "Bolig" },
 
   // Sundhed
-  { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", popular: false, category: "Sundhed" },
   { title: "Kropsfedtprocent", description: "Beregn din fedtprocent med U.S. Navy-metoden", href: "/kropsfedt", popular: false, category: "Sundhed" },
   { title: "Idealvægt", description: "Devines og Hamwis formel for din højde", href: "/idealvaegt", popular: false, category: "Sundhed" },
   { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", popular: false, category: "Sundhed" },

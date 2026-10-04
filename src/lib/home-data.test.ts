@@ -128,6 +128,10 @@ describe("getHomeCalculators", () => {
     const daPopular = getHomeCalculators("da")
       .filter((c) => c.popular)
       .map((c) => c.href);
+    // `/promille` kom med 4/10: 157 besøgende/28d og +1327 % — den ottende mest
+    // besøgte danske side og den hurtigst voksende — men den stod i den
+    // ikke-populære halvdel, så forsiden og sidebaren (alle ~120 sider) linkede
+    // den ikke. Listen er målt, så den følger Plausible 4/10 28d.
     for (const href of [
       "/dato",
       "/bmi",
@@ -137,6 +141,12 @@ describe("getHomeCalculators", () => {
       "/tidsberegner",
       "/kalorier",
       "/braendstof",
+      "/barselsdagpenge",
+      "/husleje",
+      "/promille",
+      "/renteberegner",
+      "/boernepenge",
+      "/pension",
       "/loen-efter-skat",
     ]) {
       expect(daPopular, `DA popular ${href}`).toContain(href);
@@ -165,10 +175,11 @@ describe("getHomeCalculators", () => {
   });
 
   test("the Danish popular row is the measured top pages, in traffic order", () => {
-    // Plausible 2026-09-28, 28 dage: /dato 1057, /bmi 954, /boligstoette 527,
-    // /kvadratmeter 375, /rentefradrag 319, /kalorier 293, /tidsberegner 288,
-    // /braendstof 267, /barselsdagpenge 198, /husleje 170, /renteberegner 148,
-    // /boernepenge 141, /pension 139 — plus /loen-efter-skat as brandværktøj.
+    // Plausible 2026-10-04, 28 dage: /dato 1104, /bmi 950, /boligstoette 528,
+    // /rentefradrag 456, /kvadratmeter 393, /tidsberegner 277, /kalorier 272,
+    // /braendstof 256, /barselsdagpenge 236, /husleje 169, /promille 157,
+    // /renteberegner 137, /pension 140, /boernepenge — plus /loen-efter-skat
+    // as brandværktøj. /promille kom med 4/10: +1327 % og ottende mest besøgt.
     expect(
       getHomeCalculators("da")
         .filter((c) => c.popular)
@@ -184,6 +195,7 @@ describe("getHomeCalculators", () => {
       "/braendstof",
       "/barselsdagpenge",
       "/husleje",
+      "/promille",
       "/renteberegner",
       "/boernepenge",
       "/pension",

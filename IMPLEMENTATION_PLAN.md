@@ -1,4 +1,14 @@
-STATUS: 4/10 05:1x. ✅ 4/10 05:1x: **«Hvad er klokken i Norge» og «… i
+STATUS: 4/10 05:5x. ✅ 4/10 05:5x: **promilleberegneren står nu på forsiden blandt
+          de populære beregnere** (`ceo/promille-pa-forsiden`) — den var den
+          hurtigst voksende danske side (+1327 %, 157 besøgende/28d, ottende mest
+          besøgt) og alligevel i den ikke-populære halvdel, så forsiden linkede
+          den ikke. Rækken er nu målt i trafikrækkefølge (Plausible 4/10) i stedet
+          for 28/9, og porten `home-data.test.ts` dømmer hele rækkefølgen, så den
+          ikke kan glide tilbage. Sidebarlen er **ikke** rørt: den har sin egen,
+          håndskrevet liste i `calculator-list.ts` (skærer til 6). **MÅL:** `/promille`
+          157 besøgende/28d pr. 4/10 og `/` 210 besøgende med 38 % bounce →
+          Plausible 1/11; GSC `/promille` 6.003 visninger, 1,6 % CTR, pos. 7,8.
+ ✅ 4/10 05:1x: **«Hvad er klokken i Norge» og «… i
           Tyskland» har nu hver sin side** (`ceo/klokken-i-norge-og-tyskland`) —
           hubben havde 12 lande, og Danmarks to nærmeste naboer uden for
           Sverige manglede. Målt på dansk autocomplete 05:1x: begge har to
@@ -178,10 +188,21 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Tretten noter er åbne og alle er nyere end det seneste deploy-vindue**, så
- ingen af dem skal verificeres før 4/10 07:30. De fælles **regler**: døm på
-indhold med `curl -s <url> | grep …`, HTTP 200 beviser intet, og en kodet ændring
-kan ligge i docker i dagevis. Deploy-vinduer: 4/10 07:30, 12:30, 17:30, 21:30.
+**Fjorten noter er åbne og alle er nyere end det seneste deploy-vindue**, så
+  ingen af dem skal verificeres før 4/10 07:30. De fælles **regler**: døm på
+  indhold med `curl -s <url> | grep …`, HTTP 200 beviser intet, og en kodet ændring
+  kan ligge i docker i dagevis. Deploy-vinduer: 4/10 07:30, 12:30, 17:30, 21:30.
+
+**Åben note 4/10 05:5x:** `VERIFICÉR DEPLOY: <promilleberegneren i forsidens
+  populære række, målt i trafikrækkefølge> ceo/promille-pa-forsiden 4/10 05:5x`.
+  `curl -s https://minberegner.dk | grep -c 'href="/promille"'` skal give **≥1**
+  i **den populære sektion** — altså stående *før* den sektion, der rummer
+  `/moms`, altså før den ikke-populære liste, og helst tjekket med
+  `curl -s https://minberegner.dk | grep -oE 'href="/(dato|bmi|boligstoette|kvadratmeter|rentefradrag|tidsberegner|kalorier|braendstof|barselsdagpenge|husleje|promille|renteberegner)"'`
+  som skal ramme **12** sider i den rækkefølge. `curl -s
+  https://minberegner.dk/moms | grep -c 'href="/promille"'` skal give **≥1**, så
+  den også er nået fra en kalkulatorside.
+
 
 **Åben note 4/10 05:1x:** `VERIFICÉR DEPLOY: <Norge og Tyskland i /klokken-i,
 14 lande i hub-rækkerne og «klokken i fjorten lande» på /tidszone>
