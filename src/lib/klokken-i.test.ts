@@ -3,6 +3,7 @@ import {
   beregnKlokkenNu,
   findKlokkenLand,
   getKlokkenPrefix,
+  getKlokkenHubRaekker,
   getKlokkenSlugs,
   KLOKKEN_LANDE,
   klokkenLandTitel,
@@ -122,6 +123,26 @@ describe("ruterne", () => {
     ]) {
       expect(findKlokkenLand(landSlug, "da"), landSlug).not.toBeNull();
     }
+  });
+
+  test("naboerne Norge og Tyskland har hver sin side i begge sprog", () => {
+    // Målt 4/10 05:1x: «hvad er klokken i norge» → «… i norge» + «… norge
+    // lige nu», «hvad er klokken i tyskland» → «… tyskland» + «… tyskland
+    // lige nu». Det er Danmarks nærmeste naboer, og de var de eneste af de
+    // ti målte lande vi manglede.
+    for (const sprog of ["da", "se"] as const) {
+      expect(findKlokkenLand("norge", sprog)?.byer[0].zone).toBe("Europe/Oslo");
+      expect(findKlokkenLand("tyskland", sprog)?.byer[0].zone).toBe(
+        "Europe/Berlin"
+      );
+    }
+    expect(getKlokkenSlugs("da")).toContain("norge");
+    expect(getKlokkenSlugs("se")).toContain("tyskland");
+    // Rækken på hubben er samme liste, så en side der ikke er med dér ville
+    // være en side uden indgang.
+    const raekker = getKlokkenHubRaekker("da", new Date("2026-07-15T04:00:00Z"));
+    expect(raekker.map((r) => r.id)).toContain("norge");
+    expect(raekker.map((r) => r.id)).toContain("tyskland");
   });
 
   test("egne lande får ingen side — de er dækket af /tidszone", () => {

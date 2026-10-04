@@ -546,7 +546,7 @@ describe("tidszone giver hver landside en indgang", () => {
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
   });
 
-  // 2/10: de 24 nye sider (12 lande paa hvert domaene) var kun linkede til
+  // 2/10: de 24 nye sider (12 lande paa hvert domaene, nu 14) var kun linkede til
   // hinanden og linkede selv til /tidszone — vejen den anden vej var tom, saa
   // /tidszone (24.358 visninger, 0,4 % CTR, pos. 7,6) ikke gav dem et eneste
   // indlaeg. Porten dommer paa den *renderede* side, fordi en href paa det
@@ -558,17 +558,21 @@ describe("tidszone giver hver landside en indgang", () => {
   const SLUGS_DA = [
     "usa", "thailand", "australien", "japan", "tyrkiet", "canada",
     "kina", "indien", "england", "spanien", "brasilien", "portugal",
+    // 4/10 05:1x: Danmarks narmeste naboer, malt paa dansk autocomplete.
+    "norge", "tyskland",
   ];
   const SLUGS_SE = [
     "usa", "thailand", "australien", "japan", "turkiet", "kanada",
     "kina", "indien", "england", "spanien", "brasilien", "portugal",
+    // 4/10 05:1x: Danmarks narmeste naboer, malt paa dansk autocomplete.
+    "norge", "tyskland",
   ];
 
   test.each([
     { locale: "da" as const, prefix: "/klokken-i/", slugs: SLUGS_DA, spoergsmaal: "Hvad er klokken i", anker: ["Japan", "Tyrkiet", "USA"], andet: "/klockan-i/", andetTekst: "Vad är klockan i" },
     { locale: "se" as const, prefix: "/klockan-i/", slugs: SLUGS_SE, spoergsmaal: "Vad är klockan i", anker: ["Japan", "Türkiet", "Kanada"], andet: "/klokken-i/", andetTekst: "Hvad er klokken i" },
   ])(
-    "$locale linker til alle 12 landesider med spoergsmaalstekst som anker",
+    "$locale linker til alle 14 landesider med spoergsmaalstekst som anker",
     async ({ locale, prefix, slugs, spoergsmaal, anker, andet, andetTekst }) => {
       vi.mocked(getLocale).mockResolvedValue(locale);
       vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
@@ -585,7 +589,7 @@ describe("tidszone giver hver landside en indgang", () => {
         expect(html).toContain(`>${spoergsmaal} ${navn}?</a>`);
       }
 
-      // Præcis de 12 — ikke flere, ikke færre — og intet fra det andet domaene.
+      // Præcis de 14 — ikke flere, ikke færre — og intet fra det andet domaene.
       const links = [...html.matchAll(new RegExp(`href="${prefix}[a-z-]+"`, "g"))];
       expect(links).toHaveLength(slugs.length);
       expect(html).not.toContain(`href="${andet}`);

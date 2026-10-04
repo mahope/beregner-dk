@@ -7,7 +7,7 @@ const HUB = "/klokken-i";
 
 /**
  * Svaret er klokken *lige nu*, så siden må ikke bygges ind i et tal der bliver
- * frosset ved `next build`: da ville alle tolv lande stå med det samme
+ * frosset ved `next build`: da ville alle fjorten lande stå med det samme
  * klokkeslæt på livstid. Samme grund som på `/klokken-i/[land]`, og derfor står
  * den i sitemap som `daily`.
  */

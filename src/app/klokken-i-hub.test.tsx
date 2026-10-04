@@ -153,7 +153,7 @@ describe("klokken-i hub: metadata og sitemap", () => {
         sprog
       ).toMatch(sprog === "da" ? /^Hvad er klokken i/ : /^Vad är klockan i/);
       expect(title.length, `${sprog} (${title.length})`).toBeLessThanOrEqual(60);
-      expect(title, sprog).toMatch(/12/);
+      expect(title, sprog).toMatch(/14/);
       expect(title, sprog).not.toMatch(/MinBeregner|Beregner\.no|Beräknare/);
     }
   });

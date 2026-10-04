@@ -1,7 +1,17 @@
-STATUS: 4/10 05:0x. ✅ 4/10 05:0x: **fire review-fund fra 4/10 04:2x rettet**
+STATUS: 4/10 05:1x. ✅ 4/10 05:1x: **«Hvad er klokken i Norge» og «… i
+          Tyskland» har nu hver sin side** (`ceo/klokken-i-norge-og-tyskland`) —
+          hubben havde 12 lande, og Danmarks to nærmeste naboer uden for
+          Sverige manglede. Målt på dansk autocomplete 05:1x: begge har to
+          completioner, den anden med «lige nu». Undtagelsen for Danmark og
+          Sverige gælder ikke her — en dansk læser kan ikke se svaret på sin egen
+          telefon. `/tidszone`s «klokken i tolv lande» → «**fjorten**» (og
+          «tolva» → «fjorton»), fordi en forkert påstand i brødteksten er det
+          værste. **MÅL:** `/tidszone` 23.351 visninger / 101 klik / 0,4 % /
+          pos. 7,6 og hubbens to egne søgninger (178v pos. 6, 89v pos. 5) pr.
+          4/10 → GSC 18/10; nye URL'er: 0 besøgende.
+          ✅ 4/10 05:0x: **fire review-fund fra 4/10 04:2x rettet**
           (`ceo/review-fund-idealvaegt-og-sprog`) — (1) `/idealvaegt`' titel og
-          `og:title` sagde «72 kg ved **175 cm 175 cm**», fordi
-          `IDEALVAEGT_EKSEMPEL_175` selv ender på højden; nu én gang, og
+          `og:title` sagde «72 kg ved **175 cm 175 cm**»; nu én gang, og
           `/idealvaegt` er lagt i meta-title-tal-tabellen **med en ny
           bigram-port**, fordi `toContain` ikke kan se en dobbeltgæng
           (muteret tilbage → rød med «gentager 175 cm»). (2) Svensk
@@ -26,6 +36,10 @@ STATUS: 4/10 05:0x. ✅ 4/10 05:0x: **fire review-fund fra 4/10 04:2x rettet**
           ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i
           `vitest.config.ts`): 4/10 03:54 gav 10 røde i én køring, samme kode
           var grøn i de to køringer på hver side.
+          ⚠️ `locale-leak`-scanneren melder **1 ureviewet dansk streng** i
+          `src/app/procent/page.tsx:621` («En lønsprocent kan du se:»).
+          Før denne iteration, exit 0, ikke rørt — men den bør mærkes
+          `reviewet` i scannerens liste, ellers står den som en fejl.
           PR-TJEK: 4/10 04:1x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — **fire
           fuldt landede remote branches kan ikke slettes fra maskinen**
           (`adsense-review`, `upgrade-frameworks-269`,
@@ -39,6 +53,10 @@ STATUS: 4/10 05:0x. ✅ 4/10 05:0x: **fire review-fund fra 4/10 04:2x rettet**
           CI grøn ved start (`5ad44bd`), ingen uløste Sentry-fejl, Sentry-SDK'en
           er sat op. Gate: `npm run typecheck && npm run lint && npm test`
           (samme som CI's build → lint → test; CI kører også `next build`).
+          Målt 05:1x: `/moms`-titel har allerede regnet eksempel, blogindlæggene
+          har 3-16 interne links hver, `/dato` linker til alle 22 dage-til-sider,
+          og alle 22 står i sitemap'en — de fire åbne Feature-kø-punkter er altså
+          lukkede, og `/klokken-i` var det femte hull.
 
 ## Fase 3 — trafik-drevet
 
@@ -63,6 +81,7 @@ STATUS: 4/10 05:0x. ✅ 4/10 05:0x: **fire review-fund fra 4/10 04:2x rettet**
 | `/dage-til` + se `/dagar-till` | **0 — nye URL'er 2/10** | — | — | — |
 | `/dage-mellem-datoer` + se `/dagar-mellan-datum` | **0 — nye URL'er 3/10** | — | — | — |
 | `/idealvaegt` + se | **0 — nye URL'er 4/10** | — | — | — |
+| `/klokken-i/norge` + `tyskland` (+ se) | **0 — nye URL'er 4/10 05:1x** | — | — | — |
 | se `/dato` | 133 | 101.580 | 0,1 % | 8,2 |
 | se `/tidsberegner` | 167 | 61.934 | 0,2 % | 8,0 |
 | se `/procent` | under top-15 | 26.933 | 0,0 % | 9,9 |
@@ -163,6 +182,19 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
  ingen af dem skal verificeres før 4/10 07:30. De fælles **regler**: døm på
 indhold med `curl -s <url> | grep …`, HTTP 200 beviser intet, og en kodet ændring
 kan ligge i docker i dagevis. Deploy-vinduer: 4/10 07:30, 12:30, 17:30, 21:30.
+
+**Åben note 4/10 05:1x:** `VERIFICÉR DEPLOY: <Norge og Tyskland i /klokken-i,
+14 lande i hub-rækkerne og «klokken i fjorten lande» på /tidszone>
+ceo/klokken-i-norge-og-tyskland 4/10 05:1x`. `curl -s
+https://minberegner.dk/klokken-i/norge | grep -oE '<title>[^<]*</title>'` skal
+give «Hvad er klokken i Norge? 12 i Danmark = HH:MM i Oslo» med **HH:MM** =
+12 + forskellen til `Europe/Oslo` (13:00 om sommeren, 13:00 om vinteren — Oslo
+er samme sæsonzone som Danmark), og `beraknare.se/klockan-i/tyskland` skal have
+«Vad är klockan i Tyskland? 12 i Sverige = HH:MM i Berlin» (13:00). `curl -s
+https://minberegner.dk/tidszone | grep -c 'klokken i fjorten lande'` **≥1** og
+`grep -c 'klokken i tolv lande'` **0**; `beraknare.se/tidszone` «klockan i
+fjorton länder». `/klokken-i` skal have **14** links til `/klokken-i/*`, og
+begge sitemap'er hhv. `…/klokken-i/norge` og `…/klockan-i/tyskland`.
 
 **Åben note 4/10 05:0x:** `VERIFICÉR DEPLOY: <titlen på /idealvaegt uden dobbelt
 175 cm, svensk brændstof-caption på "för", "Den første brøk" som legend> ceo/review-fund-idealvaegt-og-sprog

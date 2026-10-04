@@ -17,6 +17,14 @@ import type { Locale } from "./i18n";
  * udelader `new-york` fra listen: byen står som en række på USA-siden, så en
  * egen side for den ville være den samme side igen.
  *
+ * **Norge og Tyskland kom derimod med 4/10 05:1x**, målt på samme måde:
+ * «hvad er klokken i norge» har completionerne «hvad er klokken i norge» og
+ * «hvad er klokken i norge lige nu», «hvad er klokken i tyskland» har
+ * «hvad er klokken i tyskland» og «hvad er klokken i tyskland lige nu». De er
+ * Danmarks nærmeste naboer og de eneste af de ti lande på listen vi manglede,
+ * og de er **ikke** dækket af undtagelsen ovenfor, fordi det ikke er læserens
+ * eget land: en dansk læser kan ikke se svaret på sin egen telefon.
+ *
  * **Ingen håndskrevet tidsforskel.** `tidsforskelMinutter` læser begge sider
  * af samme øjeblik med `Intl.DateTimeFormat`, så forskellen følger den
  * virkelige kalender — også i de få uger omkring et skift, hvor Danmark og
@@ -142,6 +150,20 @@ export const KLOKKEN_LANDE: readonly KlokkenLand[] = [
     navnDa: "Portugal",
     navnSe: "Portugal",
     byer: [{ da: "Lissabon", zone: "Europe/Lisbon" }],
+  },
+  {
+    slugDa: "norge",
+    slugSe: "norge",
+    navnDa: "Norge",
+    navnSe: "Norge",
+    byer: [{ da: "Oslo", zone: "Europe/Oslo" }],
+  },
+  {
+    slugDa: "tyskland",
+    slugSe: "tyskland",
+    navnDa: "Tyskland",
+    navnSe: "Tyskland",
+    byer: [{ da: "Berlin", zone: "Europe/Berlin" }],
   },
 ];
 
