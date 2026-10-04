@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import LaanebeloebTabel from "@/components/LaanebeloebTabel";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
@@ -453,6 +454,15 @@ export default function RenteBeregner() {
               {type === "annuitet" ? l.annuitetDesc : l.serielaanDesc}
             </p>
           </div>
+
+          {/* Samme rente og løbetid, otte beløb. Autocomplete målt 4/10 under
+              «hvor meget koster det at låne» spørger om beløb, så beløbet skal
+              kunne læses uden at blive tastet ind. */}
+          <LaanebeloebTabel
+            aarligRente={rente}
+            loebetid={loebetid}
+            type={type}
+          />
         </>
       )}
     </div>

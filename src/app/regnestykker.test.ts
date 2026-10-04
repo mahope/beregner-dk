@@ -931,6 +931,7 @@ const PROCENT_MED_MELLEMRUM = [
   "src/app/laaneberegner/page.tsx",
   "src/app/procent/page.tsx",
   "src/components/AlkoholenhederBeregner.tsx",
+  "src/components/LaanebeloebTabel.tsx",
   "src/lib/categories.ts",
   "src/lib/home-data.ts",
   "src/lib/page-data.ts",
