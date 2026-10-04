@@ -1,24 +1,23 @@
-STATUS: 4/10 03:5x. 📋 **Research-iteration, ingen kode.** CEO-køens punkt 0
-         er helt lukket, og *alle* åbne Feature-kø-punkter var ⛔ blokeret af en
-         ❓, så denne iteration målte fire nye huller i dansk autocomplete for at
-         fylde køen med noget bygbart i stedet for at gætte. Målingerne ligger i
-         `## Feature-kø` (4/10 03:2x-03:4x). ⏱️ **Forhastet:** det kom ikke
-         længere til at kode noget, fordi fire målinger slugte 25 min — næste
-         iteration tager den første bygbare, **brændstoffpris-pr. afstand** på
-         `/braendstof` (ren matematik på `prisPrKm`, ingen ny kilde).
-         ✅ 4/10 03:1x: idealvægt-værktøjet på `/idealvaegt`
-         (`ceo/idealvaegt-beregner`, Devine + Hamwi, WHO-interval fra sitets
-         egen tabel, alle tal regnet fra `idealvaegt.ts`).
-         ✅ 4/10 02:3x: lånebeløb-tabel på `/renteberegner`
-         (`ceo/laanebeloeb-tabel`, otte beløb med læserens rente og løbetid).
-         ✅ 4/10 01:5x: folkepensionsalder-værktøjet på `/pension`.
-         ✅ 4/10 01:3x: mellemrum i 25 procenter i boligkøbsguiden + 10
-         drikkeknapper. ✅ 4/10 01:0x / 00:5x / 00:1x: se `docs/plan-arkiv.md`.
-         ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i
-         `vitest.config.ts`): 4/10 01:47 gav 11 røde, køringer før og efter var
-         grønne.
-         PR-TJEK: 4/10 03:2x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-         start (`100b4b2`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+STATUS: 4/10 03:5x. ✅ 4/10 03:5x: brændstoffpris-tabel for **50 → 2.000 km** på
+          `/braendstof` (`ceo/braendstof-afstandstabel`) — hver celle er
+          `prisPrKm × km` i hele kroner, så den kan læses mod «Sådan regner
+          du»-tabellen; nye tests dømmer rækkerne, `scope`, caption og
+          kæden titel → tabel på 450 kr.
+          ✅ 4/10 03:1x: idealvægt-værktøjet på `/idealvaegt`
+          (`ceo/idealvaegt-beregner`, Devine + Hamwi, WHO-interval fra sitets
+          egen tabel, alle tal regnet fra `idealvaegt.ts`).
+          ✅ 4/10 02:3x: lånebeløb-tabel på `/renteberegner`
+          (`ceo/laanebeloeb-tabel`, otte beløb med læserens rente og løbetid).
+          ✅ 4/10 01:5x: folkepensionsalder-værktøjet på `/pension`.
+          ✅ 4/10 01:3x: mellemrum i 25 procenter i boligkøbsguiden + 10
+          drikkeknapper. ✅ 4/10 01:0x / 00:5x / 00:1x: se `docs/plan-arkiv.md`.
+          ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i
+          `vitest.config.ts`): 4/10 03:54 gav 10 røde i én køring, samme kode
+          var grøn i de to køringer på hver side.
+          PR-TJEK: 4/10 03:2x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
+          start (`100b4b2`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+          Gate: `npm run typecheck && npm run lint && npm test` (samme som CI's
+          build → lint → test; CI kører også `next build`).
 
 ## CEO-kø punkt 0 — [x] ✅ alle otte lukket (verificeret i koden 4/10 01:0x)
 
@@ -244,18 +243,19 @@ er brugt på de to seneste features.
   «48 %» med mellemrum. **MÅL:** `/renteberegner` 12.610/107/0,8 %/7,4 →
   GSC 17/10.
 
-- **[ ] Målt 4/10 03:4x — `brændstoffpris pr. afstand` på `/braendstof`** (først
-  i køen, **bygbar uden ny kilde**). *Hvem:* alle der googler «hvad koster benzin
-  i dag» — den er dansk autocomplete-træffer **4 af 10** under «hvad koster»,
-  sammen med «hvad koster diesel i tyskland» (målt 4/10 03:3x). *Datagrund:*
-  `/braendstof` 16.518 GSC-visninger, **256 besøgende/28d (+58 %)**, CTR 1,1 %,
-  pos. 5,9, og GSC-søgningerne «benzin beregner» 130 visninger **pos. 2**,
-  «brændstof beregner» 93 visninger pos. 6. *Accept:* afstandstabel 50 → 2.000
-  km × benzin/diesel/el, hver celle `prisPrKm(type) × km` — altså **samme
-  funktion som værktøjet**, så tabellen og resultatkortet ikke kan sige hver sit
-  (punkt 11); da+se; `overflow-x-auto`, `sr-only`-caption og `scope` på `th`,
-  samme mønster som lånebeløb-tabellen. **MÅL:** `/braendstof` 256 besøgende/28d
-  → Plausible 18/10; GSC 17/10 mod 16.518/174/1,1 %/5,9.
+- **[x] ✅ Brændstoffpris pr. afstand 50 → 2.000 km på `/braendstof`** —
+  `ceo/braendstof-afstandstabel` 4/10 03:5x. *Hvem:* alle der googler «hvad
+  koster benzin i dag» — dansk autocomplete-træffer **4 af 10** under «hvad
+  koster» (målt 4/10 03:3x). *Datagrund:* `/braendstof` 16.518 GSC-visninger,
+  **256 besøgende/28d (+58 %)**, CTR 1,1 %, pos. 5,9, «benzin beregner»
+  130 visninger **pos. 2**. *Accept:* rækkerne 1.500 og 2.000 km tilføjet, så
+  både ferietur og pendling (sidens eget årstal er 15.000 km) er dækket; hver
+  celle `heleKroner(prisPrKm × km)`, altså **samme enhed** som «Sådan regner
+  du»-tabellen, så de to kan læses mod hinanden; `sr-only`-caption bygget af
+  tabellens **egne** afstande (regnestykker-porten tæller håndskrevne
+  tusindtal), `scope="col"`/`scope="row"`, `tabular-nums`; 6 nye tests i
+  `BraendstofBeregner.test.tsx` i da+se. **MÅL:** `/braendstof` 256
+  besøgende/28d → Plausible 18/10; GSC 17/10 mod 16.518/174/1,1 %/5,9.
 - **[ ] Målt 4/10 03:3x — «promillegrænse» i udlandet** ⛔ se ❓ nedenfor.
   *Datagrund:* **5 af 10** danske træffere under «promille» er
   «promillegrænse danmark/sverige/tyskland/italien/norge» (målt 4/10 03:2x).
@@ -288,6 +288,9 @@ sidste uundtagede slice er lukket 4/10 01:3x. `/moms` er ⛔ (de 3 lovgrænser,
 ❓ nedenfor), og de to største F5c-filer er ⛔ regelnavne.
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 4/10 03:5x:** `VERIFICÉR DEPLOY: <afstandstabel 50 → 2.000 km på /braendstof med hele kroner, caption, scope på alle th> ceo/braendstof-afstandstabel 4/10 03:5x`.
+Døm på **indhold**: `curl -s https://minberegner.dk/braendstof | grep -oE '<th scope="row"[^>]*>[^<]*</th>'` skal give **7** rækker i rækkefølgen **50, 100, 200, 500, 1.000, 1.500 og 2.000 km** (var 5, og de to nye rækker stod som `1500 km`/`2000 km` uden tusindtalsseparator). Captionen skal stå som «Pris på benzin, diesel og el for afstande fra 50 til 2.000 km», og `grep -c '2.000 km'` skal give **≥1**. Priserne skal være **hele kroner**: 500 km benzin er **450,00 kr.** — samme tal som «Sådan regner du»-tabellen og som titlen lover — så `grep -c '450,00 kr'` **≥1** og `grep -c '355,56 kr'` **0**. `beraknare.se/braendstof` skal have captionen «… från 50 **till** 2 000 km» (**till**, ikke dansk «til»), og `grep -c 'från 50 til 2 000 km'` **0** på grund af bindestregen. Næste deploy-vindue 4/10 07:30.
 
 **Åben note 4/10 03:1x:** `VERIFICÉR DEPLOY: <idealvægt-værktøj på /idealvaegt: Devines og Hamwis formel, gennemsnit, spredning og WHO's BMI-interval, da+se> ceo/idealvaegt-beregner 4/10 03:1x`.
 Døm på **indhold**: `curl -s https://minberegner.dk/idealvaegt | grep -c 'Devine (1974)'` skal give **≥1** og `grep -c 'Hamwi (1964)'` **≥1**; `<title>` skal være `Idealvægt beregner: 72 kg ved 175 cm` (`grep -c '<title>Idealvægt beregner: 72 kg ved 175 cm'` **1**). Tallet **72 kg** er gennemsnippet af 70,7 og 73,3 for 175 cm mand — et forkert gennemsnit eller en byttet grundværdi falder med det samme. BMI-intervallet skal stå som `56,7`–`76,3` kg. `beraknare.se/idealvaegt` skal have «Idealvikt för vuxna», «Devines formel (1974)», «WHO:s normalviktsband» og `<title>Idealvikt: 72 kg vid 175 cm`, og **ikke** danske ord i brødteksten («højde», «vægt» skal stå som «längd», «vikt»). Næste deploy-vindue 4/10 07:30.

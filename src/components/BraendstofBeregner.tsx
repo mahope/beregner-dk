@@ -8,7 +8,32 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency, formatNumber as formatNum } from '@/lib/format';
-import { braendstofForudsætninger, prisPrKm } from '@/lib/braendstof';
+import { braendstofForudsætninger, heleKroner, prisPrKm } from '@/lib/braendstof';
+import type { Locale } from '@/lib/i18n';
+
+/**
+ * Afstande sammenligningstabellen svarer for. Hver celle er
+ * `prisPrKm(type, locale) × km` — samme funktion som værktøjet selv bruger, så
+ * en række og resultatkortet aldrig kan skrive forskellige priser for samme km.
+ *
+ * Rækken når 2.000 km, fordi sidens eget årstal er 15.000 km («Pr. år
+ * (15.000 km)»): både en ferietur og et års pendling skal kunne slås op i
+ * tabellen frem for at løbe ud af den.
+ */
+const BRAENDSTOF_AFSTANDS_TABEL = [50, 100, 200, 500, 1000, 1500, 2000] as const;
+
+/**
+ * «fra 50 til 2.000 km» — skrevet med tabellens **egne** afstande og i læserens
+ * egen skrivemåde, så captionen ikke kan komme i strid med rækkerne, og så den
+ * ikke indeholder et håndskrevet tusindtal (regnestykker-porten). «til» hedder
+ * «till» på svensk, så bindestregen læses med sprog og ikke hardkodes.
+ */
+function afstandsOmraade(locale: Locale): string {
+  const sidste = BRAENDSTOF_AFSTANDS_TABEL[BRAENDSTOF_AFSTANDS_TABEL.length - 1];
+  const omraade = (km: number) => formatNum(km, locale, { maximumFractionDigits: 0 });
+  const forbindelse = locale === "se" ? "till" : "til";
+  return `${omraade(BRAENDSTOF_AFSTANDS_TABEL[0])} ${forbindelse} ${omraade(sidste)} km`;
+}
 
 export default function BraendstofBeregner() {
   const { locale } = useLocale();
@@ -42,6 +67,7 @@ export default function BraendstofBeregner() {
       perYear: "Pr. år (15.000 km)",
       perMonth: "Pr. måned",
       compareTitle: "Sammenlign brændstofpriser",
+      compareCaption: (locale: Locale) => `Pris på benzin, diesel og el for afstande fra ${afstandsOmraade(locale)}`,
       colDistance: "Distance",
       colBenzin: `Benzin (${F.benzin.kmPerLiter} km/l)`,
       colDiesel: `Diesel (${F.diesel.kmPerLiter} km/l)`,
@@ -75,6 +101,7 @@ export default function BraendstofBeregner() {
       perYear: "Per år (15 000 km)",
       perMonth: "Per månad",
       compareTitle: "Jämför bränslepriser",
+      compareCaption: (locale: Locale) => `Pris på bensin, diesel och el för sträckor från ${afstandsOmraade(locale)}`,
       colDistance: "Sträcka",
       colBenzin: `Bensin (${F.benzin.kmPerLiter} km/l)`,
       colDiesel: `Diesel (${F.diesel.kmPerLiter} km/l)`,
@@ -225,6 +252,13 @@ export default function BraendstofBeregner() {
   }, [beregningsType, braendstofType, literPris, kmPerLiter, distance, kwhPris, kwhPer100km, literBrugt, kmKoert]);
 
   const formatKr = (amount: number) => formatCurrency(amount, locale);
+
+  /**
+   * Hele kroner, som resten af siden: eksempeltabelen runder med `heleKroner`,
+   * så en hel krones pris gør de to tabeller læselige mod hinanden — 500 km
+   * benzin står som 450 kr. i begge, ikke 450 mod 449,55.
+   */
+  const formatHeleKroner = (amount: number) => formatCurrency(heleKroner(amount), locale);
 
   const formatNumber = (num: number, decimals: number = 2) => formatNum(num, locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
@@ -529,25 +563,26 @@ export default function BraendstofBeregner() {
         </div>
         <div className="p-4 overflow-x-auto">
           <table className="w-full text-sm dark:text-gray-200">
+            <caption className="sr-only">{l.compareCaption(locale)}</caption>
             <thead>
               <tr className="border-b dark:border-gray-700">
-                <th className="text-left py-2">{l.colDistance}</th>
-                <th className="text-right py-2">{l.colBenzin}</th>
-                <th className="text-right py-2">{l.colDiesel}</th>
-                <th className="text-right py-2">{l.colEl}</th>
+                <th scope="col" className="text-left py-2">{l.colDistance}</th>
+                <th scope="col" className="text-right py-2">{l.colBenzin}</th>
+                <th scope="col" className="text-right py-2">{l.colDiesel}</th>
+                <th scope="col" className="text-right py-2">{l.colEl}</th>
               </tr>
             </thead>
             <tbody>
-              {[50, 100, 200, 500, 1000].map((km) => {
+              {BRAENDSTOF_AFSTANDS_TABEL.map((km) => {
                 const benzinPris = km * prisPrKm("benzin", locale);
                 const dieselPris = km * prisPrKm("diesel", locale);
                 const elPris = km * prisPrKm("el", locale);
                 return (
                   <tr key={km} className="border-b last:border-b-0 dark:border-gray-700">
-                    <td className="py-2 font-medium">{km} km</td>
-                    <td className="py-2 text-right">{formatKr(benzinPris)}</td>
-                    <td className="py-2 text-right">{formatKr(dieselPris)}</td>
-                    <td className="py-2 text-right text-green-600 dark:text-green-400">{formatKr(elPris)}</td>
+                    <th scope="row" className="py-2 font-medium text-left">{formatNumber(km, 0)} km</th>
+                    <td className="py-2 text-right tabular-nums">{formatHeleKroner(benzinPris)}</td>
+                    <td className="py-2 text-right tabular-nums">{formatHeleKroner(dieselPris)}</td>
+                    <td className="py-2 text-right text-green-600 dark:text-green-400 tabular-nums">{formatHeleKroner(elPris)}</td>
                   </tr>
                 );
               })}

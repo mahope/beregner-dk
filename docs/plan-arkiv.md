@@ -28777,3 +28777,45 @@ filer**, `next build`. Nye URL'er i `.next/routes-manifest.json`:
 
 **MÅL:** `/idealvaegt` har 0 GSC-ækker (ny URL) → GSC 17/10.
 `/bmi` 950 besøgende/28d (4/10) → Plausible 18/10.
+
+## 4/10 03:5x — Brændstoffpris pr. afstand 50 → 2.000 km (`ceo/braendstof-afstandstabel`)
+
+**Hvad.** Sammenligningstabellen på `/braendstof` fik rækkerne 1.500 og 2.000 km,
+så både en ferietur og et års pendling (sidens eget årstal er 15.000 km) er
+dækket; afstanden skrives med tusindtalsseparator («1.000 km», ikke «1000 km»),
+priserne i **hele kroner**, og tabellen fik `sr-only`-caption, `scope="col"` på
+alle kolonneoverskrifter og `scope="row"` på afstandscellerne plus
+`tabular-nums`.
+
+**Målt undervejs, tre fund der lå i den ufærdige forrige iteration:**
+
+1. **To decimaler i to tabeller om samme tur.** Sammenligningstabellen viste
+   500 km diesel som 355,56 kr., mens «Sådan regner du» lige ovenfor viste
+   356 kr. Eksempeltabelen runder med vilje liter til én decimal *før* prisen
+   ganges (33,3 liter × 17,57 kr.), så den afviger med op til 1 kr. Rettelse:
+   cellerne bruger nu `heleKroner(prisPrKm × km)`, så benzin 500 km står som
+   **450,00 kr.** i begge tabeller *og* i titlen. Målt ved rendering: mutationen
+   `formatHeleKroner` → `formatKr` i cellerne giver **1 rød** af 6.
+2. **Regnestykker-porten fangede captionen.** De to nye caption-strenge
+   («… fra 50 til 2.000 km») var håndskrevne tusindtal i strengliteraler, så
+   `regnestykker.test.ts` gik fra 2 til 4 fund i `BraendstofBeregner.tsx` mod
+   loftet 2. Rettelse: captionen bygges af `afstandsOmraade(locale)` ud fra
+   `BRAENDSTOF_AFSTANDS_TABEL` selv, formateret med `Intl`.
+3. **Dansk «til» i svensk caption.** Den genererede caption læste «från 50 til
+   2 000 km» på beraknare.se, fordi bindestregen stod i kode. Testens
+   exact-streng-opslag fandt den. Rettelse: `forbindelse = locale === "se" ?
+   "till" : "til"`. Samme fejlklasse som de fund, huset netop har lukket tre
+   gange med danske ord i svensk tekst.
+
+**Tests.** Ny `src/components/BraendstofBeregner.test.tsx` (6 tests, da+se):
+de syv afstande i rækkefølge, hver celle `heleKroner(prisPrKm × km)` pr. ord,
+de to tabeller inden for 1 kr. af hinanden plus **450 kr.** eksakt for da,
+`scope` på alle 11 `th`, og captionen på `sr-only` med tabellens område. Alle
+findene ovenfor er målt som mutationer eller som røde porter undervejs.
+
+**Port.** Hele suiten grøn: 268 filer, 4.248 tests (4/10 03:5x). Én køring 4/10
+03:54 gav 10 røde i scanner-portene og var grøn igen i de to køringer på hver
+side — samme flakiness som STATUS noterer.
+
+**MÅL:** `/braendstof` 256 besøgende/28d (4/10) → Plausible 18/10;
+GSC 17/10 mod 16.518 visninger / 174 klik / 1,1 % CTR / pos. 5,9.
