@@ -14,8 +14,21 @@ STATUS: 4/10 03:5x. ✅ 4/10 03:5x: brændstoffpris-tabel for **50 → 2.000 km*
           ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i
           `vitest.config.ts`): 4/10 03:54 gav 10 røde i én køring, samme kode
           var grøn i de to køringer på hver side.
-          PR-TJEK: 4/10 03:2x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-          start (`100b4b2`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+          PR-TJEK: 4/10 04:1x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — **fire
+          fuldt landede remote branches kunne ikke slettes**: `adsense-review`
+          (6/2), `upgrade-frameworks-269` (7/3), `feat/adtraction-loan-links`
+          (27/6) og `claude/repo-deep-dive-improvements-76uz7o` (8/7) har alle
+          0 filer anderledes end `master`, men en lokal tilladelsesregel
+          nægter `git push origin --delete`. De skal slettes med
+          `git push origin --delete <branch>` af et menneske.
+          `auto/union-night` (17/9) har **unikt** arbejde i tre dokumenter
+          (`BACKLOG.md`, `docs/kommercielt-inventar.md`,
+          `docs/timepris-nichetest.md`) — må ikke slettes, se ❓.
+          ⏱️ Resten af `## Feature-kø` er **alle ⛔** på en ❓ (kogetider,
+          promille i udlandet, kvadratmeterpris, feriedatoer, GSC-eksport), så
+          næste iteration skal enten svare på en ❓ eller bygge F1/F0e.
+          CI grøn ved start (`100b4b2`), ingen uløste Sentry-fejl, Sentry-SDK'en
+          er sat op.
           Gate: `npm run typecheck && npm run lint && npm test` (samme som CI's
           build → lint → test; CI kører også `next build`).
 
@@ -289,6 +302,15 @@ sidste uundtagede slice er lukket 4/10 01:3x. `/moms` er ⛔ (de 3 lovgrænser,
 
 ## VERIFICÉR DEPLOY-noter
 
+**Dømt på indhold 4/10 04:1x: ingen af de tolv nedenstående noter er live
+endnu.** Alt efter 3/10 17:30-vinduet ligger stadig i docker: `/bil` har 12 rå
+procenter, `/topskat` 4, `/brok` 0 `legend`, `beraknare.se/promille` har stadig
+det danske «— og efter ytterligare», `beraknare.se/procent` 0 «och inte heller»,
+og bloggen har titlen «Børnepenge 2026: 5.370 kr./kvartal (0-2 år)». Det er
+**0** deploy-vinduer siden de merges, ikke to — de er korrekt ventende på
+**4/10 07:30**, og alle tolv deler det. (De fem ældste noter stod med «næste
+vindue 3/11 07:30»; det var en bogføringsfejl, rettet her.)
+
 **Åben note 4/10 03:5x:** `VERIFICÉR DEPLOY: <afstandstabel 50 → 2.000 km på /braendstof med hele kroner, caption, scope på alle th> ceo/braendstof-afstandstabel 4/10 03:5x`.
 Døm på **indhold**: `curl -s https://minberegner.dk/braendstof | grep -oE '<th scope="row"[^>]*>[^<]*</th>'` skal give **7** rækker i rækkefølgen **50, 100, 200, 500, 1.000, 1.500 og 2.000 km** (var 5, og de to nye rækker stod som `1500 km`/`2000 km` uden tusindtalsseparator). Captionen skal stå som «Pris på benzin, diesel og el for afstande fra 50 til 2.000 km», og `grep -c '2.000 km'` skal give **≥1**. Priserne skal være **hele kroner**: 500 km benzin er **450,00 kr.** — samme tal som «Sådan regner du»-tabellen og som titlen lover — så `grep -c '450,00 kr'` **≥1** og `grep -c '355,56 kr'` **0**. `beraknare.se/braendstof` skal have captionen «… från 50 **till** 2 000 km» (**till**, ikke dansk «til»), og `grep -c 'från 50 til 2 000 km'` **0** på grund af bindestregen. Næste deploy-vindue 4/10 07:30.
 
@@ -320,13 +342,19 @@ Døm på indhold: `curl -s https://minberegner.dk/brok | grep -c 'Regn med de fi
 Døm på indhold: `curl -s https://minberegner.dk/bil | sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%' | wc -l` skal give **0** (var 12), samme måling på `/topskat` (var 4) og på `minberegner.dk/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` + `…/biloekonomi-2026-hvad-koster-det-at-eje-bil` (hver 1-2). `beraknare.se/bil` skal have «20-25 %» i tabellen. Næste deploy-vindue 4/10 07:30.
 
 **Åben note 3/10 22:2x:** `VERIFICÉR DEPLOY: <mellemrum i alle interpolerede procenttal (35 steder) + loftet INTERPOLATION_LOFT 40 → 0> ceo/procent-interpolation-til-nul 3/10 22:2x`.
-Døm på indhold: `curl -s https://minberegner.dk/blog/arveafgift-regler-og-satser | grep -c 'Boafgift (15 %)'` skal give **≥1** og `grep -c 'Boafgift (15%)'` **0**; `/dagpenge` skal have «Dagpenge = 80 % af løn efter 8 % AM-bidrag»; `/kalorier` FAQ «10-15 %»; `/ejendomsvaerdiskat` «80 % × 5,1‰»; `/billaan` skal have «5,95 %» i rentetabellen *og* «kontantinsats på minst 20 %» på beraknare.se (sidste er raw, fra før). Næste deploy-vindue 3/11 07:30.
+Døm på indhold: `curl -s https://minberegner.dk/blog/arveafgift-regler-og-satser | grep -c 'Boafgift (15 %)'` skal give **≥1** og `grep -c 'Boafgift (15%)'` **0**; `/dagpenge` skal have «Dagpenge = 80 % af løn efter 8 % AM-bidrag»; `/kalorier` FAQ «10-15 %»; `/ejendomsvaerdiskat` «80 % × 5,1‰»; `/billaan` skal have «5,95 %» i rentetabellen *og* «kontantinsats på minst 20 %» på beraknare.se (sidste er raw, fra før). Næste deploy-vindue 4/10 07:30.
 
 **Åben note 3/10 21:5x:** `VERIFICÉR DEPLOY: <29. februar-dagen i /alders tekst + fem danske ord i svensk FAQ + ny se-tekst-port> ceo/review-fund-alder-tabel-og-sprog 3/10 21:5x`.
-Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter ytterligare'` skal give **0** (og «— och efter ytterligare» = 1); `https://beraknare.se/procent` skal have «och inte heller», `beraknare.se/alder` «Timmarna är dagarna gånger 24 och aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas». `/alder`-teksten er daglig præcis den 29. februar, så den kan ikke dømmes før 2028-02-29 — døm da på «28. februar» i stedet for «i dag». Næste deploy-vindue 3/11 07:30.
+Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter ytterligare'` skal give **0** (og «— och efter ytterligare» = 1); `https://beraknare.se/procent` skal have «och inte heller», `beraknare.se/alder` «Timmarna är dagarna gånger 24 och aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas». `/alder`-teksten er daglig præcis den 29. februar, så den kan ikke dømmes før 2028-02-29 — døm da på «28. februar» i stedet for «i dag». Næste deploy-vindue 4/10 07:30.
 
 ## ❓ Til Mads
 
+- ❓ **`auto/union-night` har unikt arbejde, der aldrig er landet** (ny, 4/10
+  04:1x). Branchen er fra 17/9 og skiller sig fra `master` i tre dokumenter:
+  `BACKLOG.md`, `docs/kommercielt-inventar.md` og `docs/timepris-nichetest.md`.
+  Sidste fil er et niche-test-markedstal — samme slags kilde, der låser
+  ❓ «Kilde til svenske og norske frilanstimepriser». Skal de tre dokumenter
+  merges til `master`, eller er de forældede? De må ikke slettes uden svar.
 - ❓ **Kogetider — den 2. største søgning på `/tidsberegner` (ny, 4/10 03:1x,
   højst prioriteret, fordi den er helt målt).** «hvor lang tid» har **824
   visninger** på pos. 6,8 og **10 af 10** danske completioner under den er
