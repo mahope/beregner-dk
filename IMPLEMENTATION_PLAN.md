@@ -1,4 +1,12 @@
-STATUS: 4/10 03:5x. ✅ 4/10 03:5x: brændstoffpris-tabel for **50 → 2.000 km** på
+STATUS: 4/10 04:3x. ✅ 4/10 04:2x: **titlen på `/dato` regner nedtællingen
+          til næste 1. december** (`ceo/dato-titel`) — «Beregn dage til 1.
+          december: 58 dage tilbage» / «Beräkna dagar till 1 december: 58
+          dagar kvar». Skrev før «1. jan. 2026→2027 = 365»: et interval på
+          en nedtællingsside, håndskrevet (altså 365 også i 2028, hvor det er
+          366) og på svensk ulæseligt som «365 dage kvar».
+          **MÅL:** `/dato` 131.320 visninger / 863 klik / **0,7 %** / pos. 5,6
+          (da) og 102.316 / 97 / **0,1 %** / 8,1 (se) → GSC 18/10.
+          ✅ 4/10 03:5x: brændstoffpris-tabel for **50 → 2.000 km** på
           `/braendstof` (`ceo/braendstof-afstandstabel`) — hver celle er
           `prisPrKm × km` i hele kroner, så den kan læses mod «Sådan regner
           du»-tabellen; nye tests dømmer rækkerne, `scope`, caption og
@@ -112,6 +120,19 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
    pr. sæson. Dansk autocomplete har 10 af 10 land/by under «hvad er klokken i»
    (målt 3/10 19:0x). **MÅL:** de 24 URL'er har 0 GSC-ækker endnu (nye 2/10) →
    GSC 17/10 mod `/tidszone` 23.351/101/0,4 %/7,6.
+
+**F0i. [x] ✅ `/dato`-titlen regner nedtællingen** — `ceo/dato-titel` 4/10 04:2x.
+   *Datagrund:* GSC's to største søgninger på `/dato` er «hvor mange dage er
+   der til 1 december» (1.219 v, pos. 5) og «hvor mange dage er der til den
+   24 december» (1.001 v, pos. 5) — begge nedtællinger. Titlen skrev
+   «1. jan. 2026→2027 = 365», altså et interval, håndskrevet og i svensk
+   «dagar kvar till datum: … = 365», der læses som *365 dage kvar*. *Accept:*
+   `dageTilDecember()` regner af `heleDageMellem` (dagens næste 1. december,
+   aldrig «0 dage»), tokenet `{DAGE_TIL_DEC}` fyldes i `medLevendeTekst` for
+   `metaTitle`/`metaDescription`/`ogTitle`/`ogDescription`, og syv nye tests
+   dømmer 4/10, 30/11, 1/12, 2/12, januar og skudåret 2028 i begge sprog.
+   `meta-title-tal` og `title-eksempel` regner titlens tal med samme funktion.
+   **MÅL:** se STATUS.
 
 **F1. [ ] Søgeniveau-data for `/procent`** — 150.470 visninger, 0,1 %, pos 7,4.
 GSC's tre søgninger summerer 364 visninger af 150.470. **Accept:** GSC-eksport
@@ -302,6 +323,9 @@ sidste uundtagede slice er lukket 4/10 01:3x. `/moms` er ⛔ (de 3 lovgrænser,
 
 ## VERIFICÉR DEPLOY-noter
 
+**Åben note 4/10 04:2x:** `VERIFICÉR DEPLOY: <titlen på /dato regner dagene til næste 1. december i da+se> ceo/dato-titel 4/10 04:2x`.
+Døm på **indhold**: `curl -s https://minberegner.dk/dato | grep -oE '<title>[^<]*</title>'` skal give **«Beregn dage til 1. december: NN dage tilbage»**, hvor NN er præcis antallet af kalenderdage fra deploy-dagen til 1. december samme år (58 hvis det er 4/10, 333 hvis det er 2/1 2027) — og **ikke** «→» (`grep -c '→'` **0**). `beraknare.se/dato` skal give «Beräkna dagar till 1 december: NN dagar kvar». Begge tal skal være **identiske på to sider med forskellige klokkeslæt**, altså hentet igen efter 22:00 dansk tid hvis det er nødvendigt; forskel er en fejl i `heleDageMellem`. Næste deploy-vindue 4/10 07:30.
+
 **Dømt på indhold 4/10 04:1x: ingen af de tolv nedenstående noter er live
 endnu.** Alt efter 3/10 17:30-vinduet ligger stadig i docker: `/bil` har 12 rå
 procenter, `/topskat` 4, `/brok` 0 `legend`, `beraknare.se/promille` har stadig
@@ -384,6 +408,10 @@ Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter
   `hiddenDomains` («not yet launched»). Al norsk tekst, også den norske
   dagpenge-linje fra `1174169`, er derfor usynlig for brugere. Skal `beregner.no`
   servere denne app, eller er den norske udgave ikke i drift?
+- ❓ **Ferieåret — tre kilder mere er uafgåengelige (4/10 04:1x).** Efter
+  `retsinformation.dk/api/eli/lta/2020/1146/pdf` (kun SPA-skallen «Retsinformation»),
+  `arbejdsmarkedetsparad.dk/ferie-og-feriepenge/ferie` og `besk.ft.dk/love/eli/2020/1146`
+  (alle tre transport error) er **seks** kilder prøvet. Koden er bevidst urørt.
 - ❓ **Ferieåret er ikke længere 1. september – 31. december (ny, målt
   12:3x).** `page-data.ts:1822` siger «Med den nye ferielov (fra 2020) er
   optjeningsperioden 1. september til 31. august, og ferieåret løber fra

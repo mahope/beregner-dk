@@ -56,6 +56,7 @@ import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import { EKSEMPEL_BARN } from "./arveafgift";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
+import { dageTilDecember } from "./dage-mellem-datoer";
 import { iDagPaSiden } from "./lokal-dato";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
 import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
@@ -1235,10 +1236,10 @@ faqItems: kalorierFaqItems("da"),
       slug: "dato",
       title: "Beregn antal dage mellem to datoer",
       description: "Vælg en startdato og en slutdato. Se straks antal dage, hele uger, ca. måneder, arbejdsdage, helligdage og weekenddage mellem datoerne.",
-      metaTitle: "Beregn dage til en dato: 1. jan. 2026→2027 = 365",
+      metaTitle: "Beregn dage til 1. december: {DAGE_TIL_DEC} tilbage",
       metaDescription: "Hvor mange dage er der til en dato? Tæll antal dage mellem to datoer, ca. måneder, arbejdsdage, helligdage og heluger.",
-      keywords: ["datoberegner", "antal dage mellem to datoer", "dage mellem datoer", "beregn dage", "arbejdsdage beregner", "helligdage 2026", "tilføj dage til dato", "dato kalkulator", "hvor mange dage er der til", "dage tilbage i året"],
-      ogTitle: "Beregn dage til en dato: 1. jan. 2026→2027 = 365",
+      keywords: ["datoberegner", "antal dage mellem to datoer", "dage mellem datoer", "beregn dage", "arbejdsdage beregner", "helligdager 2026", "tilføj dage til dato", "dato kalkulator", "hvor mange dage er der til", "dage tilbage i året"],
+      ogTitle: "Beregn dage til 1. december: {DAGE_TIL_DEC} tilbage",
       ogDescription: "Hvor mange dage er der til en dato? Tæll antal dage mellem to datoer, ca. måneder, arbejdsdage, helligdage og heluger.",
       category: "Hverdag",
       breadcrumbCategory: "Hverdag",
@@ -3826,10 +3827,10 @@ const sePages: Record<string, PageData> = {
       slug: "dato",
       title: "Beräkna antal dagar mellan två datum",
       description: "Välj ett startdatum och ett slutdatum. Se direkt antal dagar, hela veckor, ungefärligt antal månader, arbetsdagar och helgdagar mellan datumen.",
-      metaTitle: "Beräkna dagar kvar till datum: 1 jan. 2026→2027 = 365",
+      metaTitle: "Beräkna dagar till 1 december: {DAGE_TIL_DEC} kvar",
       metaDescription: "Hur många dagar är det kvar till ett datum? Räkna antal dagar mellan två datum, ungefärligt antal månader, arbetsdagar och helgdagar.",
       keywords: ["datumkalkylator", "antal dagar mellan två datum", "dagar mellan datum", "beräkna dagar", "arbetsdagar kalkylator", "helgdagar 2026", "lägg till dagar", "datumräknare", "hur många dagar är det kvar", "dagar kvar till"],
-      ogTitle: "Beräkna dagar kvar till datum: 1 jan. 2026→2027 = 365",
+      ogTitle: "Beräkna dagar till 1 december: {DAGE_TIL_DEC} kvar",
       ogDescription: "Hur många dagar är det kvar till ett datum? Räkna antal dagar mellan två datum, ungefärligt antal månader, arbetsdagar och helgdagar.",
       category: "Vardag",
       breadcrumbCategory: "Vardag",
@@ -4400,7 +4401,7 @@ const allPages: Record<Locale, Record<string, PageData>> = { da: daPages, no: no
  * der læser `headers()` — tallene er altså et rigtigt serverkald og ikke en
  * frossen byggeværdi. Det er samme mønster som `/dato`s nedtællinger.
  */
-const LEVENDE_SIDER = new Set(["alder"]);
+const LEVENDE_SIDER = new Set(["alder", "dato"]);
 
 /** Dagens dato i sidens egen tidszone, så tallene ikke er en dag bag. */
 function referenceDato(locale: Locale): string {
@@ -4413,6 +4414,22 @@ function medLevendeTekst(
   locale: Locale
 ): PageData {
   if (!LEVENDE_SIDER.has(slug)) return side;
+
+  // `/dato` har ét token, `{DAGE_TIL_DEC}`, og det er hele «58 dage» /
+  // «58 dagar». Datoens navn står i titlen selv, fordi det er forskelligt
+  // pr. sprog og ikke ændrer sig med dagen — kun dagene gør det.
+  if (slug === "dato") {
+    const { kort } = dageTilDecember(locale === "se" ? "se" : "da", new Date());
+    const saet = (tekst: string) => tekst.replaceAll("{DAGE_TIL_DEC}", kort);
+    return {
+      ...side,
+      metaTitle: saet(side.metaTitle),
+      metaDescription: saet(side.metaDescription),
+      ogTitle: saet(side.ogTitle),
+      ogDescription: saet(side.ogDescription),
+    };
+  }
+
   const vaerdier = alderSideTekst(referenceDato(locale), locale);
   const saet = (tekst: string) => erstatAlderTokens(tekst, vaerdier);
   return {

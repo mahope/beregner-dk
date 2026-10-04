@@ -30,6 +30,7 @@
  */
 import { describe, expect, test } from "vitest";
 import { beregnBmr, beregnTdee } from "@/lib/makroer";
+import { dageTilDecember } from "@/lib/dage-mellem-datoer";
 import { beregnMoms } from "@/lib/moms";
 import { getPageData } from "@/lib/page-data";
 import { beregnTidsinterval } from "@/lib/tidsberegner";
@@ -55,9 +56,19 @@ const SKAL_HAEVE_EKSEMPEL = [
  * 25 kr.` er et regnestykke. Det afgørende er `=` — ingen af de otte gamle
  * titler havde det, de var alle "Procentberegner – beregn 10 procent af et
  * tal" og "Dage mellem datoer og dage til en dato".
+ *
+ * **To former, begge regnet af koden siden selv bruger.** `/dato` skrev før
+ * 4/10 «1. jan. 2026→2027 = 365» — mellemledet mellem to tal. Fra 4/10 skriver
+ * den «58 dage tilbage» (se `dageTilDecember`), fordi GSC's to største
+ * søgninger på siden er nedtællinger, og en pil mellem to årstal læses i
+ * svensk som «365 dage kvar». Den anden form kræver derfor **måleenheden
+ * lige efter tallet**: uden `dage`/`dagar`/`kr.`/`%` er «Dage til 1. december: 2026»
+ * igen en titel uden svar, hvilket er den fejl de otte gamle titler havde.
  */
 function harUdregnetEksempel(titel: string): boolean {
-  return /\d/.test(titel) && /[=→]/.test(titel);
+  const harMellemledMellemTal = /[=→]/.test(titel);
+  const harSvarMedEnhed = /\d[\d.,]*\s?(dage|dagar|kr\.?|%|timer)\b/.test(titel);
+  return /\d/.test(titel) && (harMellemledMellemTal || harSvarMedEnhed);
 }
 
 describe("titler med et udregnet eksempel", () => {
@@ -129,12 +140,17 @@ describe("tallene i titlerne er rigtige", () => {
     expect(titel).toMatch(/25\b/);
   });
 
-  test("dato: 1. januar 2026 til 1. januar 2027 er 365 dage", () => {
-    const fra = new Date(Date.UTC(2026, 0, 1));
-    const til = new Date(Date.UTC(2027, 0, 1));
-    expect((til.getTime() - fra.getTime()) / 86_400_000).toBe(365);
+  // Titlen på /dato (131.320 visninger, 0,7 % CTR) skrev før 4/10
+  // «1. jan. 2026→2027 = 365» — et interval på en nedtællingsside, håndskrevet
+  // som bogstaver. Nu regner den nedtællingen til næste 1. december, så porten
+  // dømmer *dagens* tal og ikke et gammelt.
+  test("dato: titlen regner dagene til 1. december", () => {
+    const { dage, decemberTekst } = dageTilDecember("da", new Date());
     const titel = getPageData("dato", "da")!.metaTitle;
-    expect(titel).toMatch(/365/);
+    expect(titel).toContain(decemberTekst);
+    expect(titel).toContain(`${dage} dage`);
+    // Ikke længere et interval: pilen var den del, der læst som «365 dage kvar».
+    expect(titel).not.toMatch(/→/);
   });
 
   test("bmi: 75 kg og 1,75 m er BMI 24,5", () => {

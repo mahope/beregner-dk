@@ -2,6 +2,7 @@ import { describe, test, expect } from "vitest";
 import { getPageData } from "./page-data";
 import { kvadratmeterEksempelLignelse } from "./kvadratmeter-eksempler";
 import { alderLevet } from "./alder-levet";
+import { dageTilDecember } from "./dage-mellem-datoer";
 import { iDagISidensTidszone } from "./lokal-dato";
 import { formatNumber } from "./format";
 import type { Locale } from "./i18n";
@@ -75,7 +76,15 @@ const REGNETE_EKSEMPLER: {
   { slug: "promille", resulter: { da: "4 øl på 80 kg = 0,88 ‰", se: "4 öl på 80 kg = 0,88 ‰" } },
   { slug: "braendstof", resulter: { da: "500 km benzin koster 450 kr.", se: "500 km bensin kostar 585 kr.", no: "500 km bensin koster 450 kr." } },
   { slug: "procent", resulter: { da: "10 % af 250 = 25 kr.", se: "10 % av 250 kr = 25 kr" } },
-  { slug: "dato", resulter: { da: "1. jan. 2026→2027 = 365", se: "1 jan. 2026→2027 = 365" } },
+  {
+    slug: "dato",
+    // Titlens dagstal skifter hver dag, så porten regner dem med samme
+    // funktion som siden — ellers blev den rød hver 1. december.
+    resulter: {
+      da: `1. december: ${dageTilDecember("da", new Date()).kort} tilbage`,
+      se: `1 december: ${dageTilDecember("se", new Date()).kort} kvar`,
+    },
+  },
   { slug: "tidsberegner", resulter: { da: "08:30 til 16:45 = 8 t 15 min", se: "08:30 till 16:45 = 8 t 15 min" } },
   { slug: "tidszone", resulter: { da: "12 i Danmark = 06 i New York, USA", se: "12 i Sverige = 06 i New York, USA" } },
   { slug: "moms", resulter: { da: "1.000 kr. ekskl. moms + 25 % = 1.250 kr.", se: "1 000 kr. exkl. moms + 25 % = 1 250 kr." } },

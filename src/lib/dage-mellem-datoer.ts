@@ -76,6 +76,71 @@ function datoTekst(iso: string, locale: DageMellemLocale): string {
 }
 
 /**
+ * Den næste 1. december, regnet fra i dag — titlen på `/dato` i begge sprog.
+ *
+ * **Hvorfor en nedtælling og ikke et interval.** GSC 3/9–1/10 giver
+ * «hvor mange dage er der til 1 december» (1.219 visninger, pos. 5) og «hvor
+ * mange dage er der til den 24 december» (1.001, pos. 5) som de to største
+ * søgninger på `/dato` (131.320 visninger, 0,7 % CTR) — begge er
+ * nedtællinger. Titlen skrev før 4/10 «Beregn dage til en dato: 1. jan.
+ * 2026→2027 = 365», altså et *interval* på en nedtællingsside, og på svensk
+ * «Beräkna dagar kvar till datum: 1 jan. 2026→2027 = 365», der læses som
+ * «365 dage kvar» og dermed er **falsk for enhver dato**. Dertil var «2026→2027»
+ * og «= 365» håndskrevne bogstaver: fra 2028 er intervallet 1. jan. 2028→2029 =
+ * 366 dage, og titlen ville stadig sige 365.
+ *
+ * Derfor regnes dagene her, af `heleDageMellem` — samme funktion
+ * `dageMellemEksempel` og `DatoBeregner` bruger — og månedens navn læses fra
+ * `Intl`, så tallet og datoen ikke kan glide fra hinanden eller fra siden.
+ */
+export interface DageTilDecember {
+  /** "YYYY-MM-DD" for den 1. december der regnes til. */
+  decemberIso: string;
+  /** "1. december" / "1 december" — samme form som resten af siden. */
+  decemberTekst: string;
+  /** Hele kalenderdage fra i dag til den 1. december. */
+  dage: number;
+  /** "58 dage" / "58 dagar" — kortformen der står i `<title>`. */
+  kort: string;
+}
+
+/**
+ * Næste 1. december. På selve 1. december regnes der til næste års, så titlen
+ * aldrig siger «0 dage».
+ */
+export function dageTilDecember(
+  locale: DageMellemLocale,
+  today: Date
+): DageTilDecember {
+  const iDag = iDagPaSiden(today, locale);
+  const aar = Number(iDag.slice(0, 4));
+  const iDenneAar = `${aar}-12-01`;
+  // ISO-datoer sorterer rigtigt som tekst, så dette også gælder når
+  // `iDag` LIGGER på 1. december — da er «i dag» ikke «senere».
+  const decemberIso = iDag >= iDenneAar ? `${aar + 1}-12-01` : iDenneAar;
+  const fra = parseIsoDato(iDag);
+  const til = parseIsoDato(decemberIso);
+  // `iDagPaSiden` kan ikke give en ugyldig dato, men `parseIsoDato` siger det
+  // alligevel med sit typer: en `null` her må ikke blive `NaN` i `<title>`.
+  const dage = fra && til ? heleDageMellem(fra, til) : 0;
+  // Kun dag og måned, fordi titlen skriver «1. december» og ikke «1. december
+  // 2027» — og fordi året skifter med dagen, så et årstal her ville kunne blive
+  // forældet i en titel der ellers er rigtig.
+  const decemberTekst = til
+    ? til.toLocaleDateString(getIntlLocale(locale), {
+        day: "numeric",
+        month: "long",
+      })
+    : "1. december";
+  return {
+    decemberIso,
+    decemberTekst,
+    dage,
+    kort: locale === "se" ? `${dage} dagar` : `${dage} dage`,
+  };
+}
+
+/**
  * Den danske periode: 1. januar i år → 1. januar næste år. Den er valgt, fordi
  * svaret er det tal folk oftest vil bekræfte ved et skudår, og fordi den er
  * 365 eller 366 dage — altså et tal der *skal* kunne aflæses mod en kalender.

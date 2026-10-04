@@ -9,6 +9,7 @@ import { forkortBrok } from "./brok";
 import { alderLevet, formatDageLived } from "./alder-levet";
 import { formatAlder } from "./alder-eksempler";
 import { formatBelob, formatNumber, getIntlLocale } from "./format";
+import { dageTilDecember } from "./dage-mellem-datoer";
 import { iDagISidensTidszone } from "./lokal-dato";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import {
@@ -795,7 +796,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Beregn dage til en dato: 1. jan. 2026→2027 = 365",
+      titel: "Beregn dage til 1. december: {DAGE_TIL_DEC} tilbage",
       heading: "Beregn antal dage mellem to datoer",
       intent: "antal dage mellem to datoer",
       answer: "Vælg en startdato og en slutdato",
@@ -804,7 +805,7 @@ describe("getPageData", () => {
     },
     {
       locale: "se" as const,
-      title: "Beräkna dagar kvar till datum: 1 jan. 2026→2027 = 365",
+      titel: "Beräkna dagar till 1 december: {DAGE_TIL_DEC} kvar",
       heading: "Beräkna antal dagar mellan två datum",
       intent: "antal dagar mellan två datum",
       answer: "Välj ett startdatum och ett slutdatum",
@@ -813,8 +814,12 @@ describe("getPageData", () => {
     },
   ])(
     "has answer-first date metadata for $locale",
-    ({ locale, title, heading, intent, answer, months, countdown }) => {
+    ({ locale, titel, heading, intent, answer, months, countdown }) => {
       const data = getPageData("dato", locale)!;
+      // Titlens dagtal regnes hver dag, så testen regner det samme tal i stedet
+      // for at skrive «58» — ellers ville porten blive rød hver 1. december.
+      const { kort } = dageTilDecember(locale, new Date());
+      const title = titel.replaceAll("{DAGE_TIL_DEC}", kort);
 
       expect(data.title).toBe(heading);
       expect(data.metaTitle).toBe(title);
@@ -838,7 +843,7 @@ describe("getPageData", () => {
       // om noget andet. Beskrivelsen SKAL desuden begynde med spørgsmålet
       // og ikke gentage titlen: de to var ens, hvilket koster halve
       // snippet-pladsen på det samme "se mere"-link.
-      expect(data.metaTitle).toMatch(/dage til en dato|kvar till datum/);
+      expect(data.metaTitle).toMatch(/dage til 1\. december|dagar till 1 december/);
       expect(data.metaDescription.startsWith(countdown)).toBe(true);
       expect(data.metaDescription).not.toBe(data.metaTitle);
     }
