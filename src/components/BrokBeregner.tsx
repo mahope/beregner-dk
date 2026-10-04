@@ -22,7 +22,7 @@ const labels = {
     regnBody:
       "Plus og minus skal have ens nævnere, så den mindste fællesnævner lægges under. Gange og dele skal ikke — dele vender den anden brøk.",
     chooseRule: "Vælg regel",
-    firstFraction: "Det første brøk",
+    firstFraction: "Den første brøk",
     secondFraction: "Den anden brøk",
 
     firstNumerator: "Første tæller",

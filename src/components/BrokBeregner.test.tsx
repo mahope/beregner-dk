@@ -64,7 +64,7 @@ function felterUnderLegend(container: HTMLElement, legend: string): string[] {
 afterEach(cleanup);
 
 describe.each([
-  { locale: "da" as Locale, vaelg: "Vælg regel", foerste: "Det første brøk", anden: "Den anden brøk" },
+  { locale: "da" as Locale, vaelg: "Vælg regel", foerste: "Den første brøk", anden: "Den anden brøk" },
   { locale: "se" as Locale, vaelg: "Välj regel", foerste: "Det första bråket", anden: "Det andra bråket" },
 ])("/brok grupperne ($locale)", ({ locale, vaelg, foerste, anden }) => {
   test("regelknapperne har egen legend, og hver brøk har sin egen", () => {

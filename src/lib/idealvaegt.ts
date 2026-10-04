@@ -50,9 +50,11 @@ export type Koen = "mand" | "kvinde";
 
 /**
  * Højden kommer fra et felt, så den kan ikke være 0 eller negativ. Grænsen er
- * sat, fordi begge formler er lineære og dermed giver negative tal for meget
- * korte mennesker — 90 cm ville give 6,8 kg. Værktøjet og siden bruger samme
- * grænser, så et felt aldrig kan vise en værdi, formlen ikke kan regne på.
+ * sat, fordi formlerne er beregnet på voksne og derfor skal ekstrapoleres under
+ * dem: en mand på 104 cm regner ud på **6,8 kg** i Devines formel og **-4,8 kg**
+ * i Hamwis, og de fire formler krydser nul mellem 96,5 og 108,4 cm. Værktøjet
+ * og siden bruger samme grænser, så et felt aldrig kan vise en værdi, formlen
+ * ikke kan regne på.
  */
 export const MIN_HOEJDE_CM = 130;
 export const MAX_HOEJDE_CM = 220;

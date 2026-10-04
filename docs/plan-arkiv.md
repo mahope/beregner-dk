@@ -28819,3 +28819,184 @@ side — samme flakiness som STATUS noterer.
 
 **MÅL:** `/braendstof` 256 besøgende/28d (4/10) → Plausible 18/10;
 GSC 17/10 mod 16.518 visninger / 174 klik / 1,1 % CTR / pos. 5,9.
+
+## Fra planen 4/10 05:0x — lukkede blokke (planen skåret under 40 KB)
+
+Udtrukket ordret fra `IMPLEMENTATION_PLAN.md` 4/10 05:0x, da planen nåede 39,3 KB
+og CEO-kontrakten kræver under 40 KB. Indholdet er uændret; kun det fysiske
+sted er ændret.
+
+## CEO-kø punkt 0 — [x] ✅ alle otte lukket (verificeret i koden 4/10 01:0x)
+
+Målt i `HEAD`, punkt for punkt: `docs/plan-arkiv.md`.
+**F0/F0b/F0c/F0f. [x] ✅ Fire lukkede titelpunkter samlet** (se
+   `docs/plan-arkiv.md`): hreflang-skråstreg på `/dato` (modbevist: 0 af 15
+   sider har skråstreg, `page-helpers.ts` bygger `${baseUrl}/${slug}`); regnet
+   eksempel i `metaTitle` for `/alder` og `/tidszone`; titelsporten rettet til at
+   dømme **resultatet** pr. sprog i stedet for «der står et tal» (rettet efter
+   review-fund); alle sprogslagte stier dømmes mod både ruten og sitemap.
+
+**F0h. [x] ✅ Regnet svar i titlen på de 24 `/klokken-i`-landesider** —
+   `ceo/klokken-titler` 3/10 19:2x. Hver titel har byens **regnede** klokkeslæt
+   fra `tidsforskelMinutter` og er `absolute`; to nye tests dømmer pr. sprog og
+   pr. sæson. Dansk autocomplete har 10 af 10 land/by under «hvad er klokken i»
+   (målt 3/10 19:0x). **MÅL:** de 24 URL'er har 0 GSC-ækker endnu (nye 2/10) →
+   GSC 17/10 mod `/tidszone` 23.351/101/0,4 %/7,6.
+
+**F0i. [x] ✅ `/dato`-titlen regner nedtællingen** — `ceo/dato-titel` 4/10 04:2x.
+   *Datagrund:* GSC's to største søgninger på `/dato` er «hvor mange dage er
+   der til 1 december» (1.219 v, pos. 5) og «hvor mange dage er der til den
+   24 december» (1.001 v, pos. 5) — begge nedtællinger. Titlen skrev
+   «1. jan. 2026→2027 = 365», altså et interval, håndskrevet og i svensk
+   «dagar kvar till datum: … = 365», der læses som *365 dage kvar*. *Accept:*
+   `dageTilDecember()` regner af `heleDageMellem` (dagens næste 1. december,
+   aldrig «0 dage»), tokenet `{DAGE_TIL_DEC}` fyldes i `medLevendeTekst` for
+   `metaTitle`/`metaDescription`/`ogTitle`/`ogDescription`, og syv nye tests
+   dømmer 4/10, 30/11, 1/12, 2/12, januar og skudåret 2028 i begge sprog.
+   `meta-title-tal` og `title-eksempel` regner titlens tal med samme funktion.
+   **MÅL:** se STATUS.
+**F2 + F2b. [x] ✅** rabat-spørgsmål + svensk rabatt-FAQ — `docs/plan-arkiv.md`.
+**MÅL:** `/procent` 150.470 / 97 / 0,1 % / 7,4 (da), 26.933 / 2 / 0,0 % / 9,9 (se).
+**F4. [x] ✅** dobbelerede stribe væk — `docs/plan-arkiv.md`. **MÅL:** `/` 218
+besøgende/28d, bounce 38 % → mod 2-7 %.
+**F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
+dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
+**F5g. [x] ✅ Lukket 3/10 23:0x** (loft 319 → 274 → 261 → 231). De fem
+navne-undtagelser («30% reglen» ×2, «4%-reglen») står uændret. Se arkivet.
+- **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
+  *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
+  *Datagrund:* dansk autocomplete **nr. 1** under «hvor meget» målt 3/10, og
+  `/su` **falder** (201 → 127 besøgende/28d) selv om spørgsmålet er helt
+  sæsonbetonet. `grep -rn "fælleshold" src/` gav **0 træffere**: indtægtsgrænsen
+  var en tabel, ikke et svar. *Accept:* uddannelse + SU-måneder + status i de
+  øvrige måneder + børn under 18 + handicaptillæg → **årsfribeløb**, pr. måned
+  og før AM-bidrag, alle tal fra `SU_2026.freeAllowance`, med su.dk's egen
+  præcisering om at året måles som helhed. **MÅL:** `/su` 127 besøgende/28d
+  (3/10) → Plausible 17/10.
+- **⛔ Lukket og modbevist 3/10 10:0x — «SU-fælleshold».** Der findes ingen
+  fællesholdsgrænse: su.dk's fribeløbs- og indkomstsider har **0** fund af
+  «fællesøkonomi»/«partner», og reglen er «Din egenindkomst må ikke være
+  større end dit årsfribeløb». Uden den var opgaven ubyggelig, så den er
+  erstattet af værktøjet ovenfor i stedet for at blive gættet.
+**F5e. [x] ✅ Målte decimaler med punktum i dansk tekst** — lukket 3/10 12:3x
+med kommune-listen. ⛔ Resten er den samme fejl ét sted længere ned på siden:
+kommune-listen skriver stadig «Gentofte (22.8 %)» med punktum, fordi den går
+gennem `KOMMUNER`-dataene. Tages først når en port dømmer den.
+**F5d. [x] ✅ `procent-forside-feriepenge`** — 0 `\d%` i markupken på
+forsiden og `/feriepenge`, målt i den renderede komponent i da/se/no.
+- **[x] ✅ Syv lukkede feature-punkter samlet** (se `docs/plan-arkiv.md`):
+  `/leasing`'s restværdi-sammenligning (2/10), `/dage-til` + `/dagar-till`-hubben
+  (2/10), `/klokken-i` + `/klockan-i`-hubben (2/10), `/afstand-mellem-adresser`
+  (3/10), `/dage-mellem-datoer` + `/dagar-mellan-datum` (3/10), `/dage-i-aaret` +
+  `/dagar-i-aret` (3/10) og `/timer-i-aret` + `/timmar-i-aret` (3/10). Alle otte
+  måler på 0 i dag — de er nye URL'er — og deres MÅL-tall står i arkivet.
+- **⛔ Målt og modbevist 3/10 08:1x — «bloggen mangler CTA».** Hypotesen bag
+  85 % bounce på `/blog/barsel-2026-regler-og-satser` er modbevist: alle 30
+  indlæg har et `NaesteSkridt`-kort med et konkret verb, og barsel-indlægget
+  linker desuden til `/barselsdagpenge`, `/barselsplanlaegger` og
+  `/boernepenge`. Bounce skal findes et andet sted (formular-længde? intet i
+  topfolden? planlæggeren er ny?) — målt før der bygges.
+- **[x] ✅ Fire lukkede feature-punkter samlet** (se `docs/plan-arkiv.md`):
+  de fire regneregler på `/brok` (3/10, MÅL 4.865/34/0,7 %/5,1 → GSC 17/10),
+  folkepensionsalder-værktøjet på `/pension` (4/10, MÅL 142 besøgende/28d →
+  Plausible 18/10), regnet eksempel i titlen på `/renteberegner` og
+  `/arveafgift` (3/10, MÅL 12.610/107/0,8 %/7,4 → GSC 17/10) og Ironman-total i
+  `/pace` (`3720dea`).
+- **[x] ✅ Idealvægt-værktøjet på `/idealvaegt`** — `ceo/idealvaegt-beregner`
+  4/10. *Hvem:* alle der googler «idealvægt kvinde 175 cm», «idealvægt mænd
+  alder», «idealvægt mand 175 cm» — 10 af 10 danske completioner under
+  «idealvægt» er et højde- og kønsspecifikt tal (målt 4/10 03:0x), og der var
+  ingen beregner på sitet. *Datagrund:* `/bmi` er næststørste side (950
+  besøgende/28d, **−21 %**) og svarer på det andet spørgsmål; `/vaegttab`
+  og `/kropsfedt` ligger i samme klynge. *Accept:* Devine (1974) **og** Hamwi
+  (1964) ved siden af hinanden med gennemsnit og spredning, BMI-interval fra
+  `bmi-voksen-grænser.ts`, kildetekst med begge dokumenter, alle tal i
+  title/description/FAQ regnet fra `idealvaegt.ts`, da+se, kort på begge
+   forsider og i kategorien Sundhed, `/bmi` peger på den. **MÅL:** nye URL'er
+  har 0 GSC-ækker → GSC 17/10; `/bmi` 950 besøgende/28d → Plausible 18/10.
+
+- **[x] ✅ Lånebeløb-tabel på `/renteberegner`** — `ceo/laanebeloeb-tabel` 4/10.
+  *Hvem:* alle der googler «hvor meget koster det at låne 1 million» — seks af ti
+  danske completioner under «hvor meget koster det at låne» er konkrete beløb
+  (målt 4/10 02:2x). *Datagrund:* `/renteberegner` 12.610 visninger / 107 klik /
+  **0,8 % CTR** / pos. 7,4, og værktøjet svarer kun når beløbet er tastet ind.
+  *Accept:* otte beløb (100.000 → 5 mio.) som rækker med månedsydelse, samlet
+  rente, at betale i alt og renteandel, regnet med **læserens egen** rente og
+  løbetid, da+se, `overflow-x-auto`, `sr-only`-caption, `scope` på alle `th`,
+  «48 %» med mellemrum. **MÅL:** `/renteberegner` 12.610/107/0,8 %/7,4 →
+  GSC 17/10.
+
+- **[x] ✅ Brændstoffpris pr. afstand 50 → 2.000 km på `/braendstof`** —
+  `ceo/braendstof-afstandstabel` 4/10 03:5x. *Hvem:* alle der googler «hvad
+  koster benzin i dag» — dansk autocomplete-træffer **4 af 10** under «hvad
+  koster» (målt 4/10 03:3x). *Datagrund:* `/braendstof` 16.518 GSC-visninger,
+  **256 besøgende/28d (+58 %)**, CTR 1,1 %, pos. 5,9, «benzin beregner»
+  130 visninger **pos. 2**. *Accept:* rækkerne 1.500 og 2.000 km tilføjet, så
+  både ferietur og pendling (sidens eget årstal er 15.000 km) er dækket; hver
+  celle `heleKroner(prisPrKm × km)`, altså **samme enhed** som «Sådan regner
+  du»-tabellen, så de to kan læses mod hinanden; `sr-only`-caption bygget af
+  tabellens **egne** afstande (regnestykker-porten tæller håndskrevne
+  tusindtal), `scope="col"`/`scope="row"`, `tabular-nums`; 6 nye tests i
+  `BraendstofBeregner.test.tsx` i da+se. **MÅL:** `/braendstof` 256
+  besøgende/28d → Plausible 18/10; GSC 17/10 mod 16.518/174/1,1 %/5,9.
+## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
+
+Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
+blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
+
+**Åben række (strenglisten):** næste fil skal måles på ny. Loftene og de
+lukkede filers målinger står i `docs/plan-arkiv.md`.
+**Åbne F5b-slice: ingen — `/flyttebudget` er lukket 3/10 18:4x**, og F5c's
+sidste uundtagede slice er lukket 4/10 01:3x. `/moms` er ⛔ (de 3 lovgrænser,
+❓ nedenfor), og de to største F5c-filer er ⛔ regelnavne.
+
+## 4/10 05:0x — `ceo/review-fund-idealvaegt-og-sprog`: fire fund fra review 04:2x
+
+**MIDDEL — «175 cm 175 cm» i `/idealvaegt`s titel.** `IDEALVAEGT_EKSEMPEL_175`
+er bygget med højden (`` `… kg ved ${IDEALVAEGT_CM} cm` ``), og `metaTitle` og
+`ogTitle` satte så « 175 cm» til igen. Rettelse: skabelonen bruger
+`IDEALVAEGT_EKSEMPEL_175` som hele streng. Målt før: `getPageData("idealvaegt",
+"da")` → `Idealvægt beregner: 72 kg ved 175 cm 175 cm` i begge felter; svensk
+`metaTitle` skrev tallet selv og havde ingen dobbelt.
+
+**Port.** `/idealvaegt` lagt i `REGNETE_EKSEMPLER` — men `toContain` kan **ikke**
+se dobbeltgængen, fordi «72 kg ved 175 cm» stadig er et substring af den gamle
+titel (målt: mutationen til `999 cm og en helt forkert regning` gav 40/40 grøn
+hos reviewer). Derfor kom en **bigram-port**: ingen to ordrækker i træk i nogen
+titel i tabellen, dømt for alle 15 slugs i da/se/no (70 tests i filen).
+Mutationen tilbage på den gamle skabelon gør den rød med «gentager 175 cm».
+De øvrige 14 titler har ingen dobbeltgæng (dømt af porten).
+
+**LAV — dansk «på» i svensk caption.** `BraendstofBeregner.tsx:104` skrev
+«Pris **på** bensin, diesel och el för sträckor från …». Rettet til «för» i
+komponent **og** i testens forventning.
+
+**LAV — docblocken i `idealvaegt.ts` regnede forkert.** Den sagde «90 cm ville
+give 6,8 kg». Kørt i Node mod de fire formler: 104 cm mand giver Devine 6,8 og
+Hamwi -4,8; 90 cm giver -5,8 og -119,4. Null-krydsningerne er 96,5 (Devine
+mand), 101,5 (Devine kvinde), 101,6 (Hamwi kvinde) og 108,4 cm (Hamwi mand).
+Docblocken siger nu det og kalder grænsen 130 for det den er: formlerne er
+beregnet på voksne.
+
+**LAV — «Det første brøk».** Brøk er fælleskøn, så «**Den** første brøk» — samme
+nøgle på samme sted (`secondFraction`) sagde det rigtigt. Rettet i komponent og
+i `BrokBeregner.test.tsx:67`. Dansk `regnBody` havde allerede «fællesnævner» i
+ét ord.
+
+### Målt og modbevist 4/10 05:0x — «se-tekst-portens ordliste kan ikke se denne
+### fejlklasse, fordi »på« er et rigtigt svensk ord»
+
+Revieweren foreslog at lægge komponenttekster ind i `se-tekst`-portens ordliste.
+Målt: «på» i `DANSKE_ORD` gør porten rød med **40 fund på 8 svenske sider**, og
+alle 40 er **ægte svensk**: «En person på 75 kg», «På energi är en elbil nästan
+alltid billigare», «Hur mycket sparar man på en elbil per år?». Svensk «på» er
+præpositionen i/på, ikke dansk lækage. Fejlen i captionen er derfor ikke et
+lækage-fund, men et **ordvalg** i én bestemt sætning: «pris på bensin» er
+dansk, «pris för bensin» er svensk. Ingen ordliste kan dømme det generelt, så
+låsen er den eksakte streng i `BraendstofBeregner.test.tsx` (mutationen «på» →
+«för» giver 5 røde, målt af reviewer). `scripts/locale-leak.mjs` ser heller ikke
+den, fordi den kun finder strenge **udenfor** `da:`/`se:`/`no:`-objekter — den
+fejl lå *inde i* `se:`-objektet.
+
+**Port.** Hele suiten grøn: 269 filer, 4.285 tests. Typecheck og `biome lint`
+uden fund. `git diff | grep -cE '^\+.*\$[0-9]'` = 0 (punkt 13).

@@ -101,7 +101,7 @@ export default function BraendstofBeregner() {
       perYear: "Per år (15 000 km)",
       perMonth: "Per månad",
       compareTitle: "Jämför bränslepriser",
-      compareCaption: (locale: Locale) => `Pris på bensin, diesel och el för sträckor från ${afstandsOmraade(locale)}`,
+      compareCaption: (locale: Locale) => `Pris för bensin, diesel och el för sträckor från ${afstandsOmraade(locale)}`,
       colDistance: "Sträcka",
       colBenzin: `Bensin (${F.benzin.kmPerLiter} km/l)`,
       colDiesel: `Diesel (${F.diesel.kmPerLiter} km/l)`,

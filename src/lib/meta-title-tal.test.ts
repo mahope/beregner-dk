@@ -27,6 +27,12 @@ import type { Locale } from "./i18n";
  * «beregn månedsydelse på annuitetslån» — altså den sprogfejl, F0e også
  * fandt på de fire største sider.
  *
+ * `/idealvaegt` stod i tabellen 4/10 uden GSC-række: den er en ny URL, så
+ * den har 0 visninger, og der er altså ingen CTR at måle endnu. Den er
+ * med, fordi porten her også dømmer **formen** på titlen og ikke kun tallene —
+ * dobbeltgængen i review-fundet 4/10 04:2x nåede Google, fordi ingen port
+ * så den.
+ *
  * Mønsteret er et brud på positionen: de to sider med eksempel på pos. 7,6-7,8
  * har 1,1-1,6 % CTR, og de to sider med spørgsmålstitel på pos. 7,2-7,6 har
  * 0,4 %. Så det er ikke placeringen, der afgør om folk klikker.
@@ -100,6 +106,11 @@ const REGNETE_EKSEMPLER: {
   // blogindlæget lå over beregnersiden. Summen kommer fra `satsForAlder` — samme
   // funktion værktøjet bruger — så titlen ikke kan love en anden sum.
   { slug: "boernepenge", resulter: { da: "2 børn (5 og 9 år) = 7.590 kr./kvartal" } },
+  // `/idealvaegt` skrev «… 72 kg ved 175 cm 175 cm» (review-fund 4/10 04:2x):
+  // `IDEALVAEGT_EKSEMPEL_175` er selv bygget med højden, og titlen satte så
+  // « 175 cm» til igen. Titlen lå i Googles og i fanebladet, så porten dømmer
+  // både regnestykket og dobbeltgængen (se bigram-testen nedenfor).
+  { slug: "idealvaegt", resulter: { da: "72 kg ved 175 cm", se: "72,0 kg vid 175 cm" } },
 ];
 
 type SprogOgResultat = { slug: string; locale: Locale; resultat: string };
@@ -140,6 +151,31 @@ describe("regnet eksempel i metaTitle", () => {
       expect(data!.metaTitle).not.toMatch(/\{[A-Z]+\}/);
       expect(data!.metaTitle).toContain(`= ${aar} år`);
       expect(data!.ogTitle).toBe(data!.metaTitle);
+    },
+  );
+
+  /**
+   * Et regnestykke må ikke gentage sig selv. `/idealvaegt` skrev
+   * «Idealvægt beregner: 72 kg ved 175 cm **175 cm**» (review-fund 4/10 04:2x),
+   * fordi eksempelstrengen selv ender på «ved 175 cm», og skabelonen satte så
+   * højden til igen.
+   *
+   * `toContain` kan **ikke** se den slags: dobbeltgængen er stadig et substring
+   * af den forventede regning, så rækken ovenfor er grøn på den gamle kode —
+   * målt 4/10 04:2x. Derfor dømmer porten her på *ordenes bigrammer*: to
+   * identiske ordrækker i træk er aldrig mening i en titel, og ingen af de 15
+   * øvrige titler i tabellen har en (dømt mod hele listen 4/10).
+   */
+  test.each(MALTE_SIDER.map((r) => [r.slug, r.locale] as const))(
+    "/%s (%s) gentager ikke sit eget regnestykke",
+    (slug, locale) => {
+      const data = getPageData(slug, locale);
+      expect(data, `getPageData("${slug}", "${locale}") skal finde siden`).toBeDefined();
+      const ord = data!.metaTitle.split(/\s+/).filter(Boolean);
+      const gentaget = ord
+        .map((o, i) => ord.slice(i, i + 2).join(" "))
+        .filter((bigram, i, alle) => alle.indexOf(bigram) !== i);
+      expect(gentaget, `«${data!.metaTitle}» gentager ${gentaget.join("» og «")}`).toEqual([]);
     },
   );
 

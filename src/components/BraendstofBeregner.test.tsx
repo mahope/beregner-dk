@@ -36,7 +36,7 @@ function renderBraendstof(locale: "da" | "se") {
 function sammenligning(locale: "da" | "se"): HTMLElement {
   const forventet =
     locale === "se"
-      ? "Pris på bensin, diesel och el för sträckor från 50 till 2 000 km"
+      ? "Pris för bensin, diesel och el för sträckor från 50 till 2 000 km"
       : "Pris på benzin, diesel og el for afstande fra 50 til 2.000 km";
   const tbl = screen
     .getAllByRole("table")
