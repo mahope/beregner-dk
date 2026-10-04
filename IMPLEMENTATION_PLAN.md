@@ -1,32 +1,24 @@
-STATUS: 4/10 03:1x. ✅ **Idealvægt-værktøj på `/idealvaegt`** —
-        `ceo/idealvaegt-beregner`. Dansk autocomplete har 10 af 10 træffere
-        under «idealvægt», og de er næsten alle «idealvægt kvinde 175 cm» og
-        «idealvægt mænd alder» (målt 4/10 03:0x). Der var ingen beregner på
-        sitet, kun `/bmi` som regner *forholdet*. Nu regner værktøjet Devines
-        (1974) og Hamwis (1964) og viser dem begge plus deres gennemsnit,
-        fordi de er 3,6 kg fra hinanden ved 180 cm — ét tal ville være en
-        løgn. BMI-intervallet kommer fra sitets egen WHO-tabel, så de to
-        sider ikke kan sige hver sit om normalvægt. Alle tal i titel,
-        description og FAQ er regnet fra `idealvaegt.ts`, ikke skrevet i
-        hånden. Mutation: formelgrundværdier og BMI-intervallet dømt mod
-        håndskrevne tal. Gate: typecheck, lint (768 filer), **4242 tests /
-        267 filer**, build.
-        ✅ 4/10 02:3x: **Lånebeløb-tabel på `/renteberegner`** —
-        `ceo/laanebeloeb-tabel`. «Hvor meget koster det at låne» er seks af ti
-        danske autocomplete-træffere om et *beløb* (målt 4/10 02:2x), men
-        værktøjet svarer kun når beløbet er tastet ind. Nu står otte beløb
-        (100.000 → 5 mio.) som rækker, regnet med læserens egen rente og
-        løbetid, så tabellen og resultatkortene ikke kan sige hver sit.
-        Formlerne flyttede fra `useMemo` til `src/lib/laanebeloeb.ts`; testen
-        fandt 1,2e-14 rente-støv ved 0 % og rettelsen kom i kilden.
-        Mutation: **3, 2, 3, 3 og 1 røde**. Gate: typecheck, lint (764),
-        **4220 tests / 266 filer**, build. → `docs/plan-arkiv.md`.
-        ✅ 4/10 01:5x: ✅ 4/10 01:3x: ✅ 4/10 01:0x: ✅ 4/10 00:5x: ✅ 4/10
-        00:1x: se `docs/plan-arkiv.md`.
-        ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i `vitest.config.ts`):
-        4/10 01:47 gav 11 røde, køringer før og efter var grønne.
-        PR-TJEK: 4/10 02:0x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-        start (`e456654`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+STATUS: 4/10 03:5x. 📋 **Research-iteration, ingen kode.** CEO-køens punkt 0
+         er helt lukket, og *alle* åbne Feature-kø-punkter var ⛔ blokeret af en
+         ❓, så denne iteration målte fire nye huller i dansk autocomplete for at
+         fylde køen med noget bygbart i stedet for at gætte. Målingerne ligger i
+         `## Feature-kø` (4/10 03:2x-03:4x). ⏱️ **Forhastet:** det kom ikke
+         længere til at kode noget, fordi fire målinger slugte 25 min — næste
+         iteration tager den første bygbare, **brændstoffpris-pr. afstand** på
+         `/braendstof` (ren matematik på `prisPrKm`, ingen ny kilde).
+         ✅ 4/10 03:1x: idealvægt-værktøjet på `/idealvaegt`
+         (`ceo/idealvaegt-beregner`, Devine + Hamwi, WHO-interval fra sitets
+         egen tabel, alle tal regnet fra `idealvaegt.ts`).
+         ✅ 4/10 02:3x: lånebeløb-tabel på `/renteberegner`
+         (`ceo/laanebeloeb-tabel`, otte beløb med læserens rente og løbetid).
+         ✅ 4/10 01:5x: folkepensionsalder-værktøjet på `/pension`.
+         ✅ 4/10 01:3x: mellemrum i 25 procenter i boligkøbsguiden + 10
+         drikkeknapper. ✅ 4/10 01:0x / 00:5x / 00:1x: se `docs/plan-arkiv.md`.
+         ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i
+         `vitest.config.ts`): 4/10 01:47 gav 11 røde, køringer før og efter var
+         grønne.
+         PR-TJEK: 4/10 03:2x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
+         start (`100b4b2`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
 
 ## CEO-kø punkt 0 — [x] ✅ alle otte lukket (verificeret i koden 4/10 01:0x)
 
@@ -252,6 +244,38 @@ er brugt på de to seneste features.
   «48 %» med mellemrum. **MÅL:** `/renteberegner` 12.610/107/0,8 %/7,4 →
   GSC 17/10.
 
+- **[ ] Målt 4/10 03:4x — `brændstoffpris pr. afstand` på `/braendstof`** (først
+  i køen, **bygbar uden ny kilde**). *Hvem:* alle der googler «hvad koster benzin
+  i dag» — den er dansk autocomplete-træffer **4 af 10** under «hvad koster»,
+  sammen med «hvad koster diesel i tyskland» (målt 4/10 03:3x). *Datagrund:*
+  `/braendstof` 16.518 GSC-visninger, **256 besøgende/28d (+58 %)**, CTR 1,1 %,
+  pos. 5,9, og GSC-søgningerne «benzin beregner» 130 visninger **pos. 2**,
+  «brændstof beregner» 93 visninger pos. 6. *Accept:* afstandstabel 50 → 2.000
+  km × benzin/diesel/el, hver celle `prisPrKm(type) × km` — altså **samme
+  funktion som værktøjet**, så tabellen og resultatkortet ikke kan sige hver sit
+  (punkt 11); da+se; `overflow-x-auto`, `sr-only`-caption og `scope` på `th`,
+  samme mønster som lånebeløb-tabellen. **MÅL:** `/braendstof` 256 besøgende/28d
+  → Plausible 18/10; GSC 17/10 mod 16.518/174/1,1 %/5,9.
+- **[ ] Målt 4/10 03:3x — «promillegrænse» i udlandet** ⛔ se ❓ nedenfor.
+  *Datagrund:* **5 af 10** danske træffere under «promille» er
+  «promillegrænse danmark/sverige/tyskland/italien/norge» (målt 4/10 03:2x).
+  Vi har dansk og svensk grænse i koden og ingen sammenligning. Bygbart kun med
+  en menneskekilde til de øvrige landes love.
+- **[ ] Målt 4/10 03:3x — «kvadratmeterpris» pr. by** ⛔ datakilde. *Hvem:*
+  «kvadratmeterpris københavn», «kvadratmeterpris odense» og «odense c» er
+  **3 af 10** danske træffere under «kvadratmeter» (målt 4/10 03:4x), og vi har
+  98 kommuner i `kommuner.ts` til boligstøtten — men ingen salgsdata.
+  *Accept:* kr/m² pr. kommune med kilde pr. kommune og et årstal. Uden data er
+  det en gættet kurve, og punkt 11 forbyder det.
+- **[ ] Målt 4/10 03:2x — «hvor lang tid» er kogetider** ⛔ se ❓ nedenfor.
+  *Hvem:* GSCs **2. største søgning** på `/tidsberegner` (72.471 visninger,
+  0,3 % CTR, pos. 6,8) er «hvor lang tid» med **824 visninger**, og **10 af 10**
+  danske completioner er konkrete madvarer: blødkogt æg, majskolber, kartofler,
+  majs, hårdkogt æg, lasagne, kyllingelår i ovnen (målt 4/10 03:1x). Vi svarer på
+  *hvor lang tid* med tal, men ikke på *hvor lang tid skal kartofler koge*.
+  *Accept:* kogetid pr. vare pr. tilberedningsmåde, regnet af vægt og
+  tilberedningstid — kun med kildeførte tider.
+
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
@@ -299,6 +323,27 @@ Døm på indhold: `curl -s https://minberegner.dk/blog/arveafgift-regler-og-sats
 Døm på indhold: `curl -s https://beraknare.se/promille | grep -c '— og efter ytterligare'` skal give **0** (og «— och efter ytterligare» = 1); `https://beraknare.se/procent` skal have «och inte heller», `beraknare.se/alder` «Timmarna är dagarna gånger 24 och aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas». `/alder`-teksten er daglig præcis den 29. februar, så den kan ikke dømmes før 2028-02-29 — døm da på «28. februar» i stedet for «i dag». Næste deploy-vindue 3/11 07:30.
 
 ## ❓ Til Mads
+
+- ❓ **Kogetider — den 2. største søgning på `/tidsberegner` (ny, 4/10 03:1x,
+  højst prioriteret, fordi den er helt målt).** «hvor lang tid» har **824
+  visninger** på pos. 6,8 og **10 af 10** danske completioner under den er
+  madvarer med et koge- eller bagetid. Vi har ingen fødevaredatabase, og
+  `frbs.foodsearch.lex.dk` (Fødevarestyrelsen) og `www.sst.dk` er **begge
+  uafgåengelige fra denne maskine** (webfetch: transport error og 404), så
+  tiderne kan ikke hentes. **Én skærmbillede fra en fødevaredatabase-tabellen**
+  — eller rettere: en kilde, vi kan læse — låser både kogetider **og** den
+  fjerde kalorie-feature («hvor mange kalorier er der i et æg / en banan / et
+  æble» er 5 af 10 under «hvor mange kalorier»). Uden den bygges ingen madvareside.
+- ❓ **Promillegrænser i Tyskland, Norge og Italien (ny, 4/10 03:2x).** 5 af 10
+  danske træffere under «promille» er udenlandske grænser, og vi har kun dansk
+  (0,5 ‰) og svensk i koden. Vi svarer rigtigt på Danmark, men Tyskland,
+  Sverige og Norge giver **tre forkerte svar på ét domæne**. Ét skærmbillede
+  af de tre landes love låser en sammenligningstabel med pr. land.
+- ❓ **Kvadratmeterpris pr. kommune (ny, 4/10 03:4x).** «kvadratmeterpris
+  københavn/odense» er 3 af 10 danske træffere under «kvadratmeter», og vi har
+  98 kommuner i `kommuner.ts` til boligstøtten. Salgsdata pr. kommune findes
+  på boliga og i kommunes salgsundersøgelser — **én kilde pr. kommune er for
+  mange**, så det er kun bygbart for de 5-10 største byer.
 
 - ❓ **Hvor deployes den norske udgave? (ny, 2/10 14:15, højst prioriteret.)**
   Målt i live: `beregner.no` serverer et **helt andet site** — norsk «100+ gratis
