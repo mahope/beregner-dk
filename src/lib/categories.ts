@@ -61,6 +61,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Vægttab Beregner", description: "Beregn kalorieunderskud for vægttab", href: "/vaegttab", category: "Sundhed" },
   { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", category: "Sundhed" },
   { title: "Kropsfedtprocent", description: "Beregn din fedtprocent med U.S. Navy-metoden", href: "/kropsfedt", category: "Sundhed" },
+  { title: "Idealvægt", description: "Devines og Hamwis formel for din højde", href: "/idealvaegt", category: "Sundhed" },
   { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", category: "Sundhed" },
   { title: "Vandbehov", description: "Beregn dit daglige væskebehov", href: "/vandbehov", category: "Sundhed" },
   { title: "Kalorieforbrænding", description: "Forbrændte kalorier ved løb, cykling m.m.", href: "/motion-kalorier", category: "Sundhed" },

@@ -236,6 +236,7 @@ const daCalculators: HomeCalculator[] = [
   // Sundhed
   { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", popular: false, category: "Sundhed" },
   { title: "Kropsfedtprocent", description: "Beregn din fedtprocent med U.S. Navy-metoden", href: "/kropsfedt", popular: false, category: "Sundhed" },
+  { title: "Idealvægt", description: "Devines og Hamwis formel for din højde", href: "/idealvaegt", popular: false, category: "Sundhed" },
   { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", popular: false, category: "Sundhed" },
   { title: "Vandbehov", description: "Beregn dit daglige væskebehov", href: "/vandbehov", popular: false, category: "Sundhed" },
   { title: "Kalorieforbrænding", description: "Forbrændte kalorier ved løb, cykling m.m.", href: "/motion-kalorier", popular: false, category: "Sundhed" },
@@ -532,6 +533,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Löneökning", description: "Beräkna löneökning i procent", href: "/loenstigning", popular: false, category: "Ekonomi" },
   { title: "Promillekalkylator", description: "Uppskatta din alkoholpromille", href: "/promille", popular: false, category: "Hälsa" },
   { title: "Kroppsfettprosent", description: "Beräkna fettprocent (Navy-metoden)", href: "/kropsfedt", popular: false, category: "Hälsa" },
+  { title: "Idealvikt", description: "Devines och Hamwis formel för din längd", href: "/idealvaegt", popular: false, category: "Hälsa" },
   { title: "1RM kalkylator", description: "Uppskatta ditt maxlyft", href: "/1rm", popular: false, category: "Hälsa" },
   { title: "Vattenbehov", description: "Hur mycket vatten ska du dricka?", href: "/vandbehov", popular: false, category: "Hälsa" },
   { title: "Kaloriförbränning", description: "Förbrända kalorier vid motion", href: "/motion-kalorier", popular: false, category: "Hälsa" },

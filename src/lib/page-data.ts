@@ -26,6 +26,8 @@ import {
   rabatProcent,
 } from "./procent";
 import { formatBelob, formatNumber, formatSvenskText } from "./format";
+import { BMI_BAAND, vaegtInterval } from "./bmi-voksen-grænser";
+import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
 import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
@@ -488,6 +490,28 @@ const seKrPrKm = (value: number) => value.toFixed(2).replace(".", ",") + " kr/km
 const renteHoved = hovedEksempel();
 const renteFormel = annuitetsEksempel();
 
+// ─── /idealvaegt — hver eneste af de tal, titlen, metadataen og FAQ'en lover,
+// regnet fra `idealvaegt.ts`, altså fra formlernes egne kilder. Hældningen eller
+// grundværdien er ændret en dag, så skriver brødteksten sig ikke til at lyve.
+const IDEALVAEGT_CM = 175;
+const idealvaegtMand = idealvaegtResultat(IDEALVAEGT_CM, "mand");
+const idealvaegtKvinde = idealvaegtResultat(IDEALVAEGT_CM, "kvinde");
+const idealvaegtNormal = vaegtInterval(IDEALVAEGT_CM / 100, BMI_BAAND[1]);
+/** Én decimal med dansk komma — de samme tal, uanset hvor de står. */
+const idealvaegtKg = (kg: number) => kg.toLocaleString("da-DK", { maximumFractionDigits: 1 });
+/** Samme tal til svensk løbende tekst: "75,2" med komma og ét decimal. */
+const idealvaegtKgSe = (kg: number) => formatSvenskText(kg, 1);
+const IDEALVAEGT_EKSEMPEL_175 = `${idealvaegtKg(rundIdealvaegt(idealvaegtMand.gennemsnit))} kg ved ${IDEALVAEGT_CM} cm`;
+const IDEALVAEGT_M_175 = idealvaegtKg(rundIdealvaegt(idealvaegtMand.gennemsnit));
+const IDEALVAEGT_K_175 = idealvaegtKg(rundIdealvaegt(idealvaegtKvinde.gennemsnit));
+const IDEALVAEGT_M_DEVINE = idealvaegtKg(rundIdealvaegt(idealvaegtMand.devine));
+const IDEALVAEGT_M_HAMWI = idealvaegtKg(rundIdealvaegt(idealvaegtMand.hamwi));
+const IDEALVAEGT_M_SPREDNING = idealvaegtKg(rundIdealvaegt(idealvaegtMand.spredning));
+const IDEALVAEGT_K_DEVINE = idealvaegtKg(rundIdealvaegt(idealvaegtKvinde.devine));
+const IDEALVAEGT_K_HAMWI = idealvaegtKg(rundIdealvaegt(idealvaegtKvinde.hamwi));
+const IDEALVAEGT_M_INTERVAL_MIN = idealvaegtKg(idealvaegtNormal.min ?? 0);
+const IDEALVAEGT_M_INTERVAL_MAX = idealvaegtKg(idealvaegtNormal.max ?? 0);
+
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
 const daPages: Record<string, PageData> = {
@@ -726,6 +750,28 @@ const daPages: Record<string, PageData> = {
         { question: "Hvorfor vejer man forskelligt på planeterne?", answer: "Vægt er den kraft, tyngdekraften trækker i dig med, og tyngdekraften er forskellig på hver planet. Din masse er den samme, men vægten ændrer sig med tyngdekraften." },
         { question: "Hvor meget vejer man på Månen?", answer: "På Månen vejer du cirka en sjettedel (16,6 %) af din vægt på Jorden. En person på 75 kg vejer omkring 12,5 kg på Månen." },
         { question: "Hvor ville man veje mest?", answer: "Af planeterne vejer du mest på Jupiter — mere end det dobbelte af på Jorden. På Solen (som er en stjerne) ville du veje næsten 28 gange så meget." },
+      ],
+    },
+    "idealvaegt": {
+      slug: "idealvaegt",
+      title: "Idealvægt for voksne",
+      description: `Beregn din idealvægt ud fra højde og køn. Devines og Hamwis formel giver hver sit tal, og du kan se dem begge ved siden af hinanden.`,
+      metaTitle: `Idealvægt beregner: ${IDEALVAEGT_EKSEMPEL_175} 175 cm`,
+      metaDescription: `Gratis idealvægtsberegner. Find din idealvægt ud fra højde og køn med Devines (1974) og Hamwis (1964) formel. Ved 175 cm er mandens ${IDEALVAEGT_M_175} kg og kvindens ${IDEALVAEGT_K_175} kg.`,
+      keywords: ["idealvægt", "idealvægt beregner", "idealvægt kvinde", "idealvægt mand", "idealvægt mænd", "devine formel", "hamwi formel", "vægtinterval"],
+      ogTitle: `Idealvægt beregner: ${IDEALVAEGT_EKSEMPEL_175} 175 cm`,
+      ogDescription: `Beregn din idealvægt med Devines og Hamwis formel og se WHO's BMI-interval for din højde.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Idealvægtsberegner",
+      schemaDescription: "Beregn din idealvægt ud fra højde og køn med Devines og Hamwis publicerede formler.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvad er idealvægt?", answer: "Idealvægt (IBW) er et estimat af den vægt, der er forbundet med lavest dødelighed for en person af en given højde. Den blev udviklet i 1964 og 1974 til at dosere medicin efter kroppens størrelse, ikke som et slankemål." },
+        { question: `Hvor meget er min idealvægt, hvis jeg er ${IDEALVAEGT_CM} cm høj?`, answer: `Som mand vejer du ${IDEALVAEGT_M_DEVINE} kg efter Devines formel og ${IDEALVAEGT_M_HAMWI} kg efter Hamwis — altså et interval på ${IDEALVAEGT_M_SPREDNING} kg. Som kvinde er de ${IDEALVAEGT_K_DEVINE} kg og ${IDEALVAEGT_K_HAMWI} kg. WHO's normalvægtsbånd (BMI 18,5-24,9) svarer for en mand på ${IDEALVAEGT_CM} cm til ${IDEALVAEGT_M_INTERVAL_MIN}-${IDEALVAEGT_M_INTERVAL_MAX} kg.` },
+        { question: "Hvorfor giver Devine og Hamwi to forskellige tal?", answer: "De er to uafhængige formler fra henholdsvis 1964 og 1974. De er lineære og bruger forskellige grundværdier og hældninger, så de løber fra hinanden jo længere fra 152 cm, de er lavet ved. Derfor viser værktøjet begge tal og deres gennemsnit i stedet for at udpege én." },
+        { question: "Er idealvægt det samme som BMI?", answer: "Nej. BMI regner forholdet mellem din vægt og din højde, så det afhænger af den vægt du har. Idealvægt regner kun højde og køn og ser altså bort fra, hvad du vejer nu. De to kan derfor pege i hver sin retning." },
       ],
     },
     "sparemaal": {
@@ -3248,6 +3294,28 @@ const sePages: Record<string, PageData> = {
         { question: "Varför väger man olika på planeterna?", answer: "Vikt är den kraft som gravitationen drar i dig med, och gravitationen är olika på varje planet. Din massa är densamma, men vikten ändras med gravitationen." },
         { question: "Hur mycket väger man på Månen?", answer: "På Månen väger du cirka en sjättedel (16,6 %) av din vikt på Jorden. En person på 75 kg väger runt 12,5 kg på Månen." },
         { question: "Var skulle man väga mest?", answer: "Av planeterna väger du mest på Jupiter — mer än det dubbla mot på Jorden. På Solen (som är en stjärna) skulle du väga nästan 28 gånger så mycket." },
+      ],
+    },
+    "idealvaegt": {
+      slug: "idealvaegt",
+      title: "Idealvikt för vuxna",
+      description: "Beräkna din idealvikt utifrån längd och kön. Devines och Hamwis formel ger var sitt tal, och du ser dem båda sida vid sida.",
+      metaTitle: `Idealvikt: ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.gennemsnit))} kg vid ${IDEALVAEGT_CM} cm`,
+      metaDescription: `Gratis idealviktkalkylator. Beräkna din idealvikt utifrån längd och kön med Devines (1974) och Hamwis (1964) formel. Vid ${IDEALVAEGT_CM} cm: man ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.gennemsnit))} kg, kvinna ${idealvaegtKgSe(rundIdealvaegt(idealvaegtKvinde.gennemsnit))} kg.`,
+      keywords: ["idealvikt", "idealvikt kalkylator", "idealvikt kvinna", "idealvikt man", "idealvikt män", "devine formel", "hamwi formel", "viktsintervall"],
+      ogTitle: `Idealvikt: ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.gennemsnit))} kg vid ${IDEALVAEGT_CM} cm`,
+      ogDescription: "Beräkna din idealvikt med Devines och Hamwis formel och se WHO:s BMI-intervall för din längd.",
+      category: "Hälsa",
+      breadcrumbCategory: "Hälsa",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Idealviktkalkylator",
+      schemaDescription: "Beräkna din idealvikt utifrån längd och kön med Devines och Hamwis publicerade formler.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Vad är idealvikt?", answer: "Idealvikt (IBW) är en uppskattning av den vikt som är förknippad med lägst dödlighet för en person av en given längd. Den utvecklades 1964 och 1974 för att dosera medicin efter kroppens storlek, inte som ett bantmål." },
+        { question: `Hur mycket är min idealvikt om jag är ${IDEALVAEGT_CM} cm lång?`, answer: `Som man väger du ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.devine))} kg enligt Devines formel och ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.hamwi))} kg enligt Hamwis — ett intervall på ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.spredning))} kg. Som kvinna är de ${idealvaegtKgSe(rundIdealvaegt(idealvaegtKvinde.devine))} kg och ${idealvaegtKgSe(rundIdealvaegt(idealvaegtKvinde.hamwi))} kg. WHO:s normalviktsband (BMI 18,5-24,9) motsvarar för en man på ${IDEALVAEGT_CM} cm ${idealvaegtKgSe(idealvaegtNormal.min ?? 0)}-${idealvaegtKgSe(idealvaegtNormal.max ?? 0)} kg.` },
+        { question: "Varför ger Devine och Hamwi två olika tal?", answer: "De är två oberoende formler från 1964 respektive 1974. De är linjära och använder olika grundvärden och lutningar, så de avviker allt mer ju längre från 152 cm, de är byggda kring. Därför visar kalkylatorn båda talen och deras medelvärde i stället för att peka ut ett." },
+        { question: "Är idealvikt samma sak som BMI?", answer: "Nej. BMI räknar förhållandet mellan din vikt och din längd, så det beror på den vikt du har. Idealvikten räknar bara längd och kön och bortser alltså från vad du väger nu. De två kan därför peka i var sin riktning." },
       ],
     },
     "sparemaal": {

@@ -28605,3 +28605,175 @@ sats pr. område» (`page-data.ts:2130-2132`), og «2,9 %» findes ikke;
 `/topskat`, `blog/biloekonomi`, `blog/boligsalg` + `BoligsalgBeregner` 3/10
 23:0x (loft 274 → 261 → 231). `/billaan` og `/kalorier` viste sig **allerede
 rene** i `HEAD` — planens måling 3/10 21:5x så gammel kode fra før fixen.
+
+---
+
+## 4/10 02:3x — `ceo/laanebeloeb-tabel` (arkiveret fra planen)
+
+**Lånebeløb-tabel på `/renteberegner`.** Autocomplete målt 4/10 02:2x
+(hl=da&gl=dk) svarer på «hvor meget koster det at låne» med seks konkrete
+beløb: «1 million» (nr. 2), «500.000» (3), «3 millioner» (4), «2 millioner»
+(5), «til bolig» (6), «4 millioner» (7), «5 millioner» (8), «100.000» (10).
+Værktøjet besvarer spørgsmålet først når beløbet er tastet ind; GSC har
+`/renteberegner` på 12.610 visninger / 107 klik / **0,8 % CTR** / pos. 7,4 med
+«annuitetslån beregner» (331v, 1k, pos. 8) og «renteberegner» (264v, 6k, pos. 8).
+
+**Beslutning: ny komponent under værktøjet, ikke en ny route.** Beløbene er otte
+tal, der alle findes i `LAANE_BELOEB` — det er ikke en selvstændig søgning, så
+en egen URL ville være en tynd underside af `/renteberegner` (Fase 3: «én
+gennemarbejdet side slår ti tynde»). Tabellen følger læserens **egen** rente og
+løbetid, så de otte rækker og de tre resultatkort ikke kan sige hver sit; det
+er dømt af en render-test, der læser kortets tekst.
+
+**Formlerne flyttede ud af `useMemo` til `src/lib/laanebeloeb.ts`.** `0/0` ved 0 %
+rente er returneret som hovedstol delt på månederne; serielånets rentesum er
+`(n+1)/2 × første måneds rente`. Forventningerne i testen er **ikke** hentet fra
+formlen, men regnet i en uafhængig månedsløkke (`rest += rente - ydelse`), som
+slutter på 0 — kun så kan formlen være forkert og testen stadig grøn.
+
+**Fund undervejs:** testen «ved 0 % er renteandelen præcis 0» fangede **1,2e-14
+støv** i `samletBetaling - hovedstol`, fordi hovedstol delt på månederne og
+ganget tilbage ikke rammer præcis. Rettet i kilden (`r === 0` → `samletRente:
+0`), ikke i testen.
+
+**Mutationer målt:** annuity-eksponent `n`→`n+1` (3 røde), serielån `(n+1)/2`→`n/2`
+(2 røde), `renteAndel` uden division med tilbagebetalingen (3 røde),
+`laaneBeloebRaekker` med fast 30 år (3 røde), serielån uden månedens rente (1
+rød). Ren fil: 33/33.
+
+**Følger ind i `PROCENT_MED_MELLEMRUM`** i `regnestykker.test.ts`, og en
+render-test kræver «48 %» og afviser «48%».
+
+**Ikke kørt af mig:** ingen browser ved 390/1280 — repoet har intet Playwright.
+Tabellen er derfor dømt i markup: `overflow-x-auto`-indpakning (siden ruller
+aldrig vandret), `sr-only`-caption, 5 kolonner, 8 rækker, `scope` på alle `th`,
+`tabular-nums` i alle talceller. Længste celle er 13 tegn («1.932.558 kr.»), så
+tabellen kan ligge i sin egen scroll på 390 px — samme mønster som hver anden
+tabel i `/procent` og `/timer-i-aret`.
+
+**Ikke en ny strøm i sig selv:** GSC-eksporten for `/renteberegner` mangler
+stadig (❓ nedenfor), så «annuitetslån beregner» på pos. 8 er ikke dømt af en
+søgningstabel — kun af autocomplete.
+
+**Planens STATUS 4/10 01:5x → 02:3x, arkiveret.** De syv lukkede punkter
+(folkepensionsalder-værktøjet, procent-resterne i boligkøbsguiden og
+drikkelisten, BMI-porten, BMI-alderfeltet, de tre review-fund på `/brok`,
+`tidszone`-testens håndskrevne Sydney-forventning) lå med målinger i planens
+STATUS. De er flyttet her fra de afsnit, de lukkede, så planen igen kun har
+STATUS, åbne opgaver, åbne deploy-noter og ❓.
+
+⚠️ **Scanner-portene er flakiness, ikke fejl.** En fuld suite-kørsel 4/10 01:47
+gav 11 røde i de fil-scannende porte, og de to køringer før og efter var grønne
+(4176-4187 tests). `vitest.config.ts` har ingen `testTimeout`, så portene rammer
+5 s når maskinen er belæst. 4/10 02:2x kørte hele suiten grøn på 4220 tests /
+266 filer. **Gate-definitionen** (den skal noteres én gang): `npm run typecheck`
+(to tsconfig'er), `npm run lint` (`biome lint ./src`), `npm run test` (hele
+suiten, aldrig én fil) og `npm run build`.
+
+**Feature-køens sju lukkede punkter, arkiveret 4/10 02:3x.** De lå med hele
+*MÅL*-tallene i planens feature-kø: `/leasing`'s restværdi-sammenligning (2/10,
+`ceo/leasing-restvaerdi-sammenlign`), `/dage-til` + `/dagar-till`-hubben (2/10),
+`/klokken-i` + `/klockan-i`-hubben (2/10), `/afstand-mellem-adresser` (3/10),
+`/dage-mellem-datoer` + `/dagar-mellan-datum` (3/10), `/dage-i-aaret` +
+`/dagar-i-aret` (3/10) og `/timer-i-aret` + `/timmar-i-aret` (3/10). Alle otte
+URL'er er nye (2/10-3/10) og måler 0 i Plausible, så de kan ikke måles endnu —
+MÅL-datoerne står i de enkelte afsnit ovenfor i dette arkiv.
+
+**Feature-køens fem øvrige lukkede punkter, arkiveret 4/10 02:3x.**
+«Så mange dage har du levet som 10-årig?» på `/alder` (3/10,
+`ceo/dage-levet-pr-alder`, otte af ti svenske autocomplete-træffere under «hur
+många dagar har man levat» målt 3/10 16:4x; MÅL: `/alder` 10.029/43/0,4 %/7,2
+(da) og 3.689/14/0,4 %/7,6 (se) → Plausible 17/10). Ironman-total i `/pace`
+(`3720dea`; 2 af 10 danske completioner under «tid beregner», 27k visninger
+pos. 5). De fire regneregler på `/brok` (3/10, `ceo/brok-fire-regneregler`; MÅL:
+4.865/34/0,7 %/5,1 → GSC 17/10). Folkepensionsalder-værktøjet på `/pension`
+(4/10, `ceo/folkepensionsalder-vaerktoj`; «hvad er min pensionsalder»,
+«beregn min pensionsalder» og «hvornår kan jeg gå på pension» er alle danske
+autocomplete-træffere målt 4/10; MÅL: `/pension` 142 besøgende/28d (3/10) →
+Plausible 18/10). Regnet eksempel i titlen på `/renteberegner` og `/arveafgift`
+(3/10; MÅL: `/renteberegner` 12.610/107/0,8 %/7,4 → GSC 17/10).
+
+**Bemærk til folkepensionsalder-værktøjet:** de tre autocomplete-træffere er
+målt, men ikke i GSC-uddraget, så «hvad er min pensionsalder» er ikke dømt af
+en søgningstabel endnu — kun af autocomplete.
+
+«Så mange dage har du levet som 10-årig?» på `/alder` (3/10,
+`ceo/dage-levet-pr-alder`): otte af de ti svenske autocomplete-træffere under
+«hur många dagar har man levat», målt 3/10 16:4x. To tabeller (1-18 år, 20-80
+år) med dage/uger/måneder i da og se, hver celle fra `levetVedAlder` →
+`beregnAlder`. MÅL: `/alder` 10.029 visninger / 43 klik / 0,4 % / pos. 7,2 (da)
+og 3.689 / 14 / 0,4 % / 7,6 (se) → Plausible 17/10.
+
+**Planens prioriterede opgaver, lukkede afsnit arkiveret 4/10 02:3x.**
+`F4` (dobbelerede stribe væk; MÅL: `/` 218 besøgende/28d, bounce 38 % → 2-7 %).
+`F5g` (45 noder i `/billaan` da+se, `/arveafgift`, `/brutto-netto`, `/kalorier`,
+`/flyttebudget` og `/bil` da+se var de sidste uundtagede; loft 319 → 274 → 261 →
+231; MÅL `/bil` 24 besøgende/28d → Plausible 18/10). `F5e` (kommunesatsprocenten
+går gennem `formatNumber(kommuneSkat, "da")`; ⛔ resten er kommune-listen, der
+stadig skriver «Gentofte (22.8 %)» med punktum). `F5d` (0 `\d%` i markupken på
+forsiden og `/feriepenge`). `F6` (norske tal uden dansk separator), `F7`
+(tidsforskellens dage læst fra `afvigendeDage()`), `F8` (svenske helgdagslove
+kildeført). `F0` (hreflang-skråstreg på `/dato` — modbevist), `F0b/F0c/F0f`
+(regnet eksempel i `metaTitle` for `/alder` og `/tidszone`; titelsporten dømmer
+**resultatet** pr. sprog; sprogslagte stier dømmes mod både ruten og sitemap).
+`F0h` (regnet svar i titlen på de 24 `/klokken-i`-landesider, `ceo/klokken-titler`
+3/10 19:2x). `/su`s fribeløbs-værktøj (MÅL: `/su` 127 besøgende/28d → Plausible
+17/10) og den **modbeviste** «SU-fælleshold»: su.dk's fribeløbs- og
+indkomstsider har 0 fund af «fællesøkonomi»/«partner», og reglen er «Din egen
+indkomst må ikke være større end dit årsfribeløb».
+
+## 4/10 03:1x — `ceo/idealvaegt-beregner`: idealvægt-værktøj på `/idealvaegt`
+
+**Hvorfor denne feature.** Feature-køens åbne punkter var alle ⛔ på
+menneskekilder (❓ 119 sst.dk 429, ❓ feriedatoer, ❓ opgave 187 til 13/10), så
+jeg målte den hurtigste metode, der ikke kræver en person: dansk autocomplete
+fra `suggestqueries.google.com`. Under «idealvægt» ligger 10 af 10
+completioner, og de er næsten alle **højde- og kønsspecifikke tal** —
+«idealvægt kvinde 175 cm», «idealvægt mænd alder», «idealvægt mand 175 cm»,
+«idealvægt beregner», «idealvægt kvinder alder», «idealvægt kvinde 170 cm».
+Sitet havde ingen idealvægt-beregner; `/bmi` regner forholdet, ikke hvor
+tungt man burde være.
+
+**Formlerne er kildeførte, ikke huskede.** Devine (1974) og Hamwi (1964) er
+begge hentet og efterprøvet (Wikipedia, "Human body weight", afsnittene
+"Devine formula" og "Hamwi method", hentet 4/10 2026), og begge dokumenter er
+nævnt i kilden og i `<details>` på siden. De står som konstanter i
+`src/lib/idealvaegt.ts` med kildekommentar — ikke som tal i en komponent.
+
+**Hvorfor siden viser to tal.** De to formler er 3,6 kg fra hinanden ved
+180 cm mand og 0,1 kg fra hinanden ved 165 cm kvinde, altså spredningen er
+selve pointen. Værktøjet viser begge + gennemsnit + spredning, og siden siger
+udtrykkeligt at formlerne er fra 1964/1974 og lavet til medicinsk dosering.
+Ét tal uden den note ville være en slankemål-fordomsel.
+
+**BMI-intervallet er ikke genopfundet.** Det kommer fra `vaegtInterval()`
+i `bmi-voksen-grænser.ts`, som er sitets kildeførte WHO-tabel — så
+`/idealvaegt` og `/bmi` ikke kan sige hver sit om normalvægt. Nye tests
+dømmer intervallet mod `vaegtInterval(1.75, normalvaegtsbåndet)`.
+
+**Alle tal i copy er regnet.** Titel, description, og alle fire FAQ-svar læser
+`idealvaegtResultat(175, …)` og `rundIdealvaegt` — de er skrevet som
+template-strenge, så en ændret koefficient eller grundværdi flytter dem med.
+Tallet i `<title>` er **72 kg** = (70,7 + 73,3) / 2.
+
+**Porte der greb den.** Hele suiten fandt tre ting, alle rettet i samme
+opgave: (1) `home-data.test` kræver et kort på hver katalogside på dens egen
+forside — da og se fik kort; (2) samme fil låser norsk hullet i **sit eget
+tal**, så det blev bevidst 23 → 24 med en kommentar om hvorfor (norsk er
+stadig ikke i drift, `hiddenDomains`); (3) `meta-description`/`page-data`
+fandt den svenske description på 173 tegn, nu 155. `categories.ts` fik også
+et kort, så kategorisiden ikke skjuler den nye beregner.
+
+**Mutation.** `src/lib/idealvaegt.test.ts` (19 tests) dømmer **resultatet**
+mod tal regnet fra formlernes kilder, ikke mod koden: 180 cm mand = 75,2
+(Devine) og 78,8 (Hamwi), 165 cm kvinde = 57,2 og 57,1. En mutation af
+grundværdien eller hældningen gør den rød. Der er også en port for
+`Formlerne er ikke ens`, så de to aldrig kan smelte sammen til én, og en der
+kræver begge formler positive i hele 130-220 cm.
+
+**Gate:** typecheck, `biome lint ./src` (768 filer), **4242 tests / 267
+filer**, `next build`. Nye URL'er i `.next/routes-manifest.json`:
+`/idealvaegt`.
+
+**MÅL:** `/idealvaegt` har 0 GSC-ækker (ny URL) → GSC 17/10.
+`/bmi` 950 besøgende/28d (4/10) → Plausible 18/10.

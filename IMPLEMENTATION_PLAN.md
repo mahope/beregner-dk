@@ -1,39 +1,32 @@
-STATUS: 4/10 01:5x. ✅ **/pension har et folkepensionsalder-værktøj** —
-        `ceo/folkepensionsalder-vaerktoj`. Fødselsdato ind → «Du kan gå på
-        folkepension 15. marts 2060», «Søg senest 15. september 2059» og «Det
-        er 33 år, 5 måneder og 11 dage». Alt læst fra den `alderSkala` som
-        sidens egen tabel bruger, så de to ikke kan sige hver deres alder.
-        ⚠️ **Fire scanner-tests er flakiness**: en fuld suite-kørsel 4/10 01:47
-        gav 11 røde i de fil-scannende porte, og de to køringer før og efter var
-        grønne (4176-4187 tests). `vitest.config.ts` har ingen `testTimeout`, så
-        portene rammer 5 s når maskinen er belæst. Gate-definition: typecheck,
-        `biome lint ./src`, hele suiten. Se `docs/plan-arkiv.md`.
-        ✅ 4/10 01:3x. ✅ **de 25 sidste rå procenter i boligkøbsguiden og
-        drikkelisten er væk** — `ceo/procent-koeb-af-bolig-alkohol`. Loftet i
-        `regnestykker.test.ts` **231 → 206**, begge filer står nu i
-        `PROCENT_MED_MELLEMRUM`, og en ny render-test dømmer
-        `AlkoholenhederBeregner` i markup (drikkelisten skrev «4,6%», mens
-        `/alkoholenheder`s egen brødtekst skrev «4,6 %» på samme side).
-        Mutation: **3 røde** af 26. Gate: typecheck, lint (758 filer),
-        **4174 tests / 263 filer**.
-        ✅ 4/10 01:0x: **BMI-porten er genskabt med alle 30 tests** —
-        `ceo/bmi-testport`: 25 tests om enhedsskift, delelinks og WHR-grænser
-        plus 4 om alderen (enhed i etiketten, børnevarslet under 18, ingen
-        varsel fra 18, alderen i delelinken). *Verify:* 4173 tests / 263 filer.
-        ✅ 4/10 00:5x: **`/bmi` spørger nu om alder** — `ceo/bmi-alder`.
-        `inputs.alder` lå i delelinken som død kode; målt 4/10 er «bmi beregner
-        med alder», «bmi beregner med alder og køn», «bmi skala ældre» og
-        «beregn bmi formel» danske autocomplete-træffere, og `/bmi` er
-        næststørste side (**938 besøgende/28d, −24 %**). Alderen bruges kun
-        til WHO's voksenbånd (18+). ✅ 4/10 00:1x: **de tre review-fund på
-        `/brok` er rettet** — `ceo/brok-grupper-og-runding`. ✅ 4/10 00:0x:
-        `TidszoneBeregner.test.tsx` håndskrev «Sydney +8t», som gik rød to
-        gange om året. → Se `docs/plan-arkiv.md`.
-        **Næste iteration skal være en feature**: hele feature-køens åbne
-        punkter er ⛔ på menneskekilder (❓ 119 sst.dk 429, ❓ feriedatoer,
-        ❓ opgave 187 til 13/10), så næste feature skal findes uden for dem.
-        PR-TJEK: 3/10 23:4x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
-        start (`e551435`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
+STATUS: 4/10 03:1x. ✅ **Idealvægt-værktøj på `/idealvaegt`** —
+        `ceo/idealvaegt-beregner`. Dansk autocomplete har 10 af 10 træffere
+        under «idealvægt», og de er næsten alle «idealvægt kvinde 175 cm» og
+        «idealvægt mænd alder» (målt 4/10 03:0x). Der var ingen beregner på
+        sitet, kun `/bmi` som regner *forholdet*. Nu regner værktøjet Devines
+        (1974) og Hamwis (1964) og viser dem begge plus deres gennemsnit,
+        fordi de er 3,6 kg fra hinanden ved 180 cm — ét tal ville være en
+        løgn. BMI-intervallet kommer fra sitets egen WHO-tabel, så de to
+        sider ikke kan sige hver sit om normalvægt. Alle tal i titel,
+        description og FAQ er regnet fra `idealvaegt.ts`, ikke skrevet i
+        hånden. Mutation: formelgrundværdier og BMI-intervallet dømt mod
+        håndskrevne tal. Gate: typecheck, lint (768 filer), **4242 tests /
+        267 filer**, build.
+        ✅ 4/10 02:3x: **Lånebeløb-tabel på `/renteberegner`** —
+        `ceo/laanebeloeb-tabel`. «Hvor meget koster det at låne» er seks af ti
+        danske autocomplete-træffere om et *beløb* (målt 4/10 02:2x), men
+        værktøjet svarer kun når beløbet er tastet ind. Nu står otte beløb
+        (100.000 → 5 mio.) som rækker, regnet med læserens egen rente og
+        løbetid, så tabellen og resultatkortene ikke kan sige hver sit.
+        Formlerne flyttede fra `useMemo` til `src/lib/laanebeloeb.ts`; testen
+        fandt 1,2e-14 rente-støv ved 0 % og rettelsen kom i kilden.
+        Mutation: **3, 2, 3, 3 og 1 røde**. Gate: typecheck, lint (764),
+        **4220 tests / 266 filer**, build. → `docs/plan-arkiv.md`.
+        ✅ 4/10 01:5x: ✅ 4/10 01:3x: ✅ 4/10 01:0x: ✅ 4/10 00:5x: ✅ 4/10
+        00:1x: se `docs/plan-arkiv.md`.
+        ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i `vitest.config.ts`):
+        4/10 01:47 gav 11 røde, køringer før og efter var grønne.
+        PR-TJEK: 4/10 02:0x (ingen åbne). BRANCH-TJEK: 3/10 15:3x. CI grøn ved
+        start (`e456654`), ingen uløste Sentry-fejl, Sentry-SDK'en er sat op.
 
 ## CEO-kø punkt 0 — [x] ✅ alle otte lukket (verificeret i koden 4/10 01:0x)
 
@@ -82,15 +75,12 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 (`/dato` 1.617 mod 1.723 ord), så det er opgave 187's slugs og domæneautoritet.
 
 ### Prioriterede opgaver
-**F0. [x] ✅ hreflang-skråstreg på `/dato` — modbevist, lukket.** 0 af 15 sider
-   har skråstreg i `rel="alternate"`; `page-helpers.ts` bygger `${baseUrl}/${slug}`.
-   Målinger og ræsonnement: `docs/plan-arkiv.md`. *MÅL:* `/dato` 131.320/863/
-   0,7 %/5,6 (da), 102.316/97/0,1 %/8,1 (se).
-
-**F0b/F0c/F0f. [x] ✅ Regnet eksempel i `metaTitle` + port.** `/alder`,
-   `/tidszone` (F0b), titelsporten dømmer **resultatet** pr. sprog og ikke «der
-   står et tal» (F0c, rettet efter review-fund), og alle sprogslagte stier dømmes
-   mod både ruten og sitemap (F0f). Se `docs/plan-arkiv.md`.
+**F0/F0b/F0c/F0f. [x] ✅ Fire lukkede titelpunkter samlet** (se
+   `docs/plan-arkiv.md`): hreflang-skråstreg på `/dato` (modbevist: 0 af 15
+   sider har skråstreg, `page-helpers.ts` bygger `${baseUrl}/${slug}`); regnet
+   eksempel i `metaTitle` for `/alder` og `/tidszone`; titelsporten rettet til at
+   dømme **resultatet** pr. sprog i stedet for «der står et tal» (rettet efter
+   review-fund); alle sprogslagte stier dømmes mod både ruten og sitemap.
 
 **F0d. [~] Regnet eksempel i de tre titler, der kun har et årstal.**
    *Udført 3/10 16:3x for to af dem (`renteberegner`, `arveafgift`).* De tre herunder
@@ -113,15 +103,11 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
    og ❓ nedenfor er ubesvaret, så det er 0 bruger-effekt nu.
 
 **F0h. [x] ✅ Regnet svar i titlen på de 24 `/klokken-i`-landesider** —
-   `ceo/klokken-titler` 3/10 19:2x. Se STATUS og `docs/plan-arkiv.md`. *Hvem:*
-   alle der googler «hvad er klokken i <land>» — dansk autocomplete har 10 af 10
-   land/by under «hvad er klokken i» (målt 3/10 19:0x), og GSC har «hvad er
-   klokken i usa når den er 12 i danmark» 169v pos. 6 + «hvad er klokken i de
-   forskellige tidszoner» 89v pos. 5 på `/tidszone` (23.351 visninger, 0,4 %
-   CTR). *Accept (opfyldt):* hver titel har byens **regnede** klokkeslæt fra
-   `tidsforskelMinutter`, er `absolute`, og har ingen port på sig — men to nye
-   tests dømmer pr. sprog og pr. sæson. **MÅL:** de 24 URL'er har 0 GSC-ækker
-   endnu (nye 2/10) → GSC 17/10 mod `/tidszone` 23.351/101/0,4 %/7,6.
+   `ceo/klokken-titler` 3/10 19:2x. Hver titel har byens **regnede** klokkeslæt
+   fra `tidsforskelMinutter` og er `absolute`; to nye tests dømmer pr. sprog og
+   pr. sæson. Dansk autocomplete har 10 af 10 land/by under «hvad er klokken i»
+   (målt 3/10 19:0x). **MÅL:** de 24 URL'er har 0 GSC-ækker endnu (nye 2/10) →
+   GSC 17/10 mod `/tidszone` 23.351/101/0,4 %/7,6.
 
 **F1. [ ] Søgeniveau-data for `/procent`** — 150.470 visninger, 0,1 %, pos 7,4.
 GSC's tre søgninger summerer 364 visninger af 150.470. **Accept:** GSC-eksport
@@ -147,44 +133,17 @@ ved serverstart. Nøglefilen lå på `/api/indexnow-key/…` og er rettet 2/10
 **F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
 dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
 
-**F5c. [~] Procentnotationen «8 %» — 319 noder målt 3/10 12:3x.**
-*Hvad:* de største resterende er `blog/30-procent-reglen-husleje` 25 (⛔ de er
-regelnavnet — de **skal** have en undtagelse, nogen må tage stilling til om
-sitets eget navn «30% reglen» skal skrives «30 %-reglen»), `/moms` 18 (⛔ de 3
-lovgrænser, ❓ nedenfor), `billaan` 17, `blog/koeb-af-bolig-…` 15,
-`arveafgift` 14, `blog/guide-feriepenge-…` 13.
-*Accept:* loftet i `regnestykker.test.ts` (`PROCENT_UDEN_MELLEMRUM_LOFT`) må
-kun falde, og hver slice tager de tre største filer. *Målt:* 598 → 570 → 509 →
-436 → 371 → 361 → 356 → **319** noder (scanneren tæller noder, så en linje med
-to procenter tælles én gang). Fem navne-undtagelser: «30% reglen» i
-`husleje/page.tsx`, `page-data.ts` og de to blogindlægs sidelinks, plus
-«4%-reglen» i pensionsindlægget — de er **regelnavne**, ikke procenter.
-**Interpolationer er lukket som fejltype.** `regnestykker.test.ts` kan kun se
-`JsxText` og strengliteraler, så `{tal}%` er usynlig for den; derfor renderer
-`procent-i-synlig-tekst.test.tsx` de berørte komponenter i da/se/no og dømmer
-den **synlige** markup. Slice 10:5x (boliglån), 11:2x (fem beregnere) og
-12:3x (**tretten** beregnere: `/1rm`, `/moms`, `/dagpenge`, `/budget`,
-`/husleje`, `/billaan`, `/forbrugslaan`, `/aktieskat`, `/del-regning`,
-`/lon-efter-skatt`, `/arveafgift`, `/brutto-netto`). To af dem skrev **punktum**
-(`/lon-efter-skatt` 20.2 %, `/brutto-netto` 33.3 %), og de to
-resultattilstande kan hverken scanneren eller markup-porten se, så de har fire
-egne tests i `decimal-komma.test.tsx`. Detaljer og målinger: `docs/plan-arkiv.md`.
-*Slice 4/10 01:3x ✅* — de to sidste uundtagede største filer er lukket:
-`blog/koeb-af-bolig-2026-omkostninger` (15 noder) og `AlkoholenhederBeregner`
-(10), loftet **231 → 206**, begge i `PROCENT_MED_MELLEMRUM` plus en ny
-render-test på drikkelisten. *Målt:* `grep -cE '[0-9]+([.,][0-9]+)?%'` giver
-**0** i begge. *Næste slice måles på ny:* de to største er `blog/30-procent-
-reglen-husleje` (25, ⛔ regelnavn) og `/moms` (16, ⛔ lovgrænser, ❓), så resten
-af F5c er kun filer under 15 og kræver en ny måling.
+**F5c. [~] Procentnotationen «8 %» — kun filer under 15 noder.**
+*Accept:* loftet i `regnestykker.test.ts` (`PROCENT_UDEN_MELLEMRUM_LOFT`, nu
+**206**) må kun falde, og hver slice tager de tre største filer. Næste slice
+**skal måles på ny** — resten af F5c er kun filer under 15 noder. De to største
+er begge ⛔: `blog/30-procent-reglen-husleje` (25 noder, de er **regelnavnet** —
+«30% reglen» er sitets eget navn, og det er en undtagelse nogen skal tage
+stilling til) og `/moms` (16, de 3 lovgrænser, ❓ nedenfor). Scanneren tæller
+noder, så en linje med to procenter tælles én gang. Se `docs/plan-arkiv.md`.
 
-**F5g. [x] ✅ Lukket 3/10 23:0x.** 45 noder i `/billaan` (da+se), `/arveafgift`,
-`/brutto-netto`, `/kalorier`, `/flyttebudget` og `/bil` (da+se) var de sidste
-uundtagede; alle boede i `page.tsx` plus to komponenter, og porten
-(`regnestykker.test.ts` + `procent-i-synlig-tekst.test.tsx` + `decimal-komma`)
-dømmer nu både `JsxText` og interpoleret markup. Loftet: 319 → 274 → 261 → 231.
-De fem navne-undtagelser («30% reglen» ×2, «4%-reglen») står uændret. Detaljer
-og målinger: `docs/plan-arkiv.md`. *MÅL:* `/bil` 24 besøgende/28d,
-`/arveafgift` ikke i top-15 → Plausible 18/10.
+**F5g. [x] ✅ Lukket 3/10 23:0x** (loft 319 → 274 → 261 → 231). De fem
+navne-undtagelser («30% reglen» ×2, «4%-reglen») står uændret. Se arkivet.
 
 - **[x] ✅ `/su` får et fribeløbs-værktøj** — se `docs/plan-arkiv.md`.
   *Hvem:* studerende på 1. års SU og deres forældre, hver august–december.
@@ -202,21 +161,10 @@ og målinger: `docs/plan-arkiv.md`. *MÅL:* `/bil` 24 besøgende/28d,
   større end dit årsfribeløb». Uden den var opgaven ubyggelig, så den er
   erstattet af værktøjet ovenfor i stedet for at blive gættet.
 
-**F5e. [x] ✅ Målte decimaler med punktum i dansk tekst (3/10 11:2x — fundet af
-den nye port; lukket 12:3x med kommune-listen).** *Hvad:* den renderede `/brutto-netto`
-skrev «Kommuneskat (**24.94** %)» med **punktum** i den danske markup, fordi
-`LoenBeregner.tsx:426` interpolerer kommunesatsprocenten råt fra
-input-feltet; `Kirkeskat (0,64 %)` bruger derimod komma.
-*Hvorfor:* dansk decimalkomma er en del af Retskrivningsordbogen, og det er den
-samme fejltype som F5b. *Accept:* den interpolerede kommunesatsprocent går
-gennem `formatNumber(kommuneSkat, "da")`, så «Kommuneskat (24,94 %)» — og
-`decimal-komma.test.tsx` har **en** assert på kommunesatslinjen, ikke kun på
-aop-annuiteten. **Målt:** mutation med den gamle interpolation giver rød med
-hele den synlige tekst som bevis («Kommuneskat (24.94 %)» lige under
-«Kirkeskat (0,64 %)»). **⛔ Resten er den samme fejl ét sted længere ned på
-siden:** kommune-listen skriver stadig «Gentofte (22.8 %)» med punktum — den
-går gennem `KOMMUNER`-dataene og ikke gennem `LoenBeregner`. Tages først
-når en port dømmer den.
+**F5e. [x] ✅ Målte decimaler med punktum i dansk tekst** — lukket 3/10 12:3x
+med kommune-listen. ⛔ Resten er den samme fejl ét sted længere ned på siden:
+kommune-listen skriver stadig «Gentofte (22.8 %)» med punktum, fordi den går
+gennem `KOMMUNER`-dataene. Tages først når en port dømmer den.
 
 **F9. [ ] `locale === "se" ? "se" : "da"` — 13 steder med dansk på
 norske domæner.** *Hvad:* mønstret er målt med grep efter `ceo/norsk-pace-side`
@@ -233,113 +181,23 @@ eller en `Record<Locale, …>`, og en port (samme som `DANSKE_ORD`-listen i
 `beregner.no` serverer et andet site, så rettelsen har 0 bruger-effekt indtil
 den er besvaret — og norsk trafik er 0 i Plausible.
 
-**F5d. [x] ✅ `procent-forside-feriepenge` — de 9 sidste synlige procenter.**
-*Accept:* **0** `\d%` i markupken på forsiden og /feriepenge — nået, målt i
-den renderede komponent i da/se/no. Se `docs/plan-arkiv.md`.
+**F5d. [x] ✅ `procent-forside-feriepenge`** — 0 `\d%` i markupken på
+forsiden og `/feriepenge`, målt i den renderede komponent i da/se/no.
 
 ## Feature-kø
 
 Fire kandidater, i rækkefølge efter hvor ren intentionen er. Alt med ⛔
-er blokeret af en ❓ og må ikke gættes.
+er blokeret af en ❓ og må ikke gættes. Den hurtigste målemetode uden en
+menneskekilde er dansk autocomplete (`suggestqueries.google.com`), og den
+er brugt på de to seneste features.
 
-- **[x] ✅ «Så mange dage har du levet som 10-årig?» på `/alder`** —
-  `ceo/dage-levet-pr-alder` 3/10. *Hvem:* alle der googler «hur många dagar har
-  man levat om man är 12 år» — otte af de ti svenske autocomplete-træffere under
-  «hur många dagar har man levat», målt 3/10 16:4x. *Accept:* to tabeller (1-18
-  år, 20-80 år) med dage/uger/måneder i da og se, hver celle fra `levetVedAlder`
-  → `beregnAlder`, og en tekst der siger at rækkerne er den, der *fylder*
-  alderen på tabellens dag. **MÅL:** `/alder` 10.029 visninger / 43 klik / 0,4 %
-  / pos. 7,2 (da) og 3.689 / 14 / 0,4 % / 7,6 (se) → Plausible 17/10.
+- **[x] ✅ Syv lukkede feature-punkter samlet** (se `docs/plan-arkiv.md`):
+  `/leasing`'s restværdi-sammenligning (2/10), `/dage-til` + `/dagar-till`-hubben
+  (2/10), `/klokken-i` + `/klockan-i`-hubben (2/10), `/afstand-mellem-adresser`
+  (3/10), `/dage-mellem-datoer` + `/dagar-mellan-datum` (3/10), `/dage-i-aaret` +
+  `/dagar-i-aret` (3/10) og `/timer-i-aret` + `/timmar-i-aret` (3/10). Alle otte
+  måler på 0 i dag — de er nye URL'er — og deres MÅL-tall står i arkivet.
 
-- **[x] ✅ Ironman-total i `/pace`** — tre tidsfelter → samlet tid + tempo pr. ben,
-  bygget på `beregnTriatlon`, da+se+no (`3720dea`). MÅL: `/pace` 2 af 10
-  danske completioner under «tid beregner» (27k visninger, pos. 5) konverterer
-  nu til et værktøj. Måles ved næste Plausible-snapshot.
-- **[x] ✅ `/leasing` sammenligner på det rigtige tal** — `leasing-restvaerdi-`
-  sammenlign` 2/10. Se `docs/plan-arkiv.md`. MÅL: `beraknare.se/leasing`
-  2.923 visninger / 33 klik / 1,1 % / pos. 12,2 → mod 14 dage; de fire
-  søgninger «fåretagsleasing bil kalkyl» (169v), «beräkna leasing bil företag»
-  (160v), «leasing kalkylator» (112v) og «leasingkostnad bil» (109v) ligger på
-  pos. 9-15, og svaret på «blir leasing billigere eller dyrere» lå før uden
-  ét tal.
-- **[x] ✅ `/dage-til`-hub** — se `docs/plan-arkiv.md`. *Hvem:* alle 23 danske og
-  20 svenske countdown-sider var kun linket fra `/dato` og `/nedtaelling`, og
-  sektionen havde ingen side af sin egen. *Accept:* `/dage-til` + `/dagar-till`
-  lister hver dato med dagens tal, sorteret efter hvad der kommer først, med
-  canonical/hreflang, daglig sitemap-entry og 301 mellem domænerne.
-  **MÅL:** `/dage-til` 0 (ny URL 2/10) → Plausible 16/10; GSC 14 dage:
-  «hvor mange dage er der til 1. december» (1.254v, pos. 5) og «… til den 24.
-  december» (1.025v, pos. 5).
-- **[x] ✅ `/klokken-i`-hub** — se `docs/plan-arkiv.md`. *Hvem:* de 12
-  landesider var kun linket fra `/tidszone` og bloggen, så «hvad er klokken i
-  de forskellige tidszoner» (89v, pos. 5) havde intet sted at lande.
-  *Accept:* `/klokken-i` + `/klockan-i` lister hvert land med klokken lige nu
-  og tidsforskellen, sorteret efter hvor tæt landet ligger på dansk/svensk tid,
-  med canonical/hreflang, daglig sitemap-entry og 301 mellem domænerne.
-  **MÅL:** `/klokken-i` 0 (ny URL 2/10) → Plausible 16/10; GSC: «hvad er
-  klokken i usa når den er 12 i danmark» (178v) og «hvad er klokken i de
-  forskellige tidszoner» (89v), begge på pos. 5-6.
-- **[x] ✅ `/afstand-mellem-adresser`** — se `docs/plan-arkiv.md`. *Hvem:* alle
-  danske pendlere, sommerhusrejsende og bilister. *Datagrund:* «beregn afstand
-  mellem to adresser» er **nr. 3** i googles danske autocomplete under «beregn»,
-  og ruten (`RuteAfstand` + `/api/rute`) lå kun som skjult optrulle i
-  `BefordringsfradragBeregner`. *Accept:* egen dansk side med korteste bilrute,
-  færge/betalingsbro, tur/retur og årlig kørsel på `aarstal(2026).arbejdsdage`,
-  tre spørgsmål, forside-kort og interne links. **MÅL:** `/afstand-mellem-adresser`
-  0 (ny URL 3/10) → Plausible 17/10; GSC 14 dage: «beregn afstand mellem to
-  adresser» og «afstand mellem to adresser».
-- **[x] ✅ `/dage-mellem-datoer` + `/dagar-mellan-datum`** — se
-  `docs/plan-arkiv.md`. *Hvem:* alle der
-  spørger «dage mellem datoer» / «dagar mellan datum». *Datagrund:* GSC
-  2/10–30/30 lister «dage mellem datoer» (438v, **9.000 søgninger**, pos. 4) på
-  `/dato`, og tre svenske varianter — «dagar mellan datum» (888v, 2k, pos. 8),
-  «antal dagar mellan datum» (424v, 2k, pos. 8) og «räkna dagar mellan datum»
-  (399v, 1k, pos. 9) — på `beraknare.se/dato`, der har **105.188 visninger og
-  0,1 % CTR på pos. 8,1**. Værktøjet ligger i dag som ét `<h3>` dybt i `/dato`s
-  brødtekst, altså på en side der konkurrerer om 20 andre spørgsmål.
-  *Accept:* egen dansk og svensk side med eget slugsprog, egen `<h1>`/titel,
-  de tre spørgsmål som `FAQPage`, tovejs-links med `/dato` og `/ugenummer`,
-  canonical/hreflang, 301 mellem domænerne og daglig sitemap-entry.
-  **MÅL:** 0 (ny URL) → Plausible 18/10; GSC 14 dage: de fire søgninger ovenfor.
-- **[x] ✅ `/dage-i-aaret` + `/dagar-i-aret`** — se `docs/plan-arkiv.md`.
-  *Hvem:* alle der spørger «hvor mange dage er der på et år» — dansk
-  autocomplete **nr. 1** under «hvor mange dage er der», målt 3/10 — plus de to
-  spørgsmål uden egen adresse, «… i augusti» (nr. 7) og «… i juli» (nr. 8).
-  *Accept:* dansk og svensk side med de tolv måneders længde (dage, hverdage,
-  weekenddage), summeringsrække, «dage tilbage af året» og de tre målte
-  spørgsmål som `FAQPage`; **alle tal** læst fra `dato-eksempler.ts`s
-  `aarstal()`/`maanederITaar()`; canonical/hreflang, 301 mellem domænerne,
-  daglig sitemap-entry og tovejs-links med `/dato` og `/ugenummer`.
-  **MÅL:** 0 (nye URL'er 3/10) → Plausible 17/10; GSC 14 dage mod
-  `/dato` 136.071 visninger / 0,7 % / pos. 5,6 (da) og 105.188 / 0,1 % / 8,1 (se).
-- **[x] ✅ `/timer-i-aret` + `/timmar-i-aret`** — se `docs/plan-arkiv.md`.
-  *Hvem:* alle der spørger «hvor mange timer er der på et år / en uge / en
-  måned». *Datagrund:* Googles egen autocomplete 3/10 har «hvor mange timer er
-  der på et år» som **nr. 1** under «hvor mange timer er der» og «hur många
-  timmar är det på ett år» som **nr. 1** under «hur många timmar är det»;
-  `timer-periode.ts` (2/10) målte det samme og lagde tabellen ind på
-  `/tidsberegner` som ét afsnit blandt 24. *Accept:* egen dansk og svensk side
-  med periode-tabel (døgn, uge, to uger, tre kalendermåneder, år), tolv-måneders-
-  tabel i timer, «timer tilbage af året», de tre målte spørgsmål som `FAQPage`,
-  canonical/hreflang, 301 mellem domænerne, daglig sitemap-entry og
-  tovejs-link fra `/tidsberegner`. **MÅL:** 0 (nye URL'er 3/10) → Plausible
-  17/10; GSC 14 dage mod `/tidsberegner` 72.471 visninger / 0,3 % / pos. 6,8.
-- **⛔ Målt og lagt på hylden 3/10 08:1x — `/minutter-i-aret`.** Googles egen
-  autocomplete har tre søskende-familier til `/timer-i-aret`: «hvor mange
-  minutter er der» (døgn/år/dag/uge/måned/n timer), «hvor mange sekunder er
-  der» (dag/år/time/døgn/minut/måned/uge) og «hvor mange uger er der»
-  (år/måned/i 2026/tilbage i år). En tredje enheds-side er `/timer-i-aret` med
-  «60» i stedet for «1» — tynd, og tynde sider kan skade hele domænet. Bygges
-  kun som **én** samlet sekund→minut→time-side der erstatter `/timer-i-aret`, og
-  den skal måles mod den side først.
-- **[x] ✅ `/bmi` spørger om alder** — `ceo/bmi-alder` 4/10. *Hvem:* alle der
-  googler «bmi beregner med alder», «bmi beregner med alder og køn» eller
-  «bmi skala ældre» (autocomplete målt 4/10). *Datagrund:* `/bmi` er
-  næststørste side med 938 besøgende/28d og **falder 24 %**, og missionen siger
-  «ret `/bmi`, før der bygges nyt»; `inputs.alder` lå i delelinken som død
-  kode. *Accept:* alder med enhed på da/se/no, børnevarslet under 18,
-  alderen i delelinken, 6 nye render-tests. **MÅL:** `/bmi` 938
-  besøgende/28d (3/10) → Plausible 17/10.
 - **[ ] `/bmi` for børn (percentil) — målt, men ⛔ datakilde.** «bmi for børn»,
   «bmi beregner børn», «beregn bmi børn» og «bmi skala børn» er danske
   autocomplete-træffere, på svensk «bmi barn tabell», «bmi barn räkna ut» og
@@ -363,33 +221,36 @@ er blokeret af en ❓ og må ikke gættes.
   sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og
   `/boernepenge`. ⛔ Oppgave 187, 13/10 — må ikke flyttes.
 
-- **[x] ✅ De fire regneregler på `/brok`** — `ceo/brok-fire-regneregler` 3/10.
-  *Hvem:* elever og voksne, der googler «brøk udregner» og «brøkregning».
-  *Datagrund:* 4.865 visninger / 34 klik / **0,7 % CTR** / pos. 5,1 mod
-  `/rentefradrag`s 5,8 % på pos. 5,6 — 8x gap på næsten samme placering.
-  *Accept:* plus/minus på mindste fælles nævner (vist i UI), gange og dele uden
-  fælles nævner, dele vender den anden brøk, altid forkortet + decimaltal +
-  procent, da+se, **unike feltnavne**. **MÅL:** 4.865/34/0,7 %/5,1 → GSC 17/10.
+- **[x] ✅ Fire lukkede feature-punkter samlet** (se `docs/plan-arkiv.md`):
+  de fire regneregler på `/brok` (3/10, MÅL 4.865/34/0,7 %/5,1 → GSC 17/10),
+  folkepensionsalder-værktøjet på `/pension` (4/10, MÅL 142 besøgende/28d →
+  Plausible 18/10), regnet eksempel i titlen på `/renteberegner` og
+  `/arveafgift` (3/10, MÅL 12.610/107/0,8 %/7,4 → GSC 17/10) og Ironman-total i
+  `/pace` (`3720dea`).
 
-- **[x] ✅ Folkepensionsalder-værktøj på `/pension`** — `ceo/folkepensionsalder-vaerktoj`
-  4/10. *Hvem:* alle der googler «hvad er min pensionsalder», «beregn min
-  pensionsalder» eller «hvornår kan jeg gå på pension» — alle tre er danske
-  autocomplete-træffere målt 4/10 under «hvad er min» og «beregn min».
-  *Datagrund:* siden havde **kun** en statisk tabel over folkepensionsalderen pr.
-  fødselsår, altså «65 ½ år» uden en dato — spørgsmålet er en dato. *Accept:*
-  alder + dato + søgdato + tid til i da (dansk lov, ikke oversat til svensk —
-  punkt 11), `folkepensionsdatoer` læser samme `alderSkala` som tabellen,
-  månedens sidste dag ved skudår, 8 nye lib-tests + 5 render-tests.
-  **MÅL:** `/pension` 142 besøgende/28d (3/10) → Plausible 18/10.
-- **[x] ✅ `/renteberegner` og `/arveafgift` har et regnet eksempel i titlen** —
-   se `docs/plan-arkiv.md`. *Hvem:* «renteberegner» (6.000 søgninger, pos. 8)
-   og «arveafgift beregner». *Datagrund:* målt 3/10 — de var de **eneste to**
-   af GSC-top-15 med en spørgsmålstitel; `/renteberegner` har 12.610 visninger og
-   **0,8 %** CTR på pos. 7,4. *Accept:* begge titler har et regnet eksempel fra
-   `hovedEksempel()` / `EKSEMPEL_BARN` — de samme funktioner beregneren bruger —
-   og de ligger i `REGNETE_EKSEMPLER` i `meta-title-tal.test.ts`, der dømmer med
-   `toContain` pr. sprog. **MÅL:** `/renteberegner` 12.610 visninger / 107 klik /
-   0,8 % / pos. 7,4 → GSC 17/10.
+- **[x] ✅ Idealvægt-værktøjet på `/idealvaegt`** — `ceo/idealvaegt-beregner`
+  4/10. *Hvem:* alle der googler «idealvægt kvinde 175 cm», «idealvægt mænd
+  alder», «idealvægt mand 175 cm» — 10 af 10 danske completioner under
+  «idealvægt» er et højde- og kønsspecifikt tal (målt 4/10 03:0x), og der var
+  ingen beregner på sitet. *Datagrund:* `/bmi` er næststørste side (950
+  besøgende/28d, **−21 %**) og svarer på det andet spørgsmål; `/vaegttab`
+  og `/kropsfedt` ligger i samme klynge. *Accept:* Devine (1974) **og** Hamwi
+  (1964) ved siden af hinanden med gennemsnit og spredning, BMI-interval fra
+  `bmi-voksen-grænser.ts`, kildetekst med begge dokumenter, alle tal i
+  title/description/FAQ regnet fra `idealvaegt.ts`, da+se, kort på begge
+   forsider og i kategorien Sundhed, `/bmi` peger på den. **MÅL:** nye URL'er
+  har 0 GSC-ækker → GSC 17/10; `/bmi` 950 besøgende/28d → Plausible 18/10.
+
+- **[x] ✅ Lånebeløb-tabel på `/renteberegner`** — `ceo/laanebeloeb-tabel` 4/10.
+  *Hvem:* alle der googler «hvor meget koster det at låne 1 million» — seks af ti
+  danske completioner under «hvor meget koster det at låne» er konkrete beløb
+  (målt 4/10 02:2x). *Datagrund:* `/renteberegner` 12.610 visninger / 107 klik /
+  **0,8 % CTR** / pos. 7,4, og værktøjet svarer kun når beløbet er tastet ind.
+  *Accept:* otte beløb (100.000 → 5 mio.) som rækker med månedsydelse, samlet
+  rente, at betale i alt og renteandel, regnet med **læserens egen** rente og
+  løbetid, da+se, `overflow-x-auto`, `sr-only`-caption, `scope` på alle `th`,
+  «48 %» med mellemrum. **MÅL:** `/renteberegner` 12.610/107/0,8 %/7,4 →
+  GSC 17/10.
 
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
@@ -403,6 +264,12 @@ sidste uundtagede slice er lukket 4/10 01:3x. `/moms` er ⛔ (de 3 lovgrænser,
 ❓ nedenfor), og de to største F5c-filer er ⛔ regelnavne.
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 4/10 03:1x:** `VERIFICÉR DEPLOY: <idealvægt-værktøj på /idealvaegt: Devines og Hamwis formel, gennemsnit, spredning og WHO's BMI-interval, da+se> ceo/idealvaegt-beregner 4/10 03:1x`.
+Døm på **indhold**: `curl -s https://minberegner.dk/idealvaegt | grep -c 'Devine (1974)'` skal give **≥1** og `grep -c 'Hamwi (1964)'` **≥1**; `<title>` skal være `Idealvægt beregner: 72 kg ved 175 cm` (`grep -c '<title>Idealvægt beregner: 72 kg ved 175 cm'` **1**). Tallet **72 kg** er gennemsnippet af 70,7 og 73,3 for 175 cm mand — et forkert gennemsnit eller en byttet grundværdi falder med det samme. BMI-intervallet skal stå som `56,7`–`76,3` kg. `beraknare.se/idealvaegt` skal have «Idealvikt för vuxna», «Devines formel (1974)», «WHO:s normalviktsband» og `<title>Idealvikt: 72 kg vid 175 cm`, og **ikke** danske ord i brødteksten («højde», «vægt» skal stå som «längd», «vikt»). Næste deploy-vindue 4/10 07:30.
+
+**Åben note 4/10 02:3x:** `VERIFICÉR DEPLOY: <lånebeløb-tabel med otte beløb (100.000 → 5 mio.) på /renteberegner, regnet med læserens egen rente og løbetid> ceo/laanebeloeb-tabel 4/10 02:3x`.
+Døm på indhold: `curl -s https://minberegner.dk/renteberegner | grep -c 'Hvor meget koster det at låne?'` skal give **1**, og `grep -oE '5\.368 kr\.'` skal give **≥2** — een i resultatkortet og een i tabellens række for 1.000.000 kr. Tabellens otte beløb skal alle stå: `grep -c '1\.500\.000 kr\.'` **≥1**. `beraknare.se/renteberegner` skal have «Vad kostar det att låna?» og «5 368 kr» **uden** punktum efter kr. Næste deploy-vindue 4/10 07:30.
 
 **Åben note 4/10 01:5x:** `VERIFICÉR DEPLOY: <folkepensionsalder-værktøj på /pension: fødselsdato → alder, dato, søgdato og tid til> ceo/folkepensionsalder-vaerktoj 4/10 01:5x`.
 Døm på indhold: `curl -s https://minberegner.dk/pension | grep -c 'folkepensionsalder-foedselsdato'` skal give **1** (værktøjet er klient-komponeret, så feltet findes i den statiske markup), og `grep -c 'Indtast din fødselsdato for at se, hvornår du kan gå på folkepension'` **1**. Brødteksten skal stadig have tabellen med rækkerne «31. december 1953 eller tidligere / 65 år», så værktøjet ikke har spiset den. `beraknare.se/pension` skal **ikke** have værktøjet — alderskalaen er dansk lov. Næste deploy-vindue 4/10 07:30.
