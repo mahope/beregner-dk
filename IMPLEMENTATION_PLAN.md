@@ -1,4 +1,4 @@
-STATUS: 5/10 17:4x. ✅ 5/10 17:4x: **`/tidszone`s klokkeslæt for
+STATUS: 5/10 17:4x. ✅ SENTRY MINBEREGNER-2 rettet i ceo/sentry-uselocale-fix. ✅ 5/10 17:4x: **`/tidszone`s klokkeslæt for
            sydhalvkloden og Grønland rettet** (`ceo/tidszone-sydhalvklodet`).
            `tidszoneRækker` valgte byens *egen* `utcVinter`/`utcSommer` til
            kolonnerne, altså antog at byen skiftede samtidig med Danmark. Det
@@ -180,6 +180,8 @@ ramme `09:00 i Nuuk` 1, `22:00 i Sydney` 1, `Sydney</td><td...>22:00` 1 og
 (svensk retning er «efter», ikke «bagefter») — og **0** matches på
 `08 i Nuuk`, `21 i Sydney`, `4 timmar efter`. Skal verificeres efter
 5/10 17:30.
+
+**Åben note 5/10 17:5x:** `VERIFICÉR DEPLOY: Sentry MINBEREGNER-2 fejl "useLocale must be used within a LocaleProvider" på POST / er rettet ved at wrappe NotFoundSearch i LocaleProvider i not-found.tsx ceo/sentry-uselocale-fix 5/10 17:5x`. Mål på at fejlen ikke længere opstår ved at teste med en bevidst fejl i et lokalt prod-build der sender fejlen af sted. Den skal være sat bag et flag, som fjernes igen.
 
 **Åben note 5/10 16:4x:** `VERIFICÉR DEPLOY: /tidszone skriver «klokken i 14
   lande» og «klockan i 14 länder» i hub-ankeret, 0× ordformen «fjorten»/
