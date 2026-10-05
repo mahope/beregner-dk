@@ -9,7 +9,7 @@
  */
 
 import {
-  brugerSommertid,
+  byOffsetVedDanmarkSæson,
   DANSK_UTC_SOMMER,
   DANSK_UTC_VINTER,
   TIDSZONER,
@@ -105,8 +105,30 @@ function tal(timer: number): string {
   return String(timer).replace(".", ",");
 }
 
-function forskel(zone: TidszoneInfo, danskOffset: number): number {
-  return zone.utcVinter - danskOffset;
+/**
+ * Forskellen mellem byens og Danmarks UTC-forskel **på den dato, hvor Danmark
+ * har sæsonen** — altså byens faktiske offset i det øjeblik, ikke dens
+ * vinterkonstant.
+ *
+ * Den tidligere `forskel(zone, danskOffset)` trak `zone.utcVinter − danskOffset`
+ * og antog altså at byen skiftede sommertid samtidig med Danmark. Det holder
+ * for New York, London og Nuuk ved en lykket et tilfælde (de to tal er ens på
+ * de to datoer), men er forkert for byerne på **sydhalvkloden**: Sydney står på
+ * UTC+11 den 15. januar, så forskellen er 11 − 1 = **10**, ikke 10 − 1 = 9,
+ * og Auckland 13 − 1 = **12**, ikke 11. Samme fejl lå i `tidszone-blog-lander`
+ * og gav bloggen «11 timer frem» for Auckland.
+ *
+ * Det er derfor funktionen hedder det den gør: byens offset på Danmarks
+ * sæsondato, læst med byens egen `dst`-regel. Datoerne er de samme to som
+ * `tidszoneRækker` og `klokkeslaetVed` bruger, så bytabellen og landetabellen
+ * ikke kan glide fra hinanden — de to tabeller på `/tidszone` sagde tidligere
+ * Sydney `22:00/20:00` og samme side «9 timer frem, samme som vintertid».
+ */
+function forskel(zone: TidszoneInfo, danskSommerstid: boolean): number {
+  return (
+    byOffsetVedDanmarkSæson(zone, danskSommerstid) -
+    (danskSommerstid ? DANSK_UTC_SOMMER : DANSK_UTC_VINTER)
+  );
 }
 
 function tekst(
@@ -129,10 +151,18 @@ function tekst(
  * Forskellen til hvert land i både dansk vinter- og sommertid, udregnet fra
  * TIDSZONER.
  *
- * `sommer` udelades for byer, der selv bruger sommertid: de skifter UTC-offset
- * samtidig med Danmark, så *forskjellen* er den samme hele året, selv om
- * begge tal flytter sig (London er 1 time bagud om vinteren og 2 timer
- * bagud om sommeren, fordi Danmark flytter sig med).
+ * `sommer` udelades kun når de to tal er **ens** — altså når forskellen er den
+ * samme i begge sæsoner. Det er ikke det samme spørgsmål som «har byen selv
+ * sommertid?», og det er derfor betingelsen ikke er `brugerSommertid`:
+ * - London har sommertid og flytter sig med Danmark, så forskellen er 1 time
+ *   bagud hele året → ingen særskilt sommerværdi.
+ * - Sydney har sommertid på de *modsatte* datoer, så forskellen er 10 timer
+ *   frem om vinteren og 8 om sommeren. Med `brugerSommertid` som betingelse
+ *   sagde tabellen «9 timer frem» og «Samme som vintertid» — altså et forkert
+ *   tal OG en løgn om at det var fast hele året, på den samme side der lige
+ *   har fået en tilføjelse om præcis sydhalvkloden.
+ * - New York har også sommertid, men på USA's datoer, så forskellen er 6 timer
+ *   bagud på begge de to datoer (dog 5 i de tre uger hvor kun USA har skiftet).
  */
 export function tidsskillnadRaekker(
   spoergsprog: "da" | "se" = "da"
@@ -146,28 +176,31 @@ export function tidsskillnadRaekker(
 
   return TIDSSKILLNADS_LANDE.map((land) => {
     const zone = zoneFor(land.by);
-    const vinter = forskel(zone, DANSK_UTC_VINTER);
-    const sommerForskel = forskel(zone, DANSK_UTC_SOMMER);
-    const skifterSelv = brugerSommertid(zone);
+    const vinter = forskel(zone, false);
+    const sommer = forskel(zone, true);
+    const fast = sommer === vinter;
     return {
       land: spoergsprog === "se" ? (land.landSe ?? land.landDa) : land.landDa,
       by: land.by,
       vinter,
-      sommer: skifterSelv ? undefined : sommerForskel,
+      sommer: fast ? undefined : sommer,
       tekstVinter: tekst(vinter, frem, bagud, time, timmar, samme),
-      tekstSommer: skifterSelv
-        ? undefined
-        : tekst(sommerForskel, frem, bagud, time, timmar, samme),
+      tekstSommer: fast ? undefined : tekst(sommer, frem, bagud, time, timmar, samme),
     };
   });
 }
 
 /**
- * Byer der skifter sommertid selv — forskellen til Danmark/Sverige er den
- * samme hele året. Regreslåst mod `brugerSommertid`, altså mod den samme
- * definition TidszoneBeregnerens egen tabel bruger.
+ * Sand når forskellen til Danmark/Sverige er den samme i de to sæsoner, altså
+ * når byen flytter sig *med* Danmark (eller slet ikke).
+ *
+ * Det er ikke det samme som `brugerSommertid`, og det er ikke det samme som
+ * `foelgerEu`: New York flytter sig ikke på EU's datoer, men forskellen er
+ * stadig 6 timer bagud den 15. januar og den 15. juli. `/tidszone`s sætning
+ * «… følger Danmark» må derfor aldrig bygges på denne funktion — den skal
+ * læse `foelgerEu`, fordi den er den, der fortæller om skiftedatoerne.
  */
-export function skifterSammenMedDanmark(by: string): boolean {
+export function forskelSammePaaBeggeDatoer(by: string): boolean {
   return tidsskillnadRaekker().find((r) => r.by === by)?.sommer === undefined;
 }
 

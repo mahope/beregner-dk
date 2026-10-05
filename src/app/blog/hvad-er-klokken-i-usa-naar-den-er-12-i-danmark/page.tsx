@@ -305,8 +305,8 @@ export default function TidszoneUsaPage() {
           byer flytter uret <em>sammen med Danmark</em> — eller slet ikke — så{" "}
           <em>vinter- og sommertidsspalten</em> viser det samme klokkeslæt,
           selv om begge tal flytter sig: London, Lissabon, Nuuk, Madrid,
-          Athen, Kreta, New York, Toronto, Miami, Boston, Chicago, Denver, Los
-          Angeles, Sydney og Auckland.
+          Athen, Kreta, New York, Toronto, Miami, Boston, Chicago, Denver og
+          Los Angeles.
         </p>
         <p>
           <strong>Ens spalter er ikke det samme som en fast forskel.</strong> New
@@ -325,6 +325,14 @@ export default function TidszoneUsaPage() {
           <em>længere</em> bagud end Denver, præcis i de uger hvor Danmark har
           somertid. Mumbai ligger 4,5 time foran, fordi Indien ligger på
           UTC+5:30 — en tidszone der ikke går i hele time.
+        </p>
+        <p>
+          <strong>Sydney og Auckland går den anden vej.</strong> De har
+          sommertid, når Danmark har vintertid, så de står i sommerspalten{" "}
+          <em>to</em> timer tidligere: Sydney går fra 10 timer frem til 8, og
+          Auckland fra 12 til 10. Det er derfor de to byer ikke står i
+          forrige liste, selv om de også flytter uret — bare på de omvendte
+          datoer, første søndag i oktober til første søndag i april.
         </p>
 
         <h2>Sådan regner du det ud selv</h2>

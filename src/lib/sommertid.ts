@@ -11,8 +11,8 @@
  * - USA (øst- og vestkyst): anden søndag i marts kl. 02:00 lokal til
  *   første søndag i november kl. 02:00 lokal.
  * - Australien (Sydney): første søndag i oktober til første søndag i april.
- * - Grønland (America/Nuuk): følger EU's datoer siden 2023, med WGT = UTC-3 og
- *   WGST = UTC-2.
+ * - Grønland (America/Nuuk): følger EU's datoer siden 2023, med WGT = UTC-2 og
+ *   WGST = UTC-1.
  *
  * Uden for overgangsugen bruges datoens afvigelse i minutter fra UTC. Dagen for
  * skiftet regnes som sommer- resp. vintertid efter skiftet, hvilket svarer til

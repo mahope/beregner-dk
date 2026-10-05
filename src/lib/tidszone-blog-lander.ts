@@ -34,6 +34,7 @@ import {
   TIDSZONER,
   type TidszoneInfo,
   brugerSommertid,
+  byOffsetVedDanmarkSæson,
   klokkeslaetVed,
 } from "./tidszone-reference";
 
@@ -93,12 +94,21 @@ function tal(timer: number): string {
 }
 
 /**
- * Forskel i timer, positivt = byen ligger *foran* Danmark. Det er
- * `zone.utcX - danskUtc`, altså præcis `tidsskillnadRaekker`s egen
- * `forskel(zone, DANSK_UTC_VINTER)` — ikke en ny formel.
+ * Forskel i timer, positivt = byen ligger *foran* Danmark. Det er byens egen
+ * offset på den dato, hvor Danmark har sæsonen, minus Danmarks offset —
+ * præcis `tidsskillnadRaekker`s egen `forskel`, altså samme kalender og samme
+ * IANA-afledte grund som `/tidszone`s bytabel.
+ *
+ * Den tidligere formel var `zone.utcVinter − danskUtc`, som antog at byen
+ * skiftede sommertid samtidig med Danmark. Det gav artiklen «11 timer frem»
+ * for Auckland, mens `Intl` siger Pacific/Auckland er UTC+13 den 15. januar,
+ * altså 12 timer frem — og Sydney «9 timer frem» i stedet for 10.
  */
-function forskel(zone: TidszoneInfo, danskUtc: number): number {
-  return zone.utcVinter - danskUtc;
+function forskel(zone: TidszoneInfo, danskSommerstid: boolean): number {
+  return (
+    byOffsetVedDanmarkSæson(zone, danskSommerstid) -
+    (danskSommerstid ? DANSK_UTC_SOMMER : DANSK_UTC_VINTER)
+  );
 }
 
 export interface BlogVerdensRaekke {
@@ -146,17 +156,17 @@ function tekst(
 export function blogVerdensRaekker(): BlogVerdensRaekke[] {
   return VERDENS_REKKEFOLGE.map((by) => {
     const zone = zoneFor(by);
-    const vinter = forskel(zone, DANSK_UTC_VINTER);
-    const sommerForskel = forskel(zone, DANSK_UTC_SOMMER);
-    const skifterSelv = brugerSommertid(zone);
+    const vinter = forskel(zone, false);
+    const sommer = forskel(zone, true);
+    const fast = sommer === vinter;
     return {
       by,
       vinter,
-      sommer: skifterSelv ? undefined : sommerForskel,
+      sommer: fast ? undefined : sommer,
       tekstVinter: tekst(vinter, "time", "timer"),
-      tekstSommer: skifterSelv ? undefined : tekst(sommerForskel, "time", "timer"),
+      tekstSommer: fast ? undefined : tekst(sommer, "time", "timer"),
       kl14: klokkeslaetVed(14, zone, false),
-      skifterSelv,
+      skifterSelv: brugerSommertid(zone),
     };
   });
 }

@@ -173,6 +173,39 @@ describe("tidszone svar-først-tabeller for lande og Excel", () => {
     expect(tabelRaekker).not.toContain("Canada");
   });
 
+  test("landetabellens sydhalvklode-rækker er de to tal, og brødteksten siger dem", async () => {
+    // Dommer på den *renderede* markup, ikke på `tidsskillnadRaekker`: de to
+    // tabeller på samme side skal ikke kun være ens internt, den skal vise
+    // 10/8 og 12/10 — og brødteksten skal sige de samme tal, ellers står der
+    // to forskellige sandheder på én side.
+    const RAADDER: Record<string, [string, string, string][]> = {
+      da: [
+        ["Australien", "10 timer frem", "8 timer frem"],
+        ["New Zealand", "12 timer frem", "10 timer frem"],
+      ],
+      se: [
+        ["Australien", "10 timmar framåt", "8 timmar framåt"],
+        ["New Zealand", "12 timmar framåt", "10 timmar framåt"],
+      ],
+    };
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await TidszonePage());
+      for (const [land, vinter, sommer] of RAADDER[locale]) {
+        const raekke = new RegExp(
+          `<td class="py-2 pr-4">${land}</td><td class="py-2 pr-4">${vinter}</td><td class="py-2">${sommer}</td>`
+        );
+        expect(html, `${locale}: ${land} skal have ${vinter} / ${sommer}`).toMatch(raekke);
+      }
+      // Og den gamle fejl må ikke ligge mere i markupken.
+      expect(html).not.toContain("9 timer frem");
+      expect(html).not.toContain("11 timer frem");
+      expect(html).not.toContain("9 timmar framåt");
+    }
+  });
+
   test("sætningen om byerne og tabellen er bygget af samme liste, så de ikke kan glide fra hinanden", async () => {
     for (const locale of ["da", "se"] as const) {
       vi.mocked(getLocale).mockResolvedValue(locale);

@@ -1,16 +1,76 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
-import {
-  DANSK_UTC_SOMMER,
-  DANSK_UTC_VINTER,
-  TIDSZONER,
-  klokkeslaetVed,
-} from "./tidszone-reference";
+import { TIDSZONER, klokkeslaetVed } from "./tidszone-reference";
+import { tidsskillnadRaekker } from "./tidszone-eksempler";
 import { blogVerdensAntal, blogVerdensRaekker } from "./tidszone-blog-lander";
 
 const BLOG = "src/app/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark/page.tsx";
 const KOBLING = "src/lib/blog-kobling.ts";
+
+/** 12:00 dansk vintertid / 12:00 dansk sommertid — de to øjeblikke, tabellen regnes på. */
+const VINTER_OEGNBLIK = "2026-01-15T11:00:00Z";
+const SOMMER_OEGNBLIK = "2026-07-15T10:00:00Z";
+
+/**
+ * Byens egen UTC-forskel i timer, målt gennem `Intl` — altså IANA-tidszonebasen.
+ * `longOffset` giver "GMT+11", "GMT-05:30" eller "GMT" afhængigt af zonen og
+ * datoen.
+ */
+function ianaOffsetTimer(zone: string, oegnblik: string): number {
+  const del = new Intl.DateTimeFormat("en-GB", {
+    timeZone: zone,
+    timeZoneName: "longOffset",
+  })
+    .formatToParts(new Date(oegnblik))
+    .find((part) => part.type === "timeZoneName")?.value;
+  if (!del) throw new Error(`Intl gav ingen timeZoneName for ${zone}`);
+  const [timegn, minutter = "0"] = del.replace("GMT", "").split(":");
+  const tegn = timegn.startsWith("-") ? -1 : 1;
+  const hele = Number(timegn.replace("+", "").replace("-", "")) || 0;
+  return tegn * (hele + Number(minutter) / 60);
+}
+
+/** Byens forskel til Danmark i timer, målt gennem IANA. */
+function ianaForskel(zone: string, oegnblik: string): number {
+  return (
+    ianaOffsetTimer(zone, oegnblik) -
+    ianaOffsetTimer("Europe/Copenhagen", oegnblik)
+  );
+}
+
+/**
+ * Hver by med sin IANA-zone, så porten fejler hvis nogen bytter zone — ikke kun
+ * hvis et tal glider. Boston og Miami ligger i `America/New_York` ligesom New
+ * York, og Kreta i `Europe/Athens`; det er IANA's egne zoner.
+ */
+const IANA_ZONER: Record<string, string> = {
+  London: "Europe/London",
+  Lissabon: "Europe/Lisbon",
+  Reykjavik: "Atlantic/Reykjavik",
+  Nuuk: "America/Nuuk",
+  Madrid: "Europe/Madrid",
+  Athen: "Europe/Athens",
+  "Heraklion (Kreta)": "Europe/Athens",
+  Istanbul: "Europe/Istanbul",
+  "New York": "America/New_York",
+  Toronto: "America/Toronto",
+  Miami: "America/New_York",
+  Boston: "America/New_York",
+  Chicago: "America/Chicago",
+  Denver: "America/Denver",
+  Phoenix: "America/Phoenix",
+  "Los Angeles": "America/Los_Angeles",
+  "São Paulo": "America/Sao_Paulo",
+  Dubai: "Asia/Dubai",
+  Mumbai: "Asia/Kolkata",
+  Bangkok: "Asia/Bangkok",
+  "Denpasar (Bali)": "Asia/Makassar",
+  Shanghai: "Asia/Shanghai",
+  Tokyo: "Asia/Tokyo",
+  Sydney: "Australia/Sydney",
+  Auckland: "Pacific/Auckland",
+};
 
 function laes(relativ: string): string {
   return readFileSync(resolve(process.cwd(), relativ), "utf-8");
@@ -85,23 +145,47 @@ describe("blogindlæggets verdens-tabel", () => {
 
   test("hver række har samme forskel som /tidszone's egen landetabel", () => {
     // Krydscheck mod `tidsskillnadRaekker`, altså mod den funktion
-    // `/tidszone` selv renderer. Beregnet uafhængigt her af
-    // `zone.utcVinter - DANSK_UTC_VINTER`, så en fejl i den ene måde at
-    // regne på fanges her og ikke i `tidszone`'s egen visning.
-    const raekker = blogVerdensRaekker();
-    for (const raekke of raekker) {
+    // `/tidszone` selv renderer, og mod IANA gennem `Intl` — de to kan ikke
+    // have hver sin fejl, fordi de ikke kan trække på hinanden.
+    //
+    // Den tidligere version af denne test genskrev koden i testen
+    // (`zone.utcVinter - DANSK_UTC_VINTER`), altså dømte den den fejl den
+    // skulle fange. Mod IANA dømmer den i stedet byens faktiske offset på de
+    // to sæsondatoer: Auckland er UTC+13 den 15. januar, så forskellen er 12
+    // timer frem, ikke 11.
+    const lande = tidsskillnadRaekker("da");
+    for (const raekke of blogVerdensRaekker()) {
       const zone = TIDSZONER.find((z) => z.by === raekke.by);
       expect(zone, `${raekke.by} skal findes i TIDSZONER`).toBeDefined();
       if (!zone) continue;
-      const forventet = zone.utcVinter - DANSK_UTC_VINTER;
-      expect(raekke.vinter, raekke.by).toBe(forventet);
+
+      const iana = IANA_ZONER[raekke.by];
+      expect(iana, `${raekke.by} mangler en IANA-zone i porten`).toBeDefined();
+      const forventetVinter = ianaForskel(iana, VINTER_OEGNBLIK);
+      const forventetSommer = ianaForskel(iana, SOMMER_OEGNBLIK);
+
+      expect(raekke.vinter, raekke.by).toBeCloseTo(forventetVinter, 5);
+      expect(
+        raekke.sommer === undefined ? raekke.vinter : raekke.sommer,
+        `${raekke.by} om sommeren`
+      ).toBeCloseTo(forventetSommer, 5);
       expect(raekke.tekstVinter, raekke.by).toBe(
-        forventet === 0
+        forventetVinter === 0
           ? "Samme tid"
-          : `${String(Math.abs(forventet)).replace(".", ",")} ${
-              Math.abs(forventet) === 1 ? "time" : "timer"
-            } ${forventet > 0 ? "frem" : "bagud"}`
+          : `${String(Math.abs(forventetVinter)).replace(".", ",")} ${
+              Math.abs(forventetVinter) === 1 ? "time" : "timer"
+            } ${forventetVinter > 0 ? "frem" : "bagud"}`
       );
+
+      // Byen skal også stå med præcis samme vintertal som /tidszone's egen
+      // landetabel, hvis den da står der.
+      const iLandetabel = lande.find((l) => l.by === raekke.by);
+      if (iLandetabel) {
+        expect(raekke.vinter, `${raekke.by} mod /tidszone`).toBeCloseTo(
+          iLandetabel.vinter,
+          5
+        );
+      }
     }
   });
 
@@ -178,9 +262,15 @@ describe("blogindlæggets verdens-tabel", () => {
   test("Auckland er den østligste by i tabellen — den afslutter rækkerne", () => {
     const raekker = blogVerdensRaekker();
     expect(raekker[raekker.length - 1].by).toBe("Auckland");
-    // NZST er UTC+12, dansk vintertid UTC+1, så 12 − 1 = 11 timer frem.
-    expect(raekker[raekker.length - 1].vinter).toBe(11);
-    expect(raekker[raekker.length - 1].tekstVinter).toBe("11 timer frem");
+    // Pacific/Auckland er UTC+13 (NZDT) den 15. januar, og dansk vintertid er
+    // UTC+1, så 13 − 1 = 12 timer frem. Rækken lå på 11, fordi den trak
+    // `utcVinter` (UTC+12) uden at læse at Auckland har somertid i januar —
+    // altså det samme timepavsagn som Nuuk og Sydney havde.
+    expect(raekker[raekker.length - 1].vinter).toBe(12);
+    expect(raekker[raekker.length - 1].tekstVinter).toBe("12 timer frem");
+    // Og om sommeren er Auckland UTC+12 mod Danmarks UTC+2, altså 10 frem.
+    expect(raekker[raekker.length - 1].sommer).toBe(10);
+    expect(raekker[raekker.length - 1].tekstSommer).toBe("10 timer frem");
   });
 
   test("Ingen række springer byer fra listen over", () => {

@@ -29227,3 +29227,79 @@ not acquired by Runner of type hosted» efter 15 min på både 21:4x- og
 
 **Mål:** `/tidsberegner` baseline 268 Plausible-besøgende/28d (5/10) og GSC
 78.615 visninger / 198 klik / 0,3 % CTR / pos. 6,7. Sammenlign 19/10.
+
+---
+
+## 6/10 00:0x — ceo/tidszone-lande-dagsafhaengig (review-fund MIDDEL, lukket)
+
+**Fundet:** `src/lib/tidszone-eksempler.ts:108-110` — `forskel()` trak
+`zone.utcVinter − danskOffset` og antog dermed at byen skiftede sommertid
+samtidig med Danmark. Det er rigtigt for New York, London og Nuuk (de to tal er
+ens på de to sæsondatoer) og forkert for sydhalvkloden. Revieweren fandt tre
+renderede rækker; de blev målt og bekræftet mod IANA.
+
+**Målt før rettelsen** (`Intl.DateTimeFormat(…, {timeZoneName: "longOffset"})`
+på 15. jan. og 15. juli 2026, `Europe/Copenhagen` som base):
+
+| Land | renderet på `/tidszone` | IANA 15. jan. / 15. jul. |
+|---|---|---|
+| Australien | «9 timer frem» + «Samme som vintertid» | +10 / +8 |
+| New Zealand | «11 timer frem» + «Samme som vintertid» | +12 / +10 |
+| USA | «6 timer bagefter» + «Samme som vintertid» | −6 / −6 (korrekt) |
+
+Revieweren skrev at New York lå «5 timer bagud, når Danmark har somertid». Det er
+en regnefejl i fundet: i juli er Danmark UTC+2 og New York UTC−4, altså stadig
+−6, og det er derfor USA's sommerspalte stadig er korrekt. Kilden til fejlen er
+ikke USA men de to byer på sydhalvkloden.
+
+Samme formel lå 1:1 i `tidszone-blog-lander.ts:101`, hvilket gav bloggen
+«11 timer frem» for Auckland i verdens-tabellen (og `kl14` var korrekt, for den
+går gennem `klokkeslaetVed`).
+
+**Rettelsen.** `byOffsetVedDanmarkSæson` — byens egen offset på den dato hvor
+Danmark har sæsonen, læst med byens `dst`-regel — er eksporteret fra
+`tidszone-reference.ts` og læses nu af begge `forskel`-funktioner. Sommerspalden
+udelades kun når de to tal er ens (ikke når byen har sommertid), så Australien
+og New Zealand får hver sin sommerværdi. `skifterSammenMedDanmark` er omdøbt til
+`forskelSammePaaBeggeDatoer`, fordi det er hvad den spørger; kaldere er kun i
+tests plus én kommentar i `page.tsx`. Brødteksten på `/tidszone` (da + se) og
+blogindlæggets liste over byer med ens spalter fulgte med.
+
+**Porte (alle målt røde på den gamle kode).** Fire nye dømninger mod IANA:
+- `tidszone-eksempler.test.ts` «alle rækker er målt mod IANA paa de to
+  sæsondatoer» — alle 11 landerækker, sommerkolonnen kun hvis tallene afviger.
+- `…«sydhalvkloden har omvendt fortegn»» — 10/8 og 12/10 i tal *og* tekst.
+- `tidszone-blog-lander.test.ts` «hver række har samme forskel som /tidszone's
+  egen landetabel» — alle 25 byer mod IANA **og** mod `tidsskillnadRaekker`.
+- `app/tidszone/page.test.tsx` «landetabellens sydhalvklode-rækker …» — på den
+  renderede markup i begge sprog, inkl. negative krav på «9 timer frem» og
+  «11 timer frem».
+
+Mutation af `forskel` + betingelsen tilbage til den gamle kode gav **4 røde**
+(«Australien om vinteren: expected 9 to be close to 10») og **2 røde** i
+bloglanderen («Sydney: expected 9 to be close to 10», «expected 11 to be 12»).
+
+**To tests låste fejlen fast** og er erstattet: de genskrev koden som forventning
+(«vinterforskellen er zoneens egen offset minus Danmarks UTC+1» m.fl.), og
+`timeforskellen er 12 mod byens egen klokkeslæt i samme time` havde en ternær
+hvor begge grene var `raekke.vinter` — den kunne ikke fejle uanset hvad koden
+gjorde. Den læser nu `klokkeslaetVed`, altså bytabellens egen funktion.
+
+**To forældede docblocks** om Nuuk (`sommertid.ts` sagde WGT = UTC-3/WGST =
+UTC-2, `tidszone-reference.ts` sagde «ingen skift») er rettet til UTC-2/UTC-1
+på EU's datoer, så en senere blok ikke læser «Nuuk har ingen sommertid» og
+sætter `dst` væk.
+
+**Mål:** `/tidszone` 24.829 GSC-visninger, 0,4 % CTR, pos. 7,7 (5/10) — alle tre
+største søgninger spørger om præcise tal. Sammenlign 20/10.
+
+**❓ Målt undervejs, skrevet til feature-køen:** den svenske landetabel skriver
+`New Zealand`, fordi `TIDSSKILLNADS_LANDE` mangler `landSe` på den.
+
+**Verificeret:** `npm run typecheck` 0, `npm run lint` 0, `npm test` 4304 tests i
+269 filer grønne. `npm test` skriver desuden to kendte scanner-rækker (`/promille`
+34, `/procent` 1) der er røde på `master` og ikke berørt af denne diff.
+
+**VERIFICÉR DEPLOY lukket 6/10 00:0x** (badge fra `ceo/populaer-badge-sprog`):
+`curl -s https://minberegner.dk/ | grep -c '>Trending<'` = **0**,
+`>Populær nu<` > 0; beraknare.se: `>Trending<` = 0, `>Populär nu<` > 0.

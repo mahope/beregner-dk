@@ -76,10 +76,10 @@ function byListe(spoergsprog: "da" | "se"): string {
  * sætningen stadig "Grækenland og Spanien", altså om færre lande end
  * tabellen viste.
  *
- * Det må ikke udledes af `skifterSammenMedDanmark` — den spørger, om en
- * zone *har* sommertid, og USA og Australien har den, bare på andre datoer.
- * Det ville have gjort sætningen til "USA og Australien følger Danmark",
- * hvilket er forkert i de uger, hvor kun den ene side har sommartid.
+ * Det må ikke udledes af `forskelSammePaaBeggeDatoer` — den spørger om de to
+ * *forskelle* er ens, og New Yorks er (6 timer bagud begge sæsoner) uden at
+ * byen skifter på EU's datoer. Det ville have gjort sætningen til "USA følger
+ * Danmark", hvilket er forkert i de uger, hvor kun den ene side har sommartid.
  */
 function landeFoelgerDanmark(spoergsprog: "da" | "se"): string {
   const lande = TIDSSKILLNADS_LANDE.filter((l) => l.foelgerEu).map((l) =>
@@ -485,7 +485,9 @@ export default async function TidszonePage() {
           forskellen er den samme hele året. <strong>Thailand, Japan og Kina
           bruger ikke sommertid</strong>, så de ligger én time tidligere, når
           Danmark har sommertid. Det er den fælde, der giver den forkerte
-          aftale.
+          aftale. <strong>Australien og New Zealand går den anden vej</strong>:
+          de har somertid, når Danmark har vintertid, så Australien går fra 10
+          timer frem til 8, og New Zealand fra 12 til 10.
         </p>
 
         <h2>Hvad er klokken i et andet land?</h2>
@@ -621,7 +623,10 @@ export default async function TidszonePage() {
           <strong>{landeFoelgerDanmark("se")} följer Sverige</strong>, så
           skillnaden är densamma hela året. <strong>Thailand, Japan och Kina
           använder inte sommartid</strong>, så de ligger en timme tidigare, när
-          Sverige har sommartid. Det är fällan som ger det felaktiga mötet.
+          Sverige har sommartid. Det är fällan som ger det felaktiga mötet.{" "}
+          <strong>Australien ochNya Zeeland går åt andra hållet</strong>: de har
+          sommartid när Sverige har vintertid, så Australien går från 10 timmar
+          framåt till 8, ochNya Zeeland från 12 till 10.
         </p>
 
         <h2>Vad är klockan i ett annat land?</h2>

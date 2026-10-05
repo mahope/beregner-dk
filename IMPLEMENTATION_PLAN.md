@@ -1,83 +1,95 @@
-STATUS: 5/10 23:1x. ✅ 5/10 23:1x: **forsidens sæsonbadge stod på engelsk.**
-              Badgen «Trending» lå som et råt literal i `page.tsx` og fulgte
-              *ikke* `locale`, så danske læsere så «Trending» på minberegner.dk
-              og svenske læsere så «Trending» på beraknare.se — målt 5/10 23:0x
-              i live-HTML: **6 forekomster på forsiden**. Ordet er nu
-              `sections.trending` i `home-data.ts` — «Populær nu» / «Populär nu»
-              / «Populær nå» — altså samme sted som al anden forside-tekst, og
-              to nye porte i `forside.test.tsx` dømmer på det. Mål: ingen
-              `>Trending<` i markupken i noget sprog, og badgen hænger på præcis
-              de hrefs `getTrendingHrefs()` leverer (dømt på de links der
-              *indeholder* badgen, ikke på om ordet står et sted på siden).
-              Mutation tilbage til «Trending» gav **2 rød**, rettelsen 7/7 grøn.
-              ⚠️ **CI har været rød siden 5/10 19:35 — tre kørsler, alle
-              `cancelled` efter præcis 15 min med *nul* steps og intet
-              `runner_name`.** Sidste grønne kørsel var 16:13. Det er
-              GitHubs egen runner-kø, ikke diffen: jobbet startede aldrig.
-              ⛔ Ikke noget en iteration kan rette — GitHub-billing/minutter er
-              Mads' (❓ nedenfor). Lokal gate er eneste kontrol før merge.
-              ✅ 5/10 22:5x: **«/tidsberegner» sendte læseren op til et felt
-             der lå nedenfor.** Siden siger «Indtast dine egne klokkeslæt
-             **ovenfor**» og **ni** steder «præcis som værktøjet **ovenfor**» /
-             «Fyll i dina egna klockslag **ovanför**» — men `<TidsBeregner />`
-             lå *efter* svar-først-tabellen og al den øvrige brødtekst, så alle
-             ni henvisninger pegede på det, der lå længere nede. Bevægelsen er
-             målt: «ovenfor» lå ved tegn 1670, værktøjet ved 5938 i den
-             renderede markup. Rettelsen er **én flytning** — værktøjet før
-             tabellen, som på `/procent` — der gør alle ni rigtige uden at røre
-             én brødtekst. Samme rækkefølge som `/procent` (beregneren under
-             H1). Ny port dømmer på rækkefølgen i markup'en, da/se hver for
-             sig: mutation tilbage gav 1 rød, rettelsen 29/29 grøn.
-             *Datagrund:* `/tidsberegner` er sitets **tredjestørste GSC-side**
-             (78.615 visninger) med **0,3 % CTR** på pos. 6,7 — og dens egen
-             svar-først-tabel er bygget til at konvertere. MÅL:
-             `/tidsberegner` baseline **268** Plausible-besøgende/28d (5/10),
-             GSC 78.615 visninger / 198 klik / 0,3 % CTR / pos. 6,7.
-             ⚠️ **Porten blev skrevet forkert to gange undervejs og begge
-             gange slog den rød på den rigtige kode** — først på JSON-LD'en fra
-             `<FAQSchema>` (den ligger i markup før alt visuelt og siger også
-             «feltet ovenfor»; den er ikke en løgn, den er om den *renderede*
-             side), siden på en dansk indledning med «ovenfor» jeg ikke fik
-             identificeret. En tredje port krævede 4 svenske «ovanför», som
-             *er* 0. Alle tre var porten, ikke siden. Kun rækkefølge-porten
-             blev bevaret, fordi den dømmer den konkrete fejl.
-             ✅ 5/10 22:1x: juleaftens og nytårsaftens URL er nu datoen
-            (`ceo/december-dato-i-url`). GSC 5/10 lister «hvor mange dage er
-            der til den 24 december» som **1.036 visninger på pos. 5 under
-            `/dato`** — altså konkurrerede `/dato` og nedtællingssiden om den,
-            og «24 december» stod ingen steder i stien. Dansk autocomplete målt
-            5/10 22:0x bekræfter: «…til 24 december» er **første** completion
-            på «hvor mange dage er der til 24», og «…til 31 december» er en
-            træffer på «31 december». Slug'en er derfor `24-december` /
-            `31-december` i begge sprog, og det gamle navn ligger som `aliases`,
-            som routing-laget 301'er — så URL'en vi engang publicerede ikke
-            404'er og svaret har én adresse. ⚠️ **Samme opgave fandt en løgn på
-            to sider:** `december-1`'s fakta sagde «præcis **30** dage til
-            juleaftensdagen den 24. december» i dansk *og* svensk. December
-            har 31 dage, så 1. → 24. december er **23** dage; 30 er afstanden
-            til 31. december. Ingen port dækkede strengen. Nu er der en, som
-            tager dag-tallet fra `getDageTilAnswer` og kræver at brødteksten
-            indeholder det samme tal (punkt 11).
-            ✅ 5/10 21:3x lukkede alle fem ældre VERIFICÉR-noter på indhold.
-            ✅ 5/10 21:4x efterlønnens deltidstal 0,67 → 2/3 · ✅ 5/10 17:4x
-            `/tidszone`: sydhalvkloden + Nuuk · ✅ 5/10 15:0x fire rå procenter
-            i `BilBeregner.tsx` · ✅ 5/10 14:1x sidebarlens liste i målt
-            trafikrækkefølge · ✅ 5/10 13:1x to review-fund fra 4/10 · ✅ 4/10:
-            promille på forsiden, Norge+Tyskland, fire review-fund,
-            `/dato`-titel, brændstoftabel, `/idealvaegt`, lånebeløb,
-            folkepensionsalder. ✅ **CEO-køens punkt 0 er rettet**. Alt ældre:
-            `docs/plan-arkiv.md`.
-            ⚠️ **CI var rød 5/10 21:3x, men ikke af kode:** `gh run view` giver
-            «The job was not acquired by Runner of type hosted» efter 15 min.
-            Infrastrukturen, ikke diffen. CI-cron'en kører igen 6/10 07.
-            PR-TJEK: 5/10 21:2x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire
-            fuldt landede remote branches kan ikke slettes fra maskinen (lokale
-            tilladelsesregler nægter `git push origin --delete`).
-            `auto/union-night` har unikt arbejde i tre dokumenter — se ❓.
-            **Gate:** `npm run typecheck && npm run lint && npm test` (CI kører
-            også `next build`). 5/10 22:0x: typecheck 0, lint 0, **4303 tests i
-            269 filer** grønne, `next build` exit 0 med `/dage-til/[dato]` som
-            `ƒ` (dynamisk — punkt 1 ikke brudt).
+STATUS: 6/10 00:0x. ✅ 6/10 00:0x: **landetabellen på `/tidszone` løj om
+              Australien og New Zealand.** `tidszone-eksempler.ts`s `forskel()`
+              trak `zone.utcVinter − danskOffset`, altså byens *egne
+              vinterkonstant* mod Danmarks, og antog dermed at byen skiftede
+              sommertid samtidig med Danmark. Rigting for de byer der gør det
+              (New York, London, Nuuk), forkert for sydhalvkloden: IANA giver
+              Australia/Sydney **+10/+8** den 15. jan./15. jul. og
+              Pacific/Auckland **+12/+10**, så siden sagde «9 timer frem» +
+              «Samme som vintertid» for Australien og «11 timer frem» for New
+              Zealand — tre forkerte tal OG en løgn om at tallet var fast hele
+              året, på den side der lige har fået en tilføjelse om præcis dette
+              emne. Samme identiske formel lå i `tidszone-blog-lander.ts` og gav
+              bloggen «11 timer frem» for Auckland. Rettelsen er **én
+              funktion**: `byOffsetVedDanmarkSæson` (byens offset på *Danmarks*
+              sæsondato, med byens egen `dst`-regel) er nu eksporteret fra
+              `tidszone-reference.ts` og læses af begge steder, så bytabellen og
+              landetabellen ikke længere kan modsige hinanden — de siger nu
+              Sydney `22:00/20:00` **og** «10 frem / 8 frem». Sommerspalden
+              udelades kun når de to tal er *ens*, ikke når byen har sommertid
+              (`brugerSommertid`), hvilket var grunden til «Samme som
+              vintertid» for en by der flytter sig den anden vej. Brødteksten på
+              begge sprog og blogindlæggets liste over byer med ens spalter er
+              rettet med. *Portene kan fejle:* fire nye dømninger mod IANA
+              gennem `Intl.DateTimeFormat(…, {timeZoneName: "longOffset"})` på de
+              to sæsondatoer — alle 11 landerækker og alle 25 byer i
+              blogtabellen, plus én port på den *renderede* markup i begge
+              sprog. Mutation til den gamle formel gav **4 røde** i eksempler +
+              sidespejlet og **2 røde** i bloglanderen, bl.a. «Australien om
+              vinteren: expected 9 to be close to 10». De to tests der låste
+              fejlen fast (de genskrev koden som forventning) er erstattet af
+              IANA-porten, og den ene af dem havde en ternær hvor begge grene var
+              `raekke.vinter` — den kunne ikke fejle. Mål: ingen `>9 timer frem<`
+              og ingen `>11 timer frem<` i markupken på `/tidszone` i noget sprog.
+              *Datagrund:* `/tidszone` 24.829 GSC-visninger / 0,4 % CTR / pos. 7,7
+              (5/10) — de tre største søgninger («tidszoner», «hvad er klokken i
+              usa når den er 12 i danmark», «hvad er klokken i de forskellige
+              tidszoner») er alle spørgsmål om *præcise tal*. Bloggen
+              «hvad-er-klokken-i-usa-naar-den-er-12-i-danmark» har samme
+              verdens-tabel. ⛔ Samme commit rettede to forældede docblocks om
+              Nuuk (WGT/WGST), der modsagde hinanden og `TIDSZONER`.
+STATUS: 6/10 00:0x. ✅ 6/10 00:0x: **landetabellen på `/tidszone` løj om
+              Australien og New Zealand.** `tidszone-eksempler.ts`s `forskel()`
+              trak `zone.utcVinter − danskOffset` og antog dermed at byen skiftede
+              sommertid samtidig med Danmark. Rigting for New York/London/Nuuk,
+              forkert for sydhalvkloden: IANA giver Sydney **+10/+8** og Auckland
+              **+12/+10** den 15. jan./15. jul., så siden sagde «9 timer frem» +
+              «Samme som vintertid» for Australien og «11 timer frem» for New
+              Zealand — tre forkerte tal OG en løgn om at tallet var fast hele
+              året, på den side der lige har fået en tilføjelse om præcis det
+              emne. Samme formel lå i `tidszone-blog-lander.ts` («11 timer frem»
+              for Auckland). Rettelsen er **én funktion**:
+              `byOffsetVedDanmarkSæson` er eksporteret fra
+              `tidszone-reference.ts` og læses af begge steder, så bytabellen og
+              landetabellen ikke kan modsige hinanden — nu siger de Sydney
+              `22:00/20:00` **og** «10 frem / 8 frem». Sommerspalden udelades kun
+              når de to tal er *ens*, ikke når byen har sommertid — det var
+              `brugerSommertid`, der gav «Samme som vintertid» for en by der
+              flytter sig den anden vej. Brødteksten i begge sprog og bloggens
+              liste over byer med ens spalter fulgte med.
+              *Portene kan fejle:* fire nye dømninger mod IANA gennem
+              `Intl.DateTimeFormat(…, {timeZoneName: "longOffset"})` på de to
+              sæsondatoer — alle 11 landerækker, alle 25 byer i blogtabellen, plus
+              én port på den *renderede* markup i begge sprog. Mutation til den
+              gamle formel gav **4 røde** (bl.a. «Australien om vinteren:
+              expected 9 to be close to 10») og **2 røde** i bloglanderen. De to
+              tests der låste fejlen fast (de genskrev koden som forventning) er
+              erstattet af IANA-porten; den ene havde en ternær hvor begge grene
+              var `raekke.vinter`, altså umulig at fejle. Mål: ingen `>9 timer
+              frem<` / `>11 timer frem<` i markupken i noget sprog.
+              *Datagrund:* `/tidszone` 24.829 GSC-visninger, 0,4 % CTR, pos. 7,7
+              (5/10) — de tre største søgninger spørger alle om *præcise tal*.
+              ✅ 5/10 23:1x sæsonbadge «Populær nu» (ikke «Trending») ·
+              ✅ 5/10 22:5x `/tidsberegner`: værktøjet over svar-først-tabellen ·
+              ✅ 5/10 22:1x juleaftens/nytårsaftens URL er datoen · ✅ 5/10 21:4x
+              efterlønnens deltidstal 2/3 · ✅ 5/10 17:4x `/tidszone`: sydhalvkloden
+              + Nuuk · ✅ 5/10 15:0x fire rå procenter · ✅ 5/10 14:1x sidebarlens
+              liste i målt trafikrækkefølge · ✅ 5/10 13:1x to review-fund fra 4/10 ·
+              ✅ 4/10 promille på forsiden, Norge+Tyskland, fire review-fund,
+              `/dato`-titel, brændstoftabel, `/idealvaegt`, lånebeløb,
+              folkepensionsalder. **CEO-køens punkt 0 er rettet.** Alt ældre:
+              `docs/plan-arkiv.md`.
+              ✅ **CI er grøn igen 5/10 21:26** (4 min) efter tre `cancelled`
+              kørsler aftenen før — GitHubs egen runner-kø, ikke diffen (❓).
+              PR-TJEK: 5/10 21:2x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire
+              fuldt landede remote branches kan ikke slettes fra maskinen (lokale
+              tilladelsesregler nægter `git push origin --delete`).
+              `auto/union-night` har unikt arbejde i tre dokumenter — se ❓.
+              **Gate:** `npm run typecheck && npm run lint && npm test` (CI kører
+              også `next build`). 6/10 00:0x: typecheck 0, lint 0, **4304 tests i
+              269 filer** grønne. `npm test` skriver desuden to kendte
+              scanner-rækker («FEJL: 34 …» i `/promille`, «FEJL: 1 …» i
+              `/procent`) der er røde på `master` og ikke berørt her — se ❓.
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -262,6 +274,12 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 - **[ ] Kalorieguide pr. portion på `/kalorier`** — 9 af 10 danske træffere under
   «kalorier» er madvarer. ⛔ samme fødevarekilde som kogetider (❓), derfor
   én ❓ dækker begge.
+- **[ ] Landetabellen skriver danske landnavne i den svenske udgave.** Målt
+  6/10 00:0x i renderet markup: `/tidszone` med `locale: "se"` skriver
+  `<td>New Zealand</td>` og «Grekland»/«Turkiet» er oversat, men New Zealand
+  ikke. `TIDSSKILLNADS_LANDE` har `landSe` på Grønland, Grækenland og
+  Tyrkiet og mangler det på New Zealand. *Accept:* hvert land har `landSe`, og
+  en port dømmer da/se hver for sig på de 11 rækker.
 - **[ ] Svensk dækning af manglende kalkulatorer** — beraknare.se har 89
   sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og
   `/boernepenge`. ⛔ Opgave 187, 13/10.
@@ -275,17 +293,31 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Tre noter er åbne.** De ni fra 3/10–5/10 17:4x er lukket på indhold — målt med
-`curl` mod begge domæner 5/10 21:3x, ikke på HTTP-koden. De lukkede noters fulde
-krav og målinger ligger i `docs/plan-arkiv.md` (5/10 21:4x).
+**Fire noter er åbne.** (Den 5/10 17:5x er delvist lukket — se egen linje.) De ti
+fra 3/10–5/10 er lukket på indhold — målt med `curl` mod begge domæner, ikke på
+HTTP-koden. De lukkede noters fulde krav og målinger ligger i
+`docs/plan-arkiv.md` (senest 6/10 00:1x).
 
-**Åben note 5/10 23:1x:** `VERIFICÉR DEPLOY: forsidens sæsonbadge hedder
-«Populær nu» på minberegner.dk, «Populär nu» på beraknare.se og «Populær nå» på
-den norske udgave — aldrig «Trending» ceo/populaer-badge-sprog 5/10 23:1x`. Mål
-på indhold: `curl -s https://minberegner.dk/ | grep -c '>Trending<'` skal være
-**0** og `grep -c '>Populær nu<'` skal være **> 0** (samme tre greb på
-beraknare.se med «Populär nu»). ⚠️ Mergen er efter 21:30-vinduet, første reelle
-kør er 6/10 07:30.
+⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10 00:1x):
+Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer 1 for
+alt. Noterne her bruger `grep -o`.
+
+**Åben note 6/10 00:0x:** `VERIFICÉR DEPLOY: landetabellen på /tidszone (og
+bloggen hvad-er-klokken-i-usa-naar-den-er-12-i-danmark) viser Australien 10 frem /
+8 frem og New Zealand 12 frem / 10 frem i begge spalter på minberegner.dk og
+beraknare.se, og ingen af siderne siger længere «9 timer frem» eller «11 timer
+frem» ceo/tidszone-lande-dagsafhaengig 6/10 00:0x`. Mål på indhold:
+`curl -s https://minberegner.dk/tidszone | grep -c '9 timer frem\|11 timer frem'`
+skal være **0**, og `grep -o '10 timer frem' | wc -l` skal være **> 0** (samme to
+greb på beraknare.se med «10 timmar framåt»). ⚠️ Mergen er efter 21:30-vinduet,
+første reelle kør er 6/10 07:30.
+
+**Åben note 5/10 23:1x (badge):** `VERIFICÉR DEPLOY: forsidens sæsonbadge hedder
+«Populær nu» / «Populär nu» / «Populær nå», aldrig «Trending»
+ceo/populaer-badge-sprog 5/10 23:1x`. Målt på indhold 6/10 00:1x: minberegner.dk
+har **3** `>Trending<` og **0** `>Populær nu<`; beraknare.se **1** og **0** — altså
+stadig ikke live, og det er forventet, fordi mergen kom efter 21:30-vinduet. Første
+reelle kør er 6/10 07:30. Samme måling som arkivet bruger: `grep -o … | wc -l`.
 
 **Åben note 5/10 22:5x:** `VERIFICÉR DEPLOY: /tidsberegner renderer
 tidsværktøjet før svar-først-tabellen på både minberegner.dk og beraknare.se
@@ -349,14 +381,12 @@ viser 13.372 kr. og 14.694 kr., ikke 13.438 kr. og 14.768 kr. ceo/efterloen-delt
 
 ## ❓ Til Mads
 
-- ❓ **GitHub Actions kan ikke starte job på minberegner.dk** (5/10 23:1x).
-  Tre kørsler i træk (19:35, 20:10, 20:37) blev `cancelled` efter præcis
-  15 min med **nul** steps og tomt `runner_name`; seneste grønne kørsel var
-  16:13. Det er GitHubs egen runner-kø/minuttersbudget, ikke koden — jobbet
-  startede aldrig, så der er ingen log at læse. **En iteration kan ikke rette
-  det.** Betyder at den lokale gate er eneste kontrol før merge, indtil den
-  kører grøn igen. Tjekkes én gang ved næste iterations start med
-  `gh run list -L 1`.
+- ⛔ **GitHub Actions kunne ikke starte job på minberegner.dk** (5/10 19:35–20:37,
+  lukket 6/10 00:0x). Tre kørsler blev `cancelled` efter præcis 15 min med **nul**
+  steps og tomt `runner_name` — GitHubs egen runner-kø, ikke koden, jobbet startede
+  aldrig. Kørslen 5/10 21:26 var grøn på 4 min, så det var en time med kø. Ingen
+  handling: tjek én gang ved iterations start med `gh run list -L 1`, og stoler på
+  den lokale gate ellers.
 - ❓ **`auto/union-night` har unikt arbejde, der aldrig er landet** (4/10 04:1x).
   Branchen er fra 17/9 og skiller sig fra `master` i `BACKLOG.md`,
   `docs/kommercielt-inventar.md` og `docs/timepris-nichetest.md`. Sidste fil er et
@@ -455,14 +485,14 @@ viser 13.372 kr. og 14.694 kr., ikke 13.438 kr. og 14.768 kr. ceo/efterloen-delt
   allerede præcis 2/3, og `DAGPENGE_2026` siger 22.041 → 14.694 = netop 2/3.
   **Dobbeltreglen er dog stadig ulæst** — hvis loven faktisk siger 67 %, er det
   *dagpenge*-delen der skal rettes, ikke efterløn.
-- ❓ **Et skanner-fund uden fejl i koden** (5/10 21:2x). `npm test` melder «FEJL:
-  1 ureviewet(e) danske streng(e) i komponenter der monteres på beraknare.se» med
-  `src/app/procent/page.tsx:621` — men linjen er svensk («Vår procenträknare kan
-  hjälpa dig med fyra olika typer av beräkningar:») og hele blokket er svensk
-  fra `locale === "se"` og ned. Scanneren matcher et dansk stopord i svensk
-  tekst. **⛔ Ikke en opgave at fjerne ordet for** — det ville slå dansk ødelagt
-  for at tilfredsstille en port. Kræver enten en stopordsliste der skelner
-  mellem sprog, eller en allowlist-fil.
+- ❓ **To skanner-rækker uden fejl i koden** (5/10 21:2x, målt igen 6/10 00:0x).
+  `npm test` skriver «FEJL: 1 ureviewet(e) danske streng(e) …» med
+  `src/app/procent/page.tsx:621` «En lønsprocent kan du se:» (den 5/10-noterede
+  værdi på samme linje var den svenske sætning over den) og «FEJL: 34 …» med 20
+  linjer i `src/app/promille/page.tsx` (37–279), der er ren dansk i en komponent
+  der monteres på beraknare.se. **⛔ Ikke opgaver at fjerne ord for** — det ville
+  slå dansk ødelagt for at tilfredsstille en port. Kræver en stopordsliste der
+  skelner mellem sprog, eller en allowlist-fil. Porten får grøn på en af dem.
 - ❓ **Elbilens vægtafgift 2026 (og Sveriges fordonsskatt).** `/bil` skrev «Elbil:
   0 kr (til 2026)»; `skat.dk` svarer 500. Teksten siger nu kun hvad beregneren
   regner med, og tallet ligger i `bil-omkostninger.ts` som `DRIFT.da.vaegt.el`.

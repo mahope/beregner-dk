@@ -9,9 +9,9 @@ import { utcOffsetMinutter, type DstRegel } from "./sommertid";
  * - USA/Canada/Europa/Australien: standardvinter- og sommertidszoner fra
  *   IANA-tidszonebasen (UTC-offset uden DST).
  * - São Paulo har haft fast UTC-3 siden 2019 og bruger ikke sommertid.
- * - Grønland har fast UTC-2 (WGT/WGST er samme zone, ingen skift mellem
- *   standard- og sommertid), jf. IANA America/Nuuk. Rækken lå tidligere på
- *   UTC-3/-2, som gav «08 i Nuuk» i brødteksten, mens kalenderen siger 09.
+ * - Grønland er UTC-2 (WGT) og UTC-1 (WGST) og skifter på EU's datoer, jf.
+ *   IANA America/Nuuk. Rækken lå tidligere på UTC-3/-2, som gav «08 i Nuuk»
+ *   i brødteksten, mens kalenderen siger 09.
  * - Island har hele året UTC+0 og bruger ikke sommertid (Atlantic/Reykjavik).
  * - Lissabon er WET (UTC+0) og WEST (UTC+1); Athen og Kreta er EET (UTC+2)
  *   og EEST (UTC+3), jf. IANA Europe/Lisbon og Europe/Athens.
@@ -119,7 +119,7 @@ const SOMMERDATO = new Date(2026, 6, 15);
  * sommertid — altså byens faktiske offset i de to øjeblikke, ikke dens
  * vinter- og sommerkonstant.
  *
- * Det er denne funktion, der gør tabellen rigtig for **sydhalvkloden**.
+ * Det er denne funktion, der gør tabellerne rigtige for **sydhalvkloden**.
  * Australien og New Zealand har deres somertid, når Danmark har vintertid:
  * Sydney står på UTC+11, når det er 12:00 i Danmark en januar, og på UTC+10,
  * når det er 12:00 en juli. En tidligere udgave af `tidszoneRækker` valgte
@@ -130,8 +130,14 @@ const SOMMERDATO = new Date(2026, 6, 15);
  * de byer, der faktisk skifter sammen med Danmark, ved et lykket fund var
  * rigtige. Denne funktion læser i stedet offsetten på de to datoer ovenfor,
  * med byens egen `dst`-regel, så nord og syd regnes på hver sin kalender.
+ *
+ * Eksporteret fordi `tidszone-eksempler` og `tidszone-blog-lander` har den
+ * *samme* fejl i deres lande- og verdensrækker: de trak forskellen som
+ * `zone.utcVinter − danskOffset`, altså byens egen vinterkonstant mod Danmarks,
+ * hvilket for byerne på sydhalvkloden gav 9 timer for Australien, 11 for New
+ * Zealand og en løgn om at tallet var fast hele året. Én funktion, én kalender.
  */
-function byOffsetVedDanmarkSæson(
+export function byOffsetVedDanmarkSæson(
   zone: TidszoneInfo,
   danskSommerstid: boolean
 ): number {
