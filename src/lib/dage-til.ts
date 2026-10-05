@@ -43,6 +43,15 @@ export interface DageTilCopy {
 
 export interface DageTilLocaleArm {
   slug: string;
+  /**
+   * Slugs this arm used to serve, kept so the old URL can 301 instead of 404.
+   * A date people search for by its number — 24. og 31. december — was first
+   * published under the holiday's name, and the URL is what the two biggest
+   * countdown queries on `/dato` literally contain ("hvor mange dage er der til
+   * den 24 december", 1.036 visninger på pos. 5 i GSC 5/10). The old slug must
+   * resolve to the same event, or the ranking it built is thrown away.
+   */
+  aliases?: readonly string[];
   copy: DageTilCopy;
 }
 
@@ -144,7 +153,8 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       se: { kind: "fixed", month: 12, day: 24, offsetDays: 0 },
     },
     da: {
-      slug: "juleaften",
+      slug: "24-december",
+      aliases: ["juleaften"],
       copy: {
         short: "juleaften",
         // 50 tegn. Titlen er `${question} ${count}` (DageTilPage.tsx), så
@@ -180,7 +190,8 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       },
     },
     se: {
-      slug: "julafton",
+      slug: "24-december",
+      aliases: ["julafton"],
       copy: {
         short: "julafton",
         question: "Hur många dagar är det till julafton?",
@@ -293,7 +304,8 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       se: { kind: "fixed", month: 12, day: 31, offsetDays: 0 },
     },
     da: {
-      slug: "nytaarsaften",
+      slug: "31-december",
+      aliases: ["nytaarsaften"],
       copy: {
         short: "nytårsaften",
         question: "Hvor mange dage er der til nytårsaften?",
@@ -322,7 +334,8 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       },
     },
     se: {
-      slug: "nyarsafton",
+      slug: "31-december",
+      aliases: ["nyarsafton"],
       copy: {
         short: "nyårsafton",
         question: "Hur många dagar är det till nyårsafton?",
@@ -430,7 +443,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         facts: [
           "December har 31 dage, så 1. december er månedens første dag.",
           "1. december er ikke en dansk helligdag, men datoen er fast og flytter sig aldrig.",
-          "Fra 1. december er der præcis 30 dage til juleaftensdagen den 24. december.",
+          "Fra 1. december er der præcis 23 dage til juleaftensdagen den 24. december.",
         ],
         faq: [
           {
@@ -459,7 +472,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         facts: [
           "1 december är första dagen i december, och december har 31 dagar.",
           "1 december är inte en svensk helgdag, men datumet är fast och flyttar sig aldrig.",
-          "Från 1 december är det exakt 30 dagar till julafton den 24 december.",
+          "Från 1 december är det exakt 23 dagar till julafton den 24 december.",
         ],
         faq: [
           {
@@ -1951,9 +1964,20 @@ export interface DageTilSlugResolution {
 }
 
 /**
+ * Whether an arm serves `slug` — as its own canonical slug, as a slug the other
+ * language spells the same way (`1-december`, `halloween`), or as one of its
+ * retired aliases. All three must resolve to the event, or the caller either
+ * 404s a URL we published or renders a second copy of the same answer.
+ */
+function armServesSlug(arm: DageTilLocaleArm | undefined, slug: string): boolean {
+  if (!arm) return false;
+  return arm.slug === slug || (arm.aliases?.includes(slug) ?? false);
+}
+
+/**
  * Resolve a dage-til slug for a domain. A slug in the other language resolves
  * to the same event, so the caller can 301 to the locale's own slug instead
- * of serving a duplicate page.
+ * of serving a duplicate page. So does a retired alias.
  */
 export function resolveDageTilSlug(
   slug: string,
@@ -1963,13 +1987,16 @@ export function resolveDageTilSlug(
   // Either language's slug matches, because resolving across languages is the
   // whole point — that is what makes the caller 301 to the locale's own slug.
   const event = DAGE_TIL_EVENTS.find(
-    (candidate) => candidate.da.slug === slug || candidate.se?.slug === slug
+    (candidate) =>
+      armServesSlug(candidate.da, slug) || armServesSlug(candidate.se, slug)
   );
   if (!event) return undefined;
   // Sommerferien has no Swedish arm, so on beraknare.se its slug resolves to
   // nothing rather than to a 301 towards a page that does not exist.
   const localeSlug = event[locale]?.slug;
   if (!localeSlug) return undefined;
+  // A retired alias is deliberately *not* own-locale: the caller then 301s it
+  // to the canonical slug, so the same answer keeps exactly one URL.
   return { event, localeSlug, isOwnLocale: localeSlug === slug };
 }
 

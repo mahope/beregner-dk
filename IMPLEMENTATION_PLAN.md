@@ -1,53 +1,40 @@
-STATUS: 5/10 21:4x. ✅ 5/10 21:4x: **efterlønnens deltidstal rettet**
-            (`ceo/efterloen-deltid-andel`). `EfterloensBeregner.tsx` gangede
-            deltid-andelen ind som **`0.67`** på begge beregningslinjer, men
-            0,67 er ikke 2/3 = 0,6667 — værktøjet viste **13.438 kr.** mod de
-            **13.372 kr.** som 91 % af deltidens egen dagpengesats er (66 kr. for
-            højt pr. måned). Grund: efterløn er en procentdel af *egen* max
-            dagpenge, og ministeriets «Satser for 2026» siger 22.041 kr. fuldtid
-            mod 14.694 kr. deltid = netop 2/3. Nu ligger deltidgrunden i
-            `EFTERLOEN_MAX_SATS_DELTID` i `efterloen.ts` og læses af
-            `DAGPENGE_2026`, så de to steder kan ikke glide fra hinanden igen —
-            præmieportionen i samme fil (15.870 → 10.580) var allerede 2/3.
-            To nye porte, begge dømmer på **renderede** tal og begge døde mod
-            den gamle kode (mutation til `* 0.67` gav 1 rød i hver fil).
-            ❓ «2/3 eller 0,67» er dermed lukket som *intern modsigelse* uden
-            lovkilde, fordi det kun er det interne der var forkert.
-            ✅ **Alle fem åbne VERIFICÉR-noter er lukket på indhold** (curl mod
-            live, 5/10 21:3x): `/bil` har «15-20 %» ×3, «8-12 %» ×3, «op til
-            50 %» og «op til 20 %», 0 rå procenter; `/tidszone` har Sydney
-            22:00/20:00 og Nuuk 09:00/09:00 i tabellen, «09:00 i Nuuk» og
-            «22:00 i Sydney» i brødteksten, «3 timer bagefter» / «3 timmar
-            bakåt»; `/klokken-i` (og `/klockan-i`) siger «14 lande» i titel og
-            h1, 0 × «tolv»; `/tidszone`-ankeret siger «klokken i 14 lande»;
-            `/dato`s keywords har nu **«helligdage 2026»** (ikke «helligdager»);
-            sidebarlen på `/bmi` starter med `/dato` (minus siden selv) og
-            `/moms` har `href="/promille"`.
-            ⚠️ Fire af de lukkede noters **egne grep-krav var forkerte**, ikke
-            koden: React sætter `<!-- -->` mellem tekst og expression, så
-            «09:00 i Nuuk» findes som «09:00<!-- --> i Nuuk» (0 matches på det
-            rå krav), og svensk retning er «bakåt», ikke «efter». Det er samme
-            slags fejl som de tre fra 4/10 — de er rettet i teksten nedenfor, så
-            næste iteration ikke leder efter en fejl der ikke findes.
-            ⚠️ Den 5. note (Sentry MINBEREGNER-2) er **kun delvist** lukket:
-            404-siden svarer 404 og renderer søgefeltet (`placeholder="Søg efter
-            en beregner..."`), altså `NotFoundSearch` har provideren i live.
-            At fejlen er væk afgør kun Sentry-eventvolumen 14/10.
-            ✅ 5/10 17:4x `/tidszone`: sydhalvkloden + Nuuk · ✅ 5/10 16:4x
-            `/tidszone`-hub læser `KLOKKEN_LANDE.length` · ✅ 5/10 15:0x fire rå
-            procenter i `BilBeregner.tsx` · ✅ 5/10 14:1x sidebarlens liste i
-            målt trafikrækkefølge · ✅ 5/10 13:1x to review-fund fra 4/10 ·
-            ✅ 4/10: promille på forsiden, Norge+Tyskland, fire review-fund,
+STATUS: 5/10 22:1x. ✅ 5/10 22:1x: **juleaftens og nytårsaftens URL er nu datoen**
+            (`ceo/december-dato-i-url`). GSC 5/10 lister «hvor mange dage er
+            der til den 24 december» som **1.036 visninger på pos. 5 under
+            `/dato`** — altså konkurrerede `/dato` og nedtællingssiden om den,
+            og «24 december» stod ingen steder i stien. Dansk autocomplete målt
+            5/10 22:0x bekræfter: «…til 24 december» er **første** completion
+            på «hvor mange dage er der til 24», og «…til 31 december» er en
+            træffer på «31 december». Slug'en er derfor `24-december` /
+            `31-december` i begge sprog, og det gamle navn ligger som `aliases`,
+            som routing-laget 301'er — så URL'en vi engang publicerede ikke
+            404'er og svaret har én adresse. ⚠️ **Samme opgave fandt en løgn på
+            to sider:** `december-1`'s fakta sagde «præcis **30** dage til
+            juleaftensdagen den 24. december» i dansk *og* svensk. December
+            har 31 dage, så 1. → 24. december er **23** dage; 30 er afstanden
+            til 31. december. Ingen port dækkede strengen. Nu er der en, som
+            tager dag-tallet fra `getDageTilAnswer` og kræver at brødteksten
+            indeholder det samme tal (punkt 11).
+            ✅ 5/10 21:3x lukkede alle fem ældre VERIFICÉR-noter på indhold.
+            ✅ 5/10 21:4x efterlønnens deltidstal 0,67 → 2/3 · ✅ 5/10 17:4x
+            `/tidszone`: sydhalvkloden + Nuuk · ✅ 5/10 15:0x fire rå procenter
+            i `BilBeregner.tsx` · ✅ 5/10 14:1x sidebarlens liste i målt
+            trafikrækkefølge · ✅ 5/10 13:1x to review-fund fra 4/10 · ✅ 4/10:
+            promille på forsiden, Norge+Tyskland, fire review-fund,
             `/dato`-titel, brændstoftabel, `/idealvaegt`, lånebeløb,
             folkepensionsalder. ✅ **CEO-køens punkt 0 er rettet**. Alt ældre:
             `docs/plan-arkiv.md`.
+            ⚠️ **CI var rød 5/10 21:3x, men ikke af kode:** `gh run view` giver
+            «The job was not acquired by Runner of type hosted» efter 15 min.
+            Infrastrukturen, ikke diffen. CI-cron'en kører igen 6/10 07.
             PR-TJEK: 5/10 21:2x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire
             fuldt landede remote branches kan ikke slettes fra maskinen (lokale
             tilladelsesregler nægter `git push origin --delete`).
             `auto/union-night` har unikt arbejde i tre dokumenter — se ❓.
             **Gate:** `npm run typecheck && npm run lint && npm test` (CI kører
-            også `next build`). 5/10 21:2x: typecheck 0, lint 0, **4298 tests i
-            269 filer** grønne.
+            også `next build`). 5/10 22:0x: typecheck 0, lint 0, **4303 tests i
+            269 filer** grønne, `next build` exit 0 med `/dage-til/[dato]` som
+            `ƒ` (dynamisk — punkt 1 ikke brudt).
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -69,6 +56,8 @@ STATUS: 5/10 21:4x. ✅ 5/10 21:4x: **efterlønnens deltidstal rettet**
 | `/su` | **127 (fald fra 201)** | under top-15 | — | — |
 | `/` (forside) | 218, bounce 38 % | under top-15 | — | — |
 | `/dage-til` + se `/dagar-till` | **0 — nye URL'er 2/10** | — | — | — |
+| `/dage-til/24-december` + `31-december` (+ se) | **0 — nye URL'er 5/10 22:1x** | — | — | — |
+| Mål efter 14 dage: `/dage-til/24-december` skal overtage «…til den 24 december» fra `/dato` | — | 1.036 (GSC 5/10, under `/dato`) | 0 % | 5 |
 | `/dage-mellem-datoer` + se `/dagar-mellan-datum` | **0 — nye URL'er 3/10** | — | — | — |
 | `/idealvaegt` + se | **0 — nye URL'er 4/10** | — | — | — |
 | `/klokken-i/norge` + `tyskland` (+ se) | **0 — nye URL'er 4/10 05:1x** | — | — | — |
@@ -117,6 +106,24 @@ hver måned for alle deltidsforsikrede, i et værktøj der ellers henter alle si
 satser fra modulet. *Accept:* de to nye porte dømmer på renderede tal og døde
 mod den gamle kode. ⛔ Lovgrund for 2/3 er ikke læst — kun den interne
 modsigelse var dokumenteret, og den er lukket uden lovkilde.
+
+**F6c. [x] Juleaftens og nytårsaftens URL er datoen** — 5/10 22:1x.
+`/dage-til/juleaften` → `/dage-til/24-december`, `/dage-til/nytaarsaften` →
+`/dage-til/31-december` (samme to i `se`). *Datagrund:* GSC 5/10 — «hvor mange
+dage er der til den 24 december» 1.036 visninger / 2k volume / pos. 5, vist
+**under `/dato`**; dansk autocomplete «…til 24 december» er 1. completion på
+«…til 24». *Hvorfor:* `/dato` og nedtællingssiden konkurrerede om den samme
+søgning, fordi «24 december» ikke stod i nogen sti. *Accept:* gamle slugs
+301'er via `aliases`, sitemap/hub/`/dato` følger med, og fem porte dømmer på
+det (mutation tilbage til de gamle slug'er gav 6 røde, mutation af «23» tilbage
+til «30» gav 1 rød). Samme commit rettede **en løgn på to sider**: `december-1`
+sagde «præcis 30 dage» til 24. december (skal være 23).
+
+**F6d. [ ] Samme logik for de øvrige daterede nedtællinger.** Kun december har
+en URL med et datotal i dag, og kun fordi GSC viste den. Øvrige kandidater må
+**ikke** få en dato-slug uden en målt søgning — autocomplete 5/10 22:0x gav
+«…til 24 september/oktober/juni/maj» som rækker af samme type, altså det er
+ikke december, der er særligt, det er **én** søgning. ⛔ Se ❓ GSC-eksport.
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
@@ -191,18 +198,28 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Én note er åben** (den nye fra denne iteration). **Alle ni fra 3/10–5/10 17:4x
-er lukket på indhold** — målt med `curl` mod begge domæner 5/10 21:3x, ikke på
-HTTP-koden. De lukkede noters fulde krav og målinger ligger i
-`docs/plan-arkiv.md` (5/10 21:4x).
+**To noter er åbne.** De ni fra 3/10–5/10 17:4x er lukket på indhold — målt med
+`curl` mod begge domæner 5/10 21:3x, ikke på HTTP-koden. De lukkede noters fulde
+krav og målinger ligger i `docs/plan-arkiv.md` (5/10 21:4x).
+
+**Åben note 5/10 22:1x:** `VERIFICÉR DEPLOY: /dage-til/juleaften og
+/dage-til/nytaarsaften 301'er til /dage-til/24-december og /dage-til/31-december
+(og julafton/nyarsafton på beraknare.se), de fire nye URL'er svarer 200 med
+canonical på sig selv, og ingen side i live siger «præcis 30 dage til
+juleaftensdagen den 24. december» / «exakt 30 dagar till julafton»
+ceo/december-dato-i-url 5/10 22:1x`. Mål på indhold: `curl -sI` på de fire gamle
+URL'er skal vise `301`, `curl -s https://minberegner.dk/dage-til/24-december`
+skal have `<link rel="canonical" href="…/dage-til/24-december">`, og
+`curl -s …/dage-til/1-december | grep -c '30 dage'` skal være **0**.
 
 **Åben note 5/10 21:4x:** `VERIFICÉR DEPLOY: efterlønsberegnerens deltid-gren
 viser 13.372 kr. og 14.694 kr., ikke 13.438 kr. og 14.768 kr. ceo/efterloen-deltid-andel
-5/10 21:4x`. Mål på indhold: `curl -s https://minberegner.dk/efterloen` skal have
-**0** matches på `13.438`, `13.372` og `14.694` (siden er en klient-komponent,
-der først renderer tallet ved JS — brug et headless kald eller læs
-`EFTERLOEN_MAX_SATS_DELTID` i koden indtil da), og ingen FAQ- eller
-metadatastreng skal nævne et deltidstal.
+ 5/10 21:4x`. Mål på indhold: `curl -s https://minberegner.dk/efterloen` skal have
+ **0** matches på `13.438`, `13.372` og `14.694` (siden er en klient-komponent,
+ der først renderer tallet ved JS — brug et headless kald eller læs
+ `EFTERLOEN_MAX_SATS_DELTID` i koden indtil da), og ingen FAQ- eller
+ metadatastreng skal nævne et deltidstal. ⚠️ Mergen var 21:35, altså **efter**
+ batch-vinduet 21:30 — første reelle kør er 6/10 07:30.
 
 **Åben note 5/10 17:5x (Sentry, delvist lukket):** `VERIFICÉR DEPLOY: Sentry
   MINBEREGNER-2 "useLocale must be used within a LocaleProvider" på POST / er
@@ -295,7 +312,10 @@ metadatastreng skal nævne et deltidstal.
   3-4 søgninger pr. side; for `/procent` (150.470 visninger, sitets største side)
   er de tre tilsammen **364 visninger**. **Et skærmbillede af Search Console →
   Effektivitet → Søgninger, filtreret på `/procent`, plus de 20 største søgninger
-  for hele domænet, låser F1-F3.**
+  for hele domænet, låser F1-F3.** Målt 5/10 22:0x: dansk autocomplete er *ikke*
+  en erstatning — den kan ikke give en søgnings *rækkefølge* eller en
+  visningstællung, kun at et spørgsmål findes. Den kan altså finde emner
+  (kogetider, BMI-børn), men ikke rangere dem.
 - ❓ **Feriedatoer uden lovkilde** (3/10 05:30 — lukker ferie-feature-køen
   midlertidigt). da.wikipedia `Ferie` siger «Vinterferie (**typisk** i uge 7
   eller 8)» og «Efterårsferie (typisk uge 42)» — altså ingen fast uge for

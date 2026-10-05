@@ -253,6 +253,58 @@ describe("dage-til hub: metadata og sitemap", () => {
     }
   });
 
+  // 5/10: de to december-aftener har datoen i URL'en. GSC 5/10 lister
+  // "hvor mange dage er der til den 24 december" som 1.036 visninger på pos. 5
+  // under `/dato` — altså `/dato` og nedtællingssiden konkurrerede om den, og
+  // "24 december" stod ingen steder i stien. Uden 301'en på de gamle slugs
+  // ville de to URL'er være samme svar to steder, og en 404 ville kaste den
+  // rangering, juleaftens side måtte have bygget siden 2/10.
+  test("de daterede december-slugs serveres, og de gamle slug'er 301'er", () => {
+    const da = getDomainConfigByLocale("da");
+    const se = getDomainConfigByLocale("se");
+    for (const [locale, domæne, prefix] of [
+      ["da", da, "/dage-til/"],
+      ["se", se, "/dagar-till/"],
+    ] as const) {
+      for (const dato of ["24-december", "31-december"]) {
+        expect(getRouteDecision(domæne, `${prefix}${dato}`), `${locale} ${dato}`).toEqual({
+          type: "allow",
+        });
+      }
+    }
+    expect(getRouteDecision(da, "/dage-til/juleaften")).toEqual({
+      type: "redirect",
+      destination: "/dage-til/24-december",
+      status: 301,
+    });
+    expect(getRouteDecision(da, "/dage-til/nytaarsaften")).toEqual({
+      type: "redirect",
+      destination: "/dage-til/31-december",
+      status: 301,
+    });
+    expect(getRouteDecision(se, "/dagar-till/julafton")).toEqual({
+      type: "redirect",
+      destination: "/dagar-till/24-december",
+      status: 301,
+    });
+    expect(getRouteDecision(se, "/dagar-till/nyarsafton")).toEqual({
+      type: "redirect",
+      destination: "/dagar-till/31-december",
+      status: 301,
+    });
+    // Det danske alias på det svenske domæne skal pege på den svenske side,
+    // ikke på et dansk slug — samme regel som for et krydssprogs slug.
+    expect(getRouteDecision(se, "/dagar-till/juleaften")).toEqual({
+      type: "redirect",
+      destination: "/dagar-till/24-december",
+      status: 301,
+    });
+    // En slug, der aldrig har været publiceret, er stadig en 404.
+    expect(getRouteDecision(da, "/dage-til/23-december")).toEqual({
+      type: "not-found",
+    });
+  });
+
   test("en hub med den anden sprogs sti får hverken description eller canonical", async () => {
     // Forsvar i dybet: routeren redirecter, men rendereren må ikke være den
     // eneste beskyttelse mod en dublet i Googles index.

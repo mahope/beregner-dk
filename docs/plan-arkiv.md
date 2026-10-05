@@ -29109,3 +29109,77 @@ krydser en expression.
 gennemgang i træk med samme mangel, fordi repoet stadig har intet Playwright.
 Ingen ændring i denne kørsel rørte markup, så der er intet nyt layout at se i
 pixels.
+
+---
+
+## 5/10 22:1x — december-nedtællingerne får datoen i URL'en (`ceo/december-dato-i-url`)
+
+### Målinger og datagrund
+
+- **GSC 5/10 (2026-09-05 → 2026-10-03), `/dato`:** «hvor mange dage er der til
+  den 24 december» = **1.036 visninger / 2k volume / pos. 5**. Den står opført
+  **under `/dato`**, altså `/dato` og nedtællingssiden konkurrerede om den.
+  Søskendesøgningen «hvor mange dage er der til 1 december» = 1.282 v / 4k / pos.
+  5 har allerede sit eget `/dage-til/1-december` siden 2/10.
+- **Dansk autocomplete målt 5/10 22:0x** (`suggestqueries.google.com`, `hl=da`,
+  `gl=dk`):
+  - «hvor mange dage er der til 24» → **«…til 24 december» er 1. completion**,
+    derefter 24 september, 24 oktober, 24 juni, 24 maj …
+  - «hvor mange dage er der til jul» → juleaften, jul, «juleaften 2026», «**jul
+    24 december**», juleferie …
+  - «hvor mange dage er der til 31 december» → «31 december 2025», «**31
+    december**», «31 december 2026», «den 31 december 2026».
+  - «hvor mange dage er der til nytår» → nytår, «**nytårsaften**», …
+- **Konklusion:** det er **én** søgning, der er målt — ikke en sæson.
+  Autocomplete kan ikke give visninger eller rangering, kun emner. Derfor blev
+  kun de to december-datoer dateret, og resten ligger i F6d med ⛔.
+
+### Ændringen
+
+- `DageTilLocaleArm` fik `aliases?: readonly string[]`.
+- `juleaften`: `da.se.slug` `juleaften`→`24-december`, `julafton`→`24-december`,
+  hver med sit gamle navn som alias.
+- `nytaarsaften`: `nytaarsaften`→`31-december`, `nyarsafton`→`31-december`.
+- `resolveDageTilSlug` matcher nu slug **eller** alias i begge arme via den nye
+  `armServesSlug`. `isOwnLocale` er bevidst falsk for et alias, så det eksisterende
+  301-gren i `routing.ts` (uændret) sender det videre til kanonisk slug.
+- `getDageTilEventBySlug` er **ikke** ændret — den finder kun kanoniske slugs, så
+  et alias kan ikke tælles to gange, når slugs enumereres. Port dækker det.
+- Sitemap, `/dage-til`-hubben, `/dato`s nedtællingsliste og `/nedtaelling` bruger
+  alle `arm.slug`, så de fulgte med uden kodeændring.
+
+### Den løgn, opgaven fandt undervejs
+
+`december-1`'s tredje fakta (da **og** se): «Fra 1. december er der præcis **30**
+dage til juleaftensdagen den 24. december» / «Från 1 december är det exakt **30**
+dagar till julafton den 24 december». December har 31 dage, så 1. → 24. december
+er **23** dage; 30 er afstanden til 31. december. Strengen lå på to sider i to
+sprog og ingen port dækkede den. Punkt 11. Ny port
+`december-1's dag-tal til juleaftensdag er det rigtige` tager dag-tallet fra
+`getDageTilAnswer` og kræver, at brødteksten indeholder præcis det tal.
+
+### Porte — alle døde mod den gamle kode
+
+Mutation (slug'erne tilbage til `juleaften`/`julafton`/`nytaarsaften`/
+`nyarsafton` **og** «23» tilbage til «30») gav **6 røde**:
+
+1. `dage-til-hub.test.tsx` — «de daterede december-slugs serveres, og de gamle
+   slug'er 301'er» (ny).
+2. `dage-til.test.ts` — «juleaften har datoen i slug'en i begge sprog» (ny).
+3. `dage-til.test.ts` — «nytaarsaften har datoen i slug'en i begge sprog» (ny).
+4. `dage-til.test.ts` — «et alias-slug er ikke sin egen side» (ny).
+5. `dage-til.test.ts` — «december-1's dag-tal til juleaftensdag er det rigtige» (ny).
+6. `dage-til.test.ts` — «svensk mangler præcis de events der ikke har et svensk
+   dato» (opdateret fra `julafton` til `24-december`).
+
+En fjerde mutation der kun fjernede `aliases`-felterne (så TypeScript fejlede)
+forhindrede overhovedet at køre portene — dvs. portene afhænger af den nye
+mekanik, ikke kun af slug-værdierne.
+
+### Gate
+
+`npm run typecheck` 0 · `npm run lint` 0 · `npm test` **4303 tests i 269 filer**,
+exit 0 · `npm run build` exit 0. Build-outputtet viser `/dage-til/[dato]` som `ƒ`
+(dynamisk), altså punkt 1 ikke brudt: dag-tallet er ikke frosset ved build.
+Ingen browser-verifikation — repoet har intet Playwright, og ændringen rører ingen
+markup (kun href'er, canonical og to brødtekst-strenge).

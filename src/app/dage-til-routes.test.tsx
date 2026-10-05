@@ -415,7 +415,7 @@ describe("dage-til titler", () => {
   // Samme fejl, låst direkte: et fast datoheleds dag-tal er tre-cifret i store
   // dele af året, og det er præcis de dage titlen bliver ét tegn for lang.
   test("de laengste dage-til-sporgsmaal holder 60 tegn med et tresifret dag-tal", async () => {
-    const juleaften = getDageTilEvents("da").find((e) => e.da.slug === "juleaften")!;
+    const juleaften = getDageTilEvents("da").find((e) => e.da.slug === "24-december")!;
     for (const iso of ["2026-12-25T12:00:00.000Z", "2027-01-01T12:00:00.000Z", "2027-06-01T12:00:00.000Z"]) {
       const titel = await titelFor("da", juleaften.da.slug, new Date(iso));
       expect(titel, iso).toMatch(/ \d{3} dage$/);
@@ -442,8 +442,14 @@ describe("dage-til titler", () => {
   // (`{link.question}`) rummede de ord, folk faktisk skriver. Datoen står i
   // `facts[0]` og i FAQ'en, så strengen er sand — den var bare ikke i den
   // del, der vises i Google.
+  //
+  // 5/10: spørgsmålet og titlen var allerede rettet, men **URL'en** hed stadig
+  // `/dage-til/juleaften`. GSC viser søgningen under `/dato`, altså konkurrerede
+  // `/dato` og nedtællingssiden om den — og URL'en er det eneste sted, hvor
+  // "24 december" stod skrevet. Slug'en er derfor nu datoen, med
+  // "juleaften" som alias der 301'er, så svaret har én URL.
   test("juleaftens titel og /datos ankertekst har datoen, folk søger på", async () => {
-    const juleaften = getDageTilEvents("da").find((e) => e.da.slug === "juleaften")!;
+    const juleaften = getDageTilEvents("da").find((e) => e.da.slug === "24-december")!;
     expect(juleaften.da.copy.question).toBe(
       "Hvor mange dage er der til juleaften 24. december?"
     );
@@ -530,7 +536,7 @@ describe("dage-til meta descriptions", () => {
     // complete sentence rather than an empty or doubled one. The reference
     // date is an argument, not the clock — the producer is given "today" so a
     // test cannot pass on whatever day it happens to run.
-    const juleaften = await metadataFor("da", "juleaften", new Date("2026-12-24T09:00:00.000Z"));
+    const juleaften = await metadataFor("da", "24-december", new Date("2026-12-24T09:00:00.000Z"));
     const description = String(juleaften.description);
     expect(description).toBe(
       "Det er juleaften — 0 dage. 24. december 2026 er en torsdag. Tallet opdateres hver dag."

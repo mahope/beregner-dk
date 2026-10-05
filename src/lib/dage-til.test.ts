@@ -484,10 +484,71 @@ describe("slug-opløsning", () => {
     expect(resolveDageTilSlug("juldagen", "se")?.isOwnLocale).toBe(true);
   });
 
+  // 5/10: de to december-aftener er de eneste nedtællinger, hvis URL er
+  // dateret. GSC 5/10 viser "hvor mange dage er der til den 24 december" med
+  // 1.036 visninger på pos. 5 under `/dato`, og "…til 31 december" er en dansk
+  // autocomplete-træffer. Slug'en er derfor datoen, og det gamle
+  // hellighedsnavn ligger som alias — så en URL, der engang var publiceret,
+  // 301'er i stedet for at 404'e, og svaret har præcis én adresse.
+  test.each([
+    ["juleaften", "24-december", "juleaften", "julafton"],
+    ["nytaarsaften", "31-december", "nytaarsaften", "nyarsafton"],
+  ] as const)(
+    "%s har datoen i slug'en i begge sprog",
+    (id, datoSlug, danskAlias, svenskAlias) => {
+      for (const [locale, alias] of [
+        ["da", danskAlias],
+        ["se", svenskAlias],
+      ] as const) {
+        const arm = armOf(eventById(id), locale);
+        expect(arm.slug, `${locale} ${id}`).toBe(datoSlug);
+        expect(arm.aliases, `${locale} ${id}`).toEqual([alias]);
+        // Aliaset skal pege på den samme side, og kun som et redirect.
+        const resolved = resolveDageTilSlug(alias, locale);
+        expect(resolved?.localeSlug, `${locale} alias`).toBe(datoSlug);
+        expect(resolved?.isOwnLocale, `${locale} alias`).toBe(false);
+      }
+      // Den anden sprogs alias skal også pege på den anden sprogs side, så
+      // minberegner.dk/dage-til/24-december ikke 301'er et dansk alias til et
+      // dansk slug og efterlader den svenske URL død.
+      const kryds = resolveDageTilSlug(danskAlias, "se");
+      expect(kryds?.localeSlug).toBe(datoSlug);
+    }
+  );
+
+  test("et alias-slug er ikke sin egen side", () => {
+    // `getDageTilEventBySlug` finder kun det kanoniske slug, så et alias må ikke
+    // findes to gange, når nogen enumererer slugs.
+    expect(getDageTilEventBySlug("juleaften", "da")).toBeUndefined();
+    expect(getDageTilEventBySlug("nyarsafton", "se")).toBeUndefined();
+    expect(getDageTilEvents("da").filter((e) => e.da.slug === "24-december")).toHaveLength(1);
+    expect(getDageTilEvents("da").filter((e) => e.da.slug === "31-december")).toHaveLength(1);
+  });
+
+  // Punkt 11: et tal i brødteksten skal kunne verificeres mod den beregning,
+  // siden selv. 5/10: `december-1`'s tredje fakta sagde "præcis 30 dage til
+  // juleaftensdagen den 24. december". December har 31 dage, så 1. → 24.
+  // december er **23** dage — og 30 er afstanden til 31. december. Ingen test
+  // dækkede strengen, så den lå på to sider i begge sprog.
+  test("december-1's dag-tal til juleaftensdag er det rigtige", () => {
+    const forste = eventById("december-1");
+    const juleaften = eventById("juleaften");
+    for (const locale of ["da", "se"] as const) {
+      const dage = getDageTilAnswer(juleaften, locale, iso("2026-12-01")).days;
+      // 1. december → 24. december i samme år.
+      expect(dage, locale).toBe(23);
+      const medTallet = armOf(forste, locale)
+        .copy.facts.filter((fakta) => fakta.includes("24. december") || fakta.includes("24 december"));
+      expect(medTallet, `${locale}: ingen fakta nævner 24. december`).toHaveLength(1);
+      expect(medTallet[0], locale).toContain(String(dage));
+      expect(medTallet[0], locale).not.toContain("30 dage");
+      expect(medTallet[0], locale).not.toContain("30 dagar");
+    }
+  });
+
   test("ukendte slugs giver undefined", () => {
     expect(resolveDageTilSlug("tacohoedag", "da")).toBeUndefined();
-    expect(getDageTilEventBySlug("tacohoedag", "da")).toBeUndefined();
-  });
+    expect(getDageTilEventBySlug("tacohoedag", "da")).toBeUndefined();  });
 
   test("norsk locale har ingen dage-til-sider", () => {
     expect(isDageTilLocale("no")).toBe(false);
@@ -519,10 +580,12 @@ describe("slug-opløsning", () => {
       "efteraarsferien",
       "skolestart",
     ]);
-    // Slugs er ikke et sæt, der indeholder hinanden: dansk siger "juleaften",
-    // svensk siger "julafton". Det er derfor kun antallet kan sammenlignes.
-    expect(da).toContain("juleaften");
-    expect(se).toContain("julafton");
+    // Slugs er ikke et sæt, der indeholder hinanden: de to december-aftener er
+    // begge daterede i URL'en ("24-december"/"31-december"), mens påskeaften
+    // stadig hedder "paskafton"/"paskafton". Det er derfor kun antallet kan
+    // sammenlignes.
+    expect(da).toContain("24-december");
+    expect(se).toContain("24-december");
   });
 
   test("alle slugs er ASCII, fordi sitemap-URL'en er procentkodet", () => {
