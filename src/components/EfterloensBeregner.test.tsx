@@ -14,7 +14,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import EfterloensBeregner from "./EfterloensBeregner";
 import { LocaleProvider } from "./LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
-import { EFTERLOEN_MAX_SATS, SKATTEFRI_PRAEMIE_2026 } from "@/lib/efterloen";
+import { EFTERLOEN_MAX_SATS, EFTERLOEN_MAX_SATS_DELTID, SKATTEFRI_PRAEMIE_2026 } from "@/lib/efterloen";
 
 vi.mock("@/lib/analytics", () => ({
   trackCalculation: vi.fn(),
@@ -56,6 +56,22 @@ describe("EfterloensBeregner", () => {
     const resultat = screen.getByText("Månedlig efterløn").parentElement!;
     expect(resultat.textContent).toContain(
       `${num(EFTERLOEN_MAX_SATS.udenUdskydelse)} kr.`,
+    );
+  });
+
+  test("deltidsgrunden er deltidens egen dagpengesats (2/3), ikke 0,67 × fuldtid", () => {
+    // Værktøjet skrev deltid-andelen som `0.67` direkte på de to beregningslinjer
+    // og viste 13.438 kr., 66 kr. over de 13.372 kr., som 91 % af deltidens
+    // egen dagpengesats (14.694 kr.) er. Porten dømmer på den **renderede**
+    // månedsats, så den kan ikke passes ved at konstanten bare flyttes.
+    visBeregner();
+    fireEvent.click(screen.getByRole("button", { name: "Deltid" }));
+    const resultat = screen.getByText("Månedlig efterløn").parentElement!;
+    expect(resultat.textContent).toContain(
+      `${num(EFTERLOEN_MAX_SATS_DELTID.udenUdskydelse)} kr.`,
+    );
+    expect(resultat.textContent).not.toContain(
+      `${num(Math.round(EFTERLOEN_MAX_SATS.udenUdskydelse * 0.67))} kr.`,
     );
   });
 

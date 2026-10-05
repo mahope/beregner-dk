@@ -10,6 +10,7 @@ import { AffiliateBox } from "./AffiliateBox";
 import { adtractionLink } from "@/lib/adtraction";
 import {
   EFTERLOEN_MAX_SATS,
+  EFTERLOEN_MAX_SATS_DELTID,
   efterloenAlder,
   praemieManglerForudsætning,
   praemiePortioner,
@@ -104,9 +105,9 @@ export default function EfterloensBeregner() {
     // Calculate monthly amount
     let monthlyAmount: number;
     if (postpone2Years) {
-      monthlyAmount = insurance === 'full' ? EFTERLOEN_MAX_SATS.medUdskydelse : EFTERLOEN_MAX_SATS.medUdskydelse * 0.67;
+      monthlyAmount = insurance === 'full' ? EFTERLOEN_MAX_SATS.medUdskydelse : EFTERLOEN_MAX_SATS_DELTID.medUdskydelse;
     } else {
-      monthlyAmount = insurance === 'full' ? EFTERLOEN_MAX_SATS.udenUdskydelse : EFTERLOEN_MAX_SATS.udenUdskydelse * 0.67;
+      monthlyAmount = insurance === 'full' ? EFTERLOEN_MAX_SATS.udenUdskydelse : EFTERLOEN_MAX_SATS_DELTID.udenUdskydelse;
     }
 
     // Calculate efterløn period

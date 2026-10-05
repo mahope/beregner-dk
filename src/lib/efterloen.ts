@@ -46,6 +46,29 @@ export const EFTERLOEN_MAX_SATS = {
   ),
 } as const;
 
+/**
+ * Månedens maksimale efterløn i kroner, deltidsforsikret, i 2026.
+ *
+ * Efterlønnen er en procentdel af *egen* max dagpenge, så deltidsgrunden er
+ * `DAGPENGE_2026.deltid` (Beskæftigelsesministeriets «Satser for 2026»:
+ * 22.041 kr. fuldtid, 14.694 kr. deltid — netop 2/3), ikke fuldtidssatsen
+ * ganget med et tilnærmet tal.
+ *
+ * Før denne blok lå deltid-andelen som `0.67` i `EfterloensBeregner.tsx`, og
+ * 0,67 er ikke 2/3 = 0,6667: værktøjet lovede 13.438 kr. mod de 13.372 kr.
+ * deltidssatsen svarer til, og det var 66 kr. for højt på hver måned. To tal for
+ * den samme forholdelse i ét modul er kvalitetsregel 11 — præmieportionen
+ * lige ovenfor (15.870 → 10.580 kr.) er allerede præcis 2/3.
+ */
+export const EFTERLOEN_MAX_SATS_DELTID = {
+  udenUdskydelse: Math.round(
+    DAGPENGE_2026.deltid * EFTERLOEN_SATS_PROCENT.udenUdskydelse,
+  ),
+  medUdskydelse: Math.round(
+    DAGPENGE_2026.deltid * EFTERLOEN_SATS_PROCENT.medUdskydelse,
+  ),
+} as const;
+
 /** Én række i borger.dk's skema, med hele fødselsår for opslag på fødselsår. */
 export interface EfterloenAldersRække {
   /** Første fødselsår i rækken. */

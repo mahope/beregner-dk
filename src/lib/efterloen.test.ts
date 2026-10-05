@@ -2,12 +2,61 @@ import { describe, expect, test } from "vitest";
 import {
   efterloenAlder,
   EFTERLOEN_ALDER_2026,
+  EFTERLOEN_MAX_SATS,
+  EFTERLOEN_MAX_SATS_DELTID,
+  EFTERLOEN_SATS_PROCENT,
   MAX_TIMER_TIL_PRAEMIE,
   praemieManglerForudsætning,
   praemiePortioner,
   SKATTEFRI_PRAEMIE_2026,
 } from "./efterloen";
+import { DAGPENGE_2026 } from "./satser-2026";
 import { folkepensionsalder } from "./folkepension";
+
+describe("EFTERLOEN_MAX_SATS", () => {
+  test("fuldtidssatsen er 91 % og 100 % af max dagpenge", () => {
+    expect(EFTERLOEN_MAX_SATS.udenUdskydelse).toBe(20057);
+    expect(EFTERLOEN_MAX_SATS.medUdskydelse).toBe(22041);
+    expect(EFTERLOEN_MAX_SATS.udenUdskydelse).toBe(
+      Math.round(DAGPENGE_2026.fuldtid * EFTERLOEN_SATS_PROCENT.udenUdskydelse),
+    );
+  });
+
+  /**
+   * Deltidsforsikret får 2/3 af dagpengesatsen (22.041 → 14.694 kr. i
+   * ministeriets «Satser for 2026»), og efterlønssatsen er en procentdel af
+   * *egen* max dagpenge. Værktøjet gangede tidligere 0,67 ind i
+   * fuldtidssatsen, hvilket gav 13.438 kr. — 66 kr. for højt pr. måned.
+   */
+  test("deltidssatsen er 2/3 af fuldtidssatsen, ikke 0,67 gange den", () => {
+    expect(EFTERLOEN_MAX_SATS_DELTID.udenUdskydelse).toBe(13372);
+    expect(EFTERLOEN_MAX_SATS_DELTID.medUdskydelse).toBe(14694);
+
+    // Grunden er deltidens egen dagpengesats, ikke fuldtidssatsen ganget med
+    // et tilnærmet tal — derfor opgøres den mod `DAGPENGE_2026`.
+    expect(EFTERLOEN_MAX_SATS_DELTID.udenUdskydelse).toBe(
+      Math.round(DAGPENGE_2026.deltid * EFTERLOEN_SATS_PROCENT.udenUdskydelse),
+    );
+    expect(EFTERLOEN_MAX_SATS_DELTID.medUdskydelse).toBe(
+      Math.round(DAGPENGE_2026.deltid * EFTERLOEN_SATS_PROCENT.medUdskydelse),
+    );
+
+    // 2/3 forholdet, med to kroners tolerance for de to afrundinger (20057 mod
+    // 13372). Ved 0,67 bliver afvigelsen 100 kr., så porten kan ikke passes ved
+    // en lille fejl i selve brødteksten.
+    expect(
+      Math.abs(EFTERLOEN_MAX_SATS.udenUdskydelse - (EFTERLOEN_MAX_SATS_DELTID.udenUdskydelse * 3) / 2),
+    ).toBeLessThanOrEqual(2);
+    expect(
+      Math.abs(EFTERLOEN_MAX_SATS.medUdskydelse - (EFTERLOEN_MAX_SATS_DELTID.medUdskydelse * 3) / 2),
+    ).toBeLessThanOrEqual(2);
+
+    // 0,67 må ikke dukke op igen som erstatning for 2/3.
+    expect(EFTERLOEN_MAX_SATS_DELTID.udenUdskydelse).not.toBe(
+      Math.round(EFTERLOEN_MAX_SATS.udenUdskydelse * 0.67),
+    );
+  });
+});
 
 describe("EFTERLOEN_ALDER_2026", () => {
   test("indeholder præcis borger.dk's fem rækker", () => {

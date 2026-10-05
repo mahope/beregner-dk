@@ -1,34 +1,53 @@
-STATUS: 5/10 17:4x. ✅ SENTRY MINBEREGNER-2 rettet i ceo/sentry-uselocale-fix. ✅ 5/10 17:4x: **`/tidszone`s klokkeslæt for
-           sydhalvkloden og Grønland rettet** (`ceo/tidszone-sydhalvklodet`).
-           `tidszoneRækker` valgte byens *egen* `utcVinter`/`utcSommer` til
-           kolonnerne, altså antog at byen skiftede samtidig med Danmark. Det
-           holder for nordlige byer, men Sydney og Auckland har somertid, når
-           Danmark har vintertid, så tabellen sagde **21:00 i begge kolonner**
-           (rigtigt: 22/20) og **23:00 i begge** (rigtigt: 00/22). Nuuk lå på
-           UTC-3/-2, mens IANA siger fast UTC-2, så siden sagde «08 i Nuuk»,
-           «4 timer bagefter» og værktøjet regnede 6 timer i forvejet. Nu læses
-           hver bys offset på 15. januar og 15. juli med byens egen `dst`-regel
-           (`byOffsetVedDanmarkSæson`), brødtekstens to tal læses fra samme
-           funktion (`vinterTidIBy`), og porten dømmer mod **IANA via `Intl`**
-           i stedet for tal skrevet i testen. 3 mutationer (gammel
-           kolonneformel, Nuuk i begge lag, Nuuk i værktøjet) gav 3 røde hver.
-           Gate: typecheck 0, lint 0, **4295 tests i 269 filer** grønne.
-           MÅL: `/tidszone` baseline 24.829 GSC-visninger/28d, 0,4 % CTR,
-           pos 7,7 (5/10) — faktiske tal kan ikke flyttes, kun rigtigheden.
-           ✅ 5/10 16:4x `/tidszone`-hub læser `KLOKKEN_LANDE.length` ·
-           ✅ 5/10 15:0x fire rå procenter i `BilBeregner.tsx` (206→203) ·
-           ✅ 5/10 14:1x sidebarlens liste i målt trafikrækkefølge, intet dødt
-           slice · ✅ 5/10 13:1x to review-fund fra 4/10 · ✅ 4/10: promille på
-           forsiden, Norge+Tyskland, fire review-fund, `/dato`-titel,
-           brændstoftabel, `/idealvaegt`, lånebeløb, folkepensionsalder.
-           ✅ **CEO-køens punkt 0 er rettet** (målt i koden 5/10 14:0x, alle otte
-           linjer OK). Alt ældre: `docs/plan-arkiv.md`.
-           PR-TJEK: 5/10 16:3x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire fuldt
-           landede remote branches kan ikke slettes fra maskinen (lokale
-           tilladelsesregler nægter `git push origin --delete`).
-           `auto/union-night` har unikt arbejde i tre dokumenter — se ❓.
-           Gate: `npm run typecheck && npm run lint && npm test` (CI kører også
-           `next build`).
+STATUS: 5/10 21:4x. ✅ 5/10 21:4x: **efterlønnens deltidstal rettet**
+            (`ceo/efterloen-deltid-andel`). `EfterloensBeregner.tsx` gangede
+            deltid-andelen ind som **`0.67`** på begge beregningslinjer, men
+            0,67 er ikke 2/3 = 0,6667 — værktøjet viste **13.438 kr.** mod de
+            **13.372 kr.** som 91 % af deltidens egen dagpengesats er (66 kr. for
+            højt pr. måned). Grund: efterløn er en procentdel af *egen* max
+            dagpenge, og ministeriets «Satser for 2026» siger 22.041 kr. fuldtid
+            mod 14.694 kr. deltid = netop 2/3. Nu ligger deltidgrunden i
+            `EFTERLOEN_MAX_SATS_DELTID` i `efterloen.ts` og læses af
+            `DAGPENGE_2026`, så de to steder kan ikke glide fra hinanden igen —
+            præmieportionen i samme fil (15.870 → 10.580) var allerede 2/3.
+            To nye porte, begge dømmer på **renderede** tal og begge døde mod
+            den gamle kode (mutation til `* 0.67` gav 1 rød i hver fil).
+            ❓ «2/3 eller 0,67» er dermed lukket som *intern modsigelse* uden
+            lovkilde, fordi det kun er det interne der var forkert.
+            ✅ **Alle fem åbne VERIFICÉR-noter er lukket på indhold** (curl mod
+            live, 5/10 21:3x): `/bil` har «15-20 %» ×3, «8-12 %» ×3, «op til
+            50 %» og «op til 20 %», 0 rå procenter; `/tidszone` har Sydney
+            22:00/20:00 og Nuuk 09:00/09:00 i tabellen, «09:00 i Nuuk» og
+            «22:00 i Sydney» i brødteksten, «3 timer bagefter» / «3 timmar
+            bakåt»; `/klokken-i` (og `/klockan-i`) siger «14 lande» i titel og
+            h1, 0 × «tolv»; `/tidszone`-ankeret siger «klokken i 14 lande»;
+            `/dato`s keywords har nu **«helligdage 2026»** (ikke «helligdager»);
+            sidebarlen på `/bmi` starter med `/dato` (minus siden selv) og
+            `/moms` har `href="/promille"`.
+            ⚠️ Fire af de lukkede noters **egne grep-krav var forkerte**, ikke
+            koden: React sætter `<!-- -->` mellem tekst og expression, så
+            «09:00 i Nuuk» findes som «09:00<!-- --> i Nuuk» (0 matches på det
+            rå krav), og svensk retning er «bakåt», ikke «efter». Det er samme
+            slags fejl som de tre fra 4/10 — de er rettet i teksten nedenfor, så
+            næste iteration ikke leder efter en fejl der ikke findes.
+            ⚠️ Den 5. note (Sentry MINBEREGNER-2) er **kun delvist** lukket:
+            404-siden svarer 404 og renderer søgefeltet (`placeholder="Søg efter
+            en beregner..."`), altså `NotFoundSearch` har provideren i live.
+            At fejlen er væk afgør kun Sentry-eventvolumen 14/10.
+            ✅ 5/10 17:4x `/tidszone`: sydhalvkloden + Nuuk · ✅ 5/10 16:4x
+            `/tidszone`-hub læser `KLOKKEN_LANDE.length` · ✅ 5/10 15:0x fire rå
+            procenter i `BilBeregner.tsx` · ✅ 5/10 14:1x sidebarlens liste i
+            målt trafikrækkefølge · ✅ 5/10 13:1x to review-fund fra 4/10 ·
+            ✅ 4/10: promille på forsiden, Norge+Tyskland, fire review-fund,
+            `/dato`-titel, brændstoftabel, `/idealvaegt`, lånebeløb,
+            folkepensionsalder. ✅ **CEO-køens punkt 0 er rettet**. Alt ældre:
+            `docs/plan-arkiv.md`.
+            PR-TJEK: 5/10 21:2x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire
+            fuldt landede remote branches kan ikke slettes fra maskinen (lokale
+            tilladelsesregler nægter `git push origin --delete`).
+            `auto/union-night` har unikt arbejde i tre dokumenter — se ❓.
+            **Gate:** `npm run typecheck && npm run lint && npm test` (CI kører
+            også `next build`). 5/10 21:2x: typecheck 0, lint 0, **4298 tests i
+            269 filer** grønne.
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -89,6 +108,15 @@ ankeret til en løgn.
 **F5e. [x] `/tidszone`: sydhalvkloden og Nuuk rettet** — rettet 5/10 17:4x.
 Sydney/Auckland fik samme tal i begge kolonner (skifter modsat Danmark), Nuuk
 lå et timepavsagn for lavt i to lag. Porten dømmer nu mod IANA.
+
+**F6. [x] Efterlønnens deltidstal: 0,67 → 2/3** — rettet 5/10 21:4x.
+`EfterloensBeregner.tsx` skrev `* 0.67` på begge beregningslinjer og viste
+13.438 kr. i stedet for 13.372 kr. Grunden er nu `EFTERLOEN_MAX_SATS_DELTID` i
+`efterloen.ts`, læst af `DAGPENGE_2026.deltid`. *Hvorfor:* 66 kr. for højt på
+hver måned for alle deltidsforsikrede, i et værktøj der ellers henter alle sine
+satser fra modulet. *Accept:* de to nye porte dømmer på renderede tal og døde
+mod den gamle kode. ⛔ Lovgrund for 2/3 er ikke læst — kun den interne
+modsigelse var dokumenteret, og den er lukket uden lovkilde.
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
@@ -163,89 +191,51 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Tre noter er åbne.** Den nye (5/10 16:4x) skal først verificeres efter
-  5/10 17:30. **De fjorten fra 4/10–3/10 er fejet i ét kørt script 5/10 14:0x
-  og er lukket** — målt på indhold med `curl`, ikke på HTTP-koden. Målte
-  resultater, de fire der fejlede:
+**Én note er åben** (den nye fra denne iteration). **Alle ni fra 3/10–5/10 17:4x
+er lukket på indhold** — målt med `curl` mod begge domæner 5/10 21:3x, ikke på
+HTTP-koden. De lukkede noters fulde krav og målinger ligger i
+`docs/plan-arkiv.md` (5/10 21:4x).
 
-**Åben note 5/10 17:4x:** `VERIFICÉR DEPLOY: /tidszone og /tidszone (se)
-skriver «09 i Nuuk» og «22 i Sydney», tabellen har Sydney 22:00/20:00 og
-Auckland 00:00/22:00, Grønland er «3 timer bagefter» ceo/tidszone-sydhalvklodet
-5/10 17:4x`. Mål på indhold: `curl -s https://minberegner.dk/tidszone` skal
-ramme `09:00 i Nuuk` 1, `22:00 i Sydney` 1, `Sydney</td><td...>22:00` 1 og
-`Grønland</td>` efterfulgt af `3 timer bagefter` 1 — og **0** matches på
-`08 i Nuuk`, `21 i Sydney`, `4 timer bagefter`. Samme tre tal på
-`https://beraknare.se/tidszone`: `09:00 i Nuuk`, `22:00 i Sydney`,
-`Sydney</td><td...>22:00` og `Grönland</td>` efterfulgt af `3 timmar efter`
-(svensk retning er «efter», ikke «bagefter») — og **0** matches på
-`08 i Nuuk`, `21 i Sydney`, `4 timmar efter`. Skal verificeres efter
-5/10 17:30.
+**Åben note 5/10 21:4x:** `VERIFICÉR DEPLOY: efterlønsberegnerens deltid-gren
+viser 13.372 kr. og 14.694 kr., ikke 13.438 kr. og 14.768 kr. ceo/efterloen-deltid-andel
+5/10 21:4x`. Mål på indhold: `curl -s https://minberegner.dk/efterloen` skal have
+**0** matches på `13.438`, `13.372` og `14.694` (siden er en klient-komponent,
+der først renderer tallet ved JS — brug et headless kald eller læs
+`EFTERLOEN_MAX_SATS_DELTID` i koden indtil da), og ingen FAQ- eller
+metadatastreng skal nævne et deltidstal.
 
-**Åben note 5/10 17:5x:** `VERIFICÉR DEPLOY: Sentry MINBEREGNER-2 fejl "useLocale must be used within a LocaleProvider" på POST / er rettet ved at wrappe NotFoundSearch i LocaleProvider i not-found.tsx ceo/sentry-uselocale-fix 5/10 17:5x`. Mål på at fejlen ikke længere opstår ved at teste med en bevidst fejl i et lokalt prod-build der sender fejlen af sted. Den skal være sat bag et flag, som fjernes igen.
+**Åben note 5/10 17:5x (Sentry, delvist lukket):** `VERIFICÉR DEPLOY: Sentry
+  MINBEREGNER-2 "useLocale must be used within a LocaleProvider" på POST / er
+  rettet ved at wrappe NotFoundSearch i LocaleProvider i not-found.tsx
+  ceo/sentry-uselocale-fix 5/10 17:5x`. **Lukket 5/10 21:3x for det, der kan
+  måles udefra:** 404-siden svarer 404 og renderer søgefeltet
+  (`placeholder="Søg efter en beregner..."`), altså komponenten har provideren i
+  live. **Åben:** at fejlen er væk afgør kun Sentrys egen hændelsestæller
+  (2 hændelser / 0 brugere på 14 dage) — læs den 14/10, ellers er den lukket på
+  et ufuldstændigt grundlag.
 
-**Åben note 5/10 16:4x:** `VERIFICÉR DEPLOY: /tidszone skriver «klokken i 14
-  lande» og «klockan i 14 länder» i hub-ankeret, 0× ordformen «fjorten»/
-  «fjorton», begge domæner ceo/tidszone-lande-tal 5/10 16:4x`. Mål på
-  indhold: `curl -s https://minberegner.dk/tidszone | grep -c 'klokken i 14
-  lande'` = 1, `curl -s https://beraknare.se/tidszone | grep -c 'klockan i 14
-  länder'` = 1, og begge sider skal have **0** matches på `klokken i [a-zæøå]+
-  lande` / `klockan i [a-zäöå]+ länder`.
+⚠️ **Syv noter har nu afveget fra deres krav, ikke fra koden.** De er lukkede,
+  men påstandene i dem var forkerte og er rettet her + i arkivet, fordi en
+  fremtidig iteration ellers ville lede efter en fejl der ikke findes:
 
-| Note | Målt | Resultat |
-|---|---|---|
-| 5/10 13:1x klokken-hub + `helligdage` | `/klokken-i` skal sige «fjorten lande» (ikke «tolv», 0) og `tidszone` det samme; `/dato` skal have «helligdager 2026» | åben, merge skete 13:1x |
-| 5/10 14:1x sidebarlens trafikrækkefølge | se note nedenfor | åben, merge skete 14:1x |
-| 5/10 15:0x `BilBeregner` procentmellemrum | `/bil` skal have «15-20 %», «8-12 %», «op til 50 %», «op til 20 %» og **0** rå `15-20%`/`50%` | åben, merge skete 15:0x |
-| 4/10 05:5x promille på forsiden | 12 links i rækkefølge, `/promille` nr. 11; men `/moms` → `/promille` = **0** | ⚠️ se nedenfor |
-| 4/10 05:1x Norge + Tyskland | titler «12 i Danmark = 12:00 i Oslo» / «12 i Sverige = 12:00 i Berlin», `tidszone` «fjorten», 14 links, begge sitemap'er | ✅ |
-| 4/10 05:0x idealvægt-titel + brøk-legend | 0× «175 cm 175 cm», «Pris för bensin» 1/«Pris på» 0, 3 legender i rigtig rækkefølge | ✅ |
-| 4/10 04:2x `/dato`-titel | «57 dage tilbage» (da) / «57 dagar kvar» (se), 0× `→` | ✅ |
-| 4/10 03:5x brændstoftabel | 7 rækker 50→2.000 km, 500 km benzin = 450,00 kr, 0× «355,56 kr», se «från 50 **till**» | ✅ |
-| 4/10 03:1x `/idealvaegt`-værktøj | Devine (1974) 1, Hamwi (1964) 1, BMI-interval 56,7 | ✅ |
-| 4/10 02:3x lånebeløb-tabel | «Hvor meget koster det at låne?» 1, «5.368 kr.» 2×, «1.500.000 kr.» 1× | ✅ |
-| 4/10 01:5x folkepensionsalder | `folkepensionsalder-foedselsdato` 1 på da, **0 på se** som kravet | ✅ |
-| 4/10 01:3x procent-mellemrum | blog 0 rå %, `/alkoholenheder` «4,6 %» 1 / «4,6%» 0 | ✅ |
-| 4/10 00:5x BMI-alderfelt | feltet er der, men **uden «(år)»** på label | ⚠️ se nedenfor |
-| 4/10 00:1x brøk-grupper | 3 legender, 0× `role="group"`, «Fællesnævner» | ✅ |
-| 3/10 23:4x børnepenge-titel | titel + og:title, `<h1>` uændret | ✅ |
-| 3/10 23:2x fire regneregler | «Regn med de fire regler» 1, «Anden nævner» 1, 4 unikke id'er | ✅ |
-| 3/10 23:0x procent-mellemrum bilsider | `/bil` har **4 rå %** («15-20%», «50%»), `/topskat` 0, blogs 0 | ⚠️ se nedenfor |
-| 3/10 22:2x interpolation | `/dagpenge` siger **90 %** (portens krav sagde 80 %), `Boafgift (15 %)` findes, `/kalorier` «10-15 %» | ✅ (portens krav var forældet) |
-| 3/10 21:5x alder + svensk tekst | se/promille «— och efter ytterligare», procent/alder/dato alle 3 | ✅ |
-
-⚠️ **Tre noter afviger fra deres krav, ikke fra koden** — de er lukkede, men
-  påstandene i dem var forkerte og er rettet her, fordi en fremtidig iteration
-  ellers ville lede efter en fejl der ikke findes:
-
-1. **`/moms` → `/promille` gav 0**, fordi sidebarlens liste ikke havde `/promille`
-   — det var den rigtige årsag, og den er rettet 5/10 14:1x (samme commit som
-   denne plan).
+1. **`/moms` → `/promille` gav 0**, fordi sidebarlens liste ikke havde
+   `/promille` — rigtige årsag, rettet 5/10 14:1x.
 2. **BMI-label mangler «(år)»**: `BmiBeregner.tsx` har `alderLabel: "Alder"` og
-   `alderUnit: "år"` som to felter, så markup'en er «Alder» + «år» i en
-   `<span>`. Ikke en fejl — enheden vises, bare ikke i label-teksten.
+   `alderUnit: "år"` som to felt, så markup'en er «Alder» + «år». Ikke en fejl.
 3. **`/dagpenge` siger 90 %, ikke 80 %**: `dagpenge.ts` bruger 90 % af løn efter
-   AM-bidrag, hvilket er dagpengereglerne. Portens krav fra 3/10 22:2x havde
-   det ældre tal.
-
-✅ `/bil`s fire rå procenter i den danske gren af `BilBeregner.tsx` er rettet
-  5/10 15:0x — de var i selve komponentens tekststrenge, som de tre tidligere
-  procent-opgaver ikke rørte.
-
-**Åben note 5/10 15:0x:** `VERIFICÉR DEPLOY: BilBeregners danske gren skriver
-  «15-20 %», «8-12 %», «op til 50 %» og «op til 20 %», 0 rå procenter i
-  /bils tip og værdifald-felt ceo/bil-raa-procenter 5/10 15:0x`. Mål på indhold:
-  `curl -s https://minberegner.dk/bil` skal ramme «15-20 %» ≥1, «8-12 %» ≥1,
-  «op til 50 %» ≥1, «op til 20 %» ≥1 og **0** matches på `15-20%`, `8-12%`,
-  `50%` og `20%`. `beraknare.se/bil` er uændret (de har allerede «15–20 %»).
-
-**Åben note 5/10 14:1x:** `VERIFICÉR DEPLOY: <sidebarlens populære liste følger
-  målt trafik, intet dødt slice, /promille med> ceo/sidebar-trafikrækkefølge
-  5/10 14:1x`. `curl -s https://minberegner.dk/bmi | grep -oE 'href="/[a-z-]+"'`
-  skal ramme `/dato`, `/bmi`, `/boligstoette`, `/rentefradrag`, `/kvadratmeter`,
-  `/kalorier`, `/tidsberegner` og `/braendstof` i **den rækkefølge** — de otte
-  første på en side uden dem i listen. `/moms` skal have `href="/promille"` **≥1**
-  (det var 0 før denne commit). `beraknare.se/bmi` skal have `/tidsberegner`,
-  `/dato`, `/leasing` og `/alder` som de fire første.
+   AM-bidrag. Portens krav fra 3/10 22:2x havde det ældre tal.
+4. **`/dato` skulle have «helligdager 2026»** (5/10 13:1x). Rettelsen *fjerner*
+   netop det ord og sætter «helligdage 2026» — live har den nu «helligdage
+   2026», så kravet ville slået fejl på den rigtige kode.
+5. **«09:00 i Nuuk» gav 0 matches** (5/10 17:4x). React skriver `<!-- -->` mellem
+   tekst og expression, så siden har «09:00<!-- --> i Nuuk». Råt grep-streng på
+   JSX-tekst er et dårligt krav — brug et tal der står alene i en celle.
+6. **Svensk retning er «bakåt», ikke «efter»** (5/10 17:4x). `beraknare.se`
+   skriver «3 timmar bakåt».
+7. **Sidebarlen på `/bmi` kan ikke starte med `/bmi`** (5/10 14:1x) —
+   `Sidebar.tsx` filtrerer `currentHref` væk. På `/bmi` er rækken derfor
+   `/dato` → `/boligstoette` → `/rentefradrag` → `/kvadratmeter` → `/kalorier` →
+   `/tidsberegner` → `/braendstof`, som er målt rækkefølge minus siden selv.
 
 ## ❓ Til Mads
 
@@ -335,12 +325,23 @@ ramme `09:00 i Nuuk` 1, `22:00 i Sydney` 1, `Sydney</td><td...>22:00` 1 og
 - ❓ **Kilde til svenske og norske frilanstimepriser.** Ét skærmbillede af et
   markedstal for Danmark, Sverige og Norge låser `/timepris` pr. `Locale` og den
   manglende norske brødtekst.
-- ❓ **Efterløn til deltidsforsikrede: 2/3 eller 0,67?** Målt 3/10 02:38 i
-  `EfterloensBeregner.tsx`: deltid regnes som `MAX × 0,67`, altså 20.057 × 0,67
-  = **13.438 kr.**, mens `DAGPENGE_2026.deltid` er 22.041 × 2/3 = **14.694 kr.**
-  for præcis samme deltidsforsikring — så efterlønsdelen er **67 kr. for høj**.
-  Beregnerens egen præmieportion bruger modsat 2/3-reglen. Koden er bevidst
-  urørt, fordi det er en **beregningsændring** (punkt 11).
+- ❓ **Efterlønnens deltidandel: 2/3 eller 0,67?** — **lukket 5/10 21:4x uden
+  lovkilde.** `EfterloensBeregner.tsx` skrev `0.67`, og 0,67 er ikke 2/3 = 0,6667:
+  værktøjet viste 13.438 kr. mod de 13.372 kr., deltidens egen dagpengesats
+  (14.694 kr.) × 91 % er, altså 66 kr. for højt pr. måned. Rettet til
+  `EFTERLOEN_MAX_SATS_DELTID`. Det, der gjorde det til en *fejl* og ikke et
+  valg, var modsigelsen: præmieportionen i samme fil (15.870 → 10.580 kr.) var
+  allerede præcis 2/3, og `DAGPENGE_2026` siger 22.041 → 14.694 = netop 2/3.
+  **Dobbeltreglen er dog stadig ulæst** — hvis loven faktisk siger 67 %, er det
+  *dagpenge*-delen der skal rettes, ikke efterløn.
+- ❓ **Et skanner-fund uden fejl i koden** (5/10 21:2x). `npm test` melder «FEJL:
+  1 ureviewet(e) danske streng(e) i komponenter der monteres på beraknare.se» med
+  `src/app/procent/page.tsx:621` — men linjen er svensk («Vår procenträknare kan
+  hjälpa dig med fyra olika typer av beräkningar:») og hele blokket er svensk
+  fra `locale === "se"` og ned. Scanneren matcher et dansk stopord i svensk
+  tekst. **⛔ Ikke en opgave at fjerne ordet for** — det ville slå dansk ødelagt
+  for at tilfredsstille en port. Kræver enten en stopordsliste der skelner
+  mellem sprog, eller en allowlist-fil.
 - ❓ **Elbilens vægtafgift 2026 (og Sveriges fordonsskatt).** `/bil` skrev «Elbil:
   0 kr (til 2026)»; `skat.dk` svarer 500. Teksten siger nu kun hvad beregneren
   regner med, og tallet ligger i `bil-omkostninger.ts` som `DRIFT.da.vaegt.el`.

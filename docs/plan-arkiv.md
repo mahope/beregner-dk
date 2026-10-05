@@ -29073,3 +29073,39 @@ Selv fundet i egen diff: `**sydhalvkloden**` i JSX ville renderet bogstaveligt
 
 **Ikke kørt:** `next build`, ingen browser ved 360/1280 (repoet har intet
 Playwright), ingen curl mod de to domæner før deploy-vinduet.
+
+---
+
+## 5/10 21:3x — ni VERIFICÉR-noter lukket på indhold (curl mod begge domæner)
+
+Alle målt på **indhold**, ikke på HTTP-koden. De ni noter er flyttet hertil fra
+`IMPLEMENTATION_PLAN.md`; kun den nye efterløn-note og Sentry-noten er åbne.
+
+### Målte resultater
+
+| Note | Krav | Målt 5/10 21:3x | Resultat |
+|---|---|---|---|
+| 5/10 17:4x sydhalvkloden + Nuuk (da) | Sydney 22:00/20:00, Nuuk 09:00 i tabellen og brødtekst | `Sydney</td><td>22:00</td><td>20:00`, `Nuuk</td><td>09:00</td><td>09:00`, brødtekst «09:00<!-- --> i Nuuk» og «22:00<!-- --> i Sydney», `Grønland</td><td class="py-2 pr-4">3 timer bagefter», 0 på `08 i Nuuk`/`21 i Sydney` | ✅ |
+| 5/10 17:4x (se) | samme tre tal på beraknare.se | `Sydney</td><td>22:00`, `Grönland</td><td class="py-2 pr-4">3 timmar bakåt`, 0 på `08 i Nuuk`/`21 i Sydney` | ✅ (kravet sagde «efter» — svensk er «bakåt») |
+| 5/10 17:5x Sentry MINBEREGNER-2 | fejlen væk fra `POST /` | `curl -o /dev/null -w %{http_code}` på `/en-side-der-ikke-findes` = **404** og siden renderer `placeholder="Søg efter en beregner..."`, altså `NotFoundSearch` har provideren i live | ⚠️ delvist — kun Sentrys egen tæller kan lukke resten |
+| 5/10 16:4x 14 lande | «klokken i 14 lande» / «klockan i 14 länder», 0 × «fjorten» | `/tidszone` har `klokken i <!-- -->14<!-- --> lande` i ankeret, `/klokken-i` har «Klokken i 14 lande lige nu» i titel og «Klokken lige nu i 14 lande» i h1, `/klockan-i` «Klockan i 14 länder just nu», 0 × «tolv lande»/«tolv länder» | ✅ |
+| 5/10 15:0x `BilBeregner` procentmellemrum | «15-20 %», «8-12 %», «op til 50 %», «op til 20 %», 0 rå | «15-20 %» ×3, «8-12 %» ×3, «op til 20 %» ×1, «op til 50 %» ×1, 0 matches på `15-20%`/`8-12%`/`[^0-9]50%`/`[^0-9]20%` | ✅ |
+| 5/10 14:1x sidebarlens rækkefølge (da) | `/dato`, `/bmi`, `/boligstoette`, … i målt rækkefølge; `/moms` → `/promille` ≥1 | `/bmi` sidebarl: `/dato` → `/boligstoette` → `/rentefradrag` → `/kvadratmeter` → `/kalorier` → `/tidsberegner` → `/braendstof` → `/barselsdagpenge` → `/husleje` → `/promille` → `/loen-efter-skat` → `/procent` → `/moms` (`Sidebar.tsx` dropper `currentHref`, altså `/bmi` kan ikke stå først på `/bmi`). `/moms` har `href="/promille"` ×1 | ✅ |
+| 5/10 14:1x (se) | `/tidsberegner`, `/dato`, `/leasing`, `/alder` som de fire første | præcis den rækkefølge, derefter `/nedtaelling`, `/tidszone`, `/kalorier`, `/elberegner`, `/loenstigning`, `/timepris` | ✅ |
+| 5/10 13:1x `/klokken-i` + `/dato` | «fjorten lande» på klokken-hubben; `/dato` har «helligdager 2026» | «Klokken i 14 lande lige nu» (tittel + og:title + twitter:title), 0 × «tolv». `/dato`s `<meta name="keywords">` har **«helligdage 2026»** | ✅ — **men kravet var vendt**: rettelsen fjerner «helligdager 2026» og sætter «helligdage 2026», så «helligdager 2026» ville slået fejl på den rigtige kode |
+
+### Lært om grep-krav på JSX
+
+Fire af de ni krav var skrevet som rå strenge mod tekst, der renderes gennem
+JSX. React skriver `<!-- -->` mellem to tekstnoder, så «09:00 i Nuuk» står som
+`09:00<!-- --> i Nuuk` i HTML'en og et råt `grep -F` giver 0. Det samme gælder
+«klokken i 14 lande» og «klockan i 14 länder». **Skriv krav på tal der står
+alene i en tabelcelle** (`Sydney</td><td>22:00`) eller på substrings der ikke
+krydser en expression.
+
+### Ikke kørt
+
+`next build` (kun CI kører den), ingen browser ved 360/1280 — **niende**
+gennemgang i træk med samme mangel, fordi repoet stadig har intet Playwright.
+Ingen ændring i denne kørsel rørte markup, så der er intet nyt layout at se i
+pixels.
