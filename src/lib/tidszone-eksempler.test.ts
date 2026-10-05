@@ -244,10 +244,46 @@ describe("tidszone-eksempler", () => {
     // `landSe ?? landDa` ved visningsstedet.
     expect(lande).toContain("Grönland");
     expect(lande).not.toContain("Grønland");
-    // Storbritannien, Spanien, Japan, Thailand, Kina, Australien og
-    // New Zealand hedder det samme på svenska.
+    // Storbritannien, Spanien, Japan, Thailand, Kina og Australien hedder
+    // det samme på svenska. New Zealand gør **ikke** — den hedder
+    // «Nya Zealand», og den skrev beraknare.se «New Zealand» i landetabellen,
+    // fordi feltet var valgfrit og faldt tilbage på `landDa`. Testen her låste
+    // netop fejlen fast med påstanden «New Zealand hedder det samme på
+    // svenska»; den påstand er fjernet og erstattet af porten nedfor, der
+    // gennemgår alle elleve rækker i begge sprog.
     expect(lande).toContain("Storbritannien");
     expect(lande).toContain("Spanien");
+    expect(lande).not.toContain("New Zealand");
+    expect(lande).toContain("Nya Zealand");
+  });
+
+  /**
+   * Hver landerække skal have et svensk navn, fordi `landSe` er udbudt for
+   * alle — så kan den ikke glemmes ved næste land. Porten dømmer begge sprog
+   * hver for sig på de elleve rækker: et navn må ikke have æ/ø i den svenske
+   * udgave, og den danske skal være uændret.
+   */
+  test("alle elleve lande har et svensk navn, og ingen række lækker dansk", () => {
+    const se = tidsskillnadRaekker("se");
+    const da = tidsskillnadRaekker("da");
+
+    expect(se).toHaveLength(TIDSSKILLNADS_LANDE.length);
+    expect(da).toHaveLength(TIDSSKILLNADS_LANDE.length);
+    expect(se.map((r) => r.land)).toEqual(TIDSSKILLNADS_LANDE.map((l) => l.landSe));
+    expect(da.map((r) => r.land)).toEqual(TIDSSKILLNADS_LANDE.map((l) => l.landDa));
+
+    for (const raekke of se) {
+      // «Grønland» med dansk ø og «New Zealand» med dansk navn var de to
+      // lækager, feltet lod igennom.
+      expect(raekke.land).not.toMatch(/[æøåÆØÅ]/);
+    }
+    // De svenske navne, der faktisk afviger fra de danske.
+    expect(se.map((r) => r.land)).toEqual(
+      expect.arrayContaining(["Grönland", "Grekland", "Turkiet", "Nya Zealand"])
+    );
+    expect(da.map((r) => r.land)).toEqual(
+      expect.arrayContaining(["Grønland", "Grækenland", "Tyrkiet", "New Zealand"])
+    );
   });
 
   test("svensk tekst bruger timmar/timme, dansk timer/time, og ingen har fejlenheden", () => {

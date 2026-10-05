@@ -147,6 +147,16 @@ describe("tidszone svar-først-tabeller for lande og Excel", () => {
     expect(html).toContain("<td class=\"py-2 pr-4\">Turkiet</td>");
     expect(html).not.toContain("<td class=\"py-2 pr-4\">Grækenland</td>");
     expect(html).not.toContain("<td class=\"py-2 pr-4\">Tyrkiet</td>");
+    // New Zealand kom i tabellen uden `landSe`, fordi feltet var valgfrit, og
+    // faldt derfor tilbage paa `landDa`: beraknare.se skrev «New Zealand» i
+    // tabellen, mens brødteksten paa samme side siger «Nya Zeeland». De to
+    // stroede i samme side modsagde hinanden.
+    expect(html).toContain("<td class=\"py-2 pr-4\">Nya Zealand</td>");
+    expect(html).not.toContain("<td class=\"py-2 pr-4\">New Zealand</td>");
+    // «og» er dansk; den svenska side skrev «Grekland og Spanien följer
+    // Sverige» og «Sydney og Auckland är skillnaden densamma».
+    expect(html).toContain("Grönland, Grekland och Spanien följer Sverige");
+    expect(html).not.toMatch(/\sog\s/);
   });
 
   test("landetabellen viser Grønland, som dansk autocomplete spørger om først", async () => {
@@ -185,7 +195,7 @@ describe("tidszone svar-først-tabeller for lande og Excel", () => {
       ],
       se: [
         ["Australien", "10 timmar framåt", "8 timmar framåt"],
-        ["New Zealand", "12 timmar framåt", "10 timmar framåt"],
+        ["Nya Zealand", "12 timmar framåt", "10 timmar framåt"],
       ],
     };
     for (const locale of ["da", "se"] as const) {
@@ -603,7 +613,7 @@ describe("tidszone giver hver landside en indgang", () => {
 
   test.each([
     { locale: "da" as const, prefix: "/klokken-i/", slugs: SLUGS_DA, spoergsmaal: "Hvad er klokken i", anker: ["Japan", "Tyrkiet", "USA"], andet: "/klockan-i/", andetTekst: "Vad är klockan i" },
-    { locale: "se" as const, prefix: "/klockan-i/", slugs: SLUGS_SE, spoergsmaal: "Vad är klockan i", anker: ["Japan", "Türkiet", "Kanada"], andet: "/klokken-i/", andetTekst: "Hvad er klokken i" },
+    { locale: "se" as const, prefix: "/klockan-i/", slugs: SLUGS_SE, spoergsmaal: "Vad är klockan i", anker: ["Japan", "Turkiet", "Kanada"], andet: "/klokken-i/", andetTekst: "Hvad er klokken i" },
   ])(
     "$locale linker til alle 14 landesider med spoergsmaalstekst som anker",
     async ({ locale, prefix, slugs, spoergsmaal, anker, andet, andetTekst }) => {
@@ -616,10 +626,15 @@ describe("tidszone giver hver landside en indgang", () => {
         expect(html).toContain(`href="${prefix}${slug}"`);
       }
       // Ankerteksten er hele spoergsmaalet, saa den ikke kan vaere et navn
-      // der ikke svaerer til den side den peger paa. Tyrkiet/Türkiet og
+      // der ikke svaerer til den side den peger paa. Tyrkiet/Turkiet og
       // Canada/Kanada er de to, hvor de to domaener har forskellige navne.
+      // Tyrkiet stod som «Türkiet» — tysk — indtil 6/10; baade denne port og
+      // `klokken-i.test.ts` laas den tyske form fast, saa de er rettet sammen.
       for (const navn of anker) {
         expect(html).toContain(`>${spoergsmaal} ${navn}?</a>`);
+      }
+      if (locale === "se") {
+        expect(html).not.toContain("Türkiet");
       }
 
       // Præcis de 14 — ikke flere, ikke færre — og intet fra det andet domaene.

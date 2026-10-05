@@ -99,7 +99,7 @@ export const KLOKKEN_LANDE: readonly KlokkenLand[] = [
     slugDa: "tyrkiet",
     slugSe: "turkiet",
     navnDa: "Tyrkiet",
-    navnSe: "Türkiet",
+    navnSe: "Turkiet",
     byer: [{ da: "Istanbul", zone: "Europe/Istanbul" }],
   },
   {

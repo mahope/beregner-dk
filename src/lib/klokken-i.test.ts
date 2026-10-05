@@ -157,7 +157,7 @@ describe("ruterne", () => {
     expect(findKlokkenLand("turkiet", "se")).not.toBeNull();
     expect(findKlokkenLand("tyrkiet", "se")).toBeNull();
     const tyrkiet = findKlokkenLand("tyrkiet", "da");
-    expect(tyrkiet && landetsNavn(tyrkiet, "se")).toBe("Türkiet");
+    expect(tyrkiet && landetsNavn(tyrkiet, "se")).toBe("Turkiet");
     expect(getKlokkenPrefix("da")).toBe("/klokken-i/");
     expect(getKlokkenPrefix("se")).toBe("/klockan-i/");
     expect(getKlokkenPrefix("no")).toBeUndefined();

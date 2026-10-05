@@ -55,18 +55,24 @@ const POPULAERE_TIDSFORSKELSER = tidsforskelsRækker([
 ]);
 
 /**
- * Byerne bag landetabellen, som en kommasepareret liste med "og" til sidst.
+ * Byerne bag landetabellen, som en kommasepareret liste med konjunktionen til
+ * sidst.
  *
  * Sætningen skal kunne navngive præcis de byer, tabellen viser, så den er
  * bygget af `tidsskillnadRaekker` — den samme liste tabellen renderer. Da stod
  * navnene som tekst i JSX, og da et land kom i tabellen, kunne sætningen og
  * tabellen ikke glide fra hinanden (C84's `metaDescription`-fund og C109's
  * danske liste i samme fejlklasse).
+ *
+ * Konjunktionen læses af sproget: «og» på dansk og «och» på svensk. Den stod
+ * i hånden, så beraknare.se skrev «… Sydney og Auckland är skillnaden
+ * densamma» på sin egen side.
  */
 function byListe(spoergsprog: "da" | "se"): string {
   const byer = tidsskillnadRaekker(spoergsprog).map((raekke) => raekke.by);
   if (byer.length === 0) return "";
-  return `${byer.slice(0, -1).join(", ")} og ${byer[byer.length - 1]}`;
+  const og = spoergsprog === "se" ? " och " : " og ";
+  return `${byer.slice(0, -1).join(", ")}${og}${byer[byer.length - 1]}`;
 }
 
 /**
@@ -83,10 +89,11 @@ function byListe(spoergsprog: "da" | "se"): string {
  */
 function landeFoelgerDanmark(spoergsprog: "da" | "se"): string {
   const lande = TIDSSKILLNADS_LANDE.filter((l) => l.foelgerEu).map((l) =>
-    spoergsprog === "se" ? (l.landSe ?? l.landDa) : l.landDa
+    spoergsprog === "se" ? l.landSe : l.landDa
   );
   if (lande.length <= 1) return lande[0] ?? "";
-  return `${lande.slice(0, -1).join(", ")} og ${lande[lande.length - 1]}`;
+  const og = spoergsprog === "se" ? " och " : " og ";
+  return `${lande.slice(0, -1).join(", ")}${og}${lande[lande.length - 1]}`;
 }
 
 export async function generateMetadata() {

@@ -1,95 +1,43 @@
-STATUS: 6/10 00:0x. ✅ 6/10 00:0x: **landetabellen på `/tidszone` løj om
-              Australien og New Zealand.** `tidszone-eksempler.ts`s `forskel()`
-              trak `zone.utcVinter − danskOffset`, altså byens *egne
-              vinterkonstant* mod Danmarks, og antog dermed at byen skiftede
-              sommertid samtidig med Danmark. Rigting for de byer der gør det
-              (New York, London, Nuuk), forkert for sydhalvkloden: IANA giver
-              Australia/Sydney **+10/+8** den 15. jan./15. jul. og
-              Pacific/Auckland **+12/+10**, så siden sagde «9 timer frem» +
-              «Samme som vintertid» for Australien og «11 timer frem» for New
-              Zealand — tre forkerte tal OG en løgn om at tallet var fast hele
-              året, på den side der lige har fået en tilføjelse om præcis dette
-              emne. Samme identiske formel lå i `tidszone-blog-lander.ts` og gav
-              bloggen «11 timer frem» for Auckland. Rettelsen er **én
-              funktion**: `byOffsetVedDanmarkSæson` (byens offset på *Danmarks*
-              sæsondato, med byens egen `dst`-regel) er nu eksporteret fra
-              `tidszone-reference.ts` og læses af begge steder, så bytabellen og
-              landetabellen ikke længere kan modsige hinanden — de siger nu
-              Sydney `22:00/20:00` **og** «10 frem / 8 frem». Sommerspalden
-              udelades kun når de to tal er *ens*, ikke når byen har sommertid
-              (`brugerSommertid`), hvilket var grunden til «Samme som
-              vintertid» for en by der flytter sig den anden vej. Brødteksten på
-              begge sprog og blogindlæggets liste over byer med ens spalter er
-              rettet med. *Portene kan fejle:* fire nye dømninger mod IANA
-              gennem `Intl.DateTimeFormat(…, {timeZoneName: "longOffset"})` på de
-              to sæsondatoer — alle 11 landerækker og alle 25 byer i
-              blogtabellen, plus én port på den *renderede* markup i begge
-              sprog. Mutation til den gamle formel gav **4 røde** i eksempler +
-              sidespejlet og **2 røde** i bloglanderen, bl.a. «Australien om
-              vinteren: expected 9 to be close to 10». De to tests der låste
-              fejlen fast (de genskrev koden som forventning) er erstattet af
-              IANA-porten, og den ene af dem havde en ternær hvor begge grene var
-              `raekke.vinter` — den kunne ikke fejle. Mål: ingen `>9 timer frem<`
-              og ingen `>11 timer frem<` i markupken på `/tidszone` i noget sprog.
-              *Datagrund:* `/tidszone` 24.829 GSC-visninger / 0,4 % CTR / pos. 7,7
-              (5/10) — de tre største søgninger («tidszoner», «hvad er klokken i
-              usa når den er 12 i danmark», «hvad er klokken i de forskellige
-              tidszoner») er alle spørgsmål om *præcise tal*. Bloggen
-              «hvad-er-klokken-i-usa-naar-den-er-12-i-danmark» har samme
-              verdens-tabel. ⛔ Samme commit rettede to forældede docblocks om
-              Nuuk (WGT/WGST), der modsagde hinanden og `TIDSZONER`.
-STATUS: 6/10 00:0x. ✅ 6/10 00:0x: **landetabellen på `/tidszone` løj om
-              Australien og New Zealand.** `tidszone-eksempler.ts`s `forskel()`
-              trak `zone.utcVinter − danskOffset` og antog dermed at byen skiftede
-              sommertid samtidig med Danmark. Rigting for New York/London/Nuuk,
-              forkert for sydhalvkloden: IANA giver Sydney **+10/+8** og Auckland
-              **+12/+10** den 15. jan./15. jul., så siden sagde «9 timer frem» +
-              «Samme som vintertid» for Australien og «11 timer frem» for New
-              Zealand — tre forkerte tal OG en løgn om at tallet var fast hele
-              året, på den side der lige har fået en tilføjelse om præcis det
-              emne. Samme formel lå i `tidszone-blog-lander.ts` («11 timer frem»
-              for Auckland). Rettelsen er **én funktion**:
-              `byOffsetVedDanmarkSæson` er eksporteret fra
-              `tidszone-reference.ts` og læses af begge steder, så bytabellen og
-              landetabellen ikke kan modsige hinanden — nu siger de Sydney
-              `22:00/20:00` **og** «10 frem / 8 frem». Sommerspalden udelades kun
-              når de to tal er *ens*, ikke når byen har sommertid — det var
-              `brugerSommertid`, der gav «Samme som vintertid» for en by der
-              flytter sig den anden vej. Brødteksten i begge sprog og bloggens
-              liste over byer med ens spalter fulgte med.
-              *Portene kan fejle:* fire nye dømninger mod IANA gennem
-              `Intl.DateTimeFormat(…, {timeZoneName: "longOffset"})` på de to
-              sæsondatoer — alle 11 landerækker, alle 25 byer i blogtabellen, plus
-              én port på den *renderede* markup i begge sprog. Mutation til den
-              gamle formel gav **4 røde** (bl.a. «Australien om vinteren:
-              expected 9 to be close to 10») og **2 røde** i bloglanderen. De to
-              tests der låste fejlen fast (de genskrev koden som forventning) er
-              erstattet af IANA-porten; den ene havde en ternær hvor begge grene
-              var `raekke.vinter`, altså umulig at fejle. Mål: ingen `>9 timer
-              frem<` / `>11 timer frem<` i markupken i noget sprog.
-              *Datagrund:* `/tidszone` 24.829 GSC-visninger, 0,4 % CTR, pos. 7,7
-              (5/10) — de tre største søgninger spørger alle om *præcise tal*.
-              ✅ 5/10 23:1x sæsonbadge «Populær nu» (ikke «Trending») ·
-              ✅ 5/10 22:5x `/tidsberegner`: værktøjet over svar-først-tabellen ·
-              ✅ 5/10 22:1x juleaftens/nytårsaftens URL er datoen · ✅ 5/10 21:4x
-              efterlønnens deltidstal 2/3 · ✅ 5/10 17:4x `/tidszone`: sydhalvkloden
-              + Nuuk · ✅ 5/10 15:0x fire rå procenter · ✅ 5/10 14:1x sidebarlens
-              liste i målt trafikrækkefølge · ✅ 5/10 13:1x to review-fund fra 4/10 ·
-              ✅ 4/10 promille på forsiden, Norge+Tyskland, fire review-fund,
-              `/dato`-titel, brændstoftabel, `/idealvaegt`, lånebeløb,
-              folkepensionsalder. **CEO-køens punkt 0 er rettet.** Alt ældre:
-              `docs/plan-arkiv.md`.
-              ✅ **CI er grøn igen 5/10 21:26** (4 min) efter tre `cancelled`
-              kørsler aftenen før — GitHubs egen runner-kø, ikke diffen (❓).
-              PR-TJEK: 5/10 21:2x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire
-              fuldt landede remote branches kan ikke slettes fra maskinen (lokale
-              tilladelsesregler nægter `git push origin --delete`).
-              `auto/union-night` har unikt arbejde i tre dokumenter — se ❓.
+STATUS: 6/10 00:2x. ✅ 6/10 00:2x: **Den svenska `/tidszone` skrev tre
+              udenlandske ord.** Målt i *renderet* markup med `locale: "se"`:
+              landetabellen skrev `<td>New Zealand</td>` (svensk er **Nya
+              Zealand**), landelisten skrev «Türkiet» — tysk, fordi
+              `klokken-i.ts` skrev `navnSe: "Türkiet"` mens resten af koden
+              skriver «Turkiet» — og to lister sluttede med dansk «og»
+              («Grekland og Spanien följer Sverige», «Sydney og Auckland är
+              skillnaden densamma»). Rodårsagen for landetabellen er at
+              `landSe` var **valgfrit** og faldt tilbage på `landDa`, så et nyt
+              land automatisk fik det danske navn (samme fejl som C155's
+              «Grønland» med ø). Feltet er nu udbudt for alle elleve rækker, så
+              typen tvinger hvert land til at svare; konjunktionen læses af
+              `spoergsprog`. *Portene kan fejle:* en mutation af hver af de tre
+              rettelser gav 6 røde (bl.a. «expected 'Türkiet' to be
+              'Turkiet'», «to not include 'New Zealand'», «to contain
+              'Grönland, Grekland och Spanien följer Sverige'»). To tests låste
+              fejlen fast — de skrev «New Zealand hedder det samme på svenska»
+              og `toBe("Türkiet")` — de er rettet, ikke slettet.
+              *Datagrund:* `/tidszone` 4.636 GSC-visninger på beraknare.se
+              (0,3 % CTR, pos. 7,9) + 24.829 på minberegner.dk. Mål: ingen
+              `>New Zealand<` i `<td>` og intet `Türkiet` på beraknare.se.
+              ✅ 6/10 00:0x landetabellens tidsforskelser for Australien og New
+              Zealand · ✅ 5/10 23:1x sæsonbadge på dansk og svensk · ✅ 5/10
+              22:5x `/tidsberegner`: værktøjet over tabellen · ✅ 5/10 22:1x
+              juleaftens/nytårsaftens URL er datoen · ✅ 5/10 21:4x efterlønnens
+              deltidstal 2/3 · ✅ 5/10 17:4x `/tidszone`: sydhalvkloden + Nuuk ·
+              ✅ 5/10 15:0x fire rå procenter · ✅ 5/10 14:1x sidebarlens liste i
+              målt trafikrækkefølge · ✅ 4/10 fire review-fund + CEO-køens punkt 0
+              · **CEO-køens punkt 0 er rettet** (Valborg 30. april, svensk
+              påskafton lørdag, fast dansk sankthans, `Europe/Copenhagen` i
+              `toUtcMidnight` — genverificeret 6/10 00:2x med grep). Alt ældre:
+              `docs/plan-arkiv.md`. ✅ CI grøn 5/10 21:26.
+              PR-TJEK: 5/10 21:2x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
               **Gate:** `npm run typecheck && npm run lint && npm test` (CI kører
-              også `next build`). 6/10 00:0x: typecheck 0, lint 0, **4304 tests i
-              269 filer** grønne. `npm test` skriver desuden to kendte
+              også `next build`). 6/10 00:2x: typecheck 0, lint 0, **4305 tests
+              i 269 filer** grønne. `npm test` skriver desuden to kendte
               scanner-rækker («FEJL: 34 …» i `/promille`, «FEJL: 1 …» i
-              `/procent`) der er røde på `master` og ikke berørt her — se ❓.
+              `/procent») der er røde på `master` og ikke berørt her — se ❓.
+              **Målt 6/10 00:2x:** planen havde to identiske STATUS-blokke (6 KB
+               dobbelt). De er foldet sammen, og den ældre er arkiveret.
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -196,8 +144,12 @@ målt trafik — urørt.
 **F6h. [ ] `trending.ts` læser måneden i serverens tidszone** (punkt 4, målt
 5/10 23:1x — *ikke* rettet i F6g, se nedenfor). `getTrendingHrefs()` bruger
 `new Date().getMonth()`, og serveren står i **UTC**, så mellem kl. 00 og 02
-dansk tid den 1. november er UTC stadig oktober: forsiden badgede feriepenge og
-valuta på en novemberdag, og den 1. januar badgede den årsopgørelse. Rettelsen
+dansk tid kan UTC stå i **forrige måned**. ⚠️ *Korrektion 6/10 00:2x:* de to
+eksempler i den tidligere udgave af denne linje var forkerte — 1. november
+ligger i samme kurve som oktober («pension/opsparing/arveafgift», ikke
+«feriepenge og valuta»), og 1. januar ville netop have badget årsopgørelsen,
+som er det *korrekte* svar. De reelle skiftedatoer er **1. april, 1. august,
+1. oktober og 1. januar**, to timer hver. Rettelsen
 er `iDagPaSiden(new Date(), locale)` fra `lokal-dato.ts` (samme regel som
 `dage-til`, `dage-i-aaret` og `alder`) plus et `locale`-argument. ⛔ **Porten
 skal kunne fejle, og det kræver et tidszone-uvældigt krav** — målt 5/10 23:1x:
@@ -274,12 +226,11 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 - **[ ] Kalorieguide pr. portion på `/kalorier`** — 9 af 10 danske træffere under
   «kalorier» er madvarer. ⛔ samme fødevarekilde som kogetider (❓), derfor
   én ❓ dækker begge.
-- **[ ] Landetabellen skriver danske landnavne i den svenske udgave.** Målt
-  6/10 00:0x i renderet markup: `/tidszone` med `locale: "se"` skriver
-  `<td>New Zealand</td>` og «Grekland»/«Turkiet» er oversat, men New Zealand
-  ikke. `TIDSSKILLNADS_LANDE` har `landSe` på Grønland, Grækenland og
-  Tyrkiet og mangler det på New Zealand. *Accept:* hvert land har `landSe`, og
-  en port dømmer da/se hver for sig på de 11 rækker.
+- **[x] Landetabellen skriver danske landnavne i den svenske udgave.** Lukket
+  6/10 00:2x i `ceo/tidszone-svenska-lander`. `landSe` er nu udbudt for alle
+  elleve rækker (New Zealand → «Nya Zealand»), konjunktionen læses af
+  `spoergsprog`, og «Türkiet» (tysk) blev «Turkiet». *Accept:* en port dømmer
+  da/se hver for sig på alle 11 rækker + på den renderede markup i `se`.
 - **[ ] Svensk dækning af manglende kalkulatorer** — beraknare.se har 89
   sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og
   `/boernepenge`. ⛔ Opgave 187, 13/10.
@@ -301,6 +252,17 @@ HTTP-koden. De lukkede noters fulde krav og målinger ligger i
 ⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10 00:1x):
 Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer 1 for
 alt. Noterne her bruger `grep -o`.
+
+**Åben note 6/10 00:2x:** `VERIFICÉR DEPLOY: beraknare.se/tidszone skriver
+«Nya Zealand» i landetabellen, «Turkiet» i landelisten og «… Grekland och
+Spanien följer Sverige» / «… Sydney och Auckland», altså ingen «Türkiet», intet
+`<td …>New Zealand</td>` og intet dansk «og» i markupken
+ceo/tidszone-svenska-lander 6/10 00:2x`. Mål på **indhold**:
+`curl -s https://beraknare.se/tidszone | grep -o 'Türkiet' | wc -l` → **0**,
+`grep -o '>Nya Zealand<' | wc -l` → **1**, `grep -oE ' og ' | wc -l` på
+sidens råe HTML skal være **0**, og `beraknare.se/klockan-i/turkiet` skal have
+«Turkiet» i titel og H1. ⚠️ Mergen er efter 21:30-vinduet, første reelle kør er
+6/10 07:30.
 
 **Åben note 6/10 00:0x:** `VERIFICÉR DEPLOY: landetabellen på /tidszone (og
 bloggen hvad-er-klokken-i-usa-naar-den-er-12-i-danmark) viser Australien 10 frem /

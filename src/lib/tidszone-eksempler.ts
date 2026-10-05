@@ -44,8 +44,18 @@ export interface TidsskillnadEksempel {
   by: string;
   /** Landet på dansk. */
   landDa: string;
-  /** Landet på svensk, når det afviger fra dansk. */
-  landSe?: string;
+  /**
+   * Landet på svensk — **udbydet for hver række**, også når navnet er det
+   * samme på begge sprog.
+   *
+   * Feltet var valgfrit, og da faldt det tilbage på `landDa` ved
+   * visningsstedet, så et nyt land uden en svensk streng automatisk fik den
+   * danske. New Zealand gjorde det: beraknare.se skrev `<td>New Zealand</td>`,
+   * fordi det svenske navn er **Nya Zealand**. Grønland gjorde det samme med
+   * ø i «Grønland» (C155). En type, der tvinger hver række til at svare, kan
+   * ikke glemme det igen.
+   */
+  landSe: string;
   /**
    * Om landet skifter sommertid på **EU's datoer** (sidste søndag i marts til
    * sidste søndag i oktober), så zone og Danmark flytter sig præcis samtidig.
@@ -64,17 +74,17 @@ export const TIDSSKILLNADS_LANDE: readonly TidsskillnadEksempel[] = [
   // foelgerEu: kun lande, der skifter på sidste søndag i marts / oktober.
   // Storbritannien og Grækenland og Spanien og Grønland gør det; USA,
   // Canada, Australien og New Zealand har egen sommertid på andre datoer.
-  { by: "London", landDa: "Storbritannien", foelgerEu: true },
-  { by: "New York", landDa: "USA" },
+  { by: "London", landDa: "Storbritannien", landSe: "Storbritannien", foelgerEu: true },
+  { by: "New York", landDa: "USA", landSe: "USA" },
   { by: "Nuuk", landDa: "Grønland", landSe: "Grönland", foelgerEu: true },
   { by: "Athen", landDa: "Grækenland", landSe: "Grekland", foelgerEu: true },
   { by: "Istanbul", landDa: "Tyrkiet", landSe: "Turkiet" },
-  { by: "Madrid", landDa: "Spanien", foelgerEu: true },
-  { by: "Bangkok", landDa: "Thailand" },
-  { by: "Tokyo", landDa: "Japan" },
-  { by: "Shanghai", landDa: "Kina" },
-  { by: "Sydney", landDa: "Australien" },
-  { by: "Auckland", landDa: "New Zealand" },
+  { by: "Madrid", landDa: "Spanien", landSe: "Spanien", foelgerEu: true },
+  { by: "Bangkok", landDa: "Thailand", landSe: "Thailand" },
+  { by: "Tokyo", landDa: "Japan", landSe: "Japan" },
+  { by: "Shanghai", landDa: "Kina", landSe: "Kina" },
+  { by: "Sydney", landDa: "Australien", landSe: "Australien" },
+  { by: "Auckland", landDa: "New Zealand", landSe: "Nya Zealand" },
 ];
 
 export interface TidsskillnadRaekke {
@@ -180,7 +190,7 @@ export function tidsskillnadRaekker(
     const sommer = forskel(zone, true);
     const fast = sommer === vinter;
     return {
-      land: spoergsprog === "se" ? (land.landSe ?? land.landDa) : land.landDa,
+      land: spoergsprog === "se" ? land.landSe : land.landDa,
       by: land.by,
       vinter,
       sommer: fast ? undefined : sommer,
