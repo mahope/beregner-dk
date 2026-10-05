@@ -9,9 +9,9 @@ import { utcOffsetMinutter, type DstRegel } from "./sommertid";
  * - USA/Canada/Europa/Australien: standardvinter- og sommertidszoner fra
  *   IANA-tidszonebasen (UTC-offset uden DST).
  * - São Paulo har haft fast UTC-3 siden 2019 og bruger ikke sommertid.
- * - Grønland skiftede i marts 2023 fra UTC-4 til UTC-3 som standardtid
- *   (WGT) og har fortsat sommertid (WGST = UTC-2), jf. IANA
- *   America/Nuuk.
+ * - Grønland har fast UTC-2 (WGT/WGST er samme zone, ingen skift mellem
+ *   standard- og sommertid), jf. IANA America/Nuuk. Rækken lå tidligere på
+ *   UTC-3/-2, som gav «08 i Nuuk» i brødteksten, mens kalenderen siger 09.
  * - Island har hele året UTC+0 og bruger ikke sommertid (Atlantic/Reykjavik).
  * - Lissabon er WET (UTC+0) og WEST (UTC+1); Athen og Kreta er EET (UTC+2)
  *   og EEST (UTC+3), jf. IANA Europe/Lisbon og Europe/Athens.
@@ -64,7 +64,7 @@ export const TIDSZONER: readonly TidszoneInfo[] = [
   { by: "London", utcVinter: 0, utcSommer: 1, dst: "eu" },
   { by: "Lissabon", utcVinter: 0, utcSommer: 1, dst: "eu" },
   { by: "Reykjavik", utcVinter: 0 },
-  { by: "Nuuk", utcVinter: -3, utcSommer: -2, dst: "eu" },
+  { by: "Nuuk", utcVinter: -2, utcSommer: -1, dst: "eu" },
   { by: "Athen", bySe: "Aten", utcVinter: 2, utcSommer: 3, dst: "eu" },
   { by: "Heraklion (Kreta)", utcVinter: 2, utcSommer: 3, dst: "eu" },
   { by: "New York", utcVinter: -5, utcSommer: -4, dst: "us" },
@@ -103,6 +103,46 @@ export interface TidszoneRække {
   by: string;
   vinter: string;
   sommer: string;
+}
+
+/**
+ * Den dato, hver sæsonkolonne er regnet på: 15. januar til dansk vintertid
+ * og 15. juli til dansk somertid. Begge ligger midt i sæsonen, så de er
+ * uden for de korte overgangsperioder, hvor byer der skifter på andre datoer
+ * end Danmark står på et tredje offset.
+ */
+const VINTERDATO = new Date(2026, 0, 15);
+const SOMMERDATO = new Date(2026, 6, 15);
+
+/**
+ * Byens **egne** UTC-forskel på den dato, hvor Danmark har hhv. vinter- og
+ * sommertid — altså byens faktiske offset i de to øjeblikke, ikke dens
+ * vinter- og sommerkonstant.
+ *
+ * Det er denne funktion, der gør tabellen rigtig for **sydhalvkloden**.
+ * Australien og New Zealand har deres somertid, når Danmark har vintertid:
+ * Sydney står på UTC+11, når det er 12:00 i Danmark en januar, og på UTC+10,
+ * når det er 12:00 en juli. En tidligere udgave af `tidszoneRækker` valgte
+ * bare `zone.utcVinter` til vinterkolonnen og `zone.utcSommer` til
+ * sommerkolonnen, altså antaget at byen skiftede samtidig med Danmark. Det
+ * gav Sydney **21:00 i begge kolonner** og Auckland **23:00 i begge** — to
+ * forkerte klokkeslæt i brødteksten på en side med 24.829 visninger — mens
+ * de byer, der faktisk skifter sammen med Danmark, ved et lykket fund var
+ * rigtige. Denne funktion læser i stedet offsetten på de to datoer ovenfor,
+ * med byens egen `dst`-regel, så nord og syd regnes på hver sin kalender.
+ */
+function byOffsetVedDanmarkSæson(
+  zone: TidszoneInfo,
+  danskSommerstid: boolean
+): number {
+  return (
+    utcOffsetMinutter(
+      zone.utcVinter * 60,
+      zone.utcSommer === undefined ? undefined : zone.utcSommer * 60,
+      regelForBy(zone),
+      danskSommerstid ? SOMMERDATO : VINTERDATO
+    ) / 60
+  );
 }
 
 /** Om byen selv bruger sommertid. */
@@ -213,9 +253,11 @@ export function tidszoneRækker(
 ): TidszoneRække[] {
   return zoner.map((zone) => ({
     by: spoergsprog === "se" ? (zone.bySe ?? zone.by) : zone.by,
-    vinter: formaterKlokkeslaet(12 - DANSK_UTC_VINTER + zone.utcVinter),
+    vinter: formaterKlokkeslaet(
+      12 - DANSK_UTC_VINTER + byOffsetVedDanmarkSæson(zone, false)
+    ),
     sommer: formaterKlokkeslaet(
-      12 - DANSK_UTC_SOMMER + (zone.utcSommer ?? zone.utcVinter)
+      12 - DANSK_UTC_SOMMER + byOffsetVedDanmarkSæson(zone, true)
     ),
   }));
 }
@@ -237,8 +279,22 @@ export function klokkeslaetVed(
   danskSommerstid: boolean
 ): string {
   const danskUtc = danskSommerstid ? DANSK_UTC_SOMMER : DANSK_UTC_VINTER;
-  const zoneUtc = danskSommerstid ? (zone.utcSommer ?? zone.utcVinter) : zone.utcVinter;
+  const zoneUtc = byOffsetVedDanmarkSæson(zone, danskSommerstid);
   return formaterKlokkeslaet(danskTime - danskUtc + zoneUtc);
+}
+
+/**
+ * Byens klokkeslæt i tabellens **vinterkolonne**, hentet pr. bynavn i
+ * `TIDSZONER`. Det er den, `/tidszone`s indledende brødtekst skal bruge, så
+ * «09 i Nuuk» og «22 i Sydney» er læst fra samme funktion som tabellen under
+ * dem i stedet for at være håndskrevet — de to steder kan så ikke glide fra
+ * hinanden. Kaster på et navn, der ikke findes, så en by, der forsvinder fra
+ * `TIDSZONER`, giver en fejl frem for en stribe med ét færre tal.
+ */
+export function vinterTidIBy(by: string): string {
+  const zone = TIDSZONER.find((z) => z.by === by);
+  if (!zone) throw new Error(`Ukendt by i tidszone-brødteksten: ${by}`);
+  return formaterKlokkeslaet(12 - DANSK_UTC_VINTER + byOffsetVedDanmarkSæson(zone, false));
 }
 
 /** Timer formateret med decimalkomma, så 5,5 ikke skriver "5.5". */

@@ -9,10 +9,31 @@ import {
   tidsforskelBy,
   tidsforskelTekst,
   tidszoneRækker,
+  vinterTidIBy,
 } from "./tidszone-reference";
+
+/**
+ * Samme to dage, som `tidszoneRækker` regner kolonnerne på, men gjort til
+ * UTC-øjeblikke, så `Intl` kan læse dem i byens egen zone. 15. januar kl. 12
+ * i Danmark er 11:00 UTC, og 15. juli kl. 12 er 10:00 UTC (CET → CEST).
+ */
+const VINTERDATO_UTC = new Date("2026-01-15T11:00:00Z");
+const SOMMERDATO_UTC = new Date("2026-07-15T10:00:00Z");
 
 const MINUTTER = (vaerdi: string) =>
   Number(vaerdi.slice(0, 2)) * 60 + Number(vaerdi.slice(3));
+
+/**
+ * Forskellen mellem to klokkeslæt **på døgnet**, ikke på papiret. Auckland
+ * står på 00:00 i vinterkolonnen og 22:00 i sommerkolonnen, altså to timer
+ * tidligere — men 1320 - 0 er 1320, fordi klokkeslættene ikke er hinandens
+ * summering. Uden denne wrapping ville porten forbyde netop det spring, den
+ * skal fange.
+ */
+const MINUTTER_DIFF = (senere: string, tidligere: string) => {
+  const forskel = MINUTTER(senere) - MINUTTER(tidligere);
+  return ((forskel % 1440) + 1440) % 1440;
+};
 
 describe("tidszone-reference", () => {
   test("dansk reference er CET/CEST", () => {
@@ -33,8 +54,79 @@ describe("tidszone-reference", () => {
     expect(find("Mumbai")?.vinter).toBe("16:30");
     expect(find("Shanghai")?.vinter).toBe("19:00");
     expect(find("Tokyo")?.vinter).toBe("20:00");
-    expect(find("Sydney")?.vinter).toBe("21:00");
-    expect(find("Auckland")?.vinter).toBe("23:00");
+    expect(find("Sydney")?.vinter).toBe("22:00");
+    expect(find("Auckland")?.vinter).toBe("00:00");
+  });
+
+  /**
+   * Porten mod den eneste autoritet: IANA-tidszonebasen, som Node læser
+   * gennem `Intl`. Den er ikke en forventning, der er skrevet ud fra hukommelsen
+   * — den er kalenderen. Før rettelsen af `tidszoneRækker` gav den 3 røde:
+   * Nuuk 08:00 (09:00), Sydney 21:00 (22:00) og Auckland 23:00 (00:00).
+   *
+   * Kun byer med **forskellige** vinter- og sommeroffset testes, fordi en by med
+   * fast offset ellers er trivielt korrekt uanset hvilken sæson man vælger.
+   * Byerne er skrevet ud med deres IANA-zone, så porten fejler, hvis nogen
+   * bytterZone, og ikke kun hvis et tal glider.
+   */
+  test("vinterkolonnen er IANA's egen time paa 15. januar", () => {
+    const AFPROEVET: Record<string, string> = {
+      Nuuk: "America/Nuuk",
+      Sydney: "Australia/Sydney",
+      Auckland: "Pacific/Auckland",
+      Athen: "Europe/Athens",
+      Shanghai: "Asia/Shanghai",
+      Tokyo: "Asia/Tokyo",
+    };
+
+    for (const [by, zone] of Object.entries(AFPROEVET)) {
+      const forventet = new Intl.DateTimeFormat("en-GB", {
+        timeZone: zone,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).format(VINTERDATO_UTC);
+      expect(vinterTidIBy(by)).toBe(forventet);
+    }
+  });
+
+  test("sommerkolonnen er IANA's egen time paa 15. juli", () => {
+    const AFPROEVET: Record<string, string> = {
+      Nuuk: "America/Nuuk",
+      Sydney: "Australia/Sydney",
+      Auckland: "Pacific/Auckland",
+      "New York": "America/New_York",
+      London: "Europe/London",
+      Tokyo: "Asia/Tokyo",
+    };
+    const raekker = tidszoneRækker();
+    const find = (by: string) => raekker.find((r) => r.by === by);
+
+    for (const [by, zone] of Object.entries(AFPROEVET)) {
+      const forventet = new Intl.DateTimeFormat("en-GB", {
+        timeZone: zone,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).format(SOMMERDATO_UTC);
+      expect(find(by)?.sommer).toBe(forventet);
+    }
+  });
+
+  test("byer paa sydhalvkloden bytter modsat Danmark, saa de to kolonner ikke er ens", () => {
+    const raekker = tidszoneRækker();
+    const find = (by: string) => raekker.find((r) => r.by === by);
+
+    // Sydney og Auckland har somertid naar Danmark har vintertid, saa deres
+    // tal FALLER fra vinter- til sommerkolonnen. Foer rettelsen stod begge
+    // med samme tal i begge kolonner, fordi koden valgte byens egen
+    // sommerkonstant i sommerkolonnen uden at laese datoen.
+    expect(find("Sydney")?.sommer).toBe("20:00");
+    expect(find("Auckland")?.sommer).toBe("22:00");
+    for (const by of ["Sydney", "Auckland"]) {
+      const r = find(by);
+      expect(MINUTTER_DIFF(r!.sommer, r!.vinter)).toBe(1440 - 120);
+    }
   });
 
   test("alle viste klokkeslaet er gyldige dognstider", () => {
@@ -45,18 +137,34 @@ describe("tidszone-reference", () => {
     }
   });
 
-  test("byer med sommertid foelger Danmark, byer uden ligger en time tidligere om sommeren", () => {
+  test("byer der skifter med Danmark staar ens, byer der skifter modsat bytter to timer", () => {
     for (const zone of TIDSZONER) {
       const [raekke] = tidszoneRækker([zone]);
-      const forskel = MINUTTER(raekke.sommer) - MINUTTER(raekke.vinter);
-      expect(forskel).toBe(brugerSommertid(zone) ? 0 : -60);
+      const forskel = MINUTTER_DIFF(raekke.sommer, raekke.vinter);
+      if (zone.dst === "au") {
+        // Australien og New Zealand har somertid naar Danmark har vintertid,
+        // saa de ligger to tidligere i sommerkolonnen. Rettelsen af
+        // `tidszoneRækker` gjorde denne forskel aflæselig i stedet for at
+        // antage, at alle byer skifter sammen med Danmark.
+        expect(forskel).toBe(1440 - 120);
+      } else if (brugerSommertid(zone)) {
+        // Byer med egen sommertid, der skifter paa Danmarks datoer, flytter
+        // sig sammen med Danmark og viser derfor samme klokkeslaet.
+        expect(forskel).toBe(0);
+      } else {
+        // Byer uden sommertid (Tokyo, Dubai, São Paulo, ...) ligger fast, saa
+        // Danmarks eget skift flytter dem en time.
+        expect(forskel).toBe(1440 - 60);
+      }
     }
 
     const [saoPaulo] = tidszoneRækker([{ by: "São Paulo", utcVinter: -3 }]);
     expect(saoPaulo).toEqual({ by: "São Paulo", vinter: "08:00", sommer: "07:00" });
 
-    const [sydney] = tidszoneRækker([{ by: "Sydney", utcVinter: 10, utcSommer: 11 }]);
-    expect(sydney).toEqual({ by: "Sydney", vinter: "21:00", sommer: "21:00" });
+    const [sydney] = tidszoneRækker([
+      { by: "Sydney", utcVinter: 10, utcSommer: 11, dst: "au" },
+    ]);
+    expect(sydney).toEqual({ by: "Sydney", vinter: "22:00", sommer: "20:00" });
   });
 
   test("dognskifte bryder ikke tabellen", () => {
@@ -68,8 +176,10 @@ describe("tidszone-reference", () => {
     const raekker = tidszoneRækker();
     const find = (by: string) => raekker.find((r) => r.by === by);
 
-    // Gronland: WGT = UTC-3 siden marts 2023, WGST = UTC-2 om sommeren.
-    expect(find("Nuuk")).toEqual({ by: "Nuuk", vinter: "08:00", sommer: "08:00" });
+// Gronland: fast UTC-2 (WGT og WGST er samme zone), jf. IANA America/Nuuk.
+// Rækken la paa UTC-3/-2, hvilket gav "08 i Nuuk" i brodteksten naar
+// kalenderen siger 09.
+expect(find("Nuuk")).toEqual({ by: "Nuuk", vinter: "09:00", sommer: "09:00" });
     // Lissabon: WET = UTC+0, WEST = UTC+1. Island: UTC+0 hele aaret.
     expect(find("Lissabon")).toEqual({ by: "Lissabon", vinter: "11:00", sommer: "11:00" });
     expect(find("Reykjavik")).toEqual({ by: "Reykjavik", vinter: "11:00", sommer: "10:00" });

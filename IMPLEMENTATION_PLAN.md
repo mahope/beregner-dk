@@ -1,69 +1,34 @@
-STATUS: 5/10 16:4x. ✅ 5/10 16:4x: **`/tidszone`s hub-anker læser
-           landetallet i stedet for «fjorten»** (`ceo/tidszone-lande-tal`).
-           Avsnittet «Hvad er klokken i et andet land?» skrev «klokken i
-           fjorten lande» / «klockan i fjorton länder» håndskrevet lige over de
-           lister, porten ovenfor tvinger til *præcis* 14 links. Når det 15.
-           land kommer, står «fjorten» stadig, og linket lover færre lande end
-           siden viser — samme driftrige form som `2839d47` lukkede i
-           `KlokkenIHub`. Tallet er nu `{KLOKKEN_LANDE.length}`, samme
-           talform som hubben bruger. Ny port dømmer begge sprog og forbyder
-           ordformen igen. Målt: 2 røde før rettelsen, 30/30 grønne efter.
-           Gate: typecheck 0, lint 0, **4292 tests i 269 filer** grønne.
-           PR-TJEK: 5/10 16:3x (ingen åbne). Branchen `ceo/tidszone-alle-zoner`
-           var en rest fra en tidligere iteration — den lå på master og er
-           slettet lokalt.
-           ✅ 5/10 15:0x: **fire rå procenter i
-           `BilBeregner.tsx`s danske gren rettet** (`ceo/bil-raa-procenter`).
-           `/bil` serverede «Nye biler: 15-20%», «ældre: 8-12%», «op til 50%»
-           og «op til 20%» — den svenske og norske gren skrev dem hele tiden
-           rigtigt, så kun den danske gren var ramt. De tre tidligere
-           procent-opgaver ramte kun `page.tsx` og blogindlæggene, aldrig
-           komponentens egne copy-objekter. Loftet 206 → **203**, og en ny
-           port dømmer alle tre grene hver for sig, så en ny dansk streng med
-           rå procent er rød. To mutationer → 2 røde, begge gendannet.
-           Gate: typecheck 0, lint 0, **4290 tests i 269 filer** grønne.
-           ✅ 5/10 14:1x: **sidebarlens populære liste følger målt trafik**.
-          (`ceo/sidebar-trafikrækkefølge`). Den var håndskrevet i 2024
-          og holdt otte sider, **ingen af dem blandt sitets mest besøgte**:
-          `/dato` (1.100 besøgende/28d) og `/tidsberegner` (268) stod ikke i
-          den, og sidebarlen ligger på 58 sider — altså tabte hver manglende
-          side ~117 interne links, blandt andet de to sider der ligger på
-          position 5-6 i GSC med 136.986 og 78.615 visninger. Rækkerne er nu
-          skrevet i **målt trafikrækkefølge** (Plausible 2026-10-05) for da og
-          se, som `home-data.ts` allerede var. **Dødt `slice(0, 6)` væk**:
-          listen havde otte pladser og rendereren tog de seks første, så
-          `/procent` og `/moms` (151.008 og 22.464 visninger) stod i listen uden
-          at nogen læser så dem. `/promille` kom med — den er +1.250 % og den
-          hurtigst voksende side, og den manglede også. Porten dømmer hele
-          rækkefølgen i begge sprog: mutation til den gamle liste giver **3 røde**.
-          Gate: typecheck 0, lint 0, **4289 tests i 269 filer** grønne.
-          ✅ 5/10 13:1x: de to review-fund fra 4/10 (klokken-hubbens «tolv
-          lande» over 14, `/dato`s «helligdager»). ✅ 4/10: promille på
-          forsiden, Norge+Tyskland, fire review-fund, `/dato`-titel,
-          brændstoftabel, `/idealvaegt`, lånebeløbstabel, folkepensionsalder.
-          Alt ældre: `docs/plan-arkiv.md`.
-          ✅ **CEO-køens punkt 0 er rettet — målt i koden 5/10 14:0x, ingen
-          kodeændring nødvendig.** Alle otte linjer er i orden: valborg
-          `{month: 4, day: 30}` (`dage-til.ts:1267`), svensk påskafton
-          `offsetDays: -1` (`:1013`), dansk sankthans fast 23./24. juni (`:818`
-          og `:883`), påskeaften-FAQ svarer «De er to forskellige dage» (`:1030`),
-          `/husleje` skriver lejeloven § 5 + nettoprisindeks og siger at nævnet
-          **ikke** fastsætter en sats pr. område (`page-data.ts:2179`),
-          `toUtcMidnight` læser `Europe/Copenhagen` (`dage-til.ts:1545`),
-          svensk promille-FAQ genereres fra `PROMILLEGRANSE.se` (`:3381`), og
-          `dato-eksempler.ts:104` har `maneder: 12` med begrundelsen ved siden.
-          1. advent siger 27. november–3. december (`:1343`).
-✅ 5/10 15:0x: de fire rå procenter i `BilBeregner.tsx`'s danske
-           gren («15-20%», «8-12%», «op til 50%», «op til 20%») — kun den
-           danske gren, den svenske og norske havde dem rigtigt. Loftet 206 →
-           203, ny port dømmer alle tre grene hver for sig.
-          PR-TJEK: 4/10 04:1x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire fuldt
-          landede remote branches kan ikke slettes fra maskinen (lokal
-          tilladelsesregel nægter `git push origin --delete`). `auto/union-night`
-          har unikt arbejde i tre dokumenter — må ikke slettes, se ❓.
-          Gate: `npm run typecheck && npm run lint && npm test` (CI kører også
-          `next build`).
-
+STATUS: 5/10 17:4x. ✅ 5/10 17:4x: **`/tidszone`s klokkeslæt for
+           sydhalvkloden og Grønland rettet** (`ceo/tidszone-sydhalvklodet`).
+           `tidszoneRækker` valgte byens *egen* `utcVinter`/`utcSommer` til
+           kolonnerne, altså antog at byen skiftede samtidig med Danmark. Det
+           holder for nordlige byer, men Sydney og Auckland har somertid, når
+           Danmark har vintertid, så tabellen sagde **21:00 i begge kolonner**
+           (rigtigt: 22/20) og **23:00 i begge** (rigtigt: 00/22). Nuuk lå på
+           UTC-3/-2, mens IANA siger fast UTC-2, så siden sagde «08 i Nuuk»,
+           «4 timer bagefter» og værktøjet regnede 6 timer i forvejet. Nu læses
+           hver bys offset på 15. januar og 15. juli med byens egen `dst`-regel
+           (`byOffsetVedDanmarkSæson`), brødtekstens to tal læses fra samme
+           funktion (`vinterTidIBy`), og porten dømmer mod **IANA via `Intl`**
+           i stedet for tal skrevet i testen. 3 mutationer (gammel
+           kolonneformel, Nuuk i begge lag, Nuuk i værktøjet) gav 3 røde hver.
+           Gate: typecheck 0, lint 0, **4295 tests i 269 filer** grønne.
+           MÅL: `/tidszone` baseline 24.829 GSC-visninger/28d, 0,4 % CTR,
+           pos 7,7 (5/10) — faktiske tal kan ikke flyttes, kun rigtigheden.
+           ✅ 5/10 16:4x `/tidszone`-hub læser `KLOKKEN_LANDE.length` ·
+           ✅ 5/10 15:0x fire rå procenter i `BilBeregner.tsx` (206→203) ·
+           ✅ 5/10 14:1x sidebarlens liste i målt trafikrækkefølge, intet dødt
+           slice · ✅ 5/10 13:1x to review-fund fra 4/10 · ✅ 4/10: promille på
+           forsiden, Norge+Tyskland, fire review-fund, `/dato`-titel,
+           brændstoftabel, `/idealvaegt`, lånebeløb, folkepensionsalder.
+           ✅ **CEO-køens punkt 0 er rettet** (målt i koden 5/10 14:0x, alle otte
+           linjer OK). Alt ældre: `docs/plan-arkiv.md`.
+           PR-TJEK: 5/10 16:3x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire fuldt
+           landede remote branches kan ikke slettes fra maskinen (lokale
+           tilladelsesregler nægter `git push origin --delete`).
+           `auto/union-night` har unikt arbejde i tre dokumenter — se ❓.
+           Gate: `npm run typecheck && npm run lint && npm test` (CI kører også
+           `next build`).
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -120,6 +85,10 @@ havde rå procenter. Loftet 206 → **203**.
 5/10 16:4x. «fjorten»/«fjorton» var håndskrevet over en liste porten tvinger til
 at have præcis 14 links i. Tallet afledes nu, så det 15. land ikke gør
 ankeret til en løgn.
+
+**F5e. [x] `/tidszone`: sydhalvkloden og Nuuk rettet** — rettet 5/10 17:4x.
+Sydney/Auckland fik samme tal i begge kolonner (skifter modsat Danmark), Nuuk
+lå et timepavsagn for lavt i to lag. Porten dømmer nu mod IANA.
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
@@ -198,6 +167,19 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
   5/10 17:30. **De fjorten fra 4/10–3/10 er fejet i ét kørt script 5/10 14:0x
   og er lukket** — målt på indhold med `curl`, ikke på HTTP-koden. Målte
   resultater, de fire der fejlede:
+
+**Åben note 5/10 17:4x:** `VERIFICÉR DEPLOY: /tidszone og /tidszone (se)
+skriver «09 i Nuuk» og «22 i Sydney», tabellen har Sydney 22:00/20:00 og
+Auckland 00:00/22:00, Grønland er «3 timer bagefter» ceo/tidszone-sydhalvklodet
+5/10 17:4x`. Mål på indhold: `curl -s https://minberegner.dk/tidszone` skal
+ramme `09:00 i Nuuk` 1, `22:00 i Sydney` 1, `Sydney</td><td...>22:00` 1 og
+`Grønland</td>` efterfulgt af `3 timer bagefter` 1 — og **0** matches på
+`08 i Nuuk`, `21 i Sydney`, `4 timer bagefter`. Samme tre tal på
+`https://beraknare.se/tidszone`: `09:00 i Nuuk`, `22:00 i Sydney`,
+`Sydney</td><td...>22:00` og `Grönland</td>` efterfulgt af `3 timmar efter`
+(svensk retning er «efter», ikke «bagefter») — og **0** matches på
+`08 i Nuuk`, `21 i Sydney`, `4 timmar efter`. Skal verificeres efter
+5/10 17:30.
 
 **Åben note 5/10 16:4x:** `VERIFICÉR DEPLOY: /tidszone skriver «klokken i 14
   lande» og «klockan i 14 länder» i hub-ankeret, 0× ordformen «fjorten»/

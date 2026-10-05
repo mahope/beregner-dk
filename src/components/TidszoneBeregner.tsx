@@ -78,7 +78,7 @@ const tidszoner: Tidszone[] = [
   { id: "germany", navn: "Tyskland (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "Berlin" },
   { id: "france", navn: "Frankrig (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "Paris" },
   { id: "greece", navn: "Grækenland (EET/EEST)", navnSe: "Grekland (EET/EEST)", offset: 120, offsetSommer: 180, dst: "eu", by: "Athen", bySe: "Aten" },
-  { id: "greenland", navn: "Grønland (WGT/WGST)", navnSe: "Grönland (WGT/WGST)", offset: -180, offsetSommer: -120, dst: "eu", by: "Nuuk" },
+  { id: "greenland", navn: "Grønland (WGT/WGST)", navnSe: "Grönland (WGT/WGST)", offset: -120, offsetSommer: -60, dst: "eu", by: "Nuuk" },
   { id: "thailand", navn: "Thailand (ICT)", offset: 420, dst: "ingen", by: "Bangkok" },
   { id: "singapore", navn: "Singapore (SGT)", offset: 480, dst: "ingen", by: "Singapore" },
   { id: "south_africa", navn: "Sydafrika (SAST)", offset: 120, dst: "ingen", by: "Johannesburg" },

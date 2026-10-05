@@ -13,6 +13,7 @@ import {
   tidsforskelsRækker,
   tidsforskelBy,
   tidsforskelTekst,
+  vinterTidIBy,
 } from "@/lib/tidszone-reference";
 import { usaStatAntal, usaStatRaekker } from "@/lib/tidszone-usa-stater";
 import {
@@ -133,10 +134,15 @@ export default async function TidszonePage() {
           <p className="mb-4">
             Klokken 12 i Danmark er <strong>06 i New York</strong>, 05 i Chicago og{" "}
             <strong>03 i Los Angeles</strong>. Videre ud i verden er det 11 i London, 13 i Athen,
-            08 i Nuuk, 19 i Shanghai, 20 i Tokyo og 21 i Sydney. Forklaringen er tidsforskellen:
-            Danmark ligger på CET (UTC+1) om vinteren og CEST (UTC+2) om sommeren. Tallene ovenfor
-            er vinterværdierne, som passerer i kolonnen til venstre; byer uden sommertid, fx Tokyo,
-            ligger en time tidligere, når Danmark har somertid.
+            {" "}
+            {vinterTidIBy("Nuuk")} i Nuuk, 19 i Shanghai, 20 i Tokyo og{" "}
+            {vinterTidIBy("Sydney")} i Sydney. Forklaringen er tidsforskellen: Danmark ligger på
+            CET (UTC+1) om vinteren og CEST (UTC+2) om sommeren. Tallene ovenfor er
+            vinterværdierne, som passerer i kolonnen til venstre; byer uden sommertid, fx Tokyo,
+            ligger en time tidligere, når Danmark har somertid. Byer på{" "}
+            <strong>sydhalvkloden</strong> har deres somertid, når Danmark har vintertid, så
+            Sydney står på 22 om vinteren og 20 om sommeren — de byers tal bytter altså plads
+            mellem kolonnerne.
           </p>
           <div className="overflow-x-auto">
             <table>
@@ -271,10 +277,15 @@ export default async function TidszonePage() {
           <p className="mb-4">
             Klockan 12 i Sverige är <strong>06 i New York</strong>, 05 i Chicago och{" "}
             <strong>03 i Los Angeles</strong>. Vidare ut i världen är det 11 i London, 13 i Aten,
-            08 i Nuuk, 19 i Shanghai, 20 i Tokyo och 21 i Sydney. Förklaringen är tidsskillnaden:
-            Sverige ligger på CET (UTC+1) på vintern och CEST (UTC+2) på sommaren. Siffrorna ovan är
+            {" "}
+            {vinterTidIBy("Nuuk")} i Nuuk, 19 i Shanghai, 20 i Tokyo och{" "}
+            {vinterTidIBy("Sydney")} i Sydney. Förklaringen är tidsskillnaden: Sverige ligger på
+            CET (UTC+1) på vintern och CEST (UTC+2) på sommaren. Siffrorna ovan är
             vintervärdena, som passar i vänsterkolumnen; städer utan sommartid, till exempel Tokyo,
-            ligger en timme tidigare när Sverige har sommartid.
+            ligger en timme tidigare när Sverige har sommartid. Städer på{" "}
+            <strong>södhalvkloten</strong> har sin sommartid när Sverige har vintertid, så
+            Sydney står på 22 på vintern och 20 på sommaren — deras siffror byter alltså plats
+            mellan kolumnerna.
           </p>
           <div className="overflow-x-auto">
             <table>

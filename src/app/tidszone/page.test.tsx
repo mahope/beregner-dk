@@ -158,7 +158,7 @@ describe("tidszone svar-først-tabeller for lande og Excel", () => {
     // "tidsforskel grønland" er nr. 1 og "tidszoner grønland" nr. 13 i
     // dansk autocomplete, og Nuuk la allerede i bytabellen.
     expect(html).toContain("<td class=\"py-2 pr-4\">Grønland</td>");
-    expect(html).toContain("<td class=\"py-2 pr-4\">4 timer bagefter</td>");
+    expect(html).toContain("<td class=\"py-2 pr-4\">3 timer bagefter</td>");
     // Nuuk skifter paa EU's datoer, saa der er ingen særskilt sommervaerdi.
     expect(html).toContain("Samme som vintertid");
     // Canada er bevidst udeladt fra *landetabellen* — Toronto skifter paa

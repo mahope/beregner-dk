@@ -29025,3 +29025,51 @@ samme er en slået fra i den svenske.
 Verificeret: mutation «op til 20 %» → «op til 20%» giver 2 rød, mutation
 «15-20 %» → «15-20%» giver 2 rød; begge gendannet. `tsc --noEmit` exit 0,
 Biome 770 filer uden fund, **4290 tests i 269 filer** grønne.
+
+## 5/10 17:4x — `/tidszone`: sydhalvkloden og Nuuk (ceo/tidszone-sydhalvklodet)
+
+**Fund.** `tidszoneRækker` (`src/lib/tidszone-reference.ts`) byggede sine to
+kolonner som `12 - DANSK_UTC_VINTER + zone.utcVinter` og
+`12 - DANSK_UTC_SOMMER + zone.utcSommer`, altså valgte den byens **egen**
+vinter- og sommerkonstant. Det er samme antagelse som «byen skifter
+samtidig med Danmark», som kun holder for byer på nordhalvkloden. Målt mod
+IANA (`Intl`) 15. januar og 15. juli 2026:
+
+| By | kode før | rigtigt | fejl |
+|---|---|---|---|
+| Sydney | 21:00 / 21:00 | **22:00 / 20:00** | begge kolonner |
+| Auckland | 23:00 / 23:00 | **00:00 / 22:00** | begge kolonner |
+| Nuuk | 08:00 / 08:00 | **09:00 / 09:00** | offset i data |
+
+Nuuk lå på `utcVinter: -3, utcSommer: -2` i **to** lag — `TIDSZONER` og
+`TidszoneBeregner.tsx`'s `greenland`-zone. Det gav tre forkerte læser-fakta
+på samme side: «08 i Nuuk» i brødteksten, «4 timer bagefter» i landetabellen
+og 6 timers forskel i selve værktøjet.
+
+**Rettelse.** `byOffsetVedDanmarkSæson(zone, danskSommerstid)` læser byens
+offset på 15. januar / 15. juli med byens egen `dst`-regel gennem
+`utcOffsetMinutter`. Både `tidszoneRækker` og `klokkeslaetVed` bruger den, så
+de tre øvrige værktøjer, der kalder `klokkeslaetVed`
+(`tidszone-usa-stater`, `tidszone-usa-timer`, `tidszone-blog-lander`), fik
+sydhalvkloden rettet med. Nuuk er `-120/-60` i begge lag.
+
+Brødtekstens to tal læses nu fra `vinterTidIBy("Nuuk")` / `vinterTidIBy("Sydney")`
+— samme funktion som tabellen under dem — i stedet for at være håndskrevet.
+
+**Port.** De tre gamle forventninger låser fejlen fast (de krævede 21:00,
+23:00 og 08:00). Erstattet af to tests, der dømmer mod **IANA via `Intl`** på de
+to datoer plus én på døgnskiftet (`MINUTTER_DIFF` wrapping, fordi Auckland er
+00:00 mod 22:00). Den gamle blanket-port «byer med sommertid følger Danmark»
+er delt i tre tilfælde efter `zone.dst`.
+
+**Målt.** 3 mutationer gav 3 røde hver: (1) gammel kolonneformel →
+`sommerkolonnen` + `sydhalvkloden` + `skifter modsat`; (2) Nuuk til −3/−2 i
+`TIDSZONER` → `vinterkolonnen` + `sommerkolonnen` + `landetabellen`;
+(3) Nuuk til −180/−120 i `TidszoneBeregner.tsx` → `offsettene er de samme`.
+Gate: typecheck 0, lint 0, 4295 tests i 269 filer grønne.
+
+Selv fundet i egen diff: `**sydhalvkloden**` i JSX ville renderet bogstaveligt
+(punkt 13) — rettet til `<strong>` i begge sprog.
+
+**Ikke kørt:** `next build`, ingen browser ved 360/1280 (repoet har intet
+Playwright), ingen curl mod de to domæner før deploy-vinduet.

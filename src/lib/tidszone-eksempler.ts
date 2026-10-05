@@ -26,9 +26,10 @@ import {
  * Grønland står her, fordi dansk autocomplete har det øverst i begge
  * klynger ("tidsforskel grønland" er nr. 1, "tidszoner grønland" nr. 13), og
  * fordi Nuuk allerede lå i TIDSZONER — altså en kendt zone, der bare var
- * udeladt fra landetabellen. Forskjellen er 4 timer bagud hele året, fordi
- * America/Nuuk skiftede til EU's skifte datoer i 2023 (WGT/WGST), så zone og
- * Danmark flytter sig samtidig.
+ * udeladt fra landetabellen. Forskjellen er 3 timer bagud hele året: Nuuk har
+ * fast UTC-2 (WGT) og UTC-1 (WGST) om sommeren, jf. IANA America/Nuuk, så
+ * zone og Danmark flytter sig samtidig. Rækken lå på UTC-3/-2, hvilket gav
+ * "4 timer bagefter" og "08 i Nuuk" på sitet — et helt timepavsagn.
  *
  * Canada er bevidst *ikke* opført, selv om "tidszoner canada" ligger i
  * autocomplete. Toronto skifter sommertid på nordamerikanske datoer, ikke

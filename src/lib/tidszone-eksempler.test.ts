@@ -71,20 +71,24 @@ describe("tidszone-eksempler", () => {
     }
   });
 
-  test("Grønland er 4 timer bagud hele året, fordi Nuuk følger EU's skiftedatoer", () => {
+  test("Grønland er 3 timer bagud hele året, fordi Nuuk følger EU's skiftedatoer", () => {
     const groenland = tidsskillnadRaekker("da").find((r) => r.land === "Grønland");
 
     expect(groenland).toBeDefined();
     expect(groenland?.by).toBe("Nuuk");
-    expect(groenland?.vinter).toBe(-4);
-    expect(groenland?.tekstVinter).toBe("4 timer bagefter");
+    // Nuuk har fast UTC-2 (WGT) og UTC-1 (WGST) om sommeren, så den ligger
+    // 3 timer bagud Danmarks UTC+1 både om vinteren og om sommeren. Rækken
+    // lå på UTC-3/-2, hvilket gjorde siden sige "4 timer bagefter" og
+    // "08 i Nuuk" — et timepavsagn i brødteksten, kalenderen ikke deler.
+    expect(groenland?.vinter).toBe(-3);
+    expect(groenland?.tekstVinter).toBe("3 timer bagefter");
     // America/Nuuk bruger WGT/WGST på EU's datoer, så zone og Danmark flytter
     // sig samtidig, og forskellen er den samme om sommeren.
     expect(groenland?.sommer).toBeUndefined();
     // Grønland står i tabellen, fordi dansk autocomplete har det som nr. 1
     // under "tidsforskel" og nr. 13 under "tidszoner".
-    expect(zoneFor(groenland!.by).utcVinter).toBe(-3);
-    expect(zoneFor(groenland!.by).utcSommer).toBe(-2);
+    expect(zoneFor(groenland!.by).utcVinter).toBe(-2);
+    expect(zoneFor(groenland!.by).utcSommer).toBe(-1);
   });
 
   test("Canada er bevidst ikke i landetabellen: Toronto skifter ikke på EU's datoer", () => {
