@@ -49,7 +49,7 @@ export default async function Home() {
   const domainConfig = await getCurrentDomainConfig();
   const data = getHomePageData(locale);
   const beregnere = getHomeCalculators(locale);
-  const trendingHrefs = getTrendingHrefs();
+  const trendingHrefs = getTrendingHrefs(new Date(), locale);
 
   const popularBeregnere = beregnere.filter((b) => b.popular);
   const oevrigeBeregnere = beregnere.filter((b) => !b.popular);

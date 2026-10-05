@@ -154,7 +154,7 @@ describe("forsidens genvej til beregnerne", () => {
       vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
       const html = renderToStaticMarkup(await HomePage());
       const data = getHomePageData(locale);
-      const badgede = getTrendingHrefs().filter((href) => html.includes(`href="${href}"`));
+      const badgede = getTrendingHrefs(new Date(), locale).filter((href) => html.includes(`href="${href}"`));
       const synlige = html.split(`>${data.sections.trending}<`).length - 1;
 
       expect(synlige, `${locale}: antal badges på forsiden`).toBe(badgede.length);
@@ -171,7 +171,7 @@ describe("forsidens genvej til beregnerne", () => {
       );
 
       expect([...linkMedBadge].sort(), `${locale}: hvilke links der bærer badgen`).toEqual(
-        getTrendingHrefs().filter((href) => html.includes(`href="${href}"`)).sort()
+        getTrendingHrefs(new Date(), locale).filter((href) => html.includes(`href="${href}"`)).sort()
       );
     }
   });

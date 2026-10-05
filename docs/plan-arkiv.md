@@ -29401,3 +29401,42 @@ STATUS: 6/10 00:0x. ✅ 6/10 00:0x: **landetabellen på `/tidszone` løj om
               scanner-rækker («FEJL: 34 …» i `/promille`, «FEJL: 1 …» i
               `/procent`) der er røde på `master` og ikke berørt her — se ❓.
 ```
+
+---
+
+## 6/10 01:2x — F6h + /datos alias-link (arkiveret fra IMPLEMENTATION_PLAN.md)
+
+**F6h. `trending.ts` læser måneden i serverens tidszone** (punkt 4, målt 5/10 23:1x).
+`getTrendingHrefs()` bruger `new Date().getMonth()`, og serveren står i **UTC**, så
+mellem kl. 00 og 02 dansk tid kan UTC stå i **forrige måned**. ⚠️ *Korrektion 6/10 00:2x:*
+de to eksempler i den tidligere udgave af denne opgave var forkerte — 1. november ligger i
+samme kurve som oktober («pension/opsparing/arveafgift», ikke «feriepenge og valuta»), og
+1. januar ville netop have badget årsopgørelsen, som er det *korrekte* svar. De reelle
+skiftedatoer er **1. april, 1. august, 1. oktober og 1. januar**, to timer hver.
+
+*Porten kunne ikke fejle, og det låser fejlen (målt 5/10 23:1x).* En test der satte uret til
+`2026-10-31T22:30Z` og forventede november gav **0 rød** på mutationen til `getMonth()`,
+fordi testprocessen står i CEST, så `getMonth()` *accidentelt* svarede rigtigt.
+`process.env.TZ = "UTC"` øverst i filen rettede heller ikke dengang (målt) — **men** det
+skyldes at testen brugte `new Date(2026, month, 15)`, altså altid den 15. i måneden,
+hvor lokal og UTC aldrig kan komme i uoverensstemmelse. Med **grænsestidspunkter**
+(`2025-12-31T23:30Z`, `2026-03-31T22:30Z`, `2026-07-31T22:30Z`, `2026-09-30T22:30Z` — de
+to timer hvor UTC står i den forrige måned) og `process.env.TZ = "UTC"` øverst i filen er
+mutationen **3 rød**. Målt 6/10 01:1x i Node på darwin: `process.env.TZ = "UTC"` ændrer
+virkelig `Date.getMonth()` efterfølgende (før: 0, efter: 11), så porten er ikke afhængig
+af maskinens tidszone længere.
+
+Rettelsen: `getTrendingHrefs(today: Date, locale: Locale)` læser `iDagPaSiden(today,
+locale)` fra `lokal-dato.ts` (samme regel som dage-til, dage-i-aaret og alder), og
+kødsummer måneden ud af ISO-strengen. `src/app/page.tsx` kalder `getTrendingHrefs(new
+Date(), locale)`; `forside.test.tsx`' to kald er opdateret. Nye porte: alle tolv måneder
+dømt mod `Intl.DateTimeFormat(..., { timeZone: "Europe/Copenhagen" })` (uafhængig
+reference), de fire skiftedage med «præcis 00:00 dansk tid», nytårsnatten
+22:30Z/23:30Z, de tre sommerlige skiftedage, og da/se lige (Danmark og Sverige deler
+CET/CEST, så porten siger det eksplicit). ⛔ *Hvilke* beregnere der badges er en måneds-
+tabel, ikke målt trafik — urørt.
+
+**Samme commit:** `/dato` linkede til `/dage-til/nytaarsaften`, som siden F6c (5/10 22:1x)
+er et alias med 301, altså et ekstra hop fra sitets næststørste side. `src/app/dato/
+page.tsx` peger nu på `/dage-til/31-december`, og `dato/page.test.tsx` fik et
+`not.toContain` på den gamle href ved siden af det nye `toContain`.

@@ -112,7 +112,8 @@ describe("dato page — dage tilbage i året", () => {
     expect(html).toContain("<strong>95 dage tilbage af 2026</strong>");
     expect(html).toContain("13 uger og 4 dage");
     expect(html).toContain('href="/dage-til/1-december"');
-    expect(html).toContain('href="/dage-til/nytaarsaften"');
+    expect(html).toContain('href="/dage-til/31-december"');
+    expect(html).not.toContain('href="/dage-til/nytaarsaften"');
   });
 
   test("se svarer på 'dagar kvar av 2026' med dagens tal", async () => {

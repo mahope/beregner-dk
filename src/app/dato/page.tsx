@@ -220,7 +220,7 @@ export default async function DatoPage() {
         <p>
           Er du mere interesseret i datoen end i årstiden, så tæller{" "}
           <a href="/dage-til/1-december">dagene til 1. december</a> og{" "}
-          <a href="/dage-til/nytaarsaften">nytårsaften</a> — de er forskellige
+          <a href="/dage-til/31-december">nytårsaften</a> — de er forskellige
           spørgsmål med forskellige tal.
         </p>
 

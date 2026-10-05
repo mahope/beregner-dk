@@ -1,4 +1,18 @@
-STATUS: 6/10 00:4x. ✅ 6/10 00:4x: **Rumfang manglede som beregner.** `/kvadratmeter`
+STATUS: 6/10 01:2x. ✅ 6/10 01:2x: **Forsidens sæsonbadge læste serverens
+              UTC-måned.** `getTrendingHrefs()` tog `new Date().getMonth()`, og
+              serveren står i UTC — så 1. januar, 1. april, 1. august og 1.
+              oktober bar de forrige sæsons beregnere i de to første timer.
+              Nu er den `getTrendingHrefs(today, locale)` og læser
+              `iDagPaSiden` fra `lokal-dato.ts`, samme regel som dage-til, alder
+              og dage-i-aaret. *Portene kan fejle:* testfilen sætter
+              `process.env.TZ = "UTC"`, fordi en dansk maskines kalendermåned *er*
+              site-tidszonens — det var grunden til at F6h's gamle port aldrig
+              kunne se fejlen, selv med et flyttet ur. Mutation tilbage til
+              `today.getMonth()` gav **3 røde**. Samme commit: `/dato` (1.100
+              besøgende) linkede til `/dage-til/nytaarsaften`, som siden 5/10 er
+              et 301-alias — den peger på `/dage-til/31-december`, og porten
+              låser den gamle href fra før fast med `not.toContain`.
+              ✅ 6/10 00:4x: **Rumfang manglede som beregner.** `/kvadratmeter`
               regner kun areal (m²), og dansk autocomplete målt 00:2x har 10 af
               10 træffere under «hvordan beregner man rumfang», som er en figur.
               `/rumfang` regner kasse, cylinder, kugle, kegle og pyramide i m³ og
@@ -39,9 +53,9 @@ STATUS: 6/10 00:4x. ✅ 6/10 00:4x: **Rumfang manglede som beregner.** `/kvadrat
               påskafton lørdag, fast dansk sankthans, `Europe/Copenhagen` i
               `toUtcMidnight` — genverificeret 6/10 00:2x med grep). Alt ældre:
               `docs/plan-arkiv.md`. ✅ CI grøn 5/10 21:26.
-              PR-TJEK: 5/10 21:2x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
+              PR-TJEK: 6/10 01:0x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
               **Gate:** `npm run typecheck && npm run lint && npm run test`
-              (CI kører også `next build`). 6/10 00:4x: typecheck 0, lint 0
+              (CI kører også `next build`). 6/10 01:2x: typecheck 0, lint 0
               (775 filer), **4345 tests i 271 filer** grønne. `npm test` skriver desuden to kendte
               scanner-rækker («FEJL: 34 …» i `/promille`, «FEJL: 1 …» i
               `/procent») der er røde på `master` og ikke berørt her — se ❓.
@@ -151,24 +165,10 @@ beregner er aktuel lige nu (punkt 11), og den stod på et sprog sitet ellers ikk
 taler. ⛔ *Hvilke* beregnere der badges er en måneds-tabel i `trending.ts`, ikke
 målt trafik — urørt.
 
-**F6h. [ ] `trending.ts` læser måneden i serverens tidszone** (punkt 4, målt
-5/10 23:1x — *ikke* rettet i F6g, se nedenfor). `getTrendingHrefs()` bruger
-`new Date().getMonth()`, og serveren står i **UTC**, så mellem kl. 00 og 02
-dansk tid kan UTC stå i **forrige måned**. ⚠️ *Korrektion 6/10 00:2x:* de to
-eksempler i den tidligere udgave af denne linje var forkerte — 1. november
-ligger i samme kurve som oktober («pension/opsparing/arveafgift», ikke
-«feriepenge og valuta»), og 1. januar ville netop have badget årsopgørelsen,
-som er det *korrekte* svar. De reelle skiftedatoer er **1. april, 1. august,
-1. oktober og 1. januar**, to timer hver. Rettelsen
-er `iDagPaSiden(new Date(), locale)` fra `lokal-dato.ts` (samme regel som
-`dage-til`, `dage-i-aaret` og `alder`) plus et `locale`-argument. ⛔ **Porten
-skal kunne fejle, og det kræver et tidszone-uvældigt krav** — målt 5/10 23:1x:
-en test der sætter uret til `2026-10-31T22:30Z` og forventer november gav **0
-rød** på mutationen til `getMonth()`, fordi testprocessen står i CEST, så
-`getMonth()` *accidentelt* svarede rigtigt. `process.env.TZ = "UTC"` øverst i
-filen rettede heller ikke (målt begge dele). Anbefalet løsning: giv
-`getTrendingHrefs` et `today`-parameter (ren funktion, ingen ur), og døm på
-**Copenhagen-datoen vs. UTC-datoen** eksplicit i stedet for på kalendermåneden.
+**F6h. [x] `trending.ts` læser måneden i site-tidszonen** — rettet 6/10 01:2x
+i `ceo/trending-lokale-datoer`. Skiftedagene er 1. januar, 1. april, 1. august og
+1. oktober kl. 00:00 dansk tid = 23:00Z i CET og 22:00Z i CEST. Fuld tekst og
+måling i `docs/plan-arkiv.md`.
 
 **F6d. [ ] Samme logik for de øvrige daterede nedtællinger.** Kun december har
 en URL med et datotal i dag, og kun fordi GSC viste den. Øvrige kandidater må
@@ -276,6 +276,17 @@ HTTP-koden. De lukkede noters fulde krav og målinger ligger i
 ⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10 00:1x):
 Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer 1 for
 alt. Noterne her bruger `grep -o`.
+
+**Åben note 6/10 01:2x:** `VERIFICÉR DEPLOY: forsidens sæsonbadge sidder i oktober på
+præcis `/pension`, `/opsparing` og `/arveafgift` (kalendermåneden i
+`Europe/Copenhagen`, ikke UTC), og `/dato` linker til `/dage-til/31-december` uden
+301-hop ceo/trending-lokale-datoer 6/10 01:2x`. Mål på indhold: `curl -s
+https://minberegner.dk/dato | grep -o 'href="/dage-til/31-december"' | wc -l` → **1**,
+`grep -o 'nytaarsaften' | wc -l` → **0**, og på forsiden `curl -s https://minberegner.dk
+| grep -o '>Populær nu<' | wc -l` → **3** med de tre hrefs ovenfor bærende badgen (læs
+`src/lib/trending.ts` indtil det kan hentes headless). Samme greb på beraknare.se med
+«Populär nu» og `/dagar-till/31-december`. ⚠️ Mergen er efter 21:30-vinduet, første
+reelle kør er 6/10 07:30.
 
 **Åben note 6/10 00:2x:** `VERIFICÉR DEPLOY: beraknare.se/tidszone skriver
 «Nya Zealand» i landetabellen, «Turkiet» i landelisten og «… Grekland och
