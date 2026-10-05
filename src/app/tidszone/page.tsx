@@ -488,7 +488,7 @@ export default async function TidszonePage() {
           alle på én side, står de på{" "}
           {klokkenHubDa ? (
             <Link href={klokkenHubDa} className="underline">
-              klokken i fjorten lande
+              klokken i {KLOKKEN_LANDE.length} lande
             </Link>
           ) : null}{" "}
           med tidsforskellen til Danmark.
@@ -624,7 +624,7 @@ export default async function TidszonePage() {
           står de på{" "}
           {klokkenHubSe ? (
             <Link href={klokkenHubSe} className="underline">
-              klockan i fjorton länder
+              klockan i {KLOKKEN_LANDE.length} länder
             </Link>
           ) : null}{" "}
           med tidsskillnaden till Sverige.

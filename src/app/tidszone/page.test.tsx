@@ -597,6 +597,33 @@ describe("tidszone giver hver landside en indgang", () => {
     }
   );
 
+  // 5/10: avsnittet skrev «klokken i fjorten lande» / «klockan i fjorton
+  // länder» i haanden lige over de lister, porten ovenfor tvinger til at have
+  // præcis slugs.length links. Ordet «fjorten» er derfor en fri tekststreng over
+  // et tal, der kan glide fra hinanden: naar det 15. land kommer, staar der
+  // stadig «fjorten» og linket lover faerre lande end det viser — samme
+  // driftrige form som 2839d47 lukkede i KlokkenIHub. Tallet loeses fra
+  // slugs.length, ikke fra KLOKKEN_LANDE, saa porten stadig kan se en fejl i
+  // modulet — samme begrundelse som ovenfor.
+  test.each([
+    { locale: "da" as const, slugs: SLUGS_DA, anker: "klokken i", boe: "lande" },
+    { locale: "se" as const, slugs: SLUGS_SE, anker: "klockan i", boe: "länder" },
+  ])(
+    "$locale lover saa mange lande i hub-ankeret som siden linker til",
+    async ({ locale, slugs, anker, boe }) => {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await TidszonePage());
+
+      expect(html).toContain(`>${anker} ${slugs.length} ${boe}</a>`);
+      // Talformen er hele pointen, saa ordformen skal vaere væk — ellers kan
+      // den glide tilbage ind, naar et land tilfojes.
+      expect(html).not.toMatch(/klokken i [a-zæøå]+ lande<\/a>/);
+      expect(html).not.toMatch(/klockan i [a-zäöå]+ länder<\/a>/);
+    }
+  );
+
   // Samme fejlklasse som de manglende {" "} i C55/C56: JSX bevarer flere
   // mellemrum paa én linje, saa den svenske landetabel-boen skrev "eftersom"
   // med elleve mellemrum foran det foerste gaense citat. tsc, lint og build

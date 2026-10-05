@@ -1,4 +1,18 @@
-STATUS: 5/10 15:0x. ✅ 5/10 15:0x: **fire rå procenter i
+STATUS: 5/10 16:4x. ✅ 5/10 16:4x: **`/tidszone`s hub-anker læser
+           landetallet i stedet for «fjorten»** (`ceo/tidszone-lande-tal`).
+           Avsnittet «Hvad er klokken i et andet land?» skrev «klokken i
+           fjorten lande» / «klockan i fjorton länder» håndskrevet lige over de
+           lister, porten ovenfor tvinger til *præcis* 14 links. Når det 15.
+           land kommer, står «fjorten» stadig, og linket lover færre lande end
+           siden viser — samme driftrige form som `2839d47` lukkede i
+           `KlokkenIHub`. Tallet er nu `{KLOKKEN_LANDE.length}`, samme
+           talform som hubben bruger. Ny port dømmer begge sprog og forbyder
+           ordformen igen. Målt: 2 røde før rettelsen, 30/30 grønne efter.
+           Gate: typecheck 0, lint 0, **4292 tests i 269 filer** grønne.
+           PR-TJEK: 5/10 16:3x (ingen åbne). Branchen `ceo/tidszone-alle-zoner`
+           var en rest fra en tidligere iteration — den lå på master og er
+           slettet lokalt.
+           ✅ 5/10 15:0x: **fire rå procenter i
            `BilBeregner.tsx`s danske gren rettet** (`ceo/bil-raa-procenter`).
            `/bil` serverede «Nye biler: 15-20%», «ældre: 8-12%», «op til 50%»
            og «op til 20%» — den svenske og norske gren skrev dem hele tiden
@@ -102,6 +116,11 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 Den svenske og norske gren skrev dem rigtigt hele tiden; kun den danske gren
 havde rå procenter. Loftet 206 → **203**.
 
+**F5d. [x] `/tidszone`s hub-anker læser `KLOKKEN_LANDE.length`** — rettet
+5/10 16:4x. «fjorten»/«fjorton» var håndskrevet over en liste porten tvinger til
+at have præcis 14 links i. Tallet afledes nu, så det 15. land ikke gør
+ankeret til en løgn.
+
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
 CTR, så deres **danske** titler får ikke et regnet eksempel, før målingen er
@@ -175,10 +194,18 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**To noter er åbne.** Den nye (5/10 15:0x) skal først verificeres efter
+**Tre noter er åbne.** Den nye (5/10 16:4x) skal først verificeres efter
   5/10 17:30. **De fjorten fra 4/10–3/10 er fejet i ét kørt script 5/10 14:0x
   og er lukket** — målt på indhold med `curl`, ikke på HTTP-koden. Målte
   resultater, de fire der fejlede:
+
+**Åben note 5/10 16:4x:** `VERIFICÉR DEPLOY: /tidszone skriver «klokken i 14
+  lande» og «klockan i 14 länder» i hub-ankeret, 0× ordformen «fjorten»/
+  «fjorton», begge domæner ceo/tidszone-lande-tal 5/10 16:4x`. Mål på
+  indhold: `curl -s https://minberegner.dk/tidszone | grep -c 'klokken i 14
+  lande'` = 1, `curl -s https://beraknare.se/tidszone | grep -c 'klockan i 14
+  länder'` = 1, og begge sider skal have **0** matches på `klokken i [a-zæøå]+
+  lande` / `klockan i [a-zäöå]+ länder`.
 
 | Note | Målt | Resultat |
 |---|---|---|
