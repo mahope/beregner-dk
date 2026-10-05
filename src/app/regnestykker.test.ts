@@ -921,7 +921,7 @@ const PROCENT_UNDTAGELSER: Record<string, string[]> = {
   "src/app/blog/pension-hvor-meget-skal-du-spare-op/page.tsx": ["4%-reglen"],
 };
 
-const PROCENT_UDEN_MELLEMRUM_LOFT = 206;
+const PROCENT_UDEN_MELLEMRUM_LOFT = 203;
 
 const PROCENT_MED_MELLEMRUM = [
   "src/app/blog/koeb-af-bolig-2026-omkostninger/page.tsx",
@@ -959,6 +959,25 @@ describe("procentnotation", () => {
     expect(procentUdenMellemrum("const x = `Rente ${pct(r)} er høj`;", "i.ts")).toEqual([]);
   });
 
+  test("BilBeregnerens danske, svenske og norske tekst skriver «8 %»", () => {
+    // 5/10 15:0x: de tre tidligere procent-opgaver ramte kun `page.tsx` og
+    // blogindlæggene, ikke komponentens *egne* tekststrenge. Den danske gren
+    // skrev «15-20%», «8-12%», «op til 50%» og «op til 20%», mens den svenske
+    // og den norske gren allerede havde «15–20 %» og «50 %». Mutation: sæt én
+    // af dem tilbage til «20%», porten skal blive rød pr. streng.
+    const fund = procentUdenMellemrum(
+      las("src/components/BilBeregner.tsx"),
+      "src/components/BilBeregner.tsx",
+    );
+    expect(fund).toEqual([]);
+    // Bevis på at porten ser hele komponenten, ikke kun den danske gren: de to
+    // andre grene skal have deres egne procenter med mellemrum.
+    const kilde = las("src/components/BilBeregner.tsx");
+    expect(kilde).toContain("Nya bilar: 15\\u201320 %, ");
+    expect(kilde).toContain("priserna varierar upp till 50 %");
+    expect(kilde).toContain("prisene varierer opptil 50 %");
+  });
+
   test("forside, navigation og de omskrevne sider skriver «8 %»", () => {
     // Mutation: sæt «8%» tilbage i en af filerne, porten skal blive rød.
     const fund = procentfiler.flatMap((fil) =>
@@ -979,7 +998,7 @@ describe("procentnotation", () => {
 
   test("korpuset har ikke fået flere procenttal uden mellemrum", () => {
     // Loftet er målt, ikke gættet: 598 → 570 → 509 → 436 → 371 → 361 → 319
-    // → 261 → 231 → **206**, da de 28 i de fem filer, de 60 i `/procent`, `/boliglaan`,
+    // → 261 → 231 → 206 → **203**, da de 28 i de fem filer, de 60 i `/procent`, `/boliglaan`,
     // deres FAQ-svar og `ProcentBeregner`s hurtige reference, de 73 i
     // `page-data.ts`, de 58 i tre blogindlæg, de 42 i de tretten
     // beregnere med interpolationer, de 45 i fem siders brødtekst og
@@ -987,8 +1006,8 @@ describe("procentnotation", () => {
     // `/flyttebudget`), de 13 i syv beregnerkomponenter, de 30 i bilsiderne
     // (`/bil` da+se, `/topskat`, `BoligsalgBeregner`s disclaimer og de to
     // blogindlæg) og de 25 i boligkøbsguiden + drikkelisten (4/10 01:2x)
-    // blev rettet.
-    // 206 er *med* de fem dokumenterede
+    // blev rettet, og de 3 i `BilBeregner.tsx`s danske gren (5/10 15:0x).
+    // 203 er *med* de fem dokumenterede
     // undtagelser («30% reglen» ×3 og «4%-reglen» ×1).
     // Det må gerne falde; det må ikke stige i det stille, fordi så kommer den
     // nye skrivemåde ind i en ny side ubemærket.
@@ -996,6 +1015,6 @@ describe("procentnotation", () => {
       procentUdenMellemrum(las(fil), fil, PROCENT_UNDTAGELSER[fil]),
     );
     expect(fund.length).toBeLessThanOrEqual(PROCENT_UDEN_MELLEMRUM_LOFT);
-    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(206);
+    expect(PROCENT_UDEN_MELLEMRUM_LOFT).toBe(203);
   });
 });

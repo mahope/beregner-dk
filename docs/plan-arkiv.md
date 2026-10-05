@@ -29000,3 +29000,28 @@ fejl lå *inde i* `se:`-objektet.
 
 **Port.** Hele suiten grøn: 269 filer, 4.285 tests. Typecheck og `biome lint`
 uden fund. `git diff | grep -cE '^\+.*\$[0-9]'` = 0 (punkt 13).
+
+---
+
+## 5/10 15:0x — BilBeregner.tsx: fire rå procenter i den danske gren (F10)
+
+Målt i live 5/10 14:0x: `/bil` serverede «Nye biler: 15-20%», «ældre: 8-12%»,
+«priser varierer op til 50%» og «op til 20% bedre brændstoføkonomi» — altså
+fire rå procenter i `BilBeregner.tsx`s **danske** gren. Den svenske (`:78`, `:89`,
+`:91`) og den norske (`:118`, `:129`, `:131`) gren skrev dem hele tiden rigtigt med
+mellemrum, så fejlen var isoleret til den danske.
+
+De tre tidligere procent-opgaver (4/10 01:3x, 3/10 23:0x, 3/10 22:2x) ramte kun
+`page.tsx` og blogindlæggene — aldrig komponentens egne copy-objekter. Den
+`PROCENT_UDEN_MELLEMRUM_LOFT`-scanner tæller dem, men korpustallet (206) dækkede
+kun, at de ikke måtte stige, så den danske gren blev liggende ved sit niveau.
+
+Rettelse: de fire strenge skriver «15-20 %», «8-12 %», «50 %», «20 %». Loftet
+**206 → 203**, og en ny port i `regnestykker.test.ts` dømmer
+`BilBeregner.tsx` på nul fund *og* på at alle tre grene har deres egne
+procenter med mellemrum — så en ny dansk streng med rå procent er rød, og det
+samme er en slået fra i den svenske.
+
+Verificeret: mutation «op til 20 %» → «op til 20%» giver 2 rød, mutation
+«15-20 %» → «15-20%» giver 2 rød; begge gendannet. `tsc --noEmit` exit 0,
+Biome 770 filer uden fund, **4290 tests i 269 filer** grønne.

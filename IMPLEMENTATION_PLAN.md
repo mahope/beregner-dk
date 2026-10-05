@@ -1,5 +1,15 @@
-STATUS: 5/10 14:1x. ✅ 5/10 14:1x: **sidebarlens populære liste følger målt
-          trafik** (`ceo/sidebar-trafikrækkefølge`). Den var håndskrevet i 2024
+STATUS: 5/10 15:0x. ✅ 5/10 15:0x: **fire rå procenter i
+           `BilBeregner.tsx`s danske gren rettet** (`ceo/bil-raa-procenter`).
+           `/bil` serverede «Nye biler: 15-20%», «ældre: 8-12%», «op til 50%»
+           og «op til 20%» — den svenske og norske gren skrev dem hele tiden
+           rigtigt, så kun den danske gren var ramt. De tre tidligere
+           procent-opgaver ramte kun `page.tsx` og blogindlæggene, aldrig
+           komponentens egne copy-objekter. Loftet 206 → **203**, og en ny
+           port dømmer alle tre grene hver for sig, så en ny dansk streng med
+           rå procent er rød. To mutationer → 2 røde, begge gendannet.
+           Gate: typecheck 0, lint 0, **4290 tests i 269 filer** grønne.
+           ✅ 5/10 14:1x: **sidebarlens populære liste følger målt trafik**.
+          (`ceo/sidebar-trafikrækkefølge`). Den var håndskrevet i 2024
           og holdt otte sider, **ingen af dem blandt sitets mest besøgte**:
           `/dato` (1.100 besøgende/28d) og `/tidsberegner` (268) stod ikke i
           den, og sidebarlen ligger på 58 sider — altså tabte hver manglende
@@ -29,12 +39,10 @@ STATUS: 5/10 14:1x. ✅ 5/10 14:1x: **sidebarlens populære liste følger målt
           svensk promille-FAQ genereres fra `PROMILLEGRANSE.se` (`:3381`), og
           `dato-eksempler.ts:104` har `maneder: 12` med begrundelsen ved siden.
           1. advent siger 27. november–3. december (`:1343`).
-          ⏱️ **Næste opgave er målt: de fire rå procenter i BilBeregner.tsx'**
-          danske gren (`vaerditabHint:38` «15-20%», `tipKoerText:51` «20%»,
-          `tipForsikringText:49` «50%») mangler mellemrum, mens de svenske og
-          norske grene (`78`, `91`, `131`) har det. Målt i live 5/10 14:0x:
-          `/bil` serverer stadig «Nye biler: 15-20%» og «op til 50%». Samme
-          fejlklasse som de tre lukkede procent-opgaver, som kun ramte `page.tsx`.
+✅ 5/10 15:0x: de fire rå procenter i `BilBeregner.tsx`'s danske
+           gren («15-20%», «8-12%», «op til 50%», «op til 20%») — kun den
+           danske gren, den svenske og norske havde dem rigtigt. Loftet 206 →
+           203, ny port dømmer alle tre grene hver for sig.
           PR-TJEK: 4/10 04:1x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire fuldt
           landede remote branches kan ikke slettes fra maskinen (lokal
           tilladelsesregel nægter `git push origin --delete`). `auto/union-night`
@@ -89,13 +97,10 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 
 ### Prioriterede opgaver — åbne
 
-**F10. [ ] Fire rå procenter i `BilBeregner.tsx`'s danske gren.** Målt i live
-5/10 14:0x: `/bil` serverer «Nye biler: 15-20%» og «op til 50%» uden
-mellemrum, mens den svenske (`:78`) og norske (`:131`) gren har det. De tre
-lukkede procent-opgaver ramte kun `page.tsx` og blogindlæggene, ikke
-komponentens egne tekststrenge (`vaerditabHint:38`, `tipForsikringText:49`,
-`tipKoerText:51`). *Accept:* mutation til «20 %» giver 1 rød i den nye port,
-samme som `PROCENT_UDEN_MELLEMRUM_LOFT`-scanneren.
+**F5c2. [x] Fire rå procenter i `BilBeregner.tsx`'s danske gren** — rettet
+5/10 15:0x. «Nye biler: 15-20 %»/«8-12 %», «op til 50 %» og «op til 20 %».
+Den svenske og norske gren skrev dem rigtigt hele tiden; kun den danske gren
+havde rå procenter. Loftet 206 → **203**.
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
@@ -170,14 +175,16 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Én note er åben.** Den nye (5/10 14:1x) skal først verificeres efter
+**To noter er åbne.** Den nye (5/10 15:0x) skal først verificeres efter
   5/10 17:30. **De fjorten fra 4/10–3/10 er fejet i ét kørt script 5/10 14:0x
   og er lukket** — målt på indhold med `curl`, ikke på HTTP-koden. Målte
   resultater, de fire der fejlede:
 
 | Note | Målt | Resultat |
 |---|---|---|
-| 5/10 13:1x klokken-hub + `helligdage` | `/klokken-i` siger «tolv lande» (1), ikke «14 lande» (0); `/dato` har «helligdager» (2) | åben, merge skete 13:1x |
+| 5/10 13:1x klokken-hub + `helligdage` | `/klokken-i` skal sige «fjorten lande» (ikke «tolv», 0) og `tidszone` det samme; `/dato` skal have «helligdager 2026» | åben, merge skete 13:1x |
+| 5/10 14:1x sidebarlens trafikrækkefølge | se note nedenfor | åben, merge skete 14:1x |
+| 5/10 15:0x `BilBeregner` procentmellemrum | `/bil` skal have «15-20 %», «8-12 %», «op til 50 %», «op til 20 %» og **0** rå `15-20%`/`50%` | åben, merge skete 15:0x |
 | 4/10 05:5x promille på forsiden | 12 links i rækkefølge, `/promille` nr. 11; men `/moms` → `/promille` = **0** | ⚠️ se nedenfor |
 | 4/10 05:1x Norge + Tyskland | titler «12 i Danmark = 12:00 i Oslo» / «12 i Sverige = 12:00 i Berlin», `tidszone` «fjorten», 14 links, begge sitemap'er | ✅ |
 | 4/10 05:0x idealvægt-titel + brøk-legend | 0× «175 cm 175 cm», «Pris för bensin» 1/«Pris på» 0, 3 legender i rigtig rækkefølge | ✅ |
@@ -209,9 +216,16 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
    AM-bidrag, hvilket er dagpengereglerne. Portens krav fra 3/10 22:2x havde
    det ældre tal.
 
-⚠️ `/bil` har **4 rå procenter** i den danske gren af `BilBeregner.tsx` (se
-  STATUS) — de tre lukkede procent-opgaver ramte kun `page.tsx`, ikke
-  komponentens egne tekststrenge. Det er næste opgave, ikke en deploy-fejl.
+✅ `/bil`s fire rå procenter i den danske gren af `BilBeregner.tsx` er rettet
+  5/10 15:0x — de var i selve komponentens tekststrenge, som de tre tidligere
+  procent-opgaver ikke rørte.
+
+**Åben note 5/10 15:0x:** `VERIFICÉR DEPLOY: BilBeregners danske gren skriver
+  «15-20 %», «8-12 %», «op til 50 %» og «op til 20 %», 0 rå procenter i
+  /bils tip og værdifald-felt ceo/bil-raa-procenter 5/10 15:0x`. Mål på indhold:
+  `curl -s https://minberegner.dk/bil` skal ramme «15-20 %» ≥1, «8-12 %» ≥1,
+  «op til 50 %» ≥1, «op til 20 %» ≥1 og **0** matches på `15-20%`, `8-12%`,
+  `50%` og `20%`. `beraknare.se/bil` er uændret (de har allerede «15–20 %»).
 
 **Åben note 5/10 14:1x:** `VERIFICÉR DEPLOY: <sidebarlens populære liste følger
   målt trafik, intet dødt slice, /promille med> ceo/sidebar-trafikrækkefølge
