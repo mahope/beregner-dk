@@ -132,6 +132,8 @@ describe("getHomeCalculators", () => {
     // besøgte danske side og den hurtigst voksende — men den stod i den
     // ikke-populære halvdel, så forsiden og sidebaren (alle ~120 sider) linkede
     // den ikke. Listen er målt, så den følger Plausible 4/10 28d.
+    // `/procent`, `/tidszone` og `/moms` kom med 6/10: de er ikke i Plausible
+    // top-15, men de er de tre danske sider med mest uopfyldt søgning.
     for (const href of [
       "/dato",
       "/bmi",
@@ -147,6 +149,9 @@ describe("getHomeCalculators", () => {
       "/renteberegner",
       "/boernepenge",
       "/pension",
+      "/procent",
+      "/tidszone",
+      "/moms",
       "/loen-efter-skat",
     ]) {
       expect(daPopular, `DA popular ${href}`).toContain(href);
@@ -180,6 +185,9 @@ describe("getHomeCalculators", () => {
     // /braendstof 256, /barselsdagpenge 236, /husleje 169, /promille 157,
     // /renteberegner 137, /pension 140, /boernepenge — plus /loen-efter-skat
     // as brandværktøj. /promille kom med 4/10: +1327 % og ottende mest besøgt.
+    //
+    // De tre før /loen-efter-skat er ikke Plausible-top-15, men de er de
+    // danske sider med mest uopfyldt søgning — se porten nedenfor.
     expect(
       getHomeCalculators("da")
         .filter((c) => c.popular)
@@ -199,8 +207,46 @@ describe("getHomeCalculators", () => {
       "/renteberegner",
       "/boernepenge",
       "/pension",
+      "/procent",
+      "/tidszone",
+      "/moms",
       "/loen-efter-skat",
     ]);
+  });
+
+  test("hver dansk side med stor søgevisning har et link fra forsiden", () => {
+    // Rækkefølgen ovenfor følger Plausible-besøgende, og det er den fejl, der
+    // holdt /procent, /tidszone og /moms ude: de har titusindvis af
+    // søgevisninger, men så få klik at Plausible ikke tæller dem blandt
+    // top-15. Google sender altså folk til dem, og de stod alligevel uden link
+    // fra forsiden og uden plads i sidebaren på de ~120 kalkulatorsider.
+    //
+    // Tallene er Search Console 5/10, 28 dage, visninger pr. dansk side. De er
+    // her portens tærskel og ikke en rækkefølge, der skal følges — listen er
+    // ikke håndskrevet, så en ny side med stor efterspørgsel dømmes af samme
+    // regel.
+    const GSC_VISNINGER_28D: Record<string, number> = {
+      "/procent": 151008,
+      "/dato": 136986,
+      "/tidsberegner": 78615,
+      "/tidszone": 24829,
+      "/moms": 24000,
+      "/kvadratmeter": 21403,
+      "/braendstof": 16898,
+    };
+    const TAFSEL = 20000;
+    const popular = new Set(
+      getHomeCalculators("da")
+        .filter((c) => c.popular)
+        .map((c) => c.href),
+    );
+    const mangler = Object.entries(GSC_VISNINGER_28D)
+      .filter(([href, visninger]) => visninger >= TAFSEL && !popular.has(href))
+      .map(([href]) => href);
+    expect(
+      mangler,
+      "disse sider har stor søgevisning, men ingen plads på forsiden/sidebarlen",
+    ).toEqual([]);
   });
 
   test("every catalog page has a card on its own locale's homepage", () => {

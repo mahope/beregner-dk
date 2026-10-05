@@ -192,12 +192,22 @@ const daCalculators: HomeCalculator[] = [
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", popular: true, category: "Økonomi" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: true, category: "Familie" },
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: true, category: "Økonomi" },
+  // /procent, /tidszone og /moms stod i den ikke-populære halvdel, selv om de er
+  // de tre danske sider med mest uopfyldt søgning: Search Console 5/10 (28 dage)
+  // giver /procent 151.008 visninger på 0,1 % CTR og pos. 7,5, /tidszone 24.829
+  // på 0,4 % og pos. 7,7 og /moms 24.000 på 0,2 % og pos. 7,0 — altså 200.000
+  // visninger på position 5-8, hvor der er trafik, men ingen klik. Plausible
+  // viser dem ikke i top-15, fordi de få klik tælles som besøgende, og netop
+  // derfor stod de uden et enkelt link fra forsiden og uden sidebar-plads på de
+  // ~120 kalkulatorsider. Rækkefølgen er visninger, de tre har hver 0,1-0,4 %
+  // CTR.
+  { title: "Procentberegner", description: "Beregn procent af et tal, stigning, fald og mere", href: "/procent", popular: true, category: "Matematik" },
+  { title: "Tidszoneberegner", description: "Se hvad klokken er i andre lande", href: "/tidszone", popular: true, category: "Hverdag" },
+  { title: "Momsberegner", description: "Tillæg eller fratræk 25 % moms nemt og hurtigt", href: "/moms", popular: true, category: "Økonomi" },
   { title: "Løn efter skat", description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension", href: "/loen-efter-skat", popular: true, category: "Økonomi" },
   // Non-popular
   { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", popular: false, category: "Lån" },
-  { title: "Momsberegner", description: "Tillæg eller fratræk 25 % moms nemt og hurtigt", href: "/moms", popular: false, category: "Økonomi" },
   { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", popular: false, category: "Økonomi" },
-  { title: "Procentberegner", description: "Beregn procent af et tal, stigning, fald og mere", href: "/procent", popular: false, category: "Matematik" },
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", popular: false, category: "Økonomi" },
   { title: "Aldersberegner", description: "Beregn din præcise alder i år, måneder og dage", href: "/alder", popular: false, category: "Hverdag" },
   { title: "Timeprisberegner", description: "Find din timepris som freelancer eller selvstændig", href: "/timepris", popular: false, category: "Erhverv" },
@@ -205,7 +215,6 @@ const daCalculators: HomeCalculator[] = [
   { title: "Feriepenge", description: "Beregn hvor meget du har til gode i feriepenge", href: "/feriepenge", popular: false, category: "Økonomi" },
   { title: "SU Beregner", description: "Beregn din SU og fribeløb baseret på din situation", href: "/su", popular: false, category: "Uddannelse" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", popular: false, category: "Økonomi" },
-  { title: "Tidszoneberegner", description: "Se hvad klokken er i andre lande", href: "/tidszone", popular: false, category: "Hverdag" },
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", popular: false, category: "Økonomi" },
   { title: "Barselsplanlægger", description: "Planlæg barsel uge for uge med kalender og økonomi", href: "/barselsplanlaegger", popular: false, category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", popular: false, category: "Familie" },

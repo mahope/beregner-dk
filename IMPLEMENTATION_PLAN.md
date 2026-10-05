@@ -1,4 +1,13 @@
-STATUS: 6/10 02:0x. ✅ 6/10 01:5x: **dage-til's FAQ holdt op at være rigtige.**
+STATUS: 6/10 02:0x. ✅ 6/10 02:0x: **forsiden linkede sitets tre mest
+upassede søgesider slet ikke.** `/procent` (151.008 GSC-visninger, 0,1 % CTR,
+pos. 7,5), `/tidszone` (24.829, 0,4 %) og `/moms` (24.000, 0,2 %) lå alle tre
+i den ikke-populære halvdel af `home-data.ts`, altså uden link fra forsiden og
+uden plads i sidebaren på de ~120 kalkulatorsider — de er ikke i Plausible
+top-15, fordi deres få klik tælles som besøgende. 200.000 visninger på
+position 5-8 uden et eneste indgangslink. Nu populære i rækkefølge efter
+visninger; ny port dømmer princippet (tærskel 20.000 visninger), mutation af
+ét flag gav 3 røde.
+✅ 6/10 01:5x: **dage-til's FAQ holdt op at være rigtige.**
 Fire spørgsmål på ferie-siderne havde et årstal i sig («Hvornår begynder
 sommerferien i 2026?», «…senere end 27. juni?»), mens nedtællingen altid peger
 på det *næste* år: 6/10 skrev siden «27. juni» over et mål på 26. juni 2027.
@@ -25,7 +34,7 @@ svensk påskafton, fast dansk sankthans, `Europe/Copenhagen` i `toUtcMidnight`).
 Alt ældre: `docs/plan-arkiv.md`. ✅ CI grøn 5/10 21:26.
 PR-TJEK: 6/10 01:0x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
 **Gate:** `npm run typecheck && npm run lint && npm run test` (CI kører også
-`next build`). 6/10 01:4x: typecheck 0, lint 0 (775 filer), **4348 tests i 271
+`next build`). 6/10 02:0x: typecheck 0, lint 0 (775 filer), **4349 tests i 271
 filer** grønne. Ét tidligere fuldt suitekørsel gav 1 rød i `locale-leak-gate.test.ts`,
 som scanneren kører i en udspawnet proces og som er grøn 3/3 i isolation og i
 to senere fulde kørsler — urørt, se ❓ om skanner-rækkerne.
@@ -235,6 +244,16 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
   mange; kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 6/10 02:0x:** `VERIFICÉR DEPLOY: forsiden har et link til
+/procent, /tidszone og /moms i rækken mellem /pension og /loen-efter-skat, og
+sidebarlen på /dato har de tre med ceo-populaere-sogesider 6/10 02:0x`. Mål på
+indhold: `curl -s https://minberegner.dk | grep -o 'href="/procent"' | wc -l` →
+**> 0**, samme greb for `href="/tidszone"` og `href="/moms"`, og
+`grep -o 'Procentberegner' | wc -l` → **> 0**. Sidebarlen læser samme
+`popular`-flag, så `curl -s https://minberegner.dk/dato | grep -o 'href="/procent"'
+| wc -l` skal være **> 0** på en side hvor `/dato` selv ikke står i listen.
+⚠️ Mergen er efter 21:30-vinduet, første reelle kør er 6/10 07:30.
 
 **Åben note 6/10 01:5x:** `VERIFICÉR DEPLOY: /dage-til/sommerferien spørger «Kan
 sommerferien begynde senere end den sidste lørdag i juni?» og «Hvornår begynder
