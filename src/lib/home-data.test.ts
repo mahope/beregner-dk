@@ -218,14 +218,14 @@ describe("getHomeCalculators", () => {
     }
   });
 
-  test("NO is still the locale with an incomplete homepage, by 24 cards", () => {
+  test("NO is still the locale with an incomplete homepage, by 25 cards", () => {
     // Målt 2026-09-28: no har 28 kort mod 51 i katalogen, og hullet voksede
-    // til 24 med /idealvaegt 4/10, fordi norsk stadig ikke er i drift. Skrevet som sit eget
-    // tal, så en senere rettelse skal flippe den her bevidst og ikke ved en
-    // tilfældighed.
+    // til 24 med /idealvaegt 4/10 og til 25 med /rumfang 6/10, fordi norsk stadig
+    // ikke er i drift. Skrevet som sit eget tal, så en senere rettelse skal
+    // flippe den her bevidst og ikke ved en tilfældighed.
     const katalog = getCalculatorsByLocale("no").length;
     const kort = getHomeCalculators("no").length;
-    expect(katalog - kort).toBe(24);
+    expect(katalog - kort).toBe(25);
   });
 
   test("every card's category is a key in that locale's categoryOrder", () => {

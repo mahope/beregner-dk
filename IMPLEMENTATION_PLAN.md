@@ -1,4 +1,13 @@
-STATUS: 6/10 00:2x. ✅ 6/10 00:2x: **Den svenska `/tidszone` skrev tre
+STATUS: 6/10 00:4x. ✅ 6/10 00:4x: **Rumfang manglede som beregner.** `/kvadratmeter`
+              regner kun areal (m²), og dansk autocomplete målt 00:2x har 10 af
+              10 træffere under «hvordan beregner man rumfang», som er en figur.
+              `/rumfang` regner kasse, cylinder, kugle, kegle og pyramide i m³ og
+              liter og tager **diameter** — den fejl der ganges fire gange,
+              fordi cirkelarealet har radius i anden potens. Se feature-kø.
+              *Portene kan fejle:* mutation af keglens ⅓ gav 2 røde, mutation af
+              cylindertallet i `metaTitle` til grundarealet gav 1 rød. Titles i da
+              og se, ingen `no`-side (⛔ `beregner.no` er et andet site).
+              ✅ 6/10 00:2x: **Den svenska `/tidszone` skrev tre
               udenlandske ord.** Målt i *renderet* markup med `locale: "se"`:
               landetabellen skrev `<td>New Zealand</td>` (svensk er **Nya
               Zealand**), landelisten skrev «Türkiet» — tysk, fordi
@@ -31,9 +40,9 @@ STATUS: 6/10 00:2x. ✅ 6/10 00:2x: **Den svenska `/tidszone` skrev tre
               `toUtcMidnight` — genverificeret 6/10 00:2x med grep). Alt ældre:
               `docs/plan-arkiv.md`. ✅ CI grøn 5/10 21:26.
               PR-TJEK: 5/10 21:2x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
-              **Gate:** `npm run typecheck && npm run lint && npm test` (CI kører
-              også `next build`). 6/10 00:2x: typecheck 0, lint 0, **4305 tests
-              i 269 filer** grønne. `npm test` skriver desuden to kendte
+              **Gate:** `npm run typecheck && npm run lint && npm run test`
+              (CI kører også `next build`). 6/10 00:4x: typecheck 0, lint 0
+              (775 filer), **4345 tests i 271 filer** grønne. `npm test` skriver desuden to kendte
               scanner-rækker («FEJL: 34 …» i `/promille`, «FEJL: 1 …» i
               `/procent») der er røde på `master` og ikke berørt her — se ❓.
               **Målt 6/10 00:2x:** planen havde to identiske STATUS-blokke (6 KB
@@ -64,6 +73,7 @@ STATUS: 6/10 00:2x. ✅ 6/10 00:2x: **Den svenska `/tidszone` skrev tre
 | Mål efter 14 dage: `/dage-til/24-december` skal overtage «…til den 24 december» fra `/dato` | — | 1.036 (GSC 5/10, under `/dato`) | 0 % | 5 |
 | `/dage-mellem-datoer` + se `/dagar-mellan-datum` | **0 — nye URL'er 3/10** | — | — | — |
 | `/idealvaegt` + se | **0 — nye URL'er 4/10** | — | — | — |
+| `/rumfang` + se | **0 — nye URL'er 6/10** | — | — | — |
 | `/klokken-i/norge` + `tyskland` (+ se) | **0 — nye URL'er 4/10 05:1x** | — | — | — |
 | se `/dato` | 133 | 101.580 | 0,1 % | 8,2 |
 | se `/tidsberegner` | 167 | 61.934 | 0,2 % | 8,0 |
@@ -213,6 +223,20 @@ brugt på de seneste features. Syv lukkede punkter (bl.a. `/dage-til`,
 `/klokken-i`-hubben, `/brok`'s fire regneregler, `/idealvaegt`, lånebeløb- og
 brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
+- **[x] `/rumfang` — rumfang for kasse, cylinder, kugle, kegle og pyramide.**
+  Lukket 6/10 00:4x i `ceo/rumfang-beregner`. *Datagrund:* dansk autocomplete
+  6/10 00:2x — «hvordan beregner man rumfang» har **10 af 10** træffere, der er en
+  figur (kasse, cylinder, kugle, pyramide, prisme, kegle, cirkel), og «beregn
+  rumfang» har 10 af 10. To ting står frem i træffene: **diameter** (ikke radius)
+  og **liter** (ikke kun m³) — derfor tager værktøjet diameter og viser begge
+  enheder. `/kvadratmeter` regner kun areal (m²) og har 21.403 GSC-visninger på
+  1,5 % CTR og pos. 4,9, så matematik-siderne her konverterer; rumfang var det
+  andet spørgsmål og manglede. *Accept:* 31 nye porte (20 i `rumfang.test.ts`, 11 i
+  `rumfang-side.test.tsx`) dømmer formlerne mod håndregnede tal og siden i
+  renderet markup; mutér keglens ⅓ til 1/1 → 2 røde, mutér cylindertallet i
+  `metaTitle` til grundarealet → 1 rød. `MÅL: /rumfang baseline 0 (ny URL),
+  forventer > 300 Plausible-besøgende/28d efter 14 dage`. Titles i da/se, ingen
+  `no`-side (⛔ `beregner.no` er et andet site — ❓).
 - **[ ] BMI-percentil for børn.** «bmi for børn», «bmi skala børn» er danske
   autocomplete-træffere, på svensk «bmi barn tabell». WHO's BMI-for-alder-tabeller
   er ~150 tal pr. køn — for mange at transkribere uden uafhængig kontrol, og en
@@ -340,6 +364,16 @@ viser 13.372 kr. og 14.694 kr., ikke 13.438 kr. og 14.768 kr. ceo/efterloen-delt
    `Sidebar.tsx` filtrerer `currentHref` væk. På `/bmi` er rækken derfor
    `/dato` → `/boligstoette` → `/rentefradrag` → `/kvadratmeter` → `/kalorier` →
    `/tidsberegner` → `/braendstof`, som er målt rækkefølge minus siden selv.
+
+**Åben note 6/10 00:4x:** `VERIFICÉR DEPLOY: /rumfang svarer 200 på
+minberegner.dk og beraknare.se, hver sides sitemap indeholder pr. domæne
+`/rumfang`, og værktøjet renderer «1 m³» og «1.000 liter» for den
+forudindstillede kasse på 2 × 1 × 0,5 m ceo/rumfang-beregner 6/10 00:4x`. Mål på
+indhold: `curl -s https://minberegner.dk/rumfang | grep -o 'Rumfangsberegner' |
+wc -l` → **> 0**, `curl -s https://minberegner.dk/sitemap.xml | grep -o
+'/rumfang<' | wc -l` → **1**, og samme to greb på beraknare.se skal give
+`Volymberäknare` og **1**. Værktøjet er en klient-komponent, så læs
+`src/lib/rumfang.ts`, indtil tallet kan hentes headless.
 
 ## ❓ Til Mads
 

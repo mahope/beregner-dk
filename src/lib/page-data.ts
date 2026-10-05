@@ -28,6 +28,7 @@ import {
 import { formatBelob, formatNumber, formatSvenskText } from "./format";
 import { BMI_BAAND, vaegtInterval } from "./bmi-voksen-grænser";
 import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
+import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
 import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
 import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
@@ -491,6 +492,21 @@ const seKrPrKm = (value: number) => value.toFixed(2).replace(".", ",") + " kr/km
 const renteHoved = hovedEksempel();
 const renteFormel = annuitetsEksempel();
 
+// ─── /rumfang — de samme tal i titel, metadata, FAQ og løsning, regnet fra
+// `rumfang.ts`. Skriver brødteksten dem i hånden, kan de tre steder komme til at
+// sige hver sit, og de står i tre filer. Cylindereksemplet er valgt, fordi det er
+// det eneste af de fem figurer hvor diameteren ikke forsvinder i et heltal.
+const rumfangCylinder = RUMFANG_EKSEMPEL.cylinder.svar.kubikmeter;
+const RUMFANG_TEKST_DA = {
+  cylinder: rumfangCylinder.toLocaleString("da-DK", { maximumFractionDigits: 2 }),
+  cylinderAreal: (rumfangCylinder / 2).toLocaleString("da-DK", { maximumFractionDigits: 2 }),
+  cylinderLiter: RUMFANG_EKSEMPEL.cylinder.svar.liter.toLocaleString("da-DK", { maximumFractionDigits: 1 }),
+};
+const RUMFANG_TEKST_SE = {
+  cylinder: formatSvenskText(rumfangCylinder, 2),
+  cylinderAreal: formatSvenskText(rumfangCylinder / 2, 2),
+  cylinderLiter: formatSvenskText(RUMFANG_EKSEMPEL.cylinder.svar.liter, 1),
+};
 // ─── /idealvaegt — hver eneste af de tal, titlen, metadataen og FAQ'en lover,
 // regnet fra `idealvaegt.ts`, altså fra formlernes egne kilder. Hældningen eller
 // grundværdien er ændret en dag, så skriver brødteksten sig ikke til at lyve.
@@ -773,6 +789,30 @@ const daPages: Record<string, PageData> = {
         { question: `Hvor meget er min idealvægt, hvis jeg er ${IDEALVAEGT_CM} cm høj?`, answer: `Som mand vejer du ${IDEALVAEGT_M_DEVINE} kg efter Devines formel og ${IDEALVAEGT_M_HAMWI} kg efter Hamwis — altså et interval på ${IDEALVAEGT_M_SPREDNING} kg. Som kvinde er de ${IDEALVAEGT_K_DEVINE} kg og ${IDEALVAEGT_K_HAMWI} kg. WHO's normalvægtsbånd (BMI 18,5-24,9) svarer for en mand på ${IDEALVAEGT_CM} cm til ${IDEALVAEGT_M_INTERVAL_MIN}-${IDEALVAEGT_M_INTERVAL_MAX} kg.` },
         { question: "Hvorfor giver Devine og Hamwi to forskellige tal?", answer: "De er to uafhængige formler fra henholdsvis 1964 og 1974. De er lineære og bruger forskellige grundværdier og hældninger, så de løber fra hinanden jo længere fra 152 cm, de er lavet ved. Derfor viser værktøjet begge tal og deres gennemsnit i stedet for at udpege én." },
         { question: "Er idealvægt det samme som BMI?", answer: "Nej. BMI regner forholdet mellem din vægt og din højde, så det afhænger af den vægt du har. Idealvægt regner kun højde og køn og ser altså bort fra, hvad du vejer nu. De to kan derfor pege i hver sin retning." },
+      ],
+    },
+    "rumfang": {
+      slug: "rumfang",
+      title: "Rumfangsberegner",
+      description: `Beregn rumfang i m³ og liter for kasse, cylinder, kugle, kegle og pyramide. Alle mål skrives i meter, og værktøjet bruger diameter — ikke radius.`,
+      metaTitle: `Rumfangsberegner: cylinder med d = 1 m og h = 2 m er ${RUMFANG_TEKST_DA.cylinder} m³`,
+      metaDescription: `Gratis rumfangsberegner. Beregn rumfang af kasse, cylinder, kugle, kegle og pyramide i m³ og liter. Cylinder med d = 1 m og h = 2 m: ${RUMFANG_TEKST_DA.cylinder} m³ = ${RUMFANG_TEKST_DA.cylinderLiter} liter.`,
+      keywords: ["rumfangsberegner", "beregn rumfang", "rumfang cylinder", "rumfang kasse", "rumfang kugle", "rumfang formel", "rumfang liter"],
+      ogTitle: `Rumfangsberegner: cylinder med d = 1 m og h = 2 m er ${RUMFANG_TEKST_DA.cylinder} m³`,
+      ogDescription: `Beregn rumfang i m³ og liter for kasse, cylinder, kugle, kegle og pyramide.`,
+      category: "Matematik",
+      breadcrumbCategory: "Matematik",
+      breadcrumbCategoryHref: "/kategori/matematik",
+      schemaName: "Rumfangsberegner",
+      schemaDescription: "Beregn rumfang i m³ og liter for kasse, cylinder, kugle, kegle og pyramide.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvordan beregner man rumfang?", answer: `Det afhænger af figuren. Kasse er længde × bredde × højde, cylinder er π × (diameter ÷ 2)² × højde, kugle er (4 ÷ 3) × π × (diameter ÷ 2)³, kegle er (1 ÷ 3) × π × (diameter ÷ 2)² × højde, og pyramide er (1 ÷ 3) × grundside² × højde.` },
+        { question: "Hvad er rumfanget af en cylinder med diameter 1 meter og højde 2 meter?", answer: `Cylinderens grundareal er π × (1 ÷ 2)² = ${RUMFANG_TEKST_DA.cylinderAreal} m². Gang med højden på 2 m, og du får ${RUMFANG_TEKST_DA.cylinder} m³ — altså ${RUMFANG_TEKST_DA.cylinderLiter} liter.` },
+        { question: "Hvorfor skal jeg bruge diameter og ikke radius?", answer: "Fordi det er den fejl, der double-sidens egen. Hvis du har målt 20 cm på tværs og skriver 20 som radius, får du fire gange så stort rumfang. Værktøjet tager derfor diameter direkte." },
+        { question: "Hvor mange liter er der i en kubikmeter?", answer: `1 m³ = ${LITER_PR_KUBIKMETER} liter, fordi en kubikmeter er 100 cm × 100 cm × 100 cm = 1.000.000 cm³, og der går 1.000 cm³ på literen. Værktøjet viser derfor begge tal ud fra den samme beregning.` },
+        { question: "Hvordan regner man rumfang i Excel?", answer: "Kassens rumfang er bare =A1*B1*C1. Cylinderens er =PI()*(A1/2)^2*B1, hvor A1 er diameteren og B1 højden i meter. Kuglens er =4/3*PI()*(A1/2)^3." },
+        { question: "Hvad er forskellet på areal og rumfang?", answer: "Areal er fladens størrelse i m² — det er, hvad /kvadratmeterberegneren regner. Rumfang er pladsen inde i kroppen i m³. En kasse på 2 × 1 × 0,5 m har et areal på 10 m² (gulvet) og et rumfang på 1 m³." },
       ],
     },
     "sparemaal": {
@@ -3317,6 +3357,30 @@ const sePages: Record<string, PageData> = {
         { question: `Hur mycket är min idealvikt om jag är ${IDEALVAEGT_CM} cm lång?`, answer: `Som man väger du ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.devine))} kg enligt Devines formel och ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.hamwi))} kg enligt Hamwis — ett intervall på ${idealvaegtKgSe(rundIdealvaegt(idealvaegtMand.spredning))} kg. Som kvinna är de ${idealvaegtKgSe(rundIdealvaegt(idealvaegtKvinde.devine))} kg och ${idealvaegtKgSe(rundIdealvaegt(idealvaegtKvinde.hamwi))} kg. WHO:s normalviktsband (BMI 18,5-24,9) motsvarar för en man på ${IDEALVAEGT_CM} cm ${idealvaegtKgSe(idealvaegtNormal.min ?? 0)}-${idealvaegtKgSe(idealvaegtNormal.max ?? 0)} kg.` },
         { question: "Varför ger Devine och Hamwi två olika tal?", answer: "De är två oberoende formler från 1964 respektive 1974. De är linjära och använder olika grundvärden och lutningar, så de avviker allt mer ju längre från 152 cm, de är byggda kring. Därför visar kalkylatorn båda talen och deras medelvärde i stället för att peka ut ett." },
         { question: "Är idealvikt samma sak som BMI?", answer: "Nej. BMI räknar förhållandet mellan din vikt och din längd, så det beror på den vikt du har. Idealvikten räknar bara längd och kön och bortser alltså från vad du väger nu. De två kan därför peka i var sin riktning." },
+      ],
+    },
+    "rumfang": {
+      slug: "rumfang",
+      title: "Volymberäknare",
+      description: `Beräkna volym i m³ och liter för låda, cylinder, sfär, kon och pyramid. Alla mått skrivs i meter, och kalkylatorn använder diameter — inte radie.`,
+      metaTitle: `Volymberäknare: cylinder med d = 1 m och h = 2 m är ${RUMFANG_TEKST_SE.cylinder} m³`,
+      metaDescription: `Gratis volymberäknare. Beräkna volym av låda, cylinder, sfär, kon och pyramid i m³ och liter. Cylinder d = 1 m, h = 2 m: ${RUMFANG_TEKST_SE.cylinder} m³ = ${RUMFANG_TEKST_SE.cylinderLiter} liter.`,
+      keywords: ["volymberäknare", "beräkna volym", "volym cylinder", "volym låda", "volym sfär", "volym formel", "volym liter"],
+      ogTitle: `Volymberäknare: cylinder med d = 1 m och h = 2 m är ${RUMFANG_TEKST_SE.cylinder} m³`,
+      ogDescription: "Beräkna volym i m³ och liter för låda, cylinder, sfär, kon och pyramid.",
+      category: "Matematik",
+      breadcrumbCategory: "Matematik",
+      breadcrumbCategoryHref: "/kategori/matematik",
+      schemaName: "Volymberäknare",
+      schemaDescription: "Beräkna volym i m³ och liter för låda, cylinder, sfär, kon och pyramid.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hur beräknar man volym?", answer: `Det beror på formen. Låda är längd × bredd × höjd, cylinder är π × (diameter ÷ 2)² × höjd, sfär är (4 ÷ 3) × π × (diameter ÷ 2)³, kon är (1 ÷ 3) × π × (diameter ÷ 2)² × höjd, och pyramid är (1 ÷ 3) × grundside² × höjd.` },
+        { question: "Vad är volymen av en cylinder med diameter 1 meter och höjd 2 meter?", answer: `Cylinderns basarea är π × (1 ÷ 2)² = ${RUMFANG_TEKST_SE.cylinderAreal} m². Multiplicera med höjden 2 m, så får du ${RUMFANG_TEKST_SE.cylinder} m³ — alltså ${RUMFANG_TEKST_SE.cylinderLiter} liter.` },
+        { question: "Varför ska jag använda diameter och inte radie?", answer: "Eftersom det är felet som fyrdubblar svaret. Om du mätt 20 cm på tvären och skriver 20 som radie får du fyra gånger så stor volym. Kalkylatorn tar därför diameter direkt." },
+        { question: "Hur många liter går det på en kubikmeter?", answer: `1 m³ = ${LITER_PR_KUBIKMETER} liter, eftersom en kubikmeter är 100 cm × 100 cm × 100 cm = 1.000.000 cm³ och det går 1.000 cm³ på litern. Kalkylatorn visar därför båda talen från samma beräkning.` },
+        { question: "Hur räknar man ut volym i Excel?", answer: "Lådans volym är bara =A1*B1*C1. Cylinderns är =PI()*(A1/2)^2*B1, där A1 är diametern och B1 höjden i meter. Sfärens är =4/3*PI()*(A1/2)^3." },
+        { question: "Vad är skillnaden mellan area och volym?", answer: "Area är ytan storlek i m² — det är vad /kvadratmeterkalkylatorn räknar. Volym är utrymmet innanför kroppen i m³. En låda på 2 × 1 × 0,5 m har en area på 10 m² (golvet) och en volym på 1 m³." },
       ],
     },
     "sparemaal": {
