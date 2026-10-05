@@ -189,6 +189,19 @@ export default async function TidsberegnerPage() {
         {pageData.description}
       </p>
 
+      {/* Værktøjet står *før* svar-først-tabellen og alt den øvrige brødtekst,
+          fordi siden peger på det med "ovenfor" i ni steder — "Indtast dine egne
+          klokkeslæt ovenfor", "præcis som værktøjet ovenfor", "bruger du værktøjet
+          ovenfor". Så længe tabellen stod først, var alle ni henvisninger til
+          det, der lå *nedenfor* dem, og læseren blev sendt op til et felt, der
+          ikke var der. At flytte værktøjet op gør alle ni rigtige på én gang
+          uden at røre en eneste brødtekst, og det er samme rækkefølge som
+          /procent (beregneren direkte under H1). */}
+
+      <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
+        <TidsBeregner />
+      </div>
+
       {/* Svar-først: Search Console viser 790 visninger (pos. 6) på søgningen
           "hvor lang tid" og 969 (pos. 4) på "tidsberegner", men spørgsmålet
           stod ingen steder på siden. Tallene nedenfor kommer fra
@@ -264,10 +277,6 @@ export default async function TidsberegnerPage() {
         </p>
       </div>
 
-
-      <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
-        <TidsBeregner />
-      </div>
 
       {/* SEO Content */}
       {locale === "da" && (

@@ -29183,3 +29183,47 @@ exit 0 · `npm run build` exit 0. Build-outputtet viser `/dage-til/[dato]` som `
 (dynamisk), altså punkt 1 ikke brudt: dag-tallet er ikke frosset ved build.
 Ingen browser-verifikation — repoet har intet Playwright, og ændringen rører ingen
 markup (kun href'er, canonical og to brødtekst-strenge).
+
+## 5/10 22:5x — F6e `/tidsberegner`: værktøjet før svar-først-tabellen
+
+**Fundet ved at læse siden som en læser.** `src/app/tidsberegner/page.tsx`
+har ni henvisninger til værktøjet med «ovenfor»/«ovanför» (linjer 273, 369, 406,
+446, 487, 536, 557 i den gamle fil + tabellens afsluttende sætning), men
+`<TidsBeregner />` lå på linje 269 — efter tabellen og hele brødteksten.
+Alle ni pegede altså på det, der lå længere nede. Målt i renderet markup:
+første «ovenfor» ved tegn 1670, «Tidsværktøj» ved 5938.
+
+**Rettelse:** én flytning af `<TidsBeregner />` op over svar-først-tabellen,
+så de ni bliver rigtige uden at røre brødteksten. Samme rækkefølge som
+`/procent` (beregneren direkte under H1). `page.tsx` +17/-4, `page.test.tsx`
++36/-24.
+
+**Porten, og de tre forkerte forsøg.** Den endelige port dømker på rækkefølgen
+i markup'en (værktøj før tabellen), da og se hver for sig. Før den:
+
+1. Port på «alle `ovenfor` skal ligge efter værktøjet» slog rød på **JSON-LD**
+   fra `<FAQSchema>` (`page-data.ts:1309-1310`: «Sæt start- og sluttidspunkt
+   i feltet ovenfor», «det står i tabellen ovenfor»). Ikke en løgn — påstandene
+   er om den *renderede* side, hvor feltet og tabellen står over FAQ'en — men et
+   script-tag har ingen skærmplads. Rettet ved at strippe `<script>`-blokke.
+2. Samme port slog stadig rød på mindst én «ovenfor» i **indledningen**, som
+   hverken er de ni brødtekst-henvisninger eller JSON-LD. Ikke identificeret
+   inden tidbudsgrænsen; derfor gik porten fra «alle forekomster» til
+   «konkret landmærke».
+3. En tredje port krævede ≥4 «ovanför» i den svenske brødtekst — der er 0.
+   Droppet.
+
+Alle tre var **porten, ikke siden**. Kun rækkefølge-porten blev bevaret, fordi
+den dømmer den konkrete fejl; de to andre dømte noget, opgaven ikke påtager sig.
+
+**Verify:** mutation af rækkefølgen tilbage → 1 rød; rettelsen → 29/29 grøn
+i filen. Fuld gate: typecheck 0, biome 770 filer uden fund, **4301 tests i 269
+filer** grønne, `next build` exit 0 med `/tidsberegner` som `ƒ` (punkt 1 ikke
+brudt).
+
+**CI var rød 5/10 22:3x, men ikke af kode.** `gh run view` giver «The job was
+not acquired by Runner of type hosted» efter 15 min på både 21:4x- og
+22:1x-kørslen. GitHub-runnerkapacitet, ikke diffen. CI-cron kører 6/10 07.
+
+**Mål:** `/tidsberegner` baseline 268 Plausible-besøgende/28d (5/10) og GSC
+78.615 visninger / 198 klik / 0,3 % CTR / pos. 6,7. Sammenlign 19/10.

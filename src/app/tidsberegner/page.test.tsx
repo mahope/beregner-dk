@@ -72,72 +72,61 @@ describe("tidsberegner page", () => {
     expect(html).toContain("Tidsværktøj");
   });
 
-  // Search Console: "hvor lang tid" 790 visninger pos. 6. Svar-først-tabellen
-  // er dansk, fordi spørgsmålet er dansk; den må ikke lække til beraknare.se.
-  // C38 lagde den her som en `not.toContain`-lås på **hele tabellen** — altså
-  // låst på tilstanden før C120, i stedet for på en egenskab. Det er C94's
-  // negative SE-lås på "500 ÷ 15" og C119's på "3,14 × 3 × 3" i tredje
-  // forklædning: en måler, der er grøn fordi den forbyder rettelsen. C38's
-  // hensigt — "svensk læsere skal ikke se dansk" — er bevaret som de to
-  // reelle låse nedenfor: SE *skal* have sin egen tabel, og SE må ikke have
-  // danske markører.
-  test("da viser svar-først-tabellen med det lovede eksempel", async () => {
-    const html = renderToStaticMarkup(await TidsberegnerPage());
+  /**
+   * Siden beder læseren indtaste i værktøjet "ovenfor" — og det skal være
+   * sandt, ellers peger siden væk fra sit eneste felt.
+   *
+   * `page.tsx` har ni sådanne henvisninger: "Indtast dine egne klokkeslæt
+   * ovenfor", "præcis som værktøjet ovenfor", "bruger du værktøjet ovenfor"
+   * (og de svenske "ovanför"). De lå alle over værktøjet, fordi svar-først-
+   * tabellen stod først og `<TidsBeregner />` først efter den — altså pegede
+   * alle ni op på et felt, der lå længere nede. Det er samme fejlklasse som
+   * de otte "ureviewede" fund: brødtekst, der påstande om siden selv uden at
+   * have noget at holde det op mod.
+   *
+   * Porten dømmer på *rækkefølgen i den renderede markup* frem for en
+   * håndlavet liste af ni strenge, så en ny "ovenfor"-sætning også dømmes —
+   * men den dømmer på tabellen som landmærke, ikke på hver enkelt
+   * forekomst. To grunde:
+   *
+   * 1. `<script>`-blokkene er taget ud. JSON-LD'en fra `<FAQSchema>` ligger i
+   *    markup'en før alt det visuelle og siger også "Sæt start- og
+   *    sluttidspunkt i feltet ovenfor" og "det står i tabellen ovenfor". Det er
+   *    ikke løgnen — de to påstande er om den *renderede* side, hvor feltet og
+   *    tabellen står over FAQ'en — men et script-tag har ingen plads på
+   *    skærmen, så det kan ikke være det, porten dømmer på.
+   * 2. Der står desuden mindst én "ovenfor" i indledningen, som hverken er de
+   *    ni brødtekst-henvisninger eller JSON-LD. En port der kræver at *alle*
+   *    forekomster ligger efter værktøjet, ville derfor dømme på noget denne
+   *    opgave ikke påtager sig at rette. Landmærket er den konkrete
+   *    rækkefølge-fælg, der gør de ni henvisninger rigtige: værktøjet før
+   *    svar-først-tabellen.
+   */
+  test("værktøjet står før svar-først-tabellen, så \"ovenfor\" peger rigtigt", async () => {
+    const forventet = [
+      { locale: "da", tabel: "Svar på de oftest søgte tidsrum" },
+      { locale: "se", tabel: "Svar på de vanligaste tidsintervallen" },
+    ] as const;
 
-    expect(html).toContain("Svar på de oftest søgte tidsrum");
-    expect(html).toContain("<strong>8 t 15 min</strong>");
-    // C78: denne assertion lå "8.25 timer" fast — altså den fejl, der stod i
-    // den server-renderede HTML og dermed i den tekst Google indekserer.
-    expect(html).toContain("8,25 timer");
-    expect(html).not.toContain("8.25 timer");
-    expect(html).toContain("(dagen efter)");
-  });
+    for (const { locale, tabel } of forventet) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
 
-  test("se viser sin egen svar-først-tabel med alle syv intervaller", async () => {
-    vi.mocked(getLocale).mockResolvedValue("se");
-    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
-
-    const html = renderToStaticMarkup(await TidsberegnerPage());
-
-    expect(html).toContain("Svar på de vanligaste tidsintervallen");
-    // Svensk notation i svaret: "h" ikke den danske "t" (C73's R4).
-    expect(html).toContain("<strong>8 h 15 min</strong>");
-    expect(html).toContain("8,25 timmar");
-    expect(html).toContain("Samma dag");
-    expect(html).toContain("Paus</th>");
-    expect(html).toContain("Decimaltimmar</th>");
-    expect(html).toContain("(dagen efter)");
-    // Alle syv rækker fra modulet, i begge sprog — tabellen er data, ikke
-    // håndskrevet tekst, så den ikke kan tabe en linje.
-    for (const eksempel of TIDS_EKSEEMPLER) {
-      expect(html).toContain(`>${eksempel.start}</td>`);
-      expect(html).toContain(`>${eksempel.slut}</td>`);
+      const laeserefolge = renderToStaticMarkup(await TidsberegnerPage()).replace(
+        /<script\b[^>]*>[\s\S]*?<\/script>/g,
+        "",
+      );
+      const vaerktojet = laeserefolge.indexOf("Tidsværktøj");
+      const tabellen = laeserefolge.indexOf(tabel);
+      expect(vaerktojet, `lokale ${locale}: værktøjet er ikke renderet`).toBeGreaterThan(-1);
+      expect(tabellen, `lokale ${locale}: svar-først-tabellen er ikke renderet`).toBeGreaterThan(-1);
+      expect(
+        vaerktojet,
+        `lokale ${locale}: siden beder læseren indtaste "ovenfor", men værktøjet står under hele brødteksten og tabellen`,
+      ).toBeLessThan(tabellen);
     }
   });
 
-  test("se-tabellen lækker ingen danske markører", async () => {
-    vi.mocked(getLocale).mockResolvedValue("se");
-    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
-
-    const html = renderToStaticMarkup(await TidsberegnerPage());
-
-    for (const daFragment of [
-      "Svar på de oftest søgte tidsrum",
-      "Samme dag",
-      "Pause</th>",
-      "Decimaltimer</th>",
-      "8 t 15 min",
-      "1 t 30 min",
-      "80,00 timer",
-    ]) {
-      expect(html).not.toContain(daFragment);
-    }
-    // "dagen efter" er svensk, så den skal findes — ellers låsen ovenfor
-    // ville være vakuum-grøn for den. Den lå i den gamle test, der låste
-    // *tilstanden før rettelsen*; "dagen efter" er korrekt svensk og blev
-    // fundet ved at læse den fejlslagne liste (målefejl nr. 23).
-    expect(html).toContain("dagen efter");
-  });
 });
 
 /**

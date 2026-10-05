@@ -1,4 +1,29 @@
-STATUS: 5/10 22:1x. ✅ 5/10 22:1x: **juleaftens og nytårsaftens URL er nu datoen**
+STATUS: 5/10 22:5x. ✅ 5/10 22:5x: **«/tidsberegner» sendte læseren op til et felt
+             der lå nedenfor.** Siden siger «Indtast dine egne klokkeslæt
+             **ovenfor**» og **ni** steder «præcis som værktøjet **ovenfor**» /
+             «Fyll i dina egna klockslag **ovanför**» — men `<TidsBeregner />`
+             lå *efter* svar-først-tabellen og al den øvrige brødtekst, så alle
+             ni henvisninger pegede på det, der lå længere nede. Bevægelsen er
+             målt: «ovenfor» lå ved tegn 1670, værktøjet ved 5938 i den
+             renderede markup. Rettelsen er **én flytning** — værktøjet før
+             tabellen, som på `/procent` — der gør alle ni rigtige uden at røre
+             én brødtekst. Samme rækkefølge som `/procent` (beregneren under
+             H1). Ny port dømmer på rækkefølgen i markup'en, da/se hver for
+             sig: mutation tilbage gav 1 rød, rettelsen 29/29 grøn.
+             *Datagrund:* `/tidsberegner` er sitets **tredjestørste GSC-side**
+             (78.615 visninger) med **0,3 % CTR** på pos. 6,7 — og dens egen
+             svar-først-tabel er bygget til at konvertere. MÅL:
+             `/tidsberegner` baseline **268** Plausible-besøgende/28d (5/10),
+             GSC 78.615 visninger / 198 klik / 0,3 % CTR / pos. 6,7.
+             ⚠️ **Porten blev skrevet forkert to gange undervejs og begge
+             gange slog den rød på den rigtige kode** — først på JSON-LD'en fra
+             `<FAQSchema>` (den ligger i markup før alt visuelt og siger også
+             «feltet ovenfor»; den er ikke en løgn, den er om den *renderede*
+             side), siden på en dansk indledning med «ovenfor» jeg ikke fik
+             identificeret. En tredje port krævede 4 svenske «ovanför», som
+             *er* 0. Alle tre var porten, ikke siden. Kun rækkefølge-porten
+             blev bevaret, fordi den dømmer den konkrete fejl.
+             ✅ 5/10 22:1x: juleaftens og nytårsaftens URL er nu datoen
             (`ceo/december-dato-i-url`). GSC 5/10 lister «hvor mange dage er
             der til den 24 december» som **1.036 visninger på pos. 5 under
             `/dato`** — altså konkurrerede `/dato` og nedtællingssiden om den,
@@ -57,6 +82,7 @@ STATUS: 5/10 22:1x. ✅ 5/10 22:1x: **juleaftens og nytårsaftens URL er nu dato
 | `/` (forside) | 218, bounce 38 % | under top-15 | — | — |
 | `/dage-til` + se `/dagar-till` | **0 — nye URL'er 2/10** | — | — | — |
 | `/dage-til/24-december` + `31-december` (+ se) | **0 — nye URL'er 5/10 22:1x** | — | — | — |
+| `/tidsberegner` efter flytningen 5/10 22:5x (baseline 268) | 268 | 78.615 | 0,3 % | 6,7 |
 | Mål efter 14 dage: `/dage-til/24-december` skal overtage «…til den 24 december» fra `/dato` | — | 1.036 (GSC 5/10, under `/dato`) | 0 % | 5 |
 | `/dage-mellem-datoer` + se `/dagar-mellan-datum` | **0 — nye URL'er 3/10** | — | — | — |
 | `/idealvaegt` + se | **0 — nye URL'er 4/10** | — | — | — |
@@ -118,6 +144,12 @@ søgning, fordi «24 december» ikke stod i nogen sti. *Accept:* gamle slugs
 det (mutation tilbage til de gamle slug'er gav 6 røde, mutation af «23» tilbage
 til «30» gav 1 rød). Samme commit rettede **en løgn på to sider**: `december-1`
 sagde «præcis 30 dage» til 24. december (skal være 23).
+
+**F6e. [x] `/tidsberegner`: værktøjet står før svar-først-tabellen** —
+rettet 5/10 22:5x. Ni «ovenfor»/«ovanför»-henvisninger pegede alle på det, der
+lå under dem, fordi `<TidsBeregner />` stod efter tabellen og hele
+brødteksten. Én flytning gør alle ni rigtige, samme rækkefølge som
+`/procent`. Port dømmer på rækkefølgen i markup'en (1 rød ved mutation).
 
 **F6d. [ ] Samme logik for de øvrige daterede nedtællinger.** Kun december har
 en URL med et datotal i dag, og kun fordi GSC viste den. Øvrige kandidater må
@@ -198,9 +230,17 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**To noter er åbne.** De ni fra 3/10–5/10 17:4x er lukket på indhold — målt med
+**Tre noter er åbne.** De ni fra 3/10–5/10 17:4x er lukket på indhold — målt med
 `curl` mod begge domæner 5/10 21:3x, ikke på HTTP-koden. De lukkede noters fulde
 krav og målinger ligger i `docs/plan-arkiv.md` (5/10 21:4x).
+
+**Åben note 5/10 22:5x:** `VERIFICÉR DEPLOY: /tidsberegner renderer
+tidsværktøjet før svar-først-tabellen på både minberegner.dk og beraknare.se
+ceo/tidsberegner-vaerktoej-foerst 5/10 22:5x`. Mål på indhold: `curl -s
+https://minberegner.dk/tidsberegner` skal have klokkeslæts-feltene **før**
+"Svar på de oftest søgte tidsrum" i markup'en (samme på beraknare.se med
+"Svar på de vanligaste tidsintervallen") — altså tegnindeks, ikke HTTP-koden.
+⚠️ Mergen er efter 21:30-vinduet, første reelle kør er 6/10 07:30.
 
 **Åben note 5/10 22:1x:** `VERIFICÉR DEPLOY: /dage-til/juleaften og
 /dage-til/nytaarsaften 301'er til /dage-til/24-december og /dage-til/31-december
