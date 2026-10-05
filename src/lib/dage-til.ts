@@ -788,9 +788,9 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
               "I Danmark er der halv fridag, når grundlovsdagen holdes på en hverdag. Kalenderen markerer den derfor ikke automatisk som en rød dag.",
           },
           {
-            question: "Hvornår ligger grundlovsdagen i 2026?",
+            question: "Hvornår ligger grundlovsdagen?",
             answer:
-              "Den ligger 5. juni 2026 uanset hvilken kalender du slår op — det er datoen, der tæller, ikke ugedagen.",
+              "Den ligger 5. juni hvert år — det er datoen, der tæller, ikke ugedagen. 5. juni 2026 var en fredag, så den blev holdt som halv fridag.",
           },
         ],
       },
@@ -1420,14 +1420,14 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         question: "Hvor mange dage er der til sommerferie?",
         facts: [
           "Sommerferien begynder altid den sidste lørdag i juni. I 2026 er det 27. juni, i 2027 26. juni og i 2028 24. juni.",
-          "Startdatoen er fastlagt i folkeskoleloven, mens **slutdatoen** er kommunal — de fleste holder i tre til fem uger.",
+          "Startdatoen er fastlagt i folkeskoleloven § 14 a stk. 2 (LBK 2025/1100): «Elevernes sommerferie begynder den sidste lørdag i juni», mens **slutdatoen** er kommunal — de fleste holder i tre til fem uger.",
           "Er din kommune ikke færdig med undervisningen, når loven siger, kan den flytte starten, så tjek altid din egen kommunes ferieplan.",
         ],
         faq: [
           {
-            question: "Hvornår begynder sommerferien i 2026?",
+            question: "Hvornår begynder sommerferien?",
             answer:
-              "Lovens dato er den **sidste lørdag i juni**. I 2026 er det 27. juni 2026, i 2027 26. juni og i 2028 24. juni.",
+              "Lovens dato er den **sidste lørdag i juni** (folkeskoleloven § 14 a stk. 2). I 2026 er det 27. juni 2026, i 2027 26. juni og i 2028 24. juni.",
           },
           {
             question: "Hvornår slutter sommerferien?",
@@ -1435,9 +1435,13 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
               "Det er ikke fastlagt i loven. Hver kommune fastsætter slutdatoen, og den ligger typisk tre til fem uger efter starten, så en klasse kan have fri, når en anden har undervisning.",
           },
           {
-            question: "Kan sommerferien begynde senere end 27. juni?",
+            // Spørgsmålet må ikke nævne et årstal eller en dato: nedtællingen
+            // peger på *næste* lovlige start, så 6/10 2026 viste siden «27. juni»
+            // i spørgsmålet og «26. juni 2027» i målet. Loven har én regel for alle
+            // år, så spørgsmålet er skrevet som regel og ikke som dato.
+            question: "Kan sommerferien begynde senere end den sidste lørdag i juni?",
             answer:
-              "Kun hvis din kommune beslutter det. Folkeskoleloven fastlægger starten til den sidste lørdag i juni, og det er den dato, alle børn har fri fra, medmindre kommunen har besluttet andet.",
+              "Kun hvis din kommune beslutter det. Folkeskoleloven § 14 a stk. 2 fastlægger starten til den sidste lørdag i juni, og det er den dato, alle børn har fri fra, medmindre kommunen har besluttet andet.",
           },
           {
             question: "Hvornår starter sommerferien, når loven siger den er begyndt?",
@@ -1466,9 +1470,9 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         ],
         faq: [
           {
-            question: "Hvornår er efterårsferien i 2026?",
+            question: "Hvornår er efterårsferien?",
             answer:
-              "Uge 42. Skolerne har fri mandag 12. til fredag 16. oktober 2026, og med weekenderne løber ferien fra lørdag 10. til søndag 18. oktober. Første skoledag igen er mandag 19. oktober.",
+              "Uge 42 hvert år. I 2026 har skolerne fri mandag 12. til fredag 16. oktober 2026, og med weekenderne løber ferien fra lørdag 10. til søndag 18. oktober. Første skoledag igen er mandag 19. oktober.",
           },
           {
             question: "Er efterårsferien samme dato i alle kommuner?",
@@ -1512,9 +1516,9 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         ],
         faq: [
           {
-            question: "Hvornår starter skolen i 2027?",
+            question: "Hvornår starter skolen?",
             answer:
-              "Skoleåret begynder 1. august, og 1. august 2027 er en **søndag**. Undervisningen starter derfor mandag 2. august 2027, og det er den dag nedtællingen tæller til. I 2026 var 1. august en lørdag, så den første undervisningsdag var mandag 3. august.",
+              "Skoleåret begynder 1. august, og falder den på en weekend, starter undervisningen næste hverdag — nedtællingen følger den dag. 1. august 2026 var en lørdag, så undervisningen startede mandag 3. august 2026, og 1. august 2027 er en **søndag**, så den begynder mandag 2. august 2027.",
           },
           {
             question: "Er skolestart altid 1. august?",

@@ -29440,3 +29440,55 @@ tabel, ikke målt trafik — urørt.
 er et alias med 301, altså et ekstra hop fra sitets næststørste side. `src/app/dato/
 page.tsx` peger nu på `/dage-til/31-december`, og `dato/page.test.tsx` fik et
 `not.toContain` på den gamle href ved siden af det nye `toContain`.
+
+---
+
+## 6/10 01:5x — dage-til: FAQ-spørgsmål med årstal + sommerferiens lovsats
+
+Nedtællingssiderne `/dage-til/[dato]` peger på det **næste** lovlige tidspunkt
+(`getNextAnchorDate`), altså næste år, når datoen er passeret. Fire FAQ-spørgsmål
+var skrevet med et årstal i sig, så de blev forkerte, netop som dagen efter at de
+var rigtige:
+
+| Side | Spørgsmål før | Modtal 6/10 2026 |
+|---|---|---|
+| `/dage-til/sommerferien` | «Hvornår begynder sommerferien i 2026?» | «26. juni 2027» |
+| `/dage-til/sommerferien` | «Kan sommerferien begynde senere end **27. juni**?» | lovens næste dato er 26. juni 2027 |
+| `/dage-til/efteraarsferien` | «Hvornår er efterårsferien i 2026?» | uge 42 i 2027 |
+| `/dage-til/skolestart` | «Hvornår starter skolen i 2027?» | 1. august 2028 (1/8 er tirsdag) |
+| `/dage-til/grundlovsdagen` | «Hvornår ligger grundlovsdagen i 2026?» | 5. juni 2027 |
+
+Sommerferien-spørgsmålet er det værste: «…senere end 27. juni?» stod oven over en
+nedtælling til 26. juni 2027, altså spørgsmålet sagde det modsatte af målet.
+
+Rettelse: spørgsmålene er skrevet som **regler** og svarene som **eksempler**
+(«5. juni hvert år — 5. juni 2026 var en lørdag», «Uge 42 hvert år. I 2026 …»).
+Ingen tal er opfundet; kun spørgsmålsteksten flyttede årstalet ned i svaret.
+
+**Målt i node (UTC, uafhængigt af TZ), fordi selve reviewen fangede én fejl i den
+nye tekst:** 5. juni 2026 er en **fredag** (ikke lørdag, som første udkast sagde),
+så grundlovsdagen blev holdt som halv fridag — den sætning stod i to commits
+efter at den var skrevet, og blev rettet i den samme. 1. august 2026 er en lørdag
+og 1. august 2027 en søndag (begge var allerede i teksten), og sidste lørdag i
+juni er 27. juni 2026, 26. juni 2027 og 24. juni 2028.
+
+**Lovsagen er verificeret, og den bekræfter koden.** ❓ «Ferielovens regel for
+sommerferiens startdato» (opgave 201) er lukket 6/10: folkeskoleloven § 14 a stk. 2
+(LBK 2025/1100) siger ordret «Elevernes sommerferie begynder den sidste lørdag i
+juni» — læst på `retsinformation.dk/eli/lta/2025/1100/pdf` 6/10 2026 og
+bekræftet i to uafhængige genudgivelser. Den alternative regel i ❓ («den lørdag i
+den kalenderuge, hvori 20. juni ligger») **findes ikke i loven**; koden har hele
+tiden haft den rigtige regel. `§ 14 a` står nu som kilde i teksten, fordi «det står
+i folkeskoleloven» uden paragraf er en påstand uden adresse (punkt 11).
+
+**Portene kan fejle:** tre nye i `dage-til.test.ts` — ingen FAQ-spørgsmål på nogen
+dage-til-side (begge sprog, alle events) må matche `\d{4}`, sommerferiens egen
+spørgsmål skal være regel-formuleringen, og lovens paragraf skal stå i facts.
+Mutation tilbage til de fire årstal og den gamle sætning gav **3 røde**.
+
+**Målt datagrund (dansk autocomplete 6/10 01:3x):** «hvor mange dage er der til
+sommerferie» er en af de ti rækker under «hvor mange dage», og fire separate
+søgninger («dage til sommerferie», «uger til sommerferie», «hvornår er
+sommerferien», «tid til sommerferie») gav **10 af 10** træffere om sommerferien —
+så klyngen er den mest efterspurgte i `/dage-til`-familien efter jul. Derfor er det
+denne side, der først blev rettet.

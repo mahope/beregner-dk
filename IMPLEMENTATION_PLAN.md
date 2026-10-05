@@ -1,66 +1,34 @@
-STATUS: 6/10 01:2x. ✅ 6/10 01:2x: **Forsidens sæsonbadge læste serverens
-              UTC-måned.** `getTrendingHrefs()` tog `new Date().getMonth()`, og
-              serveren står i UTC — så 1. januar, 1. april, 1. august og 1.
-              oktober bar de forrige sæsons beregnere i de to første timer.
-              Nu er den `getTrendingHrefs(today, locale)` og læser
-              `iDagPaSiden` fra `lokal-dato.ts`, samme regel som dage-til, alder
-              og dage-i-aaret. *Portene kan fejle:* testfilen sætter
-              `process.env.TZ = "UTC"`, fordi en dansk maskines kalendermåned *er*
-              site-tidszonens — det var grunden til at F6h's gamle port aldrig
-              kunne se fejlen, selv med et flyttet ur. Mutation tilbage til
-              `today.getMonth()` gav **3 røde**. Samme commit: `/dato` (1.100
-              besøgende) linkede til `/dage-til/nytaarsaften`, som siden 5/10 er
-              et 301-alias — den peger på `/dage-til/31-december`, og porten
-              låser den gamle href fra før fast med `not.toContain`.
-              ✅ 6/10 00:4x: **Rumfang manglede som beregner.** `/kvadratmeter`
-              regner kun areal (m²), og dansk autocomplete målt 00:2x har 10 af
-              10 træffere under «hvordan beregner man rumfang», som er en figur.
-              `/rumfang` regner kasse, cylinder, kugle, kegle og pyramide i m³ og
-              liter og tager **diameter** — den fejl der ganges fire gange,
-              fordi cirkelarealet har radius i anden potens. Se feature-kø.
-              *Portene kan fejle:* mutation af keglens ⅓ gav 2 røde, mutation af
-              cylindertallet i `metaTitle` til grundarealet gav 1 rød. Titles i da
-              og se, ingen `no`-side (⛔ `beregner.no` er et andet site).
-              ✅ 6/10 00:2x: **Den svenska `/tidszone` skrev tre
-              udenlandske ord.** Målt i *renderet* markup med `locale: "se"`:
-              landetabellen skrev `<td>New Zealand</td>` (svensk er **Nya
-              Zealand**), landelisten skrev «Türkiet» — tysk, fordi
-              `klokken-i.ts` skrev `navnSe: "Türkiet"` mens resten af koden
-              skriver «Turkiet» — og to lister sluttede med dansk «og»
-              («Grekland og Spanien följer Sverige», «Sydney og Auckland är
-              skillnaden densamma»). Rodårsagen for landetabellen er at
-              `landSe` var **valgfrit** og faldt tilbage på `landDa`, så et nyt
-              land automatisk fik det danske navn (samme fejl som C155's
-              «Grønland» med ø). Feltet er nu udbudt for alle elleve rækker, så
-              typen tvinger hvert land til at svare; konjunktionen læses af
-              `spoergsprog`. *Portene kan fejle:* en mutation af hver af de tre
-              rettelser gav 6 røde (bl.a. «expected 'Türkiet' to be
-              'Turkiet'», «to not include 'New Zealand'», «to contain
-              'Grönland, Grekland och Spanien följer Sverige'»). To tests låste
-              fejlen fast — de skrev «New Zealand hedder det samme på svenska»
-              og `toBe("Türkiet")` — de er rettet, ikke slettet.
-              *Datagrund:* `/tidszone` 4.636 GSC-visninger på beraknare.se
-              (0,3 % CTR, pos. 7,9) + 24.829 på minberegner.dk. Mål: ingen
-              `>New Zealand<` i `<td>` og intet `Türkiet` på beraknare.se.
-              ✅ 6/10 00:0x landetabellens tidsforskelser for Australien og New
-              Zealand · ✅ 5/10 23:1x sæsonbadge på dansk og svensk · ✅ 5/10
-              22:5x `/tidsberegner`: værktøjet over tabellen · ✅ 5/10 22:1x
-              juleaftens/nytårsaftens URL er datoen · ✅ 5/10 21:4x efterlønnens
-              deltidstal 2/3 · ✅ 5/10 17:4x `/tidszone`: sydhalvkloden + Nuuk ·
-              ✅ 5/10 15:0x fire rå procenter · ✅ 5/10 14:1x sidebarlens liste i
-              målt trafikrækkefølge · ✅ 4/10 fire review-fund + CEO-køens punkt 0
-              · **CEO-køens punkt 0 er rettet** (Valborg 30. april, svensk
-              påskafton lørdag, fast dansk sankthans, `Europe/Copenhagen` i
-              `toUtcMidnight` — genverificeret 6/10 00:2x med grep). Alt ældre:
-              `docs/plan-arkiv.md`. ✅ CI grøn 5/10 21:26.
-              PR-TJEK: 6/10 01:0x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
-              **Gate:** `npm run typecheck && npm run lint && npm run test`
-              (CI kører også `next build`). 6/10 01:2x: typecheck 0, lint 0
-              (775 filer), **4345 tests i 271 filer** grønne. `npm test` skriver desuden to kendte
-              scanner-rækker («FEJL: 34 …» i `/promille`, «FEJL: 1 …» i
-              `/procent») der er røde på `master` og ikke berørt her — se ❓.
-              **Målt 6/10 00:2x:** planen havde to identiske STATUS-blokke (6 KB
-               dobbelt). De er foldet sammen, og den ældre er arkiveret.
+STATUS: 6/10 02:0x. ✅ 6/10 01:5x: **dage-til's FAQ holdt op at være rigtige.**
+Fire spørgsmål på ferie-siderne havde et årstal i sig («Hvornår begynder
+sommerferien i 2026?», «…senere end 27. juni?»), mens nedtællingen altid peger
+på det *næste* år: 6/10 skrev siden «27. juni» over et mål på 26. juni 2027.
+Spørgsmålene er nu regler, svarene er eksempler, og porten dømmer alle events i
+begge sprog. Samme commit: folkeskoleloven § 14 a stk. 2 står som kilde — ❓
+«Ferielovens regel for sommerferiens startdato» er **lukket**: loven siger
+«Elevernes sommerferie begynder den sidste lørdag i juni», altså den regel
+koden hele tiden havde. Mutation gav 3 røde. Målt: 10 af 10 danske
+autocomplete-træffere i sommerferie-klyngen. Se arkivet.
+✅ 6/10 01:2x: forsidens sæsonbadge læste serverens UTC-måned — nu
+`iDagPaSiden` fra `lokal-dato.ts`; samme commit pegede `/dato` på
+`/dage-til/31-december` i stedet for et 301-alias. Mutation 3 røde.
+✅ 6/10 00:4x `/rumfang` som beregner (kasse, cylinder, kugle, kegle, pyramide,
+diameter, m³ + liter; 31 porte). ✅ 6/10 00:2x svensk `/tidszone` skrev
+«New Zealand», «Türkiet» og dansk «og» — `landSe` er nu påkrævet for alle
+elleve rækker; 6 røde ved mutation. ✅ 6/10 00:0x landetabellens
+dagsafhængige tidsforskil (Australien 10/8, New Zealand 12/10).
+✅ 5/10 21:4x efterlønnens deltidstal 2/3. ✅ 5/10 22:1x juleaftens/nytårsaftens
+URL er datoen. ✅ 5/10 22:5x `/tidsberegner`: værktøjet før tabellen.
+✅ 5/10 23:1x «Populær nu» i stedet for «Trending». ✅ 5/10 17:4x `/tidszone`:
+sydhalvkloden + Nuuk. ✅ 5/10 15:0x fire rå procenter. ✅ 5/10 14:1x
+sidebarlens liste i målt trafikrækkefølge. ✅ 4/10 CEO-køens punkt 0 (Valborg,
+svensk påskafton, fast dansk sankthans, `Europe/Copenhagen` i `toUtcMidnight`).
+Alt ældre: `docs/plan-arkiv.md`. ✅ CI grøn 5/10 21:26.
+PR-TJEK: 6/10 01:0x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (CI kører også
+`next build`). 6/10 01:4x: typecheck 0, lint 0 (775 filer), **4348 tests i 271
+filer** grønne. Ét tidligere fuldt suitekørsel gav 1 rød i `locale-leak-gate.test.ts`,
+som scanneren kører i en udspawnet proces og som er grøn 3/3 i isolation og i
+to senere fulde kørsler — urørt, se ❓ om skanner-rækkerne.
 ## Fase 3 — trafik-drevet
 
 ### Baselines (målt 30/9, bliv til næste måling)
@@ -268,10 +236,23 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Fire noter er åbne.** (Den 5/10 17:5x er delvist lukket — se egen linje.) De ti
-fra 3/10–5/10 er lukket på indhold — målt med `curl` mod begge domæner, ikke på
-HTTP-koden. De lukkede noters fulde krav og målinger ligger i
-`docs/plan-arkiv.md` (senest 6/10 00:1x).
+**Åben note 6/10 01:5x:** `VERIFICÉR DEPLOY: /dage-til/sommerferien spørger «Kan
+sommerferien begynde senere end den sidste lørdag i juni?» og «Hvornår begynder
+sommerferien?» (ikke «…i 2026?» / «…end 27. juni?»), og facts' citerer
+folkeskoleloven § 14 a stk. 2 — samme måling på /dage-til/efteraarsferien,
+/dage-til/skolestart og /dage-til/grundlovsdagen
+ceo/dage-til-faaarstal 6/10 01:5x`. Mål på indhold: `curl -s
+https://minberegner.dk/dage-til/sommerferien | grep -o 'senere end 27. juni' |
+wc -l` → **0** og `grep -o 'folkeskoleloven § 14 a stk. 2' | wc -l` → **> 0**.
+⚠️ Mergen er efter 21:30-vinduet, første reelle kør er 6/10 07:30.
+
+**Ti noter er åbne.** Alle ti er merges efter 21:30-vinduet 5/10, så de bliver
+målbare i 07:30-kørslen 6/10. **Næste iteration skal måle alle ti på indhold i
+én kørsel** (`grep -o … | wc -l` mod begge domæner) og lukke dem med `DEPLOY OK
+6/10`; en note der stadig ikke er live efter to vinduer bliver `DEPLOY-MISSING`.
+(Den 5/10 17:5x er delvist lukket — se egen linje.) De ti fra 3/10–5/10 er lukket
+på indhold — målt med `curl` mod begge domæner, ikke på HTTP-koden. De lukkede
+noters fulde krav og målinger ligger i `docs/plan-arkiv.md` (senest 6/10 01:5x).
 
 ⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10 00:1x):
 Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer 1 for
@@ -462,11 +443,12 @@ wc -l` → **> 0**, `curl -s https://minberegner.dk/sitemap.xml | grep -o
   kildegrund mangler også der. **Ét skærmbillede fra en kommunes ferieplan
   2026/2027 (helst to kommuner) låser vinterferie, påskeferie og efterårsferie
   på én gang.**
-- ❓ **Ferielovens regel for sommerferiens startdato** (opgave 201).
-  `/dage-til/summerferien` siger «sommerferien begynder altid den **sidste lørdag
-  i juni**», og hævder det står i folkeskoleloven (2024). Er reglen «den lørdag i
-  den kalenderuge, hvori 20. juni ligger», står den siden 7 dage forkert i de
-  fleste år. Koden er bevidst urørt.
+- ✅ **Ferielovens regel for sommerferiens startdato** (opgave 201) — **lukket
+  6/10 01:5x.** Folkeskoleloven § 14 a stk. 2 (LBK 2025/1100) siger ordret
+  «Elevernes sommerferie begynder den sidste lørdag i juni», læst på
+  retsinformation.dk 6/10 2026. Den regel ❓ frygtede («den lørdag i den
+  kalenderuge, hvori 20. juni ligger») står ikke i loven, så koden har haft
+  den rigtige regel hele tiden. Paragrafen står nu som kilde i sidens tekst.
 - ❓ **`ceo/boliglaan-procent`-noten er for snævert formuleret** (3/10 12:47).
   Den kræver «95,0 % belåning» og «5,05 % p.a.», men det er interpolationer fra
   brugerens felter og flytter sig med standardværdierne. Skal dømmes på 0 `\d%`

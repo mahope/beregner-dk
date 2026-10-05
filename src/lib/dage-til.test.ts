@@ -807,6 +807,48 @@ describe("sommerferien som dansk dato", () => {
     expect(resolveDageTilSlug("sommerferien", "da")?.isOwnLocale).toBe(true);
   });
 
+  // FAQ'en må ikke nævne et årstal eller en dato i spørgsmålet: nedtællingen
+  // peger på det *næste* lovlige start, så 6/10 2026 skrev siden «Kan
+  // sommerferien begynde senere end 27. juni?» oven over et mål på 26. juni
+  // 2027. Loven har én regel for alle år, så spørgsmålet skal sige reglen.
+  test("FAQ-spørgsmålet er ikke bundet til et årstal eller en dato", () => {
+    const faq = sommerferien?.da.copy.faq ?? [];
+    for (const punkt of faq) {
+      expect(punkt.question).not.toMatch(/\d{4}/);
+      expect(punkt.question).not.toMatch(/\d+\. (juni|august)/);
+    }
+    expect(
+      faq.some((p) => p.question === "Kan sommerferien begynde senere end den sidste lørdag i juni?")
+    ).toBe(true);
+  });
+
+  // Samme fælde i alle dage-til-siders FAQ, begge sprog: et spørgsmål med et
+  // årstal i sig holder ikke, når siden næste år tæller til næste dato.
+  // Fire spørgsmål gjorde det (grundlovsdag, sommerferien, efterårsferien,
+  // skolestart) — de er skrevet som regler i stedet.
+  test("intet FAQ-spørgsmål på nogen dage-til-side binder sig til et år", () => {
+    const boede: string[] = [];
+    for (const event of DAGE_TIL_EVENTS) {
+      for (const arm of ["da", "se"] as const) {
+        for (const punkt of event[arm]?.copy.faq ?? []) {
+          if (/\d{4}/.test(punkt.question)) {
+            boede.push(`${arm}/${event.id}: ${punkt.question}`);
+          }
+        }
+      }
+    }
+    expect(boede).toEqual([]);
+  });
+
+  // Punkt 11: lovpåstande skal kunne slås op. Folkeskoleloven § 14 a stk. 2
+  // (LBK 2025/1100) siger «Elevernes sommerferie begynder den sidste lørdag i
+  // juni» — læst på retsinformation.dk 6/10 2026. Kilden skal stå på siden,
+  // ellers er «det står i folkeskoleloven» en påstand uden adresse.
+  test("lovens paragraf er citeret, så påstanden kan efterprøves", () => {
+    const tekst = sommerferien?.da.copy.facts.join(" ") ?? "";
+    expect(tekst).toContain("folkeskoleloven § 14 a stk. 2");
+  });
+
   test("tæller til den sidste lørdag i juni", () => {
     // 29. september 2026 → 26. juni 2027 = 270 dage (talt i node, ikke i hovedet).
     const svar = getDageTilAnswer(sommerferien!, "da", iso("2026-09-29"));
