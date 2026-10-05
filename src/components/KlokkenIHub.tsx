@@ -27,7 +27,7 @@ const hubCopy: Record<
   {
     h1: string;
     title: (lande: number) => string;
-    lead: string;
+    lead: (lande: number) => string;
     listHeading: string;
     listBody: string;
     converter: string;
@@ -37,8 +37,8 @@ const hubCopy: Record<
   da: {
     h1: "Hvad er klokken i …?",
     title: (lande) => `Hvad er klokken i …? Klokken i ${lande} lande lige nu`,
-    lead:
-      "Klokken lige nu i tolv lande, med tidsforskellen til Danmark. Rækkerne er sorteret efter hvor tæt landet ligger på dansk tid, og hver linje fører til en side med hele tidszonen og flere byer.",
+    lead: (lande) =>
+      `Klokken lige nu i ${lande} lande, med tidsforskellen til Danmark. Rækkerne er sorteret efter hvor tæt landet ligger på dansk tid, og hver linje fører til en side med hele tidszonen og flere byer.`,
     listHeading: "Klokken i landene lige nu",
     listBody:
       "Tallet er byens egen tid i det øjeblik siden er hentet, og forskellen er målt mod klokken i Danmark. USA står med fire byer, fordi landet har fire tidszoner.",
@@ -64,8 +64,8 @@ const hubCopy: Record<
   se: {
     h1: "Vad är klockan i …?",
     title: (lande) => `Vad är klockan i …? Klockan i ${lande} länder just nu`,
-    lead:
-      "Klockan just nu i tolv länder, med tidsskillnaden till Sverige. Raderna är sorterade efter hur nära landet ligger svensk tid, och varje rad leder till en sida med hela tidszonen och flera städer.",
+    lead: (lande) =>
+      `Klockan just nu i ${lande} länder, med tidsskillnaden till Sverige. Raderna är sorterade efter hur nära landet ligger svensk tid, och varje rad leder till en sida med hela tidszonen och flera städer.`,
     listHeading: "Klockan i länderna just nu",
     listBody:
       "Talet är stadens egen tid i det ögonblick sidan hämtas, och skillnaden är mätt mot klockan i Sverige. USA står med fyra städer, eftersom landet har fyra tidszoner.",
@@ -208,7 +208,9 @@ export async function KlokkenIHubRoute({ prefix }: { prefix: string }) {
       />
 
       <h1 className="text-3xl md:text-4xl font-bold mb-4">{c.h1}</h1>
-      <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">{c.lead}</p>
+      <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
+        {c.lead(rækker.length)}
+      </p>
 
       <div className="prose dark:prose-invert max-w-none mb-4">
         <h2>{c.listHeading}</h2>

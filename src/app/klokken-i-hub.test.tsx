@@ -106,16 +106,22 @@ describe("klokken-i hub: rendering", () => {
     // Tallet på siden kommer fra getKlokkenHubRaekker, så en mutation der
     // slår den her rød.
     expect(html).toContain(rækker[0].tid);
+    // Indledningen skal tælle de samme lande som rækkerne — og som titlen og
+    // metadata altid har gjort. Den lå fast på «tolv» med fjorten i listen.
+    expect(html).toContain(`Klokken lige nu i ${rækker.length} lande`);
     expect(html).not.toContain("NaN");
   });
 
   test("den svenske side bruger svenske slugs og ord, og ingen danske", async () => {
     const html = await render("se");
-    for (const raekke of getKlokkenHubRaekker("se", I_DAG)) {
+    const raekker = getKlokkenHubRaekker("se", I_DAG);
+    for (const raekke of raekker) {
       expect(html, raekke.id).toContain(`href="${raekke.href}"`);
     }
     expect(html).toContain("Vad är klockan i");
-    expect(html).toContain("Klockan just nu i tolv länder");
+    // Samme regel som på den danske side: indledningen tæller rækkerne, så den
+    // ikke kan love tolv lande og vise fjorten.
+    expect(html).toContain(`Klockan just nu i ${raekker.length} länder`);
     // Danske rester i den svenske udgave: danske slugs, dansk landnavn og
     // bogstaverne æ/ø, der ikke findes i svensk (å går igen — samme tegn).
     expect(html).not.toMatch(/href="\/klokken-i\//);

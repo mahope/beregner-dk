@@ -123,7 +123,7 @@ describe("FAQ'en på /klokken-i fortæller, hvilken tidszone tallet følger", ()
     }
   });
 
-  test("alle tolv lande i begge sprog gør præcis det samme", async () => {
+  test("alle lande i begge sprog gør præcis det samme", async () => {
     // Slugs er **sprogspecifikke** (`tyrkiet`/`turkiet`, `canada`/`kanada`), så
     // rækken læses fra modulet i stedet for at blive skrevet her — en ny
     // landeside kan så ikke falde uden om porten.

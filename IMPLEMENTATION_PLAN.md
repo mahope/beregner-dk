@@ -1,48 +1,31 @@
-STATUS: 4/10 05:5x. ✅ 4/10 05:5x: **promilleberegneren står nu på forsiden blandt
-          de populære beregnere** (`ceo/promille-pa-forsiden`) — den var den
-          hurtigst voksende danske side (+1327 %, 157 besøgende/28d, ottende mest
-          besøgt) og alligevel i den ikke-populære halvdel, så forsiden linkede
-          den ikke. Rækken er nu målt i trafikrækkefølge (Plausible 4/10) i stedet
-          for 28/9, og porten `home-data.test.ts` dømmer hele rækkefølgen, så den
-          ikke kan glide tilbage. Sidebarlen er **ikke** rørt: den har sin egen,
-          håndskrevet liste i `calculator-list.ts` (skærer til 6). **MÅL:** `/promille`
-          157 besøgende/28d pr. 4/10 og `/` 210 besøgende med 38 % bounce →
-          Plausible 1/11; GSC `/promille` 6.003 visninger, 1,6 % CTR, pos. 7,8.
- ✅ 4/10 05:1x: **«Hvad er klokken i Norge» og «… i
-          Tyskland» har nu hver sin side** (`ceo/klokken-i-norge-og-tyskland`) —
-          hubben havde 12 lande, og Danmarks to nærmeste naboer uden for
-          Sverige manglede. Målt på dansk autocomplete 05:1x: begge har to
-          completioner, den anden med «lige nu». Undtagelsen for Danmark og
-          Sverige gælder ikke her — en dansk læser kan ikke se svaret på sin egen
-          telefon. `/tidszone`s «klokken i tolv lande» → «**fjorten**» (og
-          «tolva» → «fjorton»), fordi en forkert påstand i brødteksten er det
-          værste. **MÅL:** `/tidszone` 23.351 visninger / 101 klik / 0,4 % /
-          pos. 7,6 og hubbens to egne søgninger (178v pos. 6, 89v pos. 5) pr.
-          4/10 → GSC 18/10; nye URL'er: 0 besøgende.
-          ✅ 4/10 05:0x: **fire review-fund fra 4/10 04:2x rettet**
-          (`ceo/review-fund-idealvaegt-og-sprog`) — (1) `/idealvaegt`' titel og
-          `og:title` sagde «72 kg ved **175 cm 175 cm**»; nu én gang, og
-          `/idealvaegt` er lagt i meta-title-tal-tabellen **med en ny
-          bigram-port**, fordi `toContain` ikke kan se en dobbeltgæng
-          (muteret tilbage → rød med «gentager 175 cm»). (2) Svensk
-          brændstof-caption: «Pris **på** bensin» → «Pris **för** bensin».
-          (3) `idealvaegt.ts`-docblocken regnede 90 cm til 6,8 kg — det er 104 cm
-          (kørt i Node: 6,8/-4,8 kg, null-krydsning 96,5-108,4 cm).
-          (4) «**Det** første brøk» → «**Den** første brøk» (fælleskøn) i
-          komponent **og** test. Planen skåret 39,3 KB → under 40 KB ved at
-          flytte 18 lukkede blokke til `docs/plan-arkiv.md`.
-          ✅ 4/10 04:3x: **titlen på `/dato` regner nedtællingen til næste
-          1. december** (`ceo/dato-titel`) — «Beregn dage til 1. december: 58
-          dage tilbage» / «Beräkna dagar till 1 december: 58 dagar kvar».
-          Skrev før «1. jan. 2026→2027 = 365»: et interval på en
-          nedtællingsside, håndskrevet (365 også i 2028, hvor det er 366) og på
-          svensk ulæseligt som «365 dage kvar». **MÅL:** `/dato` 131.320
-          visninger / 863 klik / **0,7 %** / pos. 5,6 (da) og 102.316 / 97 /
-          **0,1 %** / 8,1 (se) → GSC 18/10.
-          ✅ 4/10 03:5x: brændstoffpris-tabel for **50 → 2.000 km** på
-          `/braendstof`; ✅ 03:1x: idealvægt-værktøjet på `/idealvaegt`;
-          ✅ 02:3x: lånebeløb-tabel på `/renteberegner`; ✅ 01:5x:
-          folkepensionsalder-værktøjet på `/pension`. Alt ældre: `docs/plan-arkiv.md`.
+STATUS: 5/10 13:1x. ✅ 5/10 13:1x: **de to åbne review-fund fra 4/10 07:2x er
+          rettet** (`ceo/review-fund-klokken-og-helligdage`) — (1) `/klokken-i`-
+          hubbens **indledning lovede «tolv lande» over en liste på fjorten**
+          (Norge + Tyskland kom i `64efa13`), og `klokken-i-hub.test.tsx:118`
+          låste fejlen fast. `lead` er nu en funktion af `rækker.length`, præcis
+          som `title` og metadata altid var, så den kan ikke glide tilbage ved
+          næste land; porten dømmer nu **begge** sprog på det aflede tal
+          (mutation til «tolv» → 1 rød, «expected … to contain 'Klokken lige
+          nu i 14 lande'»). (2) `/dato`s danske nøgleord sagde «helligdager
+          2026» — dansk er *helligdage*, samme ord som `description` og
+          `metaDescription` tre linjer ovenfor bruger. Også rettet et
+          **testnavn** i `KlokkenIPage.test.tsx` der stadig lovede «alle tolv
+          lande» med 14 i modulet — samme fejlklasse, samme delmål.
+          Gate 5/10 13:1x: typecheck 0, lint 0, **4286 tests i 269 filer** grønne.
+          ✅ 4/10: promille på forsiden (05:5x), Norge+Tyskland (05:1x), fire
+          review-fund (05:0x), `/dato`-titel (04:3x), brændstoftabel (03:5x),
+          `/idealvaegt` (03:1x), lånebeløbstabel (02:3x), folkepensionsalder
+          (01:5x). Alt ældre: `docs/plan-arkiv.md`.
+          🔎 **Sentry MINBEREGNER-2 undersøgt 5/10 13:0x — ikke reproduceret.**
+          «useLocale must be used within a LocaleProvider» på `POST /` er
+          stadig kun **2 hændelser / 0 brugere**. Den kendte årsag (rod-layoutet
+          kaster → `error.tsx` uden provider) er rettet siden 2/10 (`4d48370`,
+          `def070c`) og dækket af `error.test.tsx`. Målt denne iteration:
+          `not-found.tsx` → `NotFoundSearch` **har** provideren i live (curl på
+          3 domæner: HTTP 404 + rigtigt sprog pr. domæne), og en ren `POST /`
+          svarer **200**. Der er ingen server actions, intet i `src/` POSTer til
+          `/`, og `proxy.ts:52` skriver unmatched om til `/locale-unavailable`.
+          Se ❓ nederst — 2/14 hændelser er under tærsklen for at lede videre.
           ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i
           `vitest.config.ts`): 4/10 03:54 gav 10 røde i én køring, samme kode
           var grøn i de to køringer på hver side.
@@ -57,16 +40,17 @@ STATUS: 4/10 05:5x. ✅ 4/10 05:5x: **promilleberegneren står nu på forsiden b
           0 filer anderledes end `master`, men en lokal tilladelsesregel nægter
           `git push origin --delete`). `auto/union-night` har **unikt** arbejde i
           tre dokumenter — må ikke slettes, se ❓.
-          ⏱️ Resten af `## Feature-kø` er **alle ⛔** på en ❓ (kogetider,
-          promille i udlandet, kvadratmeterpris, feriedatoer, GSC-eksport), så
-          næste iteration skal enten svare på en ❓ eller bygge F0d/F0e.
-          CI grøn ved start (`5ad44bd`), ingen uløste Sentry-fejl, Sentry-SDK'en
-          er sat op. Gate: `npm run typecheck && npm run lint && npm test`
-          (samme som CI's build → lint → test; CI kører også `next build`).
-          Målt 05:1x: `/moms`-titel har allerede regnet eksempel, blogindlæggene
-          har 3-16 interne links hver, `/dato` linker til alle 22 dage-til-sider,
-          og alle 22 står i sitemap'en — de fire åbne Feature-kø-punkter er altså
-          lukkede, og `/klokken-i` var det femte hull.
+          ⏱️ **Næste iteration skal køre CEO-køens punkt 0** — de otte linjer i
+          prompten med forkerte danske love/datoer i `dage-til.ts` og
+          `page-data.ts` er IKKE rørt i denne plan, så de er antagelig stadig
+          åbne og skal måles i koden først. Resten af `## Feature-kø` er **alle
+          ⛔** på en ❓ (kogetider, kvadratmeterpris, feriedatoer, GSC-eksport),
+          så køen er tømt for features indtil en ❓ besvares.
+          Gate: `npm run typecheck && npm run lint && npm test` (CI kører også
+          `next build`). Målt 05:1x: `/moms`-titel har regnet eksempel,
+          blogindlæggene har 3-16 interne links hver, `/dato` linker til alle 22
+          dage-til-sider, og alle 22 står i sitemap'en — de fire åbne
+          Feature-kø-punkter er lukkede, og `/klokken-i` var det femte hull.
 
 ## Fase 3 — trafik-drevet
 
@@ -188,10 +172,24 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Fjorten noter er åbne og alle er nyere end det seneste deploy-vindue**, så
-  ingen af dem skal verificeres før 4/10 07:30. De fælles **regler**: døm på
-  indhold med `curl -s <url> | grep …`, HTTP 200 beviser intet, og en kodet ændring
-  kan ligge i docker i dagevis. Deploy-vinduer: 4/10 07:30, 12:30, 17:30, 21:30.
+**Femten noter er åbne.** Den nye (5/10 13:1x) skal først verificeres efter
+  5/10 17:30. **De fjorten fra 4/10 er nu ældre end flere deploy-vinduer** og
+  er forfalde til gennemgang — næste iteration bør feje dem i ét kørt script
+  frem for én ad gangen. De fælles **regler**: døm på indhold med
+  `curl -s <url> | grep …`, HTTP 200 beviser intet, og en kodet ændring kan ligge
+  i docker i dagevis. Deploy-vinduer: 07:30, 12:30, 17:30 og 21:30.
+
+**Åben note 5/10 13:1x:** `VERIFICÉR DEPLOY: <hubbens indledning tæller
+  rækkerne i begge sprog ("14 lande"/"14 länder") + /dato-nøgleordet
+  "helligdage 2026"> ceo/review-fund-klokken-og-helligdage 5/10 13:1x`.
+  `curl -s https://minberegner.dk/klokken-i | grep -c 'Klokken lige nu i 14
+  lande'` skal give **≥1** og `grep -c 'Klokken lige nu i tolv lande'` **0**;
+  `https://beraknare.se/klockan-i | grep -c 'Klockan just nu i 14 länder'` **≥1**
+  og `'Klockan just nu i tolv länder'` **0**. Begge tal skal være **14** — `14`
+  links i `href="/klokken-i/…"` på hver side, så brødtekst og liste er enige.
+  `curl -s https://minberegner.dk/dato | grep -oE '<meta name="keywords"
+  content="[^"]*"' | grep -c 'helligdage 2026'` skal give **≥1** og
+  `grep -c 'helligdager 2026'` **0**.
 
 **Åben note 4/10 05:5x:** `VERIFICÉR DEPLOY: <promilleberegneren i forsidens
   populære række, målt i trafikrækkefølge> ceo/promille-pa-forsiden 4/10 05:5x`.
@@ -350,6 +348,14 @@ aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas».
   niche-test-markedstal — samme slags kilde, der låser ❓ «Kilde til svenske og
   norske frilanstimepriser». Skal de tre dokumenter merges, eller er de
   forældede? De må ikke slettes uden svar.
+- ❓ **Sentry MINBEREGNER-2 — `useLocale must be used within a LocaleProvider` på
+  `POST /`** (5/10 13:0x, undersøgt og ikke reproduceret). 2 hændelser / 0
+  brugere på 14 dage. Den kendte årsag er rettet (2/10, `4d48370` + `def070c`)
+  og dækket af `error.test.tsx`. Målt denne gang: `not-found.tsx` →
+  `NotFoundSearch` har provideren i live, ren `POST /` svarer 200, og der er
+  ingen server actions og intet i `src/` der POSTer til `/`. **En screenshot af
+  Sentry-hændelsen** (transactions + request headers + de to ssr-chunks) ville
+  sige, hvilken komponent der mangler kontekst, og låse den næste iteration.
 - ❓ **Kogetider og fødevaredata — den 2. største søgning på `/tidsberegner`
   (4/10 03:1x, højst prioriteret, fordi den er helt målt).** «hvor lang tid» har
   **824 visninger** på pos. 6,8, og **10 af 10** danske completioner er madvarer
