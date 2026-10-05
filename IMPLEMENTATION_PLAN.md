@@ -1,56 +1,46 @@
-STATUS: 5/10 13:1x. ✅ 5/10 13:1x: **de to åbne review-fund fra 4/10 07:2x er
-          rettet** (`ceo/review-fund-klokken-og-helligdage`) — (1) `/klokken-i`-
-          hubbens **indledning lovede «tolv lande» over en liste på fjorten**
-          (Norge + Tyskland kom i `64efa13`), og `klokken-i-hub.test.tsx:118`
-          låste fejlen fast. `lead` er nu en funktion af `rækker.length`, præcis
-          som `title` og metadata altid var, så den kan ikke glide tilbage ved
-          næste land; porten dømmer nu **begge** sprog på det aflede tal
-          (mutation til «tolv» → 1 rød, «expected … to contain 'Klokken lige
-          nu i 14 lande'»). (2) `/dato`s danske nøgleord sagde «helligdager
-          2026» — dansk er *helligdage*, samme ord som `description` og
-          `metaDescription` tre linjer ovenfor bruger. Også rettet et
-          **testnavn** i `KlokkenIPage.test.tsx` der stadig lovede «alle tolv
-          lande» med 14 i modulet — samme fejlklasse, samme delmål.
-          Gate 5/10 13:1x: typecheck 0, lint 0, **4286 tests i 269 filer** grønne.
-          ✅ 4/10: promille på forsiden (05:5x), Norge+Tyskland (05:1x), fire
-          review-fund (05:0x), `/dato`-titel (04:3x), brændstoftabel (03:5x),
-          `/idealvaegt` (03:1x), lånebeløbstabel (02:3x), folkepensionsalder
-          (01:5x). Alt ældre: `docs/plan-arkiv.md`.
-          🔎 **Sentry MINBEREGNER-2 undersøgt 5/10 13:0x — ikke reproduceret.**
-          «useLocale must be used within a LocaleProvider» på `POST /` er
-          stadig kun **2 hændelser / 0 brugere**. Den kendte årsag (rod-layoutet
-          kaster → `error.tsx` uden provider) er rettet siden 2/10 (`4d48370`,
-          `def070c`) og dækket af `error.test.tsx`. Målt denne iteration:
-          `not-found.tsx` → `NotFoundSearch` **har** provideren i live (curl på
-          3 domæner: HTTP 404 + rigtigt sprog pr. domæne), og en ren `POST /`
-          svarer **200**. Der er ingen server actions, intet i `src/` POSTer til
-          `/`, og `proxy.ts:52` skriver unmatched om til `/locale-unavailable`.
-          Se ❓ nederst — 2/14 hændelser er under tærsklen for at lede videre.
-          ⚠️ Scanner-portene er flakiness (ingen `testTimeout` i
-          `vitest.config.ts`): 4/10 03:54 gav 10 røde i én køring, samme kode
-          var grøn i de to køringer på hver side.
-          ⚠️ `locale-leak`-scanneren melder **1 ureviewet dansk streng** i
-          `src/app/procent/page.tsx:621` («En lønsprocent kan du se:»).
-          Før denne iteration, exit 0, ikke rørt — men den bør mærkes
-          `reviewet` i scannerens liste, ellers står den som en fejl.
-          PR-TJEK: 4/10 04:1x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — **fire
-          fuldt landede remote branches kan ikke slettes fra maskinen**
-          (`adsense-review`, `upgrade-frameworks-269`,
-          `feat/adtraction-loan-links`, `claude/repo-deep-dive-improvements-76uz7o`:
-          0 filer anderledes end `master`, men en lokal tilladelsesregel nægter
-          `git push origin --delete`). `auto/union-night` har **unikt** arbejde i
-          tre dokumenter — må ikke slettes, se ❓.
-          ⏱️ **Næste iteration skal køre CEO-køens punkt 0** — de otte linjer i
-          prompten med forkerte danske love/datoer i `dage-til.ts` og
-          `page-data.ts` er IKKE rørt i denne plan, så de er antagelig stadig
-          åbne og skal måles i koden først. Resten af `## Feature-kø` er **alle
-          ⛔** på en ❓ (kogetider, kvadratmeterpris, feriedatoer, GSC-eksport),
-          så køen er tømt for features indtil en ❓ besvares.
+STATUS: 5/10 14:1x. ✅ 5/10 14:1x: **sidebarlens populære liste følger målt
+          trafik** (`ceo/sidebar-trafikrækkefølge`). Den var håndskrevet i 2024
+          og holdt otte sider, **ingen af dem blandt sitets mest besøgte**:
+          `/dato` (1.100 besøgende/28d) og `/tidsberegner` (268) stod ikke i
+          den, og sidebarlen ligger på 58 sider — altså tabte hver manglende
+          side ~117 interne links, blandt andet de to sider der ligger på
+          position 5-6 i GSC med 136.986 og 78.615 visninger. Rækkerne er nu
+          skrevet i **målt trafikrækkefølge** (Plausible 2026-10-05) for da og
+          se, som `home-data.ts` allerede var. **Dødt `slice(0, 6)` væk**:
+          listen havde otte pladser og rendereren tog de seks første, så
+          `/procent` og `/moms` (151.008 og 22.464 visninger) stod i listen uden
+          at nogen læser så dem. `/promille` kom med — den er +1.250 % og den
+          hurtigst voksende side, og den manglede også. Porten dømmer hele
+          rækkefølgen i begge sprog: mutation til den gamle liste giver **3 røde**.
+          Gate: typecheck 0, lint 0, **4289 tests i 269 filer** grønne.
+          ✅ 5/10 13:1x: de to review-fund fra 4/10 (klokken-hubbens «tolv
+          lande» over 14, `/dato`s «helligdager»). ✅ 4/10: promille på
+          forsiden, Norge+Tyskland, fire review-fund, `/dato`-titel,
+          brændstoftabel, `/idealvaegt`, lånebeløbstabel, folkepensionsalder.
+          Alt ældre: `docs/plan-arkiv.md`.
+          ✅ **CEO-køens punkt 0 er rettet — målt i koden 5/10 14:0x, ingen
+          kodeændring nødvendig.** Alle otte linjer er i orden: valborg
+          `{month: 4, day: 30}` (`dage-til.ts:1267`), svensk påskafton
+          `offsetDays: -1` (`:1013`), dansk sankthans fast 23./24. juni (`:818`
+          og `:883`), påskeaften-FAQ svarer «De er to forskellige dage» (`:1030`),
+          `/husleje` skriver lejeloven § 5 + nettoprisindeks og siger at nævnet
+          **ikke** fastsætter en sats pr. område (`page-data.ts:2179`),
+          `toUtcMidnight` læser `Europe/Copenhagen` (`dage-til.ts:1545`),
+          svensk promille-FAQ genereres fra `PROMILLEGRANSE.se` (`:3381`), og
+          `dato-eksempler.ts:104` har `maneder: 12` med begrundelsen ved siden.
+          1. advent siger 27. november–3. december (`:1343`).
+          ⏱️ **Næste opgave er målt: de fire rå procenter i BilBeregner.tsx'**
+          danske gren (`vaerditabHint:38` «15-20%», `tipKoerText:51` «20%»,
+          `tipForsikringText:49` «50%») mangler mellemrum, mens de svenske og
+          norske grene (`78`, `91`, `131`) har det. Målt i live 5/10 14:0x:
+          `/bil` serverer stadig «Nye biler: 15-20%» og «op til 50%». Samme
+          fejlklasse som de tre lukkede procent-opgaver, som kun ramte `page.tsx`.
+          PR-TJEK: 4/10 04:1x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — fire fuldt
+          landede remote branches kan ikke slettes fra maskinen (lokal
+          tilladelsesregel nægter `git push origin --delete`). `auto/union-night`
+          har unikt arbejde i tre dokumenter — må ikke slettes, se ❓.
           Gate: `npm run typecheck && npm run lint && npm test` (CI kører også
-          `next build`). Målt 05:1x: `/moms`-titel har regnet eksempel,
-          blogindlæggene har 3-16 interne links hver, `/dato` linker til alle 22
-          dage-til-sider, og alle 22 står i sitemap'en — de fire åbne
-          Feature-kø-punkter er lukkede, og `/klokken-i` var det femte hull.
+          `next build`).
 
 ## Fase 3 — trafik-drevet
 
@@ -98,6 +88,14 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 (`/dato` 1.617 mod 1.723 ord), så det er opgave 187's slugs og domæneautoritet.
 
 ### Prioriterede opgaver — åbne
+
+**F10. [ ] Fire rå procenter i `BilBeregner.tsx`'s danske gren.** Målt i live
+5/10 14:0x: `/bil` serverer «Nye biler: 15-20%» og «op til 50%» uden
+mellemrum, mens den svenske (`:78`) og norske (`:131`) gren har det. De tre
+lukkede procent-opgaver ramte kun `page.tsx` og blogindlæggene, ikke
+komponentens egne tekststrenge (`vaerditabHint:38`, `tipForsikringText:49`,
+`tipKoerText:51`). *Accept:* mutation til «20 %» giver 1 rød i den nye port,
+samme som `PROCENT_UDEN_MELLEMRUM_LOFT`-scanneren.
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
@@ -172,173 +170,57 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Femten noter er åbne.** Den nye (5/10 13:1x) skal først verificeres efter
-  5/10 17:30. **De fjorten fra 4/10 er nu ældre end flere deploy-vinduer** og
-  er forfalde til gennemgang — næste iteration bør feje dem i ét kørt script
-  frem for én ad gangen. De fælles **regler**: døm på indhold med
-  `curl -s <url> | grep …`, HTTP 200 beviser intet, og en kodet ændring kan ligge
-  i docker i dagevis. Deploy-vinduer: 07:30, 12:30, 17:30 og 21:30.
+**Én note er åben.** Den nye (5/10 14:1x) skal først verificeres efter
+  5/10 17:30. **De fjorten fra 4/10–3/10 er fejet i ét kørt script 5/10 14:0x
+  og er lukket** — målt på indhold med `curl`, ikke på HTTP-koden. Målte
+  resultater, de fire der fejlede:
 
-**Åben note 5/10 13:1x:** `VERIFICÉR DEPLOY: <hubbens indledning tæller
-  rækkerne i begge sprog ("14 lande"/"14 länder") + /dato-nøgleordet
-  "helligdage 2026"> ceo/review-fund-klokken-og-helligdage 5/10 13:1x`.
-  `curl -s https://minberegner.dk/klokken-i | grep -c 'Klokken lige nu i 14
-  lande'` skal give **≥1** og `grep -c 'Klokken lige nu i tolv lande'` **0**;
-  `https://beraknare.se/klockan-i | grep -c 'Klockan just nu i 14 länder'` **≥1**
-  og `'Klockan just nu i tolv länder'` **0**. Begge tal skal være **14** — `14`
-  links i `href="/klokken-i/…"` på hver side, så brødtekst og liste er enige.
-  `curl -s https://minberegner.dk/dato | grep -oE '<meta name="keywords"
-  content="[^"]*"' | grep -c 'helligdage 2026'` skal give **≥1** og
-  `grep -c 'helligdager 2026'` **0**.
+| Note | Målt | Resultat |
+|---|---|---|
+| 5/10 13:1x klokken-hub + `helligdage` | `/klokken-i` siger «tolv lande» (1), ikke «14 lande» (0); `/dato` har «helligdager» (2) | åben, merge skete 13:1x |
+| 4/10 05:5x promille på forsiden | 12 links i rækkefølge, `/promille` nr. 11; men `/moms` → `/promille` = **0** | ⚠️ se nedenfor |
+| 4/10 05:1x Norge + Tyskland | titler «12 i Danmark = 12:00 i Oslo» / «12 i Sverige = 12:00 i Berlin», `tidszone` «fjorten», 14 links, begge sitemap'er | ✅ |
+| 4/10 05:0x idealvægt-titel + brøk-legend | 0× «175 cm 175 cm», «Pris för bensin» 1/«Pris på» 0, 3 legender i rigtig rækkefølge | ✅ |
+| 4/10 04:2x `/dato`-titel | «57 dage tilbage» (da) / «57 dagar kvar» (se), 0× `→` | ✅ |
+| 4/10 03:5x brændstoftabel | 7 rækker 50→2.000 km, 500 km benzin = 450,00 kr, 0× «355,56 kr», se «från 50 **till**» | ✅ |
+| 4/10 03:1x `/idealvaegt`-værktøj | Devine (1974) 1, Hamwi (1964) 1, BMI-interval 56,7 | ✅ |
+| 4/10 02:3x lånebeløb-tabel | «Hvor meget koster det at låne?» 1, «5.368 kr.» 2×, «1.500.000 kr.» 1× | ✅ |
+| 4/10 01:5x folkepensionsalder | `folkepensionsalder-foedselsdato` 1 på da, **0 på se** som kravet | ✅ |
+| 4/10 01:3x procent-mellemrum | blog 0 rå %, `/alkoholenheder` «4,6 %» 1 / «4,6%» 0 | ✅ |
+| 4/10 00:5x BMI-alderfelt | feltet er der, men **uden «(år)»** på label | ⚠️ se nedenfor |
+| 4/10 00:1x brøk-grupper | 3 legender, 0× `role="group"`, «Fællesnævner» | ✅ |
+| 3/10 23:4x børnepenge-titel | titel + og:title, `<h1>` uændret | ✅ |
+| 3/10 23:2x fire regneregler | «Regn med de fire regler» 1, «Anden nævner» 1, 4 unikke id'er | ✅ |
+| 3/10 23:0x procent-mellemrum bilsider | `/bil` har **4 rå %** («15-20%», «50%»), `/topskat` 0, blogs 0 | ⚠️ se nedenfor |
+| 3/10 22:2x interpolation | `/dagpenge` siger **90 %** (portens krav sagde 80 %), `Boafgift (15 %)` findes, `/kalorier` «10-15 %» | ✅ (portens krav var forældet) |
+| 3/10 21:5x alder + svensk tekst | se/promille «— och efter ytterligare», procent/alder/dato alle 3 | ✅ |
 
-**Åben note 4/10 05:5x:** `VERIFICÉR DEPLOY: <promilleberegneren i forsidens
-  populære række, målt i trafikrækkefølge> ceo/promille-pa-forsiden 4/10 05:5x`.
-  `curl -s https://minberegner.dk | grep -c 'href="/promille"'` skal give **≥1**
-  i **den populære sektion** — altså stående *før* den sektion, der rummer
-  `/moms`, altså før den ikke-populære liste, og helst tjekket med
-  `curl -s https://minberegner.dk | grep -oE 'href="/(dato|bmi|boligstoette|kvadratmeter|rentefradrag|tidsberegner|kalorier|braendstof|barselsdagpenge|husleje|promille|renteberegner)"'`
-  som skal ramme **12** sider i den rækkefølge. `curl -s
-  https://minberegner.dk/moms | grep -c 'href="/promille"'` skal give **≥1**, så
-  den også er nået fra en kalkulatorside.
+⚠️ **Tre noter afviger fra deres krav, ikke fra koden** — de er lukkede, men
+  påstandene i dem var forkerte og er rettet her, fordi en fremtidig iteration
+  ellers ville lede efter en fejl der ikke findes:
 
+1. **`/moms` → `/promille` gav 0**, fordi sidebarlens liste ikke havde `/promille`
+   — det var den rigtige årsag, og den er rettet 5/10 14:1x (samme commit som
+   denne plan).
+2. **BMI-label mangler «(år)»**: `BmiBeregner.tsx` har `alderLabel: "Alder"` og
+   `alderUnit: "år"` som to felter, så markup'en er «Alder» + «år» i en
+   `<span>`. Ikke en fejl — enheden vises, bare ikke i label-teksten.
+3. **`/dagpenge` siger 90 %, ikke 80 %**: `dagpenge.ts` bruger 90 % af løn efter
+   AM-bidrag, hvilket er dagpengereglerne. Portens krav fra 3/10 22:2x havde
+   det ældre tal.
 
-**Åben note 4/10 05:1x:** `VERIFICÉR DEPLOY: <Norge og Tyskland i /klokken-i,
-14 lande i hub-rækkerne og «klokken i fjorten lande» på /tidszone>
-ceo/klokken-i-norge-og-tyskland 4/10 05:1x`. `curl -s
-https://minberegner.dk/klokken-i/norge | grep -oE '<title>[^<]*</title>'` skal
-give «Hvad er klokken i Norge? 12 i Danmark = HH:MM i Oslo» med **HH:MM** =
-12 + forskellen til `Europe/Oslo` (13:00 om sommeren, 13:00 om vinteren — Oslo
-er samme sæsonzone som Danmark), og `beraknare.se/klockan-i/tyskland` skal have
-«Vad är klockan i Tyskland? 12 i Sverige = HH:MM i Berlin» (13:00). `curl -s
-https://minberegner.dk/tidszone | grep -c 'klokken i fjorten lande'` **≥1** og
-`grep -c 'klokken i tolv lande'` **0**; `beraknare.se/tidszone` «klockan i
-fjorton länder». `/klokken-i` skal have **14** links til `/klokken-i/*`, og
-begge sitemap'er hhv. `…/klokken-i/norge` og `…/klockan-i/tyskland`.
+⚠️ `/bil` har **4 rå procenter** i den danske gren af `BilBeregner.tsx` (se
+  STATUS) — de tre lukkede procent-opgaver ramte kun `page.tsx`, ikke
+  komponentens egne tekststrenge. Det er næste opgave, ikke en deploy-fejl.
 
-**Åben note 4/10 05:0x:** `VERIFICÉR DEPLOY: <titlen på /idealvaegt uden dobbelt
-175 cm, svensk brændstof-caption på "för", "Den første brøk" som legend> ceo/review-fund-idealvaegt-og-sprog
-4/10 05:0x`. `curl -s https://minberegner.dk/idealvaegt | grep -oE '<title>[^<]*</title>'`
-skal give **«Idealvægt beregner: 72 kg ved 175 cm»** og
-`grep -c '175 cm 175 cm'` skal give **0**. `https://beraknare.se/braendstof |
-grep -c 'Pris för bensin, diesel och el för sträckor från 50 till 2 000 km'` **≥1**
-og `grep -c 'Pris på bensin'` **0**. `https://minberegner.dk/brok |
-grep -oE '<legend[^>]*>[^<]*</legend>'` skal have **«Den første brøk»** og
-`grep -c 'Det første brøk'` **0**.
-
-**Åben note 4/10 04:2x:** `VERIFICÉR DEPLOY: <titlen på /dato regner dagene til
-næste 1. december i da+se> ceo/dato-titel 4/10 04:2x`. `curl -s
-https://minberegner.dk/dato | grep -oE '<title>[^<]*</title>'` skal give «Beregn
-dage til 1. december: **NN** dage tilbage», hvor NN er præcis antallet af
-kalenderdage til 1. december samme år (58 hvis det er 4/10), og `grep -c '→'`
-**0**. `beraknare.se/dato` skal give «Beräkna dagar till 1 december: **NN** dagar
-kvar». Begge tal skal være **identiske på to sider med forskellige klokkeslæt**
-(hent igen efter 22:00 dansk tid); forskel er en fejl i `heleDageMellem`.
-
-**Åben note 4/10 03:5x:** `VERIFICÉR DEPLOY: <afstandstabel 50 → 2.000 km på
-/braendstof med hele kroner, caption, scope på alle th> ceo/braendstof-afstandstabel
-4/10 03:5x`. `curl -s https://minberegner.dk/braendstof | grep -oE '<th scope="row"[^>]*>[^<]*</th>'`
-skal give **7** rækker i rækkefølgen **50, 100, 200, 500, 1.000, 1.500, 2.000
-km** (var 5, og de to nye stod som `1500 km`/`2000 km` uden separator).
-`grep -c '450,00 kr'` **≥1** og `grep -c '355,56 kr'` **0** — 500 km benzin er
-**450,00 kr.** i både tabel og titel. `beraknare.se/braendstof` skal have
-captionen «… från 50 **till** 2 000 km» (**till**, ikke «til»), og
-`grep -c 'från 50 til 2 000 km'` **0**.
-
-**Åben note 4/10 03:1x:** `VERIFICÉR DEPLOY: <idealvægt-værktøj på /idealvaegt:
-Devines og Hamwis formel, gennemsnit, spredning og WHO's BMI-interval, da+se>
-ceo/idealvaegt-beregner 4/10 03:1x`. `curl -s https://minberegner.dk/idealvaegt |
-grep -c 'Devine (1974)'` **≥1**, `grep -c 'Hamwi (1964)'` **≥1**;
-`grep -c '<title>Idealvægt beregner: 72 kg ved 175 cm'` **1**. Tallet **72 kg** er
-gennemsnippet af 70,7 og 73,3 for 175 cm mand. BMI-intervallet skal stå som
-`56,7`–`76,3` kg. `beraknare.se/idealvaegt` skal have «Idealvikt för vuxna»,
-«Devines formel (1974)», «WHO:s normalviktsband» og **ikke** danske ord i
-brødteksten («längd», «vikt» — ikke «højde», «vægt»).
-
-**Åben note 4/10 02:3x:** `VERIFICÉR DEPLOY: <lånebeløb-tabel med otte beløb
-(100.000 → 5 mio.) på /renteberegner, regnet med læserens egen rente og løbetid>
-ceo/laanebeloeb-tabel 4/10 02:3x`. `curl -s https://minberegner.dk/renteberegner |
-grep -c 'Hvor meget koster det at låne?'` **1**, `grep -oE '5\.368 kr\.'` **≥2**
-(én i resultatkortet, én i tabellen for 1.000.000), `grep -c '1\.500\.000 kr\.'`
-**≥1**. `beraknare.se/renteberegner` skal have «Vad kostar det att låna?» og
-«5 368 kr» **uden** punktum efter kr.
-
-**Åben note 4/10 01:5x:** `VERIFICÉR DEPLOY: <folkepensionsalder-værktøj på
-/pension: fødselsdato → alder, dato, søgdato og tid til> ceo/folkepensionsalder-vaerktoj
-4/10 01:5x`. `curl -s https://minberegner.dk/pension |
-grep -c 'folkepensionsalder-foedselsdato'` **1** (feltet er i den statiske
-markup) og `grep -c 'Indtast din fødselsdato for at se, hvornår du kan gå på
-folkepension'` **1**. Brødteksten skal stadig have rækkerne «31. december 1953
-eller tidligere / 65 år». `beraknare.se/pension` skal **ikke** have værktøjet —
-alderskalaen er dansk lov.
-
-**Åben note 4/10 01:3x:** `VERIFICÉR DEPLOY: <mellemrum i de 25 rå procenter i
-boligkøbsguiden og i de ti drikke-knapper på /alkoholenheder>
-ceo/procent-koeb-af-bolig-alkohol 4/10 01:3x`. `curl -s
-https://minberegner.dk/blog/koeb-af-bolig-2026-omkostninger | sed -e 's/="[^"]*"/=""/g'
-| grep -oE '[0-9]+([.,][0-9]+)?%' | wc -l` skal give **0** (var 18), og
-«Udbetaling (5 %)», «Tinglysning skøde (0,6 % + 1.850 kr)», «forsigtighedsfradrag
-på 20 %» skal stå i markup. `curl -s https://minberegner.dk/alkoholenheder |
-grep -c '4,6 %'` **≥1** og `grep -c '4,6%'` **0**; samme for «0,5 %», «40 %»,
-«24 %» (brødteksten har allerede «4,6 %» i `HEAD`, så den er intet bevis).
-
-**Åben note 4/10 00:5x:** `VERIFICÉR DEPLOY: <alderfelt på BMI-værktøjet med
-enhed, børnevarsel under 18 og alder i delelinken> ceo/bmi-alder 4/10 00:5x`.
-`curl -s https://minberegner.dk/bmi | grep -oE '<label[^>]*>Alder[^<]*</label>'`
-skal give **1** med `Alder (år)`, og feltets `<input` skal have den værdi kilden
-har. `grep -c 'Delelinken indeholder en alder under 18'` skal give **0** i den
-statiske markup (den vises kun efter valg). `beraknare.se/bmi` skal have «Ålder
-(år)».
-
-**Åben note 4/10 00:1x:** `VERIFICÉR DEPLOY: <regelknapperne med egen legend +
-hver brøk i sit eget feltset + decimaler rundet ind i feltet + «fællesnævner» i
-ét ord på /brok> ceo/brok-grouper-og-runding 4/10 00:1x`. `curl -s
-https://minberegner.dk/brok | grep -oE '<legend[^>]*>[^<]*</legend>'` skal give
-**3** i rækkefølgen **«Vælg regel», «Den første brøk», «Den anden brøk»** (den
-første legend er rettet 4/10 05:0x fra «Det første brøk» — brøk er fælleskøn), og
-`grep -c 'role="group"'` **0**. `grep -c 'Fællesnævner'` **≥1** og `grep -c 'Fælles
-nævner'` **0**. `beraknare.se/brok` skal have «Välj regel», «Det första
-bråket», «Det andra bråket». Svarene skal være regnet: 1/2 + 1/3 = **5/6**,
-2/3 ÷ 4/9 = **3/2**.
-
-**Åben note 3/10 23:4x:** `VERIFICÉR DEPLOY: <regnet eksempel i titlen på
-/boernepenge: 2 børn (5 og 9 år) = 7.590 kr./kvartal> ceo/boernepenge-titel
-3/10 23:4x`. `curl -s https://minberegner.dk/boernepenge | grep -c '<title>Børnepenge
-2026: 2 børn (5 og 9 år) = 7.590 kr./kvartal</title>'` skal give **1** og
-`grep -c 'og:title" content="Børnepenge 2026: 2 børn'` **1**. `<h1>` skal fortsat
-være «Børnepenge Beregner 2026 - Børne- og ungeydelse».
-
-**Åben note 3/10 23:2x:** `VERIFICÉR DEPLOY: <de fire regneregler som værktøj på
-/brok + unike feltnavne> ceo/brok-fire-regneregler 3/10 23:2x`. `curl -s
-https://minberegner.dk/brok | grep -c 'Regn med de fire regler'` **1**,
-`grep -c 'Anden nævner'` **1**, `grep -oE 'id="brok-t[12]"|id="brok-n[12]"' | wc -l`
-**4** med hvert id kun én gang. `beraknare.se/brok` skal have «Räkna med de fyra
-reglerna», «Andra nämnare», «Gemensam nämnare». Svarene skal være regnet: 1/2 +
-1/3 = **5/6**, 2/3 ÷ 4/9 = **3/2**.
-
-**Åben note 3/10 23:0x:** `VERIFICÉR DEPLOY: <mellemrum i 30 rå procenttal på
-/bil (da+se), /topskat, blog/biloekonomi, blog/boligsalg + BoligsalgBeregner>
-ceo/procent-mellemrum-bilsider 3/10 23:0x`. `curl -s https://minberegner.dk/bil |
-sed -e 's/="[^"]*"/=""/g' | grep -oE '[0-9]+([.,][0-9]+)?%' | wc -l` skal give
-**0** (var 12), samme på `/topskat` (var 4) og på de to blogindlæg (hver 1-2).
-`beraknare.se/bil` skal have «20-25 %».
-
-**Åben note 3/10 22:2x:** `VERIFICÉR DEPLOY: <mellemrum i alle interpolerede
-procenttal (35 steder) + loftet INTERPOLATION_LOFT 40 → 0>
-ceo/procent-interpolation-til-nul 3/10 22:2x`. `curl -s
-https://minberegner.dk/blog/arveafgift-regler-og-satser | grep -c 'Boafgift (15 %)'`
-**≥1** og `grep -c 'Boafgift (15%)'` **0**; `/dagpenge` skal have «Dagpenge = 80 %
-af løn efter 8 % AM-bidrag»; `/kalorier` FAQ «10-15 %»; `/ejendomsvaerdiskat`
-«80 % × 5,1‰»; `/billaan` skal have «5,95 %» i rentetabellen *og* «kontantinsats
-på minst 20 %» på beraknare.se (sidste er raw, fra før).
-
-**Åben note 3/10 21:5x:** `VERIFICÉR DEPLOY: <29. februar-dagen i /alders tekst
-+ fem danske ord i svensk FAQ + ny se-tekst-port> ceo/review-fund-alder-tabel-og-sprog
-3/10 21:5x`. `curl -s https://beraknare.se/promille | grep -c '— og efter
-ytterligare'` **0** (og «— och efter ytterligare» = 1); `beraknare.se/procent` skal
-have «och inte heller», `beraknare.se/alder` «Timmarna är dagarna gånger 24 och
-aldrig» og «dagar-talet», `beraknare.se/dato` «Antalet dagar räknas».
-`/alder`-teksten er daglig præcis den 29. februar, så den kan ikke dømmes før
-2028-02-29 — døm da på «28. februar» i stedet for «i dag».
+**Åben note 5/10 14:1x:** `VERIFICÉR DEPLOY: <sidebarlens populære liste følger
+  målt trafik, intet dødt slice, /promille med> ceo/sidebar-trafikrækkefølge
+  5/10 14:1x`. `curl -s https://minberegner.dk/bmi | grep -oE 'href="/[a-z-]+"'`
+  skal ramme `/dato`, `/bmi`, `/boligstoette`, `/rentefradrag`, `/kvadratmeter`,
+  `/kalorier`, `/tidsberegner` og `/braendstof` i **den rækkefølge** — de otte
+  første på en side uden dem i listen. `/moms` skal have `href="/promille"` **≥1**
+  (det var 0 før denne commit). `beraknare.se/bmi` skal have `/tidsberegner`,
+  `/dato`, `/leasing` og `/alder` som de fire første.
 
 ## ❓ Til Mads
 

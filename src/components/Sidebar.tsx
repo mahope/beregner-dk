@@ -28,7 +28,7 @@ export default function Sidebar({ currentHref, adSlotId }: SidebarProps) {
             {t(l, "ui.popularCalculators")}
           </h3>
           <nav className="space-y-1">
-            {beregnere.slice(0, 6).map((b) => (
+            {beregnere.map((b) => (
               <Link
                 key={b.href}
                 href={b.href}

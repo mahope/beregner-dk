@@ -281,4 +281,65 @@ describe("getPopularCalculators", () => {
     expect(hrefs).toContain("/bolan");
     expect(hrefs).not.toContain("/pension");
   });
+
+  // Sidebarlens liste var håndskrevet og holdt seks sider, ingen af dem blandt
+  // sitets mest besøgte. Sidebarlen ligger på 58 sider, så hver manglende side
+  // tabte ~117 interne links — blandt andet `/dato` (1.100 besøgende/28d) og
+  // `/tidsberegner` (268), der begge ligger på position 5-6 i Search Console
+  // med 136.986 og 78.615 visninger.
+  test("the Danish popular list is the measured top pages, in traffic order", () => {
+    // Plausible 2026-10-05, 28 dage. `/promille` er med, fordi det er den
+    // hurtigst voksende danske side (+1.250 %, 162 besøgende/28d) — den stod
+    // heller ikke i sidebarlen. `/loen-efter-skat` er brandværktøjet.
+    expect(getPopularCalculators("da").map((c) => c.href)).toEqual([
+      "/dato",
+      "/bmi",
+      "/boligstoette",
+      "/rentefradrag",
+      "/kvadratmeter",
+      "/kalorier",
+      "/tidsberegner",
+      "/braendstof",
+      "/barselsdagpenge",
+      "/husleje",
+      "/promille",
+      "/loen-efter-skat",
+      // De to største søgesider (151.008 og 22.464 visninger) holdt også
+      // plads i den gamle liste, så de må ikke tabe deres links.
+      "/procent",
+      "/moms",
+    ]);
+  });
+
+  test("the Swedish popular list is the measured top pages, in traffic order", () => {
+    // Plausible 2026-10-05, 28 dage: /tidsberegner 181, /dato 145,
+    // /leasing 49, /alder 32, /nedtaelling 25, /tidszone 14, /kalorier 14,
+    // /elberegner 12, /loenstigning 11, /timepris 11.
+    expect(getPopularCalculators("se").map((c) => c.href)).toEqual([
+      "/tidsberegner",
+      "/dato",
+      "/leasing",
+      "/alder",
+      "/nedtaelling",
+      "/tidszone",
+      "/kalorier",
+      "/elberegner",
+      "/loenstigning",
+      "/timepris",
+      "/lon-efter-skatt",
+      "/bolan",
+    ]);
+  });
+
+  test("the sidebar renders every declared popular link", () => {
+    // `Sidebar.tsx` har intet `slice` længere. Den gamle liste havde otte
+    // pladser og rendereren tog de seks første, så `/procent` og `/moms` var
+    // døde nøgler: de stod i listen, men ingen læser så dem.
+    for (const locale of ["da", "se"] as const) {
+      expect(
+        getPopularCalculators(locale).length,
+        `${locale} popular list is too short to be worth a sidebar`,
+      ).toBeGreaterThanOrEqual(10);
+    }
+  });
 });

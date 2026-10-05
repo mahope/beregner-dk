@@ -272,12 +272,48 @@ export function getRelatedCalculators(
 
 /**
  * Get popular calculators for sidebar, locale-aware.
+ *
+ * Listen er **målt trafik, ikke håndskrevet** — samme grund som `home-data.ts`.
+ * Den gamle liste var skrevet i 2024 og holdt seks sider, ingen af dem blandt
+ * sitets mest besøgte: `/dato` har 1.100 besøgende/28d og `/tidsberegner` 268,
+ * og ingen af dem stod i sidebarlen. Sidebarlen ligger på 58 sider, så hver
+ * manglende side tabte ~117 interne links — blandt andet de to sider der ligger
+ * på position 5-6 i Search Console med 136.986 og 78.615 visninger.
+ *
+ * Rækkefølgen er den lærerne kommer i (Plausible 2026-10-05, 28 dage). Der er
+ * **intet `slice` i `Sidebar.tsx`**: den gamle liste havde otte pladser og
+ * rendereren tog de seks første, så de to nederste var døde nøgler. `/promille`
+ * er med, fordi det er den hurtigst voksende danske side (+1.250 %, 162
+ * besøgende/28d, 6.878 visninger) — den manglede også i sidebarlen.
  */
 export function getPopularCalculators(locale: Locale): Calculator[] {
   const popularHrefs = locale === "da"
-    ? ["/loen-efter-skat", "/moms", "/bmi", "/laaneberegner", "/procent", "/valuta", "/feriepenge", "/boliglaan"]
+    ? [
+      // Plausible 2026-10-05, 28 dage: /dato 1100, /bmi 963,
+      // /boligstoette 528, /rentefradrag 470, /kvadratmeter 393,
+      // /kalorier 271, /tidsberegner 268, /braendstof 252,
+      // /barselsdagpenge 239, /husleje 168, /promille 162.
+      "/dato", "/bmi", "/boligstoette", "/rentefradrag", "/kvadratmeter",
+      "/kalorier", "/tidsberegner", "/braendstof", "/barselsdagpenge",
+      "/husleje", "/promille",
+      // Brandværktøjet. Ikke i trafiklisten, men sitets mest kendte navn.
+      "/loen-efter-skat",
+      // De to største **søgesider**: 151.008 og 22.464 visninger. De er ikke
+      // blandt de mest besøgte (0,1 % og 0,2 % CTR), så trafikrækken flytter
+      // dem ned — men de skal stadig have et link fra de 58 sider, ellers
+      // mister de de interne links de har i dag.
+      "/procent", "/moms",
+    ]
     : locale === "se"
-      ? ["/lon-efter-skatt", "/moms", "/bmi", "/laaneberegner", "/procent", "/valuta", "/bolan", "/timepris"]
+      ? [
+        // Plausible 2026-10-05, 28 dage: /tidsberegner 181, /dato 145,
+        // /leasing 49, /alder 32, /nedtaelling 25, /tidszone 14,
+        // /kalorier 14, /elberegner 12, /loenstigning 11, /timepris 11.
+        "/tidsberegner", "/dato", "/leasing", "/alder", "/nedtaelling",
+        "/tidszone", "/kalorier", "/elberegner", "/loenstigning", "/timepris",
+        // Svensk lön efter skatt och Bolån finns bara på beraknare.se.
+        "/lon-efter-skatt", "/bolan",
+      ]
       : ["/moms", "/bmi", "/laaneberegner", "/procent", "/valuta", "/boliglaan", "/timepris"];
 
   const allCalcs = getCalculatorsByLocale(locale);
