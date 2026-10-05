@@ -119,7 +119,7 @@ export default async function Home() {
               >
                 {isTrending && (
                   <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow">
-                    Trending
+                    {data.sections.trending}
                   </span>
                 )}
                 <div className="text-center">
@@ -222,7 +222,7 @@ export default async function Home() {
                     </div>
                     {isTrending && (
                       <span className="flex-shrink-0 bg-orange-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-                        Trending
+                        {data.sections.trending}
                       </span>
                     )}
                   </Link>

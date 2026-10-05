@@ -1,4 +1,22 @@
-STATUS: 5/10 22:5x. ✅ 5/10 22:5x: **«/tidsberegner» sendte læseren op til et felt
+STATUS: 5/10 23:1x. ✅ 5/10 23:1x: **forsidens sæsonbadge stod på engelsk.**
+              Badgen «Trending» lå som et råt literal i `page.tsx` og fulgte
+              *ikke* `locale`, så danske læsere så «Trending» på minberegner.dk
+              og svenske læsere så «Trending» på beraknare.se — målt 5/10 23:0x
+              i live-HTML: **6 forekomster på forsiden**. Ordet er nu
+              `sections.trending` i `home-data.ts` — «Populær nu» / «Populär nu»
+              / «Populær nå» — altså samme sted som al anden forside-tekst, og
+              to nye porte i `forside.test.tsx` dømmer på det. Mål: ingen
+              `>Trending<` i markupken i noget sprog, og badgen hænger på præcis
+              de hrefs `getTrendingHrefs()` leverer (dømt på de links der
+              *indeholder* badgen, ikke på om ordet står et sted på siden).
+              Mutation tilbage til «Trending» gav **2 rød**, rettelsen 7/7 grøn.
+              ⚠️ **CI har været rød siden 5/10 19:35 — tre kørsler, alle
+              `cancelled` efter præcis 15 min med *nul* steps og intet
+              `runner_name`.** Sidste grønne kørsel var 16:13. Det er
+              GitHubs egen runner-kø, ikke diffen: jobbet startede aldrig.
+              ⛔ Ikke noget en iteration kan rette — GitHub-billing/minutter er
+              Mads' (❓ nedenfor). Lokal gate er eneste kontrol før merge.
+              ✅ 5/10 22:5x: **«/tidsberegner» sendte læseren op til et felt
              der lå nedenfor.** Siden siger «Indtast dine egne klokkeslæt
              **ovenfor**» og **ni** steder «præcis som værktøjet **ovenfor**» /
              «Fyll i dina egna klockslag **ovanför**» — men `<TidsBeregner />`
@@ -79,7 +97,7 @@ STATUS: 5/10 22:5x. ✅ 5/10 22:5x: **«/tidsberegner» sendte læseren op til e
 | `/boligstoette` | 529 | 7.465 | 2,4 % | 8,7 |
 | `/renteberegner` | under top-15 | 12.610 | 0,8 % | 7,4 |
 | `/su` | **127 (fald fra 201)** | under top-15 | — | — |
-| `/` (forside) | 218, bounce 38 % | under top-15 | — | — |
+| `/` (forside) | **213, bounce 40 %** (5/10 21:25) | under top-15 | — | — |
 | `/dage-til` + se `/dagar-till` | **0 — nye URL'er 2/10** | — | — | — |
 | `/dage-til/24-december` + `31-december` (+ se) | **0 — nye URL'er 5/10 22:1x** | — | — | — |
 | `/tidsberegner` efter flytningen 5/10 22:5x (baseline 268) | 268 | 78.615 | 0,3 % | 6,7 |
@@ -150,6 +168,33 @@ rettet 5/10 22:5x. Ni «ovenfor»/«ovanför»-henvisninger pegede alle på det,
 lå under dem, fordi `<TidsBeregner />` stod efter tabellen og hele
 brødteksten. Én flytning gør alle ni rigtige, samme rækkefølge som
 `/procent`. Port dømmer på rækkefølgen i markup'en (1 rød ved mutation).
+
+**F6g. [x] Forsidens sæsonbadge læser sit eget sprog** — 5/10 23:1x.
+«Trending» lå som et råt literal i `page.tsx` og fulgte ikke `locale`, så det
+stod på dansk *og* svensk (6 forekomster målt i live-HTML). Nu er det
+`sections.trending` i `home-data.ts` («Populær nu» / «Populär nu» / «Populær nå»).
+Mål: ingen `>Trending<` i noget sprog, og badgen hænger på præcis de hrefs
+`getTrendingHrefs()` leverer — porten læser linksene og spørger hvilke der
+*bærer* badgen, så «ordet står et sted tæt ved» ikke kan få den grøn.
+Mutation tilbage gav 2 rød. *Hvorfor:* badgen er en påstand om at netop denne
+beregner er aktuel lige nu (punkt 11), og den stod på et sprog sitet ellers ikke
+taler. ⛔ *Hvilke* beregnere der badges er en måneds-tabel i `trending.ts`, ikke
+målt trafik — urørt.
+
+**F6h. [ ] `trending.ts` læser måneden i serverens tidszone** (punkt 4, målt
+5/10 23:1x — *ikke* rettet i F6g, se nedenfor). `getTrendingHrefs()` bruger
+`new Date().getMonth()`, og serveren står i **UTC**, så mellem kl. 00 og 02
+dansk tid den 1. november er UTC stadig oktober: forsiden badgede feriepenge og
+valuta på en novemberdag, og den 1. januar badgede den årsopgørelse. Rettelsen
+er `iDagPaSiden(new Date(), locale)` fra `lokal-dato.ts` (samme regel som
+`dage-til`, `dage-i-aaret` og `alder`) plus et `locale`-argument. ⛔ **Porten
+skal kunne fejle, og det kræver et tidszone-uvældigt krav** — målt 5/10 23:1x:
+en test der sætter uret til `2026-10-31T22:30Z` og forventer november gav **0
+rød** på mutationen til `getMonth()`, fordi testprocessen står i CEST, så
+`getMonth()` *accidentelt* svarede rigtigt. `process.env.TZ = "UTC"` øverst i
+filen rettede heller ikke (målt begge dele). Anbefalet løsning: giv
+`getTrendingHrefs` et `today`-parameter (ren funktion, ingen ur), og døm på
+**Copenhagen-datoen vs. UTC-datoen** eksplicit i stedet for på kalendermåneden.
 
 **F6d. [ ] Samme logik for de øvrige daterede nedtællinger.** Kun december har
 en URL med et datotal i dag, og kun fordi GSC viste den. Øvrige kandidater må
@@ -234,6 +279,14 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 `curl` mod begge domæner 5/10 21:3x, ikke på HTTP-koden. De lukkede noters fulde
 krav og målinger ligger i `docs/plan-arkiv.md` (5/10 21:4x).
 
+**Åben note 5/10 23:1x:** `VERIFICÉR DEPLOY: forsidens sæsonbadge hedder
+«Populær nu» på minberegner.dk, «Populär nu» på beraknare.se og «Populær nå» på
+den norske udgave — aldrig «Trending» ceo/populaer-badge-sprog 5/10 23:1x`. Mål
+på indhold: `curl -s https://minberegner.dk/ | grep -c '>Trending<'` skal være
+**0** og `grep -c '>Populær nu<'` skal være **> 0** (samme tre greb på
+beraknare.se med «Populär nu»). ⚠️ Mergen er efter 21:30-vinduet, første reelle
+kør er 6/10 07:30.
+
 **Åben note 5/10 22:5x:** `VERIFICÉR DEPLOY: /tidsberegner renderer
 tidsværktøjet før svar-først-tabellen på både minberegner.dk og beraknare.se
 ceo/tidsberegner-vaerktoej-foerst 5/10 22:5x`. Mål på indhold: `curl -s
@@ -296,6 +349,14 @@ viser 13.372 kr. og 14.694 kr., ikke 13.438 kr. og 14.768 kr. ceo/efterloen-delt
 
 ## ❓ Til Mads
 
+- ❓ **GitHub Actions kan ikke starte job på minberegner.dk** (5/10 23:1x).
+  Tre kørsler i træk (19:35, 20:10, 20:37) blev `cancelled` efter præcis
+  15 min med **nul** steps og tomt `runner_name`; seneste grønne kørsel var
+  16:13. Det er GitHubs egen runner-kø/minuttersbudget, ikke koden — jobbet
+  startede aldrig, så der er ingen log at læse. **En iteration kan ikke rette
+  det.** Betyder at den lokale gate er eneste kontrol før merge, indtil den
+  kører grøn igen. Tjekkes én gang ved næste iterations start med
+  `gh run list -L 1`.
 - ❓ **`auto/union-night` har unikt arbejde, der aldrig er landet** (4/10 04:1x).
   Branchen er fra 17/9 og skiller sig fra `master` i `BACKLOG.md`,
   `docs/kommercielt-inventar.md` og `docs/timepris-nichetest.md`. Sidste fil er et

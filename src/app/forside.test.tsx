@@ -33,6 +33,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getHomeCalculators, getHomePageData } from "@/lib/home-data";
+import { getTrendingHrefs } from "@/lib/trending";
 import type { Locale } from "@/lib/i18n";
 import HomePage from "./page";
 
@@ -115,6 +116,63 @@ describe("forsidens genvej til beregnerne", () => {
     for (const beregner of getHomeCalculators("da").filter((c) => c.popular)) {
       expect(html, `forsiden mangler et kort til ${beregner.href}`).toContain(`href="${beregner.href}"`);
       expect(html, `kortet til ${beregner.href} mangler titlen`).toContain(beregner.title);
+    }
+  });
+
+  test("sæsonbadgen står på forsidens eget sprog, aldrig på engelsk", async () => {
+    // Badgen er en påstand til læseren om at netop denne beregner er aktuel
+    // lige nu. Den lå som et engelsk `Trending` i `page.tsx`, altså uden for
+    // den øvrige tekst, så den fulgte ikke `locale`: danske læsere så
+    // «Trending», og de svenske ligeså. Målt 5/10 i live-HTML: 6 forekomster
+    // på minberegner.dk/forsiden (3 badger, hver et par gange — populærkortet
+    // og kategorirækken kan ramme samme href).
+    for (const locale of ["da", "se", "no"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await HomePage());
+      const data = getHomePageData(locale);
+
+      expect(html, `${locale}: sæsonbadgen mangler i markupken`).toContain(
+        `>${data.sections.trending}<`
+      );
+      // Badgen skal kunne ses, ellers dømmer porten en label der aldrig males.
+      const synlige = html.split(`>${data.sections.trending}<`).length - 1;
+      expect(synlige, `${locale}: sæsonbadgen males ikke`).toBeGreaterThan(0);
+      expect(html, `${locale}: engelsk "Trending" står stadig på forsiden`).not.toContain(
+        ">Trending<"
+      );
+    }
+  });
+
+  test("sæsonmærkets href er dem badgen faktisk sidder på", async () => {
+    // `getTrendingHrefs()` er en måneds-tabel, så porten ovenfor ville være grøn
+    // fordi en badge med et andet ord renderer et andet sted. Denne dømmer, at
+    // badgen hænger på præcis de hrefs tabellen leverer — og at ingen anden
+    // beregner er badget. Begge tal læses fra den målte trafik-tabel.
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await HomePage());
+      const data = getHomePageData(locale);
+      const badgede = getTrendingHrefs().filter((href) => html.includes(`href="${href}"`));
+      const synlige = html.split(`>${data.sections.trending}<`).length - 1;
+
+      expect(synlige, `${locale}: antal badges på forsiden`).toBe(badgede.length);
+      // Badgen ligger *inde i* sit link, så porten læser linkene og spørger om
+      // hvilke der bærer den — ikke om teksten står et sted på siden. Det er
+      // den forskel, der skelner «badgen sidder på /opsparing» fra «ordet
+      // står et sted tæt på /opsparsing».
+      const linkMedBadge = new Set(
+        html
+          .split("<a ")
+          .filter((link) => link.includes(`>${data.sections.trending}<`))
+          .map((link) => link.match(/href="(\/[^"]+)"/)?.[1])
+          .filter((href): href is string => Boolean(href))
+      );
+
+      expect([...linkMedBadge].sort(), `${locale}: hvilke links der bærer badgen`).toEqual(
+        getTrendingHrefs().filter((href) => html.includes(`href="${href}"`)).sort()
+      );
     }
   });
 

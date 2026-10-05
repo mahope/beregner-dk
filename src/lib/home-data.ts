@@ -39,6 +39,13 @@ export interface HomePageData {
      */
     popular: string;
     /**
+     * Label on the badge that marks a seasonal calculator. It is a claim the
+     * site makes to a reader, so it lives here with the rest of the copy
+     * instead of standing as an English literal in the page — the site has no
+     * other English on the homepage and neither do its readers.
+     */
+    trending: string;
+    /**
      * Heading for the countdown-link section. Only the locales that serve
      * /dage-til pages carry it; beregner.no serves no dage-til section at all,
      * so it is absent there rather than rendered empty.
@@ -102,6 +109,7 @@ const daPageData: HomePageData = {
   },
   sections: {
     popular: "Populære beregnere",
+    trending: "Populær nu",
     dageTil: "Hvor mange dage er der til…",
     whyUse: "Hvorfor bruge MinBeregner.dk?",
     features: {
@@ -313,6 +321,7 @@ const noPageData: HomePageData = {
   },
   sections: {
     popular: "Populære kalkulatorer",
+    trending: "Populær nå",
     whyUse: "Hvorfor bruke Beregner.no?",
     features: {
       free: {
@@ -438,6 +447,7 @@ const sePageData: HomePageData = {
   },
   sections: {
     popular: "Populära kalkylatorer",
+    trending: "Populär nu",
     dageTil: "Hur många dagar är det till…",
     whyUse: "Varför använda Beräknare.se?",
     features: {
