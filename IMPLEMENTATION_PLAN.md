@@ -1,4 +1,15 @@
-STATUS: 6/10 02:3x. ✅ 6/10 02:3x: **`/kvadratmeter` kunne kun omregne én
+STATUS: 6/10 02:4x. ✅ 6/10 02:4x: **`/braendstof` kunne ikke regne en
+km/l om til l/100 km.** «benzinforbrug pr km» er en dansk autocomplete-træffer,
+og 6 af 10 træffere under «km/l» er *omregninger* («km/l til l/100km», «km/l to
+mpg», «km/l vs mpg» …). `BraendstofBeregner` viste l/100 km for det forbrug man
+lige havde fundet ud af liter og kilometer, men havde intet felt at skrive i —
+så «6,7 l/100 km, hvad er det i km/l?» kunne ikke løses på sitet. Nu er der en
+Forbrugsomregner med indtast og enhedsvalg, der svarer alle fire veje, og
+brødteksten skriver de tre målte omregninger i da og se. **To fejl fundet af
+porten undervejs:** km/l ↔ l/100 km er *omvendte*, ikke et fast forhold, og mpg
+er milen *delt ind i* gallonen — begge var først skrevet modsat, så alle mpg-tal
+var 1.000 gange for små. 33 porte; mutation af gallonens division gav 8 røde.
+✅ 6/10 02:3x: **`/kvadratmeter` kunne kun omregne én
 vej.** Værktøjet *viste* m², cm², hektar og kvadratfod for det areal man lige
 havde regnet, men havde intet felt at skrive i — så «500 kvadratfod til m²»,
 første danske træffer under «kvadratfod» og 9 af 10 under «omregn kvadratmeter
@@ -42,8 +53,9 @@ svensk påskafton, fast dansk sankthans, `Europe/Copenhagen` i `toUtcMidnight`).
 Alt ældre: `docs/plan-arkiv.md`. ✅ CI grøn 5/10 21:26.
 PR-TJEK: 6/10 01:0x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
 **Gate:** `npm run typecheck && npm run lint && npm run test` (CI kører også
-`next build`). 6/10 02:3x: typecheck 0, lint 0 (779 filer), **4376 tests i 273
-filer** grønne. Ét tidligere fuldt suitekørsel gav 1 rød i `locale-leak-gate.test.ts`,
+`next build`). 6/10 02:4x: typecheck 0, lint 0 (782 filer), **4409 tests i 274
+filer** grønne. 6/10 02:3x: typecheck 0, lint 0 (779 filer), 4376 tests i 273
+filer grønne. Ét tidligere fuldt suitekørsel gav 1 rød i `locale-leak-gate.test.ts`,
 som scanneren kører i en udspawnet proces og som er grøn 3/3 i isolation og i
 to senere fulde kørsler — urørt, se ❓ om skanner-rækkerne.
 ## Fase 3 — trafik-drevet
@@ -60,6 +72,7 @@ to senere fulde kørsler — urørt, se ❓ om skanner-rækkerne.
 | `/kvadratmeter` | 391 | 20.768 | 1,5 % | 4,9 |
 | `/kvadratmeter` **før arealværktøjet** (baseline 6/10 02:3x) | **393 (+96 %)** | **21.403** | **1,5 %** | **4,9** |
 | `/braendstof` | 263 | 17.051 | 1,1 % | 5,9 |
+| `/braendstof` **før Forbrugsomregneren** (baseline 6/10 02:4x) | **252 (+56 %)** | **16.898** | **1,0 %** | **6,0** |
 | `/alder` | under top-15 | 10.029 | 0,4 % | 7,2 |
 | `/rentefradrag` | under top-15 | 5.082 | 5,8 % | 5,6 |
 | `/promille` | 148 | 6.003 | 1,6 % | 7,8 |
@@ -238,6 +251,18 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
   indtast. Mutér foden til 0,3047 → 11 røde, hektaren til 1.000 → 4 røde, et
   brødtekstal → 3 røde. `MÅL: /kvadratmeter baseline 393 besøgende/28d pr.
   6/10, forventer > 450 efter 14 dage`. Ingen ny URL, så sitemapen er uændret.
+- **[x] Forbrugsomregner på `/braendstof`.** Lukket 6/10 02:4x i
+  `ceo/forbrugsomregner`. *Datagrund:* dansk autocomplete 6/10 02:4x — 6 af 10
+  træffere under «km/l» er omregninger, og «benzinforbrug pr km» er en træffer.
+  `/braendstof` har 16.898 GSC-visninger på pos. 6,0 og 252 Plausible-besøgende
+  (+56 %), så positionen er god nok til at konvertere omregninger. *Hvorfor:*
+  værktøjet kunne *vise* l/100 km, men intet felt at skrive i. *Accept:* 33 porte
+  dømmer de eksakte enheder (mil = 1,609344 km, US gallon = 231 × 0,0254³ m³ =
+  præcis 3,785411784 L, imperial = 4,54609 L), at km/l ↔ l/100 km er omvendt,
+  symmetrien i alle 16 enhedspar, og NaN ved 0/negativt i stedet for Infinity.
+  Mutér gallonens division → 8 røde; mutér til 0,0037854 (glemt m³→liter) gav
+  13 røde. `MÅL: /braendstof baseline 252 besøgende/28d pr. 6/10, forventer >
+  290 efter 14 dage`. Titles i da/se; ingen ny URL, så sitemapen er uændret.
 - **[ ] BMI-percentil for børn.** «bmi for børn», «bmi skala børn» er danske
   autocomplete-træffere, på svensk «bmi barn tabell». WHO's BMI-for-alder-tabeller
   er ~150 tal pr. køn — for mange at transkribere uden uafhængig kontrol, og en
@@ -268,6 +293,18 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
   mange; kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben note 6/10 02:4x:** `VERIFICÉR DEPLOY: /braendstof har en
+Forbrugsomregner med indtast og enhedsvalg, der viser km/l, l/100 km, mpg (USA)
+og mpg (Storbritannien), og brødteksten skriver «6,70 l/100 km = 14,93 km/l»,
+«15,00 km/l = 6,67 l/100 km» og «15,00 km/l = 35,3 mpg (USA)» i da og se
+ceo/forbrugsomregner 6/10 02:4x`. Mål på indhold: `curl -s
+https://minberegner.dk/braendstof | grep -o 'Omregn bilens forbrug' | wc -l` →
+**1**, `grep -o '14,93 km/l' | wc -l` → **> 0**, `grep -o '1,609344' | wc -l` →
+**> 0**. Samme greb på beraknare.se med «Omvandla bilens förbrukning» og «14,93
+km/l». Værktøjet er en klient-komponent, så læs `src/lib/forbrugs-omregner.ts`
+indtil facit kan hentes headless. ⚠️ Første reelle deploy-vindue efter mergen er
+6/10 07:30.
 
 **Åben note 6/10 02:3x:** `VERIFICÉR DEPLOY: /kvadratmeter har et
 ArealOmregner med indtast og enhedsvalg, der viser alle seks enheder, og

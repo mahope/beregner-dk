@@ -29546,3 +29546,38 @@ Ingen ny URL, så sitemap og robots er uændrede.
 2026` (GSC 21.403 visninger, CTR 1,5 %, pos. 4,9). Forventer > 450 efter 14
 dage; GSC-søgningerne «omregn kvadratmeter til …» skal give nye visninger på
 siden efter samme 14 dage.
+
+## 6/10 02:4x — Forbrugsomregner på /braendstof (ceo/forbrugsomregner)
+
+*Datagrund:* dansk autocomplete 6/10 02:4x. 6 af 10 træffere under «km/l» er
+omregninger («km/l til l/100km», «km/l to l/100km», «km/l to mpg», «km/l vs
+mpg», «km/l to l/100», «km/l to l/km»), og «benzinforbrug pr km» er også en
+træffer. `/braendstof` har 16.898 GSC-visninger på pos. 6,0 og 252
+Plausible-besøgende/28d (+56 %).
+
+*Hvad:* `BraendstofBeregner` kunne *vise* l/100 km for det forbrug man lige
+havde fundet ud af liter og kilometer, men havde intet felt at skrive i. Ny
+`src/lib/forbrugs-omregner.ts` + `src/components/Forbrugsomregner.tsx`, samme
+mønster som ArealOmregner på /kvadratmeter 6/10 02:3x. Brødteksten skriver de
+tre målte omregninger i da og se, regnet fra `FORBRUGS_OMREGNINGS_EKSEAMPLER`.
+
+*To fejl fundet af porten undervejs — begge ville have været live i markup:*
+
+1. **km/l ↔ l/100 km er omvendte, ikke et fast forhold.** Første udkast
+   behandlede l/100 km som et lineært forhold (faktor 0,01), så 6,7 l/100 km
+   blev til 0,07 km/l i stedet for 14,93. Rettet ved at regne alt via km/l:
+   `l/100km → 100 ÷ værdi`, `km/l → værdi × faktor`.
+2. **mpg er milen delt ind i gallonen, ikke omvendt.** Første udkast brugte
+   `US_GALLON_I_LITER / MIL_I_KM` = 2,352 og fik 1 km/l til at være 0,43 mpg.
+   Rettet til `MIL_I_KM / US_GALLON_I_LITER` = 0,425143707 km/l pr. mpg. En
+   tredje fejl samme sted: kubiktommen er m³, og 1 m³ er 1.000 liter, så gallonen
+   var 1.000 gange for lille (0,0037854 mod 3,785411784).
+
+*Verify:* 33 porte i `src/lib/forbrugs-omregner.test.ts` dømmer de eksakte
+enheder, omvendtheden, symmetrien i alle 16 enhedspar, NaN ved 0/negativt (ikke
+Infinity) og at den valgte enhed står uændret i sit felt. Mutér gallonens
+division → 8 røde. Mutér til den manglende ×1000 → 13 røde. Under
+skrivningen fangede porten to af fejlene ovenfor plus en fejl i mine egne
+testforventninger (3 l/100 km er 33,3 km/l, ikke 333).
+
+*Gate:* typecheck 0, lint 0 (782 filer), 4409 tests i 274 filer grønne.

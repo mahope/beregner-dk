@@ -1,6 +1,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 const BraendstofBeregner = dynamic(() => import("@/components/BraendstofBeregner"));
+const Forbrugsomregner = dynamic(() => import("@/components/Forbrugsomregner"));
 import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -24,6 +25,20 @@ import {
   kmPrLiter,
   literPr100km,
 } from "@/lib/braendstof";
+import {
+  FORBRUGS_OMREGNINGS_EKSEAMPLER,
+  omregnForbrug,
+  rundForbrug,
+  type ForbrugsEnhedId,
+} from "@/lib/forbrugs-omregner";
+
+/** Enhedernes navn i brødteksten, så værktøjet og teksten siger det samme. */
+const FORBRUGS_ENHED_NAVN: Record<ForbrugsEnhedId, { da: string; se: string }> = {
+  kmPerLiter: { da: "km/l", se: "km/l" },
+  literPr100km: { da: "l/100 km", se: "l/100 km" },
+  mpg: { da: "mpg (USA)", se: "mpg (USA)" },
+  mpgUk: { da: "mpg (Storbritannien)", se: "mpg (Storbritannien)" },
+};
 
 export async function generateMetadata() {
   return generatePageMetadata("braendstof");
@@ -48,6 +63,18 @@ export default async function BraendstofPage() {
   const egentForbrug = BRAENDSTOF_EGENT_FORBRUG;
   const egentForbrugKmPrLiter = egentForbrug.km / egentForbrug.liter;
   const egentForbrugLiterPr100km = literPr100km(egentForbrugKmPrLiter);
+
+  /**
+   * De tre omregninger brødteksten skriver, regnet fra de samme tal som
+   * værktøjet viser. Hvert eksempel er «værdi i fra-enheden = resultat i
+   * til-enheden», så læseren kan efterprøve det på sin egen tank.
+   */
+  const forbrugsEksempler = FORBRUGS_OMREGNINGS_EKSEAMPLER.map((e) => ({
+    fra: e.fra,
+    til: e.til,
+    vaerdi: e.vaerdi,
+    resultat: rundForbrug(omregnForbrug(e.vaerdi, e.fra, e.til), e.til),
+  }));
   const benzinForbrug = BRAENDSTOF_FORUDSETNINGER.benzin.kmPerLiter;
   const benzinPr100 = literPr100km(benzinForbrug);
   const benzinKmPrLiter = kmPrLiter(benzinPr100);
@@ -97,6 +124,8 @@ export default async function BraendstofPage() {
         <BilforsikringAffiliate className="mt-8" />
       </div>
 
+      <Forbrugsomregner />
+
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">
@@ -111,6 +140,32 @@ export default async function BraendstofPage() {
           <strong>literprisen</strong> giver prisen. Her er de tre drivmidler regnet på{" "}
           {braendstofKm} km med de forudsætninger, beregneren selv bruger.
         </p>
+        <h3>Omregn mellem km/l, l/100 km og mpg</h3>
+        <p>
+          Benzinforbruget står som <strong>km/l</strong> i manualen og på
+          brændstoffets standere, mens <strong>l/100 km</strong> er den enhed
+          danske biler viser, og <strong>mpg</strong> er den amerikanske og
+          brittiske. <strong>km/l og l/100 km er omvendte af hinanden</strong> —
+          6,7 l/100 km er 100 delt i 6,7 — så den ene vegne kan ikke regnes
+          med en fast faktor. Omregneren her svarer alle fire veje:
+        </p>
+        <ul>
+          {forbrugsEksempler.map((e) => (
+            <li key={`${e.fra}-${e.til}`}>
+              {tal(e.vaerdi, 2)} {FORBRUGS_ENHED_NAVN[e.fra].da} ={" "}
+              <strong>
+                {tal(e.resultat, 2)} {FORBRUGS_ENHED_NAVN[e.til].da}
+              </strong>
+            </li>
+          ))}
+        </ul>
+        <p>
+          En mil er præcis 1,609344 km og en US gallon er præcis 3,785411784
+          liter, så 1 km/l er {tal(omregnForbrug(1, "kmPerLiter", "mpg"), 1)} mpg
+          i USA og {tal(omregnForbrug(1, "kmPerLiter", "mpgUk"), 1)} mpg i
+          Storbritannien. De to gallon-enheder er derfor ikke det samme tal.
+        </p>
+
         <table>
           <thead>
             <tr>
@@ -316,6 +371,33 @@ export default async function BraendstofPage() {
           tre drivmedlen räknade på {braendstofKm} km, alltså {helTalMil} mil, med de
           förutsättningar som vården använder.
         </p>
+
+        <h3>Omvandla mellan km/l, l/100 km och mpg</h3>
+        <p>
+          Förbrukningen står som <strong>km/l</strong> i manualen och på
+          bränslemätaren, medan <strong>l/100 km</strong> är den enhet svenska
+          bilar visar, och <strong>mpg</strong> är den amerikanska och brittiska.
+          <strong>km/l och l/100 km är omvända mot varandra</strong> — 6,7
+          l/100 km är 100 delat i 6,7 — så den ena vägen kan inte räknas med
+          en fast faktor. Omvandlaren här svarar alla fyra vägar:
+        </p>
+        <ul>
+          {forbrugsEksempler.map((e) => (
+            <li key={`se-${e.fra}-${e.til}`}>
+              {talSe(e.vaerdi, 2)} {FORBRUGS_ENHED_NAVN[e.fra].se} ={" "}
+              <strong>
+                {talSe(e.resultat, 2)} {FORBRUGS_ENHED_NAVN[e.til].se}
+              </strong>
+            </li>
+          ))}
+        </ul>
+        <p>
+          En mil är exakt 1,609344 km och en US gallon är exakt 3,785411784
+          liter, så 1 km/l är {talSe(omregnForbrug(1, "kmPerLiter", "mpg"))} mpg
+          i USA och {talSe(omregnForbrug(1, "kmPerLiter", "mpgUk"))} mpg i
+          Storbritannien. De två gallon-enheterna är alltså inte samma tal.
+        </p>
+
         <table>
           <thead>
             <tr>
