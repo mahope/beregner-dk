@@ -135,7 +135,10 @@ export const KLOKKEN_LANDE: readonly KlokkenLand[] = [
     slugSe: "spanien",
     navnDa: "Spanien",
     navnSe: "Spanien",
-    byer: [{ da: "Madrid", zone: "Europe/Madrid" }],
+    byer: [
+      { da: "Madrid", zone: "Europe/Madrid" },
+      { da: "Barcelona", zone: "Europe/Madrid" },
+    ],
   },
   {
     slugDa: "brasilien",
@@ -164,6 +167,55 @@ export const KLOKKEN_LANDE: readonly KlokkenLand[] = [
     navnDa: "Tyskland",
     navnSe: "Tyskland",
     byer: [{ da: "Berlin", zone: "Europe/Berlin" }],
+  },
+  {
+    slugDa: "frankrig",
+    slugSe: "frankrike",
+    navnDa: "Frankrig",
+    navnSe: "Frankrike",
+    byer: [{ da: "Paris", zone: "Europe/Paris" }],
+  },
+  {
+    slugDa: "italien",
+    slugSe: "italien",
+    navnDa: "Italien",
+    navnSe: "Italien",
+    byer: [{ da: "Rom", zone: "Europe/Rome" }],
+  },
+  {
+    slugDa: "nederlandene",
+    slugSe: "nederlanden",
+    navnDa: "Nederlandene",
+    navnSe: "Nederländerna",
+    byer: [{ da: "Amsterdam", zone: "Europe/Amsterdam" }],
+  },
+  {
+    slugDa: "graekenland",
+    slugSe: "grekland",
+    navnDa: "Grækenland",
+    navnSe: "Grekland",
+    byer: [{ da: "Athen", se: "Aten", zone: "Europe/Athens" }],
+  },
+  {
+    slugDa: "schweiz",
+    slugSe: "schweiz",
+    navnDa: "Schweiz",
+    navnSe: "Schweiz",
+    byer: [{ da: "Zürich", zone: "Europe/Zurich" }],
+  },
+  {
+    slugDa: "marokko",
+    slugSe: "marokko",
+    navnDa: "Marokko",
+    navnSe: "Marocko",
+    byer: [{ da: "Casablanca", zone: "Africa/Casablanca" }],
+  },
+  {
+    slugDa: "emiraterne",
+    slugSe: "emiraten",
+    navnDa: "Emiraterne",
+    navnSe: "Emiraten",
+    byer: [{ da: "Dubai", zone: "Asia/Dubai" }],
   },
 ];
 

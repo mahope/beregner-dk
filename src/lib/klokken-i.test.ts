@@ -219,3 +219,74 @@ describe("ruterne", () => {
     }
   });
 });
+
+describe("landene dansk autocomplete spørger om, men vi ikke dækkede", () => {
+  // «klokken i roma», «klokken i amsterdam», «klokken i dubai» m.fl. var
+  // danske completioner, men `/klokken-i/*` kunne ikke svare på dem, fordi
+  // landet ikke stod i `KLOKKEN_LANDE`. Danmark og Sverige er bevidst
+  // undtaget — de er læserens eget marked og dækket af `/tidszone`
+  // (se porten «egne lande får ingen side»).
+  const FORVENTET = [
+    { slugDa: "frankrig", slugSe: "frankrike", zone: "Europe/Paris" },
+    { slugDa: "italien", slugSe: "italien", zone: "Europe/Rome" },
+    { slugDa: "nederlandene", slugSe: "nederlanden", zone: "Europe/Amsterdam" },
+    { slugDa: "graekenland", slugSe: "grekland", zone: "Europe/Athens" },
+    { slugDa: "schweiz", slugSe: "schweiz", zone: "Europe/Zurich" },
+    { slugDa: "marokko", slugSe: "marokko", zone: "Africa/Casablanca" },
+    { slugDa: "emiraterne", slugSe: "emiraten", zone: "Asia/Dubai" },
+  ] as const;
+
+  /** UTC-forskellen i minutter, som `Intl` selv læser den — uafhængig af modulet. */
+  function ianaOffsetMinutter(zone: string, tidspunkt: Date): number {
+    const dele = new Intl.DateTimeFormat("en-US", {
+      timeZone: zone,
+      timeZoneName: "longOffset",
+    }).formatToParts(tidspunkt);
+    const navn = dele.find((d) => d.type === "timeZoneName")?.value ?? "";
+    const fundet = navn.match(/GMT([+-])(\d{1,2}):(\d{2})/);
+    if (!fundet) return navn.includes("GMT+") ? 0 : NaN;
+    const minutter = Number(fundet[2]) * 60 + Number(fundet[3]);
+    return fundet[1] === "-" ? -minutter : minutter;
+  }
+
+  test("alle svy lande har en side i begge sprog, med den IANA-zone de er dømt mod", () => {
+    for (const land of FORVENTET) {
+      expect(getKlokkenSlugs("da"), `da/${land.slugDa}`).toContain(land.slugDa);
+      expect(getKlokkenSlugs("se"), `se/${land.slugSe}`).toContain(land.slugSe);
+      const fundet = findKlokkenLand(land.slugDa, "da");
+      expect(fundet, `findKlokkenLand(${land.slugDa})`).not.toBeNull();
+      expect(fundet!.byer[0].zone, land.slugDa).toBe(land.zone);
+    }
+  });
+
+  test("tidsforskellen er præcis den, IANA siger, i både vinter og sommer", () => {
+    for (const land of FORVENTET) {
+      for (const [navn, tidspunkt] of [["januar", VINTER], ["juli", SOMMER]] as const) {
+        const dansk = ianaOffsetMinutter("Europe/Copenhagen", tidspunkt);
+        const haanden = tidsforskelMinutter(tidspunkt, land.zone);
+        const spring = ianaOffsetMinutter(land.zone, tidspunkt);
+        // Marokko springer desuden et time under ramadan, så dets IANA-zone
+        // er stadig mål — det er netop derfor vi ikke skriver et fast tal.
+        expect(haanden, `${land.slugDa} i ${navn}`).toBe(spring - dansk);
+      }
+    }
+  });
+
+  test("Spanien har Barcelona med, så «klokken i barcelona» ikke rammer Madrid-siden", () => {
+    const spanien = findKlokkenLand("spanien", "da");
+    expect(spanien!.byer.map((b) => b.da)).toEqual(["Madrid", "Barcelona"]);
+    expect(spanien!.byer[1].zone).toBe("Europe/Madrid");
+  });
+
+  test("sprognavnene er oversat, så beraknare.se ikke skriver dansk", () => {
+    for (const land of FORVENTET) {
+      const fundet = findKlokkenLand(land.slugSe, "se");
+      expect(fundet, `se/${land.slugSe}`).not.toBeNull();
+      expect(landetsNavn(fundet!, "se"), land.slugSe).toBe(fundet!.navnSe);
+    }
+    // Grækenland og Schweiz hedder det samme på begge sprog, så de skal ikke
+    // tvinges ind i en kunstig oversættelse.
+    expect(landetsNavn(findKlokkenLand("schweiz", "se")!, "se")).toBe("Schweiz");
+    expect(landetsNavn(findKlokkenLand("graekenland", "da")!, "se")).toBe("Grekland");
+  });
+});

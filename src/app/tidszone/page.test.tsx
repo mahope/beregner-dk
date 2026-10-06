@@ -603,19 +603,25 @@ describe("tidszone giver hver landside en indgang", () => {
     "kina", "indien", "england", "spanien", "brasilien", "portugal",
     // 4/10 05:1x: Danmarks narmeste naboer, malt paa dansk autocomplete.
     "norge", "tyskland",
+    // 6/10 04:1x: «klokken i roma/amsterdam/dubai/schweiz/marokko» var
+    // danske completioner, landene manglede i modulet.
+    "frankrig", "italien", "nederlandene", "graekenland", "schweiz",
+    "marokko", "emiraterne",
   ];
   const SLUGS_SE = [
     "usa", "thailand", "australien", "japan", "turkiet", "kanada",
     "kina", "indien", "england", "spanien", "brasilien", "portugal",
     // 4/10 05:1x: Danmarks narmeste naboer, malt paa dansk autocomplete.
     "norge", "tyskland",
+    "frankrike", "italien", "nederlanden", "grekland", "schweiz",
+    "marokko", "emiraten",
   ];
 
   test.each([
     { locale: "da" as const, prefix: "/klokken-i/", slugs: SLUGS_DA, spoergsmaal: "Hvad er klokken i", anker: ["Japan", "Tyrkiet", "USA"], andet: "/klockan-i/", andetTekst: "Vad är klockan i" },
     { locale: "se" as const, prefix: "/klockan-i/", slugs: SLUGS_SE, spoergsmaal: "Vad är klockan i", anker: ["Japan", "Turkiet", "Kanada"], andet: "/klokken-i/", andetTekst: "Hvad er klokken i" },
   ])(
-    "$locale linker til alle 14 landesider med spoergsmaalstekst som anker",
+    "$locale linker til alle 21 landesider med spoergsmaalstekst som anker",
     async ({ locale, prefix, slugs, spoergsmaal, anker, andet, andetTekst }) => {
       vi.mocked(getLocale).mockResolvedValue(locale);
       vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
@@ -654,7 +660,7 @@ describe("tidszone giver hver landside en indgang", () => {
   // slugs.length, ikke fra KLOKKEN_LANDE, saa porten stadig kan se en fejl i
   // modulet — samme begrundelse som ovenfor.
   test.each([
-    { locale: "da" as const, slugs: SLUGS_DA, anker: "klokken i", boe: "lande" },
+    { locale: "da" as const, slugs: SLUGS_DA, anker: "klokken i", boe: "land" },
     { locale: "se" as const, slugs: SLUGS_SE, anker: "klockan i", boe: "länder" },
   ])(
     "$locale lover saa mange lande i hub-ankeret som siden linker til",
@@ -664,10 +670,16 @@ describe("tidszone giver hver landside en indgang", () => {
 
       const html = renderToStaticMarkup(await TidszonePage());
 
-      expect(html).toContain(`>${anker} ${slugs.length} ${boe}</a>`);
+      // Dansk talordning: «21 land» men «14 lande». Tallet endende på 1 (dog
+      // ikke 11) tager singularis, og da 21 land kom i listen, kunne en fast
+      // «lande» have lavet porten grøn paa en side der siger «land».
+      const boeDa =
+        slugs.length % 10 === 1 && slugs.length % 100 !== 11 ? "land" : "lande";
+      const boeValgt = locale === "da" ? boeDa : boe;
+      expect(html).toContain(`>${anker} ${slugs.length} ${boeValgt}</a>`);
       // Talformen er hele pointen, saa ordformen skal vaere væk — ellers kan
       // den glide tilbage ind, naar et land tilfojes.
-      expect(html).not.toMatch(/klokken i [a-zæøå]+ lande<\/a>/);
+      expect(html).not.toMatch(/klokken i [a-zæøå]+ (lande|länder)<\/a>/);
       expect(html).not.toMatch(/klockan i [a-zäöå]+ länder<\/a>/);
     }
   );

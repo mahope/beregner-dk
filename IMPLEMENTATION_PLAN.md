@@ -1,29 +1,25 @@
-STATUS: 6/10 03:2x. ✅ **`/ugedag` (da) og `/veckodag` (se) — ugedagen havde
-ingen adresse.** «hvilken ugedag er jeg født», «hvilken ugedag er det i dag» og
-«ugedag beregner» er danske autocomplete-træffere; «vilken veckodag är jag född»
-og «vilken veckodag är det idag» er de to første på svensk. Ugedagen lå som et
-afsnit på `/dato` (der konkurrerer om 20 andre spørgsmål) og `/ugenummer`
-(dansk-only), så den der googlede «ugedag» skulle gætte blandt 158 URL'er. Nu
-en egen side pr. sprog med egen `<h1>`, en titel der lover et regnet eksempel,
-og hele ugen ved siden af svaret. ISO-ugenummeret følger ISO 8601's egen regel
-(uge 1 er ugen med årets første torsdag), krydset mod en uafhængig
-implementation på 2.000 datoer. **Tre fejl fundet af portene:** den korte
-ugedags-række skrev «Sø» over en mandag, testen sendte `initialLocale` som
-provideren ignorerer (så alle svenske assertions kørte på dansk markup og var
-grønne af den grund), og `/kategori/praktiskt` viste sig at være **404 på
-beraknare.se** — fundet med curl. 51 nye porte; mutationer gav 6, 2, 5, 4, 1 og 1
-røde. Se arkivet.
-✅ 6/10: `/braendstof` Forbrugsomregner, `/kvadratmeter` ArealOmregner, forsiden
-+ sidebarlen linker `/procent`+`/tidszone`+`/moms`, dage-til's FAQ som regler,
-sæsonbadge i site-tidszonen. ✅ 5/10: `/rumfang` (31 porte), svensk landetabel,
-landetabellens tidsforskil, efterlønnens deltidstal, juleaftens-URL = datoen,
-`/tidsberegner` værktøjet først, «Populær nu», sydhalvkloden + Nuuk, fire rå
-procenter, sidebarlens trafikrækkefølge. ✅ 4/10: hele CEO-køens punkt 0. Alt
-ældre: `docs/plan-arkiv.md`.
+STATUS: 6/10 04:4x. ✅ **`/klokken-i/*` dækker nu de lande dansk autocomplete
+spørger om.** «klokken i roma», «klokken i amsterdam», «klokken i barcelona»,
+«klokken i dubai», «klokken i schweiz», «klokken i marokko», «klokken i
+grækenland» og «klokken i frankrig» var alle danske completioner, men svaret
+lå i `/tidszone`, der konkurrerer om 24.829 visninger, så læseren skulle gætte
+blandt 158 URL'er. Svy nye landesider i hvert sprog + Barcelona under Spanien
+(14 → 21 lande), alle dømt mod IANA gennem `Intl` i både januar og juli, så
+Marokkos ramadan-spring og EUs skiftevinduer ikke kan give et forkert tal.
+**Danmark og Sverige bevidst undtaget** — en eksisterende port siger at læserens
+eget marked ikke får en side, så Stockholm-sluggen er ikke tilføjet. Se
+arkivet for de tre port-fejl fundet undervejs.
+✅ 6/10: `/ugedag` + `/veckodag`, `/braendstof` Forbrugsomregner,
+`/kvadratmeter` ArealOmregner, forsiden + sidebarlen linker `/procent`+`/tidszone`+`/moms`,
+dage-til's FAQ som regler, sæsonbadge i site-tidszonen. ✅ 5/10: `/rumfang`
+(31 porte), svensk landetabel, landetabellens tidsforskil, efterlønnens deltidstal,
+juleaftens-URL = datoen, `/tidsberegner` værktøjet først, «Populær nu»,
+sydhalvkloden + Nuuk, fire rå procenter, sidebarlens trafikrækkefølge. ✅ 4/10:
+hele CEO-køens punkt 0. Alt ældre: `docs/plan-arkiv.md`.
 **Gate:** `npm run typecheck && npm run lint && npm run test` (CI kører også
-`next build`). 6/10 03:2x: typecheck 0, lint 0 (789 filer), **4460 tests i 277
+`next build`). 6/10 04:4x: typecheck 0, lint 0 (789 filer), **4466 tests i 277
 filer** grønne. Ét tidligere kørsel gav 1 rød i `locale-leak-gate.test.ts`, se
-❓. CI grøn 6/10 00:40. PR-TJEK 6/10 02:5x. BRANCH-TJEK 4/10 04:1x.
+❓. CI grøn 6/10 01:22. PR-TJEK 6/10 02:5x. BRANCH-TJEK 4/10 04:1x.
 
 ## Fase 3 — trafik-drevet
 
@@ -47,6 +43,8 @@ filer** grønne. Ét tidligere kørsel gav 1 rød i `locale-leak-gate.test.ts`, 
 | `/boligstoette` | 529 | 7.465 | 2,4 % | 8,7 |
 | `/su` | **127 (fald fra 201)** | under top-15 | — | — |
 | `/` (forside) | **213, bounce 40 %** | under top-15 | — | — |
+| `/klokken-i/*` (6/10, 7 nye landesider pr. domæne) | **0** | — | — | — |
+| `/tidszone` | under top-15 | 24.829 | 0,4 % | 7,7 |
 | `/ugedag` + `/veckodag` (6/10, nye URL'er) | **0** | — | — | — |
 | `/rumfang` (6/10, ny) | **0** | — | — | — |
 | `/idealvaegt` (4/10, ny) | **0** | — | — | — |
@@ -141,6 +139,18 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 04:4x:** `VERIFICÉR DEPLOY: de svy nye landesider
+/klokken-i/{frankrig,italien,nederlandene,graekenland,schweiz,marokko,emiraterne}
+svarer 200 på minberegner.dk og /klockan-i/{frankrike,italien,nederlanden,
+grekland,schweiz,marokko,emiraten} 200 på beraknare.se, Spanien viser både
+Madrid og Barcelona, og /tidszone skriver «klokken i 21 land» (ikke «lande»)
+ceo/klokken-i-flere-lande 6/10 04:4x`. Mål: `curl -s
+https://minberegner.dk/klokken-i/emiraterne | grep -o 'Hvad er klokken i
+Emiraterne' | wc -l` → **1** for hver af de svy, `grep -o 'Barcelona' | wc -l`
+på `/klokken-i/spanien` → **> 0**, og `curl -s https://minberegner.dk/tidszone
+| grep -o 'klokken i 21 land<' | wc -l` → **1**. Samme syv greb på beraknare.se
+med `/klockan-i/…`. Første reelle deploy-vindue efter mergen er 6/10 07:30.
 
 ⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10
 00:1x): Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer

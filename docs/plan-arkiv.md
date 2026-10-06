@@ -29655,3 +29655,43 @@ afsluttede og alt målerapporten er flyttet her; `## STATUS`, `## Fase 3`,
 `## Feature-kø`, `## VERIFICÉR DEPLOY-noter` og `## ❓ Til Mads` er det, der
 er tilbage. De elleve åbne deploy-noter er skrevet ned som *krav + målegreb*,
 uden de afsluttede iterationsrapporter.
+
+## 6/10 — `/klokken-i/*` vokser fra 14 til 21 lande (ceo/klokken-i-flere-lande)
+
+**Datagrund.** Dansk autocomplete (`suggestqueries.google.com`, hl=da, gl=dk,
+6/10 03:5x): «klokken i roma», «klokken i amsterdam», «klokken i barcelona»,
+«klokken i dubai», «klokken i schweiz», «klokken i marokko», «klokken i
+grækenland» og «klokken i frankrig» er alle kompletter. `KLOKKEN_LANDE` havde
+14 lande, så de otte kunne kun besvares af `/tidszone` — der konkurrerer om
+24.829 GSC-visninger på pos. 7,7 om byer, lande og Excel-formler på én side.
+De otte første af «hvad er klokken i»-rækken (usa, danmark, new york,
+thailand, australien, japan, tyrkiet, canada, kina) var allerede dækket, så det
+er byerne og de resterende lande der var hullerne.
+
+**Tre fejl fundet af portene undervejen (alle rettet i samme commit):**
+1. «egne lande får ingen side» låser med vilje, at `findKlokkenLand("sverige",
+   "se")` er `null` — Sveriges egne læsere har `/tidszone`. Sverige blev derfor
+   **fjernet igen** fra tilføjelsen; «klokken i stockholm» er desuden kun 3 af
+   10 completioner, den svageste af de otte.
+2. `grækenland` som slug brød portens `href="/klokken-i/[a-z-]+"`-greb, så den
+   danske liste kom til at linke til 20 af 21. Sluggen er nu `graekenland`, så
+   den følger repoets ASCII-konvention (`gaeldsfri`, `brok`).
+3. `/tidszone`-s hub-anker skrev «klokken i {KLOKKEN_LANDE.length} lande», altså
+   «21 lande» da det 21. land kom i listen. Dansk talordning er nu en funktion
+   (`danskLandOrd`): tal der ender på 1 (dog ikke 11) tager singularis. Porten
+   «lover saa mange lande» havde samme fejl indbygget som en fast `boe: "lande"`.
+
+**Ports.** Fire nye: de otte lande findes i begge sprog med den IANA-zone de er
+dømt mod; `tidsforskelMinutter` svarer i **både** 15. januar og 15. juli til
+forskellen mellem `Intl.DateTimeFormat(..., {timeZoneName: "longOffset"})` for
+byen og for `Europe/Copenhagen` — altså mod kalenderen, ikke mod en håndlavet
+tabel, så Marokkos ramadan-spring er dækket. Barcelona ligger i Madrid's zone,
+så Spanien får to byer uden en ny rute. Sprognavnene er oversat (frankrike,
+nederlanden, grekland, marocko, emiraten; Schweiz og Grækenland hedder det
+samme på begge sprog og tvinges ikke ind i en kunstig oversættelse).
+Mutation (Athen → Berlin, Barcelona fjernet) gav 2 røde.
+
+**Ikke kørt:** ingen browser ved 360/390/768/1280 — repoet har stadig intet
+Playwright. `/tidszone` og `/klokken-i` er rene lister og tabeller, men de nye
+landesider er ubilleder endnu; første skærmbilleder bør tages når et
+Playwright-tjek bliver muligt.

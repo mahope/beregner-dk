@@ -100,6 +100,16 @@ export async function generateMetadata() {
   return generatePageMetadata("tidszone");
 }
 
+/**
+ * Dansk talordning for «land»: «14 lande» men «21 land». Tal der ender på 1
+ * (dog ikke 11) tager singularis. Uden den regel skrev siden «21 lande», da
+ * det svyttende land kom i listen 6/10 — samme fri tekststreng over et tal
+ * som porten «lover saa mange lande» dømmer.
+ */
+function danskLandOrd(antal: number): string {
+  return antal % 10 === 1 && antal % 100 !== 11 ? "land" : "lande";
+}
+
 export default async function TidszonePage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
@@ -508,7 +518,7 @@ export default async function TidszonePage() {
           alle på én side, står de på{" "}
           {klokkenHubDa ? (
             <Link href={klokkenHubDa} className="underline">
-              klokken i {KLOKKEN_LANDE.length} lande
+              klokken i {KLOKKEN_LANDE.length} {danskLandOrd(KLOKKEN_LANDE.length)}
             </Link>
           ) : null}{" "}
           med tidsforskellen til Danmark.
