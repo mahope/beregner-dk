@@ -1040,11 +1040,6 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         ],
         faq: [
           {
-            question: "Hvad er forskellen på påskeaften og langfredag?",
-            answer:
-              "De er to forskellige dage. Påskeaften er torsdag — påskedag minus 3 dage — og langfredag er fredagen efter, altså påskedag minus 2 dage. Langfredag er en helligdag, påskeaften er det ikke.",
-          },
-          {
             question: "Tæller dagen i dag med?",
             answer:
               "Nej. Tallet er forskellen mellem dagens dato og langfredag, så vælger du den torsdag der går forud, står der 1 dag tilbage.",
@@ -1053,6 +1048,11 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
             question: "Hvornår er langfredag næste gang?",
             answer:
               "Langfredag er altid 2 dage før påskedag, så du kan regne den ud fra påskedagen uden at slå den op. I 2027 er påskedagen 28. marts, så langfredagen er 26. marts.",
+          },
+          {
+            question: "Hvad er skærtorsdag?",
+            answer:
+              "Skærtorsdag er torsdagen før påsken — altså dagen før langfredag. Den er ikke en helligdag i Danmark, men mange har fri eller lukker tidligt. I 2026 falder skærtorsdag 2. april, i 2027 25. marts og i 2028 13. april.",
           },
         ],
       },
