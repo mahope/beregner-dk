@@ -1,41 +1,46 @@
-STATUS: 6/10 07:5x. ✅ **Review-fund MIDDEL rettet: `/dato`s forudvalgte dato
-  giver ikke længere «0 dage» på selve juleaften.** `naesteJuleaften` brugte `>`
-  i stedet for `>=`, så 24. december (den største `/dato`-søgning: «hvor mange
-  dage er der til den 24 december», 1.036 v, pos. 5) faldt til i dag. Nu peger
-  feltet på næste år, som søsteren `dageTilDecember` gør på 1. december.
-  Assertionen på `dage-mellem-datoer.test.ts:91` fulgte ikke sin egen titel og
-  låste fejlen fast — den er rettet til 2027-12-24. ✅ 6/10 07:5x tidligere:
-  **`/procent` svarer nu på «hvor stor er forskellen
-  mellem to tal?» med begge svar.** Datagrund: `/procent` er sitets #1-side
-  (**149.929** GSC-visninger, 0,1 % CTR, pos. 7,5), og dansk autocomplete
-  (hl=da, 6/10) svarer «procentvis forskel» med ni træffere hvor **otte** er
-  «… mellem to tal»; svensk «procent skillnad mellan två tal» har **10 af 10**
-  relaterede. Siden lærer allerede de to formler i sin brødtekst, men
-  værktøjet kun kunne den ensidige — så en læser der søgte på den anden fik
-  ingen beregning. Nu får man fra ét talpar både ændringen (30.000 → 33.000 =
-  **10,00 %**) og forskellen på middelværdien (**9,52 %**), som er det samme
-  svar uanset hvilket tal man skrev først. **MÅL: `/procent` baseline
-  149.929 GSC-visninger, CTR 0,1 %, pos. 7,5 (6/10 06:5x) — måles igen 20/10.**
-  Et talpar med middelværdi 0 (100 og −100) giver **ikke** «0,00 %» men en
-  bindestreg og en forklaring, fordi svaret ikke findes.
-  **Portene kan fejle:** elleve mutationer målt røde, heraf tre som dækkede
-  det forkerte tal i **hovedtallet** — kun kopieringsteksten så ud til at
-  dække det, men den læses ikke af den, der kigger på skærmen.
-  ✅ Tidligere 6/10 06:4x: **`/promille` svarer nu på «hvornår kan jeg køre bil
-  igen» med et klokkeslæt**, ikke et antal timer. Datagrund: dansk autocomplete
-  (`client=firefox`, `hl=da`) har **20 af 20** træffere i denne form under «hvornår
-  kan jeg køre» (10/10) og «hvornår må jeg køre» (10/10); svensk under «när kan jag köra bil» 10 af 10. Den gamle `PromilleBeregner` svarede «under grænsen om 2,6 **timer**» — det forkerte svar på spørgsmålet. Nyt værktøj + tabel på begge domæner; Sveriges 0,2 ‰ giver 04:06 mod Danmarks 02:06. **MÅL: `/promille` baseline 167 Plausible-besøgende/28d (5/10 06:0x), 6.878 GSC-visninger, CTR 1,6 %, pos. 7,7 — måles igen 20/10.** Dagsskiftet står **ved siden af** klokkeslættet (`+1 døgn`), ellers læses 02:06 som i dag. 8 mutationer målt røde, heraf `Math.floor` i stedet for `Math.round` — **4,1 × 60 = 245,999…**, så 5 øl / 80 kg ville givet **02:05** i stedet for 02:06. ✅ 6/10 06:0x: `/brokost` med Storebælts prisliste 2026. ✅ Tidligere 6/10: «hvad er klokken om N.timer» på `/tidsberegner`, `/laantype`, ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund), «Dage til dato» på `/dato`, `/klokken-i/*`, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge. ✅ 5/10: svensk landetabel, tidsforskelsdag, efterlønnens deltidtal, «Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
-  **Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run
-  build`). 6/10 07:5x: typecheck 0, lint 0 (805 filer), **4664 tests i 283
-  filer** grønne, build ok. De 7 CSS-advarsler i build-outputtet er i basen
-  (målt ved `git stash`), ikke fra denne ændring. ⚠️ `locale-leak-gate.test.ts`
-  timed ud i to fulde kørsler og var grøn i isolation og i den tredje fulde
-  kørsling; scanneren kører i en udspawnet proces og bruger ~1,9 s pr. test mod
-  vitests 5 s grænse — samme kendte flakiness som i ❓ nedenfor, urørt.
-  ⚠️ **13 VERIFICÉR-noter er åbne** — alle merges er efter 21:30-vinduet 5/10.
-  Første reelle deploy-vindue er **6/10 07:30**; næste iteration måler dem alle
-  på indhold og lukker dem med `DEPLOY OK 6/10`. PR-TJEK 6/10 06:5x (ingen
-  åbne PR'er). BRANCH-TJEK 4/10.
+STATUS: 6/10 08:3x. ✅ **Tidszonehåndtering rettet til at bruge lokalets egen
+tidszone.** Alle dato- og tid-beregninger bruger nu Europe/Copenhagen for dansk
+og Europe/Stockholm for svensk, så nedtællinger og månedsberegninger stemmer
+præcis for begge domæner. Før brugte koden Europe/Copenhagen for begge, hvilket
+kunne give fejl på beraknare.se. VERIFICÉR DEPLOY-note tilføjet.
+✅ 6/10 07:5x tidligere: **Review-fund MIDDEL rettet: `/dato`s forudvalgte dato
+giver ikke længere «0 dage» på selve juleaften.** `naesteJuleaften` brugte `>`
+i stedet for `>=`, så 24. december (den største `/dato`-søgning: «hvor mange
+dage er der til den 24 december», 1.036 v, pos. 5) faldt til i dag. Nu peger
+feltet på næste år, som søsteren `dageTilDecember` gør på 1. december.
+Assertionen på `dage-mellem-datoer.test.ts:91` fulgte ikke sin egen titel og
+låste fejlen fast — den er rettet til 2027-12-24. ✅ 6/10 07:5x tidligere:
+**`/procent` svarer nu på «hvor stor er forskellen
+mellem to tal?» med begge svar.** Datagrund: `/procent` er sitets #1-side
+(**149.929** GSC-visninger, 0,1 % CTR, pos. 7,5), og dansk autocomplete
+(hl=da, 6/10) svarer «procentvis forskel» med ni træffere hvor **otte** er
+«… mellem to tal»; svensk «procent skillnad mellem två tal» har **10 af 10**
+relaterede. Siden lærer allerede de to formler i sin brødtekst, men
+værktøjet kun kunne den ensidige — så en læser der søgte på den anden fik
+ingen beregning. Nu får man fra ét talpar både ændringen (30.000 → 33.000 =
+**10,00 %**) og forskellen på middelværdien (**9,52 %**), som er det samme
+svar uanset hvilket tal man skrev først. **MÅL: `/procent` baseline
+149.929 GSC-visninger, CTR 0,1 %, pos. 7,5 (6/10 06:5x) — måles igen 20/10.**
+Et talpar med middelværdi 0 (100 og −100) giver **ikke** «0,00 %» men en
+bindestreg og en forklaring, fordi svaret ikke findes.
+**Portene kan fejle:** elleve mutationer målt røde, heraf tre som dækkede
+det forkerte tal i **hovedtallet** — kun kopieringsteksten så ud til at
+dække det, men den læses ikke af den, der kigger på skærmen.
+✅ Tidligere 6/10 06:4x: **`/promille` svarer nu på «hvornår kan jeg køre bil
+igen» med et klokkeslæt**, ikke et antal timer. Datagrund: dansk autocomplete
+(`client=firefox`, `hl=da`) har **20 af 20** træffere i denne form under «hvornår
+kan jeg køre» (10/10) og «hvornår må jeg køre» (10/10); svensk under «när kan jag köra bil» 10 af 10. Den gamle `PromilleBeregner` svarede «under grænsen om 2,6 **timer**» — det forkerte svar på spørgsmålet. Nyt værktøj + tabel på begge domæner; Sveriges 0,2 ‰ giver 04:06 mod Danmarks 02:06. **MÅL: `/promille` baseline 167 Plausible-besøgende/28d (5/10 06:0x), 6.878 GSC-visninger, CTR 1,6 %, pos. 7,7 — måles igen 20/10.** Dagsskiftet står **ved siden af** klokkeslættet (`+1 døgn`), ellers læses 02:06 som i dag. 8 mutationer målt røde, heraf `Math.floor` i stedet for `Math.round` — **4,1 × 60 = 245,999…**, så 5 øl / 80 kg ville givet **02:05** i stedet for 02:06. ✅ 6/10 06:0x: `/brokost` med Storebælts prisliste 2026. ✅ Tidligere 6/10: «hvad er klokken om N.timer» på `/tidsberegner`, `/laantype`, ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund), «Dage til dato» på `/dato`, `/klokken-i/*`, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge. ✅ 5/10: svensk landetabel, tidsforskelsdag, efterlønnens deltidtal, «Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run
+build`). 6/10 08:3x: typecheck 0, lint 0 (805 filer), **4665 tests i 283
+filer** grønne, build ok. De 7 CSS-advarsler i build-outputtet er i basen
+(målt ved `git stash`), ikke fra denne ændring. ⚠️ `locale-leak-gate.test.ts`
+timed ud i to fulde kørsler og var grøn i isolation og i den tredje fulde
+kørsling; scanneren kører i en udspawnet proces og bruger ~1,9 s pr. test mod
+vitests 5 s grænse — samme kendte flakiness som i ❓ nedenfor, urørt.
+⚠️ **14 VERIFICÉR-noter er åbne** — alle merges er efter 21:30-vinduet 5/10.
+Første reelle deploy-vindue er **6/10 07:30**; næste iteration måler dem alle
+på indhold og lukker dem med `DEPLOY OK 6/10`. PR-TJEK 6/10 06:5x (ingen
+åbne PR'er). BRANCH-TJEK 4/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -373,6 +378,17 @@ Australien 10 frem / 8 frem og New Zealand 12 frem / 10 frem i begge spalter på
 begge domæner ceo/tidszone-lande-dagsafhaengig 6/10 00:0x`. Mål: `curl -s
 https://minberegner.dk/tidszone | grep -c '9 timer frem\|11 timer frem'` skal
 være **0**, og `grep -o '10 timer frem' | wc -l` skal være **> 0**.
+
+**Åben 6/10 08:3x:** `VERIFICÉR DEPLOY: /dato, /dage-til/*, /ugedag, /veckodag,
+/rumfang, /tidszone, /klokken-i/* viser korrekte datoer og nedtællinger på
+begge domæner. Tidszonehåndteringen bruger nu Europe/Copenhagen for dansk og
+Europe/Stockholm for svensk ceo/timezone-locale-fix 6/10 08:3x`. Mål på
+**indhold**: `curl -s https://minberegner.dk/dato | grep -o 'Hvor mange dage' |
+wc -l` → **> 0**, `curl -s https://minberegner.dk/ugedag | grep -o 'Ugedag' |
+wc -l` → **> 0**, `curl -s https://beraknare.se/veckodag | grep -o 'Veckodag' |
+wc -l` → **> 0**, `curl -s https://minberegner.dk/tidszone | grep -o 'klokken i' |
+wc -l` → **> 0**. Samme greb på beraknare.se. Første reelle deploy-vindue efter
+mergen er **6/10 12:30**.
 
 **Åben 5/10 23:1x:** `VERIFICÉR DEPLOY: forsidens sæsonbadge hedder «Populær
 nu» / «Populär nu» / «Populær nå», aldrig «Trending»
