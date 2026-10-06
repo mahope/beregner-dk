@@ -54,6 +54,7 @@ const navigationData: Record<Locale, NavItem[]> = {
       name: "Lån & Rente",
       children: [
         { name: "Renteberegner", href: "/renteberegner" },
+        { name: "Lånetype", href: "/laantype" },
         { name: "Renteprognose", href: "/renteprognose" },
         { name: "Låneberegner", href: "/laaneberegner" },
         { name: "Forbrugslån", href: "/forbrugslaan" },
@@ -102,6 +103,7 @@ const navigationData: Record<Locale, NavItem[]> = {
         { name: "Moms (MVA)", href: "/moms" },
         { name: "Valuta", href: "/valuta" },
         { name: "Renteberegner", href: "/renteberegner" },
+        { name: "Lånetype", href: "/laantype" },
         { name: "Opsparing", href: "/opsparing" },
         { name: "Prosent", href: "/procent" },
         { name: "Timepris", href: "/timepris" },
@@ -158,6 +160,7 @@ const navigationData: Record<Locale, NavItem[]> = {
         { name: "Moms", href: "/moms" },
         { name: "Valuta", href: "/valuta" },
         { name: "Ränteberäknare", href: "/renteberegner" },
+        { name: "Lånetyp", href: "/laantype" },
         { name: "Sparande", href: "/opsparing" },
         { name: "Procent", href: "/procent" },
         { name: "Timpris", href: "/timepris" },

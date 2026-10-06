@@ -84,6 +84,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Aldersberegner", description: "Beregn din præcise alder i år, måneder og dage", href: "/alder", category: "Hverdag" },
   { title: "Brændstofberegner", description: "Beregn pris for benzin, diesel eller el-bil", href: "/braendstof", category: "Hverdag" },
   { title: "Elbil vs. benzinbil", description: "Sammenlign driftsomkostninger for elbil og benzinbil", href: "/elbil", category: "Hverdag" },
+  { title: "Lånetype", description: "Annuitetslån, serielån og stående lån side om side", href: "/laantype", category: "Økonomi" },
   { title: "Enhedspris", description: "Find den billigste vare pr. kilo, liter eller stk", href: "/enhedspris", category: "Hverdag" },
   { title: "Rabatberegner", description: "Beregn pris efter rabat og se din besparelse", href: "/rabat", category: "Hverdag" },
   { title: "Befordringsfradrag", description: "Beregn dit kørselsfradrag 2026 og se skattebesparelsen", href: "/befordringsfradrag", category: "Økonomi" },

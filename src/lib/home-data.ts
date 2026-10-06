@@ -189,6 +189,7 @@ const daCalculators: HomeCalculator[] = [
   // den ottende mest besøgte side uden et enkelt link fra forsiden og uden
   // sidebar-plads på de ~120 kalkulatorsider.
   { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", popular: true, category: "Sundhed" },
+  { title: "Lånetype", description: "Sammenlign annuitetslån, serielån og stående lån", href: "/laantype", popular: false, category: "Økonomi" },
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", popular: true, category: "Økonomi" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: true, category: "Familie" },
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: true, category: "Økonomi" },
@@ -526,6 +527,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Lånekalkylator", description: "Beräkna månadskostnad, jämför lån och se amorteringsplan", href: "/laaneberegner", popular: false, category: "Lån" },
   { title: "Valutakalkylator", description: "Räkna om mellan SEK, EUR, USD och andra valutor", href: "/valuta", popular: false, category: "Ekonomi" },
   { title: "Procentkalkylator", description: "Beräkna procent av ett tal, ökning, minskning och mer", href: "/procent", popular: false, category: "Matematik" },
+  { title: "Lånetyp", description: "Jämför annuitetslån, serielån och stående lån", href: "/laantype", popular: false, category: "Ekonomi" },
   { title: "Räntekalkylator", description: "Beräkna räntor, amortering och total återbetalning på lån", href: "/renteberegner", popular: false, category: "Ekonomi" },
   { title: "Sparkalkylator", description: "Beräkna ränta på ränta och se ditt sparande växa", href: "/opsparing", popular: false, category: "Ekonomi" },
   { title: "Kvadratmeterkalkylator", description: "Beräkna yta av rum, trädgårdar och tomter", href: "/kvadratmeter", popular: false, category: "Matematik" },

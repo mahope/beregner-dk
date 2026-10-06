@@ -1,34 +1,43 @@
-STATUS: 6/10 04:4x. ✅ **Ugenummeret på `/ugedag` og `/veckodag` er nu det
-samme for alle læsere.** Review-fund MIDDEL fra `b474763`: `isoUge()` regnede i
-læserens egen tidszone, så et skifte for sommertid mellem 1. januar og den torsdag
-man regner på gjorde skregnen til et ikke-helt døgn, og `Math.ceil` ryddede
-fraktionen op til én uge for højt. Målt: **182 af 730 datoer i 2026-27 var
-ukorrekte i `Australia/Sydney`**, 175 i Auckland, 154 i Santiago; Danmark,
-Sverige og UTC var rene ved lykke. Samme dato gav altså «Uge 14» på
-minberegner.dk og «Uge 15» på beraknare.se for en dansk læser i udlandet.
-Formelen regner nu i UTC på kalenderfelterne, præcis som `/ugenummer` gør.
-**Port:** `ugedag.test.ts` skifter selv uret og kræver samme svar for alle 730
-datoer i syv zoner plus fire håndkontrollerede ankerdage — grøn på GitHub
-Actions' UTC uden den.
-✅ 6/10 tidligere: **«Hvor mange dage er der til …?» er et værktøj til enhver
-dato** — `/dato` har 136.986 GSC-visninger og 0,6 % CTR, de to største søgninger
-er begge nedtællinger («…til 1 december» 1.282 v, pos. 5), og `DatoBeregner` har
-nu en femte tilstand med ét datofelt forudvalgt til næste juleaften.
-**MÅL: `/dato` baseline 1.087 besøgende/28d + 136.986 GSC-visninger, CTR 0,6 %,
-pos. 5,6 pr. 2026-10-06** — mål igen 20/10.
-MÅL: `/ugedag` + `/veckodag` (6/10, nye URL'er) baseline **0 besøgende**, 0
-visninger — ny, så kun brødteksten kan måles.
-✅ 6/10 endnu: `/klokken-i/*` i 21 lande, `/rumfang`, `/braendstof`
-Forbrugsomregner, `/kvadratmeter` ArealOmregner, forside + sidebarlens links,
-dage-til's ferie-FAQ, sæsonbadge i site-tidszonen. ✅ 5/10: svensk landetabel,
-landetabellens tidsforskel, efterlønnens deltidstal, «Populær nu».
-✅ 4/10: hele CEO-køens punkt 0. Alt ældre: `docs/plan-arkiv.md`.
-**Gate:** `npm run typecheck && npm run lint && npm run test` (CI kører også
-`next build`). 6/10 04:4x: typecheck 0, lint 0 (789 filer), **4488 tests i 277
-filer** grønne. Porten kan fejle: den nye zonesweep-test er **5 rød** mod den
-gamle formel, og `Math.floor(dage/7)+2` giver 12 røde. Egen måling af hele
-modulet under otte zoner: 1.826 datoer × 8 zoner, **identisk**. CI grøn 6/10
-02:13. PR-TJEK 6/10 04:3x. BRANCH-TJEK 4/10 04:1x.
+STATUS: 6/10 05:1x. ✅ **`/laantype` — brugerne kan nu sammenligne de tre
+lånetyper på samme tal.** `/renteberegner` svarer på «annuitetslån beregner»
+(348 v, pos. 8) men regner **én** type ad gangen, og dansk autocomplete målt i
+dag har 10 af 10 træffere under «annuitetslån», «serielån» og «stående lån» som
+**valget mellem dem** («annuitetslån serielån og stående lån», «annuitetslån vs
+serielån», «serielån vs annuitetslån», «stående lån hvad er det»). Svensk
+autocomplete er samme klynge («serielån vs annuitetslån kalkulator»), så det var
+et spørgsmål, to domæner får trafik på og ingen besvarede samlet. Værktøjet
+regner første og sidste ydelse, månedsafdrag, samlet rente og renteandel for
+alle tre **og krydsmåneden** — den måned serielånet bliver billigere end
+annuitetslånet, måned 146 i eksemplet.
+⚠️ **Fandtes i min egen diff, rettet før commit:** `daKr` bevarer decimaler, så
+FAQ'en og metaDescription skrev «2.673,916 kr.» — tal i **Googles svar** via
+FAQSchema. Ny `daKr0` runder til hele kroner. Porten fangede det.
+⚠️ **Repoets egne gates fangede fire ting jeg ikke så:** `metaTitle` var 65
+tegn (grænse 60), `metaDescription` 163 (grænse 160), titlens første ord endte i
+komma så hovedord-porten ikke genkendte det, og `LaantypeBeregner` havde en dansk
+streng i JSX uden for `labels`-objektet — fund af locale-leak-scanneren, som
+jeg flyttede ind i objektet. `regnestykker`-porten fangede desuden et
+håndskrevet «2.000.000 kr.» i en streng; den skrives nu fra konstanterne.
+✅ 6/10 tidligere: ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund fra
+`b474763`, rettet i `779ed5a`), «Dage til dato» på `/dato`, `/klokken-i/*` i 21
+lande, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge.
+✅ 5/10: svensk landetabel, landetabellens tidsforskel, efterlønnens deltidstal,
+«Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny i dag: Valborg
+30. april, svensk påskafton lørdag, fast dansk sankthans 23. juni, dansk
+påskeaften-FAQ væk, `maneder: 12`, tidszone-daterede nedtællinger, nettoprisindeks
+på `/husleje`).
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build`,
+som CI også kører). 6/10 05:1x: typecheck 0, lint 0 (794 filer), **4576 tests i
+279 filer** grønne, build ok (`/laantype` på route-listen). Portene kan fejle:
+mutation til `return k + 1` i krydsløkken giver 2 røde, restgælden `* k` i stedet
+for `* (k - 1)` giver 2 røde, stående lånets rentesum til ét beløb giver 4 røde,
+serielånets månedlige afdrag til årligt 2 røde. **Målt mod uafhængig
+fremmedkilde:** BONOVO (29/9) siger for 2.400.000 kr/4 %/30 år «3.209 kr. mere
+den første måned» og «ca. 280.000 kr. mindre i rente»; modulet giver 3.208,70 og
+280.868. **Realkreditlovens § 4 er læst i lovens egen tekst** (retsinformation.dk,
+6/10) og står med paragraffen i FAQ'en. ⚠️ **11 VERIFICÉR-noter er stadig åbne** —
+alle merges er efter 21:30-vinduet 5/10, så intet kan måles endnu. Første
+reelle deploy-vindue er **6/10 07:30**. PR-TJEK 6/10 04:3x. BRANCH-TJEK 4/10 04:1x.
 
 ## Fase 3 — trafik-drevet
 
@@ -56,6 +65,7 @@ modulet under otte zoner: 1.826 datoer × 8 zoner, **identisk**. CI grøn 6/10
 | `/tidszone` | under top-15 | 24.829 | 0,4 % | 7,7 |
 | `/ugedag` + `/veckodag` (6/10, nye URL'er) | **0** | — | — | — |
 | `/rumfang` (6/10, ny) | **0** | — | — | — |
+| `/laantype` (6/10, ny) | **0** | — | — | — |
 | `/idealvaegt` (4/10, ny) | **0** | — | — | — |
 | `/dage-til/*` (2/10, nye) | **0** | — | — | — |
 | `/dage-mellem-datoer` + se (3/10, nye) | **0** | — | — | — |
@@ -82,6 +92,8 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 (`/dato` 1.617 mod 1.723 ord), så det er opgave 187's slugs og domæneautoritet.
 
 ### Prioriterede opgaver — åbne
+
+**F5d. [x] FÆRDIG 6/10 — `/laantype`, se `docs/plan-arkiv.md`.**
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
@@ -148,6 +160,19 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 05:1x:** `VERIFICÉR DEPLOY: /laantype svarer 200 på begge domæner,
+hver sides sitemap indeholder pr. domæne stien, titlen er «Annuitetslån: serielån
+eller stående lån?», værktøjet viser de tre rækker med 9.548 kr., 12.222 kr. og
+6.667 kr. i måned 1, brødteksten skriver «Serielånet koster 2.674 kr. mere i måned
+1, men sparer 234.057 kr. i rente», og **intet sted står decimaler i kroner** —
+«2.673,916» skal være **0** ceo/laantype 6/10 05:1x`. Mål på **indhold**:
+`curl -s https://minberegner.dk/laantype | grep -o 'Annuitetslån: serielån' | wc -l`
+→ **1**, `grep -o '2.673,916' | wc -l` → **0**, `grep -o 'Serielånet koster 2.674
+kr. mere i måned 1' | wc -l` → **> 0**, `grep -o '9.548 kr.' | wc -l` → **> 0**,
+`curl -s https://minberegner.dk/sitemap.xml | grep -o '/laantype<' | wc -l` → **1**.
+Samme tre greb på beraknare.se med «2 674 kr.» og «Annuitetslån: serielån».
+⚠️ Første reelle deploy-vindue efter mergen er 6/10 07:30.
 
 **Åben 6/10 04:4x:** `VERIFICÉR DEPLOY: uge og ugedag på /ugedag og
 /veckodag er de samme tal for alle læsere, så 5. april 2027 skriver «Uge 14» i

@@ -29,6 +29,13 @@ import { formatBelob, formatNumber, formatSvenskText } from "./format";
 import { BMI_BAAND, vaegtInterval } from "./bmi-voksen-grænser";
 import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
+import {
+  LAANETYPE_EKSEMPEL_AARSRENTE,
+  LAANETYPE_EKSEMPEL_HOVEDSTOL,
+  LAANETYPE_EKSEMPEL_LOEBETID,
+  laanetypeEksempelFor,
+  laanetypeEksempelKryds,
+} from "./laantype";
 import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
 import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
@@ -529,6 +536,52 @@ const RUMFANG_TEKST_SE = {
   cylinderAreal: formatSvenskText(rumfangCylinder / 2, 2),
   cylinderLiter: formatSvenskText(RUMFANG_EKSEMPEL.cylinder.svar.liter, 1),
 };
+/**
+ * Et helt kronetal med dansk tusindtalsseparator.
+ *
+ * `daKr` herover beholder decimalerne, fordi den bruges til priser pr. km, hvor
+ * decimalerne er meningen. En ydelse og en samlet rente er derimod **hele
+ * kroner** i en låneregning, og `formatNumber` uden options skriver dem som
+ * «2.673,916» — et tal der er rigtigt regnet, men som en læser i Googles svar
+ * ikke kan bruge. Derfor runder denne til 0.
+ */
+const daKr0 = (value: number) => formatNumber(value, "da", { maximumFractionDigits: 0 });
+// ─── /laantype — hver eneste af de tal, titlen, metadataen og FAQ'en lover,
+// regnet fra `laantype.ts` gennem de samme funktioner som `/renteberegner`
+// bruger. De tre steder skal ikke kunne sige hver sit, og tallene står i
+// Googles svar via FAQSchema, ikke kun i brødteksten.
+const laantypeAnnuitet = laanetypeEksempelFor("annuitet");
+const laantypeSerielaan = laanetypeEksempelFor("serielaan");
+const laantypeStaende = laanetypeEksempelFor("staende");
+const LAANETYPE_TEKST = {
+  hovedstol: daKr0(LAANETYPE_EKSEMPEL_HOVEDSTOL),
+  aarligRente: String(LAANETYPE_EKSEMPEL_AARSRENTE),
+  loebetid: String(LAANETYPE_EKSEMPEL_LOEBETID),
+  /** Serielånets ydelse i måned 1 minus annuitetslånets, i kroner. */
+  forskelFoerste: daKr0(laantypeSerielaan.foersteYdelse - laantypeAnnuitet.foersteYdelse),
+  /** Annuitetslånets samlede rente minus serielånets, i kroner. */
+  renteBesparelse: daKr0(laantypeAnnuitet.samletRente - laantypeSerielaan.samletRente),
+  annuitetYdelse: daKr0(laantypeAnnuitet.foersteYdelse),
+  serielaanFoerste: daKr0(laantypeSerielaan.foersteYdelse),
+  serielaanSidste: daKr0(laantypeSerielaan.sidsteYdelse),
+  staendeYdelse: daKr0(laantypeStaende.foersteYdelse),
+  annuitetRente: daKr0(laantypeAnnuitet.samletRente),
+  serielaanRente: daKr0(laantypeSerielaan.samletRente),
+  staendeRente: daKr0(laantypeStaende.samletRente),
+  kryds: String(laanetypeEksempelKryds() ?? 0),
+};
+const LAANETYPE_TEKST_SE = {
+  hovedstol: formatSvenskText(LAANETYPE_EKSEMPEL_HOVEDSTOL, 0),
+  aarligRente: String(LAANETYPE_EKSEMPEL_AARSRENTE),
+  loebetid: String(LAANETYPE_EKSEMPEL_LOEBETID),
+  kryds: String(laanetypeEksempelKryds() ?? 0),
+  forskelFoerste: formatSvenskText(laantypeSerielaan.foersteYdelse - laantypeAnnuitet.foersteYdelse, 0),
+  renteBesparelse: formatSvenskText(laantypeAnnuitet.samletRente - laantypeSerielaan.samletRente, 0),
+  annuitetYdelse: formatSvenskText(laantypeAnnuitet.foersteYdelse, 0),
+  serielaanFoerste: formatSvenskText(laantypeSerielaan.foersteYdelse, 0),
+  serielaanSidste: formatSvenskText(laantypeSerielaan.sidsteYdelse, 0),
+  staendeYdelse: formatSvenskText(laantypeStaende.foersteYdelse, 0),
+};
 // ─── /idealvaegt — hver eneste af de tal, titlen, metadataen og FAQ'en lover,
 // regnet fra `idealvaegt.ts`, altså fra formlernes egne kilder. Hældningen eller
 // grundværdien er ændret en dag, så skriver brødteksten sig ikke til at lyve.
@@ -835,6 +888,30 @@ const daPages: Record<string, PageData> = {
         { question: "Hvor mange liter er der i en kubikmeter?", answer: `1 m³ = ${LITER_PR_KUBIKMETER} liter, fordi en kubikmeter er 100 cm × 100 cm × 100 cm = 1.000.000 cm³, og der går 1.000 cm³ på literen. Værktøjet viser derfor begge tal ud fra den samme beregning.` },
         { question: "Hvordan regner man rumfang i Excel?", answer: "Kassens rumfang er bare =A1*B1*C1. Cylinderens er =PI()*(A1/2)^2*B1, hvor A1 er diameteren og B1 højden i meter. Kuglens er =4/3*PI()*(A1/2)^3." },
         { question: "Hvad er forskellet på areal og rumfang?", answer: "Areal er fladens størrelse i m² — det er, hvad /kvadratmeterberegneren regner. Rumfang er pladsen inde i kroppen i m³. En kasse på 2 × 1 × 0,5 m har et areal på 10 m² (gulvet) og et rumfang på 1 m³." },
+      ],
+    },
+    "laantype": {
+      slug: "laantype",
+      title: "Annuitetslån: serielån eller stående lån?",
+      description: `Sammenlign de tre lånetyper på samme beløb, rente og løbetid. Serielånet på ${LAANETYPE_TEKST.hovedstol} kr. over ${LAANETYPE_TEKST.loebetid} år til ${LAANETYPE_TEKST.aarligRente} % koster ${LAANETYPE_TEKST.forskelFoerste} kr. mere i måned 1, men sparer ${LAANETYPE_TEKST.renteBesparelse} kr. i rente.`,
+      metaTitle: `Annuitetslån vs serielån: ${LAANETYPE_TEKST.forskelFoerste} kr. dyrere i måned 1`,
+      metaDescription: `Sammenlign annuitetslån, serielån og stående lån på ${LAANETYPE_TEKST.hovedstol} kr. over ${LAANETYPE_TEKST.loebetid} år. Se første ydelse, månedsafdrag og samlet rente.`,
+      keywords: ["annuitetslån vs serielån", "annuitetslån serielån", "serielån beregner", "stående lån", "annuitetslån beregner", "serielån formel", "forskel annuitetslån serielån"],
+      ogTitle: "Annuitetslån, serielån eller stående lån?",
+      ogDescription: "Sammenlign de tre lånetyper på samme beløb, rente og løbetid.",
+      category: "Økonomi",
+      breadcrumbCategory: "Økonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Lånetypeberegner",
+      schemaDescription: "Sammenlign annuitetslån, serielån og stående lån på første ydelse, månedsafdrag og samlet rente.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hvad er forskellen på annuitetslån og serielån?", answer: `Et annuitetslån har konstant ydelse: du betaler det samme beløb hver måned, men i starten går næsten alt til renter, og i slutningen går næsten alt til afdrag. Et serielån har konstant afdrag: du afdrager det samme beløb på hovedstolen hver måned, mens renten falder, så ydelsen starter højt og bliver lavere. På ${LAANETYPE_TEKST.hovedstol} kr. over ${LAANETYPE_TEKST.loebetid} år til ${LAANETYPE_TEKST.aarligRente} % er serielånets første ydelse ${LAANETYPE_TEKST.serielaanFoerste} kr. mod annuitetslånets ${LAANETYPE_TEKST.annuitetYdelse} kr., og dens sidste ydelse er kun ${LAANETYPE_TEKST.serielaanSidste} kr.` },
+        { question: "Hvilken lånetype er billigst?", answer: `Serielånet er billigst over hele løbetiden, fordi gælden bliver nedbragt hurtigere og derfor løber mindre rente på restgælden. På ${LAANETYPE_TEKST.hovedstol} kr. over ${LAANETYPE_TEKST.loebetid} år til ${LAANETYPE_TEKST.aarligRente} % er den samlede rente ${LAANETYPE_TEKST.serielaanRente} kr. mod ${LAANETYPE_TEKST.annuitetRente} kr. i et annuitetslån — altså ${LAANETYPE_TEKST.renteBesparelse} kr. mindre. Til gengæld er startydelsen ${LAANETYPE_TEKST.forskelFoerste} kr. højere, og det er startydelsen, banken vurderer dit rådighedsbeløb på.` },
+        { question: "Hvornår er serielånet billigere end annuitetslånet?", answer: `Serielånets ydelse falder måned for måned, mens annuitetslånets er konstant, så de to krydser. På ${LAANETYPE_TEKST.hovedstol} kr. over ${LAANETYPE_TEKST.loebetid} år til ${LAANETYPE_TEKST.aarligRente} % er serielånet dyrere frem til måned ${LAANETYPE_TEKST.kryds} og billigere derfra. Krydsmåneden afhænger af renten og løbetiden, så værktøjet regner den for de tal, du indtaster.` },
+        { question: "Hvad er forskellen på et stående lån og et afdragsfrit lån?", answer: `Der er ingen forskel i tallene — et stående lån er blot det danske navn for et afdragsfrit lån. Du betaler kun renter hele løbetiden, og hovedstolen står uændret til den dag du indfrier den. På ${LAANETYPE_TEKST.hovedstol} kr. over ${LAANETYPE_TEKST.loebetid} år til ${LAANETYPE_TEKST.aarligRente} % er ydelsen ${LAANETYPE_TEKST.staendeYdelse} kr. hver måned, men den samlede rente bliver ${LAANETYPE_TEKST.staendeRente} kr., fordi renterne løber på hele beløbet hele vejen.` },
+        { question: "Må et boliglån afdrages langsommere end et 30-årigt annuitetslån?", answer: "Nej for ejerboliger til helårsbrug og fritidshuse. Realkreditlovens § 4 siger ordret, at sådanne lån \"uanset den sikkerhedsmæssige placering ikke kan ydes, så de amortiseres langsommere end et 30-årigt lån, der amortiseres over løbetiden med en ydelse, som udgør en fast procentdel af hovedstolen (annuitetslån)\". Stk. 2 giver dog tilladelse til at fravige kravet for en periode på op til 10 år — og det er grundlaget for afdragsfrihed i en periode, altså for at lånet i den periode er et stående lån. I andre ejendomskategorier er der principielt ingen grænse for afdragsfrihed." },
+        { question: "Hvad betyder lånetypen for mit rentefradrag?", answer: "Fradraget følger renteudgiften, ikke afdraget. Et annuitetslån har den højeste renteudgift i starten og derfor det største fradrag de første år. Serielånets renteudgift falder fra dag 1, så fradraget falder med det." },
       ],
     },
     "sparemaal": {
@@ -3451,6 +3528,29 @@ const sePages: Record<string, PageData> = {
         { question: "Hur många liter går det på en kubikmeter?", answer: `1 m³ = ${LITER_PR_KUBIKMETER} liter, eftersom en kubikmeter är 100 cm × 100 cm × 100 cm = 1.000.000 cm³ och det går 1.000 cm³ på litern. Kalkylatorn visar därför båda talen från samma beräkning.` },
         { question: "Hur räknar man ut volym i Excel?", answer: "Lådans volym är bara =A1*B1*C1. Cylinderns är =PI()*(A1/2)^2*B1, där A1 är diametern och B1 höjden i meter. Sfärens är =4/3*PI()*(A1/2)^3." },
         { question: "Vad är skillnaden mellan area och volym?", answer: "Area är ytan storlek i m² — det är vad /kvadratmeterkalkylatorn räknar. Volym är utrymmet innanför kroppen i m³. En låda på 2 × 1 × 0,5 m har en area på 10 m² (golvet) och en volym på 1 m³." },
+      ],
+    },
+    "laantype": {
+      slug: "laantype",
+      title: "Annuitetslån: serielån eller stående lån?",
+      description: `Jämför de tre lånetyperna på samma belopp, ränta och löptid. Serielånet på ${LAANETYPE_TEKST_SE.hovedstol} kr. över ${LAANETYPE_TEKST.loebetid} år till ${LAANETYPE_TEKST.aarligRente} % kostar ${LAANETYPE_TEKST_SE.forskelFoerste} kr. mer i månad 1, men sparar ${LAANETYPE_TEKST_SE.renteBesparelse} kr. i ränta.`,
+      metaTitle: `Annuitetslån vs serielån: ${LAANETYPE_TEKST_SE.forskelFoerste} kr. dyrare i månad 1`,
+      metaDescription: `Jämför annuitetslån, serielån och stående lån på ${LAANETYPE_TEKST_SE.hovedstol} kr. över ${LAANETYPE_TEKST.loebetid} år. Se första betalning, månadsamortisering och total ränta.`,
+      keywords: ["serielån vs annuitetslån", "annuitetslån serielån", "serielån kalkylator", "stående lån", "annuitetslån kalkylator", "serielån formel", "skillnad annuitetslån serielån"],
+      ogTitle: "Annuitetslån, serielån eller stående lån?",
+      ogDescription: "Jämför de tre lånetyperna på samma belopp, ränta och löptid.",
+      category: "Ekonomi",
+      breadcrumbCategory: "Ekonomi",
+      breadcrumbCategoryHref: "/kategori/ekonomi",
+      schemaName: "Lånetypeberäknare",
+      schemaDescription: "Jämför annuitetslån, serielån och stående lån på första betalning, månadsamortisering och total ränta.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Vad är skillnaden mellan annuitetslån och serielån?", answer: `Ett annuitetslån har konstant betalning: du betalar samma belopp varje månad, men i början går nästan allt till ränta och i slutet nästan allt till amortering. Ett serielån har konstant amortering: du amorterar samma belopp på kapitalet varje månad, medan räntan faller, så betalningen börjar hög och blir lägre. På ${LAANETYPE_TEKST_SE.hovedstol} kr. över ${LAANETYPE_TEKST.loebetid} år till ${LAANETYPE_TEKST.aarligRente} % är serielånets första betalning ${LAANETYPE_TEKST_SE.serielaanFoerste} kr. mot annuitetslånets ${LAANETYPE_TEKST_SE.annuitetYdelse} kr., och dess sista betalning är bara ${LAANETYPE_TEKST_SE.serielaanSidste} kr.` },
+        { question: "Vilken lånetyp är billigast?", answer: `Serielånet är billigast över hela löptiden, eftersom skulden amorteras snabbare och mindre ränta löper på restskulden. På ${LAANETYPE_TEKST_SE.hovedstol} kr. över ${LAANETYPE_TEKST.loebetid} år till ${LAANETYPE_TEKST.aarligRente} % är den totala räntan lägre i serielånet än i annuitetslånet, men startbetalningen är ${LAANETYPE_TEKST_SE.forskelFoerste} kr. högre — och det är startbetalningen banken bedömer din betalningsförmåga på.` },
+        { question: "När är serielånet billigare än annuitetslånet?", answer: `Serielånets betalning faller månad för månad medan annuitetslånets är konstant, så de två korsas. På ${LAANETYPE_TEKST_SE.hovedstol} kr. över ${LAANETYPE_TEKST.loebetid} år till ${LAANETYPE_TEKST.aarligRente} % är serielånet dyrare fram till månad ${LAANETYPE_TEKST.kryds} och billigare därefter. Korsmånaden beror på räntan och löptiden, så verktyget räknar den för dina egna siffror.` },
+        { question: "Vad är skillnaden mellan stående lån och amorteringsfritt lån?", answer: `Det finns ingen skillnad i siffrorna — stående lån är bara det svenska namnet på ett amorteringsfritt lån. Du betalar enbart ränta under hela löptiden och kapitalet står oförändrat till den dag du löser lånet. På ${LAANETYPE_TEKST_SE.hovedstol} kr. över ${LAANETYPE_TEKST.loebetid} år till ${LAANETYPE_TEKST.aarligRente} % är betalningen ${LAANETYPE_TEKST_SE.staendeYdelse} kr. varje månad, men den totala räntan blir högst, eftersom räntan löper på hela beloppet hela vägen.` },
+        { question: "Hur påverkar lånetypen mitt ränteavdrag?", answer: "Avdraget följer räntekostnaden, inte amorteringen. Ett annuitetslån har högst räntekostnad i början och ger därför störst avdrag de första åren. Serielånets räntekostnad faller från dag ett, så avdraget faller med den." },
       ],
     },
     "sparemaal": {

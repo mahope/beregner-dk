@@ -43,6 +43,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
 
       links: [
         { name: "Boliglån", href: "/boliglaan" },
+        { name: "Lånetype", href: "/laantype" },
         { name: "Boligstøtte", href: "/boligstoette" },
         { name: "Husleje Budget", href: "/husleje" },
         { name: "Andelsbolig", href: "/andelsbolig" },
@@ -177,6 +178,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
       links: [
         { name: "Bolån", href: "/boliglaan" },
         { name: "Bolån 2026", href: "/bolan" },
+        { name: "Lånetyp", href: "/laantype" },
         { name: "Elberäknare", href: "/elberegner" },
         { name: "Solceller", href: "/solceller" },
         { name: "Rumfang", href: "/rumfang" },

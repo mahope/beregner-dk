@@ -29695,3 +29695,82 @@ Mutation (Athen → Berlin, Barcelona fjernet) gav 2 røde.
 Playwright. `/tidszone` og `/klokken-i` er rene lister og tabeller, men de nye
 landesider er ubilleder endnu; første skærmbilleder bør tages når et
 Playwright-tjek bliver muligt.
+
+---
+
+#### 6/10 05:1x — `/laantype` — F5d: tre lånetyper, én tilsammenligning (ny side, da + se)
+
+**Datagrund.** `/renteberegner` har 13.204 GSC-visninger, 0,8 % CTR, pos. 7,6 og
+svarer på «annuitetslån beregner» (348 v, pos. 8) — men siden regner **én**
+lånetype ad gangen. Dansk autocomplete målt 6/10 04:5x (`hl=da&gl=dk`): «annuitetslån»
+→ 10 af 10 træffere hvoraf 4 er *sammenligninger* («annuitetslån serielån og
+stående lån», «annuitetslån vs serielån», «annuitetslån serielån og stående
+lån»); «serielån» → 10 af 10 («serielån vs annuitetslån», «serielån beregner»,
+«serielån eller annuitetslån»); «stående lån» → 10 af 10 («stående lån hvad er
+det», «stående lån fordele og ulemper», «stående lån vs annuitetslån»). Svensk
+autocomplete (`hl=sv&gl=se`) er samme klynge: «serielån vs annuitetslån
+kalkylator», «annuitetslån vs rak amortering». Så det er ikke dansk niche, men
+et spørgsmål, to domæner får trafik på og ingen besvarede samlet.
+
+**Hvad der blev bygget.** `src/lib/laantype.ts` (ny) regner de tre typer på ét
+beløb og giver hver type **samme** felter, så tabellen har én kolonne pr.
+egenskab: `foersteYdelse`, `sidsteYdelse`, `foersteAfdrag`, `restgaeldVedUdlob`,
+`samletRente`, `samletBetaling`, `renteAndel`, `antalMaaneder`. Annuitetslån og
+serielån går **gennem `laanebeloeb.ts`** — samme funktioner `/renteberegner` og
+`/laaneberegner` bruger — så siden kan ikke vise en anden ydelse end værktøjet.
+Stående lån er rente på hele hovedstolen hver måned, hvilket er definitionen af
+et afdragsfrit lån, så den har ingen egen formel. `krydsMaaned` finder den
+måned, serielånets faldende ydelse bliver lavere end annuitetslånets konstante
+— det er «annuitetslån vs serielån» i ét tal (måned 146 i eksemplet).
+
+**Tal, der ikke er håndskrevet nogen sted.** Eksemplet (2.000.000 kr, 4 %, 30
+år) ligger i `laantype.ts`, og titel, metaDescription, alle otve FAQ-svar og
+sidens brødtekst læser `laanetypeEksempelFor()`. `FAQSchema` læser præcis
+`faqItems`, så tallene står i **Googles svar**, ikke kun i brødteksten.
+
+**Fejl fundet i min egen diff, før commit.** `daKr` i `page-data.ts` bevarer
+decimaler (den bruges til priser pr. km, hvor decimalerne er meningen), så min
+FAQ skrev «serielånets første ydelse 12.222,222 kr. mod annuitetslånets
+9.548,306 kr.» — rigtigt regnet, ubrugeligt i et søgeresultat. Ny `daKr0`
+runder til hele kroner; porten på FAQ-ens tal fangede det.
+
+**Fire gates i repoet sagde noget, jeg ikke selv havde set.** (1) `metaTitle`
+var 65 tegn mod grænsen 60. (2) `metaDescription` var 163 mod 160. (3)
+Hovedord-porten læser sidens egen første ord og kræver det i metaTitle — min
+titel «Annuitetslån**,** serielån eller stående lån?» har kommaet *i* hovedordet,
+fordi porten deler på mellemrum og kolon men ikke komma; nu «Annuitetslån**:**».
+(4) `locale-leak`-scanneren fandt «Måneder til afdragskrydset» som dansk streng i
+JSX uden for `labels`-objektet — flyttet ind, så scanneren er igen på 0
+ureviewede. (5) `regnestykker`-porten fandt et håndskrevet «2.000.000 kr over 30
+år til 4 %» i `LaantypeBeregner`; skrives nu fra `LAANETYPE_EKSEMPEL_*`, så
+strengen ikke kan vise et beløb, værktøjet ikke regner på.
+
+**Loven er læst i primærkilden, ikke i en bank.** Realkreditlovens § 4 siger
+ordret, at lån til ejerboliger til helårsbrug og fritidshuse «uanset den
+sikkerhedsmæssige placering ikke kan ydes, så de amortiseres langsommere end et
+30-årigt lån, der amortiseres over løbetiden med en ydelse, som udgør en fast
+procentdel af hovedstolen (annuitetslån)», og at kravet efter stk. 2 kan fraviges
+i op til 10 år. Læst på retsinformation.dk/eli/lta/2025/1541 6/10 2026. Det er
+grundlaget for afdragsfrihed og dermed for stående lån som selvstændig løbetid,
+og en port kræver, at paragraffen står i svaret.
+
+**Uafhængig kontrol af regningen.** BONOVO (29/9 2026) oplyser for 2.400.000 kr,
+4 %, 30 år: serielånet koster «3.209 kr. mere den første måned» og «ca. 280.000
+kr. mindre i rente». Modulet giver **3.208,70** og **280.868**. To uafhængige
+tal, der ikke stammer fra min kode.
+
+**Portene kan fejle (målt 6/10).** Mutation til `return k + 1` i krydsløkken:
+**2 røde**. Restgælden `hovedstol - afdrag * k` i stedet for `* (k - 1)`: **2
+røde**. Stående lånets rentesum til ét beløb i stedet for måned × måneder: **4
+røde**. Serielånets første afdrag til årligt i stedet for månedligt: **2 røde**.
+Min egen oprindelige påstand i testens docblock — at mutation af `<=` til `<`
+ ville bryde forventningen — viste sig **falsk** (0 røde, fordi ydelsen i måned
+146 ikke er præcis lig annuitetslånets) og er rettet til at sige det, der er
+målt.
+
+**Gate:** typecheck 0, lint 0 (794 filer), 4576 tests i 279 filer grønne, `next
+build` ok med `/laantype` på route-listen. De 7 build-warnings er
+forhåndsværende `globals.css`-fund, ikke fra denne ændring.
+
+**MÅL: `/laantype` baseline 0 besøgende, 0 visninger (ny URL), 6/10.** Begge
+domæner. Første måling efter 14 dage, altså 20/10.
