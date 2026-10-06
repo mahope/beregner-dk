@@ -1,7 +1,8 @@
-STATUS: 6/10 20:4x. ✅ **Hastighedsomregner på `/fart` — km/t ↔ m/s ↔ mph ↔ knop, begge veje.** Datagrund: dansk autocomplete (hl=da, 6/10 20:3x) har **10 af 10** træffere under «km i timen», der spørger efter omregning («km i timen omregner», «…til miles per hour», «…til meter i sekundet», «…til knob», «…til sekundmeter»), og «knop omregner» svarer «omregner knop til km» på 2 af 4. Sitets værktøj kunne *finde* en fart i km/t, men havde intet felt at skrive i. Faktorerne er eksakte (yard-and-pound-aftalen 1959, sømil = 1852 m), tempo og s/100 m står som egne rækker fordi de går modsat farten. **MÅL: /fart baseline 5.288 visninger / 32 klik / 0,6 % CTR / pos. 6,9 pr. 6/10** (GSC 6/9–4/10) — måles igen ~20/10.
+STATUS: 6/10 21:2x. ✅ **`locale-leak`-porten kan ikke længere timeoute** — den har gjort gaten rød på *timeout* alene tre gange. Rodårsagen var 13 `execFileSync`-kald pr. fil: de 7 tests der kun spørger om repoet som det ligger, betalte hver for deres egen gennemgang af alle 743 kandidater (38 s for filen). De læser nu ét delt resultat fra én `beforeAll`; de 14 tests der *faktisk* planter en lækage og skal se den tilstand de skabte, har hver `it(…, { timeout: 30 s })`. Det globale 5 s-loft er urørt, så ingen anden test har mistet sit tjek. **Målt: filen 38 s → 25,0 s, 22/22 grønne; fuld suite 4.714 tests i 286 filer grønne.** ❓'en er lukket, se `docs/plan-arkiv.md`.
+✅ **Hastighedsomregner på `/fart` — km/t ↔ m/s ↔ mph ↔ knop, begge veje.** Datagrund: dansk autocomplete (hl=da, 6/10 20:3x) har **10 af 10** træffere under «km i timen», der spørger efter omregning, og «knop omregner» svarer «omregner knop til km» på 2 af 4. Faktorerne er eksakte (yard-and-pound-aftalen 1959, sømil = 1852 m). **MÅL: /fart baseline 5.288 visninger / 32 klik / 0,6 % CTR / pos. 6,9 pr. 6/10** — måles igen ~20/10.
 ✅ **`/skridt` er live på begge domæner — DEPLOY OK 6/10 20:2x.** Målt på indhold: «Skridt til km» 14 forekomster, «1.515 skridt» 3, «6,6 km» 5, «7,9 km» 7, sitemap 1. Samme greb på beraknare.se: «Steg till km» 14, «1 515 steg» 3, «7,9 km» 7, sitemap 1.
 ✅ CEO-kø punkt 0 (review-fund 29/9) er gennemgået alle otte: Valborg fast 30. april med port på plads, svensk påskafton `offsetDays: -1`, dansk sankthans fast 23./24. juni, påskeaften-FAQ slettet, `/husleje` på nettoprisindekset, `toUtcMidnight` læser `Europe/Copenhagen`/`Stockholm`, svensk promille-FAQ taler fra `promille-genstande`, `maneder: 12` er korrekt og 1. advent har fire søndage. Det fund, der lå åbent i review-filen (`naesteJuleaften` gav 0 dage på juleaften), er rettet i `35c6175` og porten på linje 91 følger nu sin egen titel.
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build`). 6/10 20:3x: typecheck 0, lint 0 (813 filer), **4.714 tests i 286 filer** grønne, build ok (196 sider). Nye porter: 22 i `fart-omregner.test.ts`, 8 i `FartOmregner.test.tsx`, 4 i `fart/page.test.tsx`. Mutationen `SOMERMIL_I_KM` 1,852 → 1,85 giver **8 røde** på tværs af de tre filer. ⚠️ `locale-leak-gate.test.ts` timed out i én suitekørsel (5 s-grænsen, filen tager 38 s i isolation) og var grøn i to — se ❓. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
+**Gate:** `npm run typecheck && npm run lint && npm run test`. 6/10 21:2x: typecheck 0, lint 0 (813 filer), **4.714 tests i 286 filer grønne** på 46 s. (`npm run build` køres på kodeændringer; test-only-diffen denne iteration kan ikke ændre bygget.) PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -250,13 +251,6 @@ måles udefra. **Åben:** at fejlen er væk afgør kun Sentrys egen hændelsest�
   «FEJL: 34 …» med 20 linjer i `src/app/promille/page.tsx`, der er ren dansk i en
   komponent der monteres på beraknare.se. **⛔ Ikke opgaver at fjerne ord for** —
   kræver en stopordsliste der skelner mellem sprog, eller en allowlist-fil.
-- ❓ **`locale-leak-gate.test.ts` kan timeoute i fuld suitekørs** (6/10 20:3x,
-  tredje gang). Filen udspawner `scripts/locale-leak.mjs` pr. test og tager **38 s**
-  alene, mens vitests standardgrænse er 5 s — i to fulde kørsler grøn, i én 6 røde
-  på *timeout* alene (ingen assertion fejlede). Filen er grøn i isolation (22/22),
-  og scanneren selv giver exit 0. **Fix:** hæv `testTimeout` i `vitest.config.ts`
-  for den fil, eller kør scanneren én gang i stedet for pr. test. Ikke rørt her,
-  fordi det er en port-opgave og ikke en del af hastighedsomregneren.
 - ❓ **Et tidligere suitekørsel gav 1 rød i `locale-leak-gate.test.ts`**, som
   scanneren kører i en udspawnet proces og som er grøn i isolation og i to
   senere fulde kørsler. Ikke reproduceret; urørt.

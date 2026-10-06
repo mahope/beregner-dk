@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 /**
  * The locale-leak scanner is a gate, so the gate is itself tested. A scanner
@@ -61,10 +61,22 @@ function runScanner(): { failed: boolean; json: ScanResult } {
   return { failed, json: JSON.parse(stdout) as ScanResult };
 }
 
-/** The findings alone, for the tests that never ask whether the gate held. */
-function scan() {
-  return runScanner().json;
-}
+/**
+ * Every spawn this file makes costs a full walk of the repo (~0,8 s locally,
+ * ~1,7 s on CI's slower runner). Only the plants need a scan of their *own* —
+ * they change the repo, so each one must see the state it created. The seven
+ * tests that only ask questions about the repo as committed were each paying for
+ * their own walk, which is what made this file the slowest in the suite.
+ *
+ * 6/10 measured it: 13 spawns, 38 s for the file, and the run reddens on
+ * *timeout* alone under full-suite parallel load (three times, no assertion ever
+ * failed) — vitest's default per-test limit is 5 s, and a spawn that normally
+ * takes 0,8 s can cross that when six workers hammer the disk at once. The
+ * answer is not to loosen the limit for the whole repo, and not to delete the
+ * plants: it is to ask once, and to give the tests that genuinely spawn an
+ * explicit limit of their own.
+ */
+const SPAWN_TIMEOUT = 30_000;
 
 /**
  * Inserts an entry *inside* the `sePages` object literal, not at module scope.
@@ -84,20 +96,34 @@ function plantInSePages(src: string, entry: string): string {
 }
 
 describe("locale-leak scanner", () => {
+  /**
+   * One walk of the repo, shared by every test that only asks about it.
+   *
+   * The plants below each need their own run — they mutate a file, so a cached
+   * answer would answer about the wrong repo. These seven cannot, so they read
+   * this. `beforeAll` rather than a module-level const because the suite must
+   * not walk the repo at import time, before vitest has set up the environment.
+   */
+  let repo: { failed: boolean; json: ScanResult };
+
+  beforeAll(() => {
+    repo = runScanner();
+  }, SPAWN_TIMEOUT);
+
   it("fails the gate: every candidate a human has not judged is known", () => {
     // The load-bearing assertion. If someone pastes a Danish string into a
     // component that renders on beraknare.se, this is what turns red.
-    expect(runScanner().failed).toBe(false);
+    expect(repo.failed).toBe(false);
   });
 
   it("derives the SE-mounted components from calculator-list.ts", () => {
     // 70 reachable components across the se-mounted pages. Hard-coded before?
     // Then adding a calculator would not have moved this number.
-    expect(scan().seMountedComponents).toBeGreaterThan(50);
+    expect(repo.json.seMountedComponents).toBeGreaterThan(50);
   });
 
   it("judges every candidate, and judges most of them dead", () => {
-    const result = scan();
+    const result = repo.json;
     expect(result.candidates).toBe(result.dead + result.needsEyes);
     // C65's lesson in one number: the raw text scan over-reports badly, so a
     // verdict layer is not optional.
@@ -107,7 +133,7 @@ describe("locale-leak scanner", () => {
   it("keeps a reason on every reviewed entry", () => {
     // A dismissal without a reason is a dismissal nobody can check, which is
     // what made C65's finding list expensive to inherit.
-    for (const entry of scan().reviewed) {
+    for (const entry of repo.json.reviewed) {
       expect(entry.reviewNote.length).toBeGreaterThan(20);
     }
   });
@@ -128,12 +154,12 @@ describe("locale-leak scanner", () => {
     // carries it: a broken exclusion reports locale-object copy that has *no*
     // port to be judged by, so the share the verdict layer dismisses collapses.
     // 0.9 sits under today's 0.95 and far above a broken exclusion.
-    const result = scan();
+    const result = repo.json;
     expect(result.candidates).toBeLessThan(900);
     expect(result.dead / result.candidates).toBeGreaterThan(0.9);
   });
 
-  it("flags a module-scope Danish string in an SE-mounted component", () => {
+  it("flags a module-scope Danish string in an SE-mounted component", { timeout: SPAWN_TIMEOUT }, () => {
     // Reverse verification: this is the exact shape that made C65's real bug
     // (STANDARD_APPARATER in Elberegner.tsx). Plant it, and the gate must go
     // red — otherwise the gate is a rubber stamp.
@@ -158,10 +184,10 @@ describe("locale-leak scanner", () => {
     // The first run reported twelve correct Swedish strings in BolanBeregner
     // ("Ränta (% per år)", "Månadskostnad", "Lånebelopp") because å is not a
     // Danish letter. This locks that false positive out.
-    expect(JSON.stringify(scan().unreviewed)).not.toContain("BolanBeregner");
+    expect(JSON.stringify(repo.json.unreviewed)).not.toContain("BolanBeregner");
   });
 
-  it("refuses Danish copy that sits in the Danish branch of a locale dispatcher", () => {
+  it("refuses Danish copy that sits in the Danish branch of a locale dispatcher", { timeout: SPAWN_TIMEOUT }, () => {
     // HomeContent was the scanner's biggest reviewed entry: 38 finds, and a
     // note claiming the whole Danish homepage text stood on beraknare.se. It
     // does not — the file dispatches internally. Planted here so the verdict
@@ -189,7 +215,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("still flags a dispatcher that leaves a locale on its default branch", () => {
+  it("still flags a dispatcher that leaves a locale on its default branch", { timeout: SPAWN_TIMEOUT }, () => {
     // The safety property of the rule above: a file that only diverts `se` falls
     // through to its default on `no`, and that default is what a Norwegian
     // reader would see — so it must not be excused.
@@ -214,7 +240,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("flags a Danish value inside the se: block — the leak R1-R3 cannot see", () => {
+  it("flags a Danish value inside the se: block — the leak R1-R3 cannot see", { timeout: SPAWN_TIMEOUT }, () => {
     // C71 gave /del-regning's tællerknapper names and pasted the Danish words
     // into `se`, so beraknare.se served "Færre personer" on an otherwise Swedish
     // page. Every other rule skips locale objects — that is where translations
@@ -240,7 +266,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("does not flag Norwegian æ/ø, nor a Danish fallback nested in se", () => {
+  it("does not flag Norwegian æ/ø, nor a Danish fallback nested in se", { timeout: SPAWN_TIMEOUT }, () => {
     // The safety property of R4. Norwegian writes æ and ø itself ("Færre
     // personer" is correct in Norwegian), so the same test must not run on a
     // `no:` block — C68's lesson about `ø` as a Danish marker. And a `da:`
@@ -269,7 +295,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("scans page-data.ts, and flags Danish in its Swedish block", () => {
+  it("scans page-data.ts, and flags Danish in its Swedish block", { timeout: SPAWN_TIMEOUT }, () => {
     // The blind spot that let two Danish answers live on beraknare.se's
     // third-largest page. Two independent reasons, and the test has to cover
     // both, because either one alone is enough to make the scan blind again:
@@ -297,7 +323,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("does not flag a Danish identifier inside a ${…} interpolation", () => {
+  it("does not flag a Danish identifier inside a ${…} interpolation", { timeout: SPAWN_TIMEOUT }, () => {
     // The safety property of R5, using the *real* `/bil` answer verbatim:
     // `Med kalkylatorns standardvärden på ${elbilSe.forudsætninger.kmPrAar}`.
     // The reader sees "Med kalkylatorns standardvärden på 15.000 km per år" —
@@ -327,7 +353,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("flags a long Danish answer in the Swedish block, not just a short one", () => {
+  it("flags a long Danish answer in the Swedish block, not just a short one", { timeout: SPAWN_TIMEOUT }, () => {
     // The 200-char ceiling R4 inherited from `scanStrings` (where it skips
     // minified bundles) dropped exactly the two real leaks: 308 and 236
     // characters. A cap that skips the longest strings skips the ones with the
@@ -388,14 +414,13 @@ describe("locale-leak scanner", () => {
     // files goes back to the 72 components alone and the prose on 54 pages is
     // invisible again. C118's lesson: a test that asserts a property, not a
     // name, is what catches the set shrinking.
-    const result = scan();
-    expect(result.scannedPages).toBeGreaterThan(40);
+    expect(repo.json.scannedPages).toBeGreaterThan(40);
     // The pages are the files that carry the answer-first `<h2>`s, so at least
     // one Danish string on a page file must reach the verdict layer.
-    expect(result.candidatesFromPages).toBeGreaterThan(0);
+    expect(repo.json.candidatesFromPages).toBeGreaterThan(0);
   });
 
-  it("flags Danish in the visible Swedish branch of a page", () => {
+  it("flags Danish in the visible Swedish branch of a page", { timeout: SPAWN_TIMEOUT }, () => {
     const target = resolve(ROOT, "src", "app", "procent", "page.tsx");
     const original = readFileSync(target);
     try {
@@ -411,7 +436,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("does not flag the same string in a da: branch of the same page", () => {
+  it("does not flag the same string in a da: branch of the same page", { timeout: SPAWN_TIMEOUT }, () => {
     // The safety property, and the half that would break silently. If the port
     // walk cannot see a `{locale === "da" && (…)}` wrapper, every page's Danish
     // answer-first block becomes a finding and the gate is noise. Both halves
@@ -431,7 +456,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("reads the else-arm of a locale ternary as Danish, not as Swedish", () => {
+  it("reads the else-arm of a locale ternary as Danish, not as Swedish", { timeout: SPAWN_TIMEOUT }, () => {
     // The bug this rule was written after, on a real page. `/alder`'s
     // answer-first block is `{locale === "se" ? "Svar på de vanligaste
     // åldersfrågorna" : "Svar på de oftest stillede aldersspørgsmål"}` — the
@@ -458,7 +483,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("does not excuse a table that is read outside a da-port", () => {
+  it("does not excuse a table that is read outside a da-port", { timeout: SPAWN_TIMEOUT }, () => {
     // P2 ("every read of this table sits behind a da-port") is a real rule, so
     // it needs its negative too: move the one read of `/promille`'s country
     // table out of the Danish block, and the Danish rows in it must be
@@ -502,7 +527,7 @@ describe("locale-leak scanner", () => {
     return `${src.slice(0, m.index + m[0].length)}${block}${src.slice(m.index + m[0].length)}`;
   }
 
-  it("flags Danish copy that ends in a {…} interpolation, on its own line", () => {
+  it("flags Danish copy that ends in a {…} interpolation, on its own line", { timeout: SPAWN_TIMEOUT }, () => {
     const target = resolve(ROOT, "src", "app", "procent", "page.tsx");
     const original = readFileSync(target);
     try {
@@ -518,7 +543,7 @@ describe("locale-leak scanner", () => {
     }
   });
 
-  it("does not read a TypeScript generic as JSX copy", () => {
+  it("does not read a TypeScript generic as JSX copy", { timeout: SPAWN_TIMEOUT }, () => {
     // The other half of the same fix. A bare `>` matches `useState<string>('4.5')`
     // — the `>` closes `string` and what follows looks like copy to a rule that
     // only looks forwards. The rule is anchored on the tag's own `<` instead,

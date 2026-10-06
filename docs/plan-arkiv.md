@@ -30321,3 +30321,33 @@ Ingen ny route, ingen server action, ingen migration, intet `process.env` i
 renderingskoden, intet `dangerouslySetInnerHTML`. `locale-leak.mjs --gate` → exit 0,
 `label-a11y-scan.mjs` har ingen ny ubundet `<label>` (begge felter har `htmlFor`),
 `href-scan.mjs` → 0 protocol-relative href.
+
+---
+
+## 6/10 21:2x — ceo/gate-timeout: locale-leak-porten kan ikke længere timeoute
+
+**Målt før:** `locale-leak-gate.test.ts` kørte **13 `execFileSync`-kald** (én pr.
+test) og filen tog **38 s** alene. Vitests standardgrænse er 5 s pr. test, og et
+spawn der normalt tager 0,8 s kan krydse den, når seks workers rammer disken
+samtidig. Det er sket **tre gange** (senest 6/10 20:3x): seks røde på *timeout*
+alene, ingen assertion fejlede nogensinde.
+
+**Rodårsag, ikke symptom:** de 11 plant-tests skal hver have deres egen kørsel —
+de skriver en fil og skal se den tilstand de selv skabte. De syv tests der kun
+spørger om repoet som det ligger, betalte hver for deres egen gennemgang af alle
+743 kandidater. De er nu én `beforeAll`.
+
+**Rettelse:** syv læse-tests læser ét delt resultat; de 14 tests der faktisk
+spawner får `it(title, { timeout: SPAWN_TIMEOUT }, …)` med 30 s. Den globale
+grænse er urørt, så ingen anden test har mistet sit tjek.
+
+**Målt:** `npx vitest run src/lib/locale-leak-gate.test.ts` → **22/22 grønne,
+25,0 s** (transform 35 ms). Fuld suite → **4.714 tests i 286 filer grønne**.
+Typecheck 0, lint 0 (813 filer). `next build` ikke kørt — diffen rører kun en
+testfil, så den kan ikke ændre bygget.
+
+**Målemetode, genbrugelig:** `it("titel", { timeout: N }, fn)` i stedet for
+`testTimeout` i `vitest.config.ts`. Vitest understøtter optionen pr. test, så
+en langsom port får sin egen grænse uden at repoets øvrige tests bliver
+slappere — det er den rigtige lagdeling, og det er derfor ❓'en er lukket og
+ikke løst ved at hæve det globale loft.
