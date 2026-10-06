@@ -1451,7 +1451,7 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvad er forskellen på procentpoint og procent?", answer: procentpointForskelFaqSvar("da") },
       { question: "Hvor mange procentpoint er 1 procent?", answer: "Det afhænger af, hvad du regner fra. 2 % til 3 % er 1 procentpoint og 50 %. 20 % til 21 % er også 1 procentpoint, men kun 5 %. Der er ingen fast sats — procentpoint er altid bare de to tal minus hinanden." },
       { question: "Hvorfor stiger en rente 0,25 procentpoint hver gang?", answer: "Fordi Nationalbanken hæver den i skridt af 0,25 procentpoint. Hver hævning er 0,25 procentpoint uanset det niveau, den ligger på — men den procentvise stigning bliver mindre for hver hævning, fordi den regnes på et større tal." },
-      { question: "Hvordan lægger jeg procent til?", answer: "Gang med (1 + procent/100). Læg 20 % til 150: 150 × 1,20 = 180." },
+      { question: "Hvordan lægger jeg procent til?", answer: "Gang med (1 + procent/100). Læg 20 % til 150: 150 × 1,20 = 180. Regn det ud i feltet «Læg til / træk fra» ovenfor." },
       { question: "Hvordan regner man procent i Excel?", answer: `Skriv =A1/B1*100, hvis du vil have procent direkte, og =A1*B1/100, hvis du vil have X procent af et tal. Et fald fra ${PROCENT_DA.normalPris} kr til ${PROCENT_DA.nedsatPris} kr er =(B1-A1)/A1*100 = ${PROCENT_DA.forskel} %. Formater cellen som procent, hvis du ikke skriver *100.` },
       { question: "Hvordan regner man procentforskellen mellem to tal?", answer: `Forskellen er ((nyt tal - gammelt tal) / gammelt tal) × 100. Går en pris fra ${PROCENT_DA.normalPris} kr til ${PROCENT_DA.nedsatPris} kr, er faldet (${PROCENT_DA.nedsatPris} - ${PROCENT_DA.normalPris}) / ${PROCENT_DA.normalPris} = ${PROCENT_DA.forskel} %.` },
       { question: "Hvor stor er rabatten i procent?", answer: `Rabatten er (pris før rabat - pris efter rabat) / pris før rabat × 100. Er en vare på ${RABAT_DA.normalPris} kr. sat ${RABAT_DA.nedsat} kr. ned, er rabatten ${RABAT_DA.nedsat} / ${RABAT_DA.normalPris} = ${RABAT_DA.rabat} %.` },
@@ -4206,7 +4206,7 @@ const sePages: Record<string, PageData> = {
       { question: "Vad är procentenheter vs procent?", answer: "Procentenheter är den absoluta skillnaden mellan två procenttal, procent är den relativa förändringen. Räntan från 2 % till 3 % är 1 procentenhet, men 50 % ökning. Räkna ut det med procentenhetsräknaren." },
       { question: "Vad är skillnaden på procentenheter och procent?", answer: procentpointForskelFaqSvar("se") },
       { question: "Hur många procentenheter är 1 procent?", answer: "Det beror på vad du räknar från. 2 % till 3 % är 1 procentenhet och 50 %. 20 % till 21 % är också 1 procentenhet, men bara 5 %. Det finns ingen fast sats — procentenheter är alltid bara de två talen minus varandra." },
-      { question: "Hur lägger jag till procent?", answer: "Multiplicera med (1 + procent/100). Lägg 20 % till 150: 150 × 1,20 = 180." },
+      { question: "Hur lägger jag till procent?", answer: "Multiplicera med (1 + procent/100). Lägg 20 % till 150: 150 × 1,20 = 180. Räkna ut det i fältet «Lägg till / dra av» ovan." },
       // Rabattklyngen. Svensk autocomplete (hl=se&gl=se, 2026-09-30) svarar på
       // "rabatt i procent" med sju formuleringar, hvorav fyra egna frågor:
       // "hur stor är rabatten i procent", "hur mycket rabatt i procent",

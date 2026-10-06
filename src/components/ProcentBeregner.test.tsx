@@ -234,16 +234,15 @@ test("kun procenttilstandene får procenttegn på hovedtallet", () => {
     expect(screen.getByLabelText("Pris efter rabatt (kr)")).toBeDefined();
   });
 
-test("alle seks tilstande står i to rækker af tre på stor skærm", () => {
-    // Seks tilstande i én række på 1280 px gør hver knap smallere end de
-    // 44 px, designreglen kræver som minimum, og grid-klassen md:grid-cols-5
-    // efterlod den sjette alene på en linje for sig selv. Tre kolonner giver to
-    // lige rækker, så ingen tilstand står alene.
+test("alle syv tilstande står i fire kolonner på stor skærm", () => {
+    // Syv tilstande i én række på 1280 px gør hver knap smallere end de
+    // 44 px, designreglen kræver som minimum. Fire kolonner giver 4 + 3, så
+    // ingen tilstand står alene på en linje for sig selv.
     const { container } = renderProcent("da");
 
     const radiogroup = container.querySelector('[role="radiogroup"]');
-    expect(radiogroup?.className).toContain("md:grid-cols-3");
-    expect(container.querySelectorAll('[role="radio"]')).toHaveLength(6);
+    expect(radiogroup?.className).toContain("md:grid-cols-4");
+    expect(container.querySelectorAll('[role="radio"]')).toHaveLength(7);
   });
 
 test("de to felter i forskel-tilstanden har hver sit navn", () => {
@@ -298,5 +297,38 @@ test("de to felter i forskel-tilstanden har hver sit navn", () => {
     // Bindestregen i stedet for et tal: «0,00 %» er ikke et svar på
     // «hvor stor er forskellen», det er et tal uden mening.
     expect(screen.getByText("—")).toBeDefined();
+  });
+
+  test("tillaeg-tilstanden lægger 20 % til 150 og får FAQ'ens 180 kr.", () => {
+    // "Hvordan lægger jeg procent til?" står i sidens egen FAQ med regnestykket
+    // "150 × 1,20 = 180". Værktøjets åbningseksempel er den samme beregning.
+    const { container } = renderProcent("da");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Læg til \/ træk fra/ }));
+
+    expect(container.textContent).toContain("150 kr. + 20 % = 180,00 kr.");
+    expect(container.textContent).toContain("+30 kr.");
+  });
+
+  test("træk fra 20 % af 150 giver 120 kr. og et fald", () => {
+    const { container } = renderProcent("da");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Læg til \/ træk fra/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Træk fra" }));
+
+    expect(container.textContent).toContain("150 kr. − 20 % = 120,00 kr.");
+    expect(container.textContent).toContain("−30 kr.");
+  });
+
+  test("svensk tillaeg-tilstand bruger svenske ord", () => {
+    // beraknare.se må ikke vise «Læg til», «Træk fra» eller «Beløb».
+    renderProcent("se");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Lägg till \/ dra av/ }));
+
+    expect(screen.getByRole("button", { name: "Lägg till" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Dra av" })).toBeDefined();
+    expect(screen.getByLabelText("Belopp (kr)")).toBeDefined();
+    expect(screen.getByLabelText("Procent (%)")).toBeDefined();
   });
 });

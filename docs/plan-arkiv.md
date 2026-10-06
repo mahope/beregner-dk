@@ -30586,3 +30586,25 @@ udledes nu af datoen selv med `getUTCDay()`, så porten er datouafhængig.
 390/768/1280 px er ikke set. ØresundPAY's egne betalingsregler er ikke
 modelleret; kun broens egen prisliste.
 
+
+## 7/10 — «Læg til / træk fra procent» som syvende tilstand på `/procent`
+
+Sitetets #1-side (GSC 149.929 visninger, 0,1 % CTR, pos. 7,5) manglede den
+tilstand, hver konkurrent har: at lægge en procent til eller trække den fra et
+beløb. Dansk autocomplete (hl=da&gl=dk, 7/10 01:2x) svarer både «lægge procent
+til et tal» og «trække procent fra et tal» med 10 af 10 træffere, og sidens egen
+FAQ svarede allerede i ord («Læg 20 % til 150: 150 × 1,20 = 180») uden at
+værktøjet kunne det.
+
+`laegProcentTil` og `traekProcentFra` i `src/lib/procent.ts` læser begge
+`procentAf`, så svaret ikke kan glide fra 10 %-tabellen på siden. Værktøjet
+åbner på FAQ'ens 150/20 og viser den nye værdi plus ændringen i kroner. Retningen
+vælges med to knapper (aria-pressed), ikke med et minus. Syv tilstande i
+`ModeSelector` med `columns={7}` → `md:grid-cols-4` (4 + 3). Dansk og svensk.
+
+**Målt.** typecheck 0, lint 0 (830 filer), 4.827 tests i 292 filer grønne,
+`next build` grøn. Mutation: `laegProcentTil` uden `procentAf`
+(`beloeb − procentAf`) giver 4 røde i `procent.test.ts`.
+
+**Ikke gjort.** Ingen browser/Playwright (repoet har stadig intet), så 390/768/
+1280 px er ikke set; kun tekst-indholdet i SSR-markup'en er læst.

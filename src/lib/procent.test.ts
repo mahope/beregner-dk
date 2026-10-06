@@ -3,10 +3,12 @@ import {
   PROCENTFALD_EKSEMPEL,
   PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
+  PROCENT_TILLAEG_EKSEMPEL,
   RABAT_BELOEB,
   RABAT_EKSEMPEL,
   RABAT_SATS,
   RABAT_SATS_UDLAET,
+  laegProcentTil,
   procentAf,
   procentBesparelse,
   procentDifferens,
@@ -16,6 +18,7 @@ import {
   procentRabat,
   procentRetning,
   rabatProcent,
+  traekProcentFra,
 } from "./procent";
 
 describe("procentForskelMellemTal", () => {
@@ -462,5 +465,34 @@ describe("procentRabat", () => {
       expect(svar.besparelse + (RABAT_BELOEB - svar.besparelse)).toBe(RABAT_BELOEB);
       expect(svar.erRabat).toBe(sats > 0);
     }
+  });
+});
+
+describe("laegProcentTil og traekProcentFra", () => {
+  test("lægger 20 % til 150 og får FAQ'ens 180", () => {
+    // Tallet står i sidens egen FAQ: "Læg 20 % til 150: 150 × 1,20 = 180."
+    // Værktøjets åbningseksempel er den samme beregning.
+    expect(laegProcentTil(PROCENT_TILLAEG_EKSEMPEL.beloeb, PROCENT_TILLAEG_EKSEMPEL.sats)).toBe(180);
+  });
+
+  test("lægger 25 % til 1.000 og trækker 20 % fra 1.000", () => {
+    expect(laegProcentTil(1000, 25)).toBe(1250);
+    expect(traekProcentFra(1000, 20)).toBe(800);
+  });
+
+  test("ændringen er procentAf, ikke en selvstændig formel", () => {
+    // De to funktioner må ikke kunne glide fra den 10 %-tabel, siden selv
+    // bruger: tilvæksten er procentAf, og det samme er fradraget.
+    for (const [beloeb, sats] of [[150, 20], [1000, 25], [999, 7], [40, 100]] as const) {
+      expect(laegProcentTil(beloeb, sats) - beloeb).toBeCloseTo(procentAf(beloeb, sats), 10);
+      expect(beloeb - traekProcentFra(beloeb, sats)).toBeCloseTo(procentAf(beloeb, sats), 10);
+    }
+  });
+
+  test("0 % ændrer intet, og 100 % fra giver 0", () => {
+    expect(laegProcentTil(500, 0)).toBe(500);
+    expect(traekProcentFra(500, 0)).toBe(500);
+    expect(traekProcentFra(500, 100)).toBe(0);
+    expect(laegProcentTil(500, 100)).toBe(1000);
   });
 });

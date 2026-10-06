@@ -11,16 +11,22 @@ import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatNumber, formatSvenskText } from "@/lib/format";
 import {
+  laegProcentTil,
   procentForskel,
   procentForskelMellemTal,
   procentRabat,
   procentRetning,
   rabatProcent,
   RABAT_EKSEMPEL,
+  traekProcentFra,
+  PROCENT_TILLAEG_EKSEMPEL,
 } from "@/lib/procent";
 import type { Locale } from "@/lib/i18n";
 
-type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning" | "forskel" | "rabat";
+type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning" | "forskel" | "rabat" | "tillaeg";
+
+/** Om procenten lægges til eller trækkes fra i tillaeg-tilstanden. */
+type TillaegRetning = "til" | "fra";
 
 const labels = {
   da: {
@@ -36,6 +42,14 @@ const labels = {
     modeForskelDesc: "Hvor stor er forskellen?",
     modeRabatLabel: "Rabat i procent",
     modeRabatDesc: "Pris før → pris efter = ? %",
+    modeTillaegLabel: "Læg til / træk fra",
+    modeTillaegDesc: "X % til eller fra Y",
+    tillaegRetningLabel: "Om procenten lægges til eller trækkes fra",
+    tillaegTilLabel: "Læg til",
+    tillaegFraLabel: "Træk fra",
+    tillaegBeloebLabel: "Beløb (kr.)",
+    tillaegProcentLabel: "Procent (%)",
+    tillaegAendringLabel: "Ændring",
     modeSelectorName: "Beregningstype",
     ariaDeltalTael: "Del-tal (tælleren)",
     ariaHeltalNaev: "Heltal (nævneren)",
@@ -87,6 +101,8 @@ const labels = {
     forklaringRabatStigning: (foer: string, efter: string, pct: string, ekstra: string) =>
       `${foer} kr. → ${efter} kr. er ${pct} % stigning, så du betaler ${ekstra} kr. mere.`,
     forklaringRabatUaendret: (foer: string) => `${foer} kr. er den samme pris begge steder.`,
+    forklarTillaeg: (erTil: boolean, beloeb: string, procent: string, ny: string) =>
+      `${beloeb} kr. ${erTil ? "+" : "−"} ${procent} % = ${ny} kr.`,
     prisFoerLabel: "Pris før rabat (kr.)",
     prisEfterLabel: "Pris efter rabat (kr.)",
     rabatOverskrift: "Rabatten er",
@@ -109,6 +125,14 @@ const labels = {
     modeForskelDesc: "Hur stor är skillnaden?",
     modeRabatLabel: "Rabatt i procent",
     modeRabatDesc: "Pris före → pris efter = ? %",
+    modeTillaegLabel: "Lägg till / dra av",
+    modeTillaegDesc: "X % till eller från Y",
+    tillaegRetningLabel: "Om procenten läggs till eller dras av",
+    tillaegTilLabel: "Lägg till",
+    tillaegFraLabel: "Dra av",
+    tillaegBeloebLabel: "Belopp (kr)",
+    tillaegProcentLabel: "Procent (%)",
+    tillaegAendringLabel: "Ändring",
     modeSelectorName: "Beräkningstyp",
     ariaDeltalTael: "Deltal (täljaren)",
     ariaHeltalNaev: "Heltal (nämnaren)",
@@ -159,6 +183,8 @@ const labels = {
     forklaringRabatStigning: (foer: string, efter: string, pct: string, ekstra: string) =>
       `${foer} kr. → ${efter} kr. är ${pct} % ökning, så du betalar ${ekstra} kr. mer.`,
     forklaringRabatUaendret: (foer: string) => `${foer} kr. är samma pris båda ställena.`,
+    forklarTillaeg: (erTil: boolean, beloeb: string, procent: string, ny: string) =>
+      `${beloeb} kr. ${erTil ? "+" : "−"} ${procent} % = ${ny} kr.`,
     prisFoerLabel: "Pris före rabatt (kr)",
     prisEfterLabel: "Pris efter rabatt (kr)",
     rabatOverskrift: "Rabatten är",
@@ -196,6 +222,7 @@ export default function ProcentBeregner() {
     { id: "stigning", label: l.modeStigningLabel, desc: l.modeStigningDesc },
     { id: "forskel", label: l.modeForskelLabel, desc: l.modeForskelDesc },
     { id: "rabat", label: l.modeRabatLabel, desc: l.modeRabatDesc },
+    { id: "tillaeg", label: l.modeTillaegLabel, desc: l.modeTillaegDesc },
   ];
 
   const [mode, setMode] = useState<BeregningsMode>("find-procent");
@@ -222,6 +249,13 @@ export default function ProcentBeregner() {
   const [rabatFoer, setRabatFoer] = useState<number>(RABAT_EKSEMPEL.normalPris);
   const [rabatEfter, setRabatEfter] = useState<number>(RABAT_EKSEMPEL.nedsatPris);
 
+  // Læg til / træk fra mode. 150 kr. og 20 % er de tal, sidens egen FAQ
+  // bruger ("Læg 20 % til 150: 150 × 1,20 = 180"), så værktøjet åbner på det
+  // svar, læseren lige har fået i teksten.
+  const [tillaegBeloeb, setTillaegBeloeb] = useState<number>(PROCENT_TILLAEG_EKSEMPEL.beloeb);
+  const [tillaegProcent, setTillaegProcent] = useState<number>(PROCENT_TILLAEG_EKSEMPEL.sats);
+  const [tillaegRetning, setTillaegRetning] = useState<TillaegRetning>("til");
+
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
 
@@ -244,6 +278,11 @@ export default function ProcentBeregner() {
       if (inputs.talB !== undefined) setTalB(inputs.talB);
       if (inputs.rabatFoer !== undefined) setRabatFoer(inputs.rabatFoer);
       if (inputs.rabatEfter !== undefined) setRabatEfter(inputs.rabatEfter);
+      if (inputs.tillaegBeloeb !== undefined) setTillaegBeloeb(inputs.tillaegBeloeb);
+      if (inputs.tillaegProcent !== undefined) setTillaegProcent(inputs.tillaegProcent);
+      if (inputs.tillaegRetning === "til" || inputs.tillaegRetning === "fra") {
+        setTillaegRetning(inputs.tillaegRetning);
+      }
     }
   }, []);
 
@@ -259,17 +298,20 @@ export default function ProcentBeregner() {
     setTalB(33000);
     setRabatFoer(RABAT_EKSEMPEL.normalPris);
     setRabatEfter(RABAT_EKSEMPEL.nedsatPris);
+    setTillaegBeloeb(PROCENT_TILLAEG_EKSEMPEL.beloeb);
+    setTillaegProcent(PROCENT_TILLAEG_EKSEMPEL.sats);
+    setTillaegRetning("til");
   }, []);
 
   // Get shareable link for current calculation
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'procent',
-      inputs: { mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter },
+      inputs: { mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter, tillaegBeloeb, tillaegProcent, tillaegRetning },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter]);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter, tillaegBeloeb, tillaegProcent, tillaegRetning]);
 
   const validateNotZero = useCallback((value: number) => {
     if (value === 0) return l.valueNotZero;
@@ -380,10 +422,31 @@ export default function ProcentBeregner() {
         };
       }
 
+      case "tillaeg": {
+        // Samme regel begge veje: `laegProcentTil`/`traekProcentFra` læser
+        // `procentAf`, så svaret ikke kan glide fra 10 %-tabellen på siden.
+        const erTil = tillaegRetning === "til";
+        const nyVaerdi = erTil
+          ? laegProcentTil(tillaegBeloeb, tillaegProcent)
+          : traekProcentFra(tillaegBeloeb, tillaegProcent);
+        return {
+          type: "tillaeg" as const,
+          resultat: nyVaerdi,
+          aendring: nyVaerdi - tillaegBeloeb,
+          erTil,
+          forklaring: l.forklarTillaeg(
+            erTil,
+            num(tillaegBeloeb),
+            num(tillaegProcent),
+            fixed(nyVaerdi),
+          ),
+        };
+      }
+
       default:
         return null;
     }
-  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter, l, locale]);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter, tillaegBeloeb, tillaegProcent, tillaegRetning, l, locale]);
 
   // Track calculation once per session
   useEffect(() => {
@@ -405,7 +468,7 @@ export default function ProcentBeregner() {
         currentMode={mode}
         onChange={setMode}
         name={l.modeSelectorName}
-        columns={6}
+        columns={7}
       />
 
       {/* Input fields based on mode */}
@@ -531,6 +594,50 @@ export default function ProcentBeregner() {
             />
           </div>
         )}
+
+        {/* Retningen er en del af spørgsmålet ("læg til" eller "træk fra"), så
+            den vælges med to knapper og ikke med et minus foran procenten. */}
+        {mode === "tillaeg" && (
+          <div className="space-y-4">
+            <div
+              role="group"
+              aria-label={l.tillaegRetningLabel}
+              className="inline-flex rounded-lg border-2 border-gray-200 dark:border-gray-700 p-1"
+            >
+              {(["til", "fra"] as const).map((retning) => {
+                const valgt = tillaegRetning === retning;
+                return (
+                  <button
+                    key={retning}
+                    type="button"
+                    aria-pressed={valgt}
+                    onClick={() => setTillaegRetning(retning)}
+                    className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                      valgt
+                        ? "bg-blue-500 text-white"
+                        : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    {retning === "til" ? l.tillaegTilLabel : l.tillaegFraLabel}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg">
+              <InputField
+                value={tillaegBeloeb}
+                onChange={setTillaegBeloeb}
+                label={l.tillaegBeloebLabel}
+              />
+              <InputField
+                value={tillaegProcent}
+                onChange={setTillaegProcent}
+                label={l.tillaegProcentLabel}
+                min={0}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end">
@@ -641,6 +748,25 @@ export default function ProcentBeregner() {
                   (tal) => rabatTekst(tal, locale as Locale, 1),
                 )}
               </p>
+            </div>
+          )}
+
+          {/* Ændringen i kroner. Svaret er den nye værdi, men læseren skal
+              også se, hvor meget procenten flyttede beløbet. */}
+          {resultat.type === "tillaeg" && (
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+              <div className="rounded-lg p-4 bg-white/60 dark:bg-gray-900/30">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  {l.tillaegAendringLabel}
+                </h3>
+                <p className="text-2xl font-bold mt-1">
+                  {resultat.aendring >= 0 ? "+" : "−"}
+                  {formatNumber(Math.abs(resultat.aendring), locale as Locale, {
+                    maximumFractionDigits: 2,
+                  })}
+                  {" kr."}
+                </p>
+              </div>
             </div>
           )}
 

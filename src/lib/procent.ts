@@ -344,3 +344,35 @@ export const HVERDAG_LOENSTIGNING: HverdagsEksempel = { sats: 3, beloeb: 30000 }
 export const EXCEL_ANDEL = { del: 2500, heltal: 10000 };
 export const EXCEL_PROCENT_AF = { sats: 10, heltal: 10000 };
 
+/**
+ * The amount and rate the "læg til / træk fra procent" mode opens on.
+ *
+ * 150 kr. and 20 % are the two numbers the page's own FAQ already quotes
+ * ("Læg 20 % til 150: 150 × 1,20 = 180"), so the tool opens on the example the
+ * prose answers instead of a fresh pair the page would then have to explain.
+ */
+export const PROCENT_TILLAEG_EKSEMPEL = { beloeb: 150, sats: 20 };
+
+/**
+ * A percentage added to an amount: beløb × (1 + procent/100).
+ *
+ * The question searchers ask most often about this tool — Danish autocomplete
+ * (hl=da&gl=dk, 2026-10-07) answers "lægge procent til et tal" with ten
+ * completions and "trække procent fra et tal" with ten more — and the one the
+ * page's FAQ answers in words but the tool could not do. `procentAf` is the
+ * single rule behind it, so the tool and the 10 %-table cannot disagree.
+ */
+export function laegProcentTil(beloeb: number, procent: number): number {
+  return beloeb + procentAf(beloeb, procent);
+}
+
+/**
+ * A percentage taken off an amount: beløb × (1 − procent/100).
+ *
+ * Same rule as {@link laegProcentTil} with the sign flipped, so "20 % fra
+ * 1.000 kr." is 800 kr. everywhere and not a second formula that can drift.
+ */
+export function traekProcentFra(beloeb: number, procent: number): number {
+  return beloeb - procentAf(beloeb, procent);
+}
+
