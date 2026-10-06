@@ -11,6 +11,11 @@ import {
   nettoprisindeksUnderForbrugerprisindeks,
 } from "./nettoprisindeks";
 import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
+import {
+  beregnImportmoms,
+  EGENVAERDI_GRENSE_KR_OMRUND,
+  IMPORTMOMS_EKEMPEL,
+} from "./importmoms";
 import { ruteCacheSætning } from "./rute-cache";
 import {
   EXCEL_ANDEL,
@@ -220,6 +225,37 @@ const MOMS_FAQ_FORMAT = {
     pris: (tal: number) => `${formatNumber(tal, "se", { maximumFractionDigits: 2 })} kr`,
   },
 } as const;
+
+/**
+ * De to importmoms-svar på `/moms` — «hvad koster det at købe noget uden for
+ * EU» og «er der moms på Temu». Kaldet kommer fra dansk autocomplete 6/10
+ * 21:5x: «import moms kalkulator» og «told og moms kalkulator» under «moms
+ * kalkulator», «told moms beregner» under «moms beregner» og «moms på temu»
+ * under «moms på».
+ *
+ * Alle beløb læses fra `beregnImportmoms` — samme regnestykke som værktøjet på
+ * siden bruger — så svaret ikke kan glide fra den beregning, læseren kan se.
+ * KILDER (læst 6/10 2026): ML § 32 stk. 1 og § 33, Rådets forordning (EU)
+ * 2026/382, og toldst.dk/borger/internethandel/internethandel-uden-for-eu.
+ */
+const importmomsSvar = (lang: "da" | "se") => {
+  const f = MOMS_FAQ_FORMAT[lang];
+  const r = beregnImportmoms(IMPORTMOMS_EKEMPEL)!;
+  const grænse = f.pris(EGENVAERDI_GRENSE_KR_OMRUND);
+  return lang === "da"
+    ? {
+        spg1: "Hvad koster det at købe noget uden for EU?",
+        svar1: `Varer købt uden for EU er altid pålagt 25 % dansk moms, og momsgrundlaget er varens pris, fragten og tolden (momslovens § 32 stk. 1). En pakke på ${f.pris(r.egenvaerdi)} med ${f.pris(r.fragt)} i fragt og ${r.vareposter} vareposter har ${f.pris(r.told)} i told, så momsgrundlaget er ${f.pris(r.momsgrundlag)} og momsen ${f.pris(r.moms)} — i alt ${f.pris(r.iAlt)} Under 150 EUR (${grænse}) er der fra 1. juli 2026 3 EUR (ca. 22 kr.) i told pr. varepost. Over det gælder den toldsats, EU's toldtarif giver for netop den vare, så den skal du slå op.`,
+        spg2: "Er der moms på varer fra Temu, Shein og andre netbutikker uden for EU?",
+        svar2: `Ja. Siden 1. juli 2021 er der ingen importmoms-fritagelse længere for varer under 22 EUR, så alle varer købt uden for EU er pålagt 25 % dansk moms, uanset prisen. Er pakken under 150 EUR (${grænse}), betaler du 3 EUR (ca. 22 kr.) i told pr. varepost oveni, og er den over, betaler du den tarifmæssige toldsats.`,
+      }
+    : {
+        spg1: "Vad kostar det att köpa något utanför EU?",
+        svar1: `Varor köpta utanför EU är alltid momsbelagda med 25 %, och beskattningsunderlaget är varans pris, frakten och tullen (EU:s momsdirektiv artikel 74). Ett paket på ${f.pris(r.egenvaerdi)} med ${f.pris(r.fragt)} i frakt och ${r.vareposter} varuposter har ${f.pris(r.told)} i tull, så underlaget är ${f.pris(r.momsgrundlag)} och momsen ${f.pris(r.moms)} — totalt ${f.pris(r.iAlt)} Under 150 EUR (${grænse}) gäller från 1 juli 2026 3 EUR (ca 22 kr) i tull per varupost. Över det gäller tullsatsen i EU:s tulltaxa för just den varan.`,
+        spg2: "Finns moms på varor från länder utanför EU, som Temu och Shein?",
+        svar2: `Ja. Sedan 1 juli 2021 finns ingen längre importmomsbefrielse för varor under 22 EUR, så alla varor köpta utanför EU är momsbelagda med 25 %, oavsett priset. Är paketet under 150 EUR (${grænse}) betalar du 3 EUR (ca 22 kr) i tull per varupost, och är det över gäller tullsatsen i tulltaxan.`,
+      };
+};
 
 /**
  * FAQ-svarene om "hvornår må jeg køre bil igen" har to forskellige tal: tiden
@@ -2069,6 +2105,8 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvilken momssats har EU's laveste og højeste land?", answer: satsUdenraekkeSvar("da", MOMS_FAQ_FORMAT.da) },
       { question: "Hvad er momssatsen i Norge?", answer: landSvarSprogholdig("NO", "da", MOMS_FAQ_FORMAT.da) },
       { question: "Hvad er momssatsen i Sverige?", answer: "Sverige har tre satser: 25 % standard, 12 % på mat, restaurang og hotell samt 6 % på bøger, kollektivtrafik og kultur. 100 kr. ekskl. moms koster 125 kr. inkl. moms på standard-satsen, 112 kr. ved 12 % og 106 kr. ved 6 %. Danmark har derimod kun 25 % og 0 % på bøger, aviser og tidsskrifter." },
+      { question: importmomsSvar("da").spg1, answer: importmomsSvar("da").svar1 },
+      { question: importmomsSvar("da").spg2, answer: importmomsSvar("da").svar2 },
     ],
 
     },
@@ -4738,6 +4776,8 @@ const sePages: Record<string, PageData> = {
       { question: "Vilket EU-land har lägst och högst momssats?", answer: satsUdenraekkeSvar("se", MOMS_FAQ_FORMAT.se) },
       { question: "Vad är momssatsen i Norge?", answer: landSvarSprogholdig("NO", "se", MOMS_FAQ_FORMAT.se) },
       { question: "Hur mycket moms är det på mat i Sverige?", answer: "På mat, restaurang och hotell är satsen 12 %, så 100 kr. exkl. moms kostar 112 kr. inkl. moms. Böcker, kollektivtrafik och kultur har 6 % (100 kr. blir 106 kr.). Standardvaror har 25 % (100 kr. blir 125 kr.). I Danmark finns ingen reducerad sats, så mat där är 25 %." },
+      { question: importmomsSvar("se").spg1, answer: importmomsSvar("se").svar1 },
+      { question: importmomsSvar("se").spg2, answer: importmomsSvar("se").svar2 },
       ],
     },
   };

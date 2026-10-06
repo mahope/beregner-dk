@@ -1,11 +1,11 @@
-STATUS: 6/10 21:5x. ✅ **`/fart` er DEPLOY OK 6/10 21:31** på begge domæner — «27,78 m/s» ×3, de tre danske regnestykker, FAQ'en og den nye metaDescription er live. Målt på indhold, ikke på 200: grebet på rå markup gav 0 for «62,1 mph», fordi der står et tag mellem tallet og enheden — tag-strippet tekst gav de tre sætninger.
+STATUS: 7/10 22:0x. ✅ **Importmoms på `/moms` — et værktøj til de varer, man køber uden for EU.** Datagrund: dansk autocomplete (hl=da, 6/10 21:5x) har «import moms kalkulator» og «told og moms kalkulator» under «moms kalkulator», «told moms beregner» under «moms beregner» og «moms på temu» under «moms på». Samtidig var brødteksten **fejlagtig**: den sagde «eventuel told ved import over 1.150 kr», men der har været 3 EUR (ca. 22 kr.) i told pr. varepost siden 1. juli 2026 (Rådets forordning (EU) 2026/382). Se `docs/plan-arkiv.md`.
 ✅ **Den svensk `/fart` manglede de tal, den danske side har.** Målt på beraknare.se 6/10 21:4x: den danske side lister «100 km/t i m/s: 27,78 m/s · i mph: 62,1 mph · i knop: 54 knop» og siger, at 1 mil er præcis 1,609344 km; den svenska gik direkte fra introduktionen til «3,6 km/h är exakt 1 m/s» og skrev aldrig ud, hvad 100 km/h bliver til. Nu har den samme liste på svensk, med tal fra `fartOmregningsFakta("se")` — ingen håndskrevet beløb. Se `docs/plan-arkiv.md`.
 ✅ **«Rabat i procent» er den sjette tilstand på `/procent`** — læseren kan nu regne sin egen rabat. Datagrund: GSC (6/10) har «en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?» med 56 visninger på pos. 5, og dansk autocomplete (hl=da, 6/10 21:3x) svarer «rabat procent» med «procentvis rabat», «procentregning rabat», «10 procent rabat» og «rabat 20 procent». Siden havde alle talene i brødteksten og FAQ'en, men ingen tilstand læseren kunne skrive sin egen pris ind i. Se `docs/plan-arkiv.md`.
 ✅ **`locale-leak`-porten kan ikke længere timeoute** — den har gjort gaten rød på *timeout* alene tre gange. Rodårsagen var 13 `execFileSync`-kald pr. fil: de 7 tests der kun spørger om repoet som det ligger, betalte hver for deres egen gennemgang af alle 743 kandidater (38 s for filen). De læser nu ét delt resultat fra én `beforeAll`; de 14 tests der *faktisk* planter en lækage og skal se den tilstand de skabte, har hver `it(…, { timeout: 30 s })`. Det globale 5 s-loft er urørt, så ingen anden test har mistet sit tjek. **Målt: filen 38 s → 25,0 s, 22/22 grønne; fuld suite 4.714 tests i 286 filer grønne.** ❓'en er lukket, se `docs/plan-arkiv.md`.
 ✅ **Hastighedsomregner på `/fart` — km/t ↔ m/s ↔ mph ↔ knop, begge veje.** Datagrund: dansk autocomplete (hl=da, 6/10 20:3x) har **10 af 10** træffere under «km i timen», der spørger efter omregning, og «knop omregner» svarer «omregner knop til km» på 2 af 4. Faktorerne er eksakte (yard-and-pound-aftalen 1959, sømil = 1852 m). **MÅL: /fart baseline 5.288 visninger / 32 klik / 0,6 % CTR / pos. 6,9 pr. 6/10** — måles igen ~20/10.
 ✅ **`/skridt` er live på begge domæner — DEPLOY OK 6/10 20:2x.** Målt på indhold: «Skridt til km» 14 forekomster, «1.515 skridt» 3, «6,6 km» 5, «7,9 km» 7, sitemap 1. Samme greb på beraknare.se: «Steg till km» 14, «1 515 steg» 3, «7,9 km» 7, sitemap 1.
 ✅ CEO-kø punkt 0 (review-fund 29/9) er gennemgået alle otte: Valborg fast 30. april med port på plads, svensk påskafton `offsetDays: -1`, dansk sankthans fast 23./24. juni, påskeaften-FAQ slettet, `/husleje` på nettoprisindekset, `toUtcMidnight` læser `Europe/Copenhagen`/`Stockholm`, svensk promille-FAQ taler fra `promille-genstande`, `maneder: 12` er korrekt og 1. advent har fire søndage. Det fund, der lå åbent i review-filen (`naesteJuleaften` gav 0 dage på juleaften), er rettet i `35c6175` og porten på linje 91 følger nu sin egen titel.
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). 6/10 21:36: typecheck 0, lint 0 (813 filer), **4.726 tests i 286 filer grønne** på 39 s, `next build` grøn. Mutation af `procentRabat` til den omvendte nævner giver **5 røde**. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /procent-rabat 20/10; /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). 7/10 22:0x: typecheck 0, lint 0 (816 filer), **4.751 tests i 287 filer grønne**, `next build` grøn (kun de kendte Cache-Control- og Sentry-authToken-advarsler). To mutationer målt rødde: gammel toldsrs på `/moms` = 1 rød, flad told → 0 = 6 rød. Mutation af `procentRabat` til den omvendte nævner giver **5 røde**. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /procent-rabat 20/10; /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -21,6 +21,7 @@ STATUS: 6/10 21:5x. ✅ **`/fart` er DEPLOY OK 6/10 21:31** på begge domæner �
 | se `/tidsberegner` | 179 | 75.244 | 0,2 % | 7,7 |
 | `/tidszone` | under top-15 | 24.324 | 0,4 % | 7,5 |
 | `/moms` | under top-15 | 22.464 | 0,2 % | 7,0 |
+| `/moms` før Importmoms-værktøjet (7/10) | under top-15 | **22.464** | **0,2 %** | **7,0** |
 | `/kvadratmeter` | 391 | 20.768 | 1,5 % | 4,9 |
 | `/kvadratmeter` før arealværktøjet (6/10) | **393 (+96 %)** | 21.403 | 1,5 % | 4,9 |
 | `/braendstof` | 263 | 17.051 | 1,1 % | 5,9 |
@@ -166,6 +167,17 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 7/10 22:0x:** `VERIFICÉR DEPLOY: /moms svarer 200 på begge domÃ¦ner og
+viser vÃ¦rktøjet «Moms på varer købt uden for EU» med de fire felter
+(Varens pris, Fragt, Antal vareposter) og kortet med vÃ¦rdi + fragt, told,
+moms og i alt, plus FAQ-spÃ¸rgsmålet «Hvad koster det at købe noget
+uden for EU?» — alt på dansk, og på beraknare.se «Vad kostar det att
+köpa något utanför EU?» ceo/importmoms 7/10 22:0x`. Mål på **indhold**:
+vÃ¦rktøjet er en klient-komponent, så lÃ¦s felternes labels i markup’en
+og resten i koden, indtil facit kan hentes headless. Brødtekstens punkt skal
+lÃ¦ses på rå markup: grep efter «3 EUR (ca. 22 kr.) i told pr. varepost».
+Første reelle deploy-vindue efter mergen er **7/10 07:30**.
 
 **Åben 6/10 21:5x:** `VERIFICÉR DEPLOY: beraknare.se/fart svarer 200 og den
 svenska liste står med «100 km/h i m/s: 27,78 m/s», «100 km/h i mph: 62,1 mph»

@@ -5,10 +5,14 @@ import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import { beregnMoms, DEFAULT_MOMS_SATS, momsAndel, momsFaktor, MOMS_REFERENCE_BELOEB } from "@/lib/moms";
 import { momsSatsUdenraekke, udenlandRaeekker } from "@/lib/moms-eu";
+import { beregnImportmoms, IMPORTMOMS_EKEMPEL } from "@/lib/importmoms";
 import MomsPage from "./page";
 
 vi.mock("@/components/MomsBeregner", () => ({
   default: () => <div>Momsværktøj</div>,
+}));
+vi.mock("@/components/ImportmomsBeregner", () => ({
+  default: () => <div>Importmomsværktøj</div>,
 }));
 vi.mock("@/components/AffiliateBox", () => ({
   SelvstaendigAffiliate: () => null,
@@ -546,5 +550,61 @@ describe("moms: EU-tabellen på beraknare.se har sit eget sprog", () => {
     // være dansk, men i svaret er det det korrekte svenske navn.
     expect(html).toContain("Vad är momssatsen i Holland?");
     expect(html).toContain("Momssatsen i Nederländerna är 21 %");
+  });
+});
+
+/**
+ * Fund 7/10: brødteksten sagde «Du betaler dansk moms (25%) + eventuel told
+ * ved import over 1.150 kr». Det var forkert på to måder, begge læst 6/10
+ * 2026: der er **ingen** told under 150 EUR længere (Rådets forordning (EU)
+ * 2026/382, artikel 1 og 2 — 3 EUR pr. varepost fra 1. juli 2026), og
+ * 1.150 kr. er skat.dk og toldst.sides **ca.**-omregning af 150 EUR, ikke et
+ * dansk lovbeløb. Sætter nogen de to gamle påstande tilbage, skal porten blive
+ * rød.
+ */
+describe("moms: import fra lande uden for EU", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
+  test("brødteksten siger den gældende toldregel, ikke den gamle", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    expect(html).toContain("Du betaler dansk moms (25 %) på varens pris, fragten og tolden");
+    expect(html).toContain("3 EUR (ca. 22 kr.) i told pr. varepost");
+    expect(html).toContain("under 150 EUR (ca. 1.150 kr.)");
+    // De to gamle påstande.
+    // Kun selve punktet, ikke hele siden: «dansk moms (25%)» står stadig i
+    // afsnittet om digitale ydelser, og det er ikke det, porten dømmer.
+    const punkt = html.split("<strong>Uden for EU:</strong>")[1]?.split("</li>")[0] ?? "";
+    expect(punkt).not.toContain("eventuel told");
+    expect(punkt).not.toContain("over 1.150 kr");
+  });
+
+  test("de nye spørgsmål står i FAQ'en og dermed i JSON-LD, med tal fra modulet", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+    const r = beregnImportmoms(IMPORTMOMS_EKEMPEL)!;
+    const kr = (tal: number) => `${formatNumber(tal, "da", { maximumFractionDigits: 2 })} kr.`;
+
+    expect(html).toContain("Hvad koster det at købe noget uden for EU?");
+    expect(html).toContain("Er der moms på varer fra Temu, Shein og andre netbutikker uden for EU?");
+    // Tallet i svaret er det, værktøjet regner — 800 + 100 + 66 kr. told.
+    expect(html).toContain(`${kr(r.momsgrundlag)} og momsen ${kr(r.moms)} — i alt ${kr(r.iAlt)}`);
+    expect(r.momsgrundlag).toBe(966);
+  });
+
+  test("den svenska side har de samme to spørgsmål i svensk notation", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const r = beregnImportmoms(IMPORTMOMS_EKEMPEL)!;
+    const kr = (tal: number) => `${formatNumber(tal, "se", { maximumFractionDigits: 2 })} kr`;
+
+    const html = renderToStaticMarkup(await MomsPage());
+
+    expect(html).toContain("Vad kostar det att köpa något utanför EU?");
+    expect(html).toContain("Finns moms på varor från länder utanför EU");
+    expect(html).toContain(`${kr(r.momsgrundlag)} och momsen ${kr(r.moms)} — totalt ${kr(r.iAlt)}`);
+    expect(html).not.toContain("eventuell tull vid import");
   });
 });

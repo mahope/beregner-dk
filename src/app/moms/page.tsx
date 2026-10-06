@@ -2,6 +2,7 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import MomsBeregner from "@/components/MomsBeregner";
+import ImportmomsBeregner from "@/components/ImportmomsBeregner";
 import FAQ from "@/components/FAQ";
 import {
   CalculatorSchema,
@@ -16,6 +17,13 @@ import { formatNumber } from "@/lib/format";
 import { beregnMoms, DEFAULT_MOMS_SATS, fratraekRaekker, MOMS_REFERENCE_BELOEB, momsAndel, momsFaktor } from "@/lib/moms";
 import { baklaengesEksempler, baklaengesTabel, krSe } from "@/lib/moms-eksempler";
 import { MOMS_LANDE, momsSatsUdenraekke, udenlandRaeekker } from "@/lib/moms-eu";
+import {
+  EGENVAERDI_GRENSE_EUR,
+  EGENVAERDI_GRENSE_KR_OMRUND,
+  MOMS_UDEN_FOR_EU,
+  TOLD_FLAT_EUR_PR_VARELINJE,
+  TOLD_FLAT_KR_PR_VARELINJE_OMRUND,
+} from "@/lib/importmoms";
 
 export async function generateMetadata() {
   return generatePageMetadata("moms");
@@ -135,6 +143,8 @@ export default async function MomsPage() {
         <MomsBeregner />
         <SelvstaendigAffiliate className="mt-8" />
       </div>
+
+      <ImportmomsBeregner />
 
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
@@ -406,7 +416,7 @@ export default async function MomsPage() {
         <ul>
           <li><strong>Inden for EU:</strong> Privatpersoner betaler normalt momsen i sælgerlandet. Virksomheder kan bruge reverse charge</li>
           <li><strong>Tysk købsmoms:</strong> En dansk virksomhed, der køber tjenester i Tyskland, betaler ikke tysk moms. Ved omvendt betalingsansvar registrerer virksomheden selv beløbet med 25 % i sin egen afregning</li>
-          <li><strong>Uden for EU:</strong> Du betaler dansk moms (25%) + eventuel told ved import over 1.150 kr</li>
+          <li><strong>Uden for EU:</strong> Du betaler dansk moms ({MOMS_UDEN_FOR_EU} %) på varens pris, fragten og tolden — og fra 1. juli 2026 er der {TOLD_FLAT_EUR_PR_VARELINJE} EUR (ca. {krDa(TOLD_FLAT_KR_PR_VARELINJE_OMRUND)}) i told pr. varepost, hvis pakken er under {EGENVAERDI_GRENSE_EUR} EUR (ca. {krDa(EGENVAERDI_GRENSE_KR_OMRUND)})</li>
         </ul>
 
         <h3>Moms på digitale ydelser</h3>
@@ -618,7 +628,7 @@ export default async function MomsPage() {
         </p>
         <ul>
           <li><strong>Inom EU:</strong> Privatpersoner betalar normalt momsen i säljarlandet. Företag kan använda omvänd skattskyldighet</li>
-          <li><strong>Utanför EU:</strong> Du betalar svensk moms (25%) plus eventuell tull vid import</li>
+          <li><strong>Utanför EU:</strong> Du betalar svensk moms ({MOMS_UDEN_FOR_EU} %) på varans pris, frakten och tullen — och från 1 juli 2026 är det {TOLD_FLAT_EUR_PR_VARELINJE} EUR (ca {procentDa(TOLD_FLAT_KR_PR_VARELINJE_OMRUND)} kr) i tull per varupost om paketet är under {EGENVAERDI_GRENSE_EUR} EUR (ca {krSeLang(EGENVAERDI_GRENSE_KR_OMRUND)})</li>
         </ul>
 
         <h3>Moms på digitala tjänster</h3>

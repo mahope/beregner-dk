@@ -30447,3 +30447,60 @@ hængt på de rendererede tal og ikke på en håndskrevet streng.
 39 s, `next build` grøn.
 
 **Mål:** beraknare.se `/fart` 179 besøgende/28d (+129 %, bounce 9 %) pr. 6/10.
+
+---
+
+## 7/10 22:0x — Importmoms på `/moms` (F5h)
+
+**Hvad der er leveret.** Et nyt værktøj på `/moms` (da + se) med fire felter —
+varens pris, fragt, antal vareposter og (kun over grænsen) toldsats — der regner
+told, 25 % moms på værdi + fragt + told og prisen i alt.
+
+**Datagrund.** GSC 6/10: `/moms` 22.464 visninger, 0,2 % CTR, pos. 7,0. Dansk
+autocomplete (hl=da, 6/10 21:5x): under «moms kalkulator» «import moms
+kalkulator» og «told og moms kalkulator» (nr. 2 og nr. 10), under «moms
+beregner» «told moms beregner», under «moms på» «moms på
+temu». Siden havde EU-tabellen med alle landes satser, men intet værktøj til
+et køb uden for toldunionen.
+
+**Fejlen der blev rettet.** Brødteksten sagde «Du betaler dansk moms (25%) +
+eventuel told ved import over 1.150 kr». Det er forkert på to måder:
+- Der er **ingen** told under 150 EUR længere. Rådets forordning (EU) 2026/382
+  artikel 1 sletter kapitel V i forordning (EF) nr. 1186/2009, og artikel 2 giver i
+  stedet **3 EUR pr. varepost** fra 1. juli 2026 til 1. juli 2028. Toldstyrelsen:
+  «For varer i pakker med en samlet værdi på 150 euro eller derunder bliver
+  der fra 1. juli 2026 lagt en told på 3 euro pr. varepost overi prisen.»
+- **1.150 kr. er en ca.-omregning**, ikke et dansk lovbeløb. skat.dk: «Du skal
+  betale told, hvis du køber varer for mere end 150 euro (ca. 1.150 kr.) pr.
+  bestigning.» Der står derfor altid «150 EUR (ca. 1.150 kr.)».
+
+**Regnestykket.** Momsgrundlaget er toldværdien + told + fragt/forsikring frem
+til EU, efter ML Â§ 32 stk. 1 (info.skat.dk D.A.8.3.2: «Tolden skal altsås
+medregnes i momsgrundlaget») — samme regel som EU's momsdirektiv artikel 74, så
+den gælder på beraknare.se også. Satsen er 25 % efter ML Â§ 33.
+Eksemplet i FAQ’en (800 kr. + 100 kr. fragt, 3 vareposter) er 66 kr. i told, 966 kr.
+i momsgrundlag, 241,50 kr. i moms — alle tal læst fra `beregnImportmoms`, så
+svaret ikke kan glide fra det, værktøjet viser.
+
+**Kilder læst 6/10 2026.** eur-lex.europa.eu/eli/reg/2026/382 ·
+eur-lex.europa.eu/legal-content/DA/TXT/HTML/?uri=CELEX:32009R1186 ·
+info.skat.dk D.A.8.3.2 og D.A.3.3 (ML Â§ 32 stk. 1) · D.A.9 (ML Â§ 33,
+25 %) · toldst.dk/borger/internethandel/internethandel-uden-for-eu ·
+skat.dk/skole/onlineshopping/naar-du-koeber. **Ikke læst:** moms.dk (timeout) og
+en fast dansk kr.-grænse (findes ikke på nogen officiel side).
+
+**Portene.** 22 nye prøver i `src/lib/importmoms.test.ts` — herunder at tolden er
+22 kr. uanset om varen koster 100 eller 1.000 kr., at grænsen er **egenværdien** og
+ikke værdien med fragt (skat.dk: «Når du beregner, hvor meget du har købt for,
+skal du ikke regne fragten med»), at der er 0 kr. i told over grænsen når der
+er ingen generel sats, og at NaN, negative beløb, 0 og 2,5 vareposter giver ingen
+beregning. To mutationer målt rødde: flad told → `vareposter * 0` giver 6
+rød, gammel brødtekst giver 1 rød på netop det punkt.
+
+**Fandt og rettet undervejen.** Den svenske labels-nøgle var skrevet
+«værdiOgFrakt» (manglede g) så TypeScript fandt den ikke på unionen;
+den danske nøgle havde stavet rigtigt. Samme fejltype som punkt 13 — ingen port
+sÃ¥ den på, fordi det er den lange vejs typecheck der gjorde det.
+
+**MÅL:** `/moms` baseline 22.464 visninger / 0,2 % CTR / pos. 7,0 pr. 6/10 —
+måles igen 21/10.
