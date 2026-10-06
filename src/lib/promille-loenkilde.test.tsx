@@ -36,6 +36,13 @@ import PromillePage from "@/app/promille/page";
 vi.mock("@/components/PromilleBeregner", () => ({
   default: () => <div>Promilleværktøj</div>,
 }));
+// Klientværktøjerne kalder useLocale, og denne port renderer siden til statisk
+// markup uden en LocaleProvider — samme fejlklasse som Sentrys åbne
+// MINBEREGNER-2 ("useLocale must be used within a LocaleProvider"). Derfor
+// erstattes de, præcis som PromilleBeregner allerede er.
+vi.mock("@/components/KoerIgenBeregner", () => ({
+  default: () => <div>Koer-igen-værktøj</div>,
+}));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));

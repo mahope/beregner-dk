@@ -2,6 +2,7 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import PromilleBeregner from "@/components/PromilleBeregner";
+import KoerIgenBeregner from "@/components/KoerIgenBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -15,6 +16,7 @@ import {
   formatTimer,
 } from "@/lib/promille-eksempler";
 import { graenseForLocale, PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, GRAM_PR_GENSTAND } from "@/lib/promille";
+import { KOER_IGEN_EKSEMPLER, koerIgenTidspunkt } from "@/lib/koer-igen";
 import {
   PROMILLE_GENSTANDE_RAEKKER,
   PROMILLE_VAEGTE,
@@ -170,6 +172,20 @@ export default async function PromillePage() {
           <PromilleBeregner />
         </div>
 
+        {/* Det er det spørgsmål, folk faktisk stiller: «hvornår kan jeg køre
+            bil igen». Målt 6/10 06:3x, dansk autocomplete (client=firefox,
+            hl=da): «hvornår kan jeg køre» har 10 af 10 træffere og «hvornår
+            må jeg køre» 10 af 10, i alt 20 søgninger om et klokkeslæt.
+            Svensk under «när kan jag köra bil» har 10 af 10. PromilleBeregner
+            svarer på «hvor mange timer» — det forkerte svar på spørgsmålet.
+            Eksemplerne kommer fra KOER_IGEN_EKSEMPLER og er regnet af
+            koerIgenTidspunkt, så tabellen og værktøjet ikke kan glide fra
+            hinanden; `promille/page.test.tsx` dømmer begge tal mod
+            KOER_IGEN_FORVENTET. */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
+          <KoerIgenBeregner />
+        </div>
+
         {/* Det er to forskellige tal, og den almindeligste fejl er at svare
             på det forker: du må køre bil, når du er UNDER grænsen, ikke når
             du er helt ædru. 4.159 visninger / 0,6 % CTR / pos. 7,9 (GSC
@@ -213,6 +229,58 @@ export default async function PromillePage() {
                       </td>
                       <td>{formatTimer(timerTilGraense(eksempel), se ? "se" : "da")}</td>
                       <td>{formatTimer(eksempel.timerTilNul, se ? "se" : "da")}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <h3 className="text-lg font-bold mt-8 mb-3 dark:text-white">
+            {se ? "Då kan du köra igen" : "Sådan regnes klokkeslættet"}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            {se
+              ? `Tabellen ovan säger hur många timmar det tar. Nedan ser du vilken klocktid det blir, när du anger när du drack ditt sista glas — alltså svaret på «när kan jag köra bil igen».`
+              : `Tabellen ovenfor fortæller, hvor mange timer der går. Nedan ser du, hvad det bliver af et klokkeslæt, når du indtaster, hvornår du drak dit sidste genstand — altså svaret på «hvornår kan jeg køre bil igen».`}
+          </p>
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Situation</th>
+                  <th>{se ? "Sista glas" : "Sidste genstand"}</th>
+                  <th>Promille</th>
+                  <th>{se ? "Får köra igen kl." : "Må køre igen kl."}</th>
+                  <th>{se ? "Helt nykter kl." : "Helt ædru kl."}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {KOER_IGEN_EKSEMPLER.map((eksempel) => {
+                  const r = koerIgenTidspunkt(eksempel);
+                  if (!r) return null;
+                  return (
+                    <tr key={eksempel.id}>
+                      <td>
+                        {eksempel.antalGenstande} {se ? "standardglas" : "genstande"}, {eksempel.vaegtKg} kg {se ? (eksempel.koen === "mand" ? "man" : "kvinna") : eksempel.koen === "mand" ? "mand" : "kvinde"}
+                      </td>
+                      <td>kl. {eksempel.klokkeslaet}</td>
+                      <td><strong>{formatPromille(r.promille)} ‰</strong></td>
+                      <td>
+                        <strong>{r.underGraenseKlokkeslaet}</strong>
+                        {r.underGraenseHeleDage > 0 && (
+                          <span className="block text-xs text-gray-500 dark:text-gray-400">
+                            {se ? `+${r.underGraenseHeleDage} dygn` : `+${r.underGraenseHeleDage} døgn`}
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        {r.heltAedruKlokkeslaet}
+                        {r.heltAedruHeleDage > 0 && (
+                          <span className="block text-xs text-gray-500 dark:text-gray-400">
+                            {se ? `+${r.heltAedruHeleDage} dygn` : `+${r.heltAedruHeleDage} døgn`}
+                          </span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}

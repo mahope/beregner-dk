@@ -1,4 +1,19 @@
-STATUS: 6/10 06:0x. ✅ **Ny `/brokost` — sitet svarer nu på «hvad koster det at
+STATUS: 6/10 06:4x. ✅ **`/promille` svarer nu på «hvornår kan jeg køre bil
+  igen» med et klokkeslæt**, ikke et antal timer. Datagrund: dansk autocomplete
+  (`client=firefox`, `hl=da`) har **20 af 20** træffere i denne form under «hvornår
+  kan jeg køre» (10/10) og «hvornår må jeg køre» (10/10) — «hvornår kan jeg køre
+  bil igen», «hvornår må jeg køre bil efter druk», «hvornår må jeg køre bil
+  beregner»; svensk under «när kan jag köra bil» 10 af 10, plus «promille
+  körsel». Den gamle `PromilleBeregner` svarede «under grænsen om 2,6 **timer**»
+  — det forkerte svar på spørgsmålet. Nyt værktøj + tabel på begge domæner;
+  Sveriges 0,2 ‰ giver 04:06 mod Danmarks 02:06 for samme indtastning.
+  **MÅL: `/promille` baseline 167 Plausible-besøgende/28d (5/10 06:0x), 6.878
+  GSC-visninger, CTR 1,6 %, pos. 7,7 — måles igen 20/10.** Dagsskiftet står
+  **ved siden af** klokkeslættet (`+1 døgn`), ellers læses 02:06 som i dag.
+  Portene kan fejle: 8 mutationer målt røde (se `docs/plan-arkiv.md`), heraf
+  `Math.floor` i stedet for `Math.round` i minut-omregningen — **4,1 × 60 =
+  245,999…**, så 5 øl / 80 kg ville givet **02:05** i stedet for 02:06. ✅ Tidligere
+  6/10: `/brokost` med Storebælts prisliste 2026 — sitet svarer nu på «hvad koster det at
 krydse Storebælt»** med Storebælts **egen prisliste 2026**, ikke et tilbud.
 Datagrund: dansk autocomplete har «hvad koster det at køre over storebælt» (2/10
 under «hvad koster det at»), «hvor meget koster det at krydse
@@ -20,7 +35,7 @@ nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
 build`). 6/10 06:0x: typecheck 0, lint 0 (801 filer), **4624 tests i 281
 filer** grønne, build ok med `/brokost` i ruten. Renderet side gennemgået på
 390px-kompatibel markup (ét kolonne-layout, ingen vandret rækkevidde ud over
-pristabellen, der har `overflow-x-auto`). ⚠️ **12 VERIFICÉR-noter er åbne** —
+pristabellen, der har `overflow-x-auto`). ⚠️ **13 VERIFICÉR-noter er åbne** —
 alle merges er efter 21:30-vinduet 5/10. Første reelle deploy-vindue er
 **6/10 07:30**; næste iteration måler dem alle på indhold og lukker dem med
 `DEPLOY OK 6/10`. PR-TJEK 6/10 05:1x (ingen åbne PR'er). BRANCH-TJEK 4/10.
@@ -121,8 +136,9 @@ dømmer da/no/se hver for sig. ⛔ `beregner.no` serverer et andet site — se �
 ## Feature-kø
 
 Leveret 6/10: **`/brokost` med Storebælts prisliste 2026** (26 køretøjstyper,
-ekspres-/kortpris, fritidsrabatter, årsforbrug) og **«hvad er klokken om N
-timer» + summering af tidsrum på `/tidsberegner`** (se `docs/plan-arkiv.md`). De seks punkter nedenfor er alle
+ekspres-/kortpris, fritidsrabatter, årsforbrug), **«hvad er klokken om N
+timer» + summering af tidsrum på `/tidsberegner`** og **«hvornår kan jeg køre
+bil igen» på `/promille`** (se `docs/plan-arkiv.md`). De seks punkter nedenfor er alle
 ⛔ blokeret af en ❓. Den hurtigste målemetode uden
 en menneskekilde er dansk autocomplete (`suggestqueries.google.com`); den er
 brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
@@ -157,6 +173,21 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 06:4x:** `VERIFICÉR DEPLOY: /promille har på begge domæner et
+værktøj med titlen «Hvornår kan jeg køre bil igen?» / «När kan jag köra bil
+igen?», feltet «Sidste genstand var kl.» forudvalgt til 23:30, der viser
+**02:06** og «næste døgn», og brødteksten har tabellen «Sådan regnes
+klokkeslættet» / «Då kan du köra igen» med 23:30 → 02:06 (+1 døgn), 22:30 →
+23:54 (samme døgn) og 13:00 → 14:12 (samme døgn) ceo/koer-igen-tidspunkt
+6/10 06:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/promille |
+grep -o 'Hvornår kan jeg køre bil igen?' | wc -l` → **1**, `grep -o '02:06' |
+wc -l` → **> 0**, `grep -o '+1 døgn' | wc -l` → **> 0** og `grep -o 'Sådan
+regnes klokkeslættet' | wc -l` → **1**. Samme tre greb på beraknare.se med
+«När kan jag köra bil igen?», «04:06» og «Då kan du köra igen». Værktøjet er
+klient-side, så 23:30-feltets værdi ses ikke i rå markup — læs den i koden
+eller brug brødtekstens tabel. Første reelle deploy-vindue efter mergen er
+**6/10 07:30**.
 
 **Åben 6/10 06:0x:** `VERIFICÉR DEPLOY: /brokost svarer 200 på minberegner.dk,
 sitemap.xml indeholder pr. domæne stien, og siden viser Storebælts prisliste
@@ -239,7 +270,7 @@ med `/klockan-i/…`. Første reelle deploy-vindue efter mergen er 6/10 07:30.
 1 for alt. Værktøjer der er klient-komponenter skal læses i koden, indtil
 facit kan hentes headless.
 
-**Tolv noter er åbne.** Alle er merges efter 21:30-vinduet 5/10, så de bliver
+**Tretten noter er åbne.** Alle er merges efter 21:30-vinduet 5/10, så de bliver
 målbare i 07:30-kørslen **6/10**. Næste iteration skal måle dem alle på indhold
 i én kørsel (`grep -o … | wc -l` mod begge domæner) og lukke dem med
 `DEPLOY OK 6/10`; en note der stadig ikke er live efter to vinduer bliver

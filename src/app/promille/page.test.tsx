@@ -5,10 +5,14 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { PROMILLEGRANSE } from "@/lib/promille";
+import { KOER_IGEN_EKSEMPLER, KOER_IGEN_FORVENTET, koerIgenTidspunkt } from "@/lib/koer-igen";
 import PromillePage from "./page";
 
 vi.mock("@/components/PromilleBeregner", () => ({
   default: () => <div>Promilleværktøj</div>,
+}));
+vi.mock("@/components/KoerIgenBeregner", () => ({
+  default: () => <div>Kør-igen-værktøj</div>,
 }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
@@ -303,5 +307,86 @@ describe("promille page", () => {
     // det er korrekt dansk. Låsen her er mod at rette den med den svenske.
     expect(html).toContain("før den er under 0 ‰");
     expect(html).toContain("kortere end");
+  });
+
+  /**
+   * Porten på «hvornår kan jeg køre bil igen».
+   *
+   * Søgningen er målt på begge domæner (dansk 20/20 træffere under «hvornår
+   * kan jeg køre» og «hvornår må jeg køre», svensk 10/10 under «när kan jag
+   * köra bil»), og tabellen er det, Google kan læse. Derfor skal den renderede
+   * klokkeslæt være det samme som `KOER_IGEN_FORVENTET` — de tal er
+   * håndskrevet i decimalregnestykker og lagt uden om `koerIgenTidspunkt`,
+   * så en mutation i formlen eller i døgnskiftet gør dem røde.
+   */
+  test("de fire klokkeslæt i tabellen er de håndskrevne, i da og se", async () => {
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await PromillePage());
+      for (const eksempel of KOER_IGEN_EKSEMPLER) {
+        const forventet = KOER_IGEN_FORVENTET[eksempel.id];
+        expect(html, `${locale} ${eksempel.id} under grænsen`).toContain(forventet.underGraense);
+        expect(html, `${locale} ${eksempel.id} helt ædru`).toContain(forventet.heltAedru);
+      }
+    }
+  });
+
+  test("døgnskiftet står som døgn i markuppen, så klokkeslættet ikke læses som i dag", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const html = renderToStaticMarkup(await PromillePage());
+    // 23:30 + 2 t 36 min er 02:06 næste døgn. Uden "+1 døgn" **ved siden af
+    // netop det tal** læser en læser 02:06 som den tid på dagen, han holder
+    // øje med — altså tidligere end det han har drukket. Derfor er porten
+    // et regex på klokkeslættet og dets egen døgn-markering, ikke et
+    // `toContain("+1 døgn")`: med sidste ville porten være grøn, selv om
+    // markeringen forsvandt fra netop den række, der har brug for den
+    // (mutation M7 — målt, ikke antaget).
+    const natteregne = KOER_IGEN_EKSEMPLER.filter((e) => KOER_IGEN_FORVENTET[e.id].dageUnderGraense > 0);
+    expect(natteregne.length).toBeGreaterThan(0);
+    for (const e of natteregne) {
+      const forventet = KOER_IGEN_FORVENTET[e.id];
+      const medDoegn = new RegExp(
+        `${forventet.underGraense}</strong><span[^>]*>\\+${forventet.dageUnderGraense} døgn`
+      );
+      expect(html.match(medDoegn), `${e.id}: ${forventet.underGraense} skal stå med +${forventet.dageUnderGraense} døgn`).not.toBeNull();
+      const medDoegnNul = new RegExp(
+        `${forventet.heltAedru}<span[^>]*>\\+${forventet.dageUnderGraense === 1 ? 1 : 0} døgn`
+      );
+      expect(html.match(medDoegnNul), `${e.id}: ${forventet.heltAedru} skal bære sin egen døgn-markering`).not.toBeNull();
+    }
+    // Og eftermiddagsrækken skal IKKE have en døgn-markering: 13:00 + 1 t
+    // 12 min er 14:12 **samme** døgn, og det er præcis den modsatte fejl.
+    const dag = KOER_IGEN_EKSEMPLER.find((e) => e.id === "eftermiddag")!;
+    const r = koerIgenTidspunkt(dag)!;
+    expect(r.underGraenseHeleDage).toBe(0);
+    expect(r.underGraenseKlokkeslaet).toBe("14:12");
+    expect(r.heltAedruHeleDage).toBe(0);
+    expect(r.heltAedruKlokkeslaet).toBe("17:30");
+  });
+
+  test("begge domæner får værktøjet, og det svenske svar bruger Sveriges grænse", async () => {
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await PromillePage());
+      expect(html, locale).toContain("Kør-igen-værktøj");
+      expect(html, locale).toContain(locale === "se" ? "Då kan du köra igen" : "Sådan regnes klokkeslættet");
+    }
+    // Sveriges 0,2 ‰ giver et tidligere klokkeslæt end Danmarks 0,5 ‰ for
+    // præcis samme indtastning. Det er den forskel, der gør siden ny på
+    // beraknare.se — hvis den forsvandt, ville vi svare med dansk lov.
+    const fælles = { antalGenstande: 4, vaegtKg: 80, koen: "mand" as const, klokkeslaet: "23:30" };
+    const dansk = koerIgenTidspunkt({ ...fælles, graense: PROMILLEGRANSE.da })!;
+    const svensk = koerIgenTidspunkt({ ...fælles, graense: PROMILLEGRANSE.se })!;
+    // Dansk 0,5 ‰: 23:30 → 02:06 (+1 døgn). Svensk 0,2 ‰: 23:30 → 04:06
+    // (+1 døgn). Begge krydser midnat, så døgntallet kan ikke skelne dem —
+    // det er klokkeslættet, der gør det, og det er det læseren ser.
+    expect(dansk.underGraenseKlokkeslaet).toBe("02:06");
+    expect(svensk.underGraenseKlokkeslaet).toBe("04:06");
+    expect(svensk.timerTilGraense).toBeGreaterThan(dansk.timerTilGraense);
+    expect(svensk.timerTilGraense).toBe(4.6);
+    expect(dansk.timerTilGraense).toBe(2.6);
   });
 });

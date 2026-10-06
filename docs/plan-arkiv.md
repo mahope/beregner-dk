@@ -29857,3 +29857,90 @@ beraknare.se).
 (tiende gennemgang i træk). `/dato`'s «Dage til dato» la på samme side og
 kunne have fået samme behandling; det er ikke gjort, fordi opgaven er ét
 værktøj.
+
+---
+
+## 6/10 — ceo/koer-igen-tidspunkt: «hvornår kan jeg køre bil igen» på /promille
+
+**Datagrund (målt 6/10 06:3x, `suggestqueries.google.com/complete/search`,
+`client=firefox`).** Dansk `hl=da`:
+- «hvornår kan jeg køre» → 10/10: «hvornår kan jeg køre bil», «hvornår kan jeg
+  køre bil igen», «hvornår kan jeg køre bil efter at have drukket», «hvornår kan
+  jeg køre igen», «hvornår kan jeg køre bil alkohol», «hvornår kan jeg køre bil
+  efter bytur» …
+- «hvornår må jeg køre» → 10/10: «hvornår må jeg køre bil efter druk», «hvornår
+  må jeg køre bil beregner», «hvornår må jeg køre igen», «hvornår må jeg køre
+  bil efter grå stær operation» …
+- I alt **20 træffere i samme spørgsmålstype**. Svensk `hl=se` under «när kan
+  jag köra bil» → 10/10, bl.a. «när kan jag köra bil igen», «när kan jag köra
+  bil kalkylator», «när kan jag köra bil efter 3 glas vin»; under «promille»
+  ligger «promille körsel».
+
+**Hvorfor det ikke allerede var besvaret.** `PromilleBeregner` svarer «Under
+grænsen om 2,6 timer» — et **antal timer fra nu**, ikke et klokkeslæt. Det er
+det forkerte svar på præcis denne søgning. Svensk autocomplete under «hur
+länge» gav derimod 10/10 kogetider, så «når»-spørgsmålet findes kun under de to
+promille-seeds — derfor blev det målt på dem og ikke på «hvornår».
+
+**Leveret.** `src/lib/koer-igen.ts` (tal og nøgler kun), `KoerIgenBeregner`
+(da + se), ny tabel på `/promille`. Værktøjet forudindstillet på 4 øl / 80 kg /
+mand / kl. 23:30 → **02:06 (+1 døgn)**, helt ædru 05:24. Ingen «nu»-knap:
+klokkeslættet er læserens, så der er hverken en tid at hente under render
+(punkt 1) eller en hydration-fælde.
+
+**Beslutning om portene.** Minutterne kommer fra `Math.round(timer × 60)`, fordi
+`timerTilGraense` er defineret til 0,1 times opløsning. `Math.floor` giver et
+**tidligere** svar, altså en tilladelse til at køre for tidligt.
+
+**Mutationer — alle målt røde, alle gendannet:**
+
+| # | Mutation | Rød |
+|---|---|---|
+| M1 | `Math.round(timer × 60)` → `Math.floor` | 2 filer, 2 tests |
+| M2 | `timerSiden` 0 → 1 (eliminering forskudt) | 9 tests |
+| M3 | `timer × 60 × 1.05` | 8 tests |
+| M4 | `underGraenseHeleDage` → konstant 0 | 4 tests |
+| M5 | `input.graense` → konstant 0,5 (svensk grænse tabt) | 2 tests |
+| M7 | `+1 døgn`-markeringen fjernet i tabellen | 1 test |
+| M8 | markeringen for «helt ædru» fjernet | 1 test |
+
+**M1 var målbar, ikke hypotetisk.** `4,1 × 60 = 245,99999999999997`, så 5 øl på
+80 kg mand (1,10 promille) ville svare **02:05** i stedet for **02:06**. De fire
+eksempelrækker dækkede det ikke; sweepet på 30 × 121 × 2 × 2 felter gør det.
+
+**To ting portene måtte lære undervejen.**
+1. `promille.ts` runder i to led (`ceil(x × 10) / 10`, så `× 60`), og de to led
+   lander på forskellige flydekomma: 0,51/0,15 × 60 = 204,00000000000003,
+   mens den to-leds sti giver 204. En port med et *bestemt* minuttal kan derfor
+   ikke være skrevet uafhængigt uden at genskabe samme støj. Løsningen er en
+   **begrænset** invariant, regnet fra promillen i ét regnestykke: minutterne er
+   et multiplum af 6, aldrig under kravet minus 1e-9, aldrig over kravet + 6.
+   Det er nok til at gøre M1 rød (245 er ikke et multiplum af 6) uden at
+   porten tager sit svar fra den funktion den skal dømme.
+2. EPS hører **kun** på den nedre grænse. Opad må der ikke slinges: 6 minutter
+   er hele opløsningen.
+
+**Fejl fundet og rettet undervejen.**
+- Svensk gren af brødteksten indeholdt dansk: «Tabellen ovenfor siger, hvor mange
+  timer der går» stod på beraknare.se. Fundet ved at læse den **renderede**
+  markup, ikke koden.
+- `promille-loenkilde.test.tsx` mockede ikke det nye klientværktøj og rendrede
+  siden uden LocaleProvider → **`useLocale must be used within a
+  LocaleProvider`**, altså Sentrys åbne MINBEREGNER-2's fejlklasse. Rettet med
+  `vi.mock`, samme mønster som `PromilleBeregner`.
+- Overskriften i værktøjet var `h3` monteret som søskende til sidens `h2` — præcis
+  det brud `heading-outline.test.tsx` blev skrevet for. Rettet til `h2`.
+- Overskriftstavlen siger «Sådan regnes klokseslættet», men tabellen under den er
+  **resultater**, ikke regnestykket. Omskrevet til «Då kan du köra igen» (se) /
+  «Sådan regnes klokkeslættet» (da) — de to er dømt af sidsporten, så de kan
+  ikke glide.
+- Tre forkerte forventninger i mine egne tests blev fanget af portene: `aften`
+  er 23:54 **samme** døgn (jeg skrev +1), `kvagt` er 04:42 (jeg regnede med
+  uaf rundet promille 0,784 i stedet for 0,78), og 1 genstand/95 kg er helt ædru
+  19:18 (jeg skrev «i morgen»).
+
+**Målinger.** Sidens fem eksempelrækker er håndskrevet i decimalregnestykker i
+`KOER_IGEN_FORVENTET` og lagt uden om `koerIgenTidspunkt` — samme greb som
+Valborg-fejlen, hvor porten låste den forkerte dato fast. Sveriges 0,2 ‰ giver
+04:06 mod Danmarks 02:06 for præcis samme indtastning, så domæerne kan ikke
+svare ens.
