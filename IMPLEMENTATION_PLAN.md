@@ -1,29 +1,34 @@
-STATUS: 6/10 04:2x. ✅ **«Hvor mange dage er der til …?» er nu et værktøj til
-enhver dato.** `/dato` har 136.986 GSC-visninger og 0,6 % CTR, og de to største
-søgninger er begge nedtællinger («hvor mange dage er der til 1 december» 1.282 v,
-pos. 5, «…til den 24 december» 1.036 v, pos. 5) — men `/dage-til/*` svarer kun på
-de håndplukkede datoer, og dansk autocomplete under «hvor mange dage er der til»
-rummer også «den 10 august», som ingen liste kan dække. `DatoBeregner` har nu en
-femte tilstand med ét datofelt, forudvalgt til næste juleaften, der regner med
-samme `heleDageMellem` som `/dage-til/*` og viser datoens ugedag; en dato i
-fortiden får «Dage siden» og sin egen sætning. Kopier-teksten er hele svaret:
-«Der er 79 dage til 24. december 2026, som er en torsdag.»
+STATUS: 6/10 04:4x. ✅ **Ugenummeret på `/ugedag` og `/veckodag` er nu det
+samme for alle læsere.** Review-fund MIDDEL fra `b474763`: `isoUge()` regnede i
+læserens egen tidszone, så et skifte for sommertid mellem 1. januar og den torsdag
+man regner på gjorde skregnen til et ikke-helt døgn, og `Math.ceil` ryddede
+fraktionen op til én uge for højt. Målt: **182 af 730 datoer i 2026-27 var
+ukorrekte i `Australia/Sydney`**, 175 i Auckland, 154 i Santiago; Danmark,
+Sverige og UTC var rene ved lykke. Samme dato gav altså «Uge 14» på
+minberegner.dk og «Uge 15» på beraknare.se for en dansk læser i udlandet.
+Formelen regner nu i UTC på kalenderfelterne, præcis som `/ugenummer` gør.
+**Port:** `ugedag.test.ts` skifter selv uret og kræver samme svar for alle 730
+datoer i syv zoner plus fire håndkontrollerede ankerdage — grøn på GitHub
+Actions' UTC uden den.
+✅ 6/10 tidligere: **«Hvor mange dage er der til …?» er et værktøj til enhver
+dato** — `/dato` har 136.986 GSC-visninger og 0,6 % CTR, de to største søgninger
+er begge nedtællinger («…til 1 december» 1.282 v, pos. 5), og `DatoBeregner` har
+nu en femte tilstand med ét datofelt forudvalgt til næste juleaften.
 **MÅL: `/dato` baseline 1.087 besøgende/28d + 136.986 GSC-visninger, CTR 0,6 %,
 pos. 5,6 pr. 2026-10-06** — mål igen 20/10.
-✅ 6/10 tidligere: `/klokken-i/*` i 21 lande, `/ugedag` + `/veckodag`,
-`/braendstof` Forbrugsomregner, `/kvadratmeter` ArealOmregner, forside +
-sidebarlens links til `/procent`+`/tidszone`+`/moms`, dage-til's FAQ som regler,
-sæsonbadge i site-tidszonen. ✅ 5/10: `/rumfang` (31 porte), svensk landetabel,
-landetabellens tidsforskil, efterlønnens deltidstal, juleaftens-URL = datoen,
-`/tidsberegner` værktøjet først, «Populær nu», sydhalvkloden + Nuuk, fire rå
-procenter, sidebarlens trafikrækkefølge. ✅ 4/10: hele CEO-køens punkt 0. Alt
-ældre: `docs/plan-arkiv.md`.
+MÅL: `/ugedag` + `/veckodag` (6/10, nye URL'er) baseline **0 besøgende**, 0
+visninger — ny, så kun brødteksten kan måles.
+✅ 6/10 endnu: `/klokken-i/*` i 21 lande, `/rumfang`, `/braendstof`
+Forbrugsomregner, `/kvadratmeter` ArealOmregner, forside + sidebarlens links,
+dage-til's ferie-FAQ, sæsonbadge i site-tidszonen. ✅ 5/10: svensk landetabel,
+landetabellens tidsforskel, efterlønnens deltidstal, «Populær nu».
+✅ 4/10: hele CEO-køens punkt 0. Alt ældre: `docs/plan-arkiv.md`.
 **Gate:** `npm run typecheck && npm run lint && npm run test` (CI kører også
-`next build`). 6/10 04:1x: typecheck 0, lint 0 (789 filer), **4480 tests i 277
-filer** grønne. Mutationstest: fortegnet i `dageTilDato` og årstalet i
-`naesteJuleaften` vendt gav 11 røde. Ét tidligere kørsel gav 1 rød i
-`locale-leak-gate.test.ts`, se ❓. CI grøn 6/10 01:53. PR-TJEK 6/10 02:5x.
-BRANCH-TJEK 4/10 04:1x.
+`next build`). 6/10 04:4x: typecheck 0, lint 0 (789 filer), **4488 tests i 277
+filer** grønne. Porten kan fejle: den nye zonesweep-test er **5 rød** mod den
+gamle formel, og `Math.floor(dage/7)+2` giver 12 røde. Egen måling af hele
+modulet under otte zoner: 1.826 datoer × 8 zoner, **identisk**. CI grøn 6/10
+02:13. PR-TJEK 6/10 04:3x. BRANCH-TJEK 4/10 04:1x.
 
 ## Fase 3 — trafik-drevet
 
@@ -143,6 +148,18 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 04:4x:** `VERIFICÉR DEPLOY: uge og ugedag på /ugedag og
+/veckodag er de samme tal for alle læsere, så 5. april 2027 skriver «Uge 14» i
+markuppen og ikke «Uge 15», på begge domæner og i alle tidszoner
+ceo/ugedag-iso-uge-tidszone 6/10 04:4x`. Mål på **indhold**:
+`curl -s https://minberegner.dk/ugedag | grep -o 'Uge 14' | wc -l` skal være
+**0** (værktøjet er klient-side og forudindstillet på dagens dato, så 5. april
+2027 kan ikke nås med et GET) — brug derfor **brødteksten**, som kalder den
+samme `ugedagResultat`: `grep -o 'juleaften' | wc -l` → **> 0** og
+`grep -o 'ligger i uge' | wc -l` → **> 0** med tallet fra samme funktion.
+Samme to greb på beraknare.se med «ligger i vecka». ⚠️ Første reelle
+deploy-vindue efter mergen er 6/10 07:30.
 
 **Åben 6/10 04:2x:** `VERIFICÉR DEPLOY: /dato har en femte værktøjtilstand
 «Dage til dato» med feltet «Hvilken dato» forudvalgt til næste juleaften, der

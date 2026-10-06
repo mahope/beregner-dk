@@ -101,20 +101,32 @@ export function erWeekend(iso: string): boolean {
  * er præcis derfor de fælder, `/ugenummer` har en hel side om: den 31. december
  * 2026 kan godt være uge 53 i 2026 mens den 4. januar 2019 er uge 1 i 2019 selv
  * om den ligger i uge 1 af gregorian year 1-tallet.
+ *
+ * **Regnes i UTC, fordi værktøjet kører i læserens browser.** Skregnen
+ * 1. januar − torsdagen må være et helt antal dage, ellers tæller
+ * `Math.floor(n / 7) + 1` en uge for højt. I læserens egen tidszone er den
+ * *ikke* hel: et skifte for sommertid mellem de to datoer gør den 0,9583 døgn
+ * (Danmark, skiftet før den lævede uge — lykken reddede svaret) eller 0,0417
+ * døgn (Sydney, Auckland, Santiago, skiftet *efter* 1. januar — 182 af 730
+ * datoer i 2026-27 fik uge 15 i stedet for 14). Samme dato, to tal, to sider af
+ * samme site. Derfor læses kalenderfelterne og regnes i UTC, præcis som
+ * `ugenummer.ts` gør det — samme formel, samme mappe, dømt af `/ugenummer`s
+ * egne tests.
  */
 export function isoUge(iso: string): { uge: number; ugedag: number } | null {
   const dato = parseIsoDato(iso);
   if (!dato) return null;
-  // ISO-ugedagen: mandag = 1 … søndag = 7.
-  const isoUgedag = dato.getDay() === 0 ? 7 : dato.getDay();
-  // Torsdag i samme ISO-uge. `getDay()` er 4 om torsdagen ligger i den uge,
+  // Kalenderfelterne læst, så det er *dagen læseren skrev* der regnes på.
+  const d = new Date(Date.UTC(dato.getFullYear(), dato.getMonth(), dato.getDate()));
+  // ISO-ugedagen: mandag = 1 … søndag = 7 (`getUTCDay()`: søndag = 0).
+  const isoUgedag = d.getUTCDay() || 7;
+  // Torsdag i samme ISO-uge. `getUTCDay()` er 4 om torsdagen ligger i den uge,
   // så en torsdag der ligger i **næste** uge flytter ugen tilbage til torsdagen
   // i denne uge, og det er præcis derfor `Math.floor` og et dygn ned træder ind.
-  const torsdag = new Date(dato);
-  torsdag.setDate(dato.getDate() + 4 - isoUgedag);
-  const aarStart = new Date(torsdag.getFullYear(), 0, 1);
-  const uge = Math.ceil((((torsdag.getTime() - aarStart.getTime()) / 86400000) + 1) / 7);
-  return { uge, ugedag: isoUgedag };
+  d.setUTCDate(d.getUTCDate() + 4 - isoUgedag);
+  const aarStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const dage = Math.round((d.getTime() - aarStart.getTime()) / 86400000);
+  return { uge: Math.floor(dage / 7) + 1, ugedag: isoUgedag };
 }
 
 /** Antal dage i året, og om året er et skudår. */

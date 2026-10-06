@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import {
   dageIAar,
   dageMellemIsoDatoer,
@@ -113,6 +113,84 @@ describe("isoUge", () => {
   test("en uguelig dato returnerer null", () => {
     expect(isoUge("2026-02-30")).toBeNull();
     expect(isoUge("")).toBeNull();
+  });
+
+  // Ugenummeret er et *kalender*tal, så det skal være det samme for alle.
+  // Værktøjet kører i læserens browser (et `useMemo` i UgedagBeregner), så før
+  // denne test regnede `isoUge` i læserens egen tidszone: `(torsdag − 1. jan)`
+  // var et ikke-helt døgn, hvis et skifte for sommertid lå mellem dem, og
+  // `Math.ceil` ryddede fraktionen op til **én uge for højt**. I Danmark falder
+  // skiftet før den lævede uge, så fraktionen var 0,9583 og lykken reddede
+  // svaret; på sydsiden af jorden falder skiftet efter 1. januar, fraktionen
+  // bliver 0,0417, og `ceil` tæller en uge for meget — 182 af 730 datoer i
+  // 2026-27 i Sydney. Samme dato ville altså give uge 14 på minberegner.dk og
+  // uge 15 på beraknare.se for en dansk læser der er rejst ud.
+  //
+  // Denne test skifter derfor selve uret og kræver samme svar over to år i alle
+  // syv zoner. GitHub Actions kører i UTC, så uden denne test ville porten være
+  // grøn uanset fejlen — præcis som de fem håndskrevne `isoUge`-tests var,
+  // fordi 2026 og 2020 er rene i alle zoner.
+  describe("uge og ugedag er uafhængige af læserens tidszone", () => {
+    const oprindelig = process.env.TZ;
+    afterEach(() => {
+      // `Reflect.deleteProperty` i stedet for `delete`, som biome forbyder.
+      if (oprindelig === undefined) Reflect.deleteProperty(process.env, "TZ");
+      else process.env.TZ = oprindelig;
+    });
+
+    /** Alle datoer i 2026 og 2027, som "YYYY-MM-DD". */
+    function alleDatoer(): string[] {
+      const datoer: string[] = [];
+      for (let tid = Date.UTC(2026, 0, 1); tid <= Date.UTC(2027, 11, 31); tid += 86400000) {
+        datoer.push(new Date(tid).toISOString().slice(0, 10));
+      }
+      return datoer;
+    }
+
+    // Danmark og Sverige er sidens egne domæner, UTC er byggeserveren, og de
+    // tre sidste er steder hvor skiftet for sommertid ligger *efter* 1. januar.
+    const TIDSZONER = [
+      "Europe/Copenhagen",
+      "Europe/Stockholm",
+      "UTC",
+      "Australia/Sydney",
+      "Australia/Lord_Howe",
+      "Pacific/Auckland",
+      "America/Santiago",
+    ];
+
+    test("samme dato giver samme uge i alle syv zoner", () => {
+      const svar: Record<string, string> = {};
+      for (const tidszone of TIDSZONER) {
+        process.env.TZ = tidszone;
+        svar[tidszone] = alleDatoer()
+          .map((iso) => {
+            const r = isoUge(iso)!;
+            return `${iso}:${r.uge}.${r.ugedag}`;
+          })
+          .join(" ");
+      }
+      const [foerste, ...rest] = TIDSZONER;
+      for (const tidszone of rest) {
+        // Mutation: den gamle lokale formel giver 182 afvigelser i Sydney.
+        expect(svar[tidszone], tidszone).toBe(svar[foerste]);
+      }
+    });
+
+    // De tre håndkontrollerede anker fra ISO 8601, som den tidszoneuafhængige
+    // formel skal give overalt. `Math.floor(n/7)+1` tåler fraktioner, `ceil`
+    // gør ikke — det er den mutation porten dømmer.
+    for (const tidszone of TIDSZONER) {
+      test(`ankerdagene er uge 1, 52 og 14 i ${tidszone}`, () => {
+        process.env.TZ = tidszone;
+        expect(isoUge("2026-01-01")).toEqual({ uge: 1, ugedag: 4 });
+        expect(isoUge("2017-01-01")).toEqual({ uge: 52, ugedag: 7 });
+        expect(isoUge("2019-12-30")).toEqual({ uge: 1, ugedag: 1 });
+        // 5. april 2027 er en mandag i uge 14 — den første dato hvor den gamle
+        // formel svarede 15 i Sydney, Auckland og Santiago.
+        expect(isoUge("2027-04-05")).toEqual({ uge: 14, ugedag: 1 });
+      });
+    }
   });
 });
 
