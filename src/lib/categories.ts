@@ -110,6 +110,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Ugenummer", description: "Se ISO-ugenummer for enhver dato", href: "/ugenummer", category: "Praktisk" },
   { title: "Flyttebudget Beregner", description: "Beregn dit samlede flyttebudget", href: "/flyttebudget", category: "Hverdag" },
   { title: "Boligsalg Beregner", description: "Beregn nettoprovenu ved salg af bolig — alle omkostninger", href: "/boligsalg", category: "Bolig" },
+  { title: "Nutidskroner", description: "Omregn et gammelt beløb til dagens prisniveau", href: "/nutidskroner", category: "Økonomi" },
 ];
 
 export const categories: CategoryData[] = [

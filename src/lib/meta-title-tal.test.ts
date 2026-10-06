@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { getPageData } from "./page-data";
+import { NUTIDSKRONER_TITEL_EKSEMPEL } from "./page-data";
 import { kvadratmeterEksempelLignelse } from "./kvadratmeter-eksempler";
 import { alderLevet } from "./alder-levet";
 import { dageTilDecember } from "./dage-mellem-datoer";
@@ -111,6 +112,10 @@ const REGNETE_EKSEMPLER: {
   // « 175 cm» til igen. Titlen lå i Googles og i fanebladet, så porten dømmer
   // både regnestykket og dobbeltgængen (se bigram-testen nedenfor).
   { slug: "idealvaegt", resulter: { da: "72 kg ved 175 cm", se: "72,0 kg vid 175 cm" } },
+  // `/nutidskroner` er ny og har ingen GSC-række endnu, men titlen bærer et
+  // regnet eksempel fra `nutidskroner.ts` — samme tal som værktøjet og
+  // eksempeltabellen på siden — så porten holder den fast fra første dag.
+  { slug: "nutidskroner", resulter: { da: NUTIDSKRONER_TITEL_EKSEMPEL } },
 ];
 
 type SprogOgResultat = { slug: string; locale: Locale; resultat: string };

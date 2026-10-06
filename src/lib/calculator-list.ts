@@ -97,6 +97,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/rabat", daOnly: true, titles: { da: "Rabatberegner", no: "Rabattkalkulator", se: "Rabattkalkylator" }, descriptions: { da: "Beregn pris efter rabat", no: "Beregn pris etter rabatt", se: "Beräkna pris efter rabatt" } },
   { href: "/valuta", titles: { da: "Valuta", no: "Valuta", se: "Valuta" }, descriptions: { da: "Omregn valutaer", no: "Omregn valutaer", se: "Omvandla valutor" } },
   { href: "/befordringsfradrag", daOnly: true, titles: { da: "Befordringsfradrag", no: "Befordringsfradrag", se: "Befordringsavdrag" }, descriptions: { da: "Beregn befordringsfradrag 2026", no: "Beregn befordringsfradrag", se: "Beräkna befordringsavdrag" } },
+  { href: "/nutidskroner", daOnly: true, titles: { da: "Nutidskroner", no: "Nutidskroner", se: "Nutidskroner" }, descriptions: { da: "Omregn et gammelt beløb til dagens prisniveau", no: "Omregn et gammelt beløp til dagens prisnivå", se: "Räkna om ett gammalt belopp till dagens prisnivå" } },
   // Yderligere
   { href: "/solceller", titles: { da: "Solceller", no: "Solceller", se: "Solceller" }, descriptions: { da: "Beregn solcelleøkonomi", no: "Beregn solcelleøkonomi", se: "Beräkna solcellsekonomi" } },
   { href: "/leasing", titles: { da: "Leasing", no: "Leasing", se: "Leasing" }, descriptions: { da: "Beregn leasingydelse", no: "Beregn leasingytelse", se: "Beräkna leasingavgift" } },
@@ -238,6 +239,7 @@ const relatedMap: Record<string, string[]> = {
   "/ugenummer": ["/dato", "/alder", "/nedtaelling", "/tidsberegner", "/termin"],
   "/flyttebudget": ["/husleje", "/budget", "/boliglaan", "/boligstoette", "/kvadratmeter"],
   "/boligsalg": ["/ejendomsvaerdiskat", "/andelsbolig", "/kvadratmeter", "/flyttebudget", "/boliglaan"],
+  "/nutidskroner": ["/loen-efter-skat", "/husleje", "/rentefradrag", "/opsparing", "/moms"],
 };
 
 /**

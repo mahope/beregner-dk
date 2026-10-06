@@ -55,6 +55,7 @@ import {
   ORESUND_START_TURE,
   oresundKategori,
 } from "./oresundsbroen";
+import { NUTIDSKRONER_EKSEMPEL_AAR, omregnTilNutidskroner } from "./nutidskroner";
 
 /**
  * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
@@ -83,6 +84,17 @@ const ORESUND_START_AAR_GO_KR = heleKroner(
   ORESUND_GO_AARSAFGIFT + ORESUND_START_KAT.go * 2 * ORESUND_START_TURE
 );
 const ORESUND_START_AAR_NORMAL_KR = heleKroner(ORESUND_START_KAT.normal * 2 * ORESUND_START_TURE);
+
+/**
+ * Titlens regnede eksempel til `/nutidskroner`. Det læses fra `nutidskroner.ts`
+ * — samme modul som værktøjet og eksempeltabellen på siden bruger — så titlen
+ * ikke kan love et andet tal, end beregneren viser.
+ */
+export const NUTIDSKRONER_TITEL_EKSEMPEL = (() => {
+  const aar = NUTIDSKRONER_EKSEMPEL_AAR[1]; // 1990
+  const beloeb = Math.round(omregnTilNutidskroner(10_000, aar)!.beloeb);
+  return `10.000 kr. fra ${aar} = ${beloeb.toLocaleString("da-DK")} kr.`;
+})();
 import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
 import {
@@ -2791,6 +2803,29 @@ faqItems: kalorierFaqItems("da"),
         { question: "Skal sælger betale tinglysning?", answer: "Sælger betaler normalt ikke tinglysning. Det er køber der betaler for nyt skøde og pantebrev. Øst for Storebælt deles tinglysningsafgiften dog ofte mellem køber og sælger. Beregneren kan medtage tinglysning af ny bolig hvis du også skal købe." },
         { question: "Hvad er et typisk mæglersalær?", answer: "Mæglersalæret er den største post i dit salgsregnestykke, fordi det følger salgsprisen. Beregneren regner med en procentandel, men du kan vælge et fast salær i stedet — og det er den post, der flytter mest at forhandle." },
         { question: "Hvordan får jeg det bedste salgsprovenu?", answer: "Få mindst tre mæglervurderinger og forhandl salæret, gør istandsættelsen selv når det kan lade sig gøre, og sælg de overskydende møbler i stedet for at flytte dem. Køb ingen ydelser, før du har set dit eget nettoprovenu i beregneren." },
+      ],
+    },
+    "nutidskroner": {
+      slug: "nutidskroner",
+      title: "Nutidskroner - omregn et beløb til dagens prisniveau",
+      description: "Se hvad et gammelt beløb svarer til i dag. Omregn kroner fra 1900 og frem med Danmarks Statistiks forbrugerprisindeks.",
+      metaTitle: `Nutidskroner beregner: ${NUTIDSKRONER_TITEL_EKSEMPEL}`,
+      metaDescription: "Gratis nutidskroner beregner. Omregn et beløb fra 1900 til i dag med forbrugerprisindekset og se, hvor meget priserne er steget. Kilde: Danmarks Statistik.",
+      keywords: ["nutidskroner", "nutidskroner beregner", "omregn til nutidskroner", "beløb i nutidskroner", "forbrugerprisindeks", "prisindeks beregner", "omregning til nutidskroner", "hvad er 10000 kr værd i dag"],
+      ogTitle: `Nutidskroner beregner: ${NUTIDSKRONER_TITEL_EKSEMPEL}`,
+      ogDescription: "Omregn et beløb fra et tidligere år til dagens prisniveau med forbrugerprisindekset.",
+      category: "Økonomi",
+      breadcrumbCategory: "Økonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Nutidskroner beregner",
+      schemaDescription: "Omregn et gammelt beløb til dagens prisniveau med Danmarks Statistiks forbrugerprisindeks.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hvad betyder nutidskroner?", answer: "Nutidskroner er et beløb fra et tidligere år regnet om til dagens prisniveau. Fordi priserne stiger over tid, kan et gammelt beløb ikke sammenlignes direkte med et beløb i dag — 10.000 kr. i 1980 kunne købe langt mere end 10.000 kr. kan i dag. Beregneren bruger forbrugerprisindekset fra Danmarks Statistik til at regne om." },
+        { question: "Hvordan regner man et beløb om til nutidskroner?", answer: "Du ganger beløbet med forholdet mellem prisindekset i dag og prisindekset i det år, beløbet kommer fra: beløb × indeks(i dag) ÷ indeks(dengang). Indekset er en fælles målestok, så samme formel virker for et beløb fra 1900 og for et fra 2020." },
+        { question: "Hvilket prisindeks bruger beregneren?", answer: "Beregneren bruger Danmarks Statistiks forbrugerprisindeks (årsgennemsnit), der måler prisudviklingen på et bredt gennemsnitligt dansk forbrug inkl. moms og afgifter. Tallene går tilbage til 1900, og «i dag» bruger den seneste offentliggjorte måned." },
+        { question: "Hvor langt tilbage går tallene?", answer: "Indekset dækker helt tilbage til 1900, så du kan regne et beløb fra forrige århundrede om til nutidskroner. Jo længere tilbage beløbet er fra, jo større bliver forskellen — renters rente gælder også for priser." },
+        { question: "Er nutidskroner det samme som nettoprisindekset?", answer: "Nej. Forbrugerprisindekset, som denne beregner bruger, inkluderer moms og afgifter, mens nettoprisindekset ser bort fra indirekte skatter. Det er nettoprisindekset, der bruges til at regulere huslejen i eksisterende lejemål — se husleje-beregneren for den regel." },
       ],
     },
 };

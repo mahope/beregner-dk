@@ -211,6 +211,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/ugenummer": CalendarDays,
   "/flyttebudget": Truck,
   "/boligsalg": DollarSign,
+  "/nutidskroner": TrendingUp,
 };
 
 export function getCalculatorIcon(href: string): LucideIcon {

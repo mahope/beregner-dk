@@ -294,6 +294,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Brøkberegner", description: "Forkort brøk og omregn til decimal og procent", href: "/brok", popular: false, category: "Matematik" },
   { title: "Ohms lov", description: "Beregn spænding, strøm, modstand og effekt", href: "/ohm", popular: false, category: "Matematik" },
   { title: "Vægt på planeterne", description: "Se din vægt på Månen, Mars og de andre planeter", href: "/planetvaegt", popular: false, category: "Matematik" },
+  { title: "Nutidskroner", description: "Omregn et gammelt beløb til dagens prisniveau", href: "/nutidskroner", popular: false, category: "Økonomi" },
 ];
 
 /* ------------------------------------------------------------------ */
