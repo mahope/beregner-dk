@@ -1,36 +1,29 @@
-STATUS: 6/10 05:3x. ✅ **`/tidsberegner` svarer nu på «hvad er klokken om
-8 timer?»** — sitets andenstørste side (78.615 visninger DK + 75.244 SE) kunne
-ikke lægge en varighed *på* et klokkeslæt, kun finde varigheden *imellem* to.
-Målt 6/10 05:1x: dansk autocomplete har **10 af 10** træffere under «hvad er
-klokken om» i formen «hvad er klokken om N timer» (N = 8, 12, 16, 9, 17, 18,
-14, 15, 8, 19), og GSC har beraknare.se's «räkna timmar och minuter» (141
-visninger) på **pos. 10** og «räkna tid» (121) på pos. 10 — de to søgninger
-siden ikke svarer på. Værktøjet har to faner: læg til/træk fra på et
-klokkeslæt (med hele dage ved siden af) og læg tre tidsrum sammen, som siden
-indtil nu kun besvarede med omvejen «sæt den første sluttid ind som den andens
-starttid». **Ingen dato i regnestykket** — kun klokkeslæt — så
-sommer-/vintertid ikke kan komme ind i en forkert værdi, og modulo er dobbelt
-så 06:00 minus 8 timer er 22:00 dagen før, ikke et negativt tal.
-⚠️ **Fandtes i min egen diff, rettet før commit:** dags-teksten lå i en
-`locale === "se" ? … : …`-terning, som locale-leak-scanneren meldte som læk
-præcis som i `LaantypeBeregner` 6/10 — teksterne ligger nu i et `Record`. Og
-samme scanner-port fangede «dagen for» i stedet for «dagen før» (egen
-fingerspilling) og den danske «t» i den svenske tabel, som nu går gennem
-`formatTidsvar`. **Portene kan fejle:** ren `%` i stedet for dobbelt modulo
-giver 3 røde, `Math.abs(delta)` i stedet for fortegnet giver 2 røde,
-`heleDage === 1` i stedet for `!== 0` giver 2 røde.
-✅ 6/10 tidligere: `/laantype`, ugenummeret på `/ugedag`+`/veckodag`
-(MIDDEL-fund fra `b474763`), «Dage til dato» på `/dato`, `/klokken-i/*` i 21
-lande, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge.
-✅ 5/10: svensk landetabel, landetabellens tidsforskel, efterlønnens deltidstal,
-«Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
+STATUS: 6/10 06:0x. ✅ **Ny `/brokost` — sitet svarer nu på «hvad koster det at
+krydse Storebælt»** med Storebælts **egen prisliste 2026**, ikke et tilbud.
+Datagrund: dansk autocomplete har «hvad koster det at køre over storebælt» (2/10
+under «hvad koster det at»), «hvor meget koster det at krydse
+storebæltsbroen», «storebælt pris bil med trailer» og «øresundsbroen pris» —
+og vi havde ingen side om det. Værktøjet regner 26 køretøjstyper × ekspres-
+og kortpris, tur/retur, antal gange om året og fritidsrabat. **Et fritidsrabat
+er en egen tur/retur-billet, ikke et fradrag** — det fandt porten: en bil på
+3 m koster 218 kr. tur/retur mod aftenbilletten på 246 kr., så den kan ikke
+spare noget, og værktøjet siger det i stedet for at vise −28 kr. Fritidsrabatter
+kræver alle tre ting (under 6 m, betalingsmiddel, tur/retur), og bruddet på
+hver af dem står i regnestykket. **Portene kan fejle:** `label-scan-gate`
+fangede de to radioknapper som ubundne `<label>` — nu `htmlFor` + `id`.
+✅ Tidligere 6/10: «hvad er klokken om N.timer» på `/tidsberegner`, `/laantype`,
+ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund), «Dage til dato» på `/dato`,
+`/klokken-i/*`, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge.
+✅ 5/10: svensk landetabel, tidsforskelsdag, efterlønnens deltidstal, «Populær
+nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
 **Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run
-build`). 6/10 05:3x: typecheck 0, lint 0 (797 filer), **4604 tests i 280
-filer** grønne, build ok. ⚠️ **12 VERIFICÉR-noter er åbne** — alle merges er
-efter 21:30-vinduet 5/10, så intet kan måles endnu. Første reelle
-deploy-vindue er **6/10 07:30**; næste iteration skal måle dem alle på indhold
-og lukke dem med `DEPLOY OK 6/10`. PR-TJEK 6/10 05:1x (ingen åbne PR'er).
-BRANCH-TJEK 4/10 04:1x.
+build`). 6/10 06:0x: typecheck 0, lint 0 (801 filer), **4624 tests i 281
+filer** grønne, build ok med `/brokost` i ruten. Renderet side gennemgået på
+390px-kompatibel markup (ét kolonne-layout, ingen vandret rækkevidde ud over
+pristabellen, der har `overflow-x-auto`). ⚠️ **12 VERIFICÉR-noter er åbne** —
+alle merges er efter 21:30-vinduet 5/10. Første reelle deploy-vindue er
+**6/10 07:30**; næste iteration måler dem alle på indhold og lukker dem med
+`DEPLOY OK 6/10`. PR-TJEK 6/10 05:1x (ingen åbne PR'er). BRANCH-TJEK 4/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -60,6 +53,7 @@ BRANCH-TJEK 4/10 04:1x.
 | `/ugedag` + `/veckodag` (6/10, nye URL'er) | **0** | — | — | — |
 | `/rumfang` (6/10, ny) | **0** | — | — | — |
 | `/laantype` (6/10, ny) | **0** | — | — | — |
+| `/brokost` (6/10, ny) | **0** | — | — | — |
 | `/idealvaegt` (4/10, ny) | **0** | — | — | — |
 | `/dage-til/*` (2/10, nye) | **0** | — | — | — |
 | `/dage-mellem-datoer` + se (3/10, nye) | **0** | — | — | — |
@@ -126,12 +120,19 @@ dømmer da/no/se hver for sig. ⛔ `beregner.no` serverer et andet site — se �
 
 ## Feature-kø
 
-Leveret 6/10: **«hvad er klokken om N timer» + summering af tidsrum på
-`/tidsberegner`** (se `docs/plan-arkiv.md`). De seks punkter nedenfor er alle
+Leveret 6/10: **`/brokost` med Storebælts prisliste 2026** (26 køretøjstyper,
+ekspres-/kortpris, fritidsrabatter, årsforbrug) og **«hvad er klokken om N
+timer» + summering af tidsrum på `/tidsberegner`** (se `docs/plan-arkiv.md`). De seks punkter nedenfor er alle
 ⛔ blokeret af en ❓. Den hurtigste målemetode uden
 en menneskekilde er dansk autocomplete (`suggestqueries.google.com`); den er
 brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
 
+- **[ ] Øresundsbroen på `/brokost`.** Svensk autocomplete og dansk («øresundsbroen
+  pris», «hvor meget koster det at krydse øresundsbroen») peger på den anden
+  store bro, og `/brokost`-værktøjet har allerede betalingsform, overfarter,
+  ture og rabatter. ⛔ `oresundsbroen.dk` svarer **ingen forbindelse** fra
+  maskinen (curl 000, alle stier), og ØresundPAY har egne priser — ❓ ét
+  skærmbillede af prislisten.
 - **[ ] BMI-percentil for børn.** «bmi for børn», «bmi skala børn» er danske
   autocomplete-træffere, på svensk «bmi barn tabell». WHO's BMI-for-alder-tabeller
   er ~150 tal pr. køn — for mange at transskribere uden uafhængig kontrol, og en
@@ -156,6 +157,19 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 06:0x:** `VERIFICÉR DEPLOY: /brokost svarer 200 på minberegner.dk,
+sitemap.xml indeholder pr. domæne stien, og siden viser Storebælts prisliste
+2026 med alle 26 rækker — brødteksten skriver «205 kr.» for én overfart,
+«235 kr.» for kortbetaling, «720 kr. om året» for 12 ture tur/retur og
+«246 kr.» for aftenrabatten, og værktøjet er forudindstillet på 410 kr.
+tur/retur / 4.920 kr. om året ceo/brokost-storebaelt 6/10 06:0x`. Mål på
+**indhold**: `curl -s https://minberegner.dk/brokost | grep -o 'Særtransport
+over 20 m og over 100 t' | wc -l` → **> 0**, `grep -o '205 kr.' | wc -l` →
+**> 20**, `grep -o '235 kr.' | wc -l` → **> 10**, og `curl -s
+https://minberegner.dk/sitemap.xml | grep -o '/brokost<' | wc -l` → **1**.
+⚠️ React skriver `205<!-- --> kr.` i markuppen, så tjek `205` og `kr.` hver
+for sig. Første reelle deploy-vindue efter mergen er 6/10 07:30.
 
 **Åben 6/10 05:3x:** `VERIFICÉR DEPLOY: /tidsberegner har på begge domæner
 et værktøj med overskriften «Hvad er klokken om X timer?» / «Vad är klockan om X
@@ -395,6 +409,12 @@ måles udefra. **Åben:** at fejlen er væk afgør kun Sentrys egen hændelsest�
 - ✅ **Ferielovens regel for sommerferiens startdato** (opgave 201) — **lukket 6/10
   01:5x.** Folkeskoleloven § 14 a stk. 2 siger ordret «Elevernes sommerferie
   begynder den sidste lørdag i juni», læst på retsinformation.dk 6/10 2026.
+- ❓ **Øresundsbroens prisliste** (6/10 06:0x, højst prioriteret). `oresundsbroen.dk`
+  svarer **ingen forbindelse** fra maskinen — curl giver 000 på domænet og på
+  `/priser-och-rabatter/bilpriser`, mens `storebaelt.dk/priser` er læseligt.
+  `/brokost` har derfor kun Storebælt. **Ét skærmbillede af Øresundsbroens
+  prisliste for 2026** låser den anden store bro på samme side; ØresundPAY har
+  egne regler for betaling og rabat.
 - ❓ **`ceo/boliglaan-procent`-noten er for snævt formuleret** (3/10 12:47). Den
   kræver «95,0 % belåning» og «5,05 % p.a.», men det er interpolationer fra
   brugerens felter. Skal dømmes på 0 `\d%` og de statiske strenge.

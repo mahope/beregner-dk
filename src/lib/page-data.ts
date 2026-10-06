@@ -37,6 +37,28 @@ import {
   laanetypeEksempelKryds,
 } from "./laantype";
 import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
+import {
+  BROKOST_KATEGORIER,
+  BROKOST_RABATTER,
+  BROKOST_START,
+  brokostForskel,
+  brokostKategori,
+} from "./brokost";
+
+/**
+ * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
+ * brødteksten, FAQ'en og værktøjet ikke kan komme til at sige hver sit.
+ */
+const BROKOST_START_KAT = brokostKategori(BROKOST_START)!;
+const BROKOST_START_KR = heleKroner(BROKOST_START_KAT.eksprespris);
+const BROKOST_KORT_KR = heleKroner(BROKOST_START_KAT.kortpris!);
+const BROKOST_FORSKEL_KR = heleKroner(brokostForskel(BROKOST_START_KAT)!);
+const BROKOST_RETUR_KR = heleKroner(BROKOST_START_KAT.eksprespris * 2);
+const BROKOST_AFTEN_KR = heleKroner(BROKOST_START_KAT.eksprespris * 2 - BROKOST_RABATTER.aften);
+const BROKOST_WEEKEND_KR = heleKroner(BROKOST_RABATTER.weekend);
+const BROKOST_ANHAENGER_KR = heleKroner(brokostKategori("personbil-anhaenger-over-6")!.eksprespris);
+const BROKOST_CAMPER_KR = heleKroner(brokostKategori("autocamper-10")!.eksprespris);
+const BROKOST_CAMPERAFTALE_KR = heleKroner(brokostKategori("autocamper-aftale")!.eksprespris);
 import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
 import {
@@ -1621,6 +1643,30 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvad påvirker forbruget?", answer: "Kørestil, hastighed, vejr, dæktryk, aircondition." },
       { question: "Hvorfor er diesel dyrere end benzin?", answer: `Fordi spørgsmålet kan betyde to ting. Pr. liter ligger diesel højere, da energi- og CO2-afgiften er højere pr. liter for diesel end for benzin. Pr. kilometer er det næsten altid benzin, der er dyrest, fordi diesel kører 15-22 km/l mod benzins 12-18 km/l, så det lavere forbrug mere end udligner forskellen. ${braendstofEksempelKm} km med forudsætningerne i værktøjet: benzin ${braendstofEksempelBenzin} l × 13,50 kr. = ${braendstofEksempelBenzinPris} kr. (${krPrKm(benzinPris, 2)}), diesel ${braendstofEksempelDiesel} l × 12,80 kr. = ${braendstofEksempelDieselPris} kr. (${krPrKm(dieselPris, 2)}) — altså ${braendstofDieselBilligere} kr. mindre for diesel.` },
       { question: "Hvad koster diesel pr. kilometer?", answer: `Med 18 km/l og 12,80 kr./l er det 12,80 ÷ 18 = ${krPrKm(dieselPris, 2)}, mens benzin med 15 km/l og 13,50 kr./l er 13,50 ÷ 15 = ${krPrKm(benzinPris, 2)}. Priserne er modelpriser, så skriv dagens pris fra pumperen og dit eget forbrug ind i værktøjet.` },
+      ],
+    },
+    "brokost": {
+      slug: "brokost",
+      title: "Brokostberegner",
+      description: "Beregn hvad det koster at krydse Storebæltsbroen — eksprespris, kortpris, aften-, weekend- og helligdagsrabat.",
+      metaTitle: "Brokost Storebælt: personbil 3-6 m er 205 kr. for tur",
+      metaDescription: "Se Storebælts prisliste 2026. Personbil 3-6 m koster 205 kr. med eksprespris og 235 kr. med kort. Beregn turen og årsforbruget.",
+      keywords: ["brokost storebælt", "storebælt pris bil", "brokostberegner", "storebælt 2026", "pris for at krydse storebælt", "aftenrabat storebælt", "weekendrabat storebælt", "storebælt med trailer"],
+      ogTitle: "Brokost Storebælt: personbil 3-6 m er 205 kr. for tur",
+      ogDescription: "Beregn hvad det koster at krydse Storebæltsbroen, med eksprespris, kortpris og fritidsrabatter.",
+      category: "Praktisk",
+      breadcrumbCategory: "Praktisk",
+      breadcrumbCategoryHref: "/kategori/praktisk",
+      schemaName: "Brokostberegner",
+      schemaDescription: "Gratis brokostberegner. Se Storebælts prisliste 2026 for bil, varebil, autocamper, lastbil og bus, og beregn årsforbruget.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+      { question: "Hvor meget koster det at køre over Storebælt?", answer: `En personbil 3-6 m koster ${BROKOST_START_KR} kr. for én tur med eksprespris, altså Bizz eller nummerpladebetaling i en grøn ekspresbane. Betaler du med kort eller kontanter, koster samme tur ${BROKOST_KORT_KR} kr.` },
+      { question: "Hvor meget koster det at køre over Storebælt tur/retur?", answer: `En personbil 3-6 m koster ${BROKOST_START_KR} kr. hver vej, altså ${BROKOST_RETUR_KR} kr. for tur og retur med eksprespris. Med aftenrabat bliver tur og retur ${BROKOST_AFTEN_KR} kr.` },
+      { question: "Hvad er forskellen på eksprespris og kortpris?", answer: `Ekspresprisen kræver et automatisk betalingsmiddel. For en personbil 3-6 m er forskellen ${BROKOST_FORSKEL_KR} kr. pr. overfart, så betaler du med kort i de blå og gule baner, er turen dyrere.` },
+      { question: "Hvad er en weekendrabat?", answer: `Weekendrabatten er ${BROKOST_WEEKEND_KR} kr. for tur og retur og gælder fra fredag kl. 12 til søndag kl. 24. Den kræver en Storebælt Privataftale og et køretøj under 6 m.` },
+      { question: "Hvad koster en bil med anhænger over Storebælt?", answer: `En personbil med anhænger over 6 m totallængde koster ${BROKOST_ANHAENGER_KR} kr. med eksprespris. Anhængere over 6 m kan ikke bruge fritidsbilletterne, fordi betalingsanlægget måler hele køretøjets længde.` },
+      { question: "Hvad koster det at køre over Storebælt med en autocamper?", answer: `En autocamper op til 10 m koster ${BROKOST_CAMPER_KR} kr. med eksprespris, mens en autocamper under 3.500 kg og op til 6 m kun koster ${BROKOST_START_KR} kr. En autocamper under 3.500 kg og over 6 m med autocamperaftale koster ${BROKOST_CAMPERAFTALE_KR} kr., men kun med betalingsmiddel.` },
       ],
     },
     "bil": {

@@ -86,6 +86,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Elbil vs. benzinbil", description: "Sammenlign driftsomkostninger for elbil og benzinbil", href: "/elbil", category: "Hverdag" },
   { title: "Lånetype", description: "Annuitetslån, serielån og stående lån side om side", href: "/laantype", category: "Økonomi" },
   { title: "Enhedspris", description: "Find den billigste vare pr. kilo, liter eller stk", href: "/enhedspris", category: "Hverdag" },
+  { title: "Brokost Storebælt", description: "Pris for at krydse Storebæltsbroen", href: "/brokost", category: "Hverdag" },
   { title: "Rabatberegner", description: "Beregn pris efter rabat og se din besparelse", href: "/rabat", category: "Hverdag" },
   { title: "Befordringsfradrag", description: "Beregn dit kørselsfradrag 2026 og se skattebesparelsen", href: "/befordringsfradrag", category: "Økonomi" },
   { title: "Fartberegner", description: "Beregn fart, distance og tid — plus tempo i min/km", href: "/fart", category: "Hverdag" },
