@@ -1,4 +1,11 @@
-STATUS: 6/10 07:5x. ✅ **`/procent` svarer nu på «hvor stor er forskellen
+STATUS: 6/10 07:5x. ✅ **Review-fund MIDDEL rettet: `/dato`s forudvalgte dato
+  giver ikke længere «0 dage» på selve juleaften.** `naesteJuleaften` brugte `>`
+  i stedet for `>=`, så 24. december (den største `/dato`-søgning: «hvor mange
+  dage er der til den 24 december», 1.036 v, pos. 5) faldt til i dag. Nu peger
+  feltet på næste år, som søsteren `dageTilDecember` gør på 1. december.
+  Assertionen på `dage-mellem-datoer.test.ts:91` fulgte ikke sin egen titel og
+  låste fejlen fast — den er rettet til 2027-12-24. ✅ 6/10 07:5x tidligere:
+  **`/procent` svarer nu på «hvor stor er forskellen
   mellem to tal?» med begge svar.** Datagrund: `/procent` er sitets #1-side
   (**149.929** GSC-visninger, 0,1 % CTR, pos. 7,5), og dansk autocomplete
   (hl=da, 6/10) svarer «procentvis forskel» med ni træffere hvor **otte** er

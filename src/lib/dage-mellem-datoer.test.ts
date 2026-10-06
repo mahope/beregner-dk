@@ -88,7 +88,7 @@ describe("naesteJuleaften", () => {
   // næste, og den er en fredag, så et årstal der hang på 2026 ville være en
   // påstand uden dækning.
   test("på juleaften peger feltet på næste år, og dagen efter også", () => {
-    expect(naesteJuleaften("da", dag("2026-12-24"))).toBe("2026-12-24");
+    expect(naesteJuleaften("da", dag("2026-12-24"))).toBe("2027-12-24");
     expect(naesteJuleaften("da", dag("2026-12-25"))).toBe("2027-12-24");
   });
 });

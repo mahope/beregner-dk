@@ -155,7 +155,7 @@ export function naesteJuleaften(locale: DageMellemLocale, today: Date): string {
   const iDag = iDagPaSiden(today, locale);
   const aar = Number(iDag.slice(0, 4));
   const iDenneAar = `${aar}-12-24`;
-  return iDag > iDenneAar ? `${aar + 1}-12-24` : iDenneAar;
+  return iDag >= iDenneAar ? `${aar + 1}-12-24` : iDenneAar;
 }
 
 export interface DageTilDato {
