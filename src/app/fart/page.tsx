@@ -68,8 +68,13 @@ function distance50(): string {
  * De fire omregninger brødteksten skriver, regnet af `fart-omregner` med de
  * præcise faktorer: 100 km/t i m/s, mph og knop, samt 10 knop i km/t.
  */
-function omregnet(fra: "km_t" | "knop" | "mph", til: "km_t" | "m_s" | "mph" | "knop", vaerdi: number): string {
-  return formatNumber(rundFart(omregnFart(vaerdi, fra, til), til), "da", {
+function omregnet(
+  fra: "km_t" | "knop" | "mph",
+  til: "km_t" | "m_s" | "mph" | "knop",
+  vaerdi: number,
+  locale: "da" | "se" = "da",
+): string {
+  return formatNumber(rundFart(omregnFart(vaerdi, fra, til), til), locale, {
     maximumFractionDigits: 2,
   });
 }
@@ -238,9 +243,26 @@ export default async function FartPage() {
             <p>
               Hastigheten anges i km/h, men resten av världen använder andra enheter.{" "}
               <strong>Omvandlaren ovanför</strong> svarar åt båda håll: skriv en fart, välj den
-              enhet du har skrivit i, så får du den i alla fyra.{" "}
-              {fartOmregningsFakta("se").meterPerSekund} km/h är exakt 1 m/s, och 1 knop är en
-              sjömil i timmen = exakt {fartOmregningsFakta("se").somermilKm} km/h.{" "}
+              enhet du har skrivit i, så får du den i alla fyra. De tre omvandlingar
+              som efterfrågas mest är:
+            </p>
+            <ul>
+              <li>
+                <strong>100 km/h i m/s:</strong> {omregnet("km_t", "m_s", 100, "se")} m/s.{" "}
+                {fartOmregningsFakta("se").meterPerSekund} km/h är exakt 1 m/s, eftersom
+                det finns {fartOmregningsFakta("se").sekPerTime} sekunder i en timme.
+              </li>
+              <li>
+                <strong>100 km/h i mph:</strong> {omregnet("km_t", "mph", 100, "se")} mph. 1
+                mil är exakt {fartOmregningsFakta("se").milKm} km.
+              </li>
+              <li>
+                <strong>100 km/h i knop:</strong> {omregnet("km_t", "knop", 100, "se")} knop,
+                för 1 knop är 1 sjömil i timmen = exakt{" "}
+                {fartOmregningsFakta("se").somermilKm} km/h.
+              </li>
+            </ul>
+            <p>
               <strong>Tempo och sekunder per 100 m är inte enheter i raden.</strong> De går{" "}
               <em>åt motsatt håll</em> — tempot <em>sjunker</em> när farten stiger — så de kan inte
               multipliceras med en faktor som de andra. Därför står de som två egna rader under

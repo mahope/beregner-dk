@@ -1,10 +1,11 @@
-STATUS: 6/10 21:4x. ✅ **«Rabat i procent» er den sjette tilstand på `/procent`** — læseren kan nu regne sin egen rabat. Datagrund: GSC (6/10) har «en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?» med 56 visninger på pos. 5, og dansk autocomplete (hl=da, 6/10 21:3x) svarer «rabat procent» med «procentvis rabat», «procentregning rabat», «10 procent rabat» og «rabat 20 procent». Siden havde alle talene i brødteksten og FAQ'en, men ingen tilstand læseren kunne skrive sin egen pris ind i. Se `docs/plan-arkiv.md`.
-⚠️ `/fart` er **stadig ikke deployet** 6/10 21:31 efter 21:30-vinduet (0 forekomster af «27,78 m/s» på begge domæner). Én vindue er ikke nok til `DEPLOY-MISSING` — tælles igen 7/10.
+STATUS: 6/10 21:5x. ✅ **`/fart` er DEPLOY OK 6/10 21:31** på begge domæner — «27,78 m/s» ×3, de tre danske regnestykker, FAQ'en og den nye metaDescription er live. Målt på indhold, ikke på 200: grebet på rå markup gav 0 for «62,1 mph», fordi der står et tag mellem tallet og enheden — tag-strippet tekst gav de tre sætninger.
+✅ **Den svensk `/fart` manglede de tal, den danske side har.** Målt på beraknare.se 6/10 21:4x: den danske side lister «100 km/t i m/s: 27,78 m/s · i mph: 62,1 mph · i knop: 54 knop» og siger, at 1 mil er præcis 1,609344 km; den svenska gik direkte fra introduktionen til «3,6 km/h är exakt 1 m/s» og skrev aldrig ud, hvad 100 km/h bliver til. Nu har den samme liste på svensk, med tal fra `fartOmregningsFakta("se")` — ingen håndskrevet beløb. Se `docs/plan-arkiv.md`.
+✅ **«Rabat i procent» er den sjette tilstand på `/procent`** — læseren kan nu regne sin egen rabat. Datagrund: GSC (6/10) har «en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?» med 56 visninger på pos. 5, og dansk autocomplete (hl=da, 6/10 21:3x) svarer «rabat procent» med «procentvis rabat», «procentregning rabat», «10 procent rabat» og «rabat 20 procent». Siden havde alle talene i brødteksten og FAQ'en, men ingen tilstand læseren kunne skrive sin egen pris ind i. Se `docs/plan-arkiv.md`.
 ✅ **`locale-leak`-porten kan ikke længere timeoute** — den har gjort gaten rød på *timeout* alene tre gange. Rodårsagen var 13 `execFileSync`-kald pr. fil: de 7 tests der kun spørger om repoet som det ligger, betalte hver for deres egen gennemgang af alle 743 kandidater (38 s for filen). De læser nu ét delt resultat fra én `beforeAll`; de 14 tests der *faktisk* planter en lækage og skal se den tilstand de skabte, har hver `it(…, { timeout: 30 s })`. Det globale 5 s-loft er urørt, så ingen anden test har mistet sit tjek. **Målt: filen 38 s → 25,0 s, 22/22 grønne; fuld suite 4.714 tests i 286 filer grønne.** ❓'en er lukket, se `docs/plan-arkiv.md`.
 ✅ **Hastighedsomregner på `/fart` — km/t ↔ m/s ↔ mph ↔ knop, begge veje.** Datagrund: dansk autocomplete (hl=da, 6/10 20:3x) har **10 af 10** træffere under «km i timen», der spørger efter omregning, og «knop omregner» svarer «omregner knop til km» på 2 af 4. Faktorerne er eksakte (yard-and-pound-aftalen 1959, sømil = 1852 m). **MÅL: /fart baseline 5.288 visninger / 32 klik / 0,6 % CTR / pos. 6,9 pr. 6/10** — måles igen ~20/10.
 ✅ **`/skridt` er live på begge domæner — DEPLOY OK 6/10 20:2x.** Målt på indhold: «Skridt til km» 14 forekomster, «1.515 skridt» 3, «6,6 km» 5, «7,9 km» 7, sitemap 1. Samme greb på beraknare.se: «Steg till km» 14, «1 515 steg» 3, «7,9 km» 7, sitemap 1.
 ✅ CEO-kø punkt 0 (review-fund 29/9) er gennemgået alle otte: Valborg fast 30. april med port på plads, svensk påskafton `offsetDays: -1`, dansk sankthans fast 23./24. juni, påskeaften-FAQ slettet, `/husleje` på nettoprisindekset, `toUtcMidnight` læser `Europe/Copenhagen`/`Stockholm`, svensk promille-FAQ taler fra `promille-genstande`, `maneder: 12` er korrekt og 1. advent har fire søndage. Det fund, der lå åbent i review-filen (`naesteJuleaften` gav 0 dage på juleaften), er rettet i `35c6175` og porten på linje 91 følger nu sin egen titel.
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). 6/10 21:3x: typecheck 0, lint 0 (813 filer), **4.725 tests i 286 filer grønne** på 44 s, `next build` grøn. Mutation af `procentRabat` til den omvendte nævner giver **5 røde**. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /procent-rabat 20/10; /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). 6/10 21:36: typecheck 0, lint 0 (813 filer), **4.726 tests i 286 filer grønne** på 39 s, `next build` grøn. Mutation af `procentRabat` til den omvendte nævner giver **5 røde**. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /procent-rabat 20/10; /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -67,7 +68,7 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 
 ### Prioriterede opgaver — åbne
 
-**F5f. [x] FÆRDIG 6/10 20:4x — Hastighedsomregner på `/fart`**, se `docs/plan-arkiv.md`. Datagrund: 10 af 10 danske autocomplete-træffere under «km i timen» er omregning mellem km/t, m/s, mph og knop; sitet havde kun `distance = fart × tid`.
+**F5f. [x] FÆRDIG 6/10 20:4x — Hastighedsomregner på `/fart`** (DEPLOY OK 6/10 21:31 på begge domæner), og **6/10 21:5x — de tre regnestykker også på svensk**. Datagrund: 10 af 10 danske autocomplete-træffere under «km i timen» er omregning mellem km/t, m/s, mph og knop; sitet havde kun `distance = fart × tid`.
 
 **F5g. [x] FÆRDIG 6/10 21:3x — «Rabat i procent» på `/procent`**, se
 `docs/plan-arkiv.md`. Datagrund: GSC-eksporten 6/10 (149.929 visninger, 0,1 %
@@ -166,6 +167,13 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
+**Åben 6/10 21:5x:** `VERIFICÉR DEPLOY: beraknare.se/fart svarer 200 og den
+svenska liste står med «100 km/h i m/s: 27,78 m/s», «100 km/h i mph: 62,1 mph»
+og «100 km/h i knop: 54 knop» samt «1 mil är exakt 1,609344 km»
+ceo/fart-svensk-eksempler 6/10 21:5x`. Mål på indhold med tag-strip (se advarslen
+ovenfor) — tal og enhed står hver for sig i markup'en. Første reelle
+deploy-vindue efter mergen er **7/10 07:30**.
+
 **Åben 6/10 21:3x:** `VERIFICÉR DEPLOY: /procent svarer 200 på begge domæner og
 tilstandene er seks, så radiogruppen har 6 radioer og grid-klassen md:grid-cols-3
 på dansk og svensk ceo/procent-rabat 6/10 21:3x`. Mål på **indhold**:
@@ -176,6 +184,8 @@ HTML'en; tallene kommer først ved interaktion). Samme greb på beraknare.se med
 07:30**.
 
 **Åben 6/10 20:4x:** `VERIFICÉR DEPLOY: /fart svarer 200 på begge domæner og viser Hastighedsomregneren med «100 km/t i m/s: 27,78 m/s», «100 km/t i mph: 62,1 mph», «100 km/t i knop: 54 knop» og FAQ-spørgsmålet «Hvor mange m/s er 100 km/t?» på dansk og «Hur många m/s är 100 km/h?» på svensk, samt den nye metaDescription med «omregn km/t til m/s, mph og knop» / «omvandla km/h till m/s, mph och knop» ceo/fart-omregner 6/10 20:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/fart | grep -o '27,78 m/s' | wc -l` → **> 0**, `grep -o '62,1 mph' | wc -l` → **> 0**, `grep -o 'Hvor mange m/s er 100 km/t' | wc -l` → **> 0**, og samme tre greb på beraknare.se. Værktøjet er en klient-komponent, så læs den i koden indtil facit kan hentes headless. Første reelle deploy-vindue efter mergen er **6/10 21:30**.
+
+⚠️ **`grep -oF «62,1 mph» giver 0 på en side der VISER «100 km/t i mph: 62,1 mph»** (målt 6/10 21:31): der står et tag mellem tallet og enheden, så greb på rå markup kan ikke finde en sætning med et tal og en enhed. Strip HTML'en før du læser tal: `curl -s URL | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"`. Kun tekst, der står bogstaveligt i kilden (labels, overskrifter, FAQ), er grebbar på rå markup.
 
 ⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10 00:1x): Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer 1 for alt. Værktøjer der er klient-komponenter skal læses i koden, indtil facit kan hentes headless. Interpolerede tal skrives som `1.515<!-- --> skridt` — tjek tal og enhed hver for sig, eller brug FAQ-teksten der står uinterpoleret.
 

@@ -144,6 +144,23 @@ describe("fart page", () => {
     expect(html).not.toContain("Omregn km/t til m/s");
   });
 
+  test("den svenska side regner de tre omvandlingarna, den danske gør", async () => {
+    // Målt på beraknare.se 6/10 21:4x: den danske side har en liste med de tre
+    // mest eftersökta omvandlingarna (100 km/t i m/s, mph og knop) og
+    // definitionen på milen, den svenska sida gick direkte fra introduktionen
+    // til «3,6 km/h är exakt 1 m/s» og skrev aldrig ut vad 100 km/h blir til.
+    // Läsaren på beraknare.se får alltså inga tal at efterpröva i huvudet,
+    // selv om domänen växer +141 %.
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await FartPage());
+    const fakta = fartOmregningsFakta("se");
+
+    expect(html).toContain(`<strong>100 km/h i m/s:</strong> ${fakta.eksempler[0].resultat} m/s`);
+    expect(html).toContain(`<strong>100 km/h i mph:</strong> ${fakta.eksempler[1].resultat} mph`);
+    expect(html).toContain(`<strong>100 km/h i knop:</strong> ${fakta.eksempler[2].resultat} knop`);
+    expect(html).toContain(`${fakta.milKm} km`);
+  });
+
   test("den svenske side er urørt af den danske rettelse", async () => {
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
     const html = renderToStaticMarkup(await FartPage());

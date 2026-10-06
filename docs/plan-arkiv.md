@@ -30416,3 +30416,34 @@ giver **5 røde** i `procent.test.ts` og `ProcentBeregner.test.tsx`; gendannet.
 
 **MÅL:** `/procent` baseline 149.929 visninger / 85 klik / 0,1 % CTR / pos. 7,5
 pr. 6/10 — måles igen 20/10 sammen med `/fart`-titlerne.
+
+---
+
+## 6/10 21:5x — de tre omregningseksempler også på svensk (`/fart`)
+
+**Målt, ikke gæt.** Efter at `/fart` var DEPLOY OK (21:31-vinduet) blev begge
+domæner hentet og strippet for tags. Den danske side har listen «100 km/t i m/s:
+27,78 m/s · 100 km/t i mph: 62,1 mph · 100 km/t i knop: 54 knop» og en linje om
+at 1 mil er præcis 1,609344 km. Den svenska side gik direkte fra introduktionen
+til «3,6 km/h är exakt 1 m/s, och 1 knop är en sjömil i timmen = exakt 1,852
+km/h» og skrev **aldrig ud, hvad 100 km/h bliver til** — læseren fik ingen tal at
+regne i hovedet, selv om beraknare.se er +141 % og `/fart` dens tredjestørste
+side (179 besøgende, +129 %).
+
+**Rettelsen** er samme struktur som den danske: introduktion, så `<ul>` med de tre
+omregninger, så tempo-afsnittet. Alle tal kommer fra `fartOmregningsFakta("se")`
+og `omregnet(…, "se")` — `omregnet` fik et valgfrit locale-argument med `"da"` som
+standard, så de tre danske kald er uændrede. Der står intet håndskrevet beløb i
+den nye markup, så `regnestykker.test.ts`'s liste over hårdkodede beløb er
+stadig tom.
+
+**Port.** Den svenske test «den svenske side får samme omregning på svensk» holdt
+før på `somermilKm` og overskriften, så denne mangel var usynlig. Den nye test
+«den svenska side regner de tre omvandlingarna, den danske gør» læser de tre
+`fakta.eksempler[0..2]` — samme konstant værktøjet og FAQ'en bruger — så den er
+hængt på de rendererede tal og ikke på en håndskrevet streng.
+
+**Verificeret:** typecheck 0, biome 813 filer, **4.726 tests i 286 filer** på
+39 s, `next build` grøn.
+
+**Mål:** beraknare.se `/fart` 179 besøgende/28d (+129 %, bounce 9 %) pr. 6/10.
