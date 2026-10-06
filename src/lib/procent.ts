@@ -245,6 +245,34 @@ export function rabatProcent(normalPris: number, nedsatPris: number): number {
 export const RABAT_EKSEMPEL = { normalPris: 9000, nedsatPris: 7875 };
 
 /**
+ * Both answers a reader needs after typing their own two prices into the rabat
+ * tool: the rate in percent and the amount saved in kroner.
+ *
+ * The rate comes from {@link rabatProcent}, so it is the same 12,5 % the prose
+ * and the FAQ give for {@link RABAT_EKSEMPEL}. `besparelse` is the plain
+ * difference of the two prices and `erRabat` says which of them was higher —
+ * a pair where the second price is higher is not a discount, and a reader who
+ * gets "12,5 % rabat" for 9 000 → 10 125 has been told the wrong thing.
+ */
+export interface ProcentRabatSvar {
+  /** The discount as a percent of the price before the cut. 0 when that price is 0. */
+  rabat: number;
+  /** The amount saved: `normalPris - nedsatPris`. Negative when the price rose. */
+  besparelse: number;
+  /** True when the new price is lower than the old one. */
+  erRabat: boolean;
+}
+
+/** The discount in percent and the amount saved, from two prices the reader typed. */
+export function procentRabat(normalPris: number, nedsatPris: number): ProcentRabatSvar {
+  return {
+    rabat: rabatProcent(normalPris, nedsatPris),
+    besparelse: normalPris - nedsatPris,
+    erRabat: nedsatPris < normalPris,
+  };
+}
+
+/**
  * The price the "what does X % off cost" rows are worked out from.
  *
  * A round figure, because the rows are about the *rate*, not about a product:

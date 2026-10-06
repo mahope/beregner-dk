@@ -151,18 +151,99 @@ test("kun procenttilstandene får procenttegn på hovedtallet", () => {
 
     fireEvent.click(screen.getByRole("radio", { name: /Forskel mellem to tal/ }));
     expect(harProcenttegn()).toBe(true);
+
+    fireEvent.click(screen.getByRole("radio", { name: /Rabat i procent/ }));
+    expect(harProcenttegn()).toBe(true);
   });
 
-test("alle fem tilstande står i én række på stor skærm", () => {
-    // ModeSelector tager `columns` og sætter en grid-klasse. Med fem tilstande
-    // og fire kolonner falder den femte ned på en linje for sig selv på 1280 px,
-    // hvilket gør den nye tilstand sværere at finde end de fire gamle. Rækken skal
-    // derfor have lige så mange kolonner som der er tilstande.
+  test("'rabat i procent' svarer på telefonens 9.000 kr. -> 7.875 kr.", () => {
+    // Den søgning Google har registreret for denne side: "en telefon er sat 1125
+    // kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?"
+    // (56 visninger, pos. 5). Indtil nu stod svaret kun i brødteksten — læseren
+    // kunne ikke regne sin egen pris ind. 1.125 / 9.000 = 12,5 %, og det er det
+    // beløb, der også skal stå ved siden af.
+    const { container } = renderProcent("da");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Rabat i procent/ }));
+
+    expect(container.textContent).toContain("12,50 %");
+    expect(container.textContent).toContain("Du sparer");
+    expect(container.textContent).toContain("1.125");
+  });
+
+  test("de to prisfelter i rabat-tilstanden har hver sit synlige navn", () => {
+    // Rækkefølgen er selve spørgsmålet, så felterne skal kunne læses uden
+    // skærmlæser: "pris før rabat" og "pris efter rabat", ikke to løse tal.
+    renderProcent("da");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Rabat i procent/ }));
+
+    expect(screen.getByLabelText("Pris før rabat (kr.)")).toBeDefined();
+    expect(screen.getByLabelText("Pris efter rabat (kr.)")).toBeDefined();
+  });
+
+  test("en pris der stiger kaldes en stigning og ikke en rabat", () => {
+    // 7.500 -> 7.875 er 5 % OP. Sig "5,00 % rabat, så du sparer 375 kr." til en
+    // læser, hvis vare prisen er steget, er det forkerte svar på spørgsmålet —
+    // og "sparer 375 kr." er det modsatte af det sker.
+    const { container } = renderProcent("da");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Rabat i procent/ }));
+    fireEvent.change(screen.getByLabelText("Pris før rabat (kr.)"), { target: { value: 7500 } });
+
+    expect(container.textContent).toContain("5,00 % stigning");
+    expect(container.textContent).toContain("Prisen steg");
+    expect(container.textContent).not.toContain("Rabatten er");
+    expect(container.textContent).not.toContain("du sparer");
+  });
+
+  test("to ens priser er ikke en rabat", () => {
+    const { container } = renderProcent("da");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Rabat i procent/ }));
+    fireEvent.change(screen.getByLabelText("Pris efter rabat (kr.)"), { target: { value: 9000 } });
+
+    expect(container.textContent).toContain("er den samme pris begge steder");
+    expect(container.textContent).toContain("Prisen er uændret");
+  });
+
+  test("noten regner de to procenttal, den ikke skriver i hånden", () => {
+    // Noten siger, at 1.125 kr. er 14,3 % af den pris man betaler, men at
+    // RABATTEN er 12,5 % af den pris man startede med. De to tal har hver sin
+    // nævner, og en håndskreven note kan ikke vide hvilken nævner den bruger —
+    // så begge kommer fra de samme funktioner som værktøjet.
+    const { container } = renderProcent("da");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Rabat i procent/ }));
+
+    expect(container.textContent).toContain("1.125 kr. er 14,3 %");
+    expect(container.textContent).toContain("12,5 % af de 9.000 kr.");
+  });
+
+  test("svensk rabat-tilstand svarer med svenske ord", () => {
+    // beraknare.se må ikke vise «Rabat i procent» eller «Du sparer» — modeknappen
+    // og besparelsen skal hedde det samme på svensk.
+    const { container } = renderProcent("se");
+
+    fireEvent.click(screen.getByRole("radio", { name: /Rabatt i procent/ }));
+
+    expect(container.textContent).toContain("Rabatt i procent");
+    expect(container.textContent).toContain("Du sparar");
+    expect(container.textContent).not.toContain("Du sparer");
+    expect(screen.getByLabelText("Pris före rabatt (kr)")).toBeDefined();
+    expect(screen.getByLabelText("Pris efter rabatt (kr)")).toBeDefined();
+  });
+
+test("alle seks tilstande står i to rækker af tre på stor skærm", () => {
+    // Seks tilstande i én række på 1280 px gør hver knap smallere end de
+    // 44 px, designreglen kræver som minimum, og grid-klassen md:grid-cols-5
+    // efterlod den sjette alene på en linje for sig selv. Tre kolonner giver to
+    // lige rækker, så ingen tilstand står alene.
     const { container } = renderProcent("da");
 
     const radiogroup = container.querySelector('[role="radiogroup"]');
-    expect(radiogroup?.className).toContain("md:grid-cols-5");
-    expect(container.querySelectorAll('[role="radio"]')).toHaveLength(5);
+    expect(radiogroup?.className).toContain("md:grid-cols-3");
+    expect(container.querySelectorAll('[role="radio"]')).toHaveLength(6);
   });
 
 test("de to felter i forskel-tilstanden har hver sit navn", () => {

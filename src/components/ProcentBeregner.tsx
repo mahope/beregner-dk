@@ -9,11 +9,18 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { ModeSelector, ModeOption } from "@/components/ModeSelector";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 import { useLocale } from "@/components/LocaleProvider";
-import { formatNumber } from "@/lib/format";
-import { procentForskelMellemTal, procentRetning } from "@/lib/procent";
+import { formatNumber, formatSvenskText } from "@/lib/format";
+import {
+  procentForskel,
+  procentForskelMellemTal,
+  procentRabat,
+  procentRetning,
+  rabatProcent,
+  RABAT_EKSEMPEL,
+} from "@/lib/procent";
 import type { Locale } from "@/lib/i18n";
 
-type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning" | "forskel";
+type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning" | "forskel" | "rabat";
 
 const labels = {
   da: {
@@ -27,6 +34,8 @@ const labels = {
     modeStigningDesc: "Fra X til Y = ? %",
     modeForskelLabel: "Forskel mellem to tal",
     modeForskelDesc: "Hvor stor er forskellen?",
+    modeRabatLabel: "Rabat i procent",
+    modeRabatDesc: "Pris før → pris efter = ? %",
     modeSelectorName: "Beregningstype",
     ariaDeltalTael: "Del-tal (tælleren)",
     ariaHeltalNaev: "Heltal (nævneren)",
@@ -73,6 +82,19 @@ const labels = {
     forskelMiddel: "Middelværdi",
     forskelNote:
       "De to tal er forskellige spørgsmål. Vælg den ovenfor, der passer på dit.",
+    forklaringRabat: (foer: string, efter: string, pct: string, besparelse: string) =>
+      `${foer} kr. → ${efter} kr. er ${pct} % rabat, så du sparer ${besparelse} kr.`,
+    forklaringRabatStigning: (foer: string, efter: string, pct: string, ekstra: string) =>
+      `${foer} kr. → ${efter} kr. er ${pct} % stigning, så du betaler ${ekstra} kr. mere.`,
+    forklaringRabatUaendret: (foer: string) => `${foer} kr. er den samme pris begge steder.`,
+    prisFoerLabel: "Pris før rabat (kr.)",
+    prisEfterLabel: "Pris efter rabat (kr.)",
+    rabatOverskrift: "Rabatten er",
+    rabatBesparelse: "Du sparer",
+    rabatStigning: "Prisen steg",
+    rabatUaendret: "Prisen er uændret",
+    rabatNote: (kr: (tal: number) => string, pct: (tal: number) => string) =>
+      `Rabatten regnes på prisen FØR nedsættelsen. ${kr(RABAT_BESPARELSE)} kr. er ${pct(RABAT_MOD_NY_PRIS)} % af de ${kr(RABAT_EKSEMPEL.nedsatPris)} kr. du betaler, men rabatten er ${pct(RABAT_SATS_PCT)} % af de ${kr(RABAT_EKSEMPEL.normalPris)} kr.`
   },
   se: {
     modeFindProcentLabel: "Hitta procent",
@@ -85,6 +107,8 @@ const labels = {
     modeStigningDesc: "Från X till Y = ? %",
     modeForskelLabel: "Skillnad mellan två tal",
     modeForskelDesc: "Hur stor är skillnaden?",
+    modeRabatLabel: "Rabatt i procent",
+    modeRabatDesc: "Pris före → pris efter = ? %",
     modeSelectorName: "Beräkningstyp",
     ariaDeltalTael: "Deltal (täljaren)",
     ariaHeltalNaev: "Heltal (nämnaren)",
@@ -130,8 +154,36 @@ const labels = {
     forskelDifferensOverskrift: "Skillnad på medelvärdet",
     forskelMiddel: "Medelvärde",
     forskelNote: "De två talen är två olika frågor. Välj den överst som passar din.",
+    forklaringRabat: (foer: string, efter: string, pct: string, besparelse: string) =>
+      `${foer} kr. → ${efter} kr. är ${pct} % rabatt, så du sparar ${besparelse} kr.`,
+    forklaringRabatStigning: (foer: string, efter: string, pct: string, ekstra: string) =>
+      `${foer} kr. → ${efter} kr. är ${pct} % ökning, så du betalar ${ekstra} kr. mer.`,
+    forklaringRabatUaendret: (foer: string) => `${foer} kr. är samma pris båda ställena.`,
+    prisFoerLabel: "Pris före rabatt (kr)",
+    prisEfterLabel: "Pris efter rabatt (kr)",
+    rabatOverskrift: "Rabatten är",
+    rabatBesparelse: "Du sparar",
+    rabatStigning: "Prisen steg",
+    rabatUaendret: "Prisen är oförändrad",
+    rabatNote: (kr: (tal: number) => string, pct: (tal: number) => string) =>
+      `Rabatten räknas på prisen FÖRE sänkningen. ${kr(RABAT_BESPARELSE)} kr är ${pct(RABAT_MOD_NY_PRIS)} % av de ${kr(RABAT_EKSEMPEL.nedsatPris)} kr du betalar, men rabatten är ${pct(RABAT_SATS_PCT)} % av de ${kr(RABAT_EKSEMPEL.normalPris)} kr.`
   },
 } as const;
+
+/** Hvor meget der er sparet på {@link RABAT_EKSEMPEL}, og hvor meget prisen er steget. */
+const RABAT_BESPARELSE = RABAT_EKSEMPEL.normalPris - RABAT_EKSEMPEL.nedsatPris;
+const RABAT_MOD_NY_PRIS = procentForskel(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+const RABAT_SATS_PCT = rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+
+/** Beløb og procent som løbende tekst: 1.125 kr. på dansk, 1 125 kr. på svensk. */
+function rabatTekst(tal: number, locale: Locale, decimaler: number): string {
+  return locale === "se"
+    ? formatSvenskText(tal, decimaler)
+    : formatNumber(tal, locale, {
+        minimumFractionDigits: decimaler,
+        maximumFractionDigits: decimaler,
+      });
+}
 
 export default function ProcentBeregner() {
   const { locale } = useLocale();
@@ -143,6 +195,7 @@ export default function ProcentBeregner() {
     { id: "find-heltal", label: l.modeFindHeltalLabel, desc: l.modeFindHeltalDesc },
     { id: "stigning", label: l.modeStigningLabel, desc: l.modeStigningDesc },
     { id: "forskel", label: l.modeForskelLabel, desc: l.modeForskelDesc },
+    { id: "rabat", label: l.modeRabatLabel, desc: l.modeRabatDesc },
   ];
 
   const [mode, setMode] = useState<BeregningsMode>("find-procent");
@@ -164,6 +217,11 @@ export default function ProcentBeregner() {
   const [talA, setTalA] = useState<number>(30000);
   const [talB, setTalB] = useState<number>(33000);
 
+  // Rabat mode. Telefonen fra RABAT_EKSEMPEL (9.000 → 7.875) er de to priser
+  // GSC har registreret som spørgsmålet på siden, så værktøjet åbner på dem.
+  const [rabatFoer, setRabatFoer] = useState<number>(RABAT_EKSEMPEL.normalPris);
+  const [rabatEfter, setRabatEfter] = useState<number>(RABAT_EKSEMPEL.nedsatPris);
+
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
 
@@ -184,6 +242,8 @@ export default function ProcentBeregner() {
       if (inputs.til !== undefined) setTil(inputs.til);
       if (inputs.talA !== undefined) setTalA(inputs.talA);
       if (inputs.talB !== undefined) setTalB(inputs.talB);
+      if (inputs.rabatFoer !== undefined) setRabatFoer(inputs.rabatFoer);
+      if (inputs.rabatEfter !== undefined) setRabatEfter(inputs.rabatEfter);
     }
   }, []);
 
@@ -197,17 +257,19 @@ export default function ProcentBeregner() {
     setTil(125);
     setTalA(30000);
     setTalB(33000);
+    setRabatFoer(RABAT_EKSEMPEL.normalPris);
+    setRabatEfter(RABAT_EKSEMPEL.nedsatPris);
   }, []);
 
   // Get shareable link for current calculation
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'procent',
-      inputs: { mode, deltal, heltal, procent, baseVal, fra, til, talA, talB },
+      inputs: { mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB]);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter]);
 
   const validateNotZero = useCallback((value: number) => {
     if (value === 0) return l.valueNotZero;
@@ -289,10 +351,39 @@ export default function ProcentBeregner() {
         };
       }
 
+      case "rabat": {
+        // En pris på 0 kr. før nedsættelsen kan ikke give en rabat i procent —
+        // `rabatProcent` svarer 0, og læseren skal se «Værdien kan ikke være
+        // nul» frem for et tal der ser ud som et svar.
+        if (rabatFoer === 0) return null;
+        const svar = procentRabat(rabatFoer, rabatEfter);
+        return {
+          type: "rabat" as const,
+          resultat: svar.rabat,
+          besparelse: svar.besparelse,
+          erRabat: svar.erRabat,
+          forklaring: svar.erRabat
+            ? l.forklaringRabat(
+                num(rabatFoer),
+                num(rabatEfter),
+                fixed(svar.rabat),
+                num(svar.besparelse),
+              )
+            : svar.besparelse < 0
+              ? l.forklaringRabatStigning(
+                  num(rabatFoer),
+                  num(rabatEfter),
+                  fixed(svar.rabat),
+                  num(-svar.besparelse),
+                )
+              : l.forklaringRabatUaendret(num(rabatFoer)),
+        };
+      }
+
       default:
         return null;
     }
-  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, l, locale]);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, rabatFoer, rabatEfter, l, locale]);
 
   // Track calculation once per session
   useEffect(() => {
@@ -314,7 +405,7 @@ export default function ProcentBeregner() {
         currentMode={mode}
         onChange={setMode}
         name={l.modeSelectorName}
-        columns={5}
+        columns={6}
       />
 
       {/* Input fields based on mode */}
@@ -422,6 +513,24 @@ export default function ProcentBeregner() {
             />
           </div>
         )}
+
+        {/* To priser med synlige labels: her er rækkefølgen selve spørgsmålet,
+            så felterne må ikke stå som to løse tal med en orddel imellem. */}
+        {mode === "rabat" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg">
+            <InputField
+              value={rabatFoer}
+              onChange={setRabatFoer}
+              label={l.prisFoerLabel}
+              customValidation={validateNotZero}
+            />
+            <InputField
+              value={rabatEfter}
+              onChange={setRabatEfter}
+              label={l.prisEfterLabel}
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end">
@@ -446,7 +555,8 @@ export default function ProcentBeregner() {
               formatFn={(n) =>
                 resultat.type === "find-procent" ||
                 resultat.type === "stigning" ||
-                resultat.type === "forskel"
+                resultat.type === "forskel" ||
+                resultat.type === "rabat"
                   ? `${formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })} %`
                   : formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })
               }
@@ -499,6 +609,37 @@ export default function ProcentBeregner() {
               </p>
               <p className="sm:col-span-2 text-sm text-gray-600 dark:text-gray-400">
                 {l.forskelNote}
+              </p>
+            </div>
+          )}
+
+          {/* Besparelsen i kroner. Spørgsmålet «hvor stor er rabatten?» har to
+              rigtige svar, og læseren skal have beløbet uden at regne det selv. */}
+          {resultat.type === "rabat" && (
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+              <div className="rounded-lg p-4 bg-white/60 dark:bg-gray-900/30">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  {l.rabatBesparelse}
+                </h3>
+                <p className="text-2xl font-bold mt-1">
+                  {formatNumber(Math.abs(resultat.besparelse), locale as Locale, {
+                    maximumFractionDigits: 2,
+                  })}
+                  {" kr."}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {resultat.erRabat
+                    ? l.rabatOverskrift + " " + formatNumber(resultat.resultat, locale as Locale, { maximumFractionDigits: 2 }) + " %"
+                    : resultat.besparelse < 0
+                      ? l.rabatStigning
+                      : l.rabatUaendret}
+                </p>
+              </div>
+              <p className="sm:col-span-2 text-sm text-gray-600 dark:text-gray-400">
+                {l.rabatNote(
+                  (tal) => rabatTekst(tal, locale as Locale, 0),
+                  (tal) => rabatTekst(tal, locale as Locale, 1),
+                )}
               </p>
             </div>
           )}

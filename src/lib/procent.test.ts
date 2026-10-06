@@ -13,6 +13,7 @@ import {
   procentFald,
   procentForskel,
   procentForskelMellemTal,
+  procentRabat,
   procentRetning,
   rabatProcent,
 } from "./procent";
@@ -426,3 +427,40 @@ describe("procentBesparelse", () => {
   });
 });
 
+
+describe("procentRabat", () => {
+  test("giver de to tal i FAQ'en for telefonens 9.000 kr. -> 7.875 kr.", () => {
+    const svar = procentRabat(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+    expect(svar.rabat).toBe(12.5);
+    expect(svar.besparelse).toBe(1125);
+    expect(svar.erRabat).toBe(true);
+  });
+
+  test("en pris der steg er ikke en rabat", () => {
+    const svar = procentRabat(9000, 10125);
+    expect(svar.erRabat).toBe(false);
+    expect(svar.besparelse).toBe(-1125);
+    expect(svar.rabat).toBe(12.5);
+  });
+
+  test("to ens priser er 0 % og 0 kr., ikke en rabat", () => {
+    const svar = procentRabat(500, 500);
+    expect(svar.rabat).toBe(0);
+    expect(svar.besparelse).toBe(0);
+    expect(svar.erRabat).toBe(false);
+  });
+
+  test("en pris før 0 kr. giver 0 % i stedet for NaN", () => {
+    const svar = procentRabat(0, 250);
+    expect(svar.rabat).toBe(0);
+    expect(svar.erRabat).toBe(false);
+  });
+
+  test("bede procent og bedrag til sum til den pris der betales", () => {
+    for (const sats of RABAT_SATS) {
+      const svar = procentRabat(RABAT_BELOEB, RABAT_BELOEB - procentBesparelse(RABAT_BELOEB, sats));
+      expect(svar.besparelse + (RABAT_BELOEB - svar.besparelse)).toBe(RABAT_BELOEB);
+      expect(svar.erRabat).toBe(sats > 0);
+    }
+  });
+});

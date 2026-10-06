@@ -30351,3 +30351,68 @@ testfil, så den kan ikke ændre bygget.
 en langsom port får sin egen grænse uden at repoets øvrige tests bliver
 slappere — det er den rigtige lagdeling, og det er derfor ❓'en er lukket og
 ikke løst ved at hæve det globale loft.
+
+---
+
+## 6/10 21:3x — «Rabat i procent» på `/procent` (F5g)
+
+**Datagrund.** GSC-eksporten 6/10 (`/procent` 149.929 visninger, 85 klik, 0,1 %
+CTR, pos. 7,5 — sitets #1-side) rummer blandt sidens tre søgninger «en telefon er
+sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?» med
+56 visninger på pos. 5. Dansk autocomplete (`hl=da&gl=dk`, 6/10 21:3x) svarer
+«rabat procent» med ti træffere, hvoraf «procentvis rabat»,
+«procentregning rabat», «10 procent rabat», «70 procent rabat» og «rabat 20
+procent» alle spørger om at regne en rabat.
+
+**Fundet.** Siden havde hele svaret i brødteksten: et afsnit med
+`RABAT_BELOEB`-tabellen, to FAQ-svar («Hvor stor er rabatten i procent?» og «Hvordan
+regner man rabat i procent?») og `rabatProcent()`/`RABAT_EKSEMPEL` i
+`src/lib/procent.ts` med 9.000 → 7.875 som eksempelpar. Værktøjet havde derimod
+fem tilstande — find procent, find resultat, find heltal, procentvis ændring,
+forskel mellem to tal — og ingen af dem kunne tage imod to *priser*. En læser,
+der ramte siden via søgningen, måtte selv regne 1.125 / 9.000 på papir, selv om
+sidens egen `<title>` lover «rabat».
+
+**Løsningen.** Sjette tilstand, `rabat`, med to synlige labels («Pris før rabat
+(kr.)» / «Pris efter rabat (kr.)»), et hovedtal i procent og et kort med beløbet
+sparer — de to tal spørgsmålet «hvor stor er rabatten?» har brug for. Felterne er
+ikke `inline` som de andre tilstandes, fordi rækkefølgen her *er* spørgsmålet;
+et skjelt `aria-label` på to løse tal giver ikke nogen svar på, hvilken der er
+hvilken. Ny `procentRabat(normalPris, nedsatPris)` i `src/lib/procent.ts` giver
+`{ rabat, besparelse, erRabat }` og genbruger `rabatProcent`, så satsen er den
+samme som i FAQ'en.
+
+**Tre ting værktøjet gør rigtigt, som brødteksten ikke gjorde:**
+- En pris der **steg** (7.500 → 7.875) svarer «5,00 % stigning, så du betaler
+  375 kr. mere» og «Prisen steg» — ikke «12,50 % rabat, så du sparer …», som er
+  det modsatte af det der sker.
+- To **ens priser** svarer «er den samme pris begge steder» og «Prisen er
+  uændret», ikke 0 % rabat.
+- En pris før på **0 kr.** returnerer intet resultat, så feltets egen
+  `customValidation` («Værdien kan ikke være nul») får lov at sige det samme som
+  de andre tilstande.
+
+**Noten er regnet, ikke skrevet.** `rabatNote` er en template, der henter
+beløb og procent fra `RABAT_EKSEMPEL` gennem de samme funktioner som værktøjet:
+«1.125 kr. er 14,3 % af de 7.875 kr. du betaler, men rabatten er 12,5 % af de
+9.000 kr.». De to tal har hver sin nævner, og en håndskreven note kan ikke vide
+hvilken den bruger. Det holdt også `regnestykker.test.ts` grøn uden at føje
+`ProcentBeregner.tsx` til listen over hårdkodede beløb — listen skal være tom, så
+det første håndskrevne beløb i en beregner gør porten rød. Svensk note bruger
+`formatSvenskText` (almindeligt mellemrum, ikke U+00A0).
+
+**Layout.** Seks tilstande i `md:grid-cols-5` ville givet den sjette knap en
+linje for sig selv på 1280 px; seks i én række gør hver knap smallere end de
+44 px, designreglen kræver. Derfor `ModeSelector` har fået `6: 'grid-cols-2
+md:grid-cols-3'` — to lige rækker af tre på stor skærm, uændret grid på de fem
+gamle tilstande. Testen «alle fem tilstande står i én række» blev skrevet om til
+«alle seks tilstande står i to rækker af tre».
+
+**Verificeret.** `npm run typecheck` 0, `biome lint` 813 filer uden fund,
+**4.725 tests i 286 filer grønne** på 44 s, `next build` grøn. Mutationen af
+`procentRabat` til den omvendte nævner (`procentForskel` frem for `rabatProcent`)
+giver **5 røde** i `procent.test.ts` og `ProcentBeregner.test.tsx`; gendannet.
+`git diff -- src/ | grep -cE '^\+.*\$[0-9]'` = 0.
+
+**MÅL:** `/procent` baseline 149.929 visninger / 85 klik / 0,1 % CTR / pos. 7,5
+pr. 6/10 — måles igen 20/10 sammen med `/fart`-titlerne.
