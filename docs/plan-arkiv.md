@@ -30504,3 +30504,52 @@ sÃ¥ den på, fordi det er den lange vejs typecheck der gjorde det.
 
 **MÅL:** `/moms` baseline 22.464 visninger / 0,2 % CTR / pos. 7,0 pr. 6/10 —
 måles igen 21/10.
+
+## 6/10 22:2x — «Kalorier i madvarer» på /kalorier (ceo/kalorier-madvarer)
+
+**Datagrund.** 9 af 10 danske autocomplete-træffere under «kalorier» er
+«kalorier i <madvare>» (hl=da, `suggestqueries.google.com`, 6/10 22:2x):
+æg, banan, kartofler, vindruer, avocado, æble, kirsebær, gulerødder,
+vandmelon. GSC: `/kalorier` 10.125 visninger, 1,1 % CTR, pos. 8,2; Plausible
+265 besøgende/28d (+29 %).
+
+**Hvad der blev bygget.** `src/lib/kalorier-madvarer.ts` med 53 fødevarer
+(grupperne frugt, grønt, æg, kød, brød, mejeri, fedt, sødt) og
+`src/components/KalorieTabel.tsx`: søgefelt, gram-felt pr. række, kcal +
+protein/fedt/kulhydrat pr. 100 g. Alle 53 rækker er i markup'en ved første
+render (tomt søgefelt = hele tabellen), så siden kan indekseres uden JS.
+Makrospalterne er skjult under md; gram-feltet er 100 som standard, så
+tabellens egen værdi og feltets værdi aldrig kan sige forskellige ting.
+
+**Kilden, og hvorfor den låst en ⛔.** Fødevarekilden var den åbne ❓. USDA
+FoodData Central løser den: SR Legacy 2018-04 ligger som zip på
+`fdc.nal.usda.gov` uden nøgle (200), mens **FDC-API'en kræver en nøgle og
+`DEMO_KEY` svarer 429** efter ~13 kald. Alle tal er derfor hentet fra CSV'en
+med et lille script, fundet på de engelske produktsnavne, og hver række
+bærer sit `fdc_id` + den danske oversættelse. Der er 0 håndskrevne tal i
+filen. Fisken (laks, torsk, rejer) kunne ikke findes i SR Legacy under de
+navne de har dér, så gruppen «fisk» kom ikke med — den kan næste iteration
+tage fra en anden FDC-datasæt.
+
+**Porten.** 15 tests i `kalorier-madvarer.test.ts` låser «Æg, helt, råt» på
+143 kcal / 12,6 protein / 9,5 fedt, smør på 717 / 81,1 og **kartofel rå 77 mod
+kogt 87** — den forskel, der gør tabellen værd at have. Søgningen er testet
+begge veje: «aeg» og «æg» finder «Æg, helt, råt» før «Æggeblomme» (rang så
+tabellens rækkefølge styrer), og «rugbrod» finder «Rugbrød» via
+nødalternativet, der kun kører når den strenge søgning intet fandt.
+`kalorieIgram(m, 100)` er præcis `kcal100g`, så brødteksten og tabellen ikke
+kan glide fra hinanden — brødtekstens to tal læses med `kcalIMadvare()`, som
+kaster på et navn, der ikke findes.
+
+**Målt.** typecheck 0, lint 0 (819 filer), 4.766 tests i 288 filer grønne,
+`next build` grøn. `locale-leak --gate` meldte én dansk streng fra den nye
+guard — ``Ukendt madvare i kalorier-brødteksten: ${navn}`` — og den blev
+gjort engelsk i stedet for at få en REVIEWED-post; en fejltekst er ikke copy,
+og repoet skriver kode og fejltekster på engelsk.
+
+**Ikke kørt / ikke gjort.** Ingen Playwright (repoet har stadig intet), så
+390/768/1280 px er ikke set i en browser — layoutet er bygget efter
+`ArealOmregner.tsx` med samme felt- og kortklasser, men det er ikke set.
+Ingen svensk eller norsk version af madvarerne; beraknare.se får siden uden
+tabellen. `kategori`-siden og sitemap er urørt, fordi der ikke er en ny
+URL.

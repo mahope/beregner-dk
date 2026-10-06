@@ -1,3 +1,4 @@
+STATUS: 6/10 22:2x. ✅ **«Kalorier i madvarer» på `/kalorier` — 53 fødevarer med kcal, protein, fedt og kulhydrat pr. 100 g, søgning på dansk og et gram-felt pr. række.** Datagrund: **9 af 10** danske autocomplete-træffere under «kalorier» er «kalorier i æg», «kalorier i en banan», «kalorier i kartofler» og «kalorier i vindruer» (hl=da, 6/10 22:2x), og GSC har 10.125 visninger / 1,1 % CTR / pos. 8,2 på `/kalorier`. Siden havde kaloriebehov-værktøjet, to alders-tabeller og 12 makro-FAQ'er — men intet sted, læseren kunne slå sin egen madvare op i. ⛔'en på madvaredata er lukket: **USDA FoodData Central, SR Legacy 2018-04** er fri nedlæsning fra maskinen (FDC-API'en kræver nøgle og svarer 429 på `DEMO_KEY`), så alle 53 tal er hentet fra CSV'en og hver række bærer sit `fdcId`. **MÅL: /kalorier baseline 265 Plausible-besøgende/28d, 10.125 GSC-visninger, 1,1 % CTR, pos. 8,2 pr. 6/10** — måles igen 20/10.
 STATUS: 7/10 22:0x. ✅ **Importmoms på `/moms` — et værktøj til de varer, man køber uden for EU.** Datagrund: dansk autocomplete (hl=da, 6/10 21:5x) har «import moms kalkulator» og «told og moms kalkulator» under «moms kalkulator», «told moms beregner» under «moms beregner» og «moms på temu» under «moms på». Samtidig var brødteksten **fejlagtig**: den sagde «eventuel told ved import over 1.150 kr», men der har været 3 EUR (ca. 22 kr.) i told pr. varepost siden 1. juli 2026 (Rådets forordning (EU) 2026/382). Se `docs/plan-arkiv.md`.
 ✅ **Den svensk `/fart` manglede de tal, den danske side har.** Målt på beraknare.se 6/10 21:4x: den danske side lister «100 km/t i m/s: 27,78 m/s · i mph: 62,1 mph · i knop: 54 knop» og siger, at 1 mil er præcis 1,609344 km; den svenska gik direkte fra introduktionen til «3,6 km/h är exakt 1 m/s» og skrev aldrig ud, hvad 100 km/h bliver til. Nu har den samme liste på svensk, med tal fra `fartOmregningsFakta("se")` — ingen håndskrevet beløb. Se `docs/plan-arkiv.md`.
 ✅ **«Rabat i procent» er den sjette tilstand på `/procent`** — læseren kan nu regne sin egen rabat. Datagrund: GSC (6/10) har «en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?» med 56 visninger på pos. 5, og dansk autocomplete (hl=da, 6/10 21:3x) svarer «rabat procent» med «procentvis rabat», «procentregning rabat», «10 procent rabat» og «rabat 20 procent». Siden havde alle talene i brødteksten og FAQ'en, men ingen tilstand læseren kunne skrive sin egen pris ind i. Se `docs/plan-arkiv.md`.
@@ -5,7 +6,7 @@ STATUS: 7/10 22:0x. ✅ **Importmoms på `/moms` — et værktøj til de varer, 
 ✅ **Hastighedsomregner på `/fart` — km/t ↔ m/s ↔ mph ↔ knop, begge veje.** Datagrund: dansk autocomplete (hl=da, 6/10 20:3x) har **10 af 10** træffere under «km i timen», der spørger efter omregning, og «knop omregner» svarer «omregner knop til km» på 2 af 4. Faktorerne er eksakte (yard-and-pound-aftalen 1959, sømil = 1852 m). **MÅL: /fart baseline 5.288 visninger / 32 klik / 0,6 % CTR / pos. 6,9 pr. 6/10** — måles igen ~20/10.
 ✅ **`/skridt` er live på begge domæner — DEPLOY OK 6/10 20:2x.** Målt på indhold: «Skridt til km» 14 forekomster, «1.515 skridt» 3, «6,6 km» 5, «7,9 km» 7, sitemap 1. Samme greb på beraknare.se: «Steg till km» 14, «1 515 steg» 3, «7,9 km» 7, sitemap 1.
 ✅ CEO-kø punkt 0 (review-fund 29/9) er gennemgået alle otte: Valborg fast 30. april med port på plads, svensk påskafton `offsetDays: -1`, dansk sankthans fast 23./24. juni, påskeaften-FAQ slettet, `/husleje` på nettoprisindekset, `toUtcMidnight` læser `Europe/Copenhagen`/`Stockholm`, svensk promille-FAQ taler fra `promille-genstande`, `maneder: 12` er korrekt og 1. advent har fire søndage. Det fund, der lå åbent i review-filen (`naesteJuleaften` gav 0 dage på juleaften), er rettet i `35c6175` og porten på linje 91 følger nu sin egen titel.
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). 7/10 22:0x: typecheck 0, lint 0 (816 filer), **4.751 tests i 287 filer grønne**, `next build` grøn (kun de kendte Cache-Control- og Sentry-authToken-advarsler). To mutationer målt rødde: gammel toldsrs på `/moms` = 1 rød, flad told → 0 = 6 rød. Mutation af `procentRabat` til den omvendte nævner giver **5 røde**. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /procent-rabat 20/10; /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). 6/10 22:2x: typecheck 0, lint 0 (819 filer), **4.766 tests i 288 filer grønne**, `next build` grøn, `locale-leak --gate` uden nye fund (den danske guard-tekst i `kcalIMadvare` skrev `` kalorier-brødteksten ``, så den blev engelsk — ingen allowlist-post). 7/10 22:0x: typecheck 0, lint 0 (816 filer), **4.751 tests i 287 filer grønne**, `next build` grøn (kun de kendte Cache-Control- og Sentry-authToken-advarsler). To mutationer målt rødde: gammel toldsrs på `/moms` = 1 rød, flad told → 0 = 6 rød. Mutation af `procentRabat` til den omvendte nævner giver **5 røde**. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /procent-rabat 20/10; /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -153,9 +154,13 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   madvarer med en koge- eller bagetid. *Accept:* kogetid pr. vare pr.
   tilberedningsmåde, kun med kildeførte tider. ⛔ `frbs.foodsearch.lex.dk` og
   `sst.dk` er begge uafgåengelige fra maskinen (❓).
-- **[ ] Kalorieguide pr. portion på `/kalorier`** — 9 af 10 danske træffere under
-  «kalorier» er madvarer. ⛔ samme fødevarekilde som kogetider (❓), derfor én ❓
-  dækker begge.
+- **[x] FÆRDIG 6/10 22:2x — «Kalorier i madvarer» på `/kalorier`.** 53 madvarer
+  fra USDA FoodData Central (SR Legacy 2018-04), hver med `fdcId`, søgning der
+  griber «rugbrod» og «aeg» som «Rugbrød» og «Æg», og et gram-felt pr. række.
+  Brødtekstens tal læses fra tabellen, så de ikke kan glide fra den. ⛔'en med
+  fødevarekilden er lukket med FDC-CSV'en — **kogetider er stadig ⛔**, de vil
+  gerne have den samme kilde til tider, så det næste stykke arbejde kan starte
+  dér. Svensk og norsk oversættelse af madvarerne ligger ikke i denne iteration.
 - **[ ] Svensk dækning af manglende kalkulatorer** — beraknare.se har 89
   sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og
   `/boernepenge`. ⛔ Opgave 187, 13/10.
@@ -167,6 +172,16 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 22:2x:** `VERIFICÉR DEPLOY: /kalorier svarer 200 og Madvaretabellen
+er der med søgefeltet «Søg efter madvar» og rækkerne «Æg, helt, råt»,
+«Kartoffel, kogt», «Rugbrød» og «Smør», samt brødteksten «et æg på 60 gram er
+86 kcal» og «kartofler er 87 kcal kogt og 77 kcal rå» ceo/kalorier-madvarer
+6/10 22:2x`. Mål på **indhold**: `curl -s https://minberegner.dk/kalorier | grep
+-o 'Kartoffel, kogt' | wc -l` → **1** (og `grep -o 'Søg efter madvar'` → **1**).
+Tabellen er en klient-komponent, så alle 53 rækker står i markup'en fra første
+render, hvilket også er derfor Google kan indeksere den. Første reelle
+deploy-vindue efter mergen er **7/10 07:30**.
 
 **Åben 7/10 22:0x:** `VERIFICÉR DEPLOY: /moms svarer 200 på begge domÃ¦ner og
 viser vÃ¦rktøjet «Moms på varer købt uden for EU» med de fire felter

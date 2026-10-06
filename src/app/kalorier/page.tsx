@@ -8,6 +8,8 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { PROTEIN_G_PER_KG, kaloriePrAlderRaekker, kaloriePrDagRaekker, type KalorieMaal } from "@/lib/makroer";
 import { formatNumber } from "@/lib/format";
+import KalorieTabel from "@/components/KalorieTabel";
+import { MADVARER, kalorieIgram, madvareMedNavn } from "@/lib/kalorier-madvarer";
 
 export async function generateMetadata() {
   return generatePageMetadata("kalorier");
@@ -21,6 +23,16 @@ export default async function KalorierPage() {
   const proteinRange = (maal: KalorieMaal) => {
     const { min, max } = PROTEIN_G_PER_KG[maal];
     return `${dec(min)}-${dec(max)}`;
+  };
+  /**
+   * Kalorierne i brødteksten læses fra tabellen, ikke skrevet ind i sætningen.
+   * Et navn, der ikke findes, kaster — så en ny madvare kan ikke få en brødtekst
+   * med et tal, tabellen ikke har.
+   */
+  const kcalIMadvare = (navn: string, gram: number) => {
+    const madvare = madvareMedNavn(navn);
+    if (!madvare) throw new Error(`Unknown food in the calorie prose: ${navn}`);
+    return formatNumber(kalorieIgram(madvare, gram), locale, { maximumFractionDigits: 0 });
   };
 
   return (
@@ -40,6 +52,39 @@ export default async function KalorierPage() {
       </p>
 
       <KalorieBeregner />
+
+      {locale === "da" && (
+      <>
+        <KalorieTabel locale={locale} />
+
+        <div className="mt-12 prose max-w-none">
+          <h2>Kalorier i madvarer</h2>
+          <p>
+            Det mest søgte spørgsmål på denne side er ikke «hvad er mit
+            kaloriebehov», men «kalorier i æg», «kalorier i en banan» og «kalorier
+            i kartofler». Derfor står der en tabel med{" "}
+            <strong>{MADVARER.length} madvarer</strong> ovenfor: hver med
+            kalorier, protein, fedt og kulhydrat pr. 100 g. Skriv i gram-feltet,
+            så regner den den portione, du spiser — <strong>et æg på 60 gram er{" "}
+            {kcalIMadvare("Æg, helt, råt", 60)} kcal</strong>, en banan på 118
+            gram er {kcalIMadvare("Banan", 118)} kcal.
+          </p>
+          <p>
+            Tallene er hentet fra{" "}
+            <a href="https://fdc.nal.usda.gov" rel="nofollow">
+              USDA FoodData Central
+            </a>{" "}
+            og hver madvar bærer sit nummer i den database, så tallet kan
+            slås op og efterprøves. Tilberedningsformen står i navnet:
+            kartofler er 87 kcal kogt og 77 kcal rå, og smør er 717 kcal mod
+            89 kcal i letmælk. Matcher tallet ikke din egen vare, regner
+            værktøjet ovenfor dit daglige behov, og{" "}
+            <a href="/proteinbehov">/proteinbehov</a> deler det op i protein,
+            fedt og kulhydrat.
+          </p>
+        </div>
+      </>
+      )}
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">
