@@ -875,17 +875,17 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
             question: "Vilket datum är midsommarafton?",
             answer:
               "Det är fredagen som infaller mellan 19 och 25 juni. Datumet är alltså bestämt varje år, men det hamnar på olika kalenderdatum: 19 juni 2026, 25 juni 2027 och 23 juni 2028.",
-          },
-          {
-            question: "När är midsommardagen?",
-            answer:
-              "Midsommardagen är dagen efter midsommarafton, alltså en lördag mellan 20 och 26 juni. Talet på den sidan är därför alltid 1 dag större än här.",
-          },
-          {
-            question: "Är midsommarafton en röd dag?",
-            answer:
-              "Ja, midsommarafton räknas som en röd dag och de flesta arbetsgivare ger ledigt med lön. Den är inte en laglig helgdag, men den behandlas som en.",
-          },
+            },
+            {
+              question: "När är midsommardagen?",
+              answer:
+                "Midsommardagen är dagen efter midsommarafton, alltså en lördag mellan 20 och 26 juni. Talet på den sidan är därför alltid 1 dag större än här.",
+            },
+            {
+              question: "Hur firas midsommarafton traditionellt?",
+              answer:
+                "Midsommarafton firas med att dansa runt midsommarstången, sjunga traditionella sånger och äta säsongsbetonad mat som sill, färskpotatis och jordgubbar.",
+            },
         ],
       },
     },
