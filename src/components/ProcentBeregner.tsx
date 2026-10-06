@@ -10,9 +10,10 @@ import { ModeSelector, ModeOption } from "@/components/ModeSelector";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatNumber } from "@/lib/format";
+import { procentForskelMellemTal, procentRetning } from "@/lib/procent";
 import type { Locale } from "@/lib/i18n";
 
-type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning";
+type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning" | "forskel";
 
 const labels = {
   da: {
@@ -24,6 +25,8 @@ const labels = {
     modeFindHeltalDesc: "X er Y % af ?",
     modeStigningLabel: "Procentvis ændring",
     modeStigningDesc: "Fra X til Y = ? %",
+    modeForskelLabel: "Forskel mellem to tal",
+    modeForskelDesc: "Hvor stor er forskellen?",
     modeSelectorName: "Beregningstype",
     ariaDeltalTael: "Del-tal (tælleren)",
     ariaHeltalNaev: "Heltal (nævneren)",
@@ -32,6 +35,8 @@ const labels = {
     ariaDelVaerdi: "Del-værdi",
     ariaStartvaerdi: "Startværdi",
     ariaSlutvaerdi: "Slutværdi",
+    ariaFoersteTal: "Første tal",
+    ariaAndetTal: "Andet tal",
     ariaResultProcent: "Resultat procent",
     ariaResult: "Resultat",
     ariaResultHeltal: "Resultat heltal",
@@ -41,6 +46,7 @@ const labels = {
     wordPctAf: "% af",
     wordFra: "Fra",
     wordTil: "til",
+    wordOg: "og",
     valueNotZero: "Værdien kan ikke være nul",
     resultHeading: "Resultat",
     quickReference: "Hurtig reference",
@@ -55,6 +61,18 @@ const labels = {
     explainFindHeltal: (deltal: string, procent: string, val: string) => `Hvis ${deltal} er ${procent} %, så er 100 % = ${val}`,
     explainStigning: (erStigning: boolean, fra: string, til: string, pct: string) =>
       `${erStigning ? "Stigning" : "Fald"} fra ${fra} til ${til} er ${pct} %`,
+    forklarAendring: (a: string, b: string, pct: string) =>
+      `Regnet fra ${a} er bevægelsen til ${b} ${pct} %.`,
+    forklarDifferens: (pct: string) => `Regnet på middelværdien er forskellen ${pct} %.`,
+    udefineretDifferens: "Middelværdien er 0, så forskellen kan ikke regnes i procent.",
+    retningStigning: "stigning",
+    retningFald: "fald",
+    retningUaendret: "uændret",
+    forskelOverskrift: "Procentvis ændring",
+    forskelDifferensOverskrift: "Forskel på middelværdien",
+    forskelMiddel: "Middelværdi",
+    forskelNote:
+      "De to tal er forskellige spørgsmål. Vælg den ovenfor, der passer på dit.",
   },
   se: {
     modeFindProcentLabel: "Hitta procent",
@@ -65,6 +83,8 @@ const labels = {
     modeFindHeltalDesc: "X är Y % av ?",
     modeStigningLabel: "Procentuell förändring",
     modeStigningDesc: "Från X till Y = ? %",
+    modeForskelLabel: "Skillnad mellan två tal",
+    modeForskelDesc: "Hur stor är skillnaden?",
     modeSelectorName: "Beräkningstyp",
     ariaDeltalTael: "Deltal (täljaren)",
     ariaHeltalNaev: "Heltal (nämnaren)",
@@ -73,6 +93,8 @@ const labels = {
     ariaDelVaerdi: "Delvärde",
     ariaStartvaerdi: "Startvärde",
     ariaSlutvaerdi: "Slutvärde",
+    ariaFoersteTal: "Första talet",
+    ariaAndetTal: "Andra talet",
     ariaResultProcent: "Resultat procent",
     ariaResult: "Resultat",
     ariaResultHeltal: "Resultat heltal",
@@ -82,6 +104,7 @@ const labels = {
     wordPctAf: "% av",
     wordFra: "Från",
     wordTil: "till",
+    wordOg: "och",
     valueNotZero: "Värdet kan inte vara noll",
     resultHeading: "Resultat",
     quickReference: "Snabbreferens",
@@ -96,6 +119,17 @@ const labels = {
     explainFindHeltal: (deltal: string, procent: string, val: string) => `Om ${deltal} är ${procent} %, så är 100 % = ${val}`,
     explainStigning: (erStigning: boolean, fra: string, til: string, pct: string) =>
       `${erStigning ? "Ökning" : "Minskning"} från ${fra} till ${til} är ${pct} %`,
+    forklarAendring: (a: string, b: string, pct: string) =>
+      `Räknat från ${a} är förändringen till ${b} ${pct} %.`,
+    forklarDifferens: (pct: string) => `Räknat på medelvärdet är skillnaden ${pct} %.`,
+    udefineretDifferens: "Medelvärdet är 0, så skillnaden går inte att räkna i procent.",
+    retningStigning: "ökning",
+    retningFald: "minskning",
+    retningUaendret: "oförändrat",
+    forskelOverskrift: "Procentuell förändring",
+    forskelDifferensOverskrift: "Skillnad på medelvärdet",
+    forskelMiddel: "Medelvärde",
+    forskelNote: "De två talen är två olika frågor. Välj den överst som passar din.",
   },
 } as const;
 
@@ -108,6 +142,7 @@ export default function ProcentBeregner() {
     { id: "find-resultat", label: l.modeFindResultatLabel, desc: l.modeFindResultatDesc },
     { id: "find-heltal", label: l.modeFindHeltalLabel, desc: l.modeFindHeltalDesc },
     { id: "stigning", label: l.modeStigningLabel, desc: l.modeStigningDesc },
+    { id: "forskel", label: l.modeForskelLabel, desc: l.modeForskelDesc },
   ];
 
   const [mode, setMode] = useState<BeregningsMode>("find-procent");
@@ -123,6 +158,11 @@ export default function ProcentBeregner() {
   // Stigning mode
   const [fra, setFra] = useState<number>(100);
   const [til, setTil] = useState<number>(125);
+
+  // Forskel mellem to tal mode. 30 000 → 33 000 er løneksemplet fra siden, så
+  // værktøjet åbner på de tal brødteksten og FAQ'en allerede bruger.
+  const [talA, setTalA] = useState<number>(30000);
+  const [talB, setTalB] = useState<number>(33000);
 
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
@@ -142,6 +182,8 @@ export default function ProcentBeregner() {
       if (inputs.baseVal !== undefined) setBaseVal(inputs.baseVal);
       if (inputs.fra !== undefined) setFra(inputs.fra);
       if (inputs.til !== undefined) setTil(inputs.til);
+      if (inputs.talA !== undefined) setTalA(inputs.talA);
+      if (inputs.talB !== undefined) setTalB(inputs.talB);
     }
   }, []);
 
@@ -153,17 +195,19 @@ export default function ProcentBeregner() {
     setBaseVal(200);
     setFra(100);
     setTil(125);
+    setTalA(30000);
+    setTalB(33000);
   }, []);
 
   // Get shareable link for current calculation
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'procent',
-      inputs: { mode, deltal, heltal, procent, baseVal, fra, til },
+      inputs: { mode, deltal, heltal, procent, baseVal, fra, til, talA, talB },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [mode, deltal, heltal, procent, baseVal, fra, til]);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB]);
 
   const validateNotZero = useCallback((value: number) => {
     if (value === 0) return l.valueNotZero;
@@ -223,10 +267,32 @@ export default function ProcentBeregner() {
           ),
         };
 
+      case "forskel": {
+        // Begge tal er gyldige her — 0 mod 100 er en forskel på 200 %, så den
+        // "kan ikke være nul"-regel fra de andre tilstande hører ikke til.
+        const svar = procentForskelMellemTal(talA, talB);
+        return {
+          type: "forskel" as const,
+          resultat: svar.differens,
+          aendring: svar.aendring,
+          middel: svar.middel,
+          udefineret: svar.udefineret,
+          retning: procentRetning(svar.aendring),
+          forklaring: l.forklarAendring(
+            num(talA),
+            num(talB),
+            fixed(Math.abs(svar.aendring)),
+          ),
+          forklaringDifferens: svar.udefineret
+            ? l.udefineretDifferens
+            : l.forklarDifferens(fixed(svar.differens)),
+        };
+      }
+
       default:
         return null;
     }
-  }, [mode, deltal, heltal, procent, baseVal, fra, til, l, locale]);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til, talA, talB, l, locale]);
 
   // Track calculation once per session
   useEffect(() => {
@@ -248,7 +314,7 @@ export default function ProcentBeregner() {
         currentMode={mode}
         onChange={setMode}
         name={l.modeSelectorName}
-        columns={4}
+        columns={5}
       />
 
       {/* Input fields based on mode */}
@@ -338,6 +404,24 @@ export default function ProcentBeregner() {
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaProcentvis}>? %</span>
           </div>
         )}
+
+        {mode === "forskel" && (
+          <div className="flex flex-wrap items-center gap-4 text-lg">
+            <InputField
+              value={talA}
+              onChange={setTalA}
+              ariaLabel={l.ariaFoersteTal}
+              inline
+            />
+            <span className="text-gray-600 dark:text-gray-400">{l.wordOg}</span>
+            <InputField
+              value={talB}
+              onChange={setTalB}
+              ariaLabel={l.ariaAndetTal}
+              inline
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end">
@@ -360,7 +444,9 @@ export default function ProcentBeregner() {
             <AnimatedNumber
               value={resultat.resultat}
               formatFn={(n) =>
-                resultat.type === "find-procent" || resultat.type === "stigning"
+                resultat.type === "find-procent" ||
+                resultat.type === "stigning" ||
+                resultat.type === "forskel"
                   ? `${formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })} %`
                   : formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })
               }
@@ -368,13 +454,72 @@ export default function ProcentBeregner() {
           </p>
           <p className="text-gray-600 dark:text-gray-400 mt-2">{resultat.forklaring}</p>
 
+          {/* De to svar på «forskel mellem to tal». Begge står, fordi spørgsmålet
+              har to rigtige svar, og læseren ikke kan vide på forhånd hvilket
+              af dem den anden mener. */}
+          {resultat.type === "forskel" && (
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+              <div className="rounded-lg p-4 bg-white/60 dark:bg-gray-900/30">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  {l.forskelOverskrift}
+                </h3>
+                <p className="text-2xl font-bold mt-1">
+                  {formatNumber(Math.abs(resultat.aendring), locale as Locale, {
+                    maximumFractionDigits: 2,
+                  })}
+                  {" %"}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {resultat.retning === "stigning"
+                    ? l.retningStigning
+                    : resultat.retning === "fald"
+                      ? l.retningFald
+                      : l.retningUaendret}
+                </p>
+              </div>
+              <div className="rounded-lg p-4 bg-white/60 dark:bg-gray-900/30">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  {l.forskelDifferensOverskrift}
+                </h3>
+                <p className="text-2xl font-bold mt-1">
+                  {resultat.udefineret
+                    ? "—"
+                    : `${formatNumber(resultat.resultat, locale as Locale, {
+                        maximumFractionDigits: 2,
+                      })} %`}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {l.forskelMiddel}: {formatNumber(resultat.middel, locale as Locale, {
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <p className="sm:col-span-2 text-sm text-gray-600 dark:text-gray-400">
+                {resultat.forklaringDifferens}
+              </p>
+              <p className="sm:col-span-2 text-sm text-gray-600 dark:text-gray-400">
+                {l.forskelNote}
+              </p>
+            </div>
+          )}
+
           {/* Share, Copy and Print buttons */}
           <div className="mt-4 flex justify-center gap-3">
-            <CopyResultButton text={resultat.forklaring} />
+            <CopyResultButton
+              text={
+                resultat.type === "forskel"
+                  ? `${resultat.forklaring} ${resultat.forklaringDifferens}`
+                  : resultat.forklaring
+              }
+            />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName={l.calcName}
-              resultSummary={resultat.forklaring}
+              resultSummary={
+                resultat.type === "forskel"
+                  ? `${resultat.forklaring} ${resultat.forklaringDifferens}`
+                  : resultat.forklaring
+              }
             />
             <PrintResult
               calculatorName={l.calcName}

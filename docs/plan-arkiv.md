@@ -29944,3 +29944,76 @@ eksempelrækker dækkede det ikke; sweepet på 30 × 121 × 2 × 2 felter gør d
 Valborg-fejlen, hvor porten låste den forkerte dato fast. Sveriges 0,2 ‰ giver
 04:06 mod Danmarks 02:06 for præcis samme indtastning, så domæerne kan ikke
 svare ens.
+
+---
+
+## 6/10 07:5x — «Forskel mellem to tal» på `/procent` (ceo/procentvis-forskel)
+
+**Datagrund.** `/procent` er sitets #1-side: 149.929 GSC-visninger, 85 klik,
+CTR 0,1 %, pos. 7,5 (GSC 6/9–4/10). Svensk beraknare.se har de samme 30.298
+visninger til 2 klik. Dansk autocomplete (`client=firefox&hl=da`, målt 6/10)
+svarer «procentvis forskel» med ni træffere, hvor **otte** er «… mellem to tal»
+(«procentvis forskel mellem to tal», «procentvis forskel på to tal»,
+«beregn procentvis forskel mellem to tal», «procentvis forskel mellem 2 tal»);
+«beregn procent» har «beregn procentvis forskel» som nummer 6 af 10. Svensk
+«procent skillnad mellan två tal» har **10 af 10** relaterede
+(«räkna ut procent skillnad mellan två tal», «hur beräkna procentuell
+skillnad mellan två tal», «skillnad i procent mellan två tal excel»).
+
+**Hvad var der.** Siden lærer allerede de to formler i sin brødtekst — se
+afsnittene «Sådan beregner du procentforskellen mellem to tal» (da:321) og
+«Skillnad i procent mellan två tal» (se:994), med tabeller der giver 25 % mod
+22,2 % og 10 % mod 9,5 %. Men `ProcentBeregner` havde kun fire tilstande, og
+«Procentvis ændring» regner netop den ensidige formel `((ny − gammel) /
+gammel) × 100`. En læser der søgte på «forskel mellem to tal uanset retning»
+kunne altså ikke få sit tal regnet — kun læse det.
+
+**Rettelsen.** `procentForskelMellemTal(gammel, ny)` i `src/lib/procent.ts`
+giver begge svar fra ét talpar, læst af de to eksisterende funktioner, så en
+ændring i en formel ikke kan efterlade værktøjet med et gammelt tal. Femte
+tilstand i `ProcentBeregner` med to navngivne felter («Første tal» / «Andet
+tal»). `ModeSelector` fik `columns={5}`, ellers faldt den femte knap ned på
+en linje for sig selv på 1280 px — porten dømmer grid-klassen.
+
+**Kendetegn ved den løsning.** 0 er et gyldigt input her (0 mod 100 er 200 %
+forskel), så `validateNotZero` fra de andre tilstande hører ikke til. Og et
+talpar hvis middelværdi er 0 (100 og −100) kan ikke regnes, så værktøjet viser
+en bindestreg og «Middelværdien er 0, så forskellen kan ikke regnes i procent.»
+i stedet for «0,00 %», som er det ene svar læseren ikke må få.
+
+**Fejl fundet undervejs.** Min `edit` skrev `gammel:` i stedet for `gammal:` i
+`PROCENT_SKILLNAD_EKSEMPEL` og i mine egne tests. Det døde fem porte med
+`NaN` uden at nogen af dem sagde hvorfor — de fem fejlende tests lå i helt
+andre `describe`-blokke end den kode, der var brudt. `git diff -U0` viste de
+to linjer som ændrede, men de så ens ud; `cmp -l` fandt den ene byte.
+
+**Portene kan fejle — elleve mutationer målt røde og gendannet:**
+
+| Mutation | Røde |
+|---|---|
+| `differens` = `procentForskel` i stedet for `procentDifferens` (den gamle, ensidige formel) | 4 |
+| `udefineret: false` i `procentForskelMellemTal` | 1 |
+| `procentRetning`: `>= 0` tæller 0 som stigning | 1 |
+| `middel` = den absolutte forskel i stedet for den halve sum | 2 |
+| Hovedtallet sætter `resultat: svar.aendring` i stedet for `svar.differens` | 1 |
+| `udefineret: false` i komponenten | 1 |
+| `procentForskelMellemTal(talB, talA)` — byttet om på de to tal | 2 |
+| Svensk etiket «Middelværdi» i stedet for «Medelvärde» | 1 |
+| `columns={4}` — den femte tilstand trykkes ned på egen linje | 1 |
+| `formatFn`-betingelsen inverteret, så `find-resultat` får «250 %» | 1 |
+| `forskel` fjernet fra `formatFn`, så hovedtallet mister « %» | 1 |
+
+**De tre sidste mutationer fandt porten først efter en anden omgang.** Den
+første udgave af forskel-testen læste kun kopieringsteksten, og den mutation,
+der gjorde **hovedtallet** til det ensidige tal, gik grøn — fordi
+`forklaringDifferens` stadig var rigtig. Det er præcis den fejl læseren ser
+først. Samme problem med `columns`: ingen port dækkede layouten. Begge er nu
+dækket af tests der læser den synlige tekst, ikke teksten i klippemappen.
+
+**Verificeret:** typecheck 0, lint 0 (805 filer), 4664 tests i 283 filer
+grønne, `npm run build` ok. De 7 «Parsing CSS source code failed»-advarsler i
+build-outputtet er i basen — målt ved `git stash` — ikke fra denne ændring.
+`locale-leak-gate.test.ts` timed ud i to fulde kørsler og var grøn i isolation
+og i den tredje fulde kørsling; scanneren kører i en udspawnet proces og
+bruger ~1,9 s pr. test mod vitests 5 s grænse (målt: 35–41 s for filens 22
+tests, både med og uden ændringen). Kendt flakiness, urørt.

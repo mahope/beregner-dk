@@ -47,6 +47,63 @@ export const PROCENT_SKILLNAD_EKSEMPEL = [
 ];
 
 /**
+ * Both answers to «procentvis forskel mellem to tal», from one pair of numbers.
+ *
+ * The question has two correct answers and the page has to hand out both,
+ * because the reader cannot tell in advance which one the other person meant —
+ * that is the whole reason the pair exists. Returning only one of them leaves
+ * half the searches answered, and returning the wrong one teaches the formula
+ * for the other question.
+ *
+ * `aendring` is the move from `gammel` to `ny`, so the old figure is the whole.
+ * `differens` is the symmetric difference on the mean, so the answer is the
+ * same whichever number you start from. Both are read straight off the two
+ * functions above rather than re-derived, so a change to either formula cannot
+ * leave the tool quoting an old number.
+ *
+ * `udefineret` is true when the mean is zero — the pair 100 and −100 — where
+ * the symmetric difference is a division by zero. It is reported rather than
+ * returned as 0 %, because "0 % forskel" on 100 and −100 is the one answer the
+ * reader must not get.
+ */
+export interface ProcentForskelSvar {
+  /** Percent change from `gammel` to `ny`, signed. 0 when `gammel` is 0. */
+  aendring: number;
+  /** Symmetric percent difference on the mean. 0 when the mean is 0. */
+  differens: number;
+  /** The mean the symmetric difference divides by. */
+  middel: number;
+  /** True when the mean is 0 and the symmetric difference does not exist. */
+  udefineret: boolean;
+}
+
+/** Both answers to the same pair of numbers, in one call. */
+export function procentForskelMellemTal(gammel: number, ny: number): ProcentForskelSvar {
+  const middel = (gammel + ny) / 2;
+  return {
+    aendring: procentForskel(ny, gammel),
+    differens: procentDifferens(gammel, ny),
+    middel,
+    udefineret: middel === 0,
+  };
+}
+
+/** The direction a percent move went, as the word the sentence needs. */
+export type ProcentRetning = "stigning" | "fald" | "uaendret";
+
+/**
+ * Which way {@link ProcentForskelSvar.aendring} points.
+ *
+ * A change of exactly 0 % is `uaendret` and not a fall, so a table of "de tal
+ * der faldt" cannot list a pair that stood still.
+ */
+export function procentRetning(aendring: number): ProcentRetning {
+  if (aendring > 0) return "stigning";
+  if (aendring < 0) return "fald";
+  return "uaendret";
+}
+
+/**
  * Percent fall from `gammal` to `ny`: ((gammal - ny) / gammal) × 100.
  *
  * The same arithmetic as `procentForskel` with the direction reversed, but the

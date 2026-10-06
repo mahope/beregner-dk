@@ -12,8 +12,81 @@ import {
   procentDifferens,
   procentFald,
   procentForskel,
+  procentForskelMellemTal,
+  procentRetning,
   rabatProcent,
 } from "./procent";
+
+describe("procentForskelMellemTal", () => {
+  test("giver begge svar på ét talpar, og de er forskellige", () => {
+    // «procentvis forskel mellem to tal» har to rigtige svar. 10 000 → 12 500
+    // er 25 % ændring (det gamle tal er heltalet) og 22,2 % forskel (middelværdien
+    // er heltalet). Værktøjet skal give begge — kun det ene efterlader
+    // halvdelen af søgningerne ubesvaret.
+    const svar = procentForskelMellemTal(10000, 12500);
+    expect(svar.aendring).toBe(25);
+    expect(svar.differens).toBeCloseTo(22.222, 3);
+    expect(svar.aendring).not.toBe(svar.differens);
+  });
+
+  test("middelværdien er den halve sum", () => {
+    expect(procentForskelMellemTal(30000, 33000).middel).toBe(31500);
+  });
+
+  test("et fald er negativt i ændringen og positivt i forskellen", () => {
+    const svar = procentForskelMellemTal(12500, 10000);
+    expect(svar.aendring).toBe(-20);
+    expect(svar.differens).toBeCloseTo(22.222, 3);
+  });
+
+  test("bys om i rækkefølgen giver samme forskel", () => {
+    // Det er hele pointen med procentdifferens: svaret må ikke afhænge af hvilken
+    // af de to tal læseren skrev først.
+    const [a, b] = [10000, 12500];
+    expect(procentForskelMellemTal(b, a).differens).toBeCloseTo(
+      procentForskelMellemTal(a, b).differens,
+      10,
+    );
+  });
+
+  test("et talpar der summerer til 0 melder forskellen som udefineret", () => {
+    // 100 og −100 har middelværdien 0, så |a − b| / 0 ikke findes. «0 % forskel»
+    // er det ene svar, læseren ikke må få.
+    const svar = procentForskelMellemTal(-100, 100);
+    expect(svar.udefineret).toBe(true);
+    expect(svar.middel).toBe(0);
+  });
+
+  test("et almindeligt talpar er ikke udefineret", () => {
+    expect(procentForskelMellemTal(10000, 12500).udefineret).toBe(false);
+  });
+
+  test("de to sider af parterne er de samme tal fra siden", () => {
+    const [lon, belob] = PROCENT_SKILLNAD_EKSEMPEL;
+    expect(procentForskelMellemTal(belob.gammal, belob.ny).aendring).toBe(
+      procentForskel(belob.ny, belob.gammal),
+    );
+    expect(procentForskelMellemTal(belob.gammal, belob.ny).differens).toBeCloseTo(
+      procentDifferens(belob.gammal, belob.ny),
+      10,
+    );
+    expect(procentForskelMellemTal(lon.gammal, lon.ny).differens).toBeCloseTo(9.5238, 3);
+  });
+});
+
+describe("procentRetning", () => {
+  test("et positivt tal er en stigning", () => {
+    expect(procentRetning(25)).toBe("stigning");
+  });
+
+  test("et negativt tal er et fald", () => {
+    expect(procentRetning(-20)).toBe("fald");
+  });
+
+  test("nul er uændret og ikke et fald", () => {
+    expect(procentRetning(0)).toBe("uaendret");
+  });
+});
 
 describe("procentForskel", () => {
   test("procentvis ændring fra gammal til ny", () => {
@@ -352,3 +425,4 @@ describe("procentBesparelse", () => {
     }
   });
 });
+

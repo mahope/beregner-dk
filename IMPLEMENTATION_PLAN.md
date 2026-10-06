@@ -1,44 +1,34 @@
-STATUS: 6/10 06:4x. ✅ **`/promille` svarer nu på «hvornår kan jeg køre bil
+STATUS: 6/10 07:5x. ✅ **`/procent` svarer nu på «hvor stor er forskellen
+  mellem to tal?» med begge svar.** Datagrund: `/procent` er sitets #1-side
+  (**149.929** GSC-visninger, 0,1 % CTR, pos. 7,5), og dansk autocomplete
+  (hl=da, 6/10) svarer «procentvis forskel» med ni træffere hvor **otte** er
+  «… mellem to tal»; svensk «procent skillnad mellan två tal» har **10 af 10**
+  relaterede. Siden lærer allerede de to formler i sin brødtekst, men
+  værktøjet kun kunne den ensidige — så en læser der søgte på den anden fik
+  ingen beregning. Nu får man fra ét talpar både ændringen (30.000 → 33.000 =
+  **10,00 %**) og forskellen på middelværdien (**9,52 %**), som er det samme
+  svar uanset hvilket tal man skrev først. **MÅL: `/procent` baseline
+  149.929 GSC-visninger, CTR 0,1 %, pos. 7,5 (6/10 06:5x) — måles igen 20/10.**
+  Et talpar med middelværdi 0 (100 og −100) giver **ikke** «0,00 %» men en
+  bindestreg og en forklaring, fordi svaret ikke findes.
+  **Portene kan fejle:** elleve mutationer målt røde, heraf tre som dækkede
+  det forkerte tal i **hovedtallet** — kun kopieringsteksten så ud til at
+  dække det, men den læses ikke af den, der kigger på skærmen.
+  ✅ Tidligere 6/10 06:4x: **`/promille` svarer nu på «hvornår kan jeg køre bil
   igen» med et klokkeslæt**, ikke et antal timer. Datagrund: dansk autocomplete
   (`client=firefox`, `hl=da`) har **20 af 20** træffere i denne form under «hvornår
-  kan jeg køre» (10/10) og «hvornår må jeg køre» (10/10) — «hvornår kan jeg køre
-  bil igen», «hvornår må jeg køre bil efter druk», «hvornår må jeg køre bil
-  beregner»; svensk under «när kan jag köra bil» 10 af 10, plus «promille
-  körsel». Den gamle `PromilleBeregner` svarede «under grænsen om 2,6 **timer**»
-  — det forkerte svar på spørgsmålet. Nyt værktøj + tabel på begge domæner;
-  Sveriges 0,2 ‰ giver 04:06 mod Danmarks 02:06 for samme indtastning.
-  **MÅL: `/promille` baseline 167 Plausible-besøgende/28d (5/10 06:0x), 6.878
-  GSC-visninger, CTR 1,6 %, pos. 7,7 — måles igen 20/10.** Dagsskiftet står
-  **ved siden af** klokkeslættet (`+1 døgn`), ellers læses 02:06 som i dag.
-  Portene kan fejle: 8 mutationer målt røde (se `docs/plan-arkiv.md`), heraf
-  `Math.floor` i stedet for `Math.round` i minut-omregningen — **4,1 × 60 =
-  245,999…**, så 5 øl / 80 kg ville givet **02:05** i stedet for 02:06. ✅ Tidligere
-  6/10: `/brokost` med Storebælts prisliste 2026 — sitet svarer nu på «hvad koster det at
-krydse Storebælt»** med Storebælts **egen prisliste 2026**, ikke et tilbud.
-Datagrund: dansk autocomplete har «hvad koster det at køre over storebælt» (2/10
-under «hvad koster det at»), «hvor meget koster det at krydse
-storebæltsbroen», «storebælt pris bil med trailer» og «øresundsbroen pris» —
-og vi havde ingen side om det. Værktøjet regner 26 køretøjstyper × ekspres-
-og kortpris, tur/retur, antal gange om året og fritidsrabat. **Et fritidsrabat
-er en egen tur/retur-billet, ikke et fradrag** — det fandt porten: en bil på
-3 m koster 218 kr. tur/retur mod aftenbilletten på 246 kr., så den kan ikke
-spare noget, og værktøjet siger det i stedet for at vise −28 kr. Fritidsrabatter
-kræver alle tre ting (under 6 m, betalingsmiddel, tur/retur), og bruddet på
-hver af dem står i regnestykket. **Portene kan fejle:** `label-scan-gate`
-fangede de to radioknapper som ubundne `<label>` — nu `htmlFor` + `id`.
-✅ Tidligere 6/10: «hvad er klokken om N.timer» på `/tidsberegner`, `/laantype`,
-ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund), «Dage til dato» på `/dato`,
-`/klokken-i/*`, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge.
-✅ 5/10: svensk landetabel, tidsforskelsdag, efterlønnens deltidstal, «Populær
-nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run
-build`). 6/10 06:0x: typecheck 0, lint 0 (801 filer), **4624 tests i 281
-filer** grønne, build ok med `/brokost` i ruten. Renderet side gennemgået på
-390px-kompatibel markup (ét kolonne-layout, ingen vandret rækkevidde ud over
-pristabellen, der har `overflow-x-auto`). ⚠️ **13 VERIFICÉR-noter er åbne** —
-alle merges er efter 21:30-vinduet 5/10. Første reelle deploy-vindue er
-**6/10 07:30**; næste iteration måler dem alle på indhold og lukker dem med
-`DEPLOY OK 6/10`. PR-TJEK 6/10 05:1x (ingen åbne PR'er). BRANCH-TJEK 4/10.
+  kan jeg køre» (10/10) og «hvornår må jeg køre» (10/10); svensk under «när kan jag köra bil» 10 af 10. Den gamle `PromilleBeregner` svarede «under grænsen om 2,6 **timer**» — det forkerte svar på spørgsmålet. Nyt værktøj + tabel på begge domæner; Sveriges 0,2 ‰ giver 04:06 mod Danmarks 02:06. **MÅL: `/promille` baseline 167 Plausible-besøgende/28d (5/10 06:0x), 6.878 GSC-visninger, CTR 1,6 %, pos. 7,7 — måles igen 20/10.** Dagsskiftet står **ved siden af** klokkeslættet (`+1 døgn`), ellers læses 02:06 som i dag. 8 mutationer målt røde, heraf `Math.floor` i stedet for `Math.round` — **4,1 × 60 = 245,999…**, så 5 øl / 80 kg ville givet **02:05** i stedet for 02:06. ✅ 6/10 06:0x: `/brokost` med Storebælts prisliste 2026. ✅ Tidligere 6/10: «hvad er klokken om N.timer» på `/tidsberegner`, `/laantype`, ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund), «Dage til dato» på `/dato`, `/klokken-i/*`, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge. ✅ 5/10: svensk landetabel, tidsforskelsdag, efterlønnens deltidtal, «Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
+  **Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run
+  build`). 6/10 07:5x: typecheck 0, lint 0 (805 filer), **4664 tests i 283
+  filer** grønne, build ok. De 7 CSS-advarsler i build-outputtet er i basen
+  (målt ved `git stash`), ikke fra denne ændring. ⚠️ `locale-leak-gate.test.ts`
+  timed ud i to fulde kørsler og var grøn i isolation og i den tredje fulde
+  kørsling; scanneren kører i en udspawnet proces og bruger ~1,9 s pr. test mod
+  vitests 5 s grænse — samme kendte flakiness som i ❓ nedenfor, urørt.
+  ⚠️ **13 VERIFICÉR-noter er åbne** — alle merges er efter 21:30-vinduet 5/10.
+  Første reelle deploy-vindue er **6/10 07:30**; næste iteration måler dem alle
+  på indhold og lukker dem med `DEPLOY OK 6/10`. PR-TJEK 6/10 06:5x (ingen
+  åbne PR'er). BRANCH-TJEK 4/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -46,6 +36,8 @@ alle merges er efter 21:30-vinduet 5/10. Første reelle deploy-vindue er
 
 | Side | Plausible/28d | GSC-visninger/28d | CTR | Pos. |
 |---|---|---|---|---|
+| `/procent` før Forskel-tilstanden (6/10) | under top-15 | **149.929** | **0,1 %** | **7,5** |
+| se `/procent` før Forskel-tilstanden (6/10) | under top-15 | 30.298 | 0,0 % | 9,7 |
 | `/procent` | under top-15 | 150.470 | 0,1 % | 7,4 |
 | `/dato` | 1.133 | 133.054 | 0,6 % | 5,7 |
 | `/tidsberegner` (6/10, før Plus-tidsværktøjet) | **260** | **78.615** | **0,3 %** | **6,7** |
@@ -97,6 +89,14 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 ### Prioriterede opgaver — åbne
 
 **F5d. [x] FÆRDIG 6/10 — `/laantype`, se `docs/plan-arkiv.md`.**
+
+**F5e. [x] FÆRDIG 6/10 07:5x — «Forskel mellem to tal» på `/procent`**,
+se `docs/plan-arkiv.md`. Datagrund: `/procent` er sitets #1-side (149.929
+GSC-visninger, 0,1 % CTR, pos. 7,5), og dansk autocomplete (hl=da, 6/10)
+svarer «procentvis forskel» med ni træffere, otte af dem «… mellem to tal»;
+svensk «procent skillnad mellan två tal» har 10 af 10 relaterede. Siden lærer
+allerede de to formler, men værktøjet kunne kun den ensidige — nu får
+læseren begge tal fra ét talpar.
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
@@ -173,6 +173,24 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 07:5x:** `VERIFICÉR DEPLOY: /procent har på begge domæner en
+femte værktøjtilstand «Forskel mellem to tal» / «Skillnad mellan två tal», der
+viser både ændringen fra det første tal (10,00 %) og forskellen på
+middelværdien (9,52 %) for 30.000 og 33.000, og brødteksten siger «fem
+forskellige typer beregninger» / «fem olika typer av beräkningar» og peger på
+tilstanden fra afsnittet «Sådan beregner du procentforskellen mellem to tal» /
+«Skillnad i procent mellan två tal» ceo/procentvis-forskel 6/10 07:5x`. Mål på
+**indhold**: `curl -s https://minberegner.dk/procent | grep -o 'Forskel mellem
+to tal' | wc -l` → **1**, `grep -o 'Forskel på middelværdien' | wc -l` → **> 0**
+(klient-komponenten giver også den i rå markup), `grep -o 'Middelværdi' | wc
+-l` → **> 0**, `grep -o 'fem forskellige typer' | wc -l` → **1** og
+`grep -o 'fire forskellige typer' | wc -l` → **0**. Samme tre første greb på
+beraknare.se med «Skillnad mellan två tal», «Skillnad på medelvärdet» og
+«Medelvärde», plus `grep -o 'fem olika typer' | wc -l` → **1**.
+⚠️ Hovedtallet **9,52 %** står i en klient-komponent, så det ses ikke i rå
+markup — læs det i koden (`procentForskelMellemTal(30000, 33000).differens`).
+Første reelle deploy-vindue efter mergen er **6/10 12:30**.
 
 **Åben 6/10 06:4x:** `VERIFICÉR DEPLOY: /promille har på begge domæner et
 værktøj med titlen «Hvornår kan jeg køre bil igen?» / «När kan jag köra bil

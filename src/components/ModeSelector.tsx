@@ -22,7 +22,7 @@ interface ModeSelectorProps<T extends string> {
   currentMode: T;
   onChange: (mode: T) => void;
   name: string;
-  columns?: 2 | 3 | 4;
+  columns?: 2 | 3 | 4 | 5;
 }
 
 export function ModeSelector<T extends string>({
@@ -76,6 +76,7 @@ export function ModeSelector<T extends string>({
     2: 'grid-cols-2',
     3: 'grid-cols-2 md:grid-cols-3',
     4: 'grid-cols-2 md:grid-cols-4',
+    5: 'grid-cols-2 md:grid-cols-5',
   };
 
   return (

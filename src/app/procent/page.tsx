@@ -87,7 +87,7 @@ export default async function ProcentPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du procentberegneren</h2>
         <p>
-          Vores procentberegner kan hjælpe dig med fire forskellige typer
+          Vores procentberegner kan hjælpe dig med fem forskellige typer
           beregninger:
         </p>
         <ol>
@@ -103,6 +103,10 @@ export default async function ProcentPage() {
           <li>
             <strong>Procentvis ændring:</strong> Hvor mange procent er
             stigningen/faldet fra X til Y?
+          </li>
+          <li>
+            <strong>Forskel mellem to tal:</strong> Hvor stor er forskellen
+            mellem X og Y? Her får du begge svar — se afsnittet nedenfor.
           </li>
         </ol>
 
@@ -392,6 +396,14 @@ export default async function ProcentPage() {
           retningen skal betyde noget.
         </p>
         <p>
+          Har du to tal og vil bare vide, hvor stor forskellen er, kan du lade
+          værktøjet regne begge svar for dig. Vælg{" "}
+          <strong>Forskel mellem to tal</strong> ovenfor, skriv de to tal, så
+          får du både ændringen fra det første tal og forskellen på
+          middelværdien — den er det samme svar, uanset hvilken af de to tal du
+          skrev først.
+        </p>
+        <p>
           En lønprocent kan du se i kroner her:{" "}
           <Link href="/loenstigning" className="text-blue-700 underline">
             lønstigning i procent
@@ -621,7 +633,7 @@ export default async function ProcentPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Så här använder du procenträknaren</h2>
         <p>
-          Vår procenträknare kan hjälpa dig med fyra olika typer av
+          Vår procenträknare kan hjälpa dig med fem olika typer av
           beräkningar:
         </p>
         <ol>
@@ -637,6 +649,10 @@ export default async function ProcentPage() {
           <li>
             <strong>Procentuell förändring:</strong> Hur många procent är
             ökningen/minskningen från X till Y?
+          </li>
+          <li>
+            <strong>Skillnad mellan två tal:</strong> Hur stor är skillnaden
+            mellan X och Y? Här får du båda svaren — se avsnittet nedan.
           </li>
         </ol>
 
@@ -1051,6 +1067,13 @@ export default async function ProcentPage() {
           veta om en lön stiger är det den första formeln du ska använda. Den
           andra används när du vill jämföra hur stora två belopp är i förhållande
           till varandra, utan att riktningen ska betyda något.
+        </p>
+        <p>
+          Har du två tal och bara vill veta hur stor skillnaden är, kan du låta
+          verktyget räkna båda svaren åt dig. Välj{" "}
+          <strong>Skillnad mellan två tal</strong> ovan, skriv in talen, så får
+          du både förändringen från det första talet och skillnaden på
+          medelvärdet — den är samma oavsett vilket av talen du skrev först.
         </p>
         <p>
           En lönprocent kan du se som kronor här:{" "}
