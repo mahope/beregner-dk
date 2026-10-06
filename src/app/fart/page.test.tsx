@@ -4,11 +4,15 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { beregnFart } from "@/lib/fart";
+import { fartOmregningsFakta } from "@/lib/fart-omregner";
 import { formatNumber } from "@/lib/format";
 import FartPage from "./page";
 
 vi.mock("@/components/FartBeregner", () => ({
   default: () => <div>Fartværktøj</div>,
+}));
+vi.mock("@/components/FartOmregner", () => ({
+  default: () => <div>Hastighedsomregner</div>,
 }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
@@ -94,6 +98,50 @@ describe("fart page", () => {
     expect(spgs).toContain("Er fart og tempo det samme?");
     // Formlen-spørgsmålet lå før og må ikke være forsvundet.
     expect(spgs).toContain("Hvad er formlen for fart, distance og tid?");
+  });
+
+  // Dansk autocomplete 6/10 20:3x: 10 af 10 træffere under «km i timen» er
+  // omregning. Brødteksten skal derfor kunne svare på «100 km/t i m/s» osv.,
+  // og tallene læses fra `fart-omregner` — samme modul som værktøjet.
+  test("omregningsafsnittet svarer på 100 km/t i de tre andre enheder", async () => {
+    const html = renderToStaticMarkup(await FartPage());
+    const fakta = fartOmregningsFakta("da");
+
+    expect(html).toContain("Omregn km/t til m/s, mph og knop");
+    expect(html).toContain(`<strong>100 km/t i m/s:</strong> 27,78 m/s`);
+    expect(html).toContain(`<strong>100 km/t i mph:</strong> 62,1 mph`);
+    expect(html).toContain(`<strong>100 km/t i knop:</strong> 54 knop`);
+    expect(html).toContain(`${fakta.milKm} km`);
+    expect(html).toContain(`${fakta.somermilKm} km/t`);
+    // Tempoet står som egne rækker og må derfor ikke få en enhedsfaktor.
+    expect(html).toContain("er ikke enheder på linjen");
+    expect(html).toContain("3 min/km og 18 sekunder");
+    expect(html).toContain("6 min/km og 36 sekunder");
+  });
+
+  test("omregnings-FAQ'en læser de samme tal som brødteksten", () => {
+    const fakta = fartOmregningsFakta("da");
+    const da = getPageData("fart", "da")!;
+    const spgs = da.faqItems.map((f) => f.question);
+    const svar = da.faqItems.map((f) => f.answer).join(" ");
+
+    expect(spgs).toContain("Hvor mange m/s er 100 km/t?");
+    expect(spgs).toContain("Hvor mange km/t er 60 mph?");
+    expect(spgs).toContain("Hvad er en knop, og hvor mange km/t er det?");
+    expect(svar).toContain(`100 km/t er ${fakta.eksempler[0].resultat} m/s`);
+    expect(svar).toContain(`60 mph er ${fakta.eksempler[4].resultat} km/t`);
+    expect(svar).toContain(`10 knob ${fakta.eksempler[3].resultat} km/t`);
+  });
+
+  test("den svenske side får samme omregning på svensk", async () => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await FartPage());
+    const fakta = fartOmregningsFakta("se");
+
+    expect(html).toContain("Omvandla km/h till m/s, mph och knop");
+    expect(html).toContain(`${fakta.somermilKm} km/h`);
+    expect(html).toContain("är inte enheter i raden");
+    expect(html).not.toContain("Omregn km/t til m/s");
   });
 
   test("den svenske side er urørt af den danske rettelse", async () => {

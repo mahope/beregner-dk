@@ -30253,3 +30253,71 @@ være **0**.
 `https://minberegner.dk/efterloen` (siden er en klient-komponent — brug et
 headless kald eller læs `EFTERLOEN_MAX_SATS_DELTID` i koden).
 
+
+## 6/10 20:2x — /skridt er live på begge domæner (DEPLOY OK)
+
+Den åbne note fra 6/10 15:4x er lukket ved måling på **indhold**, ikke på HTTP-status:
+
+- `curl -s https://minberegner.dk/skridt | grep -o 'Skridt til km' | wc -l` → **14**
+- samme greb `grep -o '1.515 skridt'` → **3** (brødtekst + FAQ), `'6,6 km'` → **5**,
+  `'7,9 km'` → **7**; `curl -s https://minberegner.dk/sitemap.xml | grep -o '/skridt<'` → **1**
+- beraknare.se: `'Steg till km'` → **14**, `'1 515 steg'` → **3**, `'7,9 km'` → **7**,
+  sitemap → **1**
+- `https://minberegner.dk/api/health` → `{"status":"ok"}`
+
+Alle krav fra noten er dermed opfyldt på begge domæner. Deploy-vinduet var 6/10 17:30.
+
+## 6/10 20:4x — Hastighedsomregner på /fart (ceo/fart-omregner)
+
+**Datagrund.** Dansk autocomplete (`suggestqueries.google.com`, hl=da, gl=dk, 6/10 20:3x):
+
+- «km i timen» → *10 af 10* træffere er omregning: `km i timen beregner`,
+  `km i timen omregner`, `km i timen til miles per hour`, `km i timen til pace`,
+  `km i timen til meter i sekundet`, `km i timen til knob`, `km i timen til sekundmeter`,
+  `km i timen til minutter per km` (+ `km i timen måler`).
+- «knop omregner» → `omregner knop til km` på 2 af 4.
+- «omregn mph til km» → 2 af 2. «omregn km t til m s» → 4 af 4.
+
+`/fart` før denne ændring: GSC 6/9–4/10 **5.288 visninger, 32 klik, 0,6 % CTR, pos. 6,9**
+med søgningerne «fart beregner» 99v pos. 5, «beregn tid ud fra hastighed og distance»
+83v pos. 6, «fartberegner» 28v pos. 2, «beregn fart» 21v pos. 5. Ingen af dem er
+omregning — værktøjet *fandt* en fart i km/t, men havde intet felt at skrive i.
+
+**Hvorfor.** `/kvadratmeter` og `/braendstof` fik samme behandling 6/10
+(`ArealOmregner`, `Forbrugsomregner`), fordi autocomplete viste den omvende vej.
+`/fart` havde ikke fået det.
+
+**Faktorerne er eksakte, ikke afrundede.** 1 yard = præcis 0,9144 m
+(yard-and-pound-aftalen af 1959) → 1 international mil = 1760 × 0,9144 m = præcis
+1,609344 km. 1 sømil = præcis 1852 m → 1 knop = præcis 1,852 km/t. 1 m/s = præcis
+3,6 km/t. Samme konvention som `areal-omregner.ts`.
+
+**Tempo og sekunder pr. 100 m står ikke på enhedslisten.** De er ikke lineære — de
+går *modsat* farten — så de ville give et forkert svar i en faktorbaseret liste. De
+er derfor to egne rækker under værktøjet, regnet af `tempoMinPrKm`/`sekunderPr100m`,
+hvor `tempoMinPrKm` er præcis samme formel som `beregnFart`'s `paceMinPrKm`, så de to
+værktøjer på siden ikke kan glide fra hinanden. `0 km/t` giver `null` og en
+venlig linje i stedet for tempoet, fordi tempo ved stående er udefineret.
+
+**Punkt 11 (påstande i tekst er kode).** Alle tal i brødteksten, i værktøjets note og
+i de tre nye FAQ-poster læses fra `fartOmregningsFakta()`, som kalder samme
+`omregnFart` som værktøjet. `MET`-fri, ingen ny lovpåstand, ingen ny kilde.
+
+**Metadata.** `metaDescription` for `/fart` er omskrevet på begge sprog til at
+love omregningen (da 129 tegn, se 147, loftet er 160 — `meta-description`-porten).
+`keywords` har fået de otte danske og seks svenske autocomplete-træffere. Titlen er
+**ikke** rørt, fordi «fartberegner» ligger på pos. 2 med 28 visninger, og GSC-baseline
+skal måles 14 dage før den røres (samme regel som F0d).
+
+**Verifikation.** 22 nye tests i `fart-omregner.test.ts`, 8 i `FartOmregner.test.tsx`
+og 4 i `fart/page.test.tsx` (heraf én der dømmer svensk og dansk hver for sig). Portene
+kan fejle: mutationen `SOMERMIL_I_KM = 1,85` i stedet for `SOMERMIL_I_METER / 1000`
+giver **8 røde** på tværs af de tre filer (herunder «100 km/t i knop: 54 knop» i
+brødteksten). En fejl i faktorretningen er fanget af testen «farten i m/s svarer til
+samme km/t», fordi 100 m/s ellers ville svare 27,8 km/t.
+
+**Punkt 13.** `git diff master...HEAD -- src/ | grep -cE '^\+.*\$[0-9]'` → **0**.
+Ingen ny route, ingen server action, ingen migration, intet `process.env` i
+renderingskoden, intet `dangerouslySetInnerHTML`. `locale-leak.mjs --gate` → exit 0,
+`label-a11y-scan.mjs` har ingen ny ubundet `<label>` (begge felter har `htmlFor`),
+`href-scan.mjs` → 0 protocol-relative href.

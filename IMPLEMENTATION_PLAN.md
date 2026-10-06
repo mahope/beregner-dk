@@ -1,6 +1,7 @@
-STATUS: 6/10 15:5x. ✅ **24 deploy-noter målt på indhold og lukket: DEPLOY OK 6/10.** Alle merges fra 5/10 21:4x (efterløn-deltid) til 6/10 10:4x (midsommar) er live på begge domæner — bl.a. /brokost, /laantype, /rumfang, /ugedag+/veckodag, /klokken-i/* (7 lande), «hvornår kan jeg køre bil igen» på /promille, plustid på /tidsberegner, «Forskel mellem to tal» på /procent, skærtorsdag-FAQ og midsommar-FAQ. Fulde krav og målinger: docs/plan-arkiv.md.
-✅ **Ny beregner: /skridt omregner skridt til km, gangtid og kalorier.** Datagrund: dansk autocomplete (hl=da, 6/10) giver 7 træffere under «skridt til» og «10000 skridt» (km, omregner, kalorier, kvinder, tid, kcal); svensk giver 10 under «10000 steg». Sitet havde intet værktøj. Skridtlængde 66 cm (kvinde) / 79 cm (mand) og kadence 117/min fra Murray 1964/1970; kalorier MET 3,5 (samme Compendium-kilde som motion-kalorier). Alle tal i brødtekst regnes fra skridt.ts (kvalitetsregel 11). **MÅL: /skridt baseline 0 besøgende/28d (ny side, 6/10) — måles igen ~20/10.** `VERIFICÉR DEPLOY: /skridt … ceo/skridt-til-km 6/10 15:4x`.
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build`). 6/10 15:4x: typecheck 0, lint 0 (809 filer), **4.681 tests i 284 filer** grønne, build ok. Fem porte ramt af den nye side og rettet i samme commit: beløb i JSX (tallene regnes nu fra lib), unikke relaterede links, bundne labels (htmlFor), no-locale-kort, Intl-tag med no-arm. ⚠️ `locale-leak-gate.test.ts`-flakiness urørt (se ❓). PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
+STATUS: 6/10 20:4x. ✅ **Hastighedsomregner på `/fart` — km/t ↔ m/s ↔ mph ↔ knop, begge veje.** Datagrund: dansk autocomplete (hl=da, 6/10 20:3x) har **10 af 10** træffere under «km i timen», der spørger efter omregning («km i timen omregner», «…til miles per hour», «…til meter i sekundet», «…til knob», «…til sekundmeter»), og «knop omregner» svarer «omregner knop til km» på 2 af 4. Sitets værktøj kunne *finde* en fart i km/t, men havde intet felt at skrive i. Faktorerne er eksakte (yard-and-pound-aftalen 1959, sømil = 1852 m), tempo og s/100 m står som egne rækker fordi de går modsat farten. **MÅL: /fart baseline 5.288 visninger / 32 klik / 0,6 % CTR / pos. 6,9 pr. 6/10** (GSC 6/9–4/10) — måles igen ~20/10.
+✅ **`/skridt` er live på begge domæner — DEPLOY OK 6/10 20:2x.** Målt på indhold: «Skridt til km» 14 forekomster, «1.515 skridt» 3, «6,6 km» 5, «7,9 km» 7, sitemap 1. Samme greb på beraknare.se: «Steg till km» 14, «1 515 steg» 3, «7,9 km» 7, sitemap 1.
+✅ CEO-kø punkt 0 (review-fund 29/9) er gennemgået alle otte: Valborg fast 30. april med port på plads, svensk påskafton `offsetDays: -1`, dansk sankthans fast 23./24. juni, påskeaften-FAQ slettet, `/husleje` på nettoprisindekset, `toUtcMidnight` læser `Europe/Copenhagen`/`Stockholm`, svensk promille-FAQ taler fra `promille-genstande`, `maneder: 12` er korrekt og 1. advent har fire søndage. Det fund, der lå åbent i review-filen (`naesteJuleaften` gav 0 dage på juleaften), er rettet i `35c6175` og porten på linje 91 følger nu sin egen titel.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build`). 6/10 20:3x: typecheck 0, lint 0 (813 filer), **4.714 tests i 286 filer** grønne, build ok (196 sider). Nye porter: 22 i `fart-omregner.test.ts`, 8 i `FartOmregner.test.tsx`, 4 i `fart/page.test.tsx`. Mutationen `SOMERMIL_I_KM` 1,852 → 1,85 giver **8 røde** på tværs af de tre filer. ⚠️ `locale-leak-gate.test.ts` timed out i én suitekørsel (5 s-grænsen, filen tager 38 s i isolation) og var grøn i to — se ❓. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -22,6 +23,7 @@ STATUS: 6/10 15:5x. ✅ **24 deploy-noter målt på indhold og lukket: DEPLOY OK
 | `/braendstof` før Forbrugsomregneren (6/10) | **252 (+56 %)** | 16.898 | 1,0 % | 6,0 |
 | `/alder` | under top-15 | 10.029 | 0,4 % | 7,2 |
 | `/renteberegner` | under top-15 | 12.610 | 0,8 % | 7,4 |
+| `/fart` før Hastighedsomregneren (6/10) | under top-15 | **5.288** | **0,6 %** | **6,9** |
 | `/rentefradrag` | under top-15 | 5.082 | 5,8 % | 5,6 |
 | `/promille` | 148 | 6.003 | 1,6 % | 7,8 |
 | `/boligstoette` | 529 | 7.465 | 2,4 % | 8,7 |
@@ -60,6 +62,8 @@ er lav, og den afgøres af den danske konkurrence i hvert enkelt ord.
 (`/dato` 1.617 mod 1.723 ord), så det er opgave 187's slugs og domæneautoritet.
 
 ### Prioriterede opgaver — åbne
+
+**F5f. [x] FÆRDIG 6/10 20:4x — Hastighedsomregner på `/fart`**, se `docs/plan-arkiv.md`. Datagrund: 10 af 10 danske autocomplete-træffere under «km i timen» er omregning mellem km/t, m/s, mph og knop; sitet havde kun `distance = fart × tid`.
 
 **F5d. [x] FÆRDIG 6/10 — `/laantype`, se `docs/plan-arkiv.md`.**
 
@@ -147,7 +151,7 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Åben 6/10 15:4x:** `VERIFICÉR DEPLOY: /skridt svarer 200 på begge domæner, hvert domænes sitemap indeholder /skridt, sidens titel er «Skridt til km - omregn skridt til kilometer» / «Steg till km - räkna om steg till kilometer», og brødtekst+FAQ skriver «6,6 km» (kvinde) og «7,9 km» (mand) for 10.000 skridt samt «1.515 skridt» pr. km — alle tal regnet fra skridt.ts ceo/skridt-til-km 6/10 15:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/skridt | grep -o 'Skridt til km' | wc -l` → **> 0**, `grep -o '1.515 skridt' | wc -l` → **> 0** (FAQ og brødtekst), `grep -o '6,6 km' | wc -l` → **> 0**, og `curl -s https://minberegner.dk/sitemap.xml | grep -o '/skridt<' | wc -l` → **1**. Samme greb på beraknare.se med «Steg till km» og «1 515 steg». Første reelle deploy-vindue efter mergen er **6/10 17:30**.
+**Åben 6/10 20:4x:** `VERIFICÉR DEPLOY: /fart svarer 200 på begge domæner og viser Hastighedsomregneren med «100 km/t i m/s: 27,78 m/s», «100 km/t i mph: 62,1 mph», «100 km/t i knop: 54 knop» og FAQ-spørgsmålet «Hvor mange m/s er 100 km/t?» på dansk og «Hur många m/s är 100 km/h?» på svensk, samt den nye metaDescription med «omregn km/t til m/s, mph og knop» / «omvandla km/h till m/s, mph och knop» ceo/fart-omregner 6/10 20:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/fart | grep -o '27,78 m/s' | wc -l` → **> 0**, `grep -o '62,1 mph' | wc -l` → **> 0**, `grep -o 'Hvor mange m/s er 100 km/t' | wc -l` → **> 0**, og samme tre greb på beraknare.se. Værktøjet er en klient-komponent, så læs den i koden indtil facit kan hentes headless. Første reelle deploy-vindue efter mergen er **6/10 21:30**.
 
 ⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10 00:1x): Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer 1 for alt. Værktøjer der er klient-komponenter skal læses i koden, indtil facit kan hentes headless. Interpolerede tal skrives som `1.515<!-- --> skridt` — tjek tal og enhed hver for sig, eller brug FAQ-teksten der står uinterpoleret.
 
@@ -246,6 +250,13 @@ måles udefra. **Åben:** at fejlen er væk afgør kun Sentrys egen hændelsest�
   «FEJL: 34 …» med 20 linjer i `src/app/promille/page.tsx`, der er ren dansk i en
   komponent der monteres på beraknare.se. **⛔ Ikke opgaver at fjerne ord for** —
   kræver en stopordsliste der skelner mellem sprog, eller en allowlist-fil.
+- ❓ **`locale-leak-gate.test.ts` kan timeoute i fuld suitekørs** (6/10 20:3x,
+  tredje gang). Filen udspawner `scripts/locale-leak.mjs` pr. test og tager **38 s**
+  alene, mens vitests standardgrænse er 5 s — i to fulde kørsler grøn, i én 6 røde
+  på *timeout* alene (ingen assertion fejlede). Filen er grøn i isolation (22/22),
+  og scanneren selv giver exit 0. **Fix:** hæv `testTimeout` i `vitest.config.ts`
+  for den fil, eller kør scanneren én gang i stedet for pr. test. Ikke rørt her,
+  fordi det er en port-opgave og ikke en del af hastighedsomregneren.
 - ❓ **Et tidligere suitekørsel gav 1 rød i `locale-leak-gate.test.ts`**, som
   scanneren kører i en udspawnet proces og som er grøn i isolation og i to
   senere fulde kørsler. Ikke reproduceret; urørt.

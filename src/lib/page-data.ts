@@ -125,6 +125,7 @@ import {
   kvadratmeterFaqSvar,
 } from "./kvadratmeter-eksempler";
 import { konfirmationFaqSvar } from "./konfirmation-eksempler";
+import { fartOmregningsFakta } from "./fart-omregner";
 import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, PROMILLEGROV_SE } from "./promille";
 import { SVENSK_SKATT_2026 as SV_SKATT, SVENSK_SKATT_TAL } from "./svensk-skatt";
 import {
@@ -285,6 +286,37 @@ export type PageData = {
 const LEASING_SAMMENLIGN = beregnLeasingSammenlign(LEASING_EKSEMPEL)!;
 /** De svenske strenge, der citerer samme eksempel. Se `leasing-eksempler`. */
 const LEASING_SE = leasingSeEksempelTekster();
+
+/**
+ * `/fart`s omregnings-FAQ. Dansk autocomplete (hl=da, 6/10 20:3x) svarer
+ * «km i timen omregner», «km i timen til miles per hour», «km i timen til
+ * meter i sekundet» og «omregner knop til km» — den omvende vej, som
+ * `FartOmregner` nu svarer på. Tallene læses fra `fart-omregner`, der regner
+ * dem med præcise faktorer, så FAQ'en og værktøjet ikke kan glide fra
+ * hinanden (punkt 11).
+ */
+const FART_OMREGNING = (() => {
+  const da = fartOmregningsFakta("da");
+  // `se` er formateret med `Intl` i svensk løbende tekst. Tallene her er alle
+  // under 1.000, så der kommer ingen tusindtalsseparator ud af `Intl` — kun
+  // decimalkomma, som er præcis `formatSvenskText`-formatet.
+  const se = fartOmregningsFakta("se");
+  return {
+    daMil: da.milKm,
+    daSomermil: da.somermilKm,
+    daMs: da.meterPerSekund,
+    daHundredeMs: da.eksempler[0].resultat,
+    daHundredeKnop: da.eksempler[2].resultat,
+    daTiKnop: da.eksempler[3].resultat,
+    daSESSMph: da.eksempler[4].resultat,
+    seSomermil: se.somermilKm,
+    seMs: se.meterPerSekund,
+    seHundredeMs: se.eksempler[0].resultat,
+    seHundredeKnop: se.eksempler[2].resultat,
+    seTiKnop: se.eksempler[3].resultat,
+    seSESSMph: se.eksempler[4].resultat,
+  };
+})();
 
 const kr = (value: number) => value.toLocaleString("da-DK");
 /** Svensk løbende tekst: "643 000" og "32,38" — tallene fra `svensk-skatt`. */
@@ -1121,8 +1153,8 @@ const daPages: Record<string, PageData> = {
       title: "Fartberegner - beregn fart, distance og tid",
       description: "Beregn fart, distance eller tid ud fra de to andre. Se også dit tempo i minutter pr. kilometer til løb og cykling.",
       metaTitle: "Fartberegner: 100 km/t i 2 timer = 200 km",
-      metaDescription: "Gratis fartberegner. Beregn fart (km/t), distance eller tid ud fra de to andre. Se tempo i min/km til løb og cykling. Distance = fart × tid.",
-      keywords: ["fartberegner", "beregn hastighed", "km/t beregner", "tempo beregner", "min pr km", "gennemsnitsfart"],
+      metaDescription: "Gratis fartberegner. Beregn fart, distance eller tid — og omregn km/t til m/s, mph og knop. Se tempo i min/km til løb og cykling.",
+      keywords: ["fartberegner", "beregn hastighed", "km/t beregner", "tempo beregner", "min pr km", "gennemsnitsfart", "omregn km/t", "km i timen omregner", "km i timen til m/s", "km i timen til mph", "knop omregner", "omregn mph til km/t", "m/s omregner"],
       ogTitle: "Fartberegner: 100 km/t i 2 timer = 200 km",
       ogDescription: "Beregn fart, distance eller tid ud fra de to andre.",
       category: "Hverdag",
@@ -1137,6 +1169,9 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er formlen for fart, distance og tid?", answer: "Grundformlen er distance = fart × tid. Deraf følger fart = distance / tid og tid = distance / fart. Vælg blot, hvad du vil beregne." },
         { question: "Hvordan beregner jeg tid ud fra hastighed og distance?", answer: "Del distancen med farten. 300 km ved 100 km/t er 300 / 100 = 3 timer, altså 180 minutter. Husk at svaret kommer i timer, fordi både distance og fart er pr. time." },
         { question: "Er fart og tempo det samme?", answer: "Nej. Farten er i km/t, tempoet i min/km, og de omregnes med tempo = 60 delt i farten. 10 km/t er 6 min/km, 15 km/t er 4 min/km, og 20 km/t er 3 min/km." },
+        { question: "Hvor mange m/s er 100 km/t?", answer: `100 km/t er ${FART_OMREGNING.daHundredeMs} m/s. Du kan regne det i hovedet: 1 m/s er præcis ${FART_OMREGNING.daMs} km/t, så del 100 med ${FART_OMREGNING.daMs}. Omregneren under overskriften «Omregn hastighed» svarer begge veje.` },
+        { question: "Hvor mange km/t er 60 mph?", answer: `60 mph er ${FART_OMREGNING.daSESSMph} km/t. 1 mil er præcis ${FART_OMREGNING.daMil} km, fordi en yard er præcis 0,9144 m, så du kan altid gangen med 1,609344. Skriv 60 i feltet og vælg «Miles i timen (mph)», så får du svaret sammen med de tre andre enheder.` },
+        { question: "Hvad er en knop, og hvor mange km/t er det?", answer: `En knop er én sømil i timen, altså præcis ${FART_OMREGNING.daSomermil} km/t. Derfor er 10 knob ${FART_OMREGNING.daTiKnop} km/t, og 100 km/t er ${FART_OMREGNING.daHundredeKnop} knob. Knop bruges i søfarten og i flyvning, fordi det er den enhed, begge bruger.` },
       ],
     },
     "gennemsnit": {
@@ -3803,8 +3838,8 @@ const sePages: Record<string, PageData> = {
       title: "Hastighetskalkylator - beräkna hastighet, sträcka och tid",
       description: "Beräkna hastighet, sträcka eller tid utifrån de två andra. Se även ditt tempo i minuter per kilometer för löpning och cykling.",
       metaTitle: "Hastighetsberäknare: 100 km/h i 2 timmar = 200 km",
-      metaDescription: "Gratis hastighetskalkylator. Beräkna hastighet (km/h), sträcka eller tid utifrån de två andra. Se tempo i min/km för löpning och cykling.",
-      keywords: ["hastighetskalkylator", "beräkna hastighet", "km/h kalkylator", "tempo kalkylator", "min per km", "medelhastighet"],
+      metaDescription: "Gratis hastighetskalkylator. Beräkna fart, sträcka eller tid — och omvandla km/h till m/s, mph och knop. Se tempo i min/km för löpning och cykling.",
+      keywords: ["hastighetskalkylator", "beräkna hastighet", "km/h kalkylator", "tempo kalkylator", "min per km", "medelhastighet", "omvandla km/h", "km i timmen m/s", "omvandla mph", "knop till km/h", "omvandla fart"],
       ogTitle: "Hastighetsberäknare: 100 km/h i 2 timmar = 200 km",
       ogDescription: "Beräkna hastighet, sträcka eller tid utifrån de två andra.",
       category: "Vardag",
@@ -3817,6 +3852,9 @@ const sePages: Record<string, PageData> = {
         { question: "Hur beräknar jag medelhastighet?", answer: "Dela sträckan med tiden. Exempel: 100 km på 2 timmar ger 50 km/h. Kalkylatorn gör det automatiskt — välj 'Hastighet' och ange sträcka och tid." },
         { question: "Hur omvandlar jag hastighet till tempo (min/km)?", answer: "Dela 60 med hastigheten i km/h. Exempel: 10 km/h = 60 / 10 = 6 min/km. Kalkylatorn visar tempot automatiskt, vilket är användbart för löpning och cykling." },
         { question: "Vad är formeln för hastighet, sträcka och tid?", answer: "Grundformeln är sträcka = hastighet × tid. Därav följer hastighet = sträcka / tid och tid = sträcka / hastighet. Välj bara vad du vill beräkna." },
+        { question: "Hur många m/s är 100 km/h?", answer: `100 km/h är ${FART_OMREGNING.seHundredeMs} m/s. Du kan räkna det i huvudet: 1 m/s är exakt ${FART_OMREGNING.seMs} km/h, så dela 100 med ${FART_OMREGNING.seMs}. Omvandlaren under rubriken «Omvandla hastighet» svarar åt båda håll.` },
+        { question: "Vad är en knop, och hur många km/h är det?", answer: `En knop är en sjömil i timmen, alltså exakt ${FART_OMREGNING.seSomermil} km/h. Därför är 10 knop ${FART_OMREGNING.seTiKnop} km/h, och 100 km/h är ${FART_OMREGNING.seHundredeKnop} knop. Knop används inom sjöfart och flyg, eftersom det är den enhet båda använder.` },
+        { question: "Hur många km/h är 60 mph?", answer: `60 mph är ${FART_OMREGNING.seSESSMph} km/h. Skriv 60 i fältet och välj «Miles i timmen (mph)», så får du svaret tillsammans med de tre andra enheterna.` },
       ],
     },
     "gennemsnit": {

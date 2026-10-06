@@ -2,8 +2,17 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { beregnFart } from "@/lib/fart";
+import {
+  SEKUNDER_I_TIME,
+  fartOmregningsFakta,
+  omregnFart,
+  rundFart,
+  sekunderPr100m,
+  tempoMinPrKm,
+} from "@/lib/fart-omregner";
 import { formatNumber } from "@/lib/format";
 import FartBeregner from "@/components/FartBeregner";
+import FartOmregner from "@/components/FartOmregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -55,6 +64,16 @@ function distance50(): string {
   return `${formatNumber(r?.distance ?? 0, "da", { maximumFractionDigits: 1 })} km`;
 }
 
+/**
+ * De fire omregninger brødteksten skriver, regnet af `fart-omregner` med de
+ * præcise faktorer: 100 km/t i m/s, mph og knop, samt 10 knop i km/t.
+ */
+function omregnet(fra: "km_t" | "knop" | "mph", til: "km_t" | "m_s" | "mph" | "knop", vaerdi: number): string {
+  return formatNumber(rundFart(omregnFart(vaerdi, fra, til), til), "da", {
+    maximumFractionDigits: 2,
+  });
+}
+
 export async function generateMetadata() {
   return generatePageMetadata("fart");
 }
@@ -89,6 +108,13 @@ export default async function FartPage() {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
           <FartBeregner />
         </div>
+
+        {/* Omregning mellem enheder. Beregneren ovenfor *regner en fart ud* i
+            km/t, men dansk autocomplete (hl=da, 6/10 20:3x) har 10 af 10
+            træffere under «km i timen», der spørger efter omregning — så
+            «omregn km/t til m/s», «km i timen til mph» og «omregner knop til
+            km» var umulige at løse på sitet. */}
+        <FartOmregner />
 
         {locale === "da" && (
           <div className="prose dark:prose-invert max-w-none mb-8">
@@ -158,6 +184,37 @@ export default async function FartPage() {
               et tempo på 6 min/km. Det gør det let at planlægge en løbetur eller tjekke, om du
               holder det tempo, du sigter efter.
             </p>
+            <h2>Omregn km/t til m/s, mph og knop</h2>
+            <p>
+              Farten står i km/t, men resten af verden bruger andre enheder. <strong>Omregneren
+              ovenfor</strong> svarer begge veje: skriv en fart, vælg den enhed du har indtastet,
+              og du får den i alle fire. De tre omregninger, der bliver spurgt mest, er:
+            </p>
+            <ul>
+              <li>
+                <strong>100 km/t i m/s:</strong> {omregnet("km_t", "m_s", 100)} m/s.{" "}
+                {fartOmregningsFakta("da").meterPerSekund} km/t er præcis 1 m/s, fordi der er{" "}
+                {formatNumber(SEKUNDER_I_TIME, "da")} sekunder i en time.
+              </li>
+              <li>
+                <strong>100 km/t i mph:</strong> {omregnet("km_t", "mph", 100)} mph. 1 mil er
+                præcis {fartOmregningsFakta("da").milKm} km.
+              </li>
+              <li>
+                <strong>100 km/t i knop:</strong> {omregnet("km_t", "knop", 100)} knop, fordi 1
+                knop er 1 sømil i timen = {fartOmregningsFakta("da").somermilKm} km/t.
+              </li>
+            </ul>
+            <p>
+              <strong>Tempo og sekunder pr. 100 m er ikke enheder på linjen.</strong> De går
+              <em>modsat</em> farten — tempoet <em>falder</em>, når farten stiger — så de kan ikke
+              ganges med en faktor som de andre. Derfor står de som to egne rækker under
+              omregneren: en fart på 20 km/t er {formatNumber(tempoMinPrKm(20) ?? 0, "da", { maximumFractionDigits: 1 })} min/km og{" "}
+              {formatNumber(sekunderPr100m(20) ?? 0, "da", { maximumFractionDigits: 0 })} sekunder
+              pr. 100 m, mens 10 km/t er {formatNumber(tempoMinPrKm(10) ?? 0, "da", { maximumFractionDigits: 1 })} min/km og{" "}
+              {formatNumber(sekunderPr100m(10) ?? 0, "da", { maximumFractionDigits: 0 })} sekunder
+              pr. 100 m.
+            </p>
           </div>
         )}
 
@@ -176,6 +233,18 @@ export default async function FartPage() {
               vilket är så löpare och cyklister oftast mäter fart. En hastighet på 10 km/h motsvarar
               ett tempo på 6 min/km. Det gör det lätt att planera en löprunda eller kontrollera att du
               håller det tempo du siktar på.
+            </p>
+            <h2>Omvandla km/h till m/s, mph och knop</h2>
+            <p>
+              Hastigheten anges i km/h, men resten av världen använder andra enheter.{" "}
+              <strong>Omvandlaren ovanför</strong> svarar åt båda håll: skriv en fart, välj den
+              enhet du har skrivit i, så får du den i alla fyra.{" "}
+              {fartOmregningsFakta("se").meterPerSekund} km/h är exakt 1 m/s, och 1 knop är en
+              sjömil i timmen = exakt {fartOmregningsFakta("se").somermilKm} km/h.{" "}
+              <strong>Tempo och sekunder per 100 m är inte enheter i raden.</strong> De går{" "}
+              <em>åt motsatt håll</em> — tempot <em>sjunker</em> när farten stiger — så de kan inte
+              multipliceras med en faktor som de andra. Därför står de som två egna rader under
+              omvandlaren.
             </p>
           </div>
         )}
