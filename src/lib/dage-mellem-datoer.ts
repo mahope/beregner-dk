@@ -141,6 +141,98 @@ export function dageTilDecember(
 }
 
 /**
+ * Den næste juleaften, 24. december, som "YYYY-MM-DD".
+ *
+ * **Hvorfor denne dato er standarden i værktøjet.** GSC 5/9–3/10 giver «hvor
+ * mange dage er der til juleaften» som den første danske completion under «hvor
+ * mange dage er der til», og «hvor mange dage er der til 1 december» (1.282 v,
+ * pos. 5) og «…til den 24 december» (1.036 v, pos. 5) som `/dato`s to største
+ * søgninger — så det er den dato læseren oftest vil have regnet. På selve
+ * juleaften regnes der til næste års, ligesom `dageTilDecember` gør det på 1.
+ * december, så et svar aldrig siger «0 dage».
+ */
+export function naesteJuleaften(locale: DageMellemLocale, today: Date): string {
+  const iDag = iDagPaSiden(today, locale);
+  const aar = Number(iDag.slice(0, 4));
+  const iDenneAar = `${aar}-12-24`;
+  return iDag > iDenneAar ? `${aar + 1}-12-24` : iDenneAar;
+}
+
+export interface DageTilDato {
+  /** "YYYY-MM-DD" for datoen der tælles til. */
+  malIso: string;
+  /** "24. december 2026" / "24 december 2026". */
+  datoTekst: string;
+  /** Dagens ugedag: "torsdag". */
+  ugedagTekst: string;
+  /** Hele kalenderdage fra i dag. Negativt hvis datoen er lagt bagved. */
+  dage: number;
+  /** Hele uger i `Math.abs(dage)`, og det der er tilbage. */
+  uger: number;
+  restDage: number;
+  /** Santidspunktet er passeret. */
+  overskredet: boolean;
+  /** Hele svaret i én sætning — det er teksten brugeren kopierer. */
+  sætning: string;
+}
+
+/**
+ * Hvor mange dage der er fra i dag til en **valgfri** dato.
+ *
+ * **Hvorfor et værktøj og ikke flere sider.** `/dage-til/*` svarer på de
+ * håndplukkede datoer, og dansk autocomplete under «hvor mange dage er der
+ * til» rummer både dem («juleaften», «1 december», «halloween», «sommerferie»)
+ * og datoer uden side («den 10 august», «tilbage af 2026»). Uden et felt til
+ * en vilkårlig dato er sidens svar på den sidste slags: man skal gætte, hvilken
+ * af sidens 158 URL'er der lige nu er rigtig. Ét felt løser hele klassen, og det
+ * er samme regnestykke som `/dage-til/*` bruger — `heleDageMellem` — så de to
+ * ikke kan svare forskelligt på den samme dato.
+ *
+ * Datoen i fortiden er ikke en fejl: den er ofte netop det læseren spørger om
+ * («hvor mange dage siden jul»). Derfor får den sin egen sætning frem for et
+ * negativt tal i en nedtælling.
+ */
+export function dageTilDato(
+  locale: DageMellemLocale,
+  malIso: string,
+  today: Date
+): DageTilDato | null {
+  const maal = parseIsoDato(malIso);
+  if (!maal) return null;
+  const iDag = parseIsoDato(iDagPaSiden(today, locale)) as Date;
+  const dage = heleDageMellem(iDag, maal);
+  const uger = Math.floor(Math.abs(dage) / 7);
+  const restDage = Math.abs(dage) - uger * 7;
+  const intl = getIntlLocale(locale);
+  const datoTekst = maal.toLocaleDateString(intl, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const ugedagTekst = maal.toLocaleDateString(intl, { weekday: "long" });
+  const overskredet = dage < 0;
+  const tals = (n: number) => n.toLocaleString(intl);
+  const dagOr = (n: number) => (locale === "se" ? (n === 1 ? "1 dag" : `${tals(n)} dagar`) : n === 1 ? "1 dag" : `${tals(n)} dage`);
+  const sætning = overskredet
+    ? locale === "se"
+      ? `Det gick ${dagOr(-dage)} sedan ${datoTekst}, som var en ${ugedagTekst}.`
+      : `Der er gået ${dagOr(-dage)} siden ${datoTekst}, som var en ${ugedagTekst}.`
+    : locale === "se"
+      ? `Det är ${dagOr(dage)} till ${datoTekst}, som är en ${ugedagTekst}.`
+      : `Der er ${dagOr(dage)} til ${datoTekst}, som er en ${ugedagTekst}.`;
+  return {
+    malIso,
+    datoTekst,
+    ugedagTekst,
+    dage,
+    uger,
+    restDage,
+    overskredet,
+    sætning,
+  };
+}
+
+/**
  * Den danske periode: 1. januar i år → 1. januar næste år. Den er valgt, fordi
  * svaret er det tal folk oftest vil bekræfte ved et skudår, og fordi den er
  * 365 eller 366 dage — altså et tal der *skal* kunne aflæses mod en kalender.

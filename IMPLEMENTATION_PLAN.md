@@ -1,25 +1,29 @@
-STATUS: 6/10 04:4x. ✅ **`/klokken-i/*` dækker nu de lande dansk autocomplete
-spørger om.** «klokken i roma», «klokken i amsterdam», «klokken i barcelona»,
-«klokken i dubai», «klokken i schweiz», «klokken i marokko», «klokken i
-grækenland» og «klokken i frankrig» var alle danske completioner, men svaret
-lå i `/tidszone`, der konkurrerer om 24.829 visninger, så læseren skulle gætte
-blandt 158 URL'er. Svy nye landesider i hvert sprog + Barcelona under Spanien
-(14 → 21 lande), alle dømt mod IANA gennem `Intl` i både januar og juli, så
-Marokkos ramadan-spring og EUs skiftevinduer ikke kan give et forkert tal.
-**Danmark og Sverige bevidst undtaget** — en eksisterende port siger at læserens
-eget marked ikke får en side, så Stockholm-sluggen er ikke tilføjet. Se
-arkivet for de tre port-fejl fundet undervejs.
-✅ 6/10: `/ugedag` + `/veckodag`, `/braendstof` Forbrugsomregner,
-`/kvadratmeter` ArealOmregner, forsiden + sidebarlen linker `/procent`+`/tidszone`+`/moms`,
-dage-til's FAQ som regler, sæsonbadge i site-tidszonen. ✅ 5/10: `/rumfang`
-(31 porte), svensk landetabel, landetabellens tidsforskil, efterlønnens deltidstal,
-juleaftens-URL = datoen, `/tidsberegner` værktøjet først, «Populær nu»,
-sydhalvkloden + Nuuk, fire rå procenter, sidebarlens trafikrækkefølge. ✅ 4/10:
-hele CEO-køens punkt 0. Alt ældre: `docs/plan-arkiv.md`.
+STATUS: 6/10 04:2x. ✅ **«Hvor mange dage er der til …?» er nu et værktøj til
+enhver dato.** `/dato` har 136.986 GSC-visninger og 0,6 % CTR, og de to største
+søgninger er begge nedtællinger («hvor mange dage er der til 1 december» 1.282 v,
+pos. 5, «…til den 24 december» 1.036 v, pos. 5) — men `/dage-til/*` svarer kun på
+de håndplukkede datoer, og dansk autocomplete under «hvor mange dage er der til»
+rummer også «den 10 august», som ingen liste kan dække. `DatoBeregner` har nu en
+femte tilstand med ét datofelt, forudvalgt til næste juleaften, der regner med
+samme `heleDageMellem` som `/dage-til/*` og viser datoens ugedag; en dato i
+fortiden får «Dage siden» og sin egen sætning. Kopier-teksten er hele svaret:
+«Der er 79 dage til 24. december 2026, som er en torsdag.»
+**MÅL: `/dato` baseline 1.087 besøgende/28d + 136.986 GSC-visninger, CTR 0,6 %,
+pos. 5,6 pr. 2026-10-06** — mål igen 20/10.
+✅ 6/10 tidligere: `/klokken-i/*` i 21 lande, `/ugedag` + `/veckodag`,
+`/braendstof` Forbrugsomregner, `/kvadratmeter` ArealOmregner, forside +
+sidebarlens links til `/procent`+`/tidszone`+`/moms`, dage-til's FAQ som regler,
+sæsonbadge i site-tidszonen. ✅ 5/10: `/rumfang` (31 porte), svensk landetabel,
+landetabellens tidsforskil, efterlønnens deltidstal, juleaftens-URL = datoen,
+`/tidsberegner` værktøjet først, «Populær nu», sydhalvkloden + Nuuk, fire rå
+procenter, sidebarlens trafikrækkefølge. ✅ 4/10: hele CEO-køens punkt 0. Alt
+ældre: `docs/plan-arkiv.md`.
 **Gate:** `npm run typecheck && npm run lint && npm run test` (CI kører også
-`next build`). 6/10 04:4x: typecheck 0, lint 0 (789 filer), **4466 tests i 277
-filer** grønne. Ét tidligere kørsel gav 1 rød i `locale-leak-gate.test.ts`, se
-❓. CI grøn 6/10 01:22. PR-TJEK 6/10 02:5x. BRANCH-TJEK 4/10 04:1x.
+`next build`). 6/10 04:1x: typecheck 0, lint 0 (789 filer), **4480 tests i 277
+filer** grønne. Mutationstest: fortegnet i `dageTilDato` og årstalet i
+`naesteJuleaften` vendt gav 11 røde. Ét tidligere kørsel gav 1 rød i
+`locale-leak-gate.test.ts`, se ❓. CI grøn 6/10 01:53. PR-TJEK 6/10 02:5x.
+BRANCH-TJEK 4/10 04:1x.
 
 ## Fase 3 — trafik-drevet
 
@@ -139,6 +143,17 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 04:2x:** `VERIFICÉR DEPLOY: /dato har en femte værktøjtilstand
+«Dage til dato» med feltet «Hvilken dato» forudvalgt til næste juleaften, der
+viser antal dage, hele uger og restdage samt datoens ugedag, og listen under
+«Hvor mange dage er der til …?» linker til den i da og se
+ceo/dage-til-dato 6/10 04:2x`. Mål på **indhold**: `curl -s
+https://minberegner.dk/dato | grep -o 'Hvor mange dage er der til …' | wc -l` →
+**> 0**, `grep -o 'Vilket datum\|Hvilken dato' | wc -l` → **1** (begge domæner:
+beraknare.se med «Vilket datum»). Resultatkortets tekst skal være «Dage til
+datoen» og, i januar, «Dage siden». ⚠️ Første reelle deploy-vindue efter mergen
+er 6/10 07:30.
 
 **Åben 6/10 04:4x:** `VERIFICÉR DEPLOY: de svy nye landesider
 /klokken-i/{frankrig,italien,nederlandene,graekenland,schweiz,marokko,emiraterne}

@@ -4,7 +4,7 @@
 process.env.TZ = "Europe/Copenhagen";
 
 import { describe, expect, test } from "vitest";
-import { dageTilDecember } from "./dage-mellem-datoer";
+import { dageTilDato, dageTilDecember, naesteJuleaften } from "./dage-mellem-datoer";
 
 /** En dato ved **dagens** klokkeslæt i sidens egen tidszone. */
 function dag(iso: string): Date {
@@ -72,5 +72,96 @@ describe("dageTilDecember", () => {
     const e = dageTilDecember("da", dag("2026-10-04"));
     expect(e.decemberTekst).not.toMatch(/2026/);
     expect(e.decemberTekst.toLowerCase()).toContain("december");
+  });
+});
+describe("naesteJuleaften", () => {
+  // Standarden i værktøjets nye tilstand. GSC's to største søgninger på `/dato`
+  // er «hvor mange dage er der til 1 december» (1.282 v, pos. 5) og «…til den
+  // 24 december» (1.036 v, pos. 5), så den dato skal være valgt uden at læseren
+  // rører feltet.
+  test("i oktober er det årets juleaften", () => {
+    expect(naesteJuleaften("da", dag("2026-10-06"))).toBe("2026-12-24");
+    expect(naesteJuleaften("se", dag("2026-10-06"))).toBe("2026-12-24");
+  });
+
+  // På selve juleaften skal svaret ikke være «0 dage» — juleaften 2027 er den
+  // næste, og den er en fredag, så et årstal der hang på 2026 ville være en
+  // påstand uden dækning.
+  test("på juleaften peger feltet på næste år, og dagen efter også", () => {
+    expect(naesteJuleaften("da", dag("2026-12-24"))).toBe("2026-12-24");
+    expect(naesteJuleaften("da", dag("2026-12-25"))).toBe("2027-12-24");
+  });
+});
+
+describe("dageTilDato", () => {
+  // 6. oktober 2026 → 24. december 2026 er 79 dage = 11 hele uger + 2 dage, og
+  // 24. december 2026 er en torsdag. Uden den ugedag kan læseren ikke se, om
+  // de skal gå ud lørdag eller på en hverdag.
+  test("dansk: 6/10 2026 er der 79 dage til juleaften", () => {
+    const e = dageTilDato("da", "2026-12-24", dag("2026-10-06"));
+    expect(e?.dage).toBe(79);
+    expect(e?.uger).toBe(11);
+    expect(e?.restDage).toBe(2);
+    expect(e?.datoTekst).toBe("24. december 2026");
+    expect(e?.ugedagTekst).toBe("torsdag");
+    expect(e?.overskredet).toBe(false);
+    expect(e?.sætning).toBe("Der er 79 dage til 24. december 2026, som er en torsdag.");
+  });
+
+  // Samme regnestykke på svensk: intet med punktum i datoen, og «är» i stedet
+  // for «er».
+  test("svensk: samme dag, eget format og egen sætning", () => {
+    const e = dageTilDato("se", "2026-12-24", dag("2026-10-06"));
+    expect(e?.dage).toBe(79);
+    expect(e?.datoTekst).toBe("24 december 2026");
+    expect(e?.sætning).toBe("Det är 79 dagar till 24 december 2026, som är en torsdag.");
+  });
+
+  // Ét tal, ét ord. Dansk og svensk har begge to former, og «1 dage» i den
+  // sætning brugeren kopierer er en fejl — `DatoBeregner`-porten dømmer
+  // allerede den fejl i dage-mellem-tilstanden.
+  test("én dag får «1 dag», og dagens dato får 0", () => {
+    expect(dageTilDato("da", "2026-10-07", dag("2026-10-06"))?.sætning).toBe(
+      "Der er 1 dag til 7. oktober 2026, som er en onsdag."
+    );
+    const nul = dageTilDato("da", "2026-10-06", dag("2026-10-06"));
+    expect(nul?.dage).toBe(0);
+    expect(nul?.uger).toBe(0);
+    expect(nul?.sætning).toContain("Der er 0 dage til 6. oktober 2026");
+  });
+
+  // En dato i fortiden er ikke en fejl — «hvor mange dage siden jul» er et
+  // lige så almindeligt spørgsmål. Negativt tal i en nedtælling ville være
+  // svært at læse, så sætningen vender sig i stedet.
+  test("en dato i fortiden tælles baglæns og siger det i sætningen", () => {
+    const e = dageTilDato("da", "2026-01-01", dag("2026-10-06"));
+    expect(e?.dage).toBe(-278);
+    expect(e?.overskredet).toBe(true);
+    expect(e?.uger).toBe(39);
+    expect(e?.restDage).toBe(5);
+    expect(e?.sætning).toBe(
+      "Der er gået 278 dage siden 1. januar 2026, som var en torsdag."
+    );
+  });
+
+  // 25.–26. oktober 2026 er skiftet tilbage, så der går 25 timer mellem de to
+  // midnat. Tælles der på millisekunder, bliver svaret 2 dage for to datoer der
+  // er præcis én dag hinanden — `heleDageMellem` tæller på kalenderfelterne.
+  test("et skifte for sommertid tælles som én dag, ikke to", () => {
+    expect(dageTilDato("da", "2026-10-25", dag("2026-10-24"))?.dage).toBe(1);
+    expect(dageTilDato("da", "2026-10-26", dag("2026-10-24"))?.dage).toBe(2);
+  });
+
+  // Et tomt felt eller en umulig dato må ikke blive `NaN dage` på siden.
+  test("et felt brugeren ikke har udfyldt giver intet svar", () => {
+    expect(dageTilDato("da", "", dag("2026-10-06"))).toBeNull();
+    expect(dageTilDato("da", "2026-02-31", dag("2026-10-06"))).toBeNull();
+    expect(dageTilDato("da", "24-12-2026", dag("2026-10-06"))).toBeNull();
+  });
+
+  // Skudårsdagen: 29. februar 2028 skal kunne vælges, og et interval der
+  // krydser skiftet mellem februar og marts skal tælle 29 dage i februar.
+  test("et skudår tælles med sin 29. februar", () => {
+    expect(dageTilDato("da", "2028-03-01", dag("2028-02-01"))?.dage).toBe(29);
   });
 });

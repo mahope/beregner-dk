@@ -12,7 +12,9 @@ import { LocaleProvider } from "./LocaleProvider";
 import { encodeCalculationState } from "@/lib/calculation-state";
 import { getDomainConfig } from "@/lib/domain-config";
 import { beregnAlder } from "@/lib/alder";
-import { tilIsoDato } from "@/lib/lokal-dato";
+import { parseIsoDato, tilIsoDato } from "@/lib/lokal-dato";
+import { iDagPaSiden } from "@/lib/lokal-dato";
+import { naesteJuleaften } from "@/lib/dage-mellem-datoer";
 
 vi.mock("@/lib/analytics", () => ({
   trackCalculation: vi.fn(),
@@ -310,5 +312,129 @@ describe("DatoBeregner — teksten brugeren kopierer og deler", () => {
       expect(screen.getByText(/^Resultat$/)).toBeTruthy();
     });
     expect(await kopiTekst()).toBe("1.000 dage fra 27. september 2026");
+  });
+});
+
+/**
+ * Renderer «dage til dato»-tilstanden med en måldato `forskydning` dage fra
+ * **sidens** i dag. Datoen bygges af `iDagPaSiden` og ikke af maskinens eget ur,
+ * fordi CI kører i UTC: mellem dansk og svensk aften er der to timer hvor de to
+ * siger forskellige datoer, og en test der læser maskinens ur ville være rød de
+ * to timer i døgnet og grøn de øvrige 22.
+ */
+function renderDageTil(forskydning: number, locale: "da" | "se" = "da") {
+  const iDag = iDagPaSiden(new Date(), locale);
+  const mal = parseIsoDato(iDag) as Date;
+  mal.setDate(mal.getDate() + forskydning);
+  const malDato = tilIsoDato(mal);
+  const encoded = encodeCalculationState({
+    type: "dato",
+    inputs: { mode: "dage-til", malDato },
+    timestamp: 1700000000000,
+  });
+  window.history.replaceState({}, "", `/dato?s=${encoded}`);
+  const config =
+    locale === "se" ? getDomainConfig("beraknare.se") : getDomainConfig("localhost");
+
+  render(
+    <LocaleProvider locale={locale} domainConfig={config}>
+      <DatoBeregner />
+    </LocaleProvider>
+  );
+  return malDato;
+}
+
+describe("DatoBeregner — dage til dato", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  // `/dato` har 136.986 visninger og 0,6 % CTR, og de to største søgninger er
+  // begge nedtællinger («hvor mange dage er der til 1 december», 1.282 v, pos. 5,
+  // og «…til den 24 december», 1.036 v). Feltet står derfor forudvalgt til den
+  // næste juleaften, så den læser der bare åbner tilstanden får et svar.
+  test("feltet står forudvalgt til den næste juleaften", async () => {
+    const forventet = naesteJuleaften("da", new Date());
+    render(
+      <LocaleProvider locale="da" domainConfig={getDomainConfig("localhost")}>
+        <DatoBeregner />
+      </LocaleProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Dage til dato/ }));
+
+    await waitFor(() => {
+      expect((screen.getByLabelText("Hvilken dato") as HTMLInputElement).value).toBe(
+        forventet
+      );
+    });
+  });
+
+  test("antallet, datoen og ugedagen hører sammen", async () => {
+    const malDato = renderDageTil(10);
+
+    await waitFor(() => {
+      expect(antalDage(/^Dage til datoen$/)).toBe(10);
+    });
+    expect(tile(/^Hele uger$/)).toBe(1);
+    expect(tile(/^Restdage$/)).toBe(3);
+    const ugedag = (parseIsoDato(malDato) as Date).toLocaleDateString("da-DK", {
+      weekday: "long",
+    });
+    const datoTekst = (parseIsoDato(malDato) as Date).toLocaleDateString("da-DK", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const linje = screen.getByText(new RegExp(datoTekst.replace(".", "\\.")));
+expect(linje.textContent).toBe(`${datoTekst} · ${ugedag}`);
+    // Kun ugedagen må staves med stort forbogstav. `capitalize` på hele
+    // linjen giver «24. December 2026», fordi klassen gør hvert ord stort.
+    expect(linje.querySelector("span.capitalize")?.textContent).toBe(ugedag);
+  });
+
+  // «Hvor mange dage siden …» er et lige så almindeligt spørgsmål, så en dato i
+  // fortiden skal have sin egen etiket frem for at stå som et negativt tal under
+  // «Dage til datoen».
+  test("en dato i fortiden får «Dage siden» og det positive antal", async () => {
+    renderDageTil(-5);
+
+    await waitFor(() => {
+      expect(antalDage(/^Dage siden$/)).toBe(5);
+    });
+    expect(screen.queryByText(/^-5$/)).toBeNull();
+    expect(screen.queryByText(/NaN/)).toBeNull();
+  });
+
+  test("svensk får sin egen etiket", async () => {
+    renderDageTil(10, "se");
+
+    await waitFor(() => {
+      expect(antalDage(/^Dagar till datumet$/)).toBe(10);
+    });
+    expect(screen.getByRole("button", { name: /Dagar till datum/ })).toBeTruthy();
+  });
+
+  // Det er denne tekst brugeren sender videre, så den skal kunnne bruges
+  // alene: dag-tal, dato og ugedag.
+  test("teksten der kopieres nævner både antallet og datoen", async () => {
+    const malDato = renderDageTil(10);
+
+    await waitFor(() => {
+      expect(antalDage(/^Dage til datoen$/)).toBe(10);
+    });
+    const tekst = await kopiTekst();
+    expect(tekst).toBe(
+      `Der er 10 dage til ${(parseIsoDato(malDato) as Date).toLocaleDateString("da-DK", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })}, som er en ${(parseIsoDato(malDato) as Date).toLocaleDateString("da-DK", {
+        weekday: "long",
+      })}.`
+    );
   });
 });

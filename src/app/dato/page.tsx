@@ -777,6 +777,17 @@ export default async function DatoPage() {
             ? "Talet nedan är dagens antal dagar, och räknas om varje dag."
             : "Tallet nedenfor er dagens antal dage, og det genberegnes hver dag."}
         </p>
+        {/* Listen dækker de datoer der altid søges på — juleaften, nytår,
+            Halloween, ferier. Dansk autocomplete under «hvor mange dage er der
+            til» rummer også helt vilkårlige datoer («den 10 august»), som ingen
+            liste kan dække, så de sendes videre til værktøjets egen
+            «dage til dato»-tilstand ovenfor. Uden den henvisning står den
+            læser med et spørgsmål, listen ikke kan svare på. */}
+        <p>
+          {locale === "se"
+            ? "Listan tar upp de datum som alltid efterfrågas. Vill du räkna till ett helt annat datum — ett födelsedatum, en deadline eller något utanför listan — väljer du det i verktyget «Dagar till datum» ovanför."
+            : "Listen dækker de datoer, der altid søges på. Skal du tælle til en helt anden dato — en fødselsdag, en deadline eller noget uden for listen — vælger du den i værktøjet «Dage til dato» ovenfor."}
+        </p>
         <ul>
           {dageTilLinks.map((link) => (
             <li key={link.href}>
