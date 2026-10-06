@@ -30553,3 +30553,36 @@ og repoet skriver kode og fejltekster på engelsk.
 Ingen svensk eller norsk version af madvarerne; beraknare.se får siden uden
 tabellen. `kategori`-siden og sitemap er urørt, fordi der ikke er en ny
 URL.
+
+---
+
+## Øresundsbroen på `/brokost` (7/10 00:3x)
+
+Den anden store bro er kommet på siden, der i forvejen dækkede Storebælt.
+Kilden er `oresundsbron.com/da/priser`, læst 7/10 2026: 11 køretøjstyper med
+tre betalingsformer hver (ØresundGO, onlinebillet, betalingsanlægget) og en
+årsafgift på 370 kr. for GO-aftalen, alle priser i DKK pr. enkelttur inkl.
+25 % moms fra 14. september 2026. Den danske `.dk`-host svarer curl 000, men
+`.com`-hosten svarer 200 — det var den fejl, der havde låst ❓'en.
+
+`src/lib/oresundsbroen.ts` holder hele prislisten og regner tur/retur-pris,
+årsforbrug og break-even for GO-aftalen. `OresundsbroenBeregner.tsx` er
+værktøjet, og `/brokost/page.tsx` fik et Øresunds-afsnit med tabel og et par
+FAQ-spørgsmål i `page-data.ts`. Alle tal i brødtekst, FAQ og værktøj læses
+fra modulet, så de ikke kan glide fra hinanden.
+
+**Målt.** typecheck 0, lint 0 (826 filer), 4.803 tests i 291 filer grønne,
+`next build` grøn. Mutation af `oresundGoBreakEven` uden årsafgiften i
+tælleren giver 1 rød. Testen fangede selv en fejl i min første antagelse:
+årsafgiften er tjent ind på første tur for en personbil (182 mod 470), men
+først efter to ture for en motorcykel (94 mod 240) — break-even regnes nu for
+hver type i stedet for at påstå «første tur» for alle.
+
+**Samme commit:** `ugedag-side.test.tsx` skrev «Tirsdag» som fast tekst og
+dømte dermed den 6. oktober, ikke koden; den blev rød 7/10. Ugedagen
+udledes nu af datoen selv med `getUTCDay()`, så porten er datouafhængig.
+
+**Ikke gjort.** Ingen browser/Playwright (repoet har stadig intet), så
+390/768/1280 px er ikke set. ØresundPAY's egne betalingsregler er ikke
+modelleret; kun broens egen prisliste.
+

@@ -276,7 +276,7 @@ const daCalculators: HomeCalculator[] = [
   // Hverdag
   { title: "Elbil vs. benzinbil", description: "Sammenlign driftsomkostninger for elbil og benzinbil", href: "/elbil", popular: false, category: "Hverdag" },
   { title: "Enhedspris", description: "Find den billigste vare pr. kilo, liter eller stk", href: "/enhedspris", popular: false, category: "Hverdag" },
-  { title: "Brokost Storebælt", description: "Se prisen for at krydse Storebælt og dit årsforbrug", href: "/brokost", popular: false, category: "Hverdag" },
+  { title: "Brokost Storebælt og Øresund", description: "Se prisen for at krydse Storebælt og Øresund og dit årsforbrug", href: "/brokost", popular: false, category: "Hverdag" },
   { title: "Rabatberegner", description: "Beregn pris efter rabat og se din besparelse", href: "/rabat", popular: false, category: "Hverdag" },
   { title: "Fartberegner", description: "Beregn fart, distance og tid — plus tempo i min/km", href: "/fart", popular: false, category: "Hverdag" },
   { title: "Løbetidsberegner", description: "Beregn tempo i min/km og holdtider pr. kilometer", href: "/pace", popular: false, category: "Hverdag" },

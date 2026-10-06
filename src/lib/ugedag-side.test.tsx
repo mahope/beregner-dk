@@ -137,8 +137,13 @@ describe("/ugedag — den renderede side", () => {
     const html = await markup();
     const iDag = iDagPaSiden(new Date(), "da");
     expect(html).toContain(`Ugedagsværktøj:${iDag}`);
-    // 2026-10-06 er en tirsdag; retter proppen til en forkert dato, dør porten.
-    expect(ugedagResultat(iDag, "da")!.ugedagTekst).toBe("Tirsdag");
+    // Ugedagen regnes ud af datoen selv i stedet for at stå som en fast tekst:
+    // en hardkodet «Tirsdag» var sand den 6. oktober 2026 og falsk dagen efter,
+    // så porten dømte sit eget skriveøjeblik og ikke koden.
+    const forventetUgedag = ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"][
+      new Date(`${iDag}T12:00:00Z`).getUTCDay()
+    ];
+    expect(ugedagResultat(iDag, "da")!.ugedagTekst).toBe(forventetUgedag);
     expect(html).not.toContain("INGEN-DATO");
   });
 

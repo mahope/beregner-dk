@@ -49,6 +49,12 @@ import {
   brokostForskel,
   brokostKategori,
 } from "./brokost";
+import {
+  ORESUND_GO_AARSAFGIFT,
+  ORESUND_START,
+  ORESUND_START_TURE,
+  oresundKategori,
+} from "./oresundsbroen";
 
 /**
  * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
@@ -64,6 +70,19 @@ const BROKOST_WEEKEND_KR = heleKroner(BROKOST_RABATTER.weekend);
 const BROKOST_ANHAENGER_KR = heleKroner(brokostKategori("personbil-anhaenger-over-6")!.eksprespris);
 const BROKOST_CAMPER_KR = heleKroner(brokostKategori("autocamper-10")!.eksprespris);
 const BROKOST_CAMPERAFTALE_KR = heleKroner(brokostKategori("autocamper-aftale")!.eksprespris);
+
+/**
+ * Sidens egne tal til Øresundsbroen, samme princip som for Storebælt.
+ */
+const ORESUND_START_KAT = oresundKategori(ORESUND_START)!;
+const ORESUND_START_GO_KR = heleKroner(ORESUND_START_KAT.go);
+const ORESUND_START_ONLINE_KR = heleKroner(ORESUND_START_KAT.online);
+const ORESUND_START_NORMAL_KR = heleKroner(ORESUND_START_KAT.normal);
+const ORESUND_GO_AARSAFGIFT_KR = heleKroner(ORESUND_GO_AARSAFGIFT);
+const ORESUND_START_AAR_GO_KR = heleKroner(
+  ORESUND_GO_AARSAFGIFT + ORESUND_START_KAT.go * 2 * ORESUND_START_TURE
+);
+const ORESUND_START_AAR_NORMAL_KR = heleKroner(ORESUND_START_KAT.normal * 2 * ORESUND_START_TURE);
 import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
 import {
@@ -1741,17 +1760,17 @@ faqItems: kalorierFaqItems("da"),
     "brokost": {
       slug: "brokost",
       title: "Brokostberegner",
-      description: "Beregn hvad det koster at krydse Storebæltsbroen — eksprespris, kortpris, aften-, weekend- og helligdagsrabat.",
-      metaTitle: "Brokost Storebælt: personbil 3-6 m er 205 kr. for tur",
-      metaDescription: "Se Storebælts prisliste 2026. Personbil 3-6 m koster 205 kr. med eksprespris og 235 kr. med kort. Beregn turen og årsforbruget.",
-      keywords: ["brokost storebælt", "storebælt pris bil", "brokostberegner", "storebælt 2026", "pris for at krydse storebælt", "aftenrabat storebælt", "weekendrabat storebælt", "storebælt med trailer"],
-      ogTitle: "Brokost Storebælt: personbil 3-6 m er 205 kr. for tur",
-      ogDescription: "Beregn hvad det koster at krydse Storebæltsbroen, med eksprespris, kortpris og fritidsrabatter.",
+      description: "Beregn hvad det koster at krydse Storebæltsbroen eller Øresundsbroen — eksprespris, kortpris, onlinebillet, ØresundGO og fritidsrabatter.",
+      metaTitle: "Brokost: Storebælt 205 kr. og Øresund fra 182 kr.",
+      metaDescription: "Bropriser 2026 for Storebælt og Øresund. Personbil 3-6 m: 205 kr. over Storebælt og 182 kr. over Øresund med ØresundGO. Beregn turen og årsforbruget.",
+      keywords: ["brokost storebælt", "storebælt pris bil", "brokostberegner", "storebælt 2026", "pris for at krydse storebælt", "aftenrabat storebælt", "weekendrabat storebælt", "storebælt med trailer", "øresundsbroen pris", "øresundsbroen pris 2026", "hvad koster øresundsbroen", "øresundgo pris", "broafgift øresund"],
+      ogTitle: "Brokost: Storebælt 205 kr. og Øresund fra 182 kr.",
+      ogDescription: "Beregn hvad det koster at krydse Storebæltsbroen og Øresundsbroen, med betalingsformer, rabatter og årsforbrug.",
       category: "Praktisk",
       breadcrumbCategory: "Praktisk",
       breadcrumbCategoryHref: "/kategori/praktisk",
       schemaName: "Brokostberegner",
-      schemaDescription: "Gratis brokostberegner. Se Storebælts prisliste 2026 for bil, varebil, autocamper, lastbil og bus, og beregn årsforbruget.",
+      schemaDescription: "Gratis brokostberegner. Se prislisten for 2026 for Storebælt og Øresund for bil, varebil, autocamper og motorcykel, og beregn årsforbruget.",
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Hvor meget koster det at køre over Storebælt?", answer: `En personbil 3-6 m koster ${BROKOST_START_KR} kr. for én tur med eksprespris, altså Bizz eller nummerpladebetaling i en grøn ekspresbane. Betaler du med kort eller kontanter, koster samme tur ${BROKOST_KORT_KR} kr.` },
@@ -1760,6 +1779,9 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvad er en weekendrabat?", answer: `Weekendrabatten er ${BROKOST_WEEKEND_KR} kr. for tur og retur og gælder fra fredag kl. 12 til søndag kl. 24. Den kræver en Storebælt Privataftale og et køretøj under 6 m.` },
       { question: "Hvad koster en bil med anhænger over Storebælt?", answer: `En personbil med anhænger over 6 m totallængde koster ${BROKOST_ANHAENGER_KR} kr. med eksprespris. Anhængere over 6 m kan ikke bruge fritidsbilletterne, fordi betalingsanlægget måler hele køretøjets længde.` },
       { question: "Hvad koster det at køre over Storebælt med en autocamper?", answer: `En autocamper op til 10 m koster ${BROKOST_CAMPER_KR} kr. med eksprespris, mens en autocamper under 3.500 kg og op til 6 m kun koster ${BROKOST_START_KR} kr. En autocamper under 3.500 kg og over 6 m med autocamperaftale koster ${BROKOST_CAMPERAFTALE_KR} kr., men kun med betalingsmiddel.` },
+      { question: "Hvad koster det at køre over Øresundsbroen?", answer: `En personbil på max 6 m koster ${ORESUND_START_GO_KR} kr. for én overfart med ØresundGO, ${ORESUND_START_ONLINE_KR} kr. som onlinebillet og ${ORESUND_START_NORMAL_KR} kr. i betalingsanlægget. Priserne er i danske kroner inklusive moms.` },
+      { question: "Hvad koster ØresundGO?", answer: `ØresundGO er en rabataftale med en årsafgift på ${ORESUND_GO_AARSAFGIFT_KR} kr., der giver den laveste pris pr. overfart. For en personbil på max 6 m er årsafgiften tjent ind allerede på den første tur tur/retur, fordi hver overfart bliver billigere.` },
+      { question: "Hvad koster det at køre over Øresundsbroen tur/retur?", answer: `En personbil på max 6 m koster ${ORESUND_START_NORMAL_KR} kr. tur/retur til normalpris i betalingsanlægget. Med ØresundGO koster ${ORESUND_START_TURE} ture tur/retur ${ORESUND_START_AAR_GO_KR} kr. om året mod ${ORESUND_START_AAR_NORMAL_KR} kr. til normalpris.` },
       ],
     },
     "bil": {

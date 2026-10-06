@@ -3,6 +3,7 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import BrokostBeregner from "@/components/BrokostBeregner";
+import OresundsbroenBeregner from "@/components/OresundsbroenBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -19,6 +20,16 @@ import {
   brokostAarsforskel,
   brokostForskel,
 } from "@/lib/brokost";
+import {
+  ORESUND_GO_AARSAFGIFT,
+  ORESUND_KATEGORIER,
+  ORESUND_MAX_NORMALPRIS,
+  ORESUND_MIN_NORMALPRIS,
+  ORESUND_START,
+  ORESUND_START_TURE,
+  oresundKategori,
+  oresundGoBreakEven,
+} from "@/lib/oresundsbroen";
 import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata() {
@@ -42,6 +53,19 @@ export default async function BrokostPage() {
     const kort = k.kortpris === null ? "Kun eksprespris" : `${kr(k.kortpris)} kr.`;
     return { etiket: k.etiket, eksprespris: `${kr(k.eksprespris)} kr.`, kort };
   });
+
+  // Øresundsbron har tre betalingsformer. Tallene læses samme sted som værktøjet.
+  const oresundStart = oresundKategori(ORESUND_START)!;
+  const oresundBreakEven = oresundGoBreakEven(oresundStart);
+  const oresundGoAar = ORESUND_GO_AARSAFGIFT + oresundStart.go * 2 * ORESUND_START_TURE;
+  const oresundNormalAar = oresundStart.normal * 2 * ORESUND_START_TURE;
+  const oresundBesparelse = oresundNormalAar - oresundGoAar;
+  const oresundRækker = ORESUND_KATEGORIER.map((k) => ({
+    etiket: k.etiket,
+    go: `${kr(k.go)} kr.`,
+    online: `${kr(k.online)} kr.`,
+    normal: `${kr(k.normal)} kr.`,
+  }));
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -143,6 +167,66 @@ export default async function BrokostPage() {
             Alle tre fritidsrabatter kræver en Storebælt Privataftale, at du betaler med automatisk
             betalingsmiddel, og at køretøjet er under 6 m. Over 6 m kan du ikke bruge
             fritidsbilletterne — betalingsanlægget måler totallængden, også med anhænger.
+          </p>
+        </div>
+
+        <div className="prose dark:prose-invert max-w-none mb-8">
+          <h2>Hvad koster det at krydse Øresundsbroen?</h2>
+          <p>
+            En personbil på max 6 m koster <strong>{kr(oresundStart.go)} kr.</strong> for én overfart
+            med rabataftalen ØresundGO, <strong>{kr(oresundStart.online)} kr.</strong> som
+            onlinebillet og <strong>{kr(oresundStart.normal)} kr.</strong> i betalingsanlægget.
+            ØresundGO kræver en årsafgift på <strong>{kr(ORESUND_GO_AARSAFGIFT)} kr.</strong>, men
+            den er tjent ind allerede på den første tur tur/retur. Kører du{" "}
+            {ORESUND_START_TURE} ture tur/retur om året i den samme bil, koster rejsen{" "}
+            <strong>{kr(oresundGoAar)} kr.</strong> med ØresundGO mod{" "}
+            <strong>{kr(oresundNormalAar)} kr.</strong> til normalpris — altså{" "}
+            <strong>{kr(oresundBesparelse)} kr. mindre</strong>.
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
+          <OresundsbroenBeregner />
+        </div>
+
+        <div className="prose dark:prose-invert max-w-none mb-8">
+          <h2>Prisliste for en tur over Øresundsbron</h2>
+          <p>
+            Priserne er Øresundsbrons egen prisliste fra 14. september 2026, i danske kroner pr.
+            enkelttur inklusive 25 % moms. Onlinebilletten er gyldig i 30 dage og giver yderligere
+            10 % rabat, hvis du tilmelder dig nyhedsbrevet.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-gray-300 dark:border-gray-600">
+                  <th className="py-2 pr-4">Køretøj</th>
+                  <th className="py-2 pr-4">ØresundGO</th>
+                  <th className="py-2 pr-4">Onlinebillet</th>
+                  <th className="py-2">Betalingsanlæg</th>
+                </tr>
+              </thead>
+              <tbody>
+                {oresundRækker.map((r) => (
+                  <tr
+                    key={r.etiket}
+                    className="border-b border-gray-200 dark:border-gray-700 last:border-0"
+                  >
+                    <td className="py-2 pr-4">{r.etiket}</td>
+                    <td className="py-2 pr-4">{r.go}</td>
+                    <td className="py-2 pr-4">{r.online}</td>
+                    <td className="py-2">{r.normal}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Normalprisen i listen ligger mellem {kr(ORESUND_MIN_NORMALPRIS)} kr. og{" "}
+            {kr(ORESUND_MAX_NORMALPRIS)} kr. for én overfart. ØresundGOs årsafgift på{" "}
+            {kr(ORESUND_GO_AARSAFGIFT)} kr. er tjent ind efter{" "}
+            {oresundBreakEven === 1 ? "én tur" : `${oresundBreakEven} ture`} tur/retur for en
+            personbil på max 6 m.
           </p>
 
           <h2>Brokost og resten af bilens omkostninger</h2>
