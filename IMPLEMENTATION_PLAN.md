@@ -1,51 +1,6 @@
-STATUS: 6/10 10:4x. ✅ **Tidszonehåndtering rettet til at bruge lokalets egen
-tidszone.** Alle dato- og tid-beregningar bruger nu Europe/Copenhagen for dansk
-og Europe/Stockholm for svensk, så nedtællinger og månedsberegninger stemmer
-præcis for begge domæner. Før brugte koden Europe/Copenhagen for begge, hvilket
-kunde give fejl på beraknare.se. VERIFICÉR DEPLOY-note tilføjet.
-✅ **CEO-kø punkt 0 review-fund 29/9:** Fjernet opfundet tekst om 'fri med lö' från svensk midsommar FAQ. Replacerade med legitim fråga om traditionell firande för att behålla minst 3 FAQ-poster. `VERIFICÉR DEPLOY: /midsommarvisar korrekt information utan löfte om betald ledighet ceo/fix-midsommar-fritext 6/10 10:4x`
-tidszone.** Alle dato- og tid-beregninger bruger nu Europe/Copenhagen for dansk
-og Europe/Stockholm for svensk, så nedtællinger og månedsberegninger stemmer
-præcis for begge domæner. Før brugte koden Europe/Copenhagen for begge, hvilket
-kunne give fejl på beraknare.se. VERIFICÉR DEPLOY-note tilføjet.
-✅ 6/10 07:5x tidligere: **Review-fund MIDDEL rettet: `/dato`s forudvalgte dato
-giver ikke længere «0 dage» på selve juleaften.** `naesteJuleaften` brugte `>`
-i stedet for `>=`, så 24. december (den største `/dato`-søgning: «hvor mange
-dage er der til den 24 december», 1.036 v, pos. 5) faldt til i dag. Nu peger
-feltet på næste år, som søsteren `dageTilDecember` gør på 1. december.
-Assertionen på `dage-mellem-datoer.test.ts:91` fulgte ikke sin egen titel og
-låste fejlen fast — den er rettet til 2027-12-24. ✅ 6/10 07:5x tidligere:
-**`/procent` svarer nu på «hvor stor er forskellen
-mellem to tal?» med begge svar.** Datagrund: `/procent` er sitets #1-side
-(**149.929** GSC-visninger, 0,1 % CTR, pos. 7,5), og dansk autocomplete
-(hl=da, 6/10) svarer «procentvis forskel» med ni træffere hvor **otte** er
-«… mellem to tal»; svensk «procent skillnad mellem to tal» har **10 af 10**
-relaterede. Siden lærer allerede de to formler i sin brødtekst, men
-værktøjet kun kunne den ensidige — så en læser der søgte på den anden fik
-ingen beregning. Nu får man fra ét talpar både ændringen (30.000 → 33.000 =
-**10,00 %**) og forskellen på middelværdien (**9,52 %**), som er det samme
-svar uanset hvilket tal man skrev først. **MÅL: `/procent` baseline
-149.929 GSC-visninger, CTR 0,1 %, pos. 7,5 (6/10 06:5x) — måles igen 20/10.**
-Et talpar med middelværdi 0 (100 og −100) giver **ikke** «0,00 %» men en
-bindestreg og en forklaring, fordi svaret ikke findes.
-**Portene kan fejle:** elleve mutationer målt røde, heraf tre som dækkede
-det forkerte tal i **hovedtallet** — kun kopieringsteksten så ud til at
-dække det, men den læses ikke af den, der kigger på skærmen.
-✅ Tidligere 6/10 06:4x: **`/promille` svarer nu på «hvornår kan jeg køre bil
-igen» med et klokkeslæt**, ikke et antal timer. Datagrund: dansk autocomplete
-(`client=firefox`, `hl=da`) har **20 af 20** træffere i denne form under «hvornår
-kan jeg køre» (10/10) og «hvornår må jeg køre» (10/10); svensk under «när kan jag köra bil» 10 af 10. Den gamle `PromilleBeregner` svarede «under grænsen om 2,6 **timer**» — det forkerte svar på spørgsmålet. Nyt værktøj + tabel på begge domæner; Sveriges 0,2 ‰ giver 04:06 mod Danmarks 02:06. **MÅL: `/promille` baseline 167 Plausible-besøgende/28d (5/10 06:0x), 6.878 GSC-visninger, CTR 1,6 %, pos. 7,7 — måles igen 20/10.** Dagsskiftet står **ved siden af** klokkeslættet (`+1 døgn`), ellers læses 02:06 som i dag. 8 mutationer målt røde, heraf `Math.floor` i stedet for `Math.round` — **4,1 × 60 = 245,999…**, så 5 øl / 80 kg ville givet **02:05** i stedet for 02:06. ✅ 6/10 06:0x: `/brokost` med Storebælts prisliste 2026. ✅ Tidligere 6/10: «hvad er klokken om N.timer» på `/tidsberegner`, `/laantype`, ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund), «Dage til dato» på `/dato`, `/klokken-i/*`, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge. ✅ 5/10: svensk landetabel, tidsforskelsdag, efterlønnens deltidtal, «Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10). ✅ 6/10 09:1x: **Forkert påskeaften-FAQ fjernet fra langfredag-siden.** Dansk FAQ om "påskeaften" (som ikke findes i Danmark — dagen før langfredag hedder skærtorsdag) erstattet med korrekt FAQ om skærtorsdag med datoer 2026-2028. `VERIFICÉR DEPLOY: /dato og /ugedag viser korrekt skærtorsdag-FAQ på langfredag-siden ceo/ret-paaskeaften-faq 6/10 09:1x`.
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run
-build`). 6/10 08:3x: typecheck 0, lint 0 (805 filer), **4665 tests i 283
-filer** grønne, build ok. De 7 CSS-advarsler i build-outputtet er i basen
-(målt ved `git stash`), ikke fra denne ændring. ⚠️ `locale-leak-gate.test.ts`
-timed ud i to fulde kørsler og var grøn i isolation og i den tredje fulde
-kørsling; scanneren kører i en udspawnet proces og bruger ~1,9 s pr. test mod
-vitests 5 s grænse — samme kendte flakiness som i ❓ nedenfor, urørt.
-⚠️ **14 VERIFICÉR-noter er åbne** — alle merges er efter 21:30-vinduet 5/10.
-Første reelle deploy-vindue er **6/10 07:30**; næste iteration måler dem alle
-på indhold og lukker dem med `DEPLOY OK 6/10`. PR-TJEK 6/10 06:5x (ingen
-åbne PR'er). BRANCH-TJEK 4/10.
+STATUS: 6/10 15:5x. ✅ **24 deploy-noter målt på indhold og lukket: DEPLOY OK 6/10.** Alle merges fra 5/10 21:4x (efterløn-deltid) til 6/10 10:4x (midsommar) er live på begge domæner — bl.a. /brokost, /laantype, /rumfang, /ugedag+/veckodag, /klokken-i/* (7 lande), «hvornår kan jeg køre bil igen» på /promille, plustid på /tidsberegner, «Forskel mellem to tal» på /procent, skærtorsdag-FAQ og midsommar-FAQ. Fulde krav og målinger: docs/plan-arkiv.md.
+✅ **Ny beregner: /skridt omregner skridt til km, gangtid og kalorier.** Datagrund: dansk autocomplete (hl=da, 6/10) giver 7 træffere under «skridt til» og «10000 skridt» (km, omregner, kalorier, kvinder, tid, kcal); svensk giver 10 under «10000 steg». Sitet havde intet værktøj. Skridtlængde 66 cm (kvinde) / 79 cm (mand) og kadence 117/min fra Murray 1964/1970; kalorier MET 3,5 (samme Compendium-kilde som motion-kalorier). Alle tal i brødtekst regnes fra skridt.ts (kvalitetsregel 11). **MÅL: /skridt baseline 0 besøgende/28d (ny side, 6/10) — måles igen ~20/10.** `VERIFICÉR DEPLOY: /skridt … ceo/skridt-til-km 6/10 15:4x`.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build`). 6/10 15:4x: typecheck 0, lint 0 (809 filer), **4.681 tests i 284 filer** grønne, build ok. Fem porte ramt af den nye side og rettet i samme commit: beløb i JSX (tallene regnes nu fra lib), unikke relaterede links, bundne labels (htmlFor), no-locale-kort, Intl-tag med no-arm. ⚠️ `locale-leak-gate.test.ts`-flakiness urørt (se ❓). PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10.
 
 ## Fase 3 — trafik-drevet
 
@@ -80,6 +35,7 @@ på indhold og lukker dem med `DEPLOY OK 6/10`. PR-TJEK 6/10 06:5x (ingen
 | `/brokost` (6/10, ny) | **0** | — | — | — |
 | `/idealvaegt` (4/10, ny) | **0** | — | — | — |
 | `/dage-til/*` (2/10, nye) | **0** | — | — | — |
+| `/skridt` (6/10, ny) | **0** | — | — | — |
 | `/dage-mellem-datoer` + se (3/10, nye) | **0** | — | — | — |
 | `/klokken-i/*` (4/10, nye) | **0** | — | — | — |
 | se `/dato` | 133 | 101.580 | 0,1 % | 8,2 |
@@ -152,7 +108,7 @@ dømmer da/no/se hver for sig. ⛔ `beregner.no` serverer et andet site — se �
 
 ## Feature-kø
 
-Leveret 6/10: **`/brokost` med Storebælts prisliste 2026** (26 køretøjstyper,
+Leveret 6/10 15:4x: **`/skridt` — skridt til km, gangtid og kalorier** (7+10 autocomplete-træffere). Leveret 6/10: **`/brokost` med Storebælts prisliste 2026** (26 køretøjstyper,
 ekspres-/kortpris, fritidsrabatter, årsforbrug), **«hvad er klokken om N
 timer» + summering af tidsrum på `/tidsberegner`** og **«hvornår kan jeg køre
 bil igen» på `/promille`** (se `docs/plan-arkiv.md`). De seks punkter nedenfor er alle
@@ -191,235 +147,11 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
-**Åben 6/10 07:5x:** `VERIFICÉR DEPLOY: /procent har på begge domæner en
-femte værktøjtilstand «Forskel mellem to tal» / «Skillnad mellan två tal», der
-viser både ændringen fra det første tal (10,00 %) og forskellen på
-middelværdien (9,52 %) for 30.000 og 33.000, og brødteksten siger «fem
-forskellige typer beregninger» / «fem olika typer av beräkningar» og peger på
-tilstanden fra afsnittet «Sådan beregner du procentforskellen mellem to tal» /
-«Skillnad i procent mellan två tal» ceo/procentvis-forskel 6/10 07:5x`. Mål på
-**indhold**: `curl -s https://minberegner.dk/procent | grep -o 'Forskel mellem
-to tal' | wc -l` → **1**, `grep -o 'Forskel på middelværdien' | wc -l` → **> 0**
-(klient-komponenten giver også den i rå markup), `grep -o 'Middelværdi' | wc
--l` → **> 0**, `grep -o 'fem forskellige typer' | wc -l` → **1** og
-`grep -o 'fire forskellige typer' | wc -l` → **0**. Samme tre første greb på
-beraknare.se med «Skillnad mellan två tal», «Skillnad på medelvärdet» og
-«Medelvärde», plus `grep -o 'fem olika typer' | wc -l` → **1**.
-⚠️ Hovedtallet **9,52 %** står i en klient-komponent, så det ses ikke i rå
-markup — læs det i koden (`procentForskelMellemTal(30000, 33000).differens`).
-Første reelle deploy-vindue efter mergen er **6/10 12:30**.
+**Åben 6/10 15:4x:** `VERIFICÉR DEPLOY: /skridt svarer 200 på begge domæner, hvert domænes sitemap indeholder /skridt, sidens titel er «Skridt til km - omregn skridt til kilometer» / «Steg till km - räkna om steg till kilometer», og brødtekst+FAQ skriver «6,6 km» (kvinde) og «7,9 km» (mand) for 10.000 skridt samt «1.515 skridt» pr. km — alle tal regnet fra skridt.ts ceo/skridt-til-km 6/10 15:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/skridt | grep -o 'Skridt til km' | wc -l` → **> 0**, `grep -o '1.515 skridt' | wc -l` → **> 0** (FAQ og brødtekst), `grep -o '6,6 km' | wc -l` → **> 0**, og `curl -s https://minberegner.dk/sitemap.xml | grep -o '/skridt<' | wc -l` → **1**. Samme greb på beraknare.se med «Steg till km» og «1 515 steg». Første reelle deploy-vindue efter mergen er **6/10 17:30**.
 
-**Åben 6/10 06:4x:** `VERIFICÉR DEPLOY: /promille har på begge domæner et
-værktøj med titlen «Hvornår kan jeg køre bil igen?» / «När kan jag köra bil
-igen?», feltet «Sidste genstand var kl.» forudvalgt til 23:30, der viser
-**02:06** og «næste døgn», og brødteksten har tabellen «Sådan regnes
-klokkeslættet» / «Då kan du köra igen» med 23:30 → 02:06 (+1 døgn), 22:30 →
-23:54 (samme døgn) og 13:00 → 14:12 (samme døgn) ceo/koer-igen-tidspunkt
-6/10 06:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/promille |
-grep -o 'Hvornår kan jeg køre bil igen?' | wc -l` → **1**, `grep -o '02:06' |
-wc -l` → **> 0**, `grep -o '+1 døgn' | wc -l` → **> 0** og `grep -o 'Sådan
-regnes klokkeslættet' | wc -l` → **1**. Samme tre greb på beraknare.se med
-«När kan jag köra bil igen?», «04:06» og «Då kan du köra igen». Værktøjet er
-klient-side, så 23:30-feltets værdi ses ikke i rå markup — læs den i koden
-eller brug brødtekstens tabel. Første reelle deploy-vindue efter mergen er
-**6/10 07:30**.
+⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10 00:1x): Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer 1 for alt. Værktøjer der er klient-komponenter skal læses i koden, indtil facit kan hentes headless. Interpolerede tal skrives som `1.515<!-- --> skridt` — tjek tal og enhed hver for sig, eller brug FAQ-teksten der står uinterpoleret.
 
-**Åben 6/10 06:0x:** `VERIFICÉR DEPLOY: /brokost svarer 200 på minberegner.dk,
-sitemap.xml indeholder pr. domæne stien, og siden viser Storebælts prisliste
-2026 med alle 26 rækker — brødteksten skriver «205 kr.» for én overfart,
-«235 kr.» for kortbetaling, «720 kr. om året» for 12 ture tur/retur og
-«246 kr.» for aftenrabatten, og værktøjet er forudindstillet på 410 kr.
-tur/retur / 4.920 kr. om året ceo/brokost-storebaelt 6/10 06:0x`. Mål på
-**indhold**: `curl -s https://minberegner.dk/brokost | grep -o 'Særtransport
-over 20 m og over 100 t' | wc -l` → **> 0**, `grep -o '205 kr.' | wc -l` →
-**> 20**, `grep -o '235 kr.' | wc -l` → **> 10**, og `curl -s
-https://minberegner.dk/sitemap.xml | grep -o '/brokost<' | wc -l` → **1**.
-⚠️ React skriver `205<!-- --> kr.` i markuppen, så tjek `205` og `kr.` hver
-for sig. Første reelle deploy-vindue efter mergen er 6/10 07:30.
-
-**Åben 6/10 05:3x:** `VERIFICÉR DEPLOY: /tidsberegner har på begge domæner
-et værktøj med overskriften «Hvad er klokken om X timer?» / «Vad är klockan om X
-timmar?», to faner («Læg tid til klokkeslæt» / «Lägg till tid på klockslag» og
-«Læg tidsrum sammen» / «Lägg ihop tidsintervall»), og brødteksten har en tabel
-hvor 09:00 + 8 t = 17:00, 12:00 + 12 t = 00:00 dagen efter, 22:30 + 2 t 45 =
-01:15 dagen efter, 06:00 − 8 t = 22:00 dagen før, 23:30 − 8 t = 15:30 samme dag
-og 07:15 + 50 min = 08:05 ceo/plustid 6/10 05:3x`. Mål på **indhold**: `curl -s
-https://minberegner.dk/tidsberegner | grep -o 'Hvad er klokken om X timer' | wc
--l` → **1**, `grep -o 'Læg tidsrum sammen' | wc -l` → **> 0**,
-`grep -o '01:15' | wc -l` → **> 0** og `grep -o '22:00' | wc -l` → **> 0**
-(dagen-før-tallet). Samme tre greb på beraknare.se med «Vad är klockan om X
-timmar?» og «Lägg ihop tidsintervall». ⚠️ Første reelle deploy-vindue efter
-mergen er 6/10 07:30.
-
-
-**Åben 6/10 05:1x:** `VERIFICÉR DEPLOY: /laantype svarer 200 på begge domæner,
-hver sides sitemap indeholder pr. domæne stien, titlen er «Annuitetslån: serielån
-eller stående lån?», værktøjet viser de tre rækker med 9.548 kr., 12.222 kr. og
-6.667 kr. i måned 1, brødteksten skriver «Serielånet koster 2.674 kr. mere i måned
-1, men sparer 234.057 kr. i rente», og **intet sted står decimaler i kroner** —
-«2.673,916» skal være **0** ceo/laantype 6/10 05:1x`. Mål på **indhold**:
-`curl -s https://minberegner.dk/laantype | grep -o 'Annuitetslån: serielån' | wc -l`
-→ **1**, `grep -o '2.673,916' | wc -l` → **0**, `grep -o 'Serielånet koster 2.674
-kr. mere i måned 1' | wc -l` → **> 0**, `grep -o '9.548 kr.' | wc -l` → **> 0**,
-`curl -s https://minberegner.dk/sitemap.xml | grep -o '/laantype<' | wc -l` → **1**.
-Samme tre greb på beraknare.se med «2 674 kr.» og «Annuitetslån: serielån».
-⚠️ Første reelle deploy-vindue efter mergen er 6/10 07:30.
-
-**Åben 6/10 04:4x:** `VERIFICÉR DEPLOY: uge og ugedag på /ugedag og
-/veckodag er de samme tal for alle læsere, så 5. april 2027 skriver «Uge 14» i
-markuppen og ikke «Uge 15», på begge domæner og i alle tidszoner
-ceo/ugedag-iso-uge-tidszone 6/10 04:4x`. Mål på **indhold**:
-`curl -s https://minberegner.dk/ugedag | grep -o 'Uge 14' | wc -l` skal være
-**0** (værktøjet er klient-side og forudindstillet på dagens dato, så 5. april
-2027 kan ikke nås med et GET) — brug derfor **brødteksten**, som kalder den
-samme `ugedagResultat`: `grep -o 'juleaften' | wc -l` → **> 0** og
-`grep -o 'ligger i uge' | wc -l` → **> 0** med tallet fra samme funktion.
-Samme to greb på beraknare.se med «ligger i vecka». ⚠️ Første reelle
-deploy-vindue efter mergen er 6/10 07:30.
-
-**Åben 6/10 04:2x:** `VERIFICÉR DEPLOY: /dato har en femte værktøjtilstand
-«Dage til dato» med feltet «Hvilken dato» forudvalgt til næste juleaften, der
-viser antal dage, hele uger og restdage samt datoens ugedag, og listen under
-«Hvor mange dage er der til …?» linker til den i da og se
-ceo/dage-til-dato 6/10 04:2x`. Mål på **indhold**: `curl -s
-https://minberegner.dk/dato | grep -o 'Hvor mange dage er der til …' | wc -l` →
-**> 0**, `grep -o 'Vilket datum\|Hvilken dato' | wc -l` → **1** (begge domæner:
-beraknare.se med «Vilket datum»). Resultatkortets tekst skal være «Dage til
-datoen» og, i januar, «Dage siden». ⚠️ Første reelle deploy-vindue efter mergen
-er 6/10 07:30.
-
-**Åben 6/10 04:4x:** `VERIFICÉR DEPLOY: de svy nye landesider
-/klokken-i/{frankrig,italien,nederlandene,graekenland,schweiz,marokko,emiraterne}
-svarer 200 på minberegner.dk og /klockan-i/{frankrike,italien,nederlanden,
-grekland,schweiz,marokko,emiraten} 200 på beraknare.se, Spanien viser både
-Madrid og Barcelona, og /tidszone skriver «klokken i 21 land» (ikke «lande»)
-ceo/klokken-i-flere-lande 6/10 04:4x`. Mål: `curl -s
-https://minberegner.dk/klokken-i/emiraterne | grep -o 'Hvad er klokken i
-Emiraterne' | wc -l` → **1** for hver af de svy, `grep -o 'Barcelona' | wc -l`
-på `/klokken-i/spanien` → **> 0**, og `curl -s https://minberegner.dk/tidszone
-| grep -o 'klokken i 21 land<' | wc -l` → **1**. Samme syv greb på beraknare.se
-med `/klockan-i/…`. Første reelle deploy-vindue efter mergen er 6/10 07:30.
-
-⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10
-00:1x): Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer
-1 for alt. Værktøjer der er klient-komponenter skal læses i koden, indtil
-facit kan hentes headless.
-
-**Tretten noter er åbne.** Alle er merges efter 21:30-vinduet 5/10, så de bliver
-målbare i 07:30-kørslen **6/10**. Næste iteration skal måle dem alle på indhold
-i én kørsel (`grep -o … | wc -l` mod begge domæner) og lukke dem med
-`DEPLOY OK 6/10`; en note der stadig ikke er live efter to vinduer bliver
-`DEPLOY-MISSING`. De lukkede noters fulde krav og målinger ligger i
-`docs/plan-arkiv.md`.
-
-**Åben 6/10 03:2x:** `VERIFICÉR DEPLOY: /ugedag på minberegner.dk og
-/veckodag på beraknare.se svarer 200 med hver sin titel og beskrivelse,
-brødteksten skriver «1. januar 2026 var en torsdag» (da) og «1 januari 2026
-var en torsdag» (se), og `/veckodag` på minberegner.dk svarer 301 mod `/ugedag`
-ceo/ugedagsberegner 6/10 03:2x`. Mål på indhold: `curl -s
-https://minberegner.dk/ugedag | grep -o 'var en torsdag' | wc -l` → **> 0**,
-`grep -o 'Ugedagsberegner' | wc -l` → **> 0**;
-`curl -s https://beraknare.se/veckodag | grep -o 'var en torsdag' | wc -l` →
-**> 0** med «Veckodagskalkylator»; `curl -sI https://minberegner.dk/veckodag`
-skal vise **301** med `location: /veckodag`-familien, og begge sitemaper skal
-indeholge hver sin sti. ⚠️ Første reelle deploy-vindue efter mergen er 6/10
-07:30.
-
-**Åben 6/10 02:4x:** `VERIFICÉR DEPLOY: /braendstof har en Forbrugsomregner med
-indtast og enhedsvalg, der viser km/l, l/100 km, mpg (USA) og mpg
-(Storbritannien), og brødteksten skriver «6,70 l/100 km = 14,93 km/l» og «15,00
-km/l = 35,3 mpg (USA)» i da og se ceo/forbrugsomregner 6/10 02:4x`. Mål:
-`curl -s https://minberegner.dk/braendstof | grep -o 'Omregn bilens forbrug' |
-wc -l` → **1**, `grep -o '14,93 km/l' | wc -l` → **> 0**. Samme greb på
-beraknare.se med «Omvandla bilens förbrukning».
-
-**Åben 6/10 02:3x:** `VERIFICÉR DEPLOY: /kvadratmeter har et ArealOmregner med
-indtast og enhedsvalg, der viser alle seks enheder, og brødteksten skriver «500
-kvadratfod = 46,45 m²» og «1 acre = 4.046,86 m²» i da og se med «4 046,86» på
-beraknare.se ceo/areal-omregner 6/10 02:3x`. Mål: `curl -s
-https://minberegner.dk/kvadratmeter | grep -o 'Omregn kvadratmeter til andre
-enheter' | wc -l` → **1**, `grep -o '46,45 m²' | wc -l` → **> 0**.
-
-**Åben 6/10 02:0x:** `VERIFICÉR DEPLOY: forsiden har et link til /procent,
-/tidszone og /moms i rækken mellem /pension og /loen-efter-skat, og sidebarlen
-på /dato har de tre ceo-populaere-sogesider 6/10 02:0x`. Mål: `curl -s
-https://minberegner.dk | grep -o 'href="/procent"' | wc -l` → **> 0**, samme
-greb for `/tidszone` og `/moms`, og `curl -s
-https://minberegner.dk/dato | grep -o 'href="/procent"' | wc -l` → **> 0**.
-
-**Åben 6/10 01:5x:** `VERIFICÉR DEPLOY: /dage-til/sommerferien spørger «Kan
-sommerferien begynde senere end den sidste lørdag i juni?» (ikke «…i 2026?»),
-og facts' citerer folkeskoleloven § 14 a stk. 2 — samme måling på
-/dage-til/efteraarsferien, /dage-til/skolestart og
-/dage-til/grundlovsdagen ceo/dage-til-faaarstal 6/10 01:5x`. Mål: `curl -s
-https://minberegner.dk/dage-til/sommerferien | grep -o 'senere end 27. juni' |
-wc -l` → **0** og `grep -o 'folkeskoleloven § 14 a stk. 2' | wc -l` → **> 0**.
-
-**Åben 6/10 01:2x:** `VERIFICÉR DEPLOY: forsidens sæsonbadge sidder i oktober på
-præcis /pension, /opsparing og /arveafgift (kalendermåneden i
-Europe/Copenhagen, ikke UTC), og /dato linker til /dage-til/31-december uden
-301-hop ceo/trending-lokale-datoer 6/10 01:2x`. Mål: `curl -s
-https://minberegner.dk/dato | grep -o 'href="/dage-til/31-december"' | wc -l` →
-**1**, `grep -o 'nytaarsaften' | wc -l` → **0**, og på forsiden `grep -o
-'>Populær nu<' | wc -l` → **3**.
-
-**Åben 6/10 00:4x:** `VERIFICÉR DEPLOY: /rumfang svarer 200 på begge domæner,
-hver sides sitemap indeholder pr. domæne /rumfang, og værktøjet renderer «1 m³»
-og «1.000 liter» for den forudindstillede kasse på 2 × 1 × 0,5 m
-ceo/rumfang-beregner 6/10 00:4x`. Mål: `curl -s
-https://minberegner.dk/rumfang | grep -o 'Rumfangsberegner' | wc -l` → **> 0**,
-`curl -s https://minberegner.dk/sitemap.xml | grep -o '/rumfang<' | wc -l` →
-**1**, samme to greb på beraknare.se med `Volymberäknare`.
-
-**Åben 6/10 00:2x:** `VERIFICÉR DEPLOY: beraknare.se/tidszone skriver «Nya
-Zealand» i landetabellen, «Turkiet» i landelisten og intet dansk «og» i
-markuppen ceo/tidszone-svenska-lander 6/10 00:2x`. Mål på **indhold**: `curl -s
-https://beraknare.se/tidszone | grep -o 'Türkiet' | wc -l` → **0**, `grep -o
-'>Nya Zealand<' | wc -l` → **1**, og `grep -oE ' og ' | wc -l` på sidens råe
-HTML skal være **0**.
-
-**Åben 6/10 00:0x:** `VERIFICÉR DEPLOY: landetabellen på /tidszone viser
-Australien 10 frem / 8 frem og New Zealand 12 frem / 10 frem i begge spalter på
-begge domæner ceo/tidszone-lande-dagsafhaengig 6/10 00:0x`. Mål: `curl -s
-https://minberegner.dk/tidszone | grep -c '9 timer frem\|11 timer frem'` skal
-være **0**, og `grep -o '10 timer frem' | wc -l` skal være **> 0**.
-
-**Åben 6/10 08:3x:** `VERIFICÉR DEPLOY: /dato, /dage-til/*, /ugedag, /veckodag,
-/rumfang, /tidszone, /klokken-i/* viser korrekte datoer og nedtællinger på
-begge domæner. Tidszonehåndteringen bruger nu Europe/Copenhagen for dansk og
-Europe/Stockholm for svensk ceo/timezone-locale-fix 6/10 08:3x`. Mål på
-**indhold**: `curl -s https://minberegner.dk/dato | grep -o 'Hvor mange dage' |
-wc -l` → **> 0**, `curl -s https://minberegner.dk/ugedag | grep -o 'Ugedag' |
-wc -l` → **> 0**, `curl -s https://beraknare.se/veckodag | grep -o 'Veckodag' |
-wc -l` → **> 0**, `curl -s https://minberegner.dk/tidszone | grep -o 'klokken i' |
-wc -l` → **> 0**. Samme greb på beraknare.se. Første reelle deploy-vindue efter
-mergen er **6/10 12:30**.
-
-**Åben 5/10 23:1x:** `VERIFICÉR DEPLOY: forsidens sæsonbadge hedder «Populær
-nu» / «Populär nu» / «Populær nå», aldrig «Trending»
-ceo/populaer-badge-sprog 5/10 23:1x`. Målt 6/10 00:1x: minberegner.dk har **3**
-`>Trending<` og **0** `>Populær nu<` — forventet, mergen kom efter
-21:30-vinduet.
-
-**Åben 5/10 22:5x:** `VERIFICÉR DEPLOY: /tidsberegner renderer tidsværktøjet
-før svar-først-tabellen på begge domæner ceo/tidsberegner-vaerktoej-foerst
-5/10 22:5x`. Mål på indhold: klokkeslæts-feltene skal have et **lavere
-tegnindeks** end "Svar på de oftest søgte tidsrum" i markup'en (samme på
-beraknare.se med "Svar på de vanligaste tidsintervallen").
-
-**Åben 5/10 22:1x:** `VERIFICÉR DEPLOY: /dage-til/juleaften og
-/dage-til/nytaarsaften 301'er til /dage-til/24-december og /dage-til/31-december
-(og julafton/nyarsafton på beraknare.se), de fire nye URL'er svarer 200 med
-canonical på sig selv, og ingen side i live siger «præcis 30 dage»
-ceo/december-dato-i-url 5/10 22:1x`. Mål: `curl -sI` på de fire gamle URL'er skal
-vise `301`, og `curl -s …/dage-til/1-december | grep -o '30 dage' | wc -l` skal
-være **0**.
-
-**Åben 5/10 21:4x:** `VERIFICÉR DEPLOY: efterlønsberegnerens deltid-gren viser
-13.372 kr. og 14.694 kr., ikke 13.438 kr. og 14.768 kr. ceo/efterloen-deltid-andel
-5/10 21:4x`. Mål på indhold: 0 matches på `13.438`, `13.372` og `14.694` på
-`https://minberegner.dk/efterloen` (siden er en klient-komponent — brug et
-headless kald eller læs `EFTERLOEN_MAX_SATS_DELTID` i koden).
+**24 noter lukket 6/10 15:5x med DEPLOY OK 6/10** — alle målt på indhold efter 07:30- og 12:30-vinduerne; fulde krav og målinger i `docs/plan-arkiv.md`.
 
 **Åben 5/10 17:5x (Sentry, delvist lukket):** `VERIFICÉR DEPLOY: Sentry
 MINBEREGNER-2 "useLocale must be used within a LocaleProvider" på POST / er
@@ -427,6 +159,7 @@ rettet ved at wrappe NotFoundSearch i LocaleProvider i not-found.tsx
 ceo/sentry-uselocale-fix 5/10 17:5x`. **Lukket 5/10 21:3x** for det der kan
 måles udefra. **Åben:** at fejlen er væk afgør kun Sentrys egen hændelsestæller
 (2 hændelser / 0 brugere på 14 dage) — læs den 14/10.
+
 
 ## ❓ Til Mads
 

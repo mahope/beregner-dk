@@ -30017,3 +30017,239 @@ build-outputtet er i basen — målt ved `git stash` — ikke fra denne ændring
 og i den tredje fulde kørsling; scanneren kører i en udspawnet proces og
 bruger ~1,9 s pr. test mod vitests 5 s grænse (målt: 35–41 s for filens 22
 tests, både med og uden ændringen). Kendt flakiness, urørt.
+
+
+## DEPLOY OK 6/10 — 24 noter målt på indhold og lukket (6/10 15:5x)
+
+Alle merges fra 5/10 21:4x til 6/10 10:4x er verificeret live på begge domæner med `grep -o … | wc -l` mod rå markup (klient-tal læst i koden, som noterne foreskriver). De lukkede noters fulde krav:
+
+**Åben 6/10 07:5x:** `VERIFICÉR DEPLOY: /procent har på begge domæner en
+femte værktøjtilstand «Forskel mellem to tal» / «Skillnad mellan två tal», der
+viser både ændringen fra det første tal (10,00 %) og forskellen på
+middelværdien (9,52 %) for 30.000 og 33.000, og brødteksten siger «fem
+forskellige typer beregninger» / «fem olika typer av beräkningar» og peger på
+tilstanden fra afsnittet «Sådan beregner du procentforskellen mellem to tal» /
+«Skillnad i procent mellan två tal» ceo/procentvis-forskel 6/10 07:5x`. Mål på
+**indhold**: `curl -s https://minberegner.dk/procent | grep -o 'Forskel mellem
+to tal' | wc -l` → **1**, `grep -o 'Forskel på middelværdien' | wc -l` → **> 0**
+(klient-komponenten giver også den i rå markup), `grep -o 'Middelværdi' | wc
+-l` → **> 0**, `grep -o 'fem forskellige typer' | wc -l` → **1** og
+`grep -o 'fire forskellige typer' | wc -l` → **0**. Samme tre første greb på
+beraknare.se med «Skillnad mellan två tal», «Skillnad på medelvärdet» og
+«Medelvärde», plus `grep -o 'fem olika typer' | wc -l` → **1**.
+⚠️ Hovedtallet **9,52 %** står i en klient-komponent, så det ses ikke i rå
+markup — læs det i koden (`procentForskelMellemTal(30000, 33000).differens`).
+Første reelle deploy-vindue efter mergen er **6/10 12:30**.
+
+**Åben 6/10 06:4x:** `VERIFICÉR DEPLOY: /promille har på begge domæner et
+værktøj med titlen «Hvornår kan jeg køre bil igen?» / «När kan jag köra bil
+igen?», feltet «Sidste genstand var kl.» forudvalgt til 23:30, der viser
+**02:06** og «næste døgn», og brødteksten har tabellen «Sådan regnes
+klokkeslættet» / «Då kan du köra igen» med 23:30 → 02:06 (+1 døgn), 22:30 →
+23:54 (samme døgn) og 13:00 → 14:12 (samme døgn) ceo/koer-igen-tidspunkt
+6/10 06:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/promille |
+grep -o 'Hvornår kan jeg køre bil igen?' | wc -l` → **1**, `grep -o '02:06' |
+wc -l` → **> 0**, `grep -o '+1 døgn' | wc -l` → **> 0** og `grep -o 'Sådan
+regnes klokkeslættet' | wc -l` → **1**. Samme tre greb på beraknare.se med
+«När kan jag köra bil igen?», «04:06» og «Då kan du köra igen». Værktøjet er
+klient-side, så 23:30-feltets værdi ses ikke i rå markup — læs den i koden
+eller brug brødtekstens tabel. Første reelle deploy-vindue efter mergen er
+**6/10 07:30**.
+
+**Åben 6/10 06:0x:** `VERIFICÉR DEPLOY: /brokost svarer 200 på minberegner.dk,
+sitemap.xml indeholder pr. domæne stien, og siden viser Storebælts prisliste
+2026 med alle 26 rækker — brødteksten skriver «205 kr.» for én overfart,
+«235 kr.» for kortbetaling, «720 kr. om året» for 12 ture tur/retur og
+«246 kr.» for aftenrabatten, og værktøjet er forudindstillet på 410 kr.
+tur/retur / 4.920 kr. om året ceo/brokost-storebaelt 6/10 06:0x`. Mål på
+**indhold**: `curl -s https://minberegner.dk/brokost | grep -o 'Særtransport
+over 20 m og over 100 t' | wc -l` → **> 0**, `grep -o '205 kr.' | wc -l` →
+**> 20**, `grep -o '235 kr.' | wc -l` → **> 10**, og `curl -s
+https://minberegner.dk/sitemap.xml | grep -o '/brokost<' | wc -l` → **1**.
+⚠️ React skriver `205<!-- --> kr.` i markuppen, så tjek `205` og `kr.` hver
+for sig. Første reelle deploy-vindue efter mergen er 6/10 07:30.
+
+**Åben 6/10 05:3x:** `VERIFICÉR DEPLOY: /tidsberegner har på begge domæner
+et værktøj med overskriften «Hvad er klokken om X timer?» / «Vad är klockan om X
+timmar?», to faner («Læg tid til klokkeslæt» / «Lägg till tid på klockslag» og
+«Læg tidsrum sammen» / «Lägg ihop tidsintervall»), og brødteksten har en tabel
+hvor 09:00 + 8 t = 17:00, 12:00 + 12 t = 00:00 dagen efter, 22:30 + 2 t 45 =
+01:15 dagen efter, 06:00 − 8 t = 22:00 dagen før, 23:30 − 8 t = 15:30 samme dag
+og 07:15 + 50 min = 08:05 ceo/plustid 6/10 05:3x`. Mål på **indhold**: `curl -s
+https://minberegner.dk/tidsberegner | grep -o 'Hvad er klokken om X timer' | wc
+-l` → **1**, `grep -o 'Læg tidsrum sammen' | wc -l` → **> 0**,
+`grep -o '01:15' | wc -l` → **> 0** og `grep -o '22:00' | wc -l` → **> 0**
+(dagen-før-tallet). Samme tre greb på beraknare.se med «Vad är klockan om X
+timmar?» og «Lägg ihop tidsintervall». ⚠️ Første reelle deploy-vindue efter
+mergen er 6/10 07:30.
+
+
+**Åben 6/10 05:1x:** `VERIFICÉR DEPLOY: /laantype svarer 200 på begge domæner,
+hver sides sitemap indeholder pr. domæne stien, titlen er «Annuitetslån: serielån
+eller stående lån?», værktøjet viser de tre rækker med 9.548 kr., 12.222 kr. og
+6.667 kr. i måned 1, brødteksten skriver «Serielånet koster 2.674 kr. mere i måned
+1, men sparer 234.057 kr. i rente», og **intet sted står decimaler i kroner** —
+«2.673,916» skal være **0** ceo/laantype 6/10 05:1x`. Mål på **indhold**:
+`curl -s https://minberegner.dk/laantype | grep -o 'Annuitetslån: serielån' | wc -l`
+→ **1**, `grep -o '2.673,916' | wc -l` → **0**, `grep -o 'Serielånet koster 2.674
+kr. mere i måned 1' | wc -l` → **> 0**, `grep -o '9.548 kr.' | wc -l` → **> 0**,
+`curl -s https://minberegner.dk/sitemap.xml | grep -o '/laantype<' | wc -l` → **1**.
+Samme tre greb på beraknare.se med «2 674 kr.» og «Annuitetslån: serielån».
+⚠️ Første reelle deploy-vindue efter mergen er 6/10 07:30.
+
+**Åben 6/10 04:4x:** `VERIFICÉR DEPLOY: uge og ugedag på /ugedag og
+/veckodag er de samme tal for alle læsere, så 5. april 2027 skriver «Uge 14» i
+markuppen og ikke «Uge 15», på begge domæner og i alle tidszoner
+ceo/ugedag-iso-uge-tidszone 6/10 04:4x`. Mål på **indhold**:
+`curl -s https://minberegner.dk/ugedag | grep -o 'Uge 14' | wc -l` skal være
+**0** (værktøjet er klient-side og forudindstillet på dagens dato, så 5. april
+2027 kan ikke nås med et GET) — brug derfor **brødteksten**, som kalder den
+samme `ugedagResultat`: `grep -o 'juleaften' | wc -l` → **> 0** og
+`grep -o 'ligger i uge' | wc -l` → **> 0** med tallet fra samme funktion.
+Samme to greb på beraknare.se med «ligger i vecka». ⚠️ Første reelle
+deploy-vindue efter mergen er 6/10 07:30.
+
+**Åben 6/10 04:2x:** `VERIFICÉR DEPLOY: /dato har en femte værktøjtilstand
+«Dage til dato» med feltet «Hvilken dato» forudvalgt til næste juleaften, der
+viser antal dage, hele uger og restdage samt datoens ugedag, og listen under
+«Hvor mange dage er der til …?» linker til den i da og se
+ceo/dage-til-dato 6/10 04:2x`. Mål på **indhold**: `curl -s
+https://minberegner.dk/dato | grep -o 'Hvor mange dage er der til …' | wc -l` →
+**> 0**, `grep -o 'Vilket datum\|Hvilken dato' | wc -l` → **1** (begge domæner:
+beraknare.se med «Vilket datum»). Resultatkortets tekst skal være «Dage til
+datoen» og, i januar, «Dage siden». ⚠️ Første reelle deploy-vindue efter mergen
+er 6/10 07:30.
+
+**Åben 6/10 04:4x:** `VERIFICÉR DEPLOY: de svy nye landesider
+/klokken-i/{frankrig,italien,nederlandene,graekenland,schweiz,marokko,emiraterne}
+svarer 200 på minberegner.dk og /klockan-i/{frankrike,italien,nederlanden,
+grekland,schweiz,marokko,emiraten} 200 på beraknare.se, Spanien viser både
+Madrid og Barcelona, og /tidszone skriver «klokken i 21 land» (ikke «lande»)
+ceo/klokken-i-flere-lande 6/10 04:4x`. Mål: `curl -s
+https://minberegner.dk/klokken-i/emiraterne | grep -o 'Hvad er klokken i
+Emiraterne' | wc -l` → **1** for hver af de svy, `grep -o 'Barcelona' | wc -l`
+på `/klokken-i/spanien` → **> 0**, og `curl -s https://minberegner.dk/tidszone
+| grep -o 'klokken i 21 land<' | wc -l` → **1**. Samme syv greb på beraknare.se
+med `/klockan-i/…`. Første reelle deploy-vindue efter mergen er 6/10 07:30.
+
+⚠️ **Brug `grep -o … | wc -l`, ikke `grep -c`, på rå markup** (målt 6/10
+00:1x): Next leverer HTML'en som én linje, så `grep -c` tæller linjer og svarer
+1 for alt. Værktøjer der er klient-komponenter skal læses i koden, indtil
+facit kan hentes headless.
+
+**Tretten noter er åbne.** Alle er merges efter 21:30-vinduet 5/10, så de bliver
+målbare i 07:30-kørslen **6/10**. Næste iteration skal måle dem alle på indhold
+i én kørsel (`grep -o … | wc -l` mod begge domæner) og lukke dem med
+`DEPLOY OK 6/10`; en note der stadig ikke er live efter to vinduer bliver
+`DEPLOY-MISSING`. De lukkede noters fulde krav og målinger ligger i
+`docs/plan-arkiv.md`.
+
+**Åben 6/10 03:2x:** `VERIFICÉR DEPLOY: /ugedag på minberegner.dk og
+/veckodag på beraknare.se svarer 200 med hver sin titel og beskrivelse,
+brødteksten skriver «1. januar 2026 var en torsdag» (da) og «1 januari 2026
+var en torsdag» (se), og `/veckodag` på minberegner.dk svarer 301 mod `/ugedag`
+ceo/ugedagsberegner 6/10 03:2x`. Mål på indhold: `curl -s
+https://minberegner.dk/ugedag | grep -o 'var en torsdag' | wc -l` → **> 0**,
+`grep -o 'Ugedagsberegner' | wc -l` → **> 0**;
+`curl -s https://beraknare.se/veckodag | grep -o 'var en torsdag' | wc -l` →
+**> 0** med «Veckodagskalkylator»; `curl -sI https://minberegner.dk/veckodag`
+skal vise **301** med `location: /veckodag`-familien, og begge sitemaper skal
+indeholge hver sin sti. ⚠️ Første reelle deploy-vindue efter mergen er 6/10
+07:30.
+
+**Åben 6/10 02:4x:** `VERIFICÉR DEPLOY: /braendstof har en Forbrugsomregner med
+indtast og enhedsvalg, der viser km/l, l/100 km, mpg (USA) og mpg
+(Storbritannien), og brødteksten skriver «6,70 l/100 km = 14,93 km/l» og «15,00
+km/l = 35,3 mpg (USA)» i da og se ceo/forbrugsomregner 6/10 02:4x`. Mål:
+`curl -s https://minberegner.dk/braendstof | grep -o 'Omregn bilens forbrug' |
+wc -l` → **1**, `grep -o '14,93 km/l' | wc -l` → **> 0**. Samme greb på
+beraknare.se med «Omvandla bilens förbrukning».
+
+**Åben 6/10 02:3x:** `VERIFICÉR DEPLOY: /kvadratmeter har et ArealOmregner med
+indtast og enhedsvalg, der viser alle seks enheder, og brødteksten skriver «500
+kvadratfod = 46,45 m²» og «1 acre = 4.046,86 m²» i da og se med «4 046,86» på
+beraknare.se ceo/areal-omregner 6/10 02:3x`. Mål: `curl -s
+https://minberegner.dk/kvadratmeter | grep -o 'Omregn kvadratmeter til andre
+enheter' | wc -l` → **1**, `grep -o '46,45 m²' | wc -l` → **> 0**.
+
+**Åben 6/10 02:0x:** `VERIFICÉR DEPLOY: forsiden har et link til /procent,
+/tidszone og /moms i rækken mellem /pension og /loen-efter-skat, og sidebarlen
+på /dato har de tre ceo-populaere-sogesider 6/10 02:0x`. Mål: `curl -s
+https://minberegner.dk | grep -o 'href="/procent"' | wc -l` → **> 0**, samme
+greb for `/tidszone` og `/moms`, og `curl -s
+https://minberegner.dk/dato | grep -o 'href="/procent"' | wc -l` → **> 0**.
+
+**Åben 6/10 01:5x:** `VERIFICÉR DEPLOY: /dage-til/sommerferien spørger «Kan
+sommerferien begynde senere end den sidste lørdag i juni?» (ikke «…i 2026?»),
+og facts' citerer folkeskoleloven § 14 a stk. 2 — samme måling på
+/dage-til/efteraarsferien, /dage-til/skolestart og
+/dage-til/grundlovsdagen ceo/dage-til-faaarstal 6/10 01:5x`. Mål: `curl -s
+https://minberegner.dk/dage-til/sommerferien | grep -o 'senere end 27. juni' |
+wc -l` → **0** og `grep -o 'folkeskoleloven § 14 a stk. 2' | wc -l` → **> 0**.
+
+**Åben 6/10 01:2x:** `VERIFICÉR DEPLOY: forsidens sæsonbadge sidder i oktober på
+præcis /pension, /opsparing og /arveafgift (kalendermåneden i
+Europe/Copenhagen, ikke UTC), og /dato linker til /dage-til/31-december uden
+301-hop ceo/trending-lokale-datoer 6/10 01:2x`. Mål: `curl -s
+https://minberegner.dk/dato | grep -o 'href="/dage-til/31-december"' | wc -l` →
+**1**, `grep -o 'nytaarsaften' | wc -l` → **0**, og på forsiden `grep -o
+'>Populær nu<' | wc -l` → **3**.
+
+**Åben 6/10 00:4x:** `VERIFICÉR DEPLOY: /rumfang svarer 200 på begge domæner,
+hver sides sitemap indeholder pr. domæne /rumfang, og værktøjet renderer «1 m³»
+og «1.000 liter» for den forudindstillede kasse på 2 × 1 × 0,5 m
+ceo/rumfang-beregner 6/10 00:4x`. Mål: `curl -s
+https://minberegner.dk/rumfang | grep -o 'Rumfangsberegner' | wc -l` → **> 0**,
+`curl -s https://minberegner.dk/sitemap.xml | grep -o '/rumfang<' | wc -l` →
+**1**, samme to greb på beraknare.se med `Volymberäknare`.
+
+**Åben 6/10 00:2x:** `VERIFICÉR DEPLOY: beraknare.se/tidszone skriver «Nya
+Zealand» i landetabellen, «Turkiet» i landelisten og intet dansk «og» i
+markuppen ceo/tidszone-svenska-lander 6/10 00:2x`. Mål på **indhold**: `curl -s
+https://beraknare.se/tidszone | grep -o 'Türkiet' | wc -l` → **0**, `grep -o
+'>Nya Zealand<' | wc -l` → **1**, og `grep -oE ' og ' | wc -l` på sidens råe
+HTML skal være **0**.
+
+**Åben 6/10 00:0x:** `VERIFICÉR DEPLOY: landetabellen på /tidszone viser
+Australien 10 frem / 8 frem og New Zealand 12 frem / 10 frem i begge spalter på
+begge domæner ceo/tidszone-lande-dagsafhaengig 6/10 00:0x`. Mål: `curl -s
+https://minberegner.dk/tidszone | grep -c '9 timer frem\|11 timer frem'` skal
+være **0**, og `grep -o '10 timer frem' | wc -l` skal være **> 0**.
+
+**Åben 6/10 08:3x:** `VERIFICÉR DEPLOY: /dato, /dage-til/*, /ugedag, /veckodag,
+/rumfang, /tidszone, /klokken-i/* viser korrekte datoer og nedtællinger på
+begge domæner. Tidszonehåndteringen bruger nu Europe/Copenhagen for dansk og
+Europe/Stockholm for svensk ceo/timezone-locale-fix 6/10 08:3x`. Mål på
+**indhold**: `curl -s https://minberegner.dk/dato | grep -o 'Hvor mange dage' |
+wc -l` → **> 0**, `curl -s https://minberegner.dk/ugedag | grep -o 'Ugedag' |
+wc -l` → **> 0**, `curl -s https://beraknare.se/veckodag | grep -o 'Veckodag' |
+wc -l` → **> 0**, `curl -s https://minberegner.dk/tidszone | grep -o 'klokken i' |
+wc -l` → **> 0**. Samme greb på beraknare.se. Første reelle deploy-vindue efter
+mergen er **6/10 12:30**.
+
+**Åben 5/10 23:1x:** `VERIFICÉR DEPLOY: forsidens sæsonbadge hedder «Populær
+nu» / «Populär nu» / «Populær nå», aldrig «Trending»
+ceo/populaer-badge-sprog 5/10 23:1x`. Målt 6/10 00:1x: minberegner.dk har **3**
+`>Trending<` og **0** `>Populær nu<` — forventet, mergen kom efter
+21:30-vinduet.
+
+**Åben 5/10 22:5x:** `VERIFICÉR DEPLOY: /tidsberegner renderer tidsværktøjet
+før svar-først-tabellen på begge domæner ceo/tidsberegner-vaerktoej-foerst
+5/10 22:5x`. Mål på indhold: klokkeslæts-feltene skal have et **lavere
+tegnindeks** end "Svar på de oftest søgte tidsrum" i markup'en (samme på
+beraknare.se med "Svar på de vanligaste tidsintervallen").
+
+**Åben 5/10 22:1x:** `VERIFICÉR DEPLOY: /dage-til/juleaften og
+/dage-til/nytaarsaften 301'er til /dage-til/24-december og /dage-til/31-december
+(og julafton/nyarsafton på beraknare.se), de fire nye URL'er svarer 200 med
+canonical på sig selv, og ingen side i live siger «præcis 30 dage»
+ceo/december-dato-i-url 5/10 22:1x`. Mål: `curl -sI` på de fire gamle URL'er skal
+vise `301`, og `curl -s …/dage-til/1-december | grep -o '30 dage' | wc -l` skal
+være **0**.
+
+**Åben 5/10 21:4x:** `VERIFICÉR DEPLOY: efterlønsberegnerens deltid-gren viser
+13.372 kr. og 14.694 kr., ikke 13.438 kr. og 14.768 kr. ceo/efterloen-deltid-andel
+5/10 21:4x`. Mål på indhold: 0 matches på `13.438`, `13.372` og `14.694` på
+`https://minberegner.dk/efterloen` (siden er en klient-komponent — brug et
+headless kald eller læs `EFTERLOEN_MAX_SATS_DELTID` i koden).
+

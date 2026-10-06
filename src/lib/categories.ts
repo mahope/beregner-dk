@@ -65,6 +65,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Idealvægt", description: "Devines og Hamwis formel for din højde", href: "/idealvaegt", category: "Sundhed" },
   { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", category: "Sundhed" },
   { title: "Vandbehov", description: "Beregn dit daglige væskebehov", href: "/vandbehov", category: "Sundhed" },
+  { title: "Skridt til km", description: "Omregn skridt til km, tid og kalorier", href: "/skridt", category: "Sundhed" },
   { title: "Kalorieforbrænding", description: "Forbrændte kalorier ved løb, cykling m.m.", href: "/motion-kalorier", category: "Sundhed" },
   { title: "Proteinbehov", description: "Beregn dit daglige proteinbehov efter aktivitetsniveau", href: "/proteinbehov", category: "Sundhed" },
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", category: "Sundhed" },
