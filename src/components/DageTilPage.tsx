@@ -222,8 +222,8 @@ export async function DageTilRoute({
   const today = new Date();
   // The same anchor the day count is computed from, so the date shown is the
   // date the number was counted from — a `new Date()` here would disagree with
-  // it between 00:00 and 02:00 Danish time.
-  const iDag = dagensDatoAnker(today);
+  // it between 00:00 and 02:00 local time.
+  const iDag = dagensDatoAnker(today, dageLocale);
   const iDagIso = iDag.toISOString().slice(0, 10);
   const iDagTekst = `${formatTargetDate(iDag, dageLocale)} ${formatTargetYear(iDag)}`;
   const c = copy[dageLocale];

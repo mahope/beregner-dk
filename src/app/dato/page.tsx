@@ -58,7 +58,7 @@ export default async function DatoPage() {
   // årets sidste dag — ikke om nytårsdag. Siden havde nul forekomster af
   // "tilbage af", så taleren faldt hele vejen. Tallet regnes fra dagens dato,
   // altså er den samme server-renderede side svar på dagens spørgsmål.
-  const tilbage = dageTilbageIAaret(new Date());
+  const tilbage = dageTilbageIAaret(new Date(), locale === "se" ? "se" : "da");
   // "antal dage i en måned" er dansk autocompletes nr. 1 under både "antal dage
   // i en måned" (nr. 2 er Excel) og "hvor mange dage i en måned" (nr. 2 er
   // "uden weekender"), og svensk autocomplete spørger det samme med "antal

@@ -197,8 +197,8 @@ export function pinseInterval(year: number, locale: HelligdagLocale): PinseInter
     { navn: navne.himmelfartsdag, date: himmelfartsdag, helligdag: true },
     { navn: navne.pinsedag, date: pinsedag, helligdag: true },
     { navn: navne.andenPinsedag, date: andenPinsedag, helligdag: locale === "da" },
-  ].map((d) => ({ ...d, dageFraPaaske: daysBetween(paaskedag, d.date) }));
-  const periodeKalenderdage = daysBetween(himmelfartsdag, andenPinsedag) + 1;
+  ].map((d) => ({ ...d, dageFraPaaske: daysBetween(paaskedag, d.date, locale) }));
+  const periodeKalenderdage = daysBetween(himmelfartsdag, andenPinsedag, locale) + 1;
   const periodeArbejdsdage = taellArbejdsdage(himmelfartsdag, andenPinsedag, locale);
   const iPerioden = getHelligdage(year, locale).filter(
     (h) => h.date.getTime() >= himmelfartsdag.getTime() &&
@@ -211,7 +211,7 @@ export function pinseInterval(year: number, locale: HelligdagLocale): PinseInter
     pinsedag,
     andenPinsedag,
     dage,
-    dageHimmelfartTilAndenPinse: daysBetween(himmelfartsdag, andenPinsedag),
+    dageHimmelfartTilAndenPinse: daysBetween(himmelfartsdag, andenPinsedag, locale),
     periodeKalenderdage,
     periodeArbejdsdage,
     periodeHelligdage: taellHelligdage(himmelfartsdag, andenPinsedag, locale),
@@ -309,6 +309,6 @@ export function pinseAfstande(
     himmelfart: interval.dage[0].dageFraPaaske,
     pinse: interval.dage[1].dageFraPaaske,
     andenPinse: interval.dage[2].dageFraPaaske,
-    himmelfartTilPinse: daysBetween(interval.himmelfartsdag, interval.pinsedag),
+    himmelfartTilPinse: daysBetween(interval.himmelfartsdag, interval.pinsedag, locale),
   };
 }

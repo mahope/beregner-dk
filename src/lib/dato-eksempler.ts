@@ -67,7 +67,7 @@ export function maanedRaekke(
   return {
     month,
     name: maanedNavn(month, locale),
-    dage: daysBetween(foerste, sidste) + 1,
+    dage: daysBetween(foerste, sidste, locale) + 1,
     arbejdsdage: taellArbejdsdage(foerste, sidste, locale),
     weekenddage: taellWeekender(foerste, sidste),
     skudaar: month === 2 && erSkudaar(year),
@@ -104,7 +104,7 @@ export function aarstal(year: number, locale: HelligdagLocale): Aarstal {
   const sidste = new Date(year, 11, 31);
   return {
     year,
-    dage: daysBetween(foerste, sidste) + 1,
+    dage: daysBetween(foerste, sidste, locale) + 1,
     arbejdsdage: taellArbejdsdage(foerste, sidste, locale),
     // Et år har altid 12 måneder. Et skudår har 366 *dage*, men den 29. februar
     // er en dag inde i februar, ikke en trettende måned.
@@ -159,7 +159,7 @@ export function maanedEksempel(
     month,
     start: isoDato(foerste),
     sluttOgKoeb: isoDato(efterFoelgende),
-    formelResultat: daysBetween(foerste, efterFoelgende),
+    formelResultat: daysBetween(foerste, efterFoelgende, locale),
     raekker: maanederITaar(year, locale),
     aar: year,
     aarDage: aar.dage,
@@ -168,18 +168,21 @@ export function maanedEksempel(
   };
 }
 
-/** The site's timezone — the one `/dato`'s countdowns are written in. */
-const DATO_TIMEZONE = "Europe/Copenhagen";
+/** The site's timezone per locale — the one `/dato`'s countdowns are written in. */
+const DATO_TIMEZONE: Record<HelligdagLocale, string> = {
+  da: "Europe/Copenhagen",
+  se: "Europe/Stockholm",
+};
 
 /**
- * The local day in `Europe/Copenhagen`, as UTC midnight. A UTC-server reading
+ * The local day in the locale's timezone, as UTC midnight. A UTC-server reading
  * its own `getDate()` would be a day behind (or ahead) between midnight and
  * 02:00, which is exactly the window somebody opens "hvor mange dage er der i
  * den her måned" in.
  */
-function dagITidszone(today: Date): Date {
+function dagITidszone(today: Date, locale: HelligdagLocale): Date {
   const dele = new Intl.DateTimeFormat("en-CA", {
-    timeZone: DATO_TIMEZONE,
+    timeZone: DATO_TIMEZONE[locale],
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -223,19 +226,19 @@ export interface DenneMaanedEksempel {
  *
  * The figures come from `daysBetween` and the `taell*` counters, exactly like
  * {@link maanederITaar}, so the one-month answer and the twelve-row table can
- * never disagree. `today` is read in `Europe/Copenhagen`.
+ * never disagree. `today` is read in the locale's timezone.
  */
 export function denneMaanedEksempel(
   today: Date,
   locale: HelligdagLocale
 ): DenneMaanedEksempel {
-  const nu = dagITidszone(today);
+  const nu = dagITidszone(today, locale);
   const year = nu.getUTCFullYear();
   const month = nu.getUTCMonth() + 1;
   const foerste = new Date(year, month - 1, 1);
   const efterFoelgende = new Date(year, month, 1);
   const raekke = maanedRaekke(year, month, locale);
-  const dage = daysBetween(foerste, efterFoelgende);
+  const dage = daysBetween(foerste, efterFoelgende, locale);
   return {
     year,
     month,

@@ -203,7 +203,7 @@ export async function DageTilHubRoute({ prefix }: { prefix: string }) {
   const u = units[locale];
   const hubPath = getDageTilHubPath(locale) as string;
   const naesteTarget = targetText(naeste.targetDate, locale);
-  const iDag = dagensDatoAnker(today);
+  const iDag = dagensDatoAnker(today, locale);
   const iDagIso = iDag.toISOString().slice(0, 10);
   const iDagTekst = `${formatTargetDate(iDag, locale)} ${formatTargetYear(iDag)}`;
 

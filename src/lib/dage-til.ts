@@ -1555,15 +1555,19 @@ export function isDageTilLocale(locale: Locale): locale is DageTilLocale {
 }
 
 /**
- * The timezone the countdown is read in. Denmark and Sweden share CET/CEST,
- * so one zone covers both `dage-til` locales; the Swedish name is not needed
- * for a result, only for reading the same offset rules.
+ * Timezone per locale for reading the local calendar day.
+ * Denmark uses Europe/Copenhagen, Sweden uses Europe/Stockholm.
+ * They currently share CET/CEST offsets, but using the correct zone per
+ * locale is the right thing to do and avoids future drift.
  */
-const DAGE_TIL_TIMEZONE = "Europe/Copenhagen";
+const DAGE_TIL_TIMEZONE: Record<DageTilLocale, string> = {
+  da: "Europe/Copenhagen",
+  se: "Europe/Stockholm",
+};
 
 /**
- * Midnight UTC of the *calendar day* the instant falls on in
- * {@link DAGE_TIL_TIMEZONE}.
+ * Midnight UTC of the *calendar day* the instant falls on in the given locale's
+ * timezone.
  *
  * Every anchor in this module is stored as a UTC midnight, so a UTC reading
  * is right for the target. It is wrong for `today`: at 00:30 local time the
@@ -1575,9 +1579,9 @@ const DAGE_TIL_TIMEZONE = "Europe/Copenhagen";
  * UTC midnights are unaffected: 00:00Z is 01:00 or 02:00 in Copenhagen, so a
  * stored anchor keeps the calendar day it was built with.
  */
-function toUtcMidnight(date: Date): Date {
+function toUtcMidnight(date: Date, locale: DageTilLocale = "da"): Date {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: DAGE_TIL_TIMEZONE,
+    timeZone: DAGE_TIL_TIMEZONE[locale],
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -1745,8 +1749,12 @@ function anchorInYear(anchor: DageTilAnchor, year: number): Date {
  * The next occurrence of the event's date, strictly after today. On the day
  * itself the answer is 0 days, so we do not roll over to next year.
  */
-export function getNextAnchorDate(anchor: DageTilAnchor, today: Date): Date {
-  const start = toUtcMidnight(today);
+export function getNextAnchorDate(
+  anchor: DageTilAnchor,
+  today: Date,
+  locale: DageTilLocale = "da"
+): Date {
+  const start = toUtcMidnight(today, locale);
   const thisYear = start.getUTCFullYear();
   for (let year = thisYear; year <= thisYear + 1; year++) {
     const candidate = anchorInYear(anchor, year);
@@ -1762,16 +1770,22 @@ export function getNextAnchorDate(anchor: DageTilAnchor, today: Date): Date {
  * december" er ubrugeligt uden at vide hvilken dag de 61 er regnet fra), og den
  * skal kunne læses af søgemaskiner og af en læser der lander kl. 23.50. Derfor
  * må den ikke komme fra et eget `new Date()` i komponenten: mellem 00:00 og
- * 02:00 dansk tid ville den vise dagen i forvegne, altså én dag ved siden af
+ * 02:00 lokal tid ville den vise dagen i forvegne, altså én dag ved siden af
  * det tal den står ved siden af.
  */
-export function dagensDatoAnker(today: Date): Date {
-  return toUtcMidnight(today);
+export function dagensDatoAnker(today: Date, locale: DageTilLocale = "da"): Date {
+  return toUtcMidnight(today, locale);
 }
 
-export function daysBetween(from: Date, to: Date): number {
+export function daysBetween(
+  from: Date,
+  to: Date,
+  locale: DageTilLocale = "da"
+): number {
   return Math.round(
-    (toUtcMidnight(to).getTime() - toUtcMidnight(from).getTime()) / MS_PER_DAY
+    (toUtcMidnight(to, locale).getTime() -
+      toUtcMidnight(from, locale).getTime()) /
+      MS_PER_DAY
   );
 }
 
@@ -1789,11 +1803,14 @@ export interface DageTilbageIAaret {
  * er der til nytår?": året er slut 31. december, uanset hvad man kalder
  * dagen. Tallet er 0 nytårsaften, fordi det sidste døgn *er* 31. december.
  */
-export function dageTilbageIAaret(today: Date): DageTilbageIAaret {
-  const start = toUtcMidnight(today);
+export function dageTilbageIAaret(
+  today: Date,
+  locale: DageTilLocale = "da"
+): DageTilbageIAaret {
+  const start = toUtcMidnight(today, locale);
   const year = start.getUTCFullYear();
   const sidsteDag = new Date(Date.UTC(year, 11, 31));
-  const dage = daysBetween(start, sidsteDag);
+  const dage = daysBetween(start, sidsteDag, locale);
   return {
     year,
     dage,
@@ -1836,8 +1853,8 @@ export function getDageTilAnswer(
   if (!anchor) {
     throw new Error(`Datoen "${event.id}" har ingen ${locale}-udgave`);
   }
-  const targetDate = getNextAnchorDate(anchor, today);
-  const days = daysBetween(today, targetDate);
+  const targetDate = getNextAnchorDate(anchor, today, locale);
+  const days = daysBetween(today, targetDate, locale);
   return {
     days,
     weeks: Math.floor(days / 7),
