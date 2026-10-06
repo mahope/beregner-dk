@@ -1,4 +1,4 @@
-STATUS: 6/10 08:3x. ✅ **Tidszonehåndtering rettet til at bruge lokalets egen
+STATUS: 6/10 09:1x. ✅ **Tidszonehåndtering rettet til at bruge lokalets egen
 tidszone.** Alle dato- og tid-beregninger bruger nu Europe/Copenhagen for dansk
 og Europe/Stockholm for svensk, så nedtællinger og månedsberegninger stemmer
 præcis for begge domæner. Før brugte koden Europe/Copenhagen for begge, hvilket
@@ -14,7 +14,7 @@ låste fejlen fast — den er rettet til 2027-12-24. ✅ 6/10 07:5x tidligere:
 mellem to tal?» med begge svar.** Datagrund: `/procent` er sitets #1-side
 (**149.929** GSC-visninger, 0,1 % CTR, pos. 7,5), og dansk autocomplete
 (hl=da, 6/10) svarer «procentvis forskel» med ni træffere hvor **otte** er
-«… mellem to tal»; svensk «procent skillnad mellem två tal» har **10 af 10**
+«… mellem to tal»; svensk «procent skillnad mellem to tal» har **10 af 10**
 relaterede. Siden lærer allerede de to formler i sin brødtekst, men
 værktøjet kun kunne den ensidige — så en læser der søgte på den anden fik
 ingen beregning. Nu får man fra ét talpar både ændringen (30.000 → 33.000 =
@@ -29,7 +29,7 @@ dække det, men den læses ikke af den, der kigger på skærmen.
 ✅ Tidligere 6/10 06:4x: **`/promille` svarer nu på «hvornår kan jeg køre bil
 igen» med et klokkeslæt**, ikke et antal timer. Datagrund: dansk autocomplete
 (`client=firefox`, `hl=da`) har **20 af 20** træffere i denne form under «hvornår
-kan jeg køre» (10/10) og «hvornår må jeg køre» (10/10); svensk under «när kan jag köra bil» 10 af 10. Den gamle `PromilleBeregner` svarede «under grænsen om 2,6 **timer**» — det forkerte svar på spørgsmålet. Nyt værktøj + tabel på begge domæner; Sveriges 0,2 ‰ giver 04:06 mod Danmarks 02:06. **MÅL: `/promille` baseline 167 Plausible-besøgende/28d (5/10 06:0x), 6.878 GSC-visninger, CTR 1,6 %, pos. 7,7 — måles igen 20/10.** Dagsskiftet står **ved siden af** klokkeslættet (`+1 døgn`), ellers læses 02:06 som i dag. 8 mutationer målt røde, heraf `Math.floor` i stedet for `Math.round` — **4,1 × 60 = 245,999…**, så 5 øl / 80 kg ville givet **02:05** i stedet for 02:06. ✅ 6/10 06:0x: `/brokost` med Storebælts prisliste 2026. ✅ Tidligere 6/10: «hvad er klokken om N.timer» på `/tidsberegner`, `/laantype`, ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund), «Dage til dato» på `/dato`, `/klokken-i/*`, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge. ✅ 5/10: svensk landetabel, tidsforskelsdag, efterlønnens deltidtal, «Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
+kan jeg køre» (10/10) og «hvornår må jeg køre» (10/10); svensk under «när kan jag köra bil» 10 af 10. Den gamle `PromilleBeregner` svarede «under grænsen om 2,6 **timer**» — det forkerte svar på spørgsmålet. Nyt værktøj + tabel på begge domæner; Sveriges 0,2 ‰ giver 04:06 mod Danmarks 02:06. **MÅL: `/promille` baseline 167 Plausible-besøgende/28d (5/10 06:0x), 6.878 GSC-visninger, CTR 1,6 %, pos. 7,7 — måles igen 20/10.** Dagsskiftet står **ved siden af** klokkeslættet (`+1 døgn`), ellers læses 02:06 som i dag. 8 mutationer målt røde, heraf `Math.floor` i stedet for `Math.round` — **4,1 × 60 = 245,999…**, så 5 øl / 80 kg ville givet **02:05** i stedet for 02:06. ✅ 6/10 06:0x: `/brokost` med Storebælts prisliste 2026. ✅ Tidligere 6/10: «hvad er klokken om N.timer» på `/tidsberegner`, `/laantype`, ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund), «Dage til dato» på `/dato`, `/klokken-i/*`, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge. ✅ 5/10: svensk landetabel, tidsforskelsdag, efterlønnens deltidtal, «Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10). ✅ 6/10 09:1x: **Forkert påskeaften-FAQ fjernet fra langfredag-siden.** Dansk FAQ om "påskeaften" (som ikke findes i Danmark — dagen før langfredag hedder skærtorsdag) erstattet med korrekt FAQ om skærtorsdag med datoer 2026-2028. `VERIFICÉR DEPLOY: /dato og /ugedag viser korrekt skærtorsdag-FAQ på langfredag-siden ceo/ret-paaskeaften-faq 6/10 09:1x`.
 **Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run
 build`). 6/10 08:3x: typecheck 0, lint 0 (805 filer), **4665 tests i 283
 filer** grønne, build ok. De 7 CSS-advarsler i build-outputtet er i basen
