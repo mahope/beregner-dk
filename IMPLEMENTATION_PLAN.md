@@ -1,43 +1,36 @@
-STATUS: 6/10 05:1x. ✅ **`/laantype` — brugerne kan nu sammenligne de tre
-lånetyper på samme tal.** `/renteberegner` svarer på «annuitetslån beregner»
-(348 v, pos. 8) men regner **én** type ad gangen, og dansk autocomplete målt i
-dag har 10 af 10 træffere under «annuitetslån», «serielån» og «stående lån» som
-**valget mellem dem** («annuitetslån serielån og stående lån», «annuitetslån vs
-serielån», «serielån vs annuitetslån», «stående lån hvad er det»). Svensk
-autocomplete er samme klynge («serielån vs annuitetslån kalkulator»), så det var
-et spørgsmål, to domæner får trafik på og ingen besvarede samlet. Værktøjet
-regner første og sidste ydelse, månedsafdrag, samlet rente og renteandel for
-alle tre **og krydsmåneden** — den måned serielånet bliver billigere end
-annuitetslånet, måned 146 i eksemplet.
-⚠️ **Fandtes i min egen diff, rettet før commit:** `daKr` bevarer decimaler, så
-FAQ'en og metaDescription skrev «2.673,916 kr.» — tal i **Googles svar** via
-FAQSchema. Ny `daKr0` runder til hele kroner. Porten fangede det.
-⚠️ **Repoets egne gates fangede fire ting jeg ikke så:** `metaTitle` var 65
-tegn (grænse 60), `metaDescription` 163 (grænse 160), titlens første ord endte i
-komma så hovedord-porten ikke genkendte det, og `LaantypeBeregner` havde en dansk
-streng i JSX uden for `labels`-objektet — fund af locale-leak-scanneren, som
-jeg flyttede ind i objektet. `regnestykker`-porten fangede desuden et
-håndskrevet «2.000.000 kr.» i en streng; den skrives nu fra konstanterne.
-✅ 6/10 tidligere: ugenummeret på `/ugedag`+`/veckodag` (MIDDEL-fund fra
-`b474763`, rettet i `779ed5a`), «Dage til dato» på `/dato`, `/klokken-i/*` i 21
+STATUS: 6/10 05:3x. ✅ **`/tidsberegner` svarer nu på «hvad er klokken om
+8 timer?»** — sitets andenstørste side (78.615 visninger DK + 75.244 SE) kunne
+ikke lægge en varighed *på* et klokkeslæt, kun finde varigheden *imellem* to.
+Målt 6/10 05:1x: dansk autocomplete har **10 af 10** træffere under «hvad er
+klokken om» i formen «hvad er klokken om N timer» (N = 8, 12, 16, 9, 17, 18,
+14, 15, 8, 19), og GSC har beraknare.se's «räkna timmar och minuter» (141
+visninger) på **pos. 10** og «räkna tid» (121) på pos. 10 — de to søgninger
+siden ikke svarer på. Værktøjet har to faner: læg til/træk fra på et
+klokkeslæt (med hele dage ved siden af) og læg tre tidsrum sammen, som siden
+indtil nu kun besvarede med omvejen «sæt den første sluttid ind som den andens
+starttid». **Ingen dato i regnestykket** — kun klokkeslæt — så
+sommer-/vintertid ikke kan komme ind i en forkert værdi, og modulo er dobbelt
+så 06:00 minus 8 timer er 22:00 dagen før, ikke et negativt tal.
+⚠️ **Fandtes i min egen diff, rettet før commit:** dags-teksten lå i en
+`locale === "se" ? … : …`-terning, som locale-leak-scanneren meldte som læk
+præcis som i `LaantypeBeregner` 6/10 — teksterne ligger nu i et `Record`. Og
+samme scanner-port fangede «dagen for» i stedet for «dagen før» (egen
+fingerspilling) og den danske «t» i den svenske tabel, som nu går gennem
+`formatTidsvar`. **Portene kan fejle:** ren `%` i stedet for dobbelt modulo
+giver 3 røde, `Math.abs(delta)` i stedet for fortegnet giver 2 røde,
+`heleDage === 1` i stedet for `!== 0` giver 2 røde.
+✅ 6/10 tidligere: `/laantype`, ugenummeret på `/ugedag`+`/veckodag`
+(MIDDEL-fund fra `b474763`), «Dage til dato» på `/dato`, `/klokken-i/*` i 21
 lande, `/rumfang`, `/braendstof`, ArealOmregner, ferie-FAQ, sæsonbadge.
 ✅ 5/10: svensk landetabel, landetabellens tidsforskel, efterlønnens deltidstal,
-«Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny i dag: Valborg
-30. april, svensk påskafton lørdag, fast dansk sankthans 23. juni, dansk
-påskeaften-FAQ væk, `maneder: 12`, tidszone-daterede nedtællinger, nettoprisindeks
-på `/husleje`).
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build`,
-som CI også kører). 6/10 05:1x: typecheck 0, lint 0 (794 filer), **4576 tests i
-279 filer** grønne, build ok (`/laantype` på route-listen). Portene kan fejle:
-mutation til `return k + 1` i krydsløkken giver 2 røde, restgælden `* k` i stedet
-for `* (k - 1)` giver 2 røde, stående lånets rentesum til ét beløb giver 4 røde,
-serielånets månedlige afdrag til årligt 2 røde. **Målt mod uafhængig
-fremmedkilde:** BONOVO (29/9) siger for 2.400.000 kr/4 %/30 år «3.209 kr. mere
-den første måned» og «ca. 280.000 kr. mindre i rente»; modulet giver 3.208,70 og
-280.868. **Realkreditlovens § 4 er læst i lovens egen tekst** (retsinformation.dk,
-6/10) og står med paragraffen i FAQ'en. ⚠️ **11 VERIFICÉR-noter er stadig åbne** —
-alle merges er efter 21:30-vinduet 5/10, så intet kan måles endnu. Første
-reelle deploy-vindue er **6/10 07:30**. PR-TJEK 6/10 04:3x. BRANCH-TJEK 4/10 04:1x.
+«Populær nu». ✅ 4/10: hele CEO-køens punkt 0 (verificeret på ny 6/10).
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run
+build`). 6/10 05:3x: typecheck 0, lint 0 (797 filer), **4604 tests i 280
+filer** grønne, build ok. ⚠️ **12 VERIFICÉR-noter er åbne** — alle merges er
+efter 21:30-vinduet 5/10, så intet kan måles endnu. Første reelle
+deploy-vindue er **6/10 07:30**; næste iteration skal måle dem alle på indhold
+og lukke dem med `DEPLOY OK 6/10`. PR-TJEK 6/10 05:1x (ingen åbne PR'er).
+BRANCH-TJEK 4/10 04:1x.
 
 ## Fase 3 — trafik-drevet
 
@@ -47,7 +40,8 @@ reelle deploy-vindue er **6/10 07:30**. PR-TJEK 6/10 04:3x. BRANCH-TJEK 4/10 04:
 |---|---|---|---|---|
 | `/procent` | under top-15 | 150.470 | 0,1 % | 7,4 |
 | `/dato` | 1.133 | 133.054 | 0,6 % | 5,7 |
-| `/tidsberegner` | 290 | 73.666 | 0,3 % | 6,9 |
+| `/tidsberegner` (6/10, før Plus-tidsværktøjet) | **260** | **78.615** | **0,3 %** | **6,7** |
+| se `/tidsberegner` | 179 | 75.244 | 0,2 % | 7,7 |
 | `/tidszone` | under top-15 | 24.324 | 0,4 % | 7,5 |
 | `/moms` | under top-15 | 22.464 | 0,2 % | 7,0 |
 | `/kvadratmeter` | 391 | 20.768 | 1,5 % | 4,9 |
@@ -132,7 +126,9 @@ dømmer da/no/se hver for sig. ⛔ `beregner.no` serverer et andet site — se �
 
 ## Feature-kø
 
-Alt med ⛔ er blokeret af en ❓ og må ikke gættes. Den hurtigste målemetode uden
+Leveret 6/10: **«hvad er klokken om N timer» + summering af tidsrum på
+`/tidsberegner`** (se `docs/plan-arkiv.md`). De seks punkter nedenfor er alle
+⛔ blokeret af en ❓. Den hurtigste målemetode uden
 en menneskekilde er dansk autocomplete (`suggestqueries.google.com`); den er
 brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
 
@@ -160,6 +156,21 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 6/10 05:3x:** `VERIFICÉR DEPLOY: /tidsberegner har på begge domæner
+et værktøj med overskriften «Hvad er klokken om X timer?» / «Vad är klockan om X
+timmar?», to faner («Læg tid til klokkeslæt» / «Lägg till tid på klockslag» og
+«Læg tidsrum sammen» / «Lägg ihop tidsintervall»), og brødteksten har en tabel
+hvor 09:00 + 8 t = 17:00, 12:00 + 12 t = 00:00 dagen efter, 22:30 + 2 t 45 =
+01:15 dagen efter, 06:00 − 8 t = 22:00 dagen før, 23:30 − 8 t = 15:30 samme dag
+og 07:15 + 50 min = 08:05 ceo/plustid 6/10 05:3x`. Mål på **indhold**: `curl -s
+https://minberegner.dk/tidsberegner | grep -o 'Hvad er klokken om X timer' | wc
+-l` → **1**, `grep -o 'Læg tidsrum sammen' | wc -l` → **> 0**,
+`grep -o '01:15' | wc -l` → **> 0** og `grep -o '22:00' | wc -l` → **> 0**
+(dagen-før-tallet). Samme tre greb på beraknare.se med «Vad är klockan om X
+timmar?» og «Lägg ihop tidsintervall». ⚠️ Første reelle deploy-vindue efter
+mergen er 6/10 07:30.
+
 
 **Åben 6/10 05:1x:** `VERIFICÉR DEPLOY: /laantype svarer 200 på begge domæner,
 hver sides sitemap indeholder pr. domæne stien, titlen er «Annuitetslån: serielån
@@ -214,7 +225,7 @@ med `/klockan-i/…`. Første reelle deploy-vindue efter mergen er 6/10 07:30.
 1 for alt. Værktøjer der er klient-komponenter skal læses i koden, indtil
 facit kan hentes headless.
 
-**Elleve noter er åbne.** Alle er merges efter 21:30-vinduet 5/10, så de bliver
+**Tolv noter er åbne.** Alle er merges efter 21:30-vinduet 5/10, så de bliver
 målbare i 07:30-kørslen **6/10**. Næste iteration skal måle dem alle på indhold
 i én kørsel (`grep -o … | wc -l` mod begge domæner) og lukke dem med
 `DEPLOY OK 6/10`; en note der stadig ikke er live efter to vinduer bliver

@@ -29774,3 +29774,86 @@ forhåndsværende `globals.css`-fund, ikke fra denne ændring.
 
 **MÅL: `/laantype` baseline 0 besøgende, 0 visninger (ny URL), 6/10.** Begge
 domæner. Første måling efter 14 dage, altså 20/10.
+
+---
+
+## 6/10 05:3x — `ceo/plustid`: «Hvad er klokken om X timer?» på /tidsberegner
+
+**Hvorfor denne opgave.** `/tidsberegner` er sitets andenstørste side
+(78.615 GSC-visninger på minberegner.dk + 75.244 på beraknare.se, CTR 0,3 % /
+0,2 %, pos. 6,7 / 7,7), men `TidsBeregner` regner *imellem* to klokkeslæt.
+Ingen side i repoet kunne lægge en varighed *på* et klokkeslæt, og det er
+ikke et hjørne-case:
+
+- **Dansk autocomplete** (hl=da, gl=dk, målt 6/10 05:1x) under «hvad er
+  klokken om» har **10 af 10** træffere i formen «hvad er klokken om N timer»
+  med N = 8, 12, 16, 9, 17, 18, 14, 15, 8, 19. Én spørgsmålstype, ikke
+  tilfældige varianter. Under «plus tid» ligger «plus tid sammen» og «hvad
+  er plustid»; under «tid plus» «tid plus tid».
+- **Svensk autocomplete** (hl=sv, gl=se) under «räkna timmar» har «räkna
+  timmar framåt» og «plus tid sammen», og under «plus timmar» «plus tid
+  sammen».
+- **GSC for beraknare.se** (5/10-3/10) har «räkna timmar och minuter»
+  141 visninger på **pos. 10** og «räkna tid» 121 på **pos. 10** — præcis
+  de to søgninger siden ikke svarer på. Position 10 er typisk for en side,
+  der er emnet for søgningen, men ikke kan regne det.
+
+**Hvad der blev bygget.** `src/lib/plus-tid.ts` (rent tal, ingen
+sprogstrenge — C73's R4) med to funktioner:
+
+- `plusTid({ klokkeslaet, timer, minutter })` lægger en varighed på et
+  klokkeslæt. Negativt tal trækker fra, så «klokken 23:30 minus 8 timer»
+  er samme kald som plus 8. `heleDage` er `Math.floor(total / 1440)`, så
+  23:30 + 8 t er 07:30 med `heleDage: 1`, og 06:00 − 8 t er 22:00 med
+  `heleDage: -1`.
+- `summerTidsrum(rum[])` lægger tre start/slut-par sammen. Hvert rum går
+  gennem `beregnTidsinterval` — altså samme modul `TidsBeregner` bruger,
+  så et rum der støder mod næste døgn (22:00-06:00) tælles som 8 timer
+  her som der. `null` betyder intet var gyldigt, så UI'et viser en
+  fejltilstand i stedet for en nulsum.
+
+`PlusTidBeregner.tsx` er klient-komponenten: to faner, feltet «Hvad er
+klokken?» + retning (læg til / træk fra) + timer og minutter, og tre
+start/slut/pause-rækker i summeringsfanen. Svensk og dansk ligger i ét
+`labels`-objekt, alle ikoner er fra `lucide-react` med `aria-hidden`, alle
+felter har `<label>`, trykfladerne er `min-h-[44px]`, og resultatet ligger i
+`aria-live="polite"`.
+
+**Datoen er bevidst ikke i regnestykket.** En varighed lagt på et
+klokkeslæt er det samme uanset sommer- eller vintertid, så modulet har ingen
+dato og dermed ingen DST-kant. Skal der regnes på en bestemt dato, henviser
+brødteksten til datofelterne i `/dato`.
+
+**Fejl fundet i min egen diff før commit.**
+
+1. `plusTidDag` skrev de danske tekster i en `locale === "se" ? … : …`
+   terning. `locale-leak-gate.test.ts` meldte dem som **ureviewede danske
+   strenge** — præcis den fejl scanneren fandt i `LaantypeBeregner` samme
+   dag. Teksterne ligger nu i `PLUS_TID_DAG_TEKST: Record<"da"|"se", …>`.
+2. Samme scanner-port fandt «dagen **for**» i stedet for «dagen før» —
+   egen fingerspilling i den Record, usynlig for `tsc`, `biome` og build.
+   Der er nu en test der kræver «dagen før» på da **og** «dagen innan» på se.
+3. Den svenske tabel skrev den danske timeenhed «t». Begge sproggrene går nu
+   gennem `formatTidsvar`, som er sideens egen notationsfunktion.
+4. Første testkørsel havde min egen forventning forkert: 23:30 minus 8 timer
+   er 15:30 **samme** dag (1410 − 480 = 930), ikke dagen før. Eksemplet
+   dagen-før ligger derfor på 02:30 minus 8 timer = 18:30.
+
+**Portene kan fejle** (muteret, målt, gendannet):
+
+| Mutation | Røde |
+|---|---|
+| `normaliserModDag` → ren `%` (negativt klokkeslæt) | **3** |
+| `totalMinutter: delta` → `Math.abs(delta)` | **2** |
+| `overMidnat: heleDage !== 0` → `heleDage === 1` | **2** |
+
+**Gate:** `npm run typecheck && npm run lint && npm run test` + `npm run
+build` → typecheck 0, lint 0 (797 filer), **4604 tests i 280 filer** grønne,
+build ok. Plus 22 nye tests i `plus-tid.test.ts` og 6 nye i
+`page.test.tsx` (heraf en sproglås, der kræver ingen danske markører på
+beraknare.se).
+
+**Ikke gjort:** ingen skærmbilleder — repoet har stadig intet Playwright
+(tiende gennemgang i træk). `/dato`'s «Dage til dato» la på samme side og
+kunne have fået samme behandling; det er ikke gjort, fordi opgaven er ét
+værktøj.

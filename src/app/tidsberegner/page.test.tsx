@@ -27,10 +27,14 @@ import {
   EXCEL_SUM_FORMEL,
   EXCEL_SUM_MED_PAUSE,
 } from "@/lib/tids-summer";
+import { PLUS_TID_EKSEMPLER, plusTid } from "@/lib/plus-tid";
 import TidsberegnerPage from "./page";
 
 vi.mock("@/components/TidsBeregner", () => ({
   default: () => <div>Tidsværktøj</div>,
+}));
+vi.mock("@/components/PlusTidBeregner", () => ({
+  default: () => <div>Plus-tidsværktøj</div>,
 }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
@@ -686,4 +690,59 @@ describe("lægge to tidsrum sammen på /tidsberegner", () => {
     expect(spgSe.some((q) => q.includes("tidsrum sammen"))).toBe(false);
     expect(spgDa.some((q) => q.includes("tidsintervall"))).toBe(false);
   });
+
+  describe("«hvad er klokken om X timer» (plus tid)", () => {
+    test("begge domæner har overskriften på den spørgende form", async () => {
+      expect(await html("da")).toContain("Læg tid på et klokkeslæt: hvad er klokken om X timer?");
+      expect(await html("se")).toContain("Lägg tid på ett klockslag: vad är klockan om X timmar?");
+    });
+
+    test("tabellen viser præcis de klokkeslæt modulet regner, i begge sprog", async () => {
+      for (const locale of ["da", "se"] as const) {
+        const markup = await html(locale);
+        for (const eksempel of PLUS_TID_EKSEMPLER) {
+          const r = plusTid(eksempel)!;
+          // Rækkerne læses fra modulet, så en udeladt række kan ikke gemme
+          // sig i en længde-tælling (C182's lære).
+          expect(markup).toContain(eksempel.klokkeslaet);
+          expect(markup).toContain(r.klokkeslaet);
+        }
+      }
+    });
+
+    test("de to fælder — 00:00 dagen efter og 22:00 dagen før — står i begge sprog", async () => {
+      const da = await html("da");
+      expect(da).toContain("12:00 plus 12 timer er 00:00 dagen");
+      expect(da).toContain("06:00 minus 8 timer er 22:00 dagen før");
+      const se = await html("se");
+      expect(se).toContain("12:00 plus 12 timmar blir 00:00");
+      expect(se).toContain("06:00 minus 8 timmar blir 22:00 dagen innan");
+    });
+
+    test("dags-teksten i tabellen er oversat — ikke dansk på beraknare.se", async () => {
+      // `PLUS_TID_DAG_TEKST` lå i en terning engang, så scanneren kunne
+      // læse den danske gren, og en travl fingerspelling skrev "dagen for"
+      // i stedet for "dagen før". Begge fejl låser porten.
+      const da = await html("da");
+      expect(da).toContain("dagen før");
+      expect(da).not.toContain("dagen for");
+      const se = await html("se");
+      expect(se).toContain("dagen innan");
+      expect(se).not.toContain("dage før");
+    });
+
+    test("omvej-sætningen peger nu på summeringsfanen i stedet for at være en dødsdød", async () => {
+      expect(await html("da")).toContain("Læg tidsrum sammen");
+      expect(await html("se")).toContain("Lägg ihop tidsintervall");
+    });
+
+    test("sproglås: ingen danske markører fra blokken på beraknare.se", async () => {
+      const markup = await html("se");
+      for (const daRoe of ["lægger", "tidsrum", "før", "døgn", "klokkeslæt"]) {
+        expect(markup).not.toContain(`>${daRoe}`);
+        expect(markup).not.toContain(` ${daRoe} `);
+      }
+    });
+  });
+
 });

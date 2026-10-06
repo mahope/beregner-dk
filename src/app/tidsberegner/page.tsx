@@ -1,4 +1,5 @@
 import TidsBeregner from "@/components/TidsBeregner";
+import PlusTidBeregner from "@/components/PlusTidBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -34,6 +35,7 @@ import {
   formatSekunder,
   type TempoEksempel,
 } from "@/lib/tidsberegner";
+import { PLUS_TID_EKSEMPLER, plusTid } from "@/lib/plus-tid";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -92,6 +94,42 @@ function sumRækker(locale: "da" | "se") {
       </tr>
     );
   });
+}
+
+/**
+ * Hvilken dag et resultat fra `plusTid` lander på. Kun hele dage, for et
+ * klokkeslæt uden dato er det eneste tidspunkt, der er mening.
+ *
+ * Teksterne ligger i et `Record` og ikke i en terning inde i funktionen:
+ * locale-leak-scanneren læser en dansk streng i en `se`-gren som et læk, og
+ * det er præcis den fejl LAANTYPE-straffen havde (se `plus-tid.test.ts`).
+ */
+const PLUS_TID_DAG_TEKST: Record<
+  "da" | "se",
+  { nul: string; en: string; mange: string; foer: string; mangeFoer: string }
+> = {
+  da: {
+    nul: "samme dag",
+    en: "dagen efter",
+    mange: "dage efter",
+    foer: "dagen før",
+    mangeFoer: "dage før",
+  },
+  se: {
+    nul: "samma dag",
+    en: "dagen efter",
+    mange: "dagar efter",
+    foer: "dagen innan",
+    mangeFoer: "dagar innan",
+  },
+};
+
+function plusTidDag(heleDage: number, locale: "da" | "se"): string {
+  const t = PLUS_TID_DAG_TEKST[locale];
+  if (heleDage === 0) return t.nul;
+  if (heleDage === 1) return t.en;
+  if (heleDage === -1) return t.foer;
+  return `${Math.abs(heleDage)} ${heleDage > 0 ? t.mange : t.mangeFoer}`;
 }
 
 const TEMPO_RAEKKE = TEMPO_EKSEMPLER.map((eksempel) => ({
@@ -200,6 +238,21 @@ export default async function TidsberegnerPage() {
 
       <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
         <TidsBeregner />
+      </div>
+
+      {/* Plus tid: «hvad er klokken om 8 timer». Målt 6/10 05:1x har dansk
+          autocomplete 10 af 10 træffere under «hvad er klokken om» i formen
+          «hvad er klokken om N timer» (N = 8, 12, 16, 9, 17, 18, 14, 15, 8,
+          19), og GSC for beraknare.se har «räkna timmar och minuter» (141
+          visninger) på pos. 10 og «räkna tid» (121) på pos. 10 — de to
+          søgninger TidsBeregner ovenfor ikke kan svare på, fordi den regner
+          *imellem* to klokkeslæt og ikke *på* ét. Værktøjet får den anden
+          halvdel også: summering af flere tidsrum, som siden indtil nu kun
+          besvarede med en omvej (“sæt den første sluttid ind som den andens
+          starttid”). Samme rækkefølge som /kvadratmeter og /braendstof:
+          værktøjet over brødteksten, der spørger om det. */}
+      <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
+        <PlusTidBeregner />
       </div>
 
       {/* Svar-først: Search Console viser 790 visninger (pos. 6) på søgningen
@@ -556,7 +609,9 @@ export default async function TidsberegnerPage() {
           13 timer og 30 minutter</strong>, fordi 495 + 315 = 810 minutter, og
           810 ÷ 60 = 13,50. Værktøjet ovenfor tager ét tidsrum ad gangen, så
           summerer du to dage ved at sætte den første sluttid ind som den
-          andens starttid.
+          andens starttid — eller du bruger fanen «Læg tidsrum sammen» i
+          værktøjet «Hvad er klokken om X timer?», der lægger tre rum sammen
+          på én gang.
         </p>
         <table>
           <thead>
@@ -586,6 +641,64 @@ export default async function TidsberegnerPage() {
           tidsrum og C1 og D1 det andet. Har du pauser, skal de trækkes fra i
           timer, fordi <code>=(B1-A1)*24</code> ikke kender en frokostpause:{" "}
           <code>=(B1-A1)*24+(D1-C1)*24-E1-E2</code>, hvor E1 og E2 er pauserne.
+        </p>
+
+        {/* Alle tal går gennem `plusTid`, altså samme modul som
+            værktøjet bruger, så tabellen ikke kan modsige det (C84's
+            fejlklasse). Ingen dato i regnestykket — kun klokkeslæt — så
+            sommer-/vintertid ikke kan komme ind i en forkert værdi. */}
+        <h2>Læg tid på et klokkeslæt: hvad er klokken om X timer?</h2>
+        <p>
+          Det er den anden vej rundt: her lægger du en <strong>varighed på
+          et klokkeslæt</strong> i stedet for at finde varigheden mellem to.
+          Skriv klokkeslættet, vælg om du lægger til eller trækker fra, og
+          skriv hvor mange timer og minutter. Værktøjet regner på minutter og
+          tager resten modulo 1440, så resultatet altid er et rigtigt
+          klokkeslæt — også når du krydser midnat.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Regnestykke</th>
+                <th>Bliver</th>
+                <th>Hvilken dag</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PLUS_TID_EKSEMPLER.map((eksempel) => {
+                const r = plusTid(eksempel)!;
+                const fortegn = eksempel.timer < 0 || eksempel.minutter < 0 ? "−" : "+";
+                return (
+                  <tr key={eksempel.id}>
+                    <td>
+                      {eksempel.klokkeslaet} {fortegn}{" "}
+                      {formatTidsvar(
+                        {
+                          timer: Math.abs(eksempel.timer),
+                          minutter: Math.abs(eksempel.minutter),
+                        },
+                        locale,
+                      )}{" "}
+                      = {eksempel.timer * 60 + eksempel.minutter} minutter
+                    </td>
+                    <td>{r.klokkeslaet}</td>
+                    <td>{plusTidDag(r.heleDage, "da")}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          To rækker er fælderne. <strong>12:00 plus 12 timer er 00:00 dagen
+          efter</strong>, ikke 24:00 — et klokkeslæt har kun 24 tal, så et
+          døgnskifte skal tælles som en hel dag ved siden af. Og <strong>06:00
+          minus 8 timer er 22:00 dagen før</strong>: trækker du bare
+          minutterne fra, får du et negativt tal, som ikke er noget klokkeslæt.
+          Skal du regne på en bestemt dato, skal du bruge datofelterne i{" "}
+          <a href="/dato">dato-værktøjet</a> — her er der kun klokkeslæt, og
+          det er derfor svaret er det samme uanset sommer- eller vintertid.
         </p>
 
         <h2>Tips til præcis timeregistrering</h2>
@@ -867,7 +980,9 @@ export default async function TidsberegnerPage() {
           timmar och 30 minuter</strong>, eftersom 495 + 315 = 810 minuter,
           och 810 ÷ 60 = 13,50. Verktyget ovan tar ett tidsintervall i taget,
           så du summerar två dagar genom att sätta in den första
-          sluttiden som den andra starttiden.
+          sluttiden som den andra starttiden — eller du använder fliken
+          «Lägg ihop tidsintervall» i verktyget «Vad är klockan om X
+          timmar?», som lägger ihop tre intervall i taget.
         </p>
         <table>
           <thead>
@@ -897,6 +1012,60 @@ export default async function TidsberegnerPage() {
           du pauser måste de dras av i timmar, eftersom{" "}
           <code>=(B1-A1)*24</code> inte känner en lunchpaus:{" "}
           <code>=(B1-A1)*24+(D1-C1)*24-E1-E2</code>, där E1 och E2 är pauserna.
+        </p>
+
+        <h2>Lägg tid på ett klockslag: vad är klockan om X timmar?</h2>
+        <p>
+          Det är den andra vägen: här lägger du en <strong>varaktighet på
+          ett klockslag</strong> i stället för att hitta varaktigheten mellan
+          två. Skriv klockslaget, välj om du lägger till eller drar av, och
+          skriv hur många timmar och minuter. Verktyget räknar i minuter och
+          tar resten modulo 1440, så svaret alltid är ett riktigt klockslag —
+          även när du går över midnatt.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Uttrycket</th>
+                <th>Blir</th>
+                <th>Vilken dag</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PLUS_TID_EKSEMPLER.map((eksempel) => {
+                const r = plusTid(eksempel)!;
+                const fortegn = eksempel.timer < 0 || eksempel.minutter < 0 ? "−" : "+";
+                return (
+                  <tr key={eksempel.id}>
+                    <td>
+                      {eksempel.klokkeslaet} {fortegn}{" "}
+                      {formatTidsvar(
+                        {
+                          timer: Math.abs(eksempel.timer),
+                          minutter: Math.abs(eksempel.minutter),
+                        },
+                        "se",
+                      )}{" "}
+                      = {eksempel.timer * 60 + eksempel.minutter} minuter
+                    </td>
+                    <td>{r.klokkeslaet}</td>
+                    <td>{plusTidDag(r.heleDage, "se")}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Två rader är fällorna. <strong>12:00 plus 12 timmar blir 00:00
+          dagen efter</strong>, inte 24:00 — ett klockslag har bara 24 tal, så
+          ett dygnsskifte måste räknas som en hel dag vid sidan av. Och
+          <strong> 06:00 minus 8 timmar blir 22:00 dagen innan</strong>: drar
+          du bara av minuterna får du ett negativt tal, vilket inte är något
+          klockslag. Räknar du på en bestämd dag använder du datumfälten i{" "}
+          <a href="/dato">datumverktyget</a> — här finns bara klockslag, och
+          det är därför svaret är detsamma oavsett sommar- eller vintertid.
         </p>
 
         <h2>Tips för exakt tidsregistrering</h2>
