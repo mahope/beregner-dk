@@ -1,4 +1,9 @@
-STATUS: 6/10 09:1x. ✅ **Tidszonehåndtering rettet til at bruge lokalets egen
+STATUS: 6/10 10:4x. ✅ **Tidszonehåndtering rettet til at bruge lokalets egen
+tidszone.** Alle dato- og tid-beregningar bruger nu Europe/Copenhagen for dansk
+og Europe/Stockholm for svensk, så nedtællinger og månedsberegninger stemmer
+præcis for begge domæner. Før brugte koden Europe/Copenhagen for begge, hvilket
+kunde give fejl på beraknare.se. VERIFICÉR DEPLOY-note tilføjet.
+✅ **CEO-kø punkt 0 review-fund 29/9:** Fjernet opfundet tekst om 'fri med lö' från svensk midsommar FAQ. Replacerade med legitim fråga om traditionell firande för att behålla minst 3 FAQ-poster. `VERIFICÉR DEPLOY: /midsommarvisar korrekt information utan löfte om betald ledighet ceo/fix-midsommar-fritext 6/10 10:4x`
 tidszone.** Alle dato- og tid-beregninger bruger nu Europe/Copenhagen for dansk
 og Europe/Stockholm for svensk, så nedtællinger og månedsberegninger stemmer
 præcis for begge domæner. Før brugte koden Europe/Copenhagen for begge, hvilket
