@@ -1,5 +1,6 @@
 import TidsBeregner from "@/components/TidsBeregner";
 import PlusTidBeregner from "@/components/PlusTidBeregner";
+import MinutterTilTimerBeregner from "@/components/MinutterTilTimerBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -500,6 +501,12 @@ export default async function TidsberegnerPage() {
             Sektionen er C120's svenska "Räkna om minuter till timmar", og
             alle tal regnes fra `MINUTTER_TILL_TIMMAR` i `tids-eksempler.ts`,
             som div/mod 60 bruger — samme regel som værktøjet. */}
+        {/* Værktøjet står lige over brødteksten, så læseren der skriver «omregn
+            145 minutter til timer» finder regnestykket som en beregning og
+            ikke som en tabel, han selv skal læse. Se `src/lib/tidsenhed.ts`
+            for autocomplete-målingen (8 af 8 træffere under «omregn minutter
+            til timer» er selve opgaven, fire af dem med et konkret tal). */}
+        <MinutterTilTimerBeregner />
         <h2>Omregn minutter til timer – og timer til minutter</h2>
         <p>
           Omregningen er altid <strong>minutter ÷ 60 = timer</strong>, og den
@@ -876,6 +883,11 @@ export default async function TidsberegnerPage() {
             minuter" (nr. 10) — altså båda riktningarna i omvandlingen. Den
             svenska sidan svarade på ingen av dem. Alla tal räknas från
             `totalMinutter`, så de kan inte glida ifrån `decimalTimer`. */}
+        {/* Samma verktyg som den danska grenen ovan, så beraknare.se får
+            räkningen och inte bara tabellen. Komponenten har egna svenska
+            etiketter; den danska grenen och den här monterar den en gång var,
+            precis som sidan redan gör med `TidsBeregner`. */}
+        <MinutterTilTimerBeregner />
         <h2>Räkna om minuter till timmar – och tillbaka</h2>
         <p>
           Omvandlingen är alltid <strong>minuter ÷ 60 = timmar</strong>, och

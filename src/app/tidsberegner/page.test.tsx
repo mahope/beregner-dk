@@ -36,6 +36,9 @@ vi.mock("@/components/TidsBeregner", () => ({
 vi.mock("@/components/PlusTidBeregner", () => ({
   default: () => <div>Plus-tidsværktøj</div>,
 }));
+vi.mock("@/components/MinutterTilTimerBeregner", () => ({
+  default: () => <div>Minutter-til-timer-værktøj</div>,
+}));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));
@@ -400,6 +403,10 @@ describe("minuter ↔ timmar på beraknare.se", () => {
     expect(html).toContain("Räkna om minuter till timmar");
     expect(html).toContain("minuter ÷ 60 = timmar");
     expect(html).toContain("timmar × 60 = minuter");
+    // Verktyget — ikke bara tabellen — står på beraknare.se, så den svenska
+    // gren bruger komponentens svenska etiketter i stället for at lade dem
+    // være død kode.
+    expect(html).toContain("Minutter-til-timer-værktøj");
     for (const minuter of MINUTER) {
       const decimal = formatNumber(minuter / 60, "se", {
         minimumFractionDigits: 2,

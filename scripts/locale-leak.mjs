@@ -150,6 +150,12 @@ const REVIEWED = [
       "Delt tekst der blander ${l.underskudPaa}-interpolation med dansk kode rundt om. Ikke en ren dansk streng, så den kræver en oversættelses-klynge. Se opgave 99.",
   },
   {
+    file: "src/components/MinutterTilTimerBeregner.tsx",
+    verdict: "DØD",
+    reason:
+      "Knap-etiketten `${timerVærdi} ${l.timerEnhed}` (:212) er en målefejl: `timerVærdi` er `formatNumber(eksempel.timer, lang)` (:196), og `l.timerEnhed` findes i både `da` (:22) og `se` (:38). Scanneren ser den lokale variabel som \"dansk kode rundt om\", samme klasse som KonfirmationBeregner.",
+  },
+  {
     file: "src/lib/page-data.ts",
     key: "huslejeSvaer",
     verdict: "DØD",
