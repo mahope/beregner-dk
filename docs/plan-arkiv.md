@@ -29581,3 +29581,77 @@ skrivningen fangede porten to af fejlene ovenfor plus en fejl i mine egne
 testforventninger (3 l/100 km er 33,3 km/l, ikke 333).
 
 *Gate:* typecheck 0, lint 0 (782 filer), 4409 tests i 274 filer grønne.
+
+## 6/10 03:0x — Ugedagsberegneren (`ceo/ugedagsberegner`) + planen skåret ned
+
+**Hvorfor denne side.** Dansk autocomplete 6/10 har fire spørgsmål i samme
+familie og *ingen* af dem havde en adresse på sitet: «hvilken ugedag er jeg
+født», «hvilken ugedag er det i dag» (formuleringen «hvad for en ugedag er det
+i dag»), «hvilken ugedag var» og «ugedag beregner». På svensk er «vilken
+veckodag är jag född» og «vilken veckodag är det idag» de to første
+completioner under «vilken veckodag». `/dato` og `/ugenummer` har begge et
+afsnit om ugedagen, men de ligger på sider der konkurrerer om hhv. 20 og 2
+andre spørgsmål — så den der googler «ugedag» skulle gætte blandt 158 URL'er.
+Egen sti, egen `<h1>`, egen titel: `/ugedag` (da) og `/veckodag` (se).
+
+**Mål:** `MÅL: /ugedag + /veckodag baseline 0 (nye URL'er), forventer >
+150 Plausible-besøgende/28d efter 14 dage (dansk) og > 30 (svensk)`.
+
+**Ruterne.** `/ugedag` og `/veckodag` er samme værktøj i to sprog, så
+`getRouteDecision` sender hvert domænes *andet* sprog videre med 301 — ellers
+ville beraknare.se/ugedag servere dansk, og samme svar lå på to URL'er pr.
+domæne. Samme mønster som `/dage-mellem-datoer` ↔ `/dagar-mellan-datum`, og
+samme grund for at de **ikke** står i `calculator-list.ts`: listen lister
+danske slugs, så en svensk sti kan ikke komme derfra. Sitemap'en får dem i
+stedet gennem `getUgedagPath(locale)`.
+
+**Tre fejl fundet undervejs, som portene dømmer:**
+
+1. **Mandag blev «Sø» i kalenderrækken.** `ugedagsnavnKort` indekserede en
+   række med `getDay()` (søndag = 0) men skrev elementerne i ISO-rækkefølge
+   (mandag først). Mutér rækken → 1 rød.
+2. **`LocaleProvider` hedder `locale`, ikke `initialLocale`.** Testen sendte
+   et prop, komponenten ignorerede, og *alle tre* svenske assertions kørte på
+   dansk markup og var grønne af den grund. Fundet af at `getByText("Lördag")`
+   ikke fandt ordet — den svenske gren var aldrig kørt.
+3. **`/kategori/praktiskt` er en 404 på beraknare.se.** Kategori-sluggene er
+   de *samme* på begge domæner, så den svenske breadcrumb pegede på en adresse,
+   der ikke findes. Målt med `curl -o /dev/null -w "%{http_code}"` — ikke
+   læst i koden.
+
+**Portene (51 nye).** `ugedag.test.ts` (27) dømmer den lange og den korte
+række, ISO-ugenummeret mod seks kontrollerede årsskifte, skudårsreglen og
+ugenrækken. `UgedagBeregner.test.tsx` (11) dømmer alle syv ugedage i begge
+sprog, kalenderrækken, «i dag» under `vi.useFakeTimers` kl. 00:30 dansk tid
+(UTC-dagen er da *i går*) og 44 px på alle trykflader. `ugedag-side.test.tsx`
+(13) dømmer titel, metadata, brødtekstens tal, de interne links, ruterne og
+FAQ'ens påstande.
+
+**Mutationer:** rotér den lange række → 6 røde; gør `se` til dansk → 2 røde;
+`+4` → `+3` i ISO-torsdagen → 5 røde; ugevinduet ud fra den valgte dato → 4
+røde; rotér den korte række → 1 rød; slå `UGEDAG_SIDER`-reglen fra → 1 rød.
+
+**Fem fund undervejs, alle rettet i samme opgave:**
+
+- `tidszone-reference.ts:13` siger Nuuk skifter på EU's datoer (UTC-2/-1) — det
+  er **rigtigt** og målt mod IANA (`America/Nuuk` er GMT-2 i januar, GMT-1 i
+  juli). Review-blokken havde kaldt det en modsigelse; `sommertid.ts:14` siger
+  det samme, så de to filer er enige. Ikke et fund, blot en måling.
+- `/husleje`'s nettoprisindeks-FAQ, `/dato`'s promille-`PROMILLEGRAENSER_UDLAND_SE`,
+  `/dage-til/1-december`, «hvor mange dage har jeg levt» (dækket af `/alder`),
+  «hvilken ugedag er jeg født» (ny side) og `/kategori/praktiskt` — alle fire
+  CEO-kø-punkter er lukkede i en tidligere iteration.
+- `PROMILLEGRAENSER_UDLAND_SE` findes allerede, så ❓ «svensk promille-FAQ»
+  kan lukkes: den svenske gren har sin egen række.
+- Gate-fejl fundet af den fulde suite: `meta-description.test.ts` markerede
+  `/veckodag` som en dansk side uden description. Den er et svensk søskendested,
+  der 301'er væk fra minberegner.dk — samme grund som `/dagar-mellan-datum`
+  står i `SIDER_UDEN_DESCRIPTION`.
+- `/ugenummer` er dansk-only (målt: 404 på beraknare.se). Den svenske side
+  linkede til det — rettet til at pege på værktøjets eget ISO-felt.
+
+**Planen skåret ned.** Var 40.066 bytes mod et loft på 40 KB. Alt det
+afsluttede og alt målerapporten er flyttet her; `## STATUS`, `## Fase 3`,
+`## Feature-kø`, `## VERIFICÉR DEPLOY-noter` og `## ❓ Til Mads` er det, der
+er tilbage. De elleve åbne deploy-noter er skrevet ned som *krav + målegreb*,
+uden de afsluttede iterationsrapporter.

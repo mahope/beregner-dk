@@ -44,6 +44,7 @@ import {
 import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
 import { ugeDatoerFaqSvar } from "./ugenummer";
+import { dageIAar, dageMellemIsoDatoer, ugedagResultat } from "./ugedag";
 import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
 import { kalorierFaqItems, kalorierOverskrifter } from "./kalorier-eksempler";
 import {
@@ -152,6 +153,27 @@ const DAGPENGE_AM_PROCENT_TEKST = formatNumber(SATSER_2026.amBidrag * 100, "da",
 });
 const DAGPENGE_PERIODE_TIMER_TEKST = dagpengeTimer(DAGPENGE_2026.dagpengeperiodeTimer);
 const DAGPENGE_BESKRIVELSE = `Beregn dagpenge 2026. Max sats: ${DAGPENGE_MAX_TEKST}/md (${DAGPENGE_PROCENT_TEKST} % af løn efter AM-bidrag). Med beskæftigelsestillæg op til ${DAGPENGE_TILLAEG_TEKST}/md. Beregn din dagpengesats fra din løn.`;
+
+/**
+ * Alle tal i `/ugedag` og `/veckodag`s tekst, titel og FAQ er regnet her af
+ * `ugedag.ts` — altså af de **samme** funktioner værktøjet kalder. Punkt 11 i
+ * kvalitetsreglerne: en påstand i tekst er kode. Hvis brødteksten skrev
+ * «torsdag» ved siden af et regnestykke, der siger onsdag, ville en læser
+ * miste tilliden til hele siden — og det er præcis den fejl, `tidszone.ts`
+ * havde med Danmark mod Australien.
+ *
+ * Eksemplerne er færdige, kontrollerede datoer: 1. januar 2026 (en torsdag) og
+ * 24.–25. december 2026 (torsdag og fredag). Ingen af dem er «i dag», så
+ * brødteksten siger det samme i morgen som i dag — en dynamisk eksempeltekst
+ * ville få Google til at genspejle en ny titel hver dag.
+ */
+const UGEDAG_EKSEMPEL = ugedagResultat("2026-01-01", "da")!;
+const UGEDAG_EKSEMPEL_SE = ugedagResultat("2026-01-01", "se")!;
+const UGEDAG_JULEAFTEN = ugedagResultat("2026-12-24", "da")!;
+const UGEDAG_JULEAFTEN_SE = ugedagResultat("2026-12-24", "se")!;
+/** 1. januar 2027 er 365 dage efter 1. januar 2026 — 2026 er ikke et skudår. */
+const UGEDAG_AAR_2026 = dageIAar(2026);
+const UGEDAG_DAGE_2026_2027 = dageMellemIsoDatoer("2026-01-01", "2027-01-01")!;
 
 /**
  * Formateringen i de to momssvar, der laeser et tal ud af `MOMS_LANDE`. Den er
@@ -2440,6 +2462,30 @@ faqItems: kalorierFaqItems("da"),
         { question: "Kan beregneren finde afstanden mellem hjem og arbejde?", answer: "Ja. Skriv din hjemadresse og arbejdsadresse, så finder beregneren den korteste køretur via OpenStreetMap og udfylder km tur/retur. Skat bruger den normale transportvej, som typisk er den korteste, men kan vurdere ruten anderledes – du kan altid rette tallet. Adresser og koordinater gemmes ikke." },
       ],
     },
+    "ugedag": {
+      slug: "ugedag",
+      title: "Ugedagsberegner - hvilken ugedag er det?",
+      description: "Find ugedagen for enhver dato og se hele ugen. Skriv din fødselsdato og se, hvilken ugedag du er født på.",
+      metaTitle: `Ugedagsberegner: ${UGEDAG_EKSEMPEL.datoTekst} var en ${UGEDAG_EKSEMPEL.ugedagTekst.toLowerCase()}`,
+      metaDescription: `Beregn ugedagen for enhver dato og se hele ugen med ISO-ugenummer. ${UGEDAG_EKSEMPEL.datoTekst} var en ${UGEDAG_EKSEMPEL.ugedagTekst.toLowerCase()}.`,
+      keywords: ["ugedag", "hvilken ugedag er jeg født", "hvilken ugedag er det i dag", "ugedag beregner", "hvad ugedag er det", "ugedagsberegner", "find ugedag", "hvilken ugedag var"],
+      ogTitle: `Ugedagsberegner: ${UGEDAG_EKSEMPEL.datoTekst} var en ${UGEDAG_EKSEMPEL.ugedagTekst.toLowerCase()}`,
+      ogDescription: `Beregn ugedagen for enhver dato og se hele ugen med ISO-ugenummer.`,
+      category: "Praktisk",
+      breadcrumbCategory: "Praktisk",
+      breadcrumbCategoryHref: "/kategori/praktisk",
+      schemaName: "Ugedagsberegner",
+      schemaDescription: "Beregn hvilken ugedag en dato har, se hele ugen og ISO-ugenummeret.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvilken ugedag er jeg født?", answer: `Skriv din fødselsdato i feltet, så fortaller værktøjet hvilken ugedag du blev født på. Som eksempel: ${UGEDAG_EKSEMPEL.datoTekst} var en ${UGEDAG_EKSEMPEL.ugedagTekst.toLowerCase()}, altså uge ${UGEDAG_EKSEMPEL.uge}.` },
+        { question: "Hvilken ugedag er det i dag?", answer: `Beregneren er forudindstillet med dagens dato. Du kan altid trykke på "I dag" for at komme tilbage til den, hvis du har indtastet en anden dato.` },
+        { question: "Hvordan beregnes ugedagen?", answer: "Ugedagen følger den gregorianske kalender, og den kan regnes uden nogen undtagelse: 1. januar 2026 var en torsdag, og derfra tæller du syv dage frem for hver uge. Der er ingen forskel på almindelige år og skudår — en skudag er blot en ekstra tirsdag." },
+        { question: "Hvad er forskellen på ISO-ugenummeret og kalenderugen?", answer: `ISO-ugenummeret tæller uger fra mandag til søndag, og uge 1 er den uge, der indeholder årets første torsdag. Derfor kan en dato i december tilhøre uge 1 af næste år. ${UGEDAG_JULEAFTEN.datoTekst} ligger i uge ${UGEDAG_JULEAFTEN.uge}, fordi 1. januar 2027 er en fredag.` },
+        { question: "Hvor mange dage er der i et år?", answer: `2026 har ${UGEDAG_AAR_2026.dage} dage, fordi 2026 ikke er et skudår. Et skudår har 366 dage: 2024 havde ${dageIAar(2024).dage}, mens 1900 havde ${dageIAar(1900).dage} og 2000 havde ${dageIAar(2000).dage}. Reglen er, at hvert fjerde år er et skudår, undtagen de hundrede år der ikke er delelige med 400.` },
+        { question: "Kan jeg finde ud af, hvor mange dage der er gået siden en dato?", answer: `Ja — brug ${"/dage-mellem-datoer"}s beregner, der tæller hele kalenderdage mellem to datoer. Fra 1. januar 2026 til 1. januar 2027 er der ${UGEDAG_DAGE_2026_2027} dage.` },
+      ],
+    },
     "ugenummer": {
       slug: "ugenummer",
       title: "Ugenummer - hvilken uge er det?",
@@ -3148,6 +3194,30 @@ const noPages: Record<string, PageData> = {
 // ─── SWEDISH (se) PAGE DATA ────────────────────────────────────────────────
 
 const sePages: Record<string, PageData> = {
+    "veckodag": {
+      slug: "veckodag",
+      title: "Veckodagskalkylator - vilken veckodag är det?",
+      description: "Hitta veckodagen för vilket som helst datum och se hela veckan. Skriv ditt födelsedatum och se vilken veckodag du föddes på.",
+      metaTitle: `Veckodagskalkylator: ${UGEDAG_EKSEMPEL_SE.datoTekst} var en ${UGEDAG_EKSEMPEL_SE.ugedagTekst.toLowerCase()}`,
+      metaDescription: `Beräkna veckodagen för vilket datum som helst och se hela veckan med ISO-veckonummer. ${UGEDAG_EKSEMPEL_SE.datoTekst} var en ${UGEDAG_EKSEMPEL_SE.ugedagTekst.toLowerCase()}.`,
+      keywords: ["veckodag", "vilken veckodag är jag född", "vilken veckodag är det idag", "veckodagskalkylator", "vilken veckodag", "veckodag född", "räkna veckodag"],
+      ogTitle: `Veckodagskalkylator: ${UGEDAG_EKSEMPEL_SE.datoTekst} var en ${UGEDAG_EKSEMPEL_SE.ugedagTekst.toLowerCase()}`,
+      ogDescription: "Beräkna veckodagen för vilket datum som helst och se hela veckan med ISO-veckonummer.",
+      category: "Praktiskt",
+      breadcrumbCategory: "Praktiskt",
+      breadcrumbCategoryHref: "/kategori/praktisk",
+      schemaName: "Veckodagskalkylator",
+      schemaDescription: "Beräkna vilken veckodag ett datum har, se hela veckan och ISO-veckonummeret.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Vilken veckodag är jag född?", answer: `Skriv ditt födelsedatum i fältet så berättar kalkylatorn vilken veckodag du föddes på. Som exempel: ${UGEDAG_EKSEMPEL_SE.datoTekst} var en ${UGEDAG_EKSEMPEL_SE.ugedagTekst.toLowerCase()}, alltså vecka ${UGEDAG_EKSEMPEL_SE.uge}.` },
+        { question: "Vilken veckodag är det idag?", answer: `Kalkylatorn är förinställd med dagens datum. Du kan alltid trycka på "I dag" för att komma tillbaka till den om du har skrivit in ett annat datum.` },
+        { question: "Hur beräknas veckodagen?", answer: "Veckodagen följer den gregorianska kalendern och kan räknas fram utan undantag: 1 januari 2026 var en torsdag, och därifrån räknar du sju dagar framåt för varje vecka. Det är ingen skillnad på vanliga år och skottår — en skottag är bara ytterligare en tisdag." },
+        { question: "Vad är skillnaden mellan ISO-veckonummer och kalendervecka?", answer: `ISO-veckonummeret räknar veckor från måndag till söndag, och vecka 1 är den vecka som innefattar årets första torsdag. Därför kan ett datum i december tillhöra vecka 1 av nästa år. ${UGEDAG_JULEAFTEN_SE.datoTekst} ligger i vecka ${UGEDAG_JULEAFTEN_SE.uge}, eftersom 1 januari 2027 är en fredag.` },
+        { question: "Hur många dagar har ett år?", answer: `2026 har ${UGEDAG_AAR_2026.dage} dagar, eftersom 2026 inte är ett skottår. Ett skottår har 366 dagar: 2024 hade ${dageIAar(2024).dage} dagar, medan 1900 hade ${dageIAar(1900).dage} och 2000 hade ${dageIAar(2000).dage}. Regeln är att vart fjärde år är ett skottår, utom de hundraår som inte är delbara med 400.` },
+        { question: "Kan jag räkna ut hur många dagar som gått sedan ett datum?", answer: `Ja — använd ${"/dagar-mellan-datum"}s kalkylator, som räknar hela kalenderdagar mellan två datum. Från 1 januari 2026 till 1 januari 2027 går det ${UGEDAG_DAGE_2026_2027} dagar.` },
+      ],
+    },
     "elbil": {
       slug: "elbil",
       title: "Elbil vs. bensinbil",

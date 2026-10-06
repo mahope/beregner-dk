@@ -8,6 +8,7 @@ import { getAvailableSlugs } from "@/lib/page-data";
 import { getDageTilHubPath, getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
 import { getKlokkenHubPath, getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klokken-i";
 import { getDageMellemPath } from "@/lib/dage-mellem-datoer";
+import { getUgedagPath } from "@/lib/ugedag";
 import { getDageIAaretPath } from "@/lib/dage-i-aaret";
 import { getTimerIAaretPath } from "@/lib/timer-i-aret";
 
@@ -116,6 +117,21 @@ export function buildSitemap(
       ]
     : [];
 
+  // «Ugedag» ligger i hvert sprog på sin egen sti (`/ugedag` og `/veckodag`),
+  // så den kan ikke komme fra `availableSlugs` — den lister danske slugs. Den
+  // følger **ikke** dagens dato: værktøjet er forudindstillet med dagen, men
+  // siden har ingen nedtælling, så ugentlig er nok.
+  const ugedagPath = getUgedagPath(locale);
+  const ugedagEntries: MetadataRoute.Sitemap = ugedagPath
+    ? [
+        {
+          url: `${baseUrl}${ugedagPath}`,
+          changeFrequency: "weekly" as const,
+          priority: 0.8,
+        },
+      ]
+    : [];
+
   // «Dage mellem datoer» har sit eget eksempel på siden, og det følger dagens
   // dato, så den re-crawles dagligt lige som dage-til-siderne.
   const dageMellemPath = getDageMellemPath(locale);
@@ -170,6 +186,7 @@ export function buildSitemap(
     ...blogEntries,
     ...dageTilEntries,
     ...dageMellemEntries,
+    ...ugedagEntries,
     ...dageIAaretEntries,
     ...timerIAaretEntries,
     ...klokkenEntries,

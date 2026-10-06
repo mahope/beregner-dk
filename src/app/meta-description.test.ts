@@ -37,6 +37,12 @@ const MAX_TEGN = 160;
  * og `/dagar-till/*`, der er `noindex` på minberegner.dk og først får en egen
  * description på beraknare.se. Alt andet skal have en — ellers kan en ny side
  * springe reglen over ved at glemme den.
+ *
+ * `/veckodag` står her af samme grund som `/dagar-mellan-datum`: den er det
+ * **svenske** søskendested til `/ugedag`, og `getRouteDecision` sender
+ * minberegner.dk/veckodag videre med 301, så den danske host serverer den
+ * aldrig. Den har sin egen description i `page-data.ts` — det er den danske
+ * `altFor`-scanning, der ikke skal lede efter den.
  */
 const SIDER_UDEN_DESCRIPTION = new Set([
   "/bolan",
@@ -48,6 +54,7 @@ const SIDER_UDEN_DESCRIPTION = new Set([
   "/dagar-till",
   "/dagar-till/[dato]",
   "/dagar-mellan-datum",
+  "/veckodag",
   "/dagar-i-aret",
   "/timmar-i-aret",
   "/klockan-i",

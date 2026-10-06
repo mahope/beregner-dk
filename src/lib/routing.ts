@@ -9,6 +9,7 @@ import {
 } from "./dage-til";
 import { getKlokkenHubPath } from "./klokken-i";
 import { getDageMellemPath } from "./dage-mellem-datoer";
+import { getUgedagPath } from "./ugedag";
 import { getDageIAaretPath } from "./dage-i-aaret";
 import { getTimerIAaretPath } from "./timer-i-aret";
 
@@ -27,6 +28,14 @@ const DAGE_MELLEM_SIDER = [
   "/dage-mellem-datoer",
   "/dagar-mellan-datum",
 ] as const;
+
+/**
+ * Samme regel for «ugedag»: `/ugedag` og `/veckodag` er det **samme**
+ * værktøj i to sprog — samme kalender, samme ISO-formel, samme
+ * eksempeldatoer. Uden 301 ville minberegner.dk/veckodag servere svensk tekst
+ * på et dansk domæne, og samme svar ville ligge på to URL'er pr. domæne.
+ */
+const UGEDAG_SIDER = ["/ugedag", "/veckodag"] as const;
 
 /**
  * Samme regel for «hvor mange dage er der på et år»: den danske og den svenske
@@ -124,6 +133,18 @@ export function getRouteDecision(
     DAGE_MELLEM_SIDER.includes(normalizedPath as (typeof DAGE_MELLEM_SIDER)[number])
   ) {
     const egenSti = getDageMellemPath(domainConfig.locale);
+    if (!egenSti) return { type: "not-found" };
+    if (egenSti !== normalizedPath) {
+      return { type: "redirect", destination: egenSti, status: 301 };
+    }
+  }
+
+  // Samme regel for «ugedag»: den danske og den svenske side er det samme
+  // værktøj, så stien der ikke er dette domænes er en 301. Ellers ville
+  // beraknare.se/ugedag servere dansk på et svensk domæne, og begge sprog ville
+  // have to URL'er med samme svar.
+  if (UGEDAG_SIDER.includes(normalizedPath as (typeof UGEDAG_SIDER)[number])) {
+    const egenSti = getUgedagPath(domainConfig.locale);
     if (!egenSti) return { type: "not-found" };
     if (egenSti !== normalizedPath) {
       return { type: "redirect", destination: egenSti, status: 301 };
