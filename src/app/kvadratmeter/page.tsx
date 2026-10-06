@@ -1,5 +1,6 @@
 import BoligOpslag from "@/components/BoligOpslag";
 import KvadratmeterBeregner from "@/components/KvadratmeterBeregner";
+import ArealOmregner from "@/components/ArealOmregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import {
@@ -13,6 +14,8 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import {
   kvadratmeterFacit,
+  kvadratmeterOmregninger,
+  kvadratmeterOmregningsFakta,
   kvadratmeterPrisAreal,
   kvadratmeterPrisBeloeb,
   kvadratmeterPrisPrM2,
@@ -27,6 +30,7 @@ export default async function KvadratmeterPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("kvadratmeter", locale) || getPageData("kvadratmeter", "da")!;
+  const fakta = kvadratmeterOmregningsFakta(locale);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -56,6 +60,31 @@ export default async function KvadratmeterPage() {
 
       {/* BBR lookup: Danish register, Danish locale only */}
       {locale === "da" && <BoligOpslag />}
+
+      {/* Omregning begge veje. Værktøjet ovenfor kun *viste* m², cm², hektar og
+          kvadratfod for det areal man lige havde regnet, så «500 kvadratfod til
+          m²» — første danske træffer under «kvadratfod», jf. autocomplete 6/10 —
+          var umulig at løse på sitet. */}
+      <ArealOmregner />
+
+      {/* Teksten under værktøjet, så brødteksten og facit læser de samme tal. */}
+      {(locale === "da" || locale === "se") && (
+      <div className="prose max-w-none mb-8">
+        <h2>{locale === "se" ? "Omvandla kvadratmeter till andra enheter" : "Omregn kvadratmeter til andre enheder"}</h2>
+        <p>
+          {locale === "se"
+            ? `Omregningen bygger på exakta mått, inte avrundade. En fot är exakt ${fakta.fodMeter} m, så en kvadratfot är exakt ${fakta.kvadratfodM2} m², och en acre är de ${fakta.kvadratfodPrAcre} kvadratfoten i en acre = ${fakta.acreM2} m². Här är tre omregningar du kan kontrollera själv:`
+            : `Omregningen bygger på eksakte mål, ikke avrundede. En fod er præcis ${fakta.fodMeter} m, så en kvadratfod er præcis ${fakta.kvadratfodM2} m², og en acre er de ${fakta.kvadratfodPrAcre} kvadratfod i en acre = ${fakta.acreM2} m². Her er tre omregninger, du kan efterprøve selv:`}
+        </p>
+        <ul>
+          {kvadratmeterOmregninger(locale).map(({ foer, efter }) => (
+            <li key={foer}>
+              <strong>{foer}</strong> = <strong>{efter}</strong>
+            </li>
+          ))}
+        </ul>
+      </div>
+      )}
 
       {/* Samma sak på svenska: "hur räknar man ut kvadratmeter" är svensk
           autocomplete (10 variationer under "räkna ut kvadratmeter", hvoraf

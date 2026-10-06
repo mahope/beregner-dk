@@ -8,6 +8,11 @@ import KvadratmeterPage from "./page";
 vi.mock("@/components/KvadratmeterBeregner", () => ({
   default: () => <div>Arealværktøj</div>,
 }));
+// ArealOmregner er en klient-komponent med egen LocaleProvider-kontekst;
+// den har sin egen test i src/components/ArealOmregner.test.tsx.
+vi.mock("@/components/ArealOmregner", () => ({
+  default: () => <div>Omregn arealværktøj</div>,
+}));
 vi.mock("@/components/BoligOpslag", () => ({ default: () => null }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
@@ -81,6 +86,46 @@ describe("kvadratmeter page", () => {
     expect(html).toContain("(6 × 4) / 2 = 12 m²");
     expect(html).toContain("((4 + 6) / 2) × 3 = 15 m²");
     expect(html).toContain("20 m² til 150 kr./m² er <strong>3.000 kr.</strong>");
+  });
+
+  // Dansk autocomplete 6/10: 9 af 10 træffere under «omregn kvadratmeter til»
+  // er en omregning, og «500 kvadratfod» er første træffer under «kvadratfod».
+  // Værktøjet viste kun den ene vej, så siden skal nu kunne svare begge veje.
+  test("brødteksten skriver de tre omregninger, værktøjet regner", async () => {
+    const html = renderToStaticMarkup(await KvadratmeterPage());
+
+    expect(html).toContain("Omregn arealværktøj");
+    expect(html).toContain("<h2>Omregn kvadratmeter til andre enheder</h2>");
+    expect(html).toContain("<strong>500 kvadratfod</strong> = <strong>46,45 m²</strong>");
+    expect(html).toContain("<strong>1 acre</strong> = <strong>4.046,86 m²</strong>");
+    expect(html).toContain("<strong>100 m²</strong> = <strong>1.076,39 kvadratfod</strong>");
+    // Foden er præcis 0,3048 m i begge lande, så tallene er de samme.
+    expect(html).toContain("præcis 0,3048 m");
+    expect(html).toContain("0,09290304 m²");
+  });
+
+  test("den svenska siden har samme tre omregninger i svensk notation", async () => {
+    const html = normalisér(renderToStaticMarkup(await medLocale("se")));
+
+    expect(html).toContain("<h2>Omvandla kvadratmeter till andra enheter</h2>");
+    expect(html).toContain("<strong>500 kvadratfot</strong> = <strong>46,45 m²</strong>");
+    expect(html).toContain("<strong>1 acre</strong> = <strong>4 046,86 m²</strong>");
+    expect(html).toContain("<strong>100 m²</strong> = <strong>1 076,39 kvadratfot</strong>");
+  });
+
+  test("begge sprog regner om til samme areal, så de ikke kan glide fra hinanden", async () => {
+    const da = normalisér(renderToStaticMarkup(await medLocale("da")));
+    const se = normalisér(renderToStaticMarkup(await medLocale("se")));
+
+    // 46,45 m² og 0,09290304 m² skrives ens i begge sprog.
+    for (const omregning of ["46,45 m²", "0,09290304 m²"]) {
+      expect(da).toContain(omregning);
+      expect(se).toContain(omregning);
+    }
+    // Tusindtalsseparatoren er sprogets, så 500 kvadratfod mod 1.076,39 er
+    // «1.076,39» i dansk og «1 076,39» i svensk — samme tal, to skrivemåder.
+    expect(da).toContain("<strong>1.076,39 kvadratfod</strong>");
+    expect(se).toContain("<strong>1 076,39 kvadratfot</strong>");
   });
 
   test("de nye svar kommer i FAQ'en og dermed i JSON-LD'en", async () => {

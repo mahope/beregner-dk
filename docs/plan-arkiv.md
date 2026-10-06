@@ -29492,3 +29492,57 @@ søgninger («dage til sommerferie», «uger til sommerferie», «hvornår er
 sommerferien», «tid til sommerferie») gav **10 af 10** træffere om sommerferien —
 så klyngen er den mest efterspurgte i `/dage-til`-familien efter jul. Derfor er det
 denne side, der først blev rettet.
+
+## 6/10 02:3x — arealomregner på /kvadratmeter (`ceo/areal-omregner`)
+
+**Datagrund.** Dansk autocomplete (Google suggestqueries, fire målinger):
+«omregn kvadratmeter til» → 9 af 10 træffere er *omregninger* til en anden
+arealenhed (hektar, square feet, meter, kubikmeter, kvadratcentimeter,
+kvadratkilometer, tønder land, acres, cm). «kvadratmeter til» → 10 af 10
+omregninger. «kvadratfod» → 10 af 10 træffere, alle med «… til …»
+(kvadratfod til kvadratmeter, til cm, til meter) og fire med et tal foran
+(500/700/400/100 kvadratfod). Svensk autocomplete under «räkna ut
+kvadratmeter» er allerede dækket af F5e's svenske blok.
+
+**Baggrund.** `KvadratmeterBeregner.tsx` havde et «Omregn dit areal»-afsnit
+med fire *read-only* felter (m², cm², ha, sq ft), beregnet ud fra den figur,
+brugeren lige havde valgt. Der var intet input-felt og ingen enhedsvalg, så
+omregningen kunne *kun* læse fra m². Den omvende vej — «500 kvadratfod til
+m²» — var umulig at løse på sitet. Samtidig skrev brødteksten omregningen
+uden tal: `SQ_FT_PR_M2 = 10.76` med kommentaren «de to decimaler er sidens
+facit», altså et tilnærmelsestal forklædet som et facit.
+
+**Løsningen.** Nyt modul `src/lib/areal-omregner.ts` med de **eksakte**
+faktorer, ikke afrundede:
+- 1 fod = 0,3048 m præcis (yard-and-pound-aftalen af 1959, som både DK og SE
+  bruger) → 1 kvadratfod = 0,09290304 m² præcis
+- 1 acre = 66 × 660 = 43.560 kvadratfod = 4.046,8564224 m² præcis
+- SI-præfikserne: 1 m² = 10.000 cm², 1 km² = 1.000.000 m², 1 ha = 10.000 m²
+
+Seks enheder (m², cm², km², hektar, kvadratfod, acre) med enhedens egne
+decimaler. `ArealOmregner.tsx` er et indtastningsfelt + enhedsvalg, der viser
+alle seks på én gang; `ArealOmregner` renderer på `/kvadratmeter` under
+værktøjet. Brødteksten fik en `<h2>` med tre omregninger
+(`OMREGNINGS_EKSEAMPLER`: 500 kvadratfod, 1 acre, 100 m²), og **alle** tal i
+både brødteksten og værktøjets note læses fra samme to funktioner
+(`kvadratmeterOmregninger`, `kvadratmeterOmregningsFakta`) — så «4.046,8564224»
+kan ikke stå som dansk notation i den svenske version, hvilket var den fejl
+`kvadratmeter-eksempler.ts` blev bygget for at fjerne.
+
+**Porte.** 27 nye: 18 i `areal-omregner.test.ts` (faktorer, omregninger,
+ugyldige tal, alle-enheder, brødtekstens tre tal, afrunding), 6 i
+`ArealOmregner.test.tsx` (renderede tal i da/se/no, enhedslisten er præcis de
+seks med m² først, tomt felt, negativt tal, sprog), 3 i `page.test.tsx` (de tre
+omregninger i da og se, og at begge sprog regner til samme areal).
+Mutationer målt 6/10 02:2x: `FOD_I_METER = 0.3047` → **11 røde**;
+`hektar.faktorM2 = 1_000` → **4 røde**; `OMREGNINGS_EKSEAMPLER[1].vaerdi = 2`
+→ **3 røde** (lib + to sidetests). Mutationerne er gendannet,
+`git status --porcelain` ren.
+
+**Gate.** typecheck 0, biome 0 (779 filer), 4376 tests i 273 filer grønne.
+Ingen ny URL, så sitemap og robots er uændrede.
+
+**Mål.** `MÅL: /kvadratmeter baseline 393 Plausible-besøgende/28d pr. 6/10
+2026` (GSC 21.403 visninger, CTR 1,5 %, pos. 4,9). Forventer > 450 efter 14
+dage; GSC-søgningerne «omregn kvadratmeter til …» skal give nye visninger på
+siden efter samme 14 dage.

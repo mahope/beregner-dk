@@ -38,6 +38,17 @@ import {
   arealEksempel,
   type ArealEksempelId,
 } from "./areal-eksempler";
+import {
+  ACRE_I_M2,
+  FOD_I_METER,
+  KVADRATFOD_I_M2,
+  KVADRATFOD_PR_ACRE,
+  OMREGNINGS_EKSEAMPLER,
+  arealEnhed,
+  omregnAreal,
+  rundAreal,
+  type ArealEnhedId,
+} from "./areal-omregner";
 import type { Locale } from "./i18n";
 
 /**
@@ -237,6 +248,54 @@ export function kvadratmeterEksempelLignelse(locale: Locale): string {
  */
 export function kvadratmeterEksempelProdukt(locale: Locale): string {
   return `${led("rektangel", 0, locale)} × ${led("rektangel", 1, locale)} = ${facit("rektangel", locale)} m²`;
+}
+
+/** «m²», «cm²», «km²», «ha», «kvadratfod» og «acre» som brødteksten skriver dem. */
+const OMREGNINGS_ETIKET: Record<ArealEnhedId, Record<Locale, string>> = {
+  m2: { da: "m²", se: "m²", no: "m²" },
+  cm2: { da: "cm²", se: "cm²", no: "cm²" },
+  km2: { da: "km²", se: "km²", no: "km²" },
+  hektar: { da: "hektar", se: "hektar", no: "hektar" },
+  kvadratfod: { da: "kvadratfod", se: "kvadratfot", no: "kvadratfot" },
+  acre: { da: "acre", se: "acre", no: "acre" },
+};
+
+/**
+ * De tre omregninger brødteksten skriver, som «500 kvadratfod = 46,45 m²».
+ * Begge tal regnes i {@link OMREGNINGS_EKSEAMPLER}, så sætningen ikke kan
+ * få en faktor, værktøjet ikke bruger (punkt 11).
+ */
+export function kvadratmeterOmregninger(
+  locale: Locale,
+): { foer: string; efter: string }[] {
+  return OMREGNINGS_EKSEAMPLER.map(({ vaerdi, fra, til }) => ({
+    foer: `${n(vaerdi, locale)} ${OMREGNINGS_ETIKET[fra][locale]}`,
+    efter: `${n(
+      rundAreal(omregnAreal(vaerdi, fra, til), til),
+      locale,
+      arealEnhed(til).decimaler,
+    )} ${OMREGNINGS_ETIKET[til][locale]}`,
+  }));
+}
+
+/**
+ * De to eksakte omregningsfaktorer brødteksten retfærdiggør tallene med,
+ * formateret i det sprog de publiceres i. «4.046,8564224» på dansk er
+ * 4046,8564224 i svensk notation — samme fejl som `kvadratmeter-eksempler.ts`
+ * blev bygget for at fjerne, så de læses fra `formatBelob` herfra.
+ */
+export function kvadratmeterOmregningsFakta(locale: Locale): {
+  kvadratfodM2: string;
+  acreM2: string;
+  fodMeter: string;
+  kvadratfodPrAcre: string;
+} {
+  return {
+    kvadratfodM2: n(KVADRATFOD_I_M2, locale, 8),
+    acreM2: n(ACRE_I_M2, locale, 7),
+    fodMeter: n(FOD_I_METER, locale, 4),
+    kvadratfodPrAcre: n(KVADRATFOD_PR_ACRE, locale),
+  };
 }
 
 /** «5 × 4» — rektangleksemplets led uden enhed, til sider der skriver «= 20 m²» ved siden af. */

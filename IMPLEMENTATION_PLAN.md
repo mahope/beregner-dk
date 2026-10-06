@@ -1,4 +1,12 @@
-STATUS: 6/10 02:0x. ✅ 6/10 02:0x: **forsiden linkede sitets tre mest
+STATUS: 6/10 02:3x. ✅ 6/10 02:3x: **`/kvadratmeter` kunne kun omregne én
+vej.** Værktøjet *viste* m², cm², hektar og kvadratfod for det areal man lige
+havde regnet, men havde intet felt at skrive i — så «500 kvadratfod til m²»,
+første danske træffer under «kvadratfod» og 9 af 10 under «omregn kvadratmeter
+til», kunne ikke løses på sitet overhovedet. Nu er der et arealværktøj med indtast
+og enhedsvalg, der svarer alle seks veje, og brødteksten skriver de tre samme
+omregninger med tal fra samme modul. 24 nye porte; mutation af foden til 0,3047
+gav 11 røde, af hektaren 4, af et brødtekstal 3. Se arkivet.
+✅ 6/10 02:0x: **forsiden linkede sitets tre mest
 upassede søgesider slet ikke.** `/procent` (151.008 GSC-visninger, 0,1 % CTR,
 pos. 7,5), `/tidszone` (24.829, 0,4 %) og `/moms` (24.000, 0,2 %) lå alle tre
 i den ikke-populære halvdel af `home-data.ts`, altså uden link fra forsiden og
@@ -34,7 +42,7 @@ svensk påskafton, fast dansk sankthans, `Europe/Copenhagen` i `toUtcMidnight`).
 Alt ældre: `docs/plan-arkiv.md`. ✅ CI grøn 5/10 21:26.
 PR-TJEK: 6/10 01:0x (ingen åbne). BRANCH-TJEK: 4/10 04:1x — se ❓.
 **Gate:** `npm run typecheck && npm run lint && npm run test` (CI kører også
-`next build`). 6/10 02:0x: typecheck 0, lint 0 (775 filer), **4349 tests i 271
+`next build`). 6/10 02:3x: typecheck 0, lint 0 (779 filer), **4376 tests i 273
 filer** grønne. Ét tidligere fuldt suitekørsel gav 1 rød i `locale-leak-gate.test.ts`,
 som scanneren kører i en udspawnet proces og som er grøn 3/3 i isolation og i
 to senere fulde kørsler — urørt, se ❓ om skanner-rækkerne.
@@ -50,6 +58,7 @@ to senere fulde kørsler — urørt, se ❓ om skanner-rækkerne.
 | `/tidszone` | under top-15 | 24.324 | 0,4 % | 7,5 |
 | `/moms` | under top-15 | 22.464 | 0,2 % | 7,0 |
 | `/kvadratmeter` | 391 | 20.768 | 1,5 % | 4,9 |
+| `/kvadratmeter` **før arealværktøjet** (baseline 6/10 02:3x) | **393 (+96 %)** | **21.403** | **1,5 %** | **4,9** |
 | `/braendstof` | 263 | 17.051 | 1,1 % | 5,9 |
 | `/alder` | under top-15 | 10.029 | 0,4 % | 7,2 |
 | `/rentefradrag` | under top-15 | 5.082 | 5,8 % | 5,6 |
@@ -214,6 +223,21 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
   `metaTitle` til grundarealet → 1 rød. `MÅL: /rumfang baseline 0 (ny URL),
   forventer > 300 Plausible-besøgende/28d efter 14 dage`. Titles i da/se, ingen
   `no`-side (⛔ `beregner.no` er et andet site — ❓).
+- **[x] Arealomregner på `/kvadratmeter`.** Lukket 6/10 02:3x i
+  `ceo/areal-omregner`. *Datagrund:* dansk autocomplete 6/10 02:2x — 9 af 10
+  træffere under «omregn kvadratmeter til» er kvadratcentimeter, kvadratfod,
+  kvadratkilometer, hektar, acres og square feet, og **10 af 10** under
+  «kvadratfod» starter med «kvadratfod til …» («500 kvadratfod» er nr. 1).
+  `/kvadratmeter` har 21.403 GSC-visninger på pos. 4,9 og 393 Plausible-besøgende
+  (+96 %), så positionen er allerede god nok til at konvertere omregninger.
+  *Hvorfor:* værktøjet viste kun den ene vej, så den omvende — den folk faktisk
+  googler — var umulig at løse på sitet. *Accept:* 27 porte (18 i
+  `areal-omregner.test.ts`, 6 i `ArealOmregner.test.tsx`, 3 i sidens test)
+  dømmer de eksakte faktorer (fod = 0,3048 m præcis, kvadratfod = 0,09290304
+  m², acre = 43.560 kvadratfod = 4.046,8564224 m²), alle tre sprog og den negative
+  indtast. Mutér foden til 0,3047 → 11 røde, hektaren til 1.000 → 4 røde, et
+  brødtekstal → 3 røde. `MÅL: /kvadratmeter baseline 393 besøgende/28d pr.
+  6/10, forventer > 450 efter 14 dage`. Ingen ny URL, så sitemapen er uændret.
 - **[ ] BMI-percentil for børn.** «bmi for børn», «bmi skala børn» er danske
   autocomplete-træffere, på svensk «bmi barn tabell». WHO's BMI-for-alder-tabeller
   er ~150 tal pr. køn — for mange at transkribere uden uafhængig kontrol, og en
@@ -245,6 +269,18 @@ brændstofstabellen, pensionstidslinjen) står i `docs/plan-arkiv.md`.
 
 ## VERIFICÉR DEPLOY-noter
 
+**Åben note 6/10 02:3x:** `VERIFICÉR DEPLOY: /kvadratmeter har et
+ArealOmregner med indtast og enhedsvalg, der viser alle seks enheder, og
+brødteksten skriver «500 kvadratfod = 46,45 m²», «1 acre = 4.046,86 m²» og
+«100 m² = 1.076,39 kvadratfod» i da og se med «4 046,86» / «1 076,39
+kvadratfot» på beraknare.se ceo/areal-omregner 6/10 02:3x`. Mål på indhold:
+`curl -s https://minberegner.dk/kvadratmeter | grep -o 'Omregn kvadratmeter til
+andre enheter' | wc -l` → **1**, `grep -o '46,45 m²' | wc -l` → **> 0**,
+`grep -o '0,09290304' | wc -l` → **> 0**. Samme tre greb på beraknare.se med
+«Omvandla kvadratmeter till andra enheter» og «4 046,86». Værktøjet er en
+klient-komponent, så læs `src/lib/areal-omregner.ts`, indtil facit kan hentes
+headless. ⚠️ Første reelle deploy-vindue efter mergen er 6/10 07:30.
+
 **Åben note 6/10 02:0x:** `VERIFICÉR DEPLOY: forsiden har et link til
 /procent, /tidszone og /moms i rækken mellem /pension og /loen-efter-skat, og
 sidebarlen på /dato har de tre med ceo-populaere-sogesider 6/10 02:0x`. Mål på
@@ -265,9 +301,9 @@ https://minberegner.dk/dage-til/sommerferien | grep -o 'senere end 27. juni' |
 wc -l` → **0** og `grep -o 'folkeskoleloven § 14 a stk. 2' | wc -l` → **> 0**.
 ⚠️ Mergen er efter 21:30-vinduet, første reelle kør er 6/10 07:30.
 
-**Ti noter er åbne.** Alle ti er merges efter 21:30-vinduet 5/10, så de bliver
-målbare i 07:30-kørslen 6/10. **Næste iteration skal måle alle ti på indhold i
-én kørsel** (`grep -o … | wc -l` mod begge domæner) og lukke dem med `DEPLOY OK
+**Elleve noter er åbne.** Alle elleve er merges efter 21:30-vinduet 5/10, så de
+bliver målbare i 07:30-kørslen 6/10. **Næste iteration skal måle alle elleve på
+indhold i én kørsel** (`grep -o … | wc -l` mod begge domæner) og lukke dem med `DEPLOY OK
 6/10`; en note der stadig ikke er live efter to vinduer bliver `DEPLOY-MISSING`.
 (Den 5/10 17:5x er delvist lukket — se egen linje.) De ti fra 3/10–5/10 er lukket
 på indhold — målt med `curl` mod begge domæner, ikke på HTTP-koden. De lukkede
