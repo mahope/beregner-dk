@@ -224,17 +224,17 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat",
+      title: "Procentberegner: 10 % af et tal, rabat og stigning/fald",
       intent: "10 procent af",
-      descriptionAnswer: "10 procent af 250 er 25",
-      metaAnswer: "10 % af 250 kr. = 25 kr.",
+      descriptionAnswer: "Beregn procent af et tal",
+      metaAnswer: "rabatten på 1125 kr",
     },
     {
       locale: "se" as const,
-      title: "Procenträknare: 10 % av 250 kr = 25 kr",
+      title: "Procenträknare: 10 % av ett tal, rabatt och ökning/minskning",
       intent: "10 procent av",
-      descriptionAnswer: "10 procent av 250 är 25",
-      metaAnswer: "10 procent av 250 är 25",
+      descriptionAnswer: "Beräkna procent av ett tal",
+      metaAnswer: "rabatten på 1125 kr",
     },
   ])(
     "has answer-first percentage metadata for $locale",

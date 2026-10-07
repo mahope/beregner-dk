@@ -1467,15 +1467,15 @@ faqItems: kalorierFaqItems("da"),
     "procent": {
       slug: "procent",
       title: "Procentberegner",
-      description: "10 procent af 250 er 25. Beregn procent, procentvis stigning og fald med formler.",
-      metaTitle:
-        "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat",
+      description:
+        "Beregn procent af et tal, rabatprocent og stigning eller fald mellem to tal.",
+      metaTitle: "Procentberegner: 10 % af et tal, rabat og stigning/fald",
       metaDescription:
-        "10 % af 250 kr. = 25 kr. Beregn procent af et tal, procentvis stigning, fald, rabat og vækst mellem to tal med formler.",
+        "Beregn procent af et tal, rabatprocent og procentvis ændring mellem to tal. F.eks. rabatten på 1125 kr. ned fra 9000 kr.",
       keywords: ["procentberegner", "beregn procent", "procent af", "procentvis stigning", "procentvis ændring", "procentregning"],
-      ogTitle: "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat",
+      ogTitle: "Procentberegner: 10 % af et tal, rabat og stigning/fald",
       ogDescription:
-        "10 % af 250 kr. = 25 kr. Beregn procent af et tal, procentvis stigning, fald, rabat og vækst mellem to tal med formler.",
+        "Beregn procent af et tal, rabatprocent og procentvis ændring mellem to tal. F.eks. rabatten på 1125 kr. ned fra 9000 kr.",
       category: "Matematik",
       breadcrumbCategory: "Matematik",
       breadcrumbCategoryHref: "/kategori/matematik",
@@ -4345,12 +4345,14 @@ const sePages: Record<string, PageData> = {
     "procent": {
       slug: "procent",
       title: "Procenträknare",
-      description: "10 procent av 250 är 25. Beräkna procent, procentuell ökning och minskning med formler.",
-      metaTitle: "Procenträknare: 10 % av 250 kr = 25 kr",
-      metaDescription: "10 procent av ett tal är talet × 0,10. 10 procent av 250 är 25. Beräkna också ökning, minskning och andra procentuppgifter.",
+      description: "Beräkna procent av ett tal, rabattprocent och ökning eller minskning mellan två tal.",
+      metaTitle: "Procenträknare: 10 % av ett tal, rabatt och ökning/minskning",
+      metaDescription:
+        "Beräkna procent av ett tal, rabattprocent och procentuell ändring mellan två tal. T. ex. rabatten på 1125 kr ned från 9000 kr.",
       keywords: ["procenträknare", "beräkna procent", "procent av", "procentuell ökning", "procentuell förändring", "procenträkning"],
-      ogTitle: "Procenträknare: 10 % av 250 kr = 25 kr",
-      ogDescription: "10 procent av ett tal är talet × 0,10. 10 procent av 250 är 25. Beräkna också ökning, minskning och andra procentuppgifter.",
+      ogTitle: "Procenträknare: 10 % av ett tal, rabatt och ökning/minskning",
+      ogDescription:
+        "Beräkna procent av ett tal, rabattprocent och procentuell ändring mellan två tal. T. ex. rabatten på 1125 kr ned från 9000 kr.",
       category: "Matematik",
       breadcrumbCategory: "Matematik",
       breadcrumbCategoryHref: "/kategori/matematik",

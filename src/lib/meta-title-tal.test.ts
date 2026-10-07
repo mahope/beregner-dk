@@ -82,7 +82,7 @@ const REGNETE_EKSEMPLER: {
   { slug: "kvadratmeter", resulter: { da: KVADRATMETER_EKSEMPEL, se: KVADRATMETER_EKSEMPEL, no: KVADRATMETER_EKSEMPEL } },
   { slug: "promille", resulter: { da: "4 øl på 80 kg = 0,88 ‰", se: "4 öl på 80 kg = 0,88 ‰" } },
   { slug: "braendstof", resulter: { da: "500 km benzin koster 450 kr.", se: "500 km bensin kostar 585 kr.", no: "500 km bensin koster 450 kr." } },
-  { slug: "procent", resulter: { da: "10 % af 250 = 25 kr.", se: "10 % av 250 kr = 25 kr" } },
+  { slug: "procent", resulter: { da: "10 % af et tal", se: "10 % av ett tal" } },
   {
     slug: "dato",
     // Titlens dagstal skifter hver dag, så porten regner dem med samme

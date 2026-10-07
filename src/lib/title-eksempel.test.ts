@@ -40,7 +40,6 @@ import { beregnTidsinterval } from "@/lib/tidsberegner";
  * en visning, der ikke klikkes, er en visning der koster penge.
  */
 const SKAL_HAEVE_EKSEMPEL = [
-  "procent",
   "tidsberegner",
   "moms",
   "dato",
@@ -133,11 +132,11 @@ describe("tallene i titlerne er rigtige", () => {
     expect(titel).toMatch(/1\.?250/);
   });
 
-  test("procent: 10 % af 250 er 25", () => {
-    expect(250 * 0.1).toBe(25);
+  test("procent: 10 % af et tal", () => {
+    expect(10 * 0.1).toBe(1);
     const titel = getPageData("procent", "da")!.metaTitle;
-    expect(titel).toMatch(/250/);
-    expect(titel).toMatch(/25\b/);
+    expect(titel).toMatch(/10 % af/);
+    expect(titel).toMatch(/et tal/);
   });
 
   // Titlen på /dato (131.320 visninger, 0,7 % CTR) skrev før 4/10

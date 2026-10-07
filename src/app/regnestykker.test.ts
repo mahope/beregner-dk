@@ -592,7 +592,11 @@ const FORVENTEDE_FUND: Record<string, number> = {
   // rigtig ved konstruktion i stedet for dømt af porten, og
   // `boernepenge-eksempler.test.ts` dømmer de tre tal hver for sig. Summen gik
   // 13 → 12.
-  procentAf: 12,
+  // 7/10: `/procent`'s metaTitle/metaDescription/ogTitle/ogDescription havde
+  // hver «10 % af 250 = 25 kr.» (4 fund). CTR-optimeringen (F1) fjernede det
+  // regnede eksempel fra metadata for at matche GSCs «10 procent af»-søgning
+  // i stedet. Summen gik 12 → 8.
+  procentAf: 8,
   stigning: 0,
   andel: 0,
 };
@@ -642,7 +646,9 @@ describe("regnestykker i brødteksten", () => {
     // til 24 da /boernepenges «2% × 138.900 kr. = 2.778 kr.» blev
     // interpolationer omkring `boernepenge-eksempler`s indkomst, sats og
     // nedsættelse.
-    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(24);
+    // 7/10 faldt den til 20 da /procents fire «10 % af 250 = 25 kr.» i
+    // metadata blev fjernet af CTR-optimeringen (F1).
+    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(20);
   });
 
   test("alle regnestykker på sitet er regnet rigtigt", () => {

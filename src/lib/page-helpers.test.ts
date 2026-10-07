@@ -43,14 +43,15 @@ describe("buildPageMetadata", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat",
+      title: "Procentberegner: 10 % af et tal, rabat og stigning/fald",
       description:
-        "10 % af 250 kr. = 25 kr. Beregn procent af et tal, procentvis stigning, fald, rabat og vækst mellem to tal med formler.",
+        "Beregn procent af et tal, rabatprocent og procentvis ændring mellem to tal. F.eks. rabatten på 1125 kr. ned fra 9000 kr.",
     },
     {
       locale: "se" as const,
-      title: "Procenträknare: 10 % av 250 kr = 25 kr",
-      description: "10 procent av ett tal är talet × 0,10. 10 procent av 250 är 25. Beräkna också ökning, minskning och andra procentuppgifter.",
+      title: "Procenträknare: 10 % av ett tal, rabatt och ökning/minskning",
+      description:
+        "Beräkna procent av ett tal, rabattprocent och procentuell ändring mellan två tal. T. ex. rabatten på 1125 kr ned från 9000 kr.",
     },
   ])("builds answer-first percentage metadata for $locale", ({ locale, title, description }) => {
     const metadata = buildPageMetadata("procent", getDomainConfigByLocale(locale));
