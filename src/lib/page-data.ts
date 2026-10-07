@@ -48,6 +48,12 @@ import {
   laanetypeEksempelFor,
   laanetypeEksempelKryds,
 } from "./laantype";
+import {
+  SEERAFSTAND_FJERN_GRAD,
+  SEERAFSTAND_NAER_GRAD,
+  beregnSeerafstand,
+  beregnSkarmMaal,
+} from "./skaermstorrelse";
 import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
 import {
   BROKOST_KATEGORIER,
@@ -749,6 +755,13 @@ const IDEALVAEGT_M_INTERVAL_MAX = idealvaegtKg(idealvaegtNormal.max ?? 0);
 
 /** Lånekapacitetens FAQ læser sine tal fra samme modul som værktøjet. */
 const LAANEKAPACITET_FAQ = beregnLaanekapacitet(LAANEKAPACITET_EKSEMPEL);
+
+/** TV-størrelsens FAQ læser sine mål fra samme modul som værktøjet. */
+const TV_55 = beregnSkarmMaal(55, "16:9")!;
+const TV_65 = beregnSkarmMaal(65, "16:9")!;
+const TV_55_AFSTAND = beregnSeerafstand(TV_55.breddeCm);
+const tvTal = (n: number, dec = 1) =>
+  formatNumber(n, "da", { maximumFractionDigits: dec });
 
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
@@ -2900,6 +2913,29 @@ faqItems: kalorierFaqItems("da"),
         { question: "Skal jeg regne med ét eller to strøg?", answer: "Regn med to strøg, når du skifter farve, eller når underlaget er sugende eller ujævnt. Skal du kun friske en ensfarvet væg op, kan ét strøg være nok — vælger du ét strøg i beregneren, halveres forbruget." },
         { question: "Hvorfor skal jeg lægge spild til?", answer: `Der skal altid lidt maling til hjørner, kanter og opretning bagefter. Branchen anbefaler ${MALING_STANDARD_SPILD_PCT} % ekstra, og det er den værdi, beregneren bruger.` },
         { question: "Skal døre og vinduer trækkes fra?", answer: "Ja, de skal ikke males. Mål dem og skriv det samlede areal i feltet «Døre og vinduer». Skal loftet også males, sætter du flueben i «Medregn loftet»." },
+      ],
+    },
+    "tv-storrelse": {
+      slug: "tv-storrelse",
+      title: "TV-størrelse – hvor mange cm er et 55-tommers tv?",
+      description: "Omregn tv'ets diagonale tommer til bredde og højde i centimeter. Se målene for 32 til 85 tommer og den anbefalede seerafstand.",
+      metaTitle: "TV-størrelse i cm – hvor stort er et 55-tommers tv?",
+      metaDescription: "Regn et tv's tommer om til centimeter. Se bredde og højde fra 32 til 85 tommer, og hvor langt væk du bør sidde fra skærmen.",
+      keywords: ["tv størrelse", "hvor mange cm er 55 tommer", "tv størrelse i cm", "tommer til cm", "hvor stor er et 55 tommer tv", "seerafstand tv", "tv størrelse afstand"],
+      ogTitle: "TV-størrelse i cm – regn tommer om til bredde og højde",
+      ogDescription: "Skriv skærmens diagonal i tommer og se bredde, højde og anbefalet seerafstand med det samme.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "TV-størrelse beregner",
+      schemaDescription: "Omregn et tv's diagonale tommer til bredde og højde i centimeter og se den anbefalede seerafstand.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvor mange cm er et 55-tommers tv?", answer: `Et 55-tommers tv i 16:9 har en diagonal på ${tvTal(TV_55.diagonalCm)} cm, er ${tvTal(TV_55.breddeCm)} cm bredt og ${tvTal(TV_55.hoejdeCm)} cm højt. Det er bredden og højden — ikke diagonalen — der afgør, om skærmen passer på væggen eller i møblet.` },
+        { question: "Hvor langt væk skal man sidde fra et tv?", answer: `Der er ikke ét facit, men branchen anbefaler en vandret synsvinkel på ${SEERAFSTAND_NAER_GRAD}–${SEERAFSTAND_FJERN_GRAD} grader. For et 55-tommers tv betyder det en seerafstand på cirka ${tvTal(TV_55_AFSTAND.naerCm / 100)} til ${tvTal(TV_55_AFSTAND.fjernCm / 100)} meter. Sidder du tættere på, fylder skærmen mere af synsfeltet, hvilket kan føles mere biografagtigt, men også blive trættende i længden.` },
+        { question: "Er et tv's tommer bredden eller diagonalen?", answer: "Tommerne angiver altid diagonalen — den længste afstand fra hjørne til hjørne. Et 55-tommers tv er derfor ikke 55 tommer bredt, men omkring 48 tommer (121,8 cm) bredt i 16:9. Bredden er typisk omkring 87 % af diagonalen." },
+        { question: "Hvor bredt er et 65-tommers tv?", answer: `Et 65-tommers tv i 16:9 er ${tvTal(TV_65.breddeCm)} cm bredt og ${tvTal(TV_65.hoejdeCm)} cm højt, altså en diagonal på ${tvTal(TV_65.diagonalCm)} cm. Den anbefalede seerafstand er cirka ${tvTal(beregnSeerafstand(TV_65.breddeCm).naerCm / 100)} til ${tvTal(beregnSeerafstand(TV_65.breddeCm).fjernCm / 100)} meter.` },
+        { question: "Hvad er forskellen på 16:9 og 21:9?", answer: "16:9 er det almindelige tv-format, hvor billedet er 16 enheder bredt for hver 9 højt. 21:9 er et ultrawide-format, der er bredere og lavere for samme diagonal — det giver en bredere billedflade uden sort bjælke under film, men passer sjældnere i et almindeligt tv-møbel." },
       ],
     },
     "laanekapacitet": {
