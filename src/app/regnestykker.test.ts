@@ -188,7 +188,6 @@ function findFejl(kode: string, fil: string): Fund[] {
 const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/aktieskat/page.tsx": 0,
   "src/app/alder/page.tsx": 1,
-
   "src/app/befordringsfradrag/page.tsx": 3,
   "src/app/blog/30-procent-reglen-husleje/page.tsx": 4,
   "src/app/blog/arveafgift-regler-og-satser/page.tsx": 2,
@@ -198,6 +197,8 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/blog/boligsalg-2026-guide-til-omkostninger-og-provenu/page.tsx": 42,
   "src/app/blog/dagpenge-saadan-finder-du-din-sats/page.tsx": 3,
   "src/app/blog/elpriser-2026-beregn-dit-forbrug/page.tsx": 10,
+  "src/app/gaveafgift/page.tsx": 0,
+  "src/app/kirkeskat/page.tsx": 0,
   "src/app/blog/fradrag-2026-komplet-guide/page.tsx": 1,
   "src/app/blog/guide-feriepenge-hvornaar-og-hvor-meget/page.tsx": 9,
   "src/app/blog/guide-til-laan-og-renter/page.tsx": 8,

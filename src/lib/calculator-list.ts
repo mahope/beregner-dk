@@ -48,6 +48,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/ejendomsvaerdiskat", daOnly: true, titles: { da: "Ejendomsværdiskat", no: "Eiendomsskatt", se: "Fastighetsskatt" }, descriptions: { da: "Beregn din boligskat", no: "Beregn eiendomsskatten din", se: "Beräkna din fastighetsskatt" } },
   { href: "/arveafgift", daOnly: true, titles: { da: "Arveafgift", no: "Arveavgift", se: "Arvsskatt" }, descriptions: { da: "Beregn boafgift", no: "Beregn arveavgiften", se: "Beräkna arvsskatt" } },
   { href: "/gaveafgift", daOnly: true, titles: { da: "Gaveafgift", no: "Gaveavgift", se: "Gåvoskatt" }, descriptions: { da: "Beregn gaveafgift og afgiftsfri gave", no: "Beregn gaveavgift", se: "Beräkna gåvoskatt" } },
+  { href: "/kirkeskat", daOnly: true, titles: { da: "Kirkeskat", no: "Kirkeskat", se: "Kyrkoskatt" }, descriptions: { da: "Beregn din kirkeskat", no: "Beregn kirkeskatten din", se: "Beräkna din kyrkoskatt" } },
   { href: "/topskat", daOnly: true, titles: { da: "Topskat", no: "Toppskatt", se: "Toppskatt" }, descriptions: { da: "Beregn din topskat", no: "Beregn toppskatten din", se: "Beräkna din toppskatt" } },
   { href: "/skattefradrag", daOnly: true, titles: { da: "Skattefradrag", no: "Skattefradrag", se: "Skatteavdrag" }, descriptions: { da: "Beregn dine skattefradrag", no: "Beregn skattefradragene dine", se: "Beräkna dina skatteavdrag" } },
   { href: "/aktieskat", daOnly: true, titles: { da: "Aktieskat", no: "Aksjeskatt", se: "Aktieskatt" }, descriptions: { da: "Beregn skat af aktier", no: "Beregn skatt av aksjer", se: "Beräkna skatt på aktier" } },

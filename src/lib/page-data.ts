@@ -71,6 +71,7 @@ import {
 } from "./oresundsbroen";
 import { NUTIDSKRONER_EKSEMPEL_AAR, omregnTilNutidskroner } from "./nutidskroner";
 import { GAVE_RELATIONER, beregnGaveafgift } from "./gaveafgift";
+import { KIRKESKAT_EKSEMPLER, KIRKESKAT_SNIT, KIRKESKAT_EKSEMPEL_INDKOMST, beregnKirkeskat, kirkeskatSats } from "./kirkeskat";
 import { MALING_DAEKNING_M2_PR_LITER, MALING_STANDARD_SPILD_PCT } from "./maling";
 
 /**
@@ -382,6 +383,31 @@ export type PageData = {
 const LEASING_SAMMENLIGN = beregnLeasingSammenlign(LEASING_EKSEMPEL)!;
 /** De svenske strenge, der citerer samme eksempel. Se `leasing-eksempler`. */
 const LEASING_SE = leasingSeEksempelTekster();
+
+/**
+ * Kirkeskattens egne tal til `/kirkeskat`s titel, beskrivelse og FAQ. De læser
+ * samme satser som `KirkeskatBeregner` via `kommuner.ts` og `SATSER_2026`, så en
+ * ny sats i 2027 flytter alle tallene med i stedet for at stå stille i
+ * titlen (punkt 11). Den gennemsnitlige sats står i `SATSER_2026.kirkeskatSnit` —
+ * samme kilde som BruttoNettoBeregner og TopskatBeregner bruger.
+ */
+const KIRKESKAT_KBH_TEKST = formatNumber(kirkeskatSats("København"), "da", { minimumFractionDigits: 2 });
+const KIRKESKAT_FRB_TEKST = formatNumber(kirkeskatSats("Frederiksberg"), "da", { minimumFractionDigits: 2 });
+const KIRKESKAT_AAR_TEKST = formatNumber(kirkeskatSats("Aarhus"), "da", { minimumFractionDigits: 2 });
+const KIRKESKAT_ODD_TEKST = formatNumber(kirkeskatSats("Odense"), "da", { minimumFractionDigits: 2 });
+const KIRKESKAT_AAL_TEKST = formatNumber(kirkeskatSats("Aalborg"), "da", { minimumFractionDigits: 2 });
+const KIRKESKAT_SNIT_TEKST = formatNumber(KIRKESKAT_SNIT, "da", { minimumFractionDigits: 2 });
+
+/**
+ * `/kirkeskat`s eksempel- og FAQ-tal. Læst fra `KIRKESKAT_EKSEMPLER`, så
+ * tabellen på siden og svarene i FAQ'en altid hører til de samme satser.
+ */
+const KIRKESKAT_EKSEMPEL_TEKST = KIRKESKAT_EKSEMPLER
+  .map(
+    (e) =>
+      `${formatBelob(e.skattepligtig, "da")} kr. i ${e.kommune} = ${formatBelob(e.resultat.kirkeskat, "da")} kr. i kirkeskat (${formatNumber(e.resultat.sats, "da", { minimumFractionDigits: 2 })} %)`
+  )
+  .join("; ");
 
 /**
  * `/fart`s omregnings-FAQ. Dansk autocomplete (hl=da, 6/10 20:3x) svarer
@@ -2463,6 +2489,30 @@ faqItems: kalorierFaqItems("da"),
       { question: "Er gaver mellem ægtefæller afgiftsfrie?", answer: "Ja, som hovedregel kan ægtefæller frit give hinanden gaver, også selvom beløbet overstiger det afgiftsfrie beløb. Det gælder dog ikke, hvis ægteskabet er ophørt ved separation eller skilsmisse, når gaven modtages." },
       { question: "Skal gaver til venner og søskende beskattes?", answer: "Gaver til venner, bekendte og fjernere familie som søskende, nevøer og niecer er ikke omfattet af gaveafgift. Modtageren skal i stedet skrive beløbet på sin årsopgørelse som anden personlig indkomst. Fra 1. januar 2027 bliver søskende omfattet af de almindelige gaveafgiftsregler." },
       { question: "Er lejlighedsgaver skattefrie?", answer: "Almindelige gaver til jul, fødselsdag, konfirmation, bryllup og lignende af beskeden værdi er skattefrie. Det er de store pengegaver ud over det afgiftsfrie beløb, der udløser gaveafgift." },
+      ],
+    },
+    "kirkeskat": {
+      slug: "kirkeskat",
+      title: "Kirkeskat 2026 - hvor meget betaler du i kirkeskat?",
+      description: `Beregn din kirkeskat for 2026. Satsen varierer kommune til kommune - København er ${KIRKESKAT_KBH_TEKST} %, Frederiksberg ${KIRKESKAT_FRB_TEKST} % og den gennemsnitlige sats er ${KIRKESKAT_SNIT_TEKST} %. Meld dig ud af folkekirken og spar hele beløbet.`,
+      metaTitle: `Kirkeskat 2026: ${kr(KIRKESKAT_EKSEMPEL_INDKOMST)} kr. i København = ${kr(beregnKirkeskat(KIRKESKAT_EKSEMPEL_INDKOMST, "København")!.kirkeskat)} kr.`,
+      metaDescription: `Beregn din kirkeskat i 2026. Satsen varierer kommune til kommune (fx ${KIRKESKAT_KBH_TEKST} % i København), og den gennemsnitlige er ${KIRKESKAT_SNIT_TEKST} %.`,
+      keywords: ["kirkeskat", "kirkeskat 2026", "kirkeskat beregner", "hvad er kirkeskat", "hvad koster kirkeskat", "kirkeskat sats", "melde ud af folkekirken", "spare penge kirkeskat"],
+      ogTitle: "Kirkeskat 2026 - beregn din kirkeskat",
+      ogDescription: `Beregn din kirkeskat i 2026. Satsen varierer kommune til kommune, og du sparer hele beløbet ved at melde dig ud af folkekirken.`,
+      category: "Økonomi",
+      breadcrumbCategory: "Økonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Kirkeskat beregner 2026",
+      schemaDescription: `Gratis kirkeskat beregner med 2026-satser. Se din kirkeskat ud fra din skattepligtige indkomst og din kommune, og hvor meget du sparer ved at melde dig ud af folkekirken.`,
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+      { question: "Hvad er kirkeskat?", answer: "Kirkeskat er en skat til den danske folkekirke, som betales af medlemmer af kirken. Satsen varierer kommune til kommune, og grundlaget er din skattepligtige indkomst efter fradrag. Kirkeskat indregnes automatisk i din forskudsopgørelse." },
+      { question: "Hvad er kirkeskattesatsen i 2026?", answer: `Satsen varierer kommune til kommune. Her er nogle eksempler: København ${KIRKESKAT_KBH_TEKST} %, Frederiksberg ${KIRKESKAT_FRB_TEKST} %, Aarhus ${KIRKESKAT_AAR_TEKST} %, Odense ${KIRKESKAT_ODD_TEKST} % og Aalborg ${KIRKESKAT_AAL_TEKST} %. Den gennemsnitlige kirkeskattesats i Danmark er ${KIRKESKAT_SNIT_TEKST} %.` },
+      { question: "Hvor meget sparer jeg ved at melde mig ud?", answer: `Hvis du melder dig ud af folkekirken, sparer du hele kirkeskatten. For en person med en skattepligtig indkomst på ${kr(KIRKESKAT_EKSEMPEL_INDKOMST)} kr. i København (sats: ${KIRKESKAT_KBH_TEKST} %) er det ${kr(beregnKirkeskat(KIRKESKAT_EKSEMPEL_INDKOMST, "København")!.kirkeskat)} kr. pr. år.` },
+      { question: "Hvordan regner man kirkeskat ud?", answer: "Kirkeskatten er din skattepligtige indkomst ganget med satsen for din kommune, afrundet til hele kroner. Eksempler: " + KIRKESKAT_EKSEMPEL_TEKST + "." },
+      { question: "Kan man melde sig ud af folkekirken?", answer: "Ja, du kan melde dig ud af folkekirken når som helst, gratis, og altid melde dig ind igen. Det sker via skat.dk eller ved at kontakte din sognepræst." },
+      { question: "Hvad er forskellen på kirkeskat og kommuneskat?", answer: "Kommuneskat er en skat til kommunen, som alle betaler. Kirkeskat er en ekstra skat, kun medlemmer af folkekirken betaler, og den indregnes automatisk i forskudsopgørelsen." },
       ],
     },
     "renteprognose": {
