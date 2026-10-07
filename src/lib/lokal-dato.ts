@@ -67,7 +67,7 @@ export function iDagPaSiden(
   dato: Date,
   locale: "da" | "se" | "no"
 ): string {
-  return iDagISidensTidszone(dato, locale === "se" ? "se" : "da");
+  return iDagISidensTidszone(dato, locale);
 }
 
 /**

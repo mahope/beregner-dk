@@ -16,6 +16,31 @@ import { denneMaanedEksempel, maanedEksempel } from "@/lib/dato-eksempler";
 import { helligdagsnavne } from "@/lib/helligdage";
 import { naestePinseInterval } from "@/lib/pinse-intervaller";
 import { formatNumber } from "@/lib/format";
+import { getTextLocale, getDaSeLocale, getLocaleText } from "@/lib/locale-text";
+
+const dageTilHeading: Record<"da" | "se" | "no", string> = {
+  da: "Hvor mange dage er der til …?",
+  se: "Hur många dagar är det till …?",
+  no: "Hvor mange dager er det til …?",
+};
+
+const dageTilIntro: Record<"da" | "se" | "no", string> = {
+  da: "Vil du se det præcise antal dage til en bestemt dato? Siden for hver dato tæller sig selv frem hver dag, så tallet er altid aktuelt.",
+  se: "Vill du veta exakt hur många dagar som är kvar till ett bestämt datum? Sidan för varje datum räknar om sig själv varje dag, så talet är alltid aktuellt.",
+  no: "Vil du se det presise antallet dager til en bestemt dato? Siden for hver dato teller seg selv frem hver dag, så tallet er alltid aktuelt.",
+};
+
+const dageTilRecalc: Record<"da" | "se" | "no", string> = {
+  da: "Tallet nedenfor er dagens antal dage, og det genberegnes hver dag.",
+  se: "Talet nedan är dagens antal dagar, och räknas om varje dag.",
+  no: "Tallet nedenfor er dagens antall dager, og det genberegnes hver dag.",
+};
+
+const dageTilListIntro: Record<"da" | "se" | "no", string> = {
+  da: "Listen dækker de datoer, der altid søges på. Skal du tælle til en helt anden dato — en fødselsdag, en deadline eller noget uden for listen — vælger du den i værktøjet «Dage til dato» ovenfor.",
+  se: "Listan tar upp de datum som alltid efterfrågas. Vill du räkna till ett helt annat datum — ett födelsedatum, en deadline eller något utanför listan — väljer du det i verktyget «Dagar till datum» ovanför.",
+  no: "Listen dekker de datoene som alltid søkes på. Skal du telle til en helt annen dato — en fødselsdag, en deadline eller noe utenfor listen — velger du den i verktøyet «Dager til dato» ovenfor.",
+};
 
 export async function generateMetadata() {
   return generatePageMetadata("dato");
@@ -52,28 +77,30 @@ export default async function DatoPage() {
         weeks: raekke.weeks,
         daysLeft: raekke.daysLeft,
       }))
-    : [];
+: [];
   // "hvor mange dage er der tilbage af 2026?" (227 visninger, pos. 5 i dansk
   // GSC) og "dagar till 31 dec" (367 visninger i svensk) er to søgninger om
   // årets sidste dag — ikke om nytårsdag. Siden havde nul forekomster af
   // "tilbage af", så taleren faldt hele vejen. Tallet regnes fra dagens dato,
   // altså er den samme server-renderede side svar på dagens spørgsmål.
-  const tilbage = dageTilbageIAaret(new Date(), locale === "se" ? "se" : "da");
+  const textLocale = getTextLocale(locale);
+  const daSeLocale = getDaSeLocale(locale);
+  const tilbage = dageTilbageIAaret(new Date(), daSeLocale);
   // "antal dage i en måned" er dansk autocompletes nr. 1 under både "antal dage
   // i en måned" (nr. 2 er Excel) og "hvor mange dage i en måned" (nr. 2 er
   // "uden weekender"), og svensk autocomplete spørger det samme med "antal
-  // dagar i en månad" og "hur många arbetsdagar i en månad". Siden svarede på
+  // dagar i en måned" og "hur många arbetsdagar i en måned". Siden svarede på
   // året ("1 år = 365 dage") men aldrig på måneden: 0 forekomster af "i en
   // måned" i begge sprog. Eksemplet følger det kalenderår siden ligger i, så
   // skudårsflaget kan ikke blive stående fra et tidligere år.
-  const maaned = maanedEksempel(tilbage.year, 2, locale === "se" ? "se" : "da");
+  const maaned = maanedEksempel(tilbage.year, 2, daSeLocale);
   // "hvor mange dage er der i den her måned" er dansk autocompletes nr. 9 under
   // "hvor mange dage er der i" (hvor nr. 1-6 og 8 er "i juli", "i august 2026"
   // og således), og tabellen nedenfor svarer på den slags kun indirecte: tolv
   // rækker, hvor læseren selv skal finde sin måned. `denneMaanedEksempel`
   // læser dagen i Europe/Copenhagen og regner med de samme `daysBetween` og
   // `taellArbejdsdage`, som rækkerne og `DatoBeregner` bruger.
-  const denneMaaned = denneMaanedEksempel(new Date(), locale === "se" ? "se" : "da");
+  const denneMaaned = denneMaanedEksempel(new Date(), daSeLocale);
   // "hvor mange dage er der fra påske til pinse" og "hvor mange dage er der i
   // pinsen" er de to øvrige danske autocomplete-træffere under "hvor mange
   // dage er der til pinse", og de er *interval* spørgsmål, ikke nedtællinger.
@@ -85,7 +112,8 @@ export default async function DatoPage() {
   const pinse = isDageTilLocale(locale)
     ? naestePinseInterval(new Date(), locale)
     : null;
-  const pinseLocale = locale === "se" ? "se" : "da";
+  const pinseLocale = textLocale;
+  const pinseFormatLocale = daSeLocale;
   // `getHelligdage` bygger lokale midnatspunkter, så en ISO-formatering ville
   // trække dagen en enhed tilbage i de tidszoner, der ligger foran UTC. Begge
   // formater normaliserer derfor til UTC-midnat først — samme greb som
@@ -93,7 +121,7 @@ export default async function DatoPage() {
   const pinseDato = (d: Date) =>
     formatTargetDate(
       new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())),
-      pinseLocale
+      pinseFormatLocale
     );
   const pinseUgedag = (d: Date) =>
     new Intl.DateTimeFormat(getIntlLocale(pinseLocale), {
@@ -762,32 +790,16 @@ export default async function DatoPage() {
 
       {dageTilLinks.length > 0 && (
       <div className="prose dark:prose-invert max-w-none mt-12">
-        <h2>
-          {locale === "se"
-            ? "Hur många dagar är det till …?"
-            : "Hvor mange dage er der til …?"}
-        </h2>
-        <p>
-          {locale === "se"
-            ? "Vill du veta exakt hur många dagar som är kvar till ett bestämt datum? Sidan för varje datum räknar om sig själv varje dag, så talet är alltid aktuellt."
-            : "Vil du se det præcise antal dage til en bestemt dato? Siden for hver dato tæller sig selv frem hver dag, så tallet er altid aktuelt."}
-        </p>
-        <p>
-          {locale === "se"
-            ? "Talet nedan är dagens antal dagar, och räknas om varje dag."
-            : "Tallet nedenfor er dagens antal dage, og det genberegnes hver dag."}
-        </p>
+        <h2>{getLocaleText(dageTilHeading, locale)}</h2>
+        <p>{getLocaleText(dageTilIntro, locale)}</p>
+        <p>{getLocaleText(dageTilRecalc, locale)}</p>
         {/* Listen dækker de datoer der altid søges på — juleaften, nytår,
             Halloween, ferier. Dansk autocomplete under «hvor mange dage er der
             til» rummer også helt vilkårlige datoer («den 10 august»), som ingen
             liste kan dække, så de sendes videre til værktøjets egen
             «dage til dato»-tilstand ovenfor. Uden den henvisning står den
             læser med et spørgsmål, listen ikke kan svare på. */}
-        <p>
-          {locale === "se"
-            ? "Listan tar upp de datum som alltid efterfrågas. Vill du räkna till ett helt annat datum — ett födelsedatum, en deadline eller något utanför listan — väljer du det i verktyget «Dagar till datum» ovanför."
-            : "Listen dækker de datoer, der altid søges på. Skal du tælle til en helt anden dato — en fødselsdag, en deadline eller noget uden for listen — vælger du den i værktøjet «Dage til dato» ovenfor."}
-        </p>
+        <p>{getLocaleText(dageTilListIntro, locale)}</p>
         <ul>
           {dageTilLinks.map((link) => (
             <li key={link.href}>

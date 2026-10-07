@@ -67,7 +67,7 @@ const STANDARD: BilStandardindgange = {
   vaerditabProcent: 15,
 };
 
-const DRIFT: Record<"da" | "se", BilDriftsomkostninger> = {
+const DRIFT: Record<"da" | "se" | "no", BilDriftsomkostninger> = {
   da: {
     vaegt: { benzin: 4000, diesel: 5500, hybrid: 3000, el: 0 },
     serviceProcent: 3,
@@ -80,13 +80,19 @@ const DRIFT: Record<"da" | "se", BilDriftsomkostninger> = {
     serviceProcent: 3,
     daek: 3000,
   },
+  no: {
+    // Norge bruger danske værdier for vægtafgift (elbil 0 kr)
+    vaegt: { benzin: 4000, diesel: 5500, hybrid: 3000, el: 0 },
+    serviceProcent: 3,
+    daek: 3000,
+  },
 };
 
-export type BilSprog = "da" | "se";
+export type BilSprog = "da" | "se" | "no";
 
 /** De omkostninger der ligger uden for beregnerens felter, pr. sprog. */
 export function bilDriftsomkostninger(locale: string): BilDriftsomkostninger {
-  return DRIFT[locale === "se" ? "se" : "da"];
+  return DRIFT[locale as BilSprog] ?? DRIFT.da;
 }
 
 /**
@@ -246,4 +252,5 @@ export function bilProcent(value: number, locale: Locale): string {
 export const BIL_NAVN: Record<BilSprog, Record<BilBraendstof, string>> = {
   da: { benzin: "Benzin", diesel: "Diesel", hybrid: "Hybrid", el: "Elbil" },
   se: { benzin: "Bensin", diesel: "Diesel", hybrid: "Laddhybrid", el: "Elbil" },
+  no: { benzin: "Bensin", diesel: "Diesel", hybrid: "Hybrid", el: "Elbil" },
 };
