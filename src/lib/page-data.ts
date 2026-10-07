@@ -35,6 +35,7 @@ import { formatBelob, formatNumber, formatSvenskText } from "./format";
 import { BMI_BAAND, vaegtInterval } from "./bmi-voksen-grænser";
 import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
+import { AREAL_EKSEMPEL, KVADRATCENTIMETER_PR_KVADRATMETER } from "./areal";
 import {
   GAELDSFAKTOR_STANDARD,
   LAANEKAPACITET_EKSEMPEL,
@@ -727,6 +728,22 @@ const RUMFANG_TEKST_SE = {
   cylinderAreal: formatSvenskText(rumfangCylinder / 2, 2),
   cylinderLiter: formatSvenskText(RUMFANG_EKSEMPEL.cylinder.svar.liter, 1),
 };
+// ─── /areal — de samme tal i titel, metadata, FAQ og løsning, regnet fra
+// `areal.ts`. Trapez-eksemplet er valgt til titlen, fordi det er det eneste af
+// de syv figurer hvor middeltallet af de to parallelle sider ikke forsvinder i
+// et heltal, og cirklen bærer π i svaret.
+const AREAL_TEKST_DA = {
+  cirkel: AREAL_EKSEMPEL.cirkel.svar.kvadratmeter.toLocaleString("da-DK", { maximumFractionDigits: 2 }),
+  cirkelCm: AREAL_EKSEMPEL.cirkel.svar.kvadratcentimeter.toLocaleString("da-DK", { maximumFractionDigits: 0 }),
+  trapez: AREAL_EKSEMPEL.trapez.svar.kvadratmeter.toLocaleString("da-DK", { maximumFractionDigits: 0 }),
+  cmPrM2: KVADRATCENTIMETER_PR_KVADRATMETER.toLocaleString("da-DK", { maximumFractionDigits: 0 }),
+};
+const AREAL_TEKST_SE = {
+  cirkel: formatSvenskText(AREAL_EKSEMPEL.cirkel.svar.kvadratmeter, 2),
+  cirkelCm: formatSvenskText(AREAL_EKSEMPEL.cirkel.svar.kvadratcentimeter, 0),
+  trapez: formatSvenskText(AREAL_EKSEMPEL.trapez.svar.kvadratmeter, 0),
+  cmPrM2: formatSvenskText(KVADRATCENTIMETER_PR_KVADRATMETER, 0),
+};
 /**
  * Et helt kronetal med dansk tusindtalsseparator.
  *
@@ -1111,6 +1128,32 @@ const daPages: Record<string, PageData> = {
         { question: "Hvor mange liter er der i en kubikmeter?", answer: `1 m³ = ${LITER_PR_KUBIKMETER} liter, fordi en kubikmeter er 100 cm × 100 cm × 100 cm = 1.000.000 cm³, og der går 1.000 cm³ på literen. Værktøjet viser derfor begge tal ud fra den samme beregning.` },
         { question: "Hvordan regner man rumfang i Excel?", answer: "Kassens rumfang er bare =A1*B1*C1. Cylinderens er =PI()*(A1/2)^2*B1, hvor A1 er diameteren og B1 højden i meter. Kuglens er =4/3*PI()*(A1/2)^3." },
         { question: "Hvad er forskellet på areal og rumfang?", answer: "Areal er fladens størrelse i m² — det er, hvad /kvadratmeterberegneren regner. Rumfang er pladsen inde i kroppen i m³. En kasse på 2 × 1 × 0,5 m har et areal på 10 m² (gulvet) og et rumfang på 1 m³." },
+      ],
+    },
+    "areal": {
+      slug: "areal",
+      title: "Arealberegner",
+      description: `Beregn arealet i m² og cm² for cirkel, trekant, rektangel, kvadrat, trapez, parallelogram og rombe. Alle mål skrives i meter, og værktøjet tager diameter — ikke radius.`,
+      metaTitle: `Arealberegner: trapez med sider 2 og 4 m = ${AREAL_TEKST_DA.trapez} m²`,
+      metaDescription: `Beregn areal af cirkel, trekant, rektangel, kvadrat, trapez, parallelogram og rombe i m² og cm². Cirkel med diameter 1 m: ${AREAL_TEKST_DA.cirkel} m² = ${AREAL_TEKST_DA.cirkelCm} cm².`,
+      keywords: ["arealberegner", "beregn areal", "areal af cirkel", "areal af trekant", "areal af firkant", "areal formel", "areal trapez", "areal parallelogram", "areal rombe", "areal af rektangel"],
+      ogTitle: `Arealberegner: trapez med sider 2 og 4 m = ${AREAL_TEKST_DA.trapez} m²`,
+      ogDescription: `Beregn arealet i m² og cm² for cirkel, trekant, rektangel, kvadrat, trapez, parallelogram og rombe.`,
+      category: "Matematik",
+      breadcrumbCategory: "Matematik",
+      breadcrumbCategoryHref: "/kategori/matematik",
+      schemaName: "Arealberegner",
+      schemaDescription: "Beregn arealet i m² og cm² for cirkel, trekant, rektangel, kvadrat, trapez, parallelogram og rombe.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvordan beregner man areal?", answer: "Det afhænger af figuren. Cirkel er π × (diameter ÷ 2)², trekant er (grundlinje × højde) ÷ 2, rektangel er længde × bredde, kvadrat er side × side, trapez er ((a + b) ÷ 2) × højde, parallelogram er grundlinje × højde, og rombe er (d1 × d2) ÷ 2." },
+        { question: "Hvad er arealet af en cirkel med diameter 1 meter?", answer: `Radius er 0,5 m, så arealet er π × 0,5² = ${AREAL_TEKST_DA.cirkel} m² — altså ${AREAL_TEKST_DA.cirkelCm} cm². Værktøjet halverer diameteren selv, så du skriver bare 1.` },
+        { question: "Hvorfor skal jeg bruge diameter og ikke radius?", answer: "Fordi det er den fejl, der firedobler svaret. Måler du 20 cm på tværs og skriver 20 som radius, bliver arealet fire gange for stort — kvadratet i πr² gør fejlen firedobbelt. Værktøjet tager derfor diameter direkte." },
+        { question: "Hvordan regner man arealet af en trekant?", answer: "Arealet af en trekant er (grundlinje × højde) ÷ 2 — altså halvdelen af et rektangel med samme grundlinje og højde. En trekant med grundlinje 2 m og højde 3 m har arealet 3 m²." },
+        { question: "Hvad er forskellen på areal og rumfang?", answer: "Areal er fladens størrelse i m² — gulvet, væggen, grundstykket. Rumfang er pladsen inde i kroppen i m³ — det regner /rumfang. En kasse på 2 × 1 × 0,5 m har 10 m² gulv, men kun 1 m³ rumfang." },
+        { question: "Hvor mange cm² er en m²?", answer: `1 m² = ${AREAL_TEKST_DA.cmPrM2} cm², fordi 1 m er 100 cm, og 100 × 100 = ${AREAL_TEKST_DA.cmPrM2}. Værktøjet viser derfor begge enheder ud fra den samme beregning.` },
+        { question: "Hvordan regner man areal i Excel?", answer: "Rektangel: =A1*B1. Cirkel: =PI()*(A1/2)^2, hvor A1 er diameteren. Trekant: =A1*B1/2. Trapez: =(A1+B1)/2*C1, hvor A1 og B1 er de parallelle sider og C1 højden." },
+        { question: "Hvad er forskellen på et parallelogram og et rektangel?", answer: "De har samme formel — grundlinje × højde — men i et parallelogram står siderne skævt, så højden er den vinkelrette afstand mellem de to grundlinjer, ikke sidelængden. Måler du sidelængden i stedet for højden, bliver arealet for stort." },
       ],
     },
     "laantype": {
@@ -4020,6 +4063,32 @@ const sePages: Record<string, PageData> = {
         { question: "Hur många liter går det på en kubikmeter?", answer: `1 m³ = ${LITER_PR_KUBIKMETER} liter, eftersom en kubikmeter är 100 cm × 100 cm × 100 cm = 1.000.000 cm³ och det går 1.000 cm³ på litern. Kalkylatorn visar därför båda talen från samma beräkning.` },
         { question: "Hur räknar man ut volym i Excel?", answer: "Lådans volym är bara =A1*B1*C1. Cylinderns är =PI()*(A1/2)^2*B1, där A1 är diametern och B1 höjden i meter. Sfärens är =4/3*PI()*(A1/2)^3." },
         { question: "Vad är skillnaden mellan area och volym?", answer: "Area är ytan storlek i m² — det är vad /kvadratmeterkalkylatorn räknar. Volym är utrymmet innanför kroppen i m³. En låda på 2 × 1 × 0,5 m har en area på 10 m² (golvet) och en volym på 1 m³." },
+      ],
+    },
+    "areal": {
+      slug: "areal",
+      title: "Areaberäknare",
+      description: `Beräkna arean i m² och cm² för cirkel, triangel, rektangel, kvadrat, trapets, parallellogram och romb. Alla mått skrivs i meter, och kalkylatorn använder diameter — inte radie.`,
+      metaTitle: `Areaberäknare: trapets med sidor 2 och 4 m = ${AREAL_TEKST_SE.trapez} m²`,
+      metaDescription: `Beräkna area av cirkel, triangel, rektangel, kvadrat, trapets, parallellogram och romb i m² och cm². Cirkel med diameter 1 m: ${AREAL_TEKST_SE.cirkel} m² = ${AREAL_TEKST_SE.cirkelCm} cm².`,
+      keywords: ["areaberäknare", "beräkna area", "area cirkel", "area triangel", "area rektangel", "area formel", "area trapets", "area parallellogram", "area romb"],
+      ogTitle: `Areaberäknare: trapets med sidor 2 och 4 m = ${AREAL_TEKST_SE.trapez} m²`,
+      ogDescription: "Beräkna arean i m² och cm² för cirkel, triangel, rektangel, kvadrat, trapets, parallellogram och romb.",
+      category: "Matematik",
+      breadcrumbCategory: "Matematik",
+      breadcrumbCategoryHref: "/kategori/matematik",
+      schemaName: "Areaberäknare",
+      schemaDescription: "Beräkna arean i m² och cm² för cirkel, triangel, rektangel, kvadrat, trapets, parallellogram och romb.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hur beräknar man area?", answer: "Det beror på formen. Cirkel är π × (diameter ÷ 2)², triangel är (baslinje × höjd) ÷ 2, rektangel är längd × bredd, kvadrat är sida × sida, trapets är ((a + b) ÷ 2) × höjd, parallellogram är baslinje × höjd, och romb är (d1 × d2) ÷ 2." },
+        { question: "Vad är arean av en cirkel med diameter 1 meter?", answer: `Radien är 0,5 m, så arean är π × 0,5² = ${AREAL_TEKST_SE.cirkel} m² — alltså ${AREAL_TEKST_SE.cirkelCm} cm². Kalkylatorn halverar diametern själv, så du skriver bara 1.` },
+        { question: "Varför ska jag använda diameter och inte radie?", answer: "Eftersom det är felet som fyrdubblar svaret. Mäter du 20 cm på tvären och skriver 20 som radie blir arean fyra gånger för stor — kvadraten i πr² gör felet fyrdubbelt. Kalkylatorn tar därför diameter direkt." },
+        { question: "Hur räknar man arean av en triangel?", answer: "Arean av en triangel är (baslinje × höjd) ÷ 2 — alltså halva en rektangel med samma baslinje och höjd. En triangel med baslinje 2 m och höjd 3 m har arean 3 m²." },
+        { question: "Vad är skillnaden mellan area och volym?", answer: "Area är ytans storlek i m² — golvet, väggen, tomten. Volym är utrymmet innanför kroppen i m³ — det räknar /rumfang. En låda på 2 × 1 × 0,5 m har 10 m² golv men bara 1 m³ volym." },
+        { question: "Hur många cm² går det på en m²?", answer: `1 m² = ${AREAL_TEKST_SE.cmPrM2} cm², eftersom 1 m är 100 cm och 100 × 100 = ${AREAL_TEKST_SE.cmPrM2}. Kalkylatorn visar därför båda enheterna från samma beräkning.` },
+        { question: "Hur räknar man area i Excel?", answer: "Rektangel: =A1*B1. Cirkel: =PI()*(A1/2)^2, där A1 är diametern. Triangel: =A1*B1/2. Trapets: =(A1+B1)/2*C1, där A1 och B1 är de parallella sidorna och C1 höjden." },
+        { question: "Vad är skillnaden mellan en parallellogram och en rektangel?", answer: "De har samma formel — baslinje × höjd — men i en parallellogram står sidorna snett, så höjden är det vinkelräta avståndet mellan de två baslinjerna, inte sidlängden. Mäter du sidlängden i stället för höjden blir arean för stor." },
       ],
     },
     "laantype": {

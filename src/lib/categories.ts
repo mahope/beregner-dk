@@ -64,6 +64,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", category: "Sundhed" },
   { title: "Kropsfedtprocent", description: "Beregn din fedtprocent med U.S. Navy-metoden", href: "/kropsfedt", category: "Sundhed" },
   { title: "Rumfang", description: "Kasse, cylinder, kugle, kegle og pyramide i m³", href: "/rumfang", category: "Matematik" },
+  { title: "Areal", description: "Cirkel, trekant, rektangel, trapez og flerkanter i m²", href: "/areal", category: "Matematik" },
   { title: "Idealvægt", description: "Devines og Hamwis formel for din højde", href: "/idealvaegt", category: "Sundhed" },
   { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", category: "Sundhed" },
   { title: "Vandbehov", description: "Beregn dit daglige væskebehov", href: "/vandbehov", category: "Sundhed" },

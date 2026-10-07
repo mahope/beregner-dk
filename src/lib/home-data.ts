@@ -263,6 +263,7 @@ const daCalculators: HomeCalculator[] = [
   // Sundhed
   { title: "Kropsfedtprocent", description: "Beregn din fedtprocent med U.S. Navy-metoden", href: "/kropsfedt", popular: false, category: "Sundhed" },
   { title: "Rumfangsberegner", description: "Beregn rumfang i m³ og liter", href: "/rumfang", popular: false, category: "Matematik" },
+  { title: "Arealberegner", description: "Beregn areal af cirkel, trekant og flerkanter", href: "/areal", popular: false, category: "Matematik" },
   { title: "Idealvægt", description: "Devines og Hamwis formel for din højde", href: "/idealvaegt", popular: false, category: "Sundhed" },
   { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", popular: false, category: "Sundhed" },
   { title: "Vandbehov", description: "Beregn dit daglige væskebehov", href: "/vandbehov", popular: false, category: "Sundhed" },
@@ -572,6 +573,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Promillekalkylator", description: "Uppskatta din alkoholpromille", href: "/promille", popular: false, category: "Hälsa" },
   { title: "Kroppsfettprosent", description: "Beräkna fettprocent (Navy-metoden)", href: "/kropsfedt", popular: false, category: "Hälsa" },
   { title: "Volymberäknare", description: "Beräkna volym i m³ och liter", href: "/rumfang", popular: false, category: "Matematik" },
+  { title: "Areaberäknare", description: "Beräkna area av cirkel, triangel och månghörningar", href: "/areal", popular: false, category: "Matematik" },
   { title: "Idealvikt", description: "Devines och Hamwis formel för din längd", href: "/idealvaegt", popular: false, category: "Hälsa" },
   { title: "1RM kalkylator", description: "Uppskatta ditt maxlyft", href: "/1rm", popular: false, category: "Hälsa" },
   { title: "Vattenbehov", description: "Hur mycket vatten ska du dricka?", href: "/vandbehov", popular: false, category: "Hälsa" },
