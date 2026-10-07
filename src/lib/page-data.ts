@@ -37,6 +37,7 @@ import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
 import { AREAL_EKSEMPEL, KVADRATCENTIMETER_PR_KVADRATMETER } from "./areal";
 import { HUNDEALDER_EKSEMPEL, menneskeAar, regnestykke } from "./hundealder";
+import { BYGGEPRIS_NIVEAUER, beregnByggepris } from "./byggepris";
 import {
   GAELDSFAKTOR_STANDARD,
   LAANEKAPACITET_EKSEMPEL,
@@ -3141,6 +3142,50 @@ faqItems: kalorierFaqItems("da"),
           question: "Hvorfor sænker min gæld, hvor meget jeg kan låne?",
           answer:
             "Al anden gæld indgår i gældsfaktoren — billån, studielån, forbrugslån og hele kassekreditten, også selv om du ikke har brugt den. Derfor flytter det ofte mere at betale gæld ud end at få en tilsvarende lønstigning. Skriv din gæld i feltet «Anden gæld» for at se effekten.",
+        },
+      ],
+    },
+    "byggepris": {
+      slug: "byggepris",
+      title: "Byggepris – hvad koster det at bygge et hus?",
+      description:
+        "Beregn hvad det koster at bygge et nyt hus. Indtast boligareal og vælg standard, og se kvadratmeterpris og samlet byggepris eksklusiv grund.",
+      metaTitle: `Byggepris: 150 m² typehus koster ${krHelt(beregnByggepris(150, "typehus").byggeprisMin)}-${krHelt(beregnByggepris(150, "typehus").byggeprisMax)} kr.`,
+      metaDescription: `Beregn byggeprisen for et nyt hus. 150 m² typehus koster ${krHelt(beregnByggepris(150, "typehus").byggeprisMin)}-${krHelt(beregnByggepris(150, "typehus").byggeprisMax)} kr. ekskl. grund — indtast dit areal og standard.`,
+      keywords: [
+        "byggepris",
+        "hvad koster det at bygge et hus",
+        "byggepris beregner",
+        "kvadratmeterpris nybyggeri",
+        "bygge hus pris",
+        "nybyg pris",
+        "typehus pris",
+      ],
+      ogTitle: `Byggepris: 150 m² typehus koster ${krHelt(beregnByggepris(150, "typehus").byggeprisMin)}-${krHelt(beregnByggepris(150, "typehus").byggeprisMax)} kr.`,
+      ogDescription: `Beregn hvad det koster at bygge et hus. Indtast boligareal og standard og se pris pr. m² og samlet byggepris.`,
+      category: "Bolig",
+      breadcrumbCategory: "Bolig",
+      breadcrumbCategoryHref: "/kategori/bolig",
+      schemaName: "Byggeprisberegner",
+      schemaDescription:
+        "Beregn hvad det koster at bygge et nyt hus ud fra boligareal og standard.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        {
+          question: "Hvor meget koster det at bygge et hus?",
+          answer: `Det afhænger af størrelse og standard. Et typehus koster ${krHelt(BYGGEPRIS_NIVEAUER.typehus.min)}-${krHelt(BYGGEPRIS_NIVEAUER.typehus.max)} kr./m² inkl. moms, en totalentreprise ${krHelt(BYGGEPRIS_NIVEAUER.totalentreprise.min)}-${krHelt(BYGGEPRIS_NIVEAUER.totalentreprise.max)} kr./m² og et arkitekttegnet hus ${krHelt(BYGGEPRIS_NIVEAUER.arkitekttegnet.min)}-${krHelt(BYGGEPRIS_NIVEAUER.arkitekttegnet.max)} kr./m². Priserne dækker selve huset — ikke grund, byggemodning eller tilslutning.`,
+        },
+        {
+          question: "Hvad er kvadratmeterprisen på et nyt hus?",
+          answer: `Et typehus koster ${krHelt(BYGGEPRIS_NIVEAUER.typehus.min)}-${krHelt(BYGGEPRIS_NIVEAUER.typehus.max)} kr./m² inkl. moms. Jo større huset er, jo lavere bliver prisen pr. m², fordi køkken, bad og teknik fylder relativt mindre.`,
+        },
+        {
+          question: "Hvad er forskellen på typehus og arkitekttegnet?",
+          answer: `Et typehus bygges efter et standardkoncept med kendte materialer og processer og er det billigste at bygge. Et arkitekttegnet hus har unikt design, højere kompleksitet og dyrere materialer og koster typisk 20.000-30.000 kr./m² eller mere. En totalentreprise ligger imellem.`,
+        },
+        {
+          question: "Hvad er ikke med i byggeprisen?",
+          answer: `Byggeprisen dækker kun selve huset. Der skal lægges grund, byggemodning, tilslutningsafgifter, fundament og ofte arkitekthonorar til. Byggemodning og tilslutninger ligger typisk på 200.000-600.000 kr., og grundprisen varierer fra nogle hundrede tusinde kroner i landdistrikterne til flere millioner i og omkring de store byer.`,
         },
       ],
     },

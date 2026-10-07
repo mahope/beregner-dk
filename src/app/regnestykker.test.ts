@@ -216,6 +216,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/boernepenge/page.tsx": 0,
   "src/app/bolan/page.tsx": 1,
   "src/app/boliglaan/page.tsx": 4,
+  "src/app/byggepris/page.tsx": 1,
   "src/app/boligsalg/page.tsx": 0,
   "src/app/brok/page.tsx": 1,
   "src/app/brutto-netto/page.tsx": 4,
@@ -327,7 +328,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * `beregnAftrapning`. **Ingen** er bevaret: de var rigtige, så slicen er et lås
  * mod 2027-drift.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 313;
+const HAARDKODEDE_BELOB_I_LISTEN = 314;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -713,7 +714,9 @@ describe("beløb i JSX-tekst på siderne", () => {
     // brødtekstbeløb læses fra `aktieskat-eksempler`.
     // 3/10: 315 → 313, målt med portens egen `jsxBelob`, da `/boernepenge`s 2
     // brødtekstbeløb læses fra `boernepenge-eksempler`.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(313);
+    // 7/10: 313 → 314, da `/byggepris` tilføjede 1 kildeført brødtekstbeløb
+    // (200.000-600.000 kr. til byggemodning og tilslutninger).
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(314);
   });
 });
 

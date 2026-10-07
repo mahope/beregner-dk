@@ -303,6 +303,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Malingberegner", description: "Beregn hvor mange liter maling du skal bruge", href: "/maling", popular: false, category: "Hverdag" },
   { title: "TV-størrelse", description: "Omregn tv'ets tommer til cm og se seerafstanden", href: "/tv-storrelse", popular: false, category: "Hverdag" },
   { title: "Lånekapacitet", description: "Se hvor meget du kan låne til bolig", href: "/laanekapacitet", popular: false, category: "Bolig" },
+  { title: "Byggepris", description: "Beregn hvad det koster at bygge et hus", href: "/byggepris", popular: false, category: "Bolig" },
 ];
 
 /* ------------------------------------------------------------------ */
