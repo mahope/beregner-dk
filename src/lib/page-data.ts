@@ -57,6 +57,7 @@ import {
 } from "./oresundsbroen";
 import { NUTIDSKRONER_EKSEMPEL_AAR, omregnTilNutidskroner } from "./nutidskroner";
 import { GAVE_RELATIONER, beregnGaveafgift } from "./gaveafgift";
+import { MALING_DAEKNING_M2_PR_LITER, MALING_STANDARD_SPILD_PCT } from "./maling";
 
 /**
  * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
@@ -2866,6 +2867,29 @@ faqItems: kalorierFaqItems("da"),
         { question: "Hvilket prisindeks bruger beregneren?", answer: "Beregneren bruger Danmarks Statistiks forbrugerprisindeks (årsgennemsnit), der måler prisudviklingen på et bredt gennemsnitligt dansk forbrug inkl. moms og afgifter. Tallene går tilbage til 1900, og «i dag» bruger den seneste offentliggjorte måned." },
         { question: "Hvor langt tilbage går tallene?", answer: "Indekset dækker helt tilbage til 1900, så du kan regne et beløb fra forrige århundrede om til nutidskroner. Jo længere tilbage beløbet er fra, jo større bliver forskellen — renters rente gælder også for priser." },
         { question: "Er nutidskroner det samme som nettoprisindekset?", answer: "Nej. Forbrugerprisindekset, som denne beregner bruger, inkluderer moms og afgifter, mens nettoprisindekset ser bort fra indirekte skatter. Det er nettoprisindekset, der bruges til at regulere huslejen i eksisterende lejemål — se husleje-beregneren for den regel." },
+      ],
+    },
+    "maling": {
+      slug: "maling",
+      title: "Malingberegner – hvor meget maling skal du bruge?",
+      description: "Beregn hvor mange liter maling du skal bruge til vægge og loft. Indtast rummets mål, antal strøg og malingens dækkevne.",
+      metaTitle: "Malingberegner – beregn liter maling til vægge og loft",
+      metaDescription: "Beregn hvor mange liter maling du skal bruge. Indtast rummets mål og antal strøg og få liter og maleareal med det samme.",
+      keywords: ["maling beregner", "malingberegner", "hvor meget maling skal jeg bruge", "beregn maling", "liter maling", "maling pr m2", "hvor mange liter maling"],
+      ogTitle: "Malingberegner – beregn liter maling til vægge og loft",
+      ogDescription: "Indtast rummets mål og antal strøg og se, hvor mange liter maling du skal købe.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Malingberegner",
+      schemaDescription: "Beregn hvor mange liter maling der skal bruges til vægge og loft ud fra rummets mål og antal strøg.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvor meget maling skal jeg bruge til et rum?", answer: "Regn vægarealet ud som 2 × (længde + bredde) × højde, gang med antal strøg og del med malingens dækkevne. Et rum på 5 x 4 m med 2,5 m til loftet har 45 m² væg. Skriv målene ind i beregneren, så får du literforbruget med det samme." },
+        { question: "Hvor mange m² dækker en liter maling?", answer: `Det står på malingsdåsens eget datablad. En typisk vægmaling dækker ca. ${MALING_DAEKNING_M2_PR_LITER} m² pr. liter pr. strøg, men et sugende eller ru underlag bruger mere. Skriv malingens egen dækkevne ind i beregneren.` },
+        { question: "Skal jeg regne med ét eller to strøg?", answer: "Regn med to strøg, når du skifter farve, eller når underlaget er sugende eller ujævnt. Skal du kun friske en ensfarvet væg op, kan ét strøg være nok — vælger du ét strøg i beregneren, halveres forbruget." },
+        { question: "Hvorfor skal jeg lægge spild til?", answer: `Der skal altid lidt maling til hjørner, kanter og opretning bagefter. Branchen anbefaler ${MALING_STANDARD_SPILD_PCT} % ekstra, og det er den værdi, beregneren bruger.` },
+        { question: "Skal døre og vinduer trækkes fra?", answer: "Ja, de skal ikke males. Mål dem og skriv det samlede areal i feltet «Døre og vinduer». Skal loftet også males, sætter du flueben i «Medregn loftet»." },
       ],
     },
 };

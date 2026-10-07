@@ -30608,3 +30608,8 @@ vælges med to knapper (aria-pressed), ikke med et minus. Syv tilstande i
 
 **Ikke gjort.** Ingen browser/Playwright (repoet har stadig intet), så 390/768/
 1280 px er ikke set; kun tekst-indholdet i SSR-markup'en er læst.
+
+
+## Gate-historik flyttet fra planen 7/10 02:5x
+
+6/10 22:2x: typecheck 0, lint 0 (819 filer), **4.766 tests i 288 filer grønne**, `next build` grøn, `locale-leak --gate` uden nye fund (den danske guard-tekst i `kcalIMadvare` skrev `` kalorier-brødteksten ``, så den blev engelsk — ingen allowlist-post). 7/10 22:0x: typecheck 0, lint 0 (816 filer), **4.751 tests i 287 filer grønne**, `next build` grøn (kun de kendte Cache-Control- og Sentry-authToken-advarsler). To mutationer målt rødde: gammel toldsrs på `/moms` = 1 rød, flad told → 0 = 6 rød. Mutation af `procentRabat` til den omvendte nævner giver **5 røde**. 7/10 00:3x: typecheck 0, lint 0 (826 filer), **4.803 tests i 291 filer grønne**, `next build` grøn. Mutation målt rød: `oresundGoBreakEven` uden årsafgiften i tælleren giver 1 rød i `oresundsbroen.test.ts`; motorkøretøjets break-even er 2 ture (ikke 1), hvilket testen nu fastholder. 7/10 01:1x: typecheck 0, lint 0 (830 filer), **4.820 tests i 292 filer grønne**, `next build` grøn, og `/nutidskroner` svarede 200 lokalt med eksempeltabellen i SSR. Mutation målt: vendes `indeksTil / indeksFra` til `indeksFra / indeksTil` i `omregnTilNutidskroner`, bliver `nutidskroner.test.ts` **5 røde**. 7/10 01:2x: typecheck 0, lint 0 (830 filer), **4.827 tests i 292 filer grønne**, `next build` grøn. Mutation målt: `laegProcentTil` uden `procentAf` (`beloeb − procentAf`) giver **4 røde** i `procent.test.ts`.

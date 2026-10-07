@@ -296,6 +296,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Ohms lov", description: "Beregn spænding, strøm, modstand og effekt", href: "/ohm", popular: false, category: "Matematik" },
   { title: "Vægt på planeterne", description: "Se din vægt på Månen, Mars og de andre planeter", href: "/planetvaegt", popular: false, category: "Matematik" },
   { title: "Nutidskroner", description: "Omregn et gammelt beløb til dagens prisniveau", href: "/nutidskroner", popular: false, category: "Økonomi" },
+  { title: "Malingberegner", description: "Beregn hvor mange liter maling du skal bruge", href: "/maling", popular: false, category: "Hverdag" },
 ];
 
 /* ------------------------------------------------------------------ */
