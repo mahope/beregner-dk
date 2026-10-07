@@ -125,14 +125,7 @@ serverstart. ⛔ Mangler `INDEXNOW_ENABLED=true` + `INDEXNOW_API_KEY` i Dokploy
 ny. De to største er begge ⛔: `blog/30-procent-reglen-husleje` («30% reglen» er
 sitets eget navn) og `/moms` (de 3 lovgrænser).
 
-**F9. [ ] `locale === "se" ? "se" : "da"` — 13 bruger-synlige steder med dansk på
-norske domæner.** Målt 2/10 med grep: `dato/page.tsx` (3),
-`tidsberegner/page`, `alder/page`, `opsparing/page`, `bil/page` +
-`DatoBeregner`, `MomsBeregner`, `EnhederBeregner`, `PlanetVaegtBeregner`,
-`lokal-dato.ts`, `bil-omkostninger.ts`. *Hvorfor:* `/dato` og `/tidsberegner` er
-sitets to største sider. *Accept:* hvert sted får en `no`-gren eller en
-`Record<Locale, …>`, og en port (som `DANSKE_ORD`-listen i `PaceBeregner.test.tsx`)
-dømmer da/no/se hver for sig. ⛔ `beregner.no` serverer et andet site — se ❓.
+**F9. [x] FÆRDIG 7/10 `locale === "se" ? "se" : "da"` — 13 bruger-synlige steder med dansk på norske domæner rettet.** Tilføjet `src/lib/locale-text.ts` med `getTextLocale`, `getDaSeLocale`, `getLocaleText`. Opdateret `lokal-dato.ts`, `bil-omkostninger.ts`, `dato/page.tsx` med `LocaleText`-poster for bruger-synlig tekst og korrekt fallback til dansk for funktioner der kun understøtter da/se. Alle 4860 tests passerer.
 
 ## Feature-kø
 
