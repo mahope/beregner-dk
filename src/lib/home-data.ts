@@ -274,6 +274,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Proteinbehov", description: "Beregn dit daglige proteinbehov efter aktivitetsniveau", href: "/proteinbehov", popular: false, category: "Sundhed" },
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", popular: false, category: "Sundhed" },
   { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", popular: false, category: "Sundhed" },
+  { title: "Søvnbehov", description: "Se hvor meget søvn du har brug for efter din alder", href: "/soevnbehov", popular: false, category: "Sundhed" },
 
   // Familie
   { title: "Ægløsningsberegner", description: "Find dine frugtbare dage og din ægløsning", href: "/aegloesning", popular: false, category: "Familie" },
@@ -589,6 +590,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Steg till km", description: "Hur långt är 10 000 steg?", href: "/skridt", popular: false, category: "Hälsa" },
   { title: "Kaloriförbränning", description: "Förbrända kalorier vid motion", href: "/motion-kalorier", popular: false, category: "Hälsa" },
   { title: "Proteinbehov", description: "Beräkna ditt dagliga proteinbehov", href: "/proteinbehov", popular: false, category: "Hälsa" },
+  { title: "Sömnbehov", description: "Hur mycket sömn behöver du?", href: "/soevnbehov", popular: false, category: "Hälsa" },
   { title: "Elbil vs. bensin", description: "Jämför elbil och bensinbil", href: "/elbil", popular: false, category: "Vardag" },
   { title: "Laddkostnad elbil", description: "Beräkna vad det kostar att ladda din elbil", href: "/elbil-lading", popular: false, category: "Vardag" },
   { title: "Jämförpris", description: "Hitta den billigaste varan per enhet", href: "/enhedspris", popular: false, category: "Vardag" },

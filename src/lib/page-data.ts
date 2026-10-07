@@ -39,6 +39,7 @@ import { AREAL_EKSEMPEL, KVADRATCENTIMETER_PR_KVADRATMETER } from "./areal";
 import { OMKREDS_EKSEMPEL } from "./omkreds";
 import { RETVINKLET_EKSEMPEL } from "./retvinklet-trekant";
 import { HUNDEALDER_EKSEMPEL, menneskeAar, regnestykke } from "./hundealder";
+import { SOEVN_EKSEMPEL, soevnInterval, soevnbehovFaqSvar } from "./soevnbehov";
 import { BYGGEPRIS_NIVEAUER, beregnByggepris } from "./byggepris";
 import {
   GAELDSFAKTOR_STANDARD,
@@ -1287,6 +1288,32 @@ const daPages: Record<string, PageData> = {
         { question: "Hvor mange menneskeår er et hundår?", answer: "Der er ikke ét tal. Det første hundår er ca. 15 menneskeår, det andet ca. 9, og derefter 4-7 afhængigt af størrelsen. Derfor kan man ikke gange med et fast tal — værktøjet regner de tre led hver for sig." },
         { question: "Hvad hvis hunden er under to år?", answer: "Så er de to første led lineære: en hvalp på et halvt år er 15 × 0,5 = 7,5 menneskeår, og en hund på halvandet år er 15 + 9 × 0,5 = 19,5. Det er den samme interpolation, de offentliggjorte tabeller bruger mellem hele år." },
         { question: "Gælder metoden også for katte?", answer: "Nej. Katte følger 15 menneskeår det første år, 9 det andet, og derefter 4 pr. år — uden størrelsesopdeling, fordi katteracer ikke varierer i størrelse på samme måde som hunde." },
+      ],
+    },
+    "soevnbehov": {
+      slug: "soevnbehov",
+      title: "Søvnbehov",
+      description: `Hvor meget søvn har du brug for? Se den anbefalede søvn for din alder — en ${SOEVN_EKSEMPEL.aar}-årig har brug for ${soevnInterval(SOEVN_EKSEMPEL)} timer, et skolebarn 9-12 og en voksen 7-9.`,
+      metaTitle: `Søvnbehov: en ${SOEVN_EKSEMPEL.aar}-årig skal sove ${soevnInterval(SOEVN_EKSEMPEL)} timer`,
+      metaDescription: `Hvor meget søvn har du brug for? Se anbefalingen for din alder: en ${SOEVN_EKSEMPEL.aar}-årig ${soevnInterval(SOEVN_EKSEMPEL)} timer, et skolebarn 9-12. Kilde: Sleep Foundation.`,
+      keywords: ["søvnbehov", "hvor meget søvn skal man have", "hvor meget søvn skal jeg have", "søvn behov alder", "hvor meget søvn skal børn have", "søvnberegner", "hvor mange timers søvn", "søvn pr. alder"],
+      ogTitle: `Søvnbehov: en ${SOEVN_EKSEMPEL.aar}-årig skal sove ${soevnInterval(SOEVN_EKSEMPEL)} timer`,
+      ogDescription: "Skriv din alder, og se hvor meget søvn du har brug for efter anbefalingerne fra Sleep Foundation.",
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Søvnbehovsberegner",
+      schemaDescription: "Se hvor meget søvn du har brug for, og hvornår du bør gå i seng, ud fra din alder og søvncyklusser på 90 minutter.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvor meget søvn skal man have?", answer: "Det afhænger af alderen. Babyer sover 14-17 timer i døgnet, spædbørn 12-16, småbørn 11-14, børnehavebørn 10-13, skolebørn 9-12 og teenagere 8-10. Voksne har brug for 7-9 timer. Anbefalingerne kommer fra American Academy of Sleep Medicine, gengivet af Sleep Foundation." },
+        { question: "Hvor meget søvn skal en 13-årig have?", answer: soevnbehovFaqSvar(13, "da") },
+        { question: "Hvor meget søvn skal en 15-årig have?", answer: soevnbehovFaqSvar(15, "da") },
+        { question: "Hvor meget søvn skal et skolebarn have?", answer: soevnbehovFaqSvar(9, "da") },
+        { question: "Hvor meget søvn skal en voksen have?", answer: `${soevnbehovFaqSvar(40, "da")} De fleste voksne har brug for mindst 7 timer; får du mindre, går det ud over koncentration, humør og immunforsvar.` },
+        { question: "Er 6 timers søvn nok?", answer: "Nej, ikke for de fleste voksne. Anbefalingen er mindst 7 timer, og 7-9 timer er det typiske behov. Fast søvnunderskud er forbundet med blandt andet nedsat immunforsvar, dårligere koncentration og øget risiko for hjerte-kar-sygdom." },
+        { question: "Hvornår bør jeg gå i seng, hvis jeg skal op kl. 07:00?", answer: "Søvnen skifter i cyklusser på cirka 90 minutter. Regner man baglæns fra 07:00 i hele cyklusser og med cirka 15 minutter til at falde i søvn, ligger sengetiderne omkring 21:45 (6 cyklusser), 23:15 (5) og 00:45 (4). Vælg den, der passer til dig." },
+        { question: "Hvor mange søvncyklusser har man om natten?", answer: "De fleste har 4-6 cyklusser om natten, hver på cirka 90 minutter. Det svarer til 6-9 timers søvn. Vågner du midt i en cyklus, føles det ofte som at blive vækket midt i en drøm." },
       ],
     },
     "laantype": {
@@ -4344,6 +4371,32 @@ const sePages: Record<string, PageData> = {
         { question: "Hur många människoår är ett hundår?", answer: "Det finns inget enda tal. Det första hundåret är ca 15 människoår, det andra ca 9, och därefter 4-7 beroende på storleken. Därför kan man inte multiplicera med ett fast tal — kalkylatorn räknar de tre leden var för sig." },
         { question: "Vad gäller om hunden är under två år?", answer: "Då är de två första leden linjära: en valp på ett halvt år är 15 × 0,5 = 7,5 människoår, och en hund på ett och ett halvt år är 15 + 9 × 0,5 = 19,5. Det är samma interpolation som de publicerade tabellerna använder mellan hela år." },
         { question: "Gäller metoden även katter?", answer: "Nej. Katter följer 15 människoår första året, 9 det andra, och därefter 4 per år — utan storleksuppdelning, eftersom kattraser inte varierar i storlek på samma sätt som hundar." },
+      ],
+    },
+    "soevnbehov": {
+      slug: "soevnbehov",
+      title: "Sömnbehov",
+      description: `Hur mycket sömn behöver du? Se den rekommenderade sömnen för din ålder — en ${SOEVN_EKSEMPEL.aar}-åring behöver ${soevnInterval(SOEVN_EKSEMPEL)} timmar, ett skolbarn 9-12 och en vuxen 7-9.`,
+      metaTitle: `Sömnbehov: en ${SOEVN_EKSEMPEL.aar}-åring bör sova ${soevnInterval(SOEVN_EKSEMPEL)} timmar`,
+      metaDescription: `Hur mycket sömn behöver du? Se rekommendationen för din ålder: en ${SOEVN_EKSEMPEL.aar}-åring ${soevnInterval(SOEVN_EKSEMPEL)} timmar, ett skolbarn 9-12. Källa: Sleep Foundation.`,
+      keywords: ["sömnbehov", "hur mycket sömn behöver man", "sömnbehov barn", "sömn per ålder", "sömnkalkylator", "hur många timmar sömn", "sömnbehov vuxen"],
+      ogTitle: `Sömnbehov: en ${SOEVN_EKSEMPEL.aar}-åring bör sova ${soevnInterval(SOEVN_EKSEMPEL)} timmar`,
+      ogDescription: "Ange din ålder och se hur mycket sömn du behöver enligt rekommendationerna från Sleep Foundation.",
+      category: "Hälsa",
+      breadcrumbCategory: "Hälsa",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Sömnbehovsberäknare",
+      schemaDescription: "Se hur mycket sömn du behöver, och när du bör gå och lägga dig, utifrån din ålder och sömncykler på 90 minuter.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hur mycket sömn behöver man?", answer: "Det beror på åldern. Bebisar sover 14-17 timmar per dygn, spädbarn 12-16, småbarn 11-14, förskolebarn 10-13, skolbarn 9-12 och tonåringar 8-10. Vuxna behöver 7-9 timmar. Rekommendationerna kommer från American Academy of Sleep Medicine, återgivna av Sleep Foundation." },
+        { question: "Hur mycket sömn behöver en 13-åring?", answer: soevnbehovFaqSvar(13, "se") },
+        { question: "Hur mycket sömn behöver en 15-åring?", answer: soevnbehovFaqSvar(15, "se") },
+        { question: "Hur mycket sömn behöver ett skolbarn?", answer: soevnbehovFaqSvar(9, "se") },
+        { question: "Hur mycket sömn behöver en vuxen?", answer: `${soevnbehovFaqSvar(40, "se")} De flesta vuxna behöver minst 7 timmar; sover du mindre påverkas koncentration, humör och immunförsvar.` },
+        { question: "Räcker 6 timmars sömn?", answer: "Nej, inte för de flesta vuxna. Rekommendationen är minst 7 timmar, och 7-9 timmar är det vanliga behovet. Återkommande sömnbrist kopplas till bland annat nedsatt immunförsvar, sämre koncentration och högre risk för hjärt- och kärlsjukdom." },
+        { question: "När bör jag gå och lägga mig om jag ska upp kl. 07:00?", answer: "Sömnen rör sig i cykler på cirka 90 minuter. Räknar man bakåt från 07:00 i hela cykler och med cirka 15 minuter för att somna, ligger läggdags runt 21:45 (6 cykler), 23:15 (5) och 00:45 (4). Välj den som passar dig." },
+        { question: "Hur många sömncykler har man per natt?", answer: "De flesta har 4-6 cykler per natt, var och en på cirka 90 minuter. Det motsvarar 6-9 timmars sömn. Vaknar du mitt i en cykel känns det ofta som att bli väckt mitt i en dröm." },
       ],
     },
     "laantype": {
