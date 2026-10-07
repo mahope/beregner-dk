@@ -199,6 +199,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/blog/elpriser-2026-beregn-dit-forbrug/page.tsx": 10,
   "src/app/gaveafgift/page.tsx": 0,
   "src/app/kirkeskat/page.tsx": 0,
+  "src/app/skatteprocent/page.tsx": 0,
   "src/app/blog/fradrag-2026-komplet-guide/page.tsx": 1,
   "src/app/blog/guide-feriepenge-hvornaar-og-hvor-meget/page.tsx": 9,
   "src/app/blog/guide-til-laan-og-renter/page.tsx": 8,

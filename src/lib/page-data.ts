@@ -78,6 +78,8 @@ import {
 import { NUTIDSKRONER_EKSEMPEL_AAR, omregnTilNutidskroner } from "./nutidskroner";
 import { GAVE_RELATIONER, beregnGaveafgift } from "./gaveafgift";
 import { KIRKESKAT_EKSEMPLER, KIRKESKAT_SNIT, KIRKESKAT_EKSEMPEL_INDKOMST, beregnKirkeskat, kirkeskatSats } from "./kirkeskat";
+import { beregnSkat } from "./skattefordeling";
+import { KOMMUNER, KOMMUNER_SNIT } from "./kommuner";
 import { MALING_DAEKNING_M2_PR_LITER, MALING_STANDARD_SPILD_PCT } from "./maling";
 
 /**
@@ -447,6 +449,26 @@ const FART_OMREGNING = (() => {
 })();
 
 const kr = (value: number) => value.toLocaleString("da-DK");
+
+/**
+ * `/skatteprocent`s egne tal. Læser `beregnSkat` (samme funktion som
+ * BruttoNettoBeregner bruger) og `KOMMUNER`, så titel, FAQ og værktøj altid
+ * hører til de samme satser (punkt 11).
+ */
+const kommuneskatFraNavn = (navn: string) =>
+  KOMMUNER.find((k) => k.navn === navn)?.kommuneskat ?? KOMMUNER_SNIT;
+const SKATTEPROCENT_EKSEMPEL_INDKOMST = 500_000;
+const SKATTEPROCENT_KBH = beregnSkat(
+  SKATTEPROCENT_EKSEMPEL_INDKOMST,
+  kommuneskatFraNavn("København") / 100,
+  kirkeskatSats("København") / 100
+)!;
+const SKATTEPROCENT_KBH_KR = kr(Math.round(SKATTEPROCENT_KBH.samletSkat));
+const SKATTEPROCENT_KBH_EFFEKTIV = formatNumber(SKATTEPROCENT_KBH.effektivSkat, "da", { minimumFractionDigits: 1 });
+const SKATTEPROCENT_KBH_NETTO = kr(Math.round(SKATTEPROCENT_KBH.nettoAar));
+const KOMMUNER_SNIT_TEKST = formatNumber(KOMMUNER_SNIT, "da", { minimumFractionDigits: 2 });
+const KOMMUNER_LAVESTE = [...KOMMUNER].sort((a, b) => a.kommuneskat - b.kommuneskat)[0];
+const KOMMUNER_HOEJESTE = [...KOMMUNER].sort((a, b) => b.kommuneskat - a.kommuneskat)[0];
 /** Svensk løbende tekst: "643 000" og "32,38" — tallene fra `svensk-skatt`. */
 const krSe = (tal: number) => formatSvenskText(tal);
 const pctSe = (andel: number, dec = 0) => formatSvenskText(andel * 100, dec);
@@ -2715,7 +2737,30 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvor meget sparer jeg ved at melde mig ud?", answer: `Hvis du melder dig ud af folkekirken, sparer du hele kirkeskatten. For en person med en skattepligtig indkomst på ${kr(KIRKESKAT_EKSEMPEL_INDKOMST)} kr. i København (sats: ${KIRKESKAT_KBH_TEKST} %) er det ${kr(beregnKirkeskat(KIRKESKAT_EKSEMPEL_INDKOMST, "København")!.kirkeskat)} kr. pr. år.` },
       { question: "Hvordan regner man kirkeskat ud?", answer: "Kirkeskatten er din skattepligtige indkomst ganget med satsen for din kommune, afrundet til hele kroner. Eksempler: " + KIRKESKAT_EKSEMPEL_TEKST + "." },
       { question: "Kan man melde sig ud af folkekirken?", answer: "Ja, du kan melde dig ud af folkekirken når som helst, gratis, og altid melde dig ind igen. Det sker via skat.dk eller ved at kontakte din sognepræst." },
-      { question: "Hvad er forskellen på kirkeskat og kommuneskat?", answer: "Kommuneskat er en skat til kommunen, som alle betaler. Kirkeskat er en ekstra skat, kun medlemmer af folkekirken betaler, og den indregnes automatisk i forskudsopgørelsen." },
+        { question: "Hvad er forskellen på skatteprocent og kirkeskat?", answer: "Skatteprocent er den samlede skat af din indkomst. Kirkeskat er én del af den — en skat til folkekirken, som kun medlemmer af folkekirken betaler. Se vores kirkeskat-beregner for at se, hvor meget du sparer ved at melde dig ud." },
+      ],
+    },
+    "skatteprocent": {
+      slug: "skatteprocent",
+      title: "Skatteprocent 2026 - hvor meget betaler du i skat?",
+      description: `Beregn din samlede skat for 2026. Vælg din kommune og bruttoløn for at se fordelingen på AM-bidrag, bundskat, kommuneskat, kirkeskat, mellemskat og topskat.`,
+      metaTitle: `Skatteprocent 2026: ${kr(SKATTEPROCENT_EKSEMPEL_INDKOMST)} kr. = ${SKATTEPROCENT_KBH_KR} kr. i skat`,
+      metaDescription: `Beregn din skat i 2026 med din kommunes satser. Se fordelingen på AM-bidrag, bundskat, kommuneskat, kirkeskat, mellemskat og topskat.`,
+      keywords: ["skatteprocent", "skatteprocent 2026", "skatteberegner", "hvor meget skat betaler jeg", "kommuneskat", "kommuneskat 2026", "skat af løn", "skatteprocent pr kommune", "skatteopgørelse"],
+      ogTitle: "Skatteprocent 2026 - beregn din skat",
+      ogDescription: "Beregn din samlede skat for 2026 med din kommunes satser, og sammenlign alle 98 kommuner.",
+      category: "Økonomi",
+      breadcrumbCategory: "Økonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Skatteprocent beregner 2026",
+      schemaDescription: "Gratis skatteprocent beregner med 2026-satser. Se din samlede skat ud fra din bruttoløn og kommune, og sammenlign alle 98 kommuner.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hvad er skatteprocent?", answer: "Skatteprocent er den samlede skat du betaler af din indkomst, udtrykt i procent. Den består af AM-bidrag (8 %), bundskat (12,01 %), kommuneskat (23,4-27,1 % afhængig af kommune), kirkeskat (0,42-1,10 %), mellemskat (7,5 % over 641.200 kr.) og topskat (7,5 % over 777.900 kr.)." },
+        { question: "Hvor meget skat betaler jeg?", answer: `Det afhænger af din bruttoløn og kommune. Eksempel: Med en bruttoløn på ${kr(SKATTEPROCENT_EKSEMPEL_INDKOMST)} kr. i København (kommuneskat 23,80 %, kirkeskat 0,44 %) betaler du ${SKATTEPROCENT_KBH_KR} kr. i skat pr. år — en effektiv skattesats på ${SKATTEPROCENT_KBH_EFFEKTIV} %. Du får ${SKATTEPROCENT_KBH_NETTO} kr. om året efter skat.` },
+        { question: "Hvad er kommuneskat?", answer: `Kommuneskat er en skat til din kommune, og satsen varierer fra ${formatNumber(KOMMUNER_LAVESTE.kommuneskat, "da", { minimumFractionDigits: 2 })} % i ${KOMMUNER_LAVESTE.navn} til ${formatNumber(KOMMUNER_HOEJESTE.kommuneskat, "da", { minimumFractionDigits: 2 })} % i ${KOMMUNER_HOEJESTE.navn}. Danmarks gennemsnit er ${KOMMUNER_SNIT_TEKST} %.` },
+        { question: "Hvordan regner man skatteprocent ud?", answer: "Skatten beregnes af din skattepligtige indkomst efter fradrag. AM-bidraget er 8 % af bruttolønnen. Bundskatten er 12,01 % af den skattepligtige indkomst. Kommuneskat og kirkeskat beregnes af den skattepligtige indkomst med din kommunes satser. Mellemskat og topskat betales af indkomst over hhv. 641.200 og 777.900 kr. efter AM-bidrag." },
+        { question: "Hvad er forskellen på skatteprocent og kirkeskat?", answer: "Skatteprocent er den samlede skat af din indkomst. Kirkeskat er én del af den — en skat til folkekirken, som kun medlemmer af folkekirken betaler. Se vores kirkeskat-beregner for at se, hvor meget du sparer ved at melde dig ud." },
       ],
     },
     "renteprognose": {

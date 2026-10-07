@@ -238,6 +238,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Arveafgift", description: "Beregn bo- og tillægsafgift ved arv", href: "/arveafgift", popular: false, category: "Økonomi" },
   { title: "Gaveafgift", description: "Se hvor meget du må give afgiftsfrit, og beregn gaveafgiften", href: "/gaveafgift", popular: false, category: "Økonomi" },
   { title: "Kirkeskat", description: "Beregn din kirkeskat, og se hvad du sparer ved at melde dig ud", href: "/kirkeskat", popular: false, category: "Økonomi" },
+  { title: "Skatteprocent", description: "Beregn din samlede skat, og sammenlign alle 98 kommuner", href: "/skatteprocent", popular: false, category: "Økonomi" },
   { title: "Aktieskat", description: "Beregn skat på aktiegevinst — frit depot vs. ASK", href: "/aktieskat", popular: false, category: "Økonomi" },
   { title: "Topskat Beregner", description: "Beregn om du betaler mellemskat eller topskat", href: "/topskat", popular: false, category: "Økonomi" },
   { title: "Brutto/Netto Beregner", description: "Find bruttoløn ud fra ønsket udbetaling", href: "/brutto-netto", popular: false, category: "Økonomi" },
