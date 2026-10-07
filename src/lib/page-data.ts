@@ -37,6 +37,7 @@ import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
 import { AREAL_EKSEMPEL, KVADRATCENTIMETER_PR_KVADRATMETER } from "./areal";
 import { OMKREDS_EKSEMPEL } from "./omkreds";
+import { RETVINKLET_EKSEMPEL } from "./retvinklet-trekant";
 import { HUNDEALDER_EKSEMPEL, menneskeAar, regnestykke } from "./hundealder";
 import { BYGGEPRIS_NIVEAUER, beregnByggepris } from "./byggepris";
 import {
@@ -759,6 +760,25 @@ const OMKREDS_TEKST_SE = {
   cirkelCm: formatSvenskText(OMKREDS_EKSEMPEL.cirkel.svar.centimeter, 0),
   rektangel: formatSvenskText(OMKREDS_EKSEMPEL.rektangel.svar.meter, 0),
 };
+// ─── /retvinklet-trekant — eksemplet læses fra `retvinklet-trekant.ts`, så
+// titel, FAQ og værktøj ikke kan vise tre forskellige svar for den samme
+// trekant. 3-4-5 er valgt, fordi enhver kan efterprøve den i hovedet.
+const RETVINKLET_TEKST_DA = {
+  c: RETVINKLET_EKSEMPEL.svar.c.toLocaleString("da-DK", { maximumFractionDigits: 3 }),
+  areal: RETVINKLET_EKSEMPEL.svar.areal.toLocaleString("da-DK", { maximumFractionDigits: 3 }),
+  omkreds: RETVINKLET_EKSEMPEL.svar.omkreds.toLocaleString("da-DK", { maximumFractionDigits: 3 }),
+  vinkelA: RETVINKLET_EKSEMPEL.svar.vinkelA.toLocaleString("da-DK", { maximumFractionDigits: 2 }),
+  vinkelB: RETVINKLET_EKSEMPEL.svar.vinkelB.toLocaleString("da-DK", { maximumFractionDigits: 2 }),
+  regnestykke: RETVINKLET_EKSEMPEL.svar.regnestykke,
+};
+const RETVINKLET_TEKST_SE = {
+  c: formatNumber(RETVINKLET_EKSEMPEL.svar.c, "se", { maximumFractionDigits: 3 }).replace(/\u00a0/g, " "),
+  areal: formatNumber(RETVINKLET_EKSEMPEL.svar.areal, "se", { maximumFractionDigits: 3 }).replace(/\u00a0/g, " "),
+  omkreds: formatNumber(RETVINKLET_EKSEMPEL.svar.omkreds, "se", { maximumFractionDigits: 3 }).replace(/\u00a0/g, " "),
+  vinkelA: formatNumber(RETVINKLET_EKSEMPEL.svar.vinkelA, "se", { maximumFractionDigits: 2 }).replace(/\u00a0/g, " "),
+  vinkelB: formatNumber(RETVINKLET_EKSEMPEL.svar.vinkelB, "se", { maximumFractionDigits: 2 }).replace(/\u00a0/g, " "),
+  regnestykke: RETVINKLET_EKSEMPEL.svar.regnestykke,
+};
 // ─── /hundealder — eksemplet og tabeltallene læses fra `hundealder.ts`, så
 // titel, FAQ og tabellen ikke kan vise tre forskellige svar for den samme hund.
 const HUNDEALDER_TEKST_DA = {
@@ -1215,6 +1235,32 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er forskellen på areal og omkreds?", answer: "Omkreds er længden af kanten rundt om figuren, målt i meter. Areal er fladens størrelse indeni, målt i m² — det regner /areal. To figurer kan have samme omkreds og forskelligt areal: et kvadrat på 2 × 2 m og et rektangel på 1 × 3 m har begge omkredsen 8 m." },
         { question: "Hvordan regner man omkreds i Excel?", answer: "Cirkel: =PI()*A1, hvor A1 er diameteren. Rektangel: =2*(A1+B1). Kvadrat: =4*A1. Trekant: =A1+B1+C1. Trapez: =A1+B1+C1+D1, hvor hver celle er en side." },
         { question: "Hvad er forskellen på omkreds og diameter?", answer: "Diameteren er den lige linje tværs over cirklen gennem midten. Omkredsen er kanten hele vejen rundt, og den er π ≈ 3,14 gange så lang som diameteren. Måler du diameteren til 10 cm, er omkredsen ca. 31,4 cm." },
+      ],
+    },
+    "retvinklet-trekant": {
+      slug: "retvinklet-trekant",
+      title: "Retvinklet trekant: hypotenuse og vinkler",
+      description: `Skriv to af siderne i en retvinklet trekant, og få den tredje side, de to spidse vinkler, arealet og omkredsen. Kateterne 3 og 4 m giver hypotenusen ${RETVINKLET_TEKST_DA.c} m.`,
+      metaTitle: `Retvinklet trekant: 3 og 4 m giver hypotenusen ${RETVINKLET_TEKST_DA.c} m`,
+      metaDescription: `Beregn hypotenuse, katete, vinkler, areal og omkreds i en retvinklet trekant. Kateterne 3 og 4 m giver hypotenusen ${RETVINKLET_TEKST_DA.c} m og arealet ${RETVINKLET_TEKST_DA.areal} m².`,
+      keywords: ["retvinklet trekant", "pythagoras", "hypotenuse beregner", "retvinklet trekant beregner", "pythagoras beregner", "beregn hypotenuse", "retvinklet trekant vinkler", "katete beregner"],
+      ogTitle: `Retvinklet trekant: 3 og 4 m giver hypotenusen ${RETVINKLET_TEKST_DA.c} m`,
+      ogDescription: `Skriv to sider, og se den tredje side, vinklerne, arealet og omkredsen.`,
+      category: "Matematik",
+      breadcrumbCategory: "Matematik",
+      breadcrumbCategoryHref: "/kategori/matematik",
+      schemaName: "Retvinklet trekant-beregner",
+      schemaDescription: "Beregn hypotenuse, katete, vinkler, areal og omkreds i en retvinklet trekant med Pythagoras' læresætning.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvordan beregner man hypotenusen i en retvinklet trekant?", answer: `Hypotenusen er c = √(a² + b²), hvor a og b er de to kateter. Er kateterne 3 og 4 m, bliver det √(9 + 16) = √25 = ${RETVINKLET_TEKST_DA.c} m. Hypotenusen er altid den længste side og ligger modsat den rette vinkel.` },
+        { question: "Hvordan finder man en katete, når man kender hypotenusen?", answer: `Så trækker du i stedet den kendte katete fra: a = √(c² − b²). Kender du hypotenusen 5 m og kateten 4 m, bliver den anden katete √(25 − 16) = √9 = 3 m. Det er den samme formel som hypotenus-formlen, blot vendt om.` },
+        { question: "Hvordan regner man vinklerne ud?", answer: `De to spidse vinkler findes med tangens: A = tan⁻¹(a ÷ b) og B = 90° − A. I 3-4-5-trekanten er A = tan⁻¹(3 ÷ 4) = ${RETVINKLET_TEKST_DA.vinkelA}° og B = ${RETVINKLET_TEKST_DA.vinkelB}°. Den tredje vinkel er altid 90°, og de to spidse giver tilsammen 90°.` },
+        { question: "Hvad er arealet af en retvinklet trekant?", answer: `Arealet er (a × b) ÷ 2 — altså det halve af rektanglet med de to kateter som sider. Med kateterne 3 og 4 m bliver arealet (3 × 4) ÷ 2 = ${RETVINKLET_TEKST_DA.areal} m². Det er den samme formel, /areal bruger for en trekant.` },
+        { question: "Hvad er forskellen på en katete og hypotenusen?", answer: "Hypotenusen er den længste side og ligger modsat den rette vinkel. De to andre sider kaldes kateter, og de mødes i den rette vinkel. Bytter du om på dem og skriver en katete i hypotenusfeltet, bliver svaret forkert — derfor regner værktøjet den side ud, du lod stå tom." },
+        { question: "Hvad er Pythagoras' læresætning?", answer: "Den siger, at a² + b² = c² i enhver retvinklet trekant: summen af kvadraterne på de to kateter er lig kvadratet på hypotenusen. Er siderne 3 og 4, er 3² + 4² = 9 + 16 = 25, og 5² = 25 — derfor er hypotenusen 5." },
+        { question: "Hvordan regner man Pythagoras i Excel?", answer: "Hypotenusen: =KVROD(A1^2+B1^2) med kateterne i A1 og B1. En katete: =KVROD(C1^2-B1^2). Vinklen A i grader: =GRADER(ARCTAN(A1/B1)). På engelsk Excel hedder funktionerne SQRT, DEGREES og ATAN." },
+        { question: "Hvilke sider kan værktøjet regne ud?", answer: "Du skriver to af de tre sider, og værktøjet regner den tredje ud — uanset om det er hypotenusen eller en katete. Skriver du alle tre, tjekker det, at de passer med a² + b² = c², og siger til, hvis de ikke gør." },
       ],
     },
     "hundealder": {
@@ -4246,6 +4292,32 @@ const sePages: Record<string, PageData> = {
         { question: "Vad är skillnaden mellan area och omkrets?", answer: "Omkrets är längden av kanten runt figuren, mätt i meter. Area är ytans storlek innanför, mätt i m² — det räknar /areal. Två figurer kan ha samma omkrets och olika area: en kvadrat på 2 × 2 m och en rektangel på 1 × 3 m har båda omkretsen 8 m." },
         { question: "Hur räknar man omkrets i Excel?", answer: "Cirkel: =PI()*A1, där A1 är diametern. Rektangel: =2*(A1+B1). Kvadrat: =4*A1. Triangel: =A1+B1+C1. Trapets: =A1+B1+C1+D1, där varje cell är en sida." },
         { question: "Vad är skillnaden mellan omkrets och diameter?", answer: "Diametern är den raka linjen tvärs över cirkeln genom mitten. Omkretsen är kanten hela vägen runt, och den är π ≈ 3,14 gånger så lång som diametern. Mäter du diametern till 10 cm är omkretsen ca 31,4 cm." },
+      ],
+    },
+    "retvinklet-trekant": {
+      slug: "retvinklet-trekant",
+      title: "Rätvinklig triangel: hypotenusa och vinklar",
+      description: `Fyll i två av sidorna i en rätvinklig triangel och få den tredje sidan, de två spetsiga vinklarna, arean och omkretsen. Kateterna 3 och 4 m ger hypotenusan ${RETVINKLET_TEKST_SE.c} m.`,
+      metaTitle: `Rätvinklig triangel: 3 och 4 m ger hypotenusan ${RETVINKLET_TEKST_SE.c} m`,
+      metaDescription: `Beräkna hypotenusa, katet, vinklar, area och omkrets i en rätvinklig triangel. Kateterna 3 och 4 m ger hypotenusan ${RETVINKLET_TEKST_SE.c} m och arean ${RETVINKLET_TEKST_SE.areal} m².`,
+      keywords: ["rätvinklig triangel", "pythagoras", "hypotenusa kalkylator", "rätvinklig triangel kalkylator", "pythagoras sats", "beräkna hypotenusa", "rätvinklig triangel vinklar", "katet kalkylator"],
+      ogTitle: `Rätvinklig triangel: 3 och 4 m ger hypotenusan ${RETVINKLET_TEKST_SE.c} m`,
+      ogDescription: `Fyll i två sidor och se den tredje sidan, vinklarna, arean och omkretsen.`,
+      category: "Matematik",
+      breadcrumbCategory: "Matematik",
+      breadcrumbCategoryHref: "/kategori/matematik",
+      schemaName: "Rätvinklig triangel-kalkylator",
+      schemaDescription: "Beräkna hypotenusa, katet, vinklar, area och omkrets i en rätvinklig triangel med Pythagoras sats.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hur beräknar man hypotenusan i en rätvinklig triangel?", answer: `Hypotenusan är c = √(a² + b²), där a och b är de två kateterna. Är kateterna 3 och 4 m blir det √(9 + 16) = √25 = ${RETVINKLET_TEKST_SE.c} m. Hypotenusan är alltid den längsta sidan och ligger mittemot den räta vinkeln.` },
+        { question: "Hur hittar man en katet när man känner hypotenusan?", answer: "Då subtraherar du i stället den kända kateten: a = √(c² − b²). Känner du hypotenusan 5 m och kateten 4 m blir den andra kateten √(25 − 16) = √9 = 3 m. Det är samma formel som hypotenuseformeln, bara omvänd." },
+        { question: "Hur räknar man ut vinklarna?", answer: `De två spetsiga vinklarna hittas med tangens: A = tan⁻¹(a ÷ b) och B = 90° − A. I 3-4-5-triangeln är A = tan⁻¹(3 ÷ 4) = ${RETVINKLET_TEKST_SE.vinkelA}° och B = ${RETVINKLET_TEKST_SE.vinkelB}°. Den tredje vinkeln är alltid 90°, och de två spetsiga summerar till 90°.` },
+        { question: "Vad är arean av en rätvinklig triangel?", answer: `Arean är (a × b) ÷ 2 — alltså halva rektangeln med de två kateterna som sidor. Med kateterna 3 och 4 m blir arean (3 × 4) ÷ 2 = ${RETVINKLET_TEKST_SE.areal} m². Det är samma formel som /areal använder för en triangel.` },
+        { question: "Vad är skillnaden mellan en katet och hypotenusan?", answer: "Hypotenusan är den längsta sidan och ligger mittemot den räta vinkeln. De två andra sidorna kallas kateter, och de möts i den räta vinkeln. Byter du plats på dem och skriver en katet i hypotenusfältet blir svaret fel — därför räknar verktyget ut den sida du lämnade tom." },
+        { question: "Vad är Pythagoras sats?", answer: "Den säger att a² + b² = c² i varje rätvinklig triangel: summan av kvadraterna på de två kateterna är lika med kvadraten på hypotenusan. Är sidorna 3 och 4 är 3² + 4² = 9 + 16 = 25, och 5² = 25 — därför är hypotenusan 5." },
+        { question: "Hur räknar man Pythagoras i Excel?", answer: "Hypotenusan: =KVROT(A1^2+B1^2) med kateterna i A1 och B1. En katet: =KVROT(C1^2-B1^2). Vinkeln A i grader: =GRADER(ARCTAN(A1/B1)). I engelska Excel heter funktionerna SQRT, DEGREES och ATAN." },
+        { question: "Vilka sidor kan kalkylatorn räkna ut?", answer: "Du fyller i två av de tre sidorna, och kalkylatorn räknar ut den tredje — oavsett om det är hypotenusan eller en katet. Fyller du i alla tre kontrollerar den att de stämmer med a² + b² = c² och säger till om de inte gör det." },
       ],
     },
     "hundealder": {
