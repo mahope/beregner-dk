@@ -36,6 +36,7 @@ import { BMI_BAAND, vaegtInterval } from "./bmi-voksen-grænser";
 import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
 import { AREAL_EKSEMPEL, KVADRATCENTIMETER_PR_KVADRATMETER } from "./areal";
+import { HUNDEALDER_EKSEMPEL, menneskeAar, regnestykke } from "./hundealder";
 import {
   GAELDSFAKTOR_STANDARD,
   LAANEKAPACITET_EKSEMPEL,
@@ -744,6 +745,26 @@ const AREAL_TEKST_SE = {
   trapez: formatSvenskText(AREAL_EKSEMPEL.trapez.svar.kvadratmeter, 0),
   cmPrM2: formatSvenskText(KVADRATCENTIMETER_PR_KVADRATMETER, 0),
 };
+// ─── /hundealder — eksemplet og tabeltallene læses fra `hundealder.ts`, så
+// titel, FAQ og tabellen ikke kan vise tre forskellige svar for den samme hund.
+const HUNDEALDER_TEKST_DA = {
+  eksempelAar: HUNDEALDER_EKSEMPEL.hundAar.toLocaleString("da-DK"),
+  eksempelMenneske: HUNDEALDER_EKSEMPEL.menneskeAar.toLocaleString("da-DK", { maximumFractionDigits: 1 }),
+  eksempelRegnestykke: regnestykke(HUNDEALDER_EKSEMPEL.hundAar, HUNDEALDER_EKSEMPEL.storrelse),
+  tiAarLille: menneskeAar(10, "lille").toLocaleString("da-DK"),
+  tiAarStor: menneskeAar(10, "stor").toLocaleString("da-DK"),
+  tiAarKaempe: menneskeAar(10, "kaempe").toLocaleString("da-DK"),
+  syvAarMellem: menneskeAar(7, "mellem").toLocaleString("da-DK"),
+};
+const HUNDEALDER_TEKST_SE = {
+  eksempelAar: formatSvenskText(HUNDEALDER_EKSEMPEL.hundAar, 0),
+  eksempelMenneske: formatSvenskText(HUNDEALDER_EKSEMPEL.menneskeAar, 1),
+  eksempelRegnestykke: regnestykke(HUNDEALDER_EKSEMPEL.hundAar, HUNDEALDER_EKSEMPEL.storrelse),
+  tiAarLille: formatSvenskText(menneskeAar(10, "lille"), 0),
+  tiAarStor: formatSvenskText(menneskeAar(10, "stor"), 0),
+  tiAarKaempe: formatSvenskText(menneskeAar(10, "kaempe"), 0),
+  syvAarMellem: formatSvenskText(menneskeAar(7, "mellem"), 0),
+};
 /**
  * Et helt kronetal med dansk tusindtalsseparator.
  *
@@ -1154,6 +1175,32 @@ const daPages: Record<string, PageData> = {
         { question: "Hvor mange cm² er en m²?", answer: `1 m² = ${AREAL_TEKST_DA.cmPrM2} cm², fordi 1 m er 100 cm, og 100 × 100 = ${AREAL_TEKST_DA.cmPrM2}. Værktøjet viser derfor begge enheder ud fra den samme beregning.` },
         { question: "Hvordan regner man areal i Excel?", answer: "Rektangel: =A1*B1. Cirkel: =PI()*(A1/2)^2, hvor A1 er diameteren. Trekant: =A1*B1/2. Trapez: =(A1+B1)/2*C1, hvor A1 og B1 er de parallelle sider og C1 højden." },
         { question: "Hvad er forskellen på et parallelogram og et rektangel?", answer: "De har samme formel — grundlinje × højde — men i et parallelogram står siderne skævt, så højden er den vinkelrette afstand mellem de to grundlinjer, ikke sidelængden. Måler du sidelængden i stedet for højden, bliver arealet for stort." },
+      ],
+    },
+    "hundealder": {
+      slug: "hundealder",
+      title: "Hundeår til menneskeår",
+      description: `Hvor gammel er din hund i menneskeår? Skriv alderen og vælg hundens størrelse, og se svaret med AVMA's metode: 15 menneskeår det første år, 9 det andet, og 4-7 pr. år derefter.`,
+      metaTitle: `Hundeår til menneskeår: 7 år = ${HUNDEALDER_TEKST_DA.syvAarMellem} (mellemstor)`,
+      metaDescription: `Omregn hundeår til menneskeår. En mellemstor hund på ${HUNDEALDER_TEKST_DA.eksempelAar} år er ${HUNDEALDER_TEKST_DA.eksempelMenneske} menneskeår; en stor hund på 10 år er ${HUNDEALDER_TEKST_DA.tiAarStor}, en lille er ${HUNDEALDER_TEKST_DA.tiAarLille}.`,
+      keywords: ["hundeår", "hundeår til menneskeår", "hvor gammel er min hund", "hund alder i menneskeår", "hundealder", "hundens alder", "hvor gammel er hunden i menneskeår", "beregn hundeår", "hund alder beregner"],
+      ogTitle: `Hundeår til menneskeår: 7 år = ${HUNDEALDER_TEKST_DA.syvAarMellem} (mellemstor)`,
+      ogDescription: `Skriv hundens alder og størrelse, og se hvor gammel den er i menneskeår efter AVMA's metode.`,
+      category: "Praktisk",
+      breadcrumbCategory: "Praktisk",
+      breadcrumbCategoryHref: "/kategori/praktisk",
+      schemaName: "Hundealderberegner",
+      schemaDescription: "Omregn hundeår til menneskeår efter AVMA's størrelsesjusterede metode: 15 + 9, derefter 4-7 pr. år.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvordan regner man hundeår om til menneskeår?", answer: `Det første hundår er ca. 15 menneskeår, det andet lægger 9 til, så en hund på to år er 24 menneskeår. Derefter lægger hvert år 4 menneskeår til for en lille hund, 5 for en mellemstor, 6 for en stor og 7 for en kæmpehund. En mellemstor hund på ${HUNDEALDER_TEKST_DA.eksempelAar} år er derfor ${HUNDEALDER_TEKST_DA.eksempelRegnestykke} menneskeår.` },
+        { question: "Er en hund på 7 år 49 i menneskeår?", answer: `Kun hvis den er mellemstor. 15 + 9 + 5 × 5 = 49 for en hund på 10-25 kg. Er den lille (under 10 kg), bliver den 44, er den stor (25-45 kg) 54, og er den kæmpe (over 45 kg) 59 — størrelsen afgør takten efter det andet år.` },
+        { question: "Hvorfor er reglen om 7 hundår forkert?", answer: "Fordi en hund ikke ældes jævnt. En etårig hund er allerede udvokset og kønsmoden — nærmest en teenager på 15, ikke et barn på 7. Reglen rammer heller ikke størrelsesforskellen: en stor hund på 10 år er 72 menneskeår, en lille hund på 10 år kun 56." },
+        { question: "Hvor gammel er en stor hund på 10 år i menneskeår?", answer: `En stor hund (25-45 kg) på 10 år er ${HUNDEALDER_TEKST_DA.tiAarStor} menneskeår efter AVMA's tabel. En kæmpehund (over 45 kg) på samme alder er ${HUNDEALDER_TEKST_DA.tiAarKaempe}, mens en lille hund kun er ${HUNDEALDER_TEKST_DA.tiAarLille}.` },
+        { question: "Hvornår er en hund senior?", answer: "Små og mellemstore hunde regnes som seniorer ved 7 år, store hunde ved 6 og kæmpehunde allerede ved 5. Grænsen følger AVMA's tommelfingerregel: store racer har kortere levetid og ældes hurtigere efter de første år." },
+        { question: "Hvor mange menneskeår er et hundår?", answer: "Der er ikke ét tal. Det første hundår er ca. 15 menneskeår, det andet ca. 9, og derefter 4-7 afhængigt af størrelsen. Derfor kan man ikke gange med et fast tal — værktøjet regner de tre led hver for sig." },
+        { question: "Hvad hvis hunden er under to år?", answer: "Så er de to første led lineære: en hvalp på et halvt år er 15 × 0,5 = 7,5 menneskeår, og en hund på halvandet år er 15 + 9 × 0,5 = 19,5. Det er den samme interpolation, de offentliggjorte tabeller bruger mellem hele år." },
+        { question: "Gælder metoden også for katte?", answer: "Nej. Katte følger 15 menneskeår det første år, 9 det andet, og derefter 4 pr. år — uden størrelsesopdeling, fordi katteracer ikke varierer i størrelse på samme måde som hunde." },
       ],
     },
     "laantype": {
@@ -4089,6 +4136,32 @@ const sePages: Record<string, PageData> = {
         { question: "Hur många cm² går det på en m²?", answer: `1 m² = ${AREAL_TEKST_SE.cmPrM2} cm², eftersom 1 m är 100 cm och 100 × 100 = ${AREAL_TEKST_SE.cmPrM2}. Kalkylatorn visar därför båda enheterna från samma beräkning.` },
         { question: "Hur räknar man area i Excel?", answer: "Rektangel: =A1*B1. Cirkel: =PI()*(A1/2)^2, där A1 är diametern. Triangel: =A1*B1/2. Trapets: =(A1+B1)/2*C1, där A1 och B1 är de parallella sidorna och C1 höjden." },
         { question: "Vad är skillnaden mellan en parallellogram och en rektangel?", answer: "De har samma formel — baslinje × höjd — men i en parallellogram står sidorna snett, så höjden är det vinkelräta avståndet mellan de två baslinjerna, inte sidlängden. Mäter du sidlängden i stället för höjden blir arean för stor." },
+      ],
+    },
+    "hundealder": {
+      slug: "hundealder",
+      title: "Hundår till människoår",
+      description: `Hur gammal är din hund i människoår? Skriv åldern och välj hundens storlek, och se svaret med AVMA:s metod: 15 människoår första året, 9 det andra, och 4-7 per år därefter.`,
+      metaTitle: `Hundår till människoår: 7 år = ${HUNDEALDER_TEKST_SE.syvAarMellem} (mellanstor)`,
+      metaDescription: `Omvandla hundår till människoår. En mellanstor hund på ${HUNDEALDER_TEKST_SE.eksempelAar} år är ${HUNDEALDER_TEKST_SE.eksempelMenneske} människoår; en stor hund på 10 år är ${HUNDEALDER_TEKST_SE.tiAarStor}, en liten är ${HUNDEALDER_TEKST_SE.tiAarLille}.`,
+      keywords: ["hundår", "hundår till människoår", "hur gammal är min hund", "hund alder i människoår", "hundålder", "hundens ålder", "kalkylator alder hund", "beräkna hundår"],
+      ogTitle: `Hundår till människoår: 7 år = ${HUNDEALDER_TEKST_SE.syvAarMellem} (mellanstor)`,
+      ogDescription: `Skriv hundens ålder och storlek, och se hur gammal den är i människoår med AVMA:s metod.`,
+      category: "Praktiskt",
+      breadcrumbCategory: "Praktiskt",
+      breadcrumbCategoryHref: "/kategori/praktisk",
+      schemaName: "Hundåldersberäknare",
+      schemaDescription: "Omvandla hundår till människoår med AVMA:s storleksjusterade metod: 15 + 9, därefter 4-7 per år.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hur räknar man hundår till människoår?", answer: `Det första hundåret är ca 15 människoår, det andra lägger till 9, så en hund på två år är 24 människoår. Därefter lägger varje år till 4 människoår för en liten hund, 5 för en mellanstor, 6 för en stor och 7 för en jättehund. En mellanstor hund på ${HUNDEALDER_TEKST_SE.eksempelAar} år är alltså ${HUNDEALDER_TEKST_SE.eksempelRegnestykke} människoår.` },
+        { question: "Är en hund på 7 år 49 i människoår?", answer: "Bara om den är mellanstor. 15 + 9 + 5 × 5 = 49 för en hund på 10-25 kg. Är den liten (under 10 kg) blir den 44, är den stor (25-45 kg) 54, och är den jättehund (över 45 kg) 59 — storleken avgör takten efter det andra året." },
+        { question: "Varför är 7-regeln fel?", answer: "Därför att en hund inte åldras jämnt. En ettårig hund är redan färdigvuxen och könsmogen — närmast en tonåring på 15, inte ett barn på 7. Regeln missar också storleksskillnaden: en stor hund på 10 år är 72 människoår, en liten hund på 10 år bara 56." },
+        { question: "Hur gammal är en stor hund på 10 år i människoår?", answer: `En stor hund (25-45 kg) på 10 år är ${HUNDEALDER_TEKST_SE.tiAarStor} människoår enligt AVMA:s tabell. En jättehund (över 45 kg) i samma ålder är ${HUNDEALDER_TEKST_SE.tiAarKaempe}, medan en liten hund bara är ${HUNDEALDER_TEKST_SE.tiAarLille}.` },
+        { question: "När är en hund senior?", answer: "Små och mellanstora hundar räknas som seniorer vid 7 år, stora hundar vid 6 och jättehundar redan vid 5. Gränsen följer AVMA:s tumregel: stora raser lever kortare och åldras snabbare efter de första åren." },
+        { question: "Hur många människoår är ett hundår?", answer: "Det finns inget enda tal. Det första hundåret är ca 15 människoår, det andra ca 9, och därefter 4-7 beroende på storleken. Därför kan man inte multiplicera med ett fast tal — kalkylatorn räknar de tre leden var för sig." },
+        { question: "Vad gäller om hunden är under två år?", answer: "Då är de två första leden linjära: en valp på ett halvt år är 15 × 0,5 = 7,5 människoår, och en hund på ett och ett halvt år är 15 + 9 × 0,5 = 19,5. Det är samma interpolation som de publicerade tabellerna använder mellan hela år." },
+        { question: "Gäller metoden även katter?", answer: "Nej. Katter följer 15 människoår första året, 9 det andra, och därefter 4 per år — utan storleksuppdelning, eftersom kattraser inte varierar i storlek på samma sätt som hundar." },
       ],
     },
     "laantype": {

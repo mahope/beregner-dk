@@ -290,6 +290,7 @@ const daCalculators: HomeCalculator[] = [
 
   // Praktisk
   { title: "Ugenummer", description: "Se ISO-ugenummer for enhver dato", href: "/ugenummer", popular: false, category: "Praktisk" },
+  { title: "Hundeår", description: "Omregn hundeår til menneskeår efter størrelse", href: "/hundealder", popular: false, category: "Praktisk" },
 
   // Matematik
   { title: "Temperaturberegner", description: "Omregn mellem Celsius, Fahrenheit og Kelvin", href: "/temperatur", popular: false, category: "Matematik" },
@@ -574,6 +575,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Kroppsfettprosent", description: "Beräkna fettprocent (Navy-metoden)", href: "/kropsfedt", popular: false, category: "Hälsa" },
   { title: "Volymberäknare", description: "Beräkna volym i m³ och liter", href: "/rumfang", popular: false, category: "Matematik" },
   { title: "Areaberäknare", description: "Beräkna area av cirkel, triangel och månghörningar", href: "/areal", popular: false, category: "Matematik" },
+  { title: "Hundår", description: "Omvandla hundår till människoår efter storlek", href: "/hundealder", popular: false, category: "Praktiskt" },
   { title: "Idealvikt", description: "Devines och Hamwis formel för din längd", href: "/idealvaegt", popular: false, category: "Hälsa" },
   { title: "1RM kalkylator", description: "Uppskatta ditt maxlyft", href: "/1rm", popular: false, category: "Hälsa" },
   { title: "Vattenbehov", description: "Hur mycket vatten ska du dricka?", href: "/vandbehov", popular: false, category: "Hälsa" },

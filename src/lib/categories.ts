@@ -111,6 +111,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", category: "Praktisk" },
   { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", category: "Praktisk" },
   { title: "Ugenummer", description: "Se ISO-ugenummer for enhver dato", href: "/ugenummer", category: "Praktisk" },
+  { title: "Hundeår", description: "Omregn hundeår til menneskeår efter størrelse", href: "/hundealder", category: "Praktisk" },
   { title: "Flyttebudget Beregner", description: "Beregn dit samlede flyttebudget", href: "/flyttebudget", category: "Hverdag" },
   { title: "Boligsalg Beregner", description: "Beregn nettoprovenu ved salg af bolig — alle omkostninger", href: "/boligsalg", category: "Bolig" },
   { title: "Nutidskroner", description: "Omregn et gammelt beløb til dagens prisniveau", href: "/nutidskroner", category: "Økonomi" },
