@@ -36,6 +36,7 @@ import { BMI_BAAND, vaegtInterval } from "./bmi-voksen-grænser";
 import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
 import { AREAL_EKSEMPEL, KVADRATCENTIMETER_PR_KVADRATMETER } from "./areal";
+import { OMKREDS_EKSEMPEL } from "./omkreds";
 import { HUNDEALDER_EKSEMPEL, menneskeAar, regnestykke } from "./hundealder";
 import { BYGGEPRIS_NIVEAUER, beregnByggepris } from "./byggepris";
 import {
@@ -746,6 +747,18 @@ const AREAL_TEKST_SE = {
   trapez: formatSvenskText(AREAL_EKSEMPEL.trapez.svar.kvadratmeter, 0),
   cmPrM2: formatSvenskText(KVADRATCENTIMETER_PR_KVADRATMETER, 0),
 };
+// ─── /omkreds — eksemplet læses fra `omkreds.ts`, så titel, FAQ og værktøj
+// ikke kan vise tre forskellige svar for den samme figur. Cirklen bærer π.
+const OMKREDS_TEKST_DA = {
+  cirkel: OMKREDS_EKSEMPEL.cirkel.svar.meter.toLocaleString("da-DK", { maximumFractionDigits: 2 }),
+  cirkelCm: OMKREDS_EKSEMPEL.cirkel.svar.centimeter.toLocaleString("da-DK", { maximumFractionDigits: 0 }),
+  rektangel: OMKREDS_EKSEMPEL.rektangel.svar.meter.toLocaleString("da-DK", { maximumFractionDigits: 0 }),
+};
+const OMKREDS_TEKST_SE = {
+  cirkel: formatSvenskText(OMKREDS_EKSEMPEL.cirkel.svar.meter, 2),
+  cirkelCm: formatSvenskText(OMKREDS_EKSEMPEL.cirkel.svar.centimeter, 0),
+  rektangel: formatSvenskText(OMKREDS_EKSEMPEL.rektangel.svar.meter, 0),
+};
 // ─── /hundealder — eksemplet og tabeltallene læses fra `hundealder.ts`, så
 // titel, FAQ og tabellen ikke kan vise tre forskellige svar for den samme hund.
 const HUNDEALDER_TEKST_DA = {
@@ -1176,6 +1189,32 @@ const daPages: Record<string, PageData> = {
         { question: "Hvor mange cm² er en m²?", answer: `1 m² = ${AREAL_TEKST_DA.cmPrM2} cm², fordi 1 m er 100 cm, og 100 × 100 = ${AREAL_TEKST_DA.cmPrM2}. Værktøjet viser derfor begge enheder ud fra den samme beregning.` },
         { question: "Hvordan regner man areal i Excel?", answer: "Rektangel: =A1*B1. Cirkel: =PI()*(A1/2)^2, hvor A1 er diameteren. Trekant: =A1*B1/2. Trapez: =(A1+B1)/2*C1, hvor A1 og B1 er de parallelle sider og C1 højden." },
         { question: "Hvad er forskellen på et parallelogram og et rektangel?", answer: "De har samme formel — grundlinje × højde — men i et parallelogram står siderne skævt, så højden er den vinkelrette afstand mellem de to grundlinjer, ikke sidelængden. Måler du sidelængden i stedet for højden, bliver arealet for stort." },
+      ],
+    },
+    "omkreds": {
+      slug: "omkreds",
+      title: "Omkredsberegner",
+      description: `Beregn omkredsen i m og cm for cirkel, kvadrat, rektangel, trekant, trapez, parallelogram og rombe. Alle mål skrives i meter.`,
+      metaTitle: `Omkredsberegner: cirkel med diameter 1 m = ${OMKREDS_TEKST_DA.cirkel} m`,
+      metaDescription: `Beregn omkreds af cirkel, trekant, rektangel og flerkanter i m og cm. Cirkel med diameter 1 m er ${OMKREDS_TEKST_DA.cirkel} m = ${OMKREDS_TEKST_DA.cirkelCm} cm.`,
+      keywords: ["omkredsberegner", "beregn omkreds", "omkreds af cirkel", "omkreds af trekant", "omkreds af firkant", "omkreds formel", "omkreds af rektangel", "omkreds af rombe", "omkreds cirkel diameter"],
+      ogTitle: `Omkredsberegner: cirkel med diameter 1 m = ${OMKREDS_TEKST_DA.cirkel} m`,
+      ogDescription: `Beregn omkredsen i m og cm for cirkel, trekant, rektangel og flerkanter.`,
+      category: "Matematik",
+      breadcrumbCategory: "Matematik",
+      breadcrumbCategoryHref: "/kategori/matematik",
+      schemaName: "Omkredsberegner",
+      schemaDescription: "Beregn omkredsen i m og cm for cirkel, kvadrat, rektangel, trekant, trapez, parallelogram og rombe.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvordan beregner man omkreds?", answer: "Det afhænger af figuren. Cirkel er π × diameter, kvadrat er 4 × side, rektangel er 2 × (længde + bredde), trekant er a + b + c, trapez er a + b + c + d, parallelogram er 2 × (a + b), og rombe er 4 × side." },
+        { question: "Hvad er omkredsen af en cirkel med diameter 1 meter?", answer: `Omkredsen er π × 1 = ${OMKREDS_TEKST_DA.cirkel} m, altså ${OMKREDS_TEKST_DA.cirkelCm} cm. Værktøjet ganger diameteren med π, så du skriver bare 1.` },
+        { question: "Hvorfor skal jeg bruge diameter og ikke radius?", answer: "Fordi radius giver det halve svar. Omkredsen er 2 × π × radius = π × diameter. Skriver du radius i diameterfeltet, bliver omkredsen halvt så stor, som den skal være." },
+        { question: "Hvordan regner man omkredsen af en trekant?", answer: "Du lægger de tre sider sammen: a + b + c. En trekant med siderne 3, 4 og 5 m har omkredsen 12 m. Det gælder alle trekanter — også den retvinklede — fordi omkredsen kun er kanten rundt." },
+        { question: "Hvordan regner man omkredsen af et rektangel?", answer: `Du lægger længden og bredden sammen og ganger med 2, fordi der er to af hver: 2 × (længde + bredde). Et rektangel på 2 × 3 m har omkredsen ${OMKREDS_TEKST_DA.rektangel} m.` },
+        { question: "Hvad er forskellen på areal og omkreds?", answer: "Omkreds er længden af kanten rundt om figuren, målt i meter. Areal er fladens størrelse indeni, målt i m² — det regner /areal. To figurer kan have samme omkreds og forskelligt areal: et kvadrat på 2 × 2 m og et rektangel på 1 × 3 m har begge omkredsen 8 m." },
+        { question: "Hvordan regner man omkreds i Excel?", answer: "Cirkel: =PI()*A1, hvor A1 er diameteren. Rektangel: =2*(A1+B1). Kvadrat: =4*A1. Trekant: =A1+B1+C1. Trapez: =A1+B1+C1+D1, hvor hver celle er en side." },
+        { question: "Hvad er forskellen på omkreds og diameter?", answer: "Diameteren er den lige linje tværs over cirklen gennem midten. Omkredsen er kanten hele vejen rundt, og den er π ≈ 3,14 gange så lang som diameteren. Måler du diameteren til 10 cm, er omkredsen ca. 31,4 cm." },
       ],
     },
     "hundealder": {
@@ -4181,6 +4220,32 @@ const sePages: Record<string, PageData> = {
         { question: "Hur många cm² går det på en m²?", answer: `1 m² = ${AREAL_TEKST_SE.cmPrM2} cm², eftersom 1 m är 100 cm och 100 × 100 = ${AREAL_TEKST_SE.cmPrM2}. Kalkylatorn visar därför båda enheterna från samma beräkning.` },
         { question: "Hur räknar man area i Excel?", answer: "Rektangel: =A1*B1. Cirkel: =PI()*(A1/2)^2, där A1 är diametern. Triangel: =A1*B1/2. Trapets: =(A1+B1)/2*C1, där A1 och B1 är de parallella sidorna och C1 höjden." },
         { question: "Vad är skillnaden mellan en parallellogram och en rektangel?", answer: "De har samma formel — baslinje × höjd — men i en parallellogram står sidorna snett, så höjden är det vinkelräta avståndet mellan de två baslinjerna, inte sidlängden. Mäter du sidlängden i stället för höjden blir arean för stor." },
+      ],
+    },
+    "omkreds": {
+      slug: "omkreds",
+      title: "Omkretsberäknare",
+      description: `Beräkna omkretsen i m och cm för cirkel, kvadrat, rektangel, triangel, trapets, parallellogram och romb. Alla mått skrivs i meter.`,
+      metaTitle: `Omkretsberäknare: cirkel med diameter 1 m = ${OMKREDS_TEKST_SE.cirkel} m`,
+      metaDescription: `Beräkna omkrets av cirkel, triangel, rektangel och månghörningar i m och cm. Cirkel med diameter 1 m är ${OMKREDS_TEKST_SE.cirkel} m = ${OMKREDS_TEKST_SE.cirkelCm} cm.`,
+      keywords: ["omkretsberäknare", "beräkna omkrets", "omkrets cirkel", "omkrets triangel", "omkrets rektangel", "omkrets formel", "omkrets kvadrat", "omkrets romb", "omkrets diameter"],
+      ogTitle: `Omkretsberäknare: cirkel med diameter 1 m = ${OMKREDS_TEKST_SE.cirkel} m`,
+      ogDescription: "Beräkna omkretsen i m och cm för cirkel, triangel, rektangel och månghörningar.",
+      category: "Matematik",
+      breadcrumbCategory: "Matematik",
+      breadcrumbCategoryHref: "/kategori/matematik",
+      schemaName: "Omkretsberäknare",
+      schemaDescription: "Beräkna omkretsen i m och cm för cirkel, kvadrat, rektangel, triangel, trapets, parallellogram och romb.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hur beräknar man omkrets?", answer: "Det beror på formen. Cirkel är π × diameter, kvadrat är 4 × sida, rektangel är 2 × (längd + bredd), triangel är a + b + c, trapets är a + b + c + d, parallellogram är 2 × (a + b), och romb är 4 × sida." },
+        { question: "Vad är omkretsen av en cirkel med diameter 1 meter?", answer: `Omkretsen är π × 1 = ${OMKREDS_TEKST_SE.cirkel} m, alltså ${OMKREDS_TEKST_SE.cirkelCm} cm. Kalkylatorn multiplicerar diametern med π, så du skriver bara 1.` },
+        { question: "Varför ska jag använda diameter och inte radie?", answer: "Eftersom radien ger halva svaret. Omkretsen är 2 × π × radie = π × diameter. Skriver du radien i diameterfältet blir omkretsen hälften så stor som den ska vara." },
+        { question: "Hur räknar man omkretsen av en triangel?", answer: "Du lägger ihop de tre sidorna: a + b + c. En triangel med sidorna 3, 4 och 5 m har omkretsen 12 m. Det gäller alla trianglar — även den rätvinkliga — eftersom omkretsen bara är kanten runt." },
+        { question: "Hur räknar man omkretsen av en rektangel?", answer: `Du lägger ihop längden och bredden och multiplicerar med 2, eftersom det finns två av varje: 2 × (längd + bredd). En rektangel på 2 × 3 m har omkretsen ${OMKREDS_TEKST_SE.rektangel} m.` },
+        { question: "Vad är skillnaden mellan area och omkrets?", answer: "Omkrets är längden av kanten runt figuren, mätt i meter. Area är ytans storlek innanför, mätt i m² — det räknar /areal. Två figurer kan ha samma omkrets och olika area: en kvadrat på 2 × 2 m och en rektangel på 1 × 3 m har båda omkretsen 8 m." },
+        { question: "Hur räknar man omkrets i Excel?", answer: "Cirkel: =PI()*A1, där A1 är diametern. Rektangel: =2*(A1+B1). Kvadrat: =4*A1. Triangel: =A1+B1+C1. Trapets: =A1+B1+C1+D1, där varje cell är en sida." },
+        { question: "Vad är skillnaden mellan omkrets och diameter?", answer: "Diametern är den raka linjen tvärs över cirkeln genom mitten. Omkretsen är kanten hela vägen runt, och den är π ≈ 3,14 gånger så lång som diametern. Mäter du diametern till 10 cm är omkretsen ca 31,4 cm." },
       ],
     },
     "hundealder": {

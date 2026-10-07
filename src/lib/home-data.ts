@@ -264,6 +264,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Kropsfedtprocent", description: "Beregn din fedtprocent med U.S. Navy-metoden", href: "/kropsfedt", popular: false, category: "Sundhed" },
   { title: "Rumfangsberegner", description: "Beregn rumfang i m³ og liter", href: "/rumfang", popular: false, category: "Matematik" },
   { title: "Arealberegner", description: "Beregn areal af cirkel, trekant og flerkanter", href: "/areal", popular: false, category: "Matematik" },
+  { title: "Omkredsberegner", description: "Beregn omkreds af cirkel, trekant og flerkanter", href: "/omkreds", popular: false, category: "Matematik" },
   { title: "Idealvægt", description: "Devines og Hamwis formel for din højde", href: "/idealvaegt", popular: false, category: "Sundhed" },
   { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", popular: false, category: "Sundhed" },
   { title: "Vandbehov", description: "Beregn dit daglige væskebehov", href: "/vandbehov", popular: false, category: "Sundhed" },
@@ -409,6 +410,7 @@ const noCalculators: HomeCalculator[] = [
   // Non-popular
   { title: "Sparekalkulator", description: "Beregn rentes rente og se sparepengene dine vokse", href: "/opsparing", popular: false, category: "Økonomi" },
   { title: "Kvadratmeterkalkulator", description: "Beregn areal av rom, hager og tomter", href: "/kvadratmeter", popular: false, category: "Matematikk" },
+  { title: "Omkretskalkulator", description: "Beregn omkrets av sirkel, trekant og mangekanter", href: "/omkreds", popular: false, category: "Matematikk" },
   { title: "Alderskalkulator", description: "Beregn din nøyaktige alder i år, måneder og dager", href: "/alder", popular: false, category: "Hverdag" },
   { title: "Løpetidskalkulator", description: "Beregn tempo per km og deltider per kilometer", href: "/pace", popular: false, category: "Hverdag" },
   { title: "Timepriskalkulator", description: "Finn timeprisen din som frilanser eller selvstendig", href: "/timepris", popular: false, category: "Økonomi" },
@@ -576,6 +578,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Kroppsfettprosent", description: "Beräkna fettprocent (Navy-metoden)", href: "/kropsfedt", popular: false, category: "Hälsa" },
   { title: "Volymberäknare", description: "Beräkna volym i m³ och liter", href: "/rumfang", popular: false, category: "Matematik" },
   { title: "Areaberäknare", description: "Beräkna area av cirkel, triangel och månghörningar", href: "/areal", popular: false, category: "Matematik" },
+  { title: "Omkretsberäknare", description: "Beräkna omkrets av cirkel, triangel och månghörningar", href: "/omkreds", popular: false, category: "Matematik" },
   { title: "Hundår", description: "Omvandla hundår till människoår efter storlek", href: "/hundealder", popular: false, category: "Praktiskt" },
   { title: "Idealvikt", description: "Devines och Hamwis formel för din längd", href: "/idealvaegt", popular: false, category: "Hälsa" },
   { title: "1RM kalkylator", description: "Uppskatta ditt maxlyft", href: "/1rm", popular: false, category: "Hälsa" },
