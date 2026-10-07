@@ -56,6 +56,7 @@ import {
   oresundKategori,
 } from "./oresundsbroen";
 import { NUTIDSKRONER_EKSEMPEL_AAR, omregnTilNutidskroner } from "./nutidskroner";
+import { GAVE_RELATIONER, beregnGaveafgift } from "./gaveafgift";
 
 /**
  * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
@@ -200,6 +201,19 @@ const ARVE_BUNDFRADRAG_TEKST = formatNumber(SATSER_2026.arveBundfradrag, "da");
  * Håndskrevet holdt den boafgiften stående ved et nyt bundfradrag (punkt 11).
  */
 const ARVE_EKSEMPEL_TEKST = `Arveafgift beregner: 1.000.000 kr. arv = ${formatNumber(EKSEMPEL_BARN.boafgift, "da")} kr. boafgift`;
+
+/**
+ * Gaveafgiftens egne tal til `/gaveafgift`s titel, beskrivelse og FAQ. De læser
+ * samme satser som `GaveafgiftBeregner` via `GAVE_RELATIONER`, så en ny
+ * bundgrænse i 2027 flytter alle tallene med i stedet for at stå stille i
+ * titlen (punkt 11).
+ */
+const GAVE_NAER_TEKST = formatNumber(GAVE_RELATIONER.naer.bundfradrag, "da");
+const GAVE_SVIGER_TEKST = formatNumber(GAVE_RELATIONER.svigerboern.bundfradrag, "da");
+const GAVE_EKSEMPEL_TEKST = `Gaveafgift 2026: 100.000 kr. gave = ${formatNumber(
+  beregnGaveafgift(100_000, "naer")!.afgift,
+  "da"
+)} kr. i afgift`;
 
 /**
  * Dagpengens egne tal, skrevet ét sted for `/dagpenge`s beskrivelse, FAQ og
@@ -2383,6 +2397,32 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvornår skal arveafgift betales?", answer: "Arveafgiften skal betales til Skattestyrelsen inden 1 år efter dødsfaldet. Boet afvikles typisk gennem en bobestyrer eller advokat, som sørger for at beregne og afregne afgifterne." },
       { question: "Ændres reglerne for søskende i 2027?", answer: "Ja, fra 1. januar 2027 afskaffes tillægsafgiften for søskende. Det betyder at søskende fremover kun betaler 15 % boafgift i stedet for den nuværende effektive sats på op til 36,25 %." },
       { question: "Skal man betale arveafgift af forsikringer?", answer: "Forsikringsudbetalinger der tilfalder en navngiven begunstiget (fx livsforsikring) indgår som udgangspunkt ikke i boet og er dermed ikke underlagt boafgift. Men beløbet kan i stedet være omfattet af afgiftspligt efter forsikringsaftalelovens regler." },
+      ],
+    },
+    "gaveafgift": {
+      slug: "gaveafgift",
+      title: "Gaveafgift 2026 - hvor meget må du give skattefrit?",
+      description: `Giv op til ${GAVE_NAER_TEKST} kr. afgiftsfrit til nær familie i 2026. Beregn gaveafgiften, hvis gaven er større. Gratis beregner med 2026-satser fra Skattestyrelsen.`,
+      metaTitle: GAVE_EKSEMPEL_TEKST,
+      metaDescription: `Hvor meget må du give skattefrit i 2026? Nær familie: ${GAVE_NAER_TEKST} kr., svigerbørn: ${GAVE_SVIGER_TEKST} kr. Beregn gaveafgiften på det overskydende beløb.`,
+      keywords: ["gaveafgift", "gaveafgift 2026", "hvor meget må jeg give i gave", "afgiftsfri gave", "gave til børn afgift", "gaveafgift beregner", "skattefri gave 2026"],
+      ogTitle: GAVE_EKSEMPEL_TEKST,
+      ogDescription: `Beregn gaveafgiften i 2026. Nær familie kan modtage ${GAVE_NAER_TEKST} kr. afgiftsfrit, svigerbørn ${GAVE_SVIGER_TEKST} kr.`,
+      category: "Økonomi",
+      breadcrumbCategory: "Økonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Gaveafgift beregner 2026",
+      schemaDescription: `Gratis gaveafgift beregner med 2026-satser. Se hvor meget du må give afgiftsfrit til nær familie (${GAVE_NAER_TEKST} kr.) og svigerbørn (${GAVE_SVIGER_TEKST} kr.), og hvad afgiften bliver af resten.`,
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+      { question: "Hvor meget må jeg give skattefrit i 2026?", answer: `Du kan give op til ${GAVE_NAER_TEKST} kr. afgiftsfrit til et familiemedlem i din nærmeste familie i 2026. Det gælder børn, stedbørn og deres børn, forældre, samlever og plejebørn. Beløbet er pr. gavemodtager pr. kalenderår.` },
+      { question: "Hvad er gaveafgiften i 2026?", answer: `Gaveafgiften er som hovedregel 15 % af det beløb, der overstiger det afgiftsfrie beløb på ${GAVE_NAER_TEKST} kr. Giver du fx 100.000 kr. til et barn, betaler du 15 % af ${formatNumber(100_000 - GAVE_RELATIONER.naer.bundfradrag, "da")} kr. = ${formatNumber(beregnGaveafgift(100_000, "naer")!.afgift, "da")} kr.` },
+      { question: "Hvor meget må jeg give til et svigerbarn?", answer: `For svigerbørn er det afgiftsfrie beløb lavere: ${GAVE_SVIGER_TEKST} kr. i 2026. Giver du mere, skal der betales 15 % i gaveafgift af det overskydende beløb.` },
+      { question: "Betaler bedsteforældre og stedforældre en anden sats?", answer: "Ja. Er gavemodtageren en bedsteforælder eller stedforælder, er satsen 36,25 % af beløbet over det afgiftsfrie beløb på 80.600 kr. i 2026." },
+      { question: "Hvornår skal gaven anmeldes?", answer: "Gaver over det afgiftsfrie beløb skal anmeldes til Skattestyrelsen senest 1. maj året efter, at gaven er modtaget. Gaveafgiften skal betales samme dag, som anmeldelsen sendes ind." },
+      { question: "Er gaver mellem ægtefæller afgiftsfrie?", answer: "Ja, som hovedregel kan ægtefæller frit give hinanden gaver, også selvom beløbet overstiger det afgiftsfrie beløb. Det gælder dog ikke, hvis ægteskabet er ophørt ved separation eller skilsmisse, når gaven modtages." },
+      { question: "Skal gaver til venner og søskende beskattes?", answer: "Gaver til venner, bekendte og fjernere familie som søskende, nevøer og niecer er ikke omfattet af gaveafgift. Modtageren skal i stedet skrive beløbet på sin årsopgørelse som anden personlig indkomst. Fra 1. januar 2027 bliver søskende omfattet af de almindelige gaveafgiftsregler." },
+      { question: "Er lejlighedsgaver skattefrie?", answer: "Almindelige gaver til jul, fødselsdag, konfirmation, bryllup og lignende af beskeden værdi er skattefrie. Det er de store pengegaver ud over det afgiftsfrie beløb, der udløser gaveafgift." },
       ],
     },
     "renteprognose": {

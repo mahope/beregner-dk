@@ -41,6 +41,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", category: "Økonomi" },
   { title: "Rentefradrag", description: "Beregn din skattebesparelse på rentefradrag", href: "/rentefradrag", category: "Økonomi" },
   { title: "Arveafgift", description: "Beregn bo- og tillægsafgift ved arv", href: "/arveafgift", category: "Økonomi" },
+  { title: "Gaveafgift", description: "Se hvor meget du må give afgiftsfrit, og beregn gaveafgiften", href: "/gaveafgift", category: "Økonomi" },
   { title: "Aktieskat", description: "Beregn skat på aktiegevinst — frit depot vs. ASK", href: "/aktieskat", category: "Økonomi" },
   { title: "Topskat Beregner", description: "Beregn om du betaler mellemskat eller topskat", href: "/topskat", category: "Økonomi" },
   { title: "Brutto/Netto Beregner", description: "Find bruttoløn ud fra ønsket udbetaling", href: "/brutto-netto", category: "Økonomi" },
@@ -124,7 +125,7 @@ export const categories: CategoryData[] = [
     faqItems: [
       {
         question: "Hvilke økonomiberegnere har I?",
-        answer: "Vi har 11 økonomiberegnere: løn efter skat, moms, valuta, rente, opsparing, feriepenge, dagpenge, pension, efterløn, rentefradrag og arveafgift. Alle er gratis og opdateret med 2026-satser.",
+        answer: "Vi har 12 økonomiberegnere: løn efter skat, moms, valuta, rente, opsparing, feriepenge, dagpenge, pension, efterløn, rentefradrag, arveafgift og gaveafgift. Alle er gratis og opdateret med 2026-satser.",
       },
       {
         question: "Er beregningerne baseret på de nyeste satser?",

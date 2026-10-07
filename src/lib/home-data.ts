@@ -236,6 +236,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Forbrugslån", description: "Beregn ydelse og ÅOP på forbrugslån", href: "/forbrugslaan", popular: false, category: "Lån" },
   { title: "Ejendomsværdiskat", description: "Beregn ejendomsværdiskat og grundskyld 2026", href: "/ejendomsvaerdiskat", popular: false, category: "Bolig" },
   { title: "Arveafgift", description: "Beregn bo- og tillægsafgift ved arv", href: "/arveafgift", popular: false, category: "Økonomi" },
+  { title: "Gaveafgift", description: "Se hvor meget du må give afgiftsfrit, og beregn gaveafgiften", href: "/gaveafgift", popular: false, category: "Økonomi" },
   { title: "Aktieskat", description: "Beregn skat på aktiegevinst — frit depot vs. ASK", href: "/aktieskat", popular: false, category: "Økonomi" },
   { title: "Topskat Beregner", description: "Beregn om du betaler mellemskat eller topskat", href: "/topskat", popular: false, category: "Økonomi" },
   { title: "Brutto/Netto Beregner", description: "Find bruttoløn ud fra ønsket udbetaling", href: "/brutto-netto", popular: false, category: "Økonomi" },

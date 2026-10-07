@@ -33,6 +33,7 @@ const navigationData: Record<Locale, NavItem[]> = {
         { name: "Skattefradrag", href: "/skattefradrag" },
         { name: "Aktieskat", href: "/aktieskat" },
         { name: "Arveafgift", href: "/arveafgift" },
+        { name: "Gaveafgift", href: "/gaveafgift" },
       ],
     },
     {

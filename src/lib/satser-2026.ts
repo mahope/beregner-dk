@@ -45,6 +45,12 @@ export const SATSER_2026 = {
   boafgift: 0.15, // 15 %
   tillaegsboafgift: 0.25, // 25 % (søskende m.fl.)
 
+  // Gaveafgift (kilde: skat.dk/borger/gaver-gevinster-og-legater/gaver-saa-meget-maa-du-give, læst 7/10-2026)
+  gaveBundfradragNaer: 80600, // nær familie (børn, forældre, samlever m.fl.)
+  gaveBundfradragSvigerboern: 28200, // svigerbørn
+  gaveafgift: 0.15, // 15 %
+  gaveafgiftBedsteforaeldre: 0.3625, // 36,25 % (bedsteforældre og stedforældre)
+
   // Kørselsfradrag / befordringsfradrag (daglige tur-retur-km, kilde: skat.dk)
   koerselBundgraense: 24, // ingen fradrag for de første 24 km/dag
   koerselHoejGraense: 120, // høj sats op til 120 km/dag
