@@ -100,6 +100,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/befordringsfradrag", daOnly: true, titles: { da: "Befordringsfradrag", no: "Befordringsfradrag", se: "Befordringsavdrag" }, descriptions: { da: "Beregn befordringsfradrag 2026", no: "Beregn befordringsfradrag", se: "Beräkna befordringsavdrag" } },
   { href: "/nutidskroner", daOnly: true, titles: { da: "Nutidskroner", no: "Nutidskroner", se: "Nutidskroner" }, descriptions: { da: "Omregn et gammelt beløb til dagens prisniveau", no: "Omregn et gammelt beløp til dagens prisnivå", se: "Räkna om ett gammalt belopp till dagens prisnivå" } },
   { href: "/maling", daOnly: true, titles: { da: "Malingberegner", no: "Malingskalkulator", se: "Färgkalkylator" }, descriptions: { da: "Beregn hvor mange liter maling du skal bruge", no: "Beregn hvor mange liter maling du trenger", se: "Beräkna hur många liter färg du behöver" } },
+  { href: "/laanekapacitet", daOnly: true, titles: { da: "Lånekapacitet", no: "Lånekapasitet", se: "Lånekapacitet" }, descriptions: { da: "Beregn hvor meget du kan låne til bolig", no: "Beregn hvor mye du kan låne til bolig", se: "Beräkna hur mycket du kan låna till bostad" } },
   // Yderligere
   { href: "/solceller", titles: { da: "Solceller", no: "Solceller", se: "Solceller" }, descriptions: { da: "Beregn solcelleøkonomi", no: "Beregn solcelleøkonomi", se: "Beräkna solcellsekonomi" } },
   { href: "/leasing", titles: { da: "Leasing", no: "Leasing", se: "Leasing" }, descriptions: { da: "Beregn leasingydelse", no: "Beregn leasingytelse", se: "Beräkna leasingavgift" } },
@@ -177,7 +178,8 @@ const relatedMap: Record<string, string[]> = {
   "/renteberegner": ["/boliglaan", "/renteprognose", "/laaneberegner", "/opsparing", "/procent", "/rentefradrag"],
   "/husleje": ["/boligstoette", "/boliglaan", "/ejendomsvaerdiskat", "/loen-efter-skat", "/kvadratmeter", "/flyttebudget"],
   "/boligstoette": ["/husleje", "/boernepenge", "/loen-efter-skat", "/su", "/dagpenge", "/flyttebudget"],
-  "/laaneberegner": ["/boliglaan", "/renteberegner", "/billaan", "/forbrugslaan", "/rentefradrag"],
+  "/laaneberegner": ["/boliglaan", "/renteberegner", "/billaan", "/forbrugslaan", "/rentefradrag", "/laanekapacitet"],
+  "/laanekapacitet": ["/boliglaan", "/laaneberegner", "/renteberegner", "/budget", "/boligstoette"],
   "/opsparing": ["/renteberegner", "/pension", "/aktieskat", "/laaneberegner", "/loen-efter-skat"],
   "/budget": ["/loen-efter-skat", "/opsparing", "/gaeldsfri", "/rygestop", "/laaneberegner", "/flyttebudget"],
   "/afkast": ["/opsparing", "/renteberegner", "/aktieskat", "/procent", "/pension"],

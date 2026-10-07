@@ -49,6 +49,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Bolån", description: "Beräkna månadskostnad för bolån", href: "/bolan", category: "Bolig" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", category: "Bolig" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", category: "Bolig" },
+  { title: "Lånekapacitet", description: "Se hvor meget du kan låne til bolig ud fra indkomst og udbetaling", href: "/laanekapacitet", category: "Bolig" },
   { title: "Ejendomsværdiskat", description: "Beregn ejendomsværdiskat og grundskyld 2026", href: "/ejendomsvaerdiskat", category: "Bolig" },
   { title: "Andelsbolig Beregner", description: "Beregn omkostninger ved køb af andelsbolig", href: "/andelsbolig", category: "Bolig" },
   { title: "Solcelle Beregner", description: "Beregn besparelse og tilbagebetalingstid for solceller", href: "/solceller", category: "Bolig" },

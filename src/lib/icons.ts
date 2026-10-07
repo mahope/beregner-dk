@@ -172,6 +172,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/kvadratmeter": Square,
   "/maling": PaintRoller,
   "/laaneberegner": Landmark,
+  "/laanekapacitet": HandCoins,
   "/leasing": Repeat,
   "/loen-efter-skat": Banknote,
   "/lon-efter-skatt": Banknote,

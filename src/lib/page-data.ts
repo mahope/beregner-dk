@@ -35,6 +35,13 @@ import { BMI_BAAND, vaegtInterval } from "./bmi-voksen-grænser";
 import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
 import {
+  GAELDSFAKTOR_STANDARD,
+  LAANEKAPACITET_EKSEMPEL,
+  REALKREDIT_MAKS_PCT,
+  UDBETALING_MIN_PCT,
+  beregnLaanekapacitet,
+} from "./laanekapacitet";
+import {
   LAANETYPE_EKSEMPEL_AARSRENTE,
   LAANETYPE_EKSEMPEL_HOVEDSTOL,
   LAANETYPE_EKSEMPEL_LOEBETID,
@@ -739,6 +746,9 @@ const IDEALVAEGT_K_DEVINE = idealvaegtKg(rundIdealvaegt(idealvaegtKvinde.devine)
 const IDEALVAEGT_K_HAMWI = idealvaegtKg(rundIdealvaegt(idealvaegtKvinde.hamwi));
 const IDEALVAEGT_M_INTERVAL_MIN = idealvaegtKg(idealvaegtNormal.min ?? 0);
 const IDEALVAEGT_M_INTERVAL_MAX = idealvaegtKg(idealvaegtNormal.max ?? 0);
+
+/** Lånekapacitetens FAQ læser sine tal fra samme modul som værktøjet. */
+const LAANEKAPACITET_FAQ = beregnLaanekapacitet(LAANEKAPACITET_EKSEMPEL);
 
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
@@ -2890,6 +2900,56 @@ faqItems: kalorierFaqItems("da"),
         { question: "Skal jeg regne med ét eller to strøg?", answer: "Regn med to strøg, når du skifter farve, eller når underlaget er sugende eller ujævnt. Skal du kun friske en ensfarvet væg op, kan ét strøg være nok — vælger du ét strøg i beregneren, halveres forbruget." },
         { question: "Hvorfor skal jeg lægge spild til?", answer: `Der skal altid lidt maling til hjørner, kanter og opretning bagefter. Branchen anbefaler ${MALING_STANDARD_SPILD_PCT} % ekstra, og det er den værdi, beregneren bruger.` },
         { question: "Skal døre og vinduer trækkes fra?", answer: "Ja, de skal ikke males. Mål dem og skriv det samlede areal i feltet «Døre og vinduer». Skal loftet også males, sætter du flueben i «Medregn loftet»." },
+      ],
+    },
+    "laanekapacitet": {
+      slug: "laanekapacitet",
+      title: "Lånekapacitet – hvor meget kan du låne til bolig?",
+      description:
+        "Beregn hvor meget du kan låne til bolig ud fra indkomst, udbetaling og gæld. Se hvilken pris du kan købe for, og hvordan købet deles i realkredit, banklån og udbetaling.",
+      metaTitle: "Lånekapacitet – hvor meget kan du låne til bolig?",
+      metaDescription: `Beregn hvor meget du kan låne til bolig. Indtast indkomst, udbetaling og gæld og se, hvad du kan købe for med realkredit, banklån og udbetaling.`,
+      keywords: [
+        "lånekapacitet",
+        "hvor meget kan jeg låne",
+        "hvor meget kan jeg låne til hus",
+        "hvor meget kan jeg købe bolig for",
+        "låneevne",
+        "gældsfaktor",
+        "beregn lån til bolig",
+      ],
+      ogTitle: "Lånekapacitet – hvor meget kan du låne til bolig?",
+      ogDescription:
+        "Indtast indkomst, udbetaling og gæld og se, hvor meget du kan låne og købe bolig for.",
+      category: "Bolig",
+      breadcrumbCategory: "Bolig",
+      breadcrumbCategoryHref: "/kategori/bolig",
+      schemaName: "Lånekapacitet",
+      schemaDescription:
+        "Beregn hvor meget du kan låne til bolig ud fra husstandsindkomst, udbetaling og eksisterende gæld.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        {
+          question: "Hvor meget kan jeg låne til en bolig?",
+          answer: `Det er den laveste af to grænser, der bestemmer: gældsfaktoren og udbetalingen. Med gældsfaktor ${GAELDSFAKTOR_STANDARD} må husstandens samlede gæld være ${GAELDSFAKTOR_STANDARD} gange årsindkomsten før skat, og udbetalingen skal som udgangspunkt være mindst ${UDBETALING_MIN_PCT} % af købesummen. Skriv dine tal ind i beregneren, så ser du både beløbet og hvilken grænse der binder.`,
+        },
+        {
+          question: "Hvad er en gældsfaktor?",
+          answer: `Gældsfaktoren er husstandens samlede gæld divideret med den årlige bruttoindkomst. Finanstilsynet anser som udgangspunkt en gældsfaktor over ${GAELDSFAKTOR_STANDARD} for høj — ikke som et loft, men som et punkt, hvor banken skal kunne begrunde lånet bedre. Derfor kan du vælge mellem 3,5, ${GAELDSFAKTOR_STANDARD} og 5 i beregneren.`,
+        },
+        {
+          question: "Hvor stor en udbetaling skal jeg have?",
+          answer: `Finanstilsynets vejledning bruger ${UDBETALING_MIN_PCT} % af købesummen som udgangspunkt for en passende udbetaling, og pengene skal som udgangspunkt være dine egne. På en bolig til ${LAANEKAPACITET_FAQ.maksBoligpris.toLocaleString("da-DK", { maximumFractionDigits: 0 })} kr. svarer det til ${LAANEKAPACITET_FAQ.kraevUdbetaling.toLocaleString("da-DK", { maximumFractionDigits: 0 })} kr.`,
+        },
+        {
+          question: "Hvordan er boligkøbet finansieret?",
+          answer: `Et boligkøb deles typisk i tre: realkredit kan dække op til ${REALKREDIT_MAKS_PCT} % af boligens værdi, de næste 15 % er et dyrere banklån, og de sidste ${UDBETALING_MIN_PCT} % er din egen udbetaling. På en bolig til ${LAANEKAPACITET_FAQ.maksBoligpris.toLocaleString("da-DK", { maximumFractionDigits: 0 })} kr. er det ca. ${LAANEKAPACITET_FAQ.realkreditDel.toLocaleString("da-DK", { maximumFractionDigits: 0 })} kr. i realkredit og ${LAANEKAPACITET_FAQ.banklaanDel.toLocaleString("da-DK", { maximumFractionDigits: 0 })} kr. i banklån.`,
+        },
+        {
+          question: "Hvorfor sænker min gæld, hvor meget jeg kan låne?",
+          answer:
+            "Al anden gæld indgår i gældsfaktoren — billån, studielån, forbrugslån og hele kassekreditten, også selv om du ikke har brugt den. Derfor flytter det ofte mere at betale gæld ud end at få en tilsvarende lønstigning. Skriv din gæld i feltet «Anden gæld» for at se effekten.",
+        },
       ],
     },
 };

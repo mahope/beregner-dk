@@ -297,6 +297,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Vægt på planeterne", description: "Se din vægt på Månen, Mars og de andre planeter", href: "/planetvaegt", popular: false, category: "Matematik" },
   { title: "Nutidskroner", description: "Omregn et gammelt beløb til dagens prisniveau", href: "/nutidskroner", popular: false, category: "Økonomi" },
   { title: "Malingberegner", description: "Beregn hvor mange liter maling du skal bruge", href: "/maling", popular: false, category: "Hverdag" },
+  { title: "Lånekapacitet", description: "Se hvor meget du kan låne til bolig", href: "/laanekapacitet", popular: false, category: "Bolig" },
 ];
 
 /* ------------------------------------------------------------------ */

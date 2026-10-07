@@ -1,4 +1,5 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 const BoliglaanBeregner = dynamic(() => import("@/components/BoliglaanBeregner"));
 import FAQ from "@/components/FAQ";
@@ -50,6 +51,11 @@ export default async function BoliglaanPage() {
           <li><strong>Realkreditlån:</strong> Op til 80 % af boligens værdi</li>
           <li><strong>Banklån/tillægslån:</strong> De resterende 15 % (mellem udbetaling og realkredit)</li>
         </ul>
+        <p>
+          Er du i tvivl om, hvor meget du kan låne i det hele taget, kan du starte med{" "}
+          <Link href="/laanekapacitet">lånekapacitetsberegneren</Link>, der regner ud fra din
+          indkomst, udbetaling og gæld.
+        </p>
 
         <h2>Fastforrentet vs. variabel rente</h2>
 
