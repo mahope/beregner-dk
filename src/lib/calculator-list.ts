@@ -79,6 +79,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/braendstof", titles: { da: "Brændstof", no: "Drivstoff", se: "Bränsle" }, descriptions: { da: "Beregn brændstofforbrug", no: "Beregn drivstofforbruk", se: "Beräkna bränsleförbrukning" } },
   { href: "/elbil", titles: { da: "Elbil vs. benzin", no: "Elbil vs. bensin", se: "Elbil vs. bensin" }, descriptions: { da: "Sammenlign elbil og benzinbil", no: "Sammenlign elbil og bensinbil", se: "Jämför elbil och bensinbil" } },
   { href: "/elberegner", titles: { da: "Elberegner", no: "Strømkalkulator", se: "Elkalkylator" }, descriptions: { da: "Beregn dit elforbrug", no: "Beregn strømforbruket ditt", se: "Beräkna din elförbrukning" } },
+  { href: "/elbil-lading", titles: { da: "Elbil-lading", no: "Elbil-lading", se: "Laddkostnad elbil" }, descriptions: { da: "Beregn prisen for at lade elbilen", no: "Beregn prisen for å lade elbilen", se: "Beräkna kostnaden för att ladda elbilen" } },
   // Andet
   { href: "/kvadratmeter", titles: { da: "Kvadratmeter", no: "Kvadratmeter", se: "Kvadratmeter" }, descriptions: { da: "Beregn areal", no: "Beregn areal", se: "Beräkna yta" } },
   { href: "/temperatur", titles: { da: "Temperatur", no: "Temperatur", se: "Temperatur" }, descriptions: { da: "Omregn °C, °F og Kelvin", no: "Omregn °C, °F og Kelvin", se: "Omvandla °C, °F och Kelvin" } },
@@ -223,6 +224,7 @@ const relatedMap: Record<string, string[]> = {
   "/bil": ["/braendstof", "/billaan", "/elberegner", "/forbrugslaan", "/loen-efter-skat"],
   "/braendstof": ["/bil", "/elberegner", "/procent", "/valuta", "/kvadratmeter"],
   "/elbil": ["/braendstof", "/bil", "/elberegner", "/leasing", "/billaan"],
+  "/elbil-lading": ["/elbil", "/braendstof", "/elberegner", "/bil", "/billaan"],
   "/laantype": ["/renteberegner", "/laaneberegner", "/boliglaan", "/forbrugslaan", "/rentefradrag"],
   "/elberegner": ["/braendstof", "/bil", "/procent", "/husleje", "/boligstoette"],
   "/kvadratmeter": ["/rumfang", "/husleje", "/boliglaan", "/procent", "/maling", "/flyttebudget"],

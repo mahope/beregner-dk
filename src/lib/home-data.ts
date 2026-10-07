@@ -276,6 +276,7 @@ const daCalculators: HomeCalculator[] = [
 
   // Hverdag
   { title: "Elbil vs. benzinbil", description: "Sammenlign driftsomkostninger for elbil og benzinbil", href: "/elbil", popular: false, category: "Hverdag" },
+  { title: "Elbil-lading", description: "Beregn hvad det koster at lade din elbil", href: "/elbil-lading", popular: false, category: "Hverdag" },
   { title: "Enhedspris", description: "Find den billigste vare pr. kilo, liter eller stk", href: "/enhedspris", popular: false, category: "Hverdag" },
   { title: "Brokost Storebælt og Øresund", description: "Se prisen for at krydse Storebælt og Øresund og dit årsforbrug", href: "/brokost", popular: false, category: "Hverdag" },
   { title: "Rabatberegner", description: "Beregn pris efter rabat og se din besparelse", href: "/rabat", popular: false, category: "Hverdag" },
@@ -577,6 +578,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Kaloriförbränning", description: "Förbrända kalorier vid motion", href: "/motion-kalorier", popular: false, category: "Hälsa" },
   { title: "Proteinbehov", description: "Beräkna ditt dagliga proteinbehov", href: "/proteinbehov", popular: false, category: "Hälsa" },
   { title: "Elbil vs. bensin", description: "Jämför elbil och bensinbil", href: "/elbil", popular: false, category: "Vardag" },
+  { title: "Laddkostnad elbil", description: "Beräkna vad det kostar att ladda din elbil", href: "/elbil-lading", popular: false, category: "Vardag" },
   { title: "Jämförpris", description: "Hitta den billigaste varan per enhet", href: "/enhedspris", popular: false, category: "Vardag" },
   { title: "Hastighetskalkylator", description: "Beräkna hastighet, sträcka och tid", href: "/fart", popular: false, category: "Vardag" },
   { title: "Löptidsberäknare", description: "Beräkna pace per km och deltider per kilometer", href: "/pace", popular: false, category: "Vardag" },

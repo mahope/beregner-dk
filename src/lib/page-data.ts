@@ -2,6 +2,7 @@ import type { Locale } from "./i18n";
 import { BARSEL_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
+import { beregnElbilLading, elbilLadingStandard } from "./elbil-lading";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
 import {
   NETTOPRISINDEKS_2026M08,
@@ -655,8 +656,23 @@ function kommatal(value: number) {
 // kr. pr. km, altså 53 % af benzinprisen.
 const elbilDa = elbilSammenligning("da");
 const elbilSe = elbilSammenligning("se");
+
+// ─── /elbil-lading — titel og FAQ læser værktøjets egene standardværdier, så
+// ingen tekst kan glide fra beregningen.
+const elbilLadingStandarder = {
+  da: elbilLadingStandard("da"),
+  se: elbilLadingStandard("se"),
+};
+const elbilLadingEksempel = beregnElbilLading(elbilLadingStandarder.da)!;
+const elbilLadingEksempelSe = beregnElbilLading(elbilLadingStandarder.se)!;
 /** Et beløb med to decimaler og dansk komma: 2.5 -> "2,50". */
 const krTal = (value: number) => value.toFixed(2).replace(".", ",");
+/** Helt krontal med dansk tusindtalsseparator: 1250 -> "1.250". */
+const krHelt = (value: number) => value.toLocaleString("da-DK", { maximumFractionDigits: 0 });
+/** Helt tal med svensk tusindtalsseparator: 1250 -> "1 250". */
+const seHelt = (value: number) => value.toLocaleString("sv-SE", { maximumFractionDigits: 0 });
+/** To decimaler med svensk komma: 0.45 -> "0,45". */
+const seTal = (value: number) => value.toFixed(2).replace(".", ",");
 /** Tusindtalsseparator som i Sverige: 12400 -> "12 400". */
 const seKr = (value: number) => value.toLocaleString("sv-SE");
 /** Tusindtalsseparator som i Danmark: 9000 -> "9.000". Samme notation som `formatNumber` i `format.ts`. */
@@ -2988,6 +3004,29 @@ faqItems: kalorierFaqItems("da"),
         },
       ],
     },
+    "elbil-lading": {
+      slug: "elbil-lading",
+      title: "Elbil-lading – hvad koster det at lade en elbil?",
+      description: `Beregn hvad det koster at lade din elbil fra et ladningsniveau til et andet. Se prisen for opladningen, prisen pr. 100 km og den månedlige ladeomkostning.`,
+      metaTitle: `Elbil-lading: ${krHelt(elbilLadingEksempel.kwhTilOpladning)} kWh koster ${krHelt(elbilLadingEksempel.prisForOpladning)} kr.`,
+      metaDescription: `Beregn ladeomkostningen for en elbil. ${krHelt(elbilLadingEksempel.kwhTilOpladning)} kWh til ${krHelt(elbilLadingEksempel.prisForOpladning)} kr. ved ${krTal(elbilLadingStandarder.da.elpris)} kr/kWh — og se prisen pr. 100 km og pr. måned.`,
+      keywords: ["elbil lading", "hvad koster det at lade en elbil", "elbil ladeomkostning", "ladekostnad elbil", "elbil opladning pris", "kwh pris elbil"],
+      ogTitle: `Elbil-lading: ${krHelt(elbilLadingEksempel.kwhTilOpladning)} kWh koster ${krHelt(elbilLadingEksempel.prisForOpladning)} kr.`,
+      ogDescription: `Beregn hvad det koster at lade din elbil. Se prisen for opladningen, pr. 100 km og pr. måned.`,
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Elbil-lading beregner",
+      schemaDescription: "Beregn hvad det koster at lade en elbil: pris for opladningen, pr. 100 km og pr. måned.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvad koster det at lade en elbil?", answer: `Det afhænger af batteriets størrelse, ladningsniveauerne og elprisen. Et batteri på ${krHelt(elbilLadingStandarder.da.batteriKwh)} kWh, der skal fyldes fra ${krHelt(elbilLadingStandarder.da.ladningNuPct)} til ${krHelt(elbilLadingStandarder.da.ladningTilPct)} procent, skal have ${krTal(elbilLadingEksempel.kwhTilOpladning)} kWh. Til ${krTal(elbilLadingStandarder.da.elpris)} kr/kWh koster det ${krTal(elbilLadingEksempel.prisForOpladning)} kr.` },
+        { question: "Hvad koster det at køre 100 km i en elbil?", answer: `Med et forbrug på ${krTal(elbilLadingStandarder.da.forbrugKwh100km)} kWh/100 km og en elpris på ${krTal(elbilLadingStandarder.da.elpris)} kr/kWh koster kørselen ${krTal(elbilLadingEksempel.prisPr100km)} kr. pr. 100 km — altså ${krTal(elbilLadingEksempel.prisPrKm)} kr. pr. km.` },
+        { question: "Hvad koster det at lade en elbil pr. måned?", answer: `Kører du ${krHelt(elbilLadingStandarder.da.kmPrMaaned)} km pr. måned ved ${krTal(elbilLadingStandarder.da.forbrugKwh100km)} kWh/100 km, bruger det ${krHelt(elbilLadingEksempel.kwhPrMaaned)} kWh og koster det ${krTal(elbilLadingEksempel.maanedligPris)} kr. pr. måned at lade bilen hjemme.` },
+        { question: "Er regningen præcis?", answer: "Beregningen viser energien bilen bruger. En hjemmeoplader er typisk omkring 85-90 % effektiv, så den reelle regning fra stikkontakten kan være lidt højere end beregnet. Elprisen kan også svinge gennem dagen, så en nat- eller spotprisaftale kan halvere regningen." },
+        { question: "Hvad koster en hurtigladning?", answer: `Offentlig hurtigladning koster typisk mere end hjemmeladning — ofte 4-6 kr/kWh mod din elpris på ${krTal(elbilLadingStandarder.da.elpris)} kr/kWh. Skriv den pris du betaler i elpris-feltet for at se forskellen.` },
+      ],
+    },
 };
 
 // ─── NORWEGIAN (no) PAGE DATA ──────────────────────────────────────────────
@@ -3672,6 +3711,29 @@ const sePages: Record<string, PageData> = {
         { question: "Är en elbil billigare än en bensinbil?", answer: `På energi är en elbil nästan alltid billigare: en elbil drar cirka 15-20 kWh per 100 km, en bensinbil 5-7 liter. Kalkylatorns standardvärden — ${elbilSe.forudsætninger.elKwhPer100km} kWh per 100 km till ${krTal(elbilSe.forudsætninger.elKwhPris)} kr/kWh mot ${elbilSe.forudsætninger.benzinKmPerLiter} km/l till ${krTal(elbilSe.forudsætninger.benzinLiterPris)} kr/l — ger ${seKrPrKm(elbilSe.elPrisPrKm)} för el mot ${seKrPrKm(elbilSe.benzinPrisPrKm)} för bensin, alltså ${pct(elbilSe.besparelseProcent)} % billigare per km. Över ${pct(elbilSe.breakEvenKwhPris)} kr/kWh — alltså vid offentlig laddning — är el dyrare än bensin. Elbilar är dock ofta dyrare att köpa — kalkylatorn visar när merpriset är intjänat.` },
         { question: "Hur mycket sparar man på en elbil per år?", answer: `Med kalkylatorns standardvärden på ${seKr(elbilSe.forudsætninger.kmPrAar)} km per år är besparingen ca. ${seKr(elbilSe.aarligBesparelse)} kr per år. Den beror på el- och bensinpris, så fyll i dina egna tal.` },
         { question: "Vad ingår inte i beräkningen?", answer: "Kalkylatorn jämför energikostnaden (el vs. bensin). Försäkring, service, däck, fordonsskatt och värdeminskning varierar mycket och ingår inte — men energikostnaden är den största löpande skillnaden." },
+      ],
+    },
+    "elbil-lading": {
+      slug: "elbil-lading",
+      title: "Laddkostnad elbil – vad kostar det att ladda en elbil?",
+      description: "Beräkna vad det kostar att ladda din elbil från en laddningsnivå till en annan. Se kostnaden för laddningen, kostnaden per 100 km och den månatliga laddkostnaden.",
+      metaTitle: `Laddkostnad elbil: ${seHelt(elbilLadingEksempelSe.kwhTilOpladning)} kWh kostar ${seHelt(elbilLadingEksempelSe.prisForOpladning)} kr.`,
+      metaDescription: `Beräkna laddkostnaden för en elbil. ${seHelt(elbilLadingEksempelSe.kwhTilOpladning)} kWh till ${seHelt(elbilLadingEksempelSe.prisForOpladning)} kr. vid ${seTal(elbilLadingStandarder.se.elpris)} kr/kWh — och se kostnaden per 100 km och per månad.`,
+      keywords: ["laddkostnad elbil", "vad kostar det att ladda en elbil", "elbil laddkostnad", "laddning elbil pris", "kwh pris elbil", "ladda elbil kostnad"],
+      ogTitle: `Laddkostnad elbil: ${seHelt(elbilLadingEksempelSe.kwhTilOpladning)} kWh kostar ${seHelt(elbilLadingEksempelSe.prisForOpladning)} kr.`,
+      ogDescription: "Beräkna vad det kostar att ladda din elbil. Se kostnaden för laddningen, per 100 km och per månad.",
+      category: "Vardag",
+      breadcrumbCategory: "Vardag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Laddkostnad elbil kalkylator",
+      schemaDescription: "Beräkna vad det kostar att ladda en elbil: kostnad för laddningen, per 100 km och per månad.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Vad kostar det att ladda en elbil?", answer: `Det beror på batteriets storlek, laddningsnivåerna och elpriset. Ett batteri på ${seHelt(elbilLadingStandarder.se.batteriKwh)} kWh som ska fyllas från ${seHelt(elbilLadingStandarder.se.ladningNuPct)} till ${seHelt(elbilLadingStandarder.se.ladningTilPct)} procent behöver ${seTal(elbilLadingEksempelSe.kwhTilOpladning)} kWh. Till ${seTal(elbilLadingStandarder.se.elpris)} kr/kWh kostar det ${seTal(elbilLadingEksempelSe.prisForOpladning)} kr.` },
+        { question: "Vad kostar det att köra 100 km i en elbil?", answer: `Med en förbrukning på ${seTal(elbilLadingStandarder.se.forbrugKwh100km)} kWh/100 km och ett elpris på ${seTal(elbilLadingStandarder.se.elpris)} kr/kWh kostar det ${seTal(elbilLadingEksempelSe.prisPr100km)} kr. per 100 km — alltså ${seTal(elbilLadingEksempelSe.prisPrKm)} kr. per km.` },
+        { question: "Vad kostar det att ladda en elbil per månad?", answer: `Kör du ${seHelt(elbilLadingStandarder.se.kmPrMaaned)} km per månad vid ${seTal(elbilLadingStandarder.se.forbrugKwh100km)} kWh/100 km används ${seHelt(elbilLadingEksempelSe.kwhPrMaaned)} kWh och kostar det ${seTal(elbilLadingEksempelSe.maanedligPris)} kr. per månad att ladda bilen hemma.` },
+        { question: "Är beräkningen exakt?", answer: "Beräkningen visar energin bilen använder. En hemladdare är typisk cirka 85-90 % effektiv, så den verkliga räkningen från vägguttaget kan vara lite högre än beräknat. Elpriset kan också variera under dagen, så ett natt- eller spotprisavtal kan halvera kostnaden." },
+        { question: "Vad kostar en snabbladdning?", answer: `Offentlig snabbladdning kostar oftast mer än hemladdning — ofta 4-6 kr/kWh mot ditt elpris på ${seTal(elbilLadingStandarder.se.elpris)} kr/kWh. Ange det pris du betalar i elprisfältet för att se skillnaden.` },
       ],
     },
     "vandbehov": {

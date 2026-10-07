@@ -30626,3 +30626,63 @@ STATUS: 7/10 22:0x. ✅ **Importmoms på `/moms` — et værktøj til de varer, 
 ✅ **`/skridt` er live på begge domæner — DEPLOY OK 6/10 20:2x.** Målt på indhold: «Skridt til km» 14 forekomster, «1.515 skridt» 3, «6,6 km» 5, «7,9 km» 7, sitemap 1. Samme greb på beraknare.se: «Steg till km» 14, «1 515 steg» 3, «7,9 km» 7, sitemap 1.
 ✅ CEO-kø punkt 0 (review-fund 29/9) er gennemgået alle otte: Valborg fast 30. april med port på plads, svensk påskafton `offsetDays: -1`, dansk sankthans fast 23./24. juni, påskeaften-FAQ slettet, `/husleje` på nettoprisindekset, `toUtcMidnight` læser `Europe/Copenhagen`/`Stockholm`, svensk promille-FAQ taler fra `promille-genstande`, `maneder: 12` er korrekt og 1. advent har fire søndage. Det fund, der lå åbent i review-filen (`naesteJuleaften` gav 0 dage på juleaften), er rettet i `35c6175` og porten på linje 91 følger nu sin egen titel.
 ✅ **«Minutter til timer» på `/tidsberegner` — et værktøj med begge retninger (minutter ÷ 60 og timer × 60), dansk og svensk.** Datagrund: dansk autocomplete under «omregn minutter til timer» (8 af 8 træffere er selve opgaven, bl.a. «omregn 145 minutter til timer»), og GSC har 79.260 visninger / 0,3 % CTR / pos. 6,7 på `/tidsberegner`. Siden havde brødteksten og tabellen, men intet værktøj, så læseren skulle selv dividere. ⚠️ Den svenske gren monterede først komponenten i denne iteration — uden det var de svenske etiketter død kode og beraknare.se fik kun tabellen. **MÅL: /tidsberegner baseline 260 Plausible-besøgende/28d, 79.260 GSC-visninger, 0,3 % CTR, pos. 6,7 pr. 6/10** — måles igen 20/10. Se VERIFICÉR DEPLOY-note nedenfor.
+
+
+## VERIFICÉR DEPLOY-noter lukket 7/10 08:5x (flyttet fra planen)
+
+**Åben 7/10 05:4x:** `VERIFICÉR DEPLOY: /procent svarer 200 på begge domæner og metaTitle er «Procentberegner: 10 % af et tal, rabat og stigning/fald» (da) / «Procenträknare: 10 % av ett tal, rabatt och ökning/minskning» (se) og metaDescription indeholder «rabatten på 1125 kr. ned fra 9000 kr.» ceo/procent-gsc-optimering 7/10 05:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/procent | grep -o '10 % af et tal' | wc -l` → **> 0** og `grep -o 'rabatten på 1125 kr' | wc -l` → **> 0**; samme to greb på beraknare.se med «10 % av ett tal» og «rabatten på 1125 kr». Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 7/10 04:3x:** `VERIFICÉR DEPLOY: /tv-storrelse svarer 200 og viser værktøjet med feltet «Skærmens diagonal (tommer)» (forudvalgt 55), formatknapperne «16:9 (almindeligt tv)», «21:9 (ultrawide)» og «4:3 (ældre tv)», resultatet «Bredde × højde», «121,8 × 68,5 cm», «139,7 cm» og «0,83 m²» samt «Anbefalet seerafstand» og tabellen med rækkerne «32"», «55"» og «85"» ceo/tv-storrelse 7/10 04:3x`. Mål på **indhold**: værktøjet er en klient-komponent, men overskrifter, labels, knapper og eksempeltabellen står i SSR-markup'en (målt lokalt: 200 med «121,8» og «139,7»). Strip tags og grep: `curl -s https://minberegner.dk/tv-storrelse | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Skærmens diagonal (tommer)», «121,8», «139,7» og «Anbefalet seerafstand». Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 7/10 04:0x:** `VERIFICÉR DEPLOY: /laanekapacitet svarer 200 og viser værktøjet med felterne «Husstandens indkomst før skat (kr./år)», «Udbetaling (kr.)» og «Anden gæld (kr.)», gældsfaktor-knapperne «3,5»/«4»/«5», resultatet «Du kan købe bolig for op til» med «2.105.263 kr.» samt brødteksten «Så meget kan du købe bolig for» og «Lån op til» ceo/laanekapacitet 7/10 04:0x`. Mål på **indhold**: siden er en server-komponent og værktøjet en klient-komponent, men overskrifter, labels, eksempeltabellen og det forudvalgte resultat står i SSR-markup'en (målt lokalt: 200 med «2.105.263» 13 gange og «Gældsfaktoren» 6). Strip tags og grep: `curl -s https://minberegner.dk/laanekapacitet | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Du kan købe bolig for op til», «2.105.263 kr.» og «Så meget kan du købe bolig for». Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 7/10 02:5x:** `VERIFICÉR DEPLOY: /maling svarer 200 og viser værktøjet med felterne «Længde (m)», «Bredde (m)», «Højde (m)», «Dækkevne (m² pr. liter)», fluebenet «Medregn loftet», strøg-knapperne «1»/«2»/«3» og resultatet «Maling i alt», samt brødteksten «45 m² væg» og «10 liter» ceo/malingberegner 7/10 02:5x`. Mål på **indhold** med tag-strip: `curl -s https://minberegner.dk/maling | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Malingberegner», «Maling i alt», «Medregn loftet», «45 m² væg» og «10 liter». Værktøjet er en klient-komponent, men overskrifter, labels og eksempeltabellen står i SSR-markup'en (målt lokalt: 200 med «45 m²» og «10 liter»). Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 7/10 02:1x:** `VERIFICÉR DEPLOY: /gaveafgift svarer 200 og viser værktøjet med feltet «Gavens størrelse (kr.)», de tre valg «Nær familie», «Bedsteforældre / stedforældre» og «Svigerbarn» samt overskriften «Så meget må du give (2026)» og tabellen med «80.600 kr.» og «28.200 kr.» ceo/gaveafgift 7/10 02:1x`. Mål på **indhold**: siden er en server-komponent og værktøjet en klient-komponent, men overskrifter, labels og eksempeltabellen står i SSR-markup'en. Strip tags og grep: `curl -s https://minberegner.dk/gaveafgift | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Gavens størrelse (kr.)», «Så meget må du give (2026)», «80.600 kr.» og «28.200 kr.». Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 7/10 01:2x:** `VERIFICÉR DEPLOY: /procent svarer 200 på begge domæner og radiogruppen har 7 radioer med «Læg til / træk fra» samt felterne «Beløb (kr.)» og «Procent (%)» og retningsknapperne «Læg til»/«Træk fra» ceo/procent-tillaeg 7/10 01:2x`. Mål på **indhold**: `curl -s https://minberegner.dk/procent | grep -o 'Læg til / træk fra' | wc -l` → **1** og `grep -o 'Beløb (kr.)' | wc -l` → **1**; på beraknare.se «Lägg till / dra av» og «Belopp (kr)». Tilstanden er en klient-komponent, så kun labels og overskrifter står i markup'en; tallene kommer først ved interaktion. Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 7/10 01:1x:** `VERIFICÉR DEPLOY: /nutidskroner svarer 200 og viser værktøjet med feltet «Beløb (kr.)», vælgerne «Beløbet er fra år» og «Regn om til», resultatet «10.000 kr. i 2000 svarer til 16.292 kr.» og eksempeltabellen med «10.000 kr. i 1980», «10.000 kr. i 1990» og «35.718 kr.» ceo/nutidskroner 7/10 01:1x`. Mål på **indhold**: siden er en server-komponent og værktøjet en klient-komponent, men både overskrifter, labels og eksempeltabellen står i SSR-markup'en. Strip tags og grep: `curl -s https://minberegner.dk/nutidskroner | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Sådan regner du et beløb om til nutidskroner», «10.000 kr. i 1980», «Beløbet er fra år» og «i dag (august 2026)». Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 7/10 00:3x:** `VERIFICÉR DEPLOY: /brokost svarer 200 og viser det nye Øresunds-afsnit med overskriften «Hvad koster det at krydse Øresundsbroen?», tabellens kolonner «ØresundGO», «Onlinebillet» og «Betalingsanlæg», og en række med «Personbil (max 6 m)» samt «182» og «470» ceo/oresund-brokost 7/10 00:3x`. Mål på **indhold**: begge værktøjer er klient-komponenter, så læs overskrifter og tabelceller i markup'en — `curl -s https://minberegner.dk/brokost | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Hvad koster det at krydse Øresundsbroen?», «ØresundGO» og «Betalingsanlæg». Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 6/10 23:2x:** `VERIFICÉR DEPLOY: /tidsberegner svarer 200 og viser værktøjet «Omregn minutter til timer» med feltet «Minutter» (forudvalgt 145) og knapperne «25 minutter», «145 minutter», «180 minutter» på dansk, og på beraknare.se «Räkna om minuter till timmar» med «Minuter» og «25 minuter» ceo/minutter-til-timer 6/10 23:2x`. Mål på **indhold**: værktøjet er en klient-komponent, men SSR skriver overskrift, labels og knapper i markup'en — `curl -s https://minberegner.dk/tidsberegner | grep -o 'Omregn minutter til timer' | wc -l` → **> 0** og `grep -o 'Fra søgningerne' | wc -l` → **1**; samme to greb på beraknare.se med «Räkna om minuter till timmar» og «Från sökningarna». Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 6/10 22:2x:** `VERIFICÉR DEPLOY: /kalorier svarer 200 og Madvaretabellen
+er der med søgefeltet «Søg efter madvar» og rækkerne «Æg, helt, råt»,
+«Kartoffel, kogt», «Rugbrød» og «Smør», samt brødteksten «et æg på 60 gram er
+86 kcal» og «kartofler er 87 kcal kogt og 77 kcal rå» ceo/kalorier-madvarer
+6/10 22:2x`. Mål på **indhold**: `curl -s https://minberegner.dk/kalorier | grep
+-o 'Kartoffel, kogt' | wc -l` → **1** (og `grep -o 'Søg efter madvar'` → **1**).
+Tabellen er en klient-komponent, så alle 53 rækker står i markup'en fra første
+render, hvilket også er derfor Google kan indeksere den. Første reelle
+deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 7/10 22:0x:** `VERIFICÉR DEPLOY: /moms svarer 200 på begge domÃ¦ner og
+viser vÃ¦rktøjet «Moms på varer købt uden for EU» med de fire felter
+(Varens pris, Fragt, Antal vareposter) og kortet med vÃ¦rdi + fragt, told,
+moms og i alt, plus FAQ-spÃ¸rgsmålet «Hvad koster det at købe noget
+uden for EU?» — alt på dansk, og på beraknare.se «Vad kostar det att
+köpa något utanför EU?» ceo/importmoms 7/10 22:0x`. Mål på **indhold**:
+vÃ¦rktøjet er en klient-komponent, så lÃ¦s felternes labels i markup’en
+og resten i koden, indtil facit kan hentes headless. Brødtekstens punkt skal
+lÃ¦ses på rå markup: grep efter «3 EUR (ca. 22 kr.) i told pr. varepost».
+Første reelle deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 6/10 21:5x:** `VERIFICÉR DEPLOY: beraknare.se/fart svarer 200 og den
+svenska liste står med «100 km/h i m/s: 27,78 m/s», «100 km/h i mph: 62,1 mph»
+og «100 km/h i knop: 54 knop» samt «1 mil är exakt 1,609344 km»
+ceo/fart-svensk-eksempler 6/10 21:5x`. Mål på indhold med tag-strip (se advarslen
+ovenfor) — tal og enhed står hver for sig i markup'en. Første reelle
+deploy-vindue efter mergen er **7/10 07:30**.
+
+**Åben 6/10 21:3x:** `VERIFICÉR DEPLOY: /procent svarer 200 på begge domæner og
+tilstandene er seks, så radiogruppen har 6 radioer og grid-klassen md:grid-cols-3
+på dansk og svensk ceo/procent-rabat 6/10 21:3x`. Mål på **indhold**:
+`curl -s https://minberegner.dk/procent | grep -o 'Pris før rabat (kr.)' | wc -l`
+→ **1** (Rabat i procent er en klient-tilstand, så kun felternes labels står i
+HTML'en; tallene kommer først ved interaktion). Samme greb på beraknare.se med
+«Pris före rabatt (kr)». Første reelle deploy-vindue efter mergen er **7/10
+07:30**.
+
+**Åben 6/10 20:4x:** `VERIFICÉR DEPLOY: /fart svarer 200 på begge domæner og viser Hastighedsomregneren med «100 km/t i m/s: 27,78 m/s», «100 km/t i mph: 62,1 mph», «100 km/t i knop: 54 knop» og FAQ-spørgsmålet «Hvor mange m/s er 100 km/t?» på dansk og «Hur många m/s är 100 km/h?» på svensk, samt den nye metaDescription med «omregn km/t til m/s, mph og knop» / «omvandla km/h till m/s, mph och knop» ceo/fart-omregner 6/10 20:4x`. Mål på **indhold**: `curl -s https://minberegner.dk/fart | grep -o '27,78 m/s' | wc -l` → **> 0**, `grep -o '62,1 mph' | wc -l` → **> 0**, `grep -o 'Hvor mange m/s er 100 km/t' | wc -l` → **> 0**, og samme tre greb på beraknare.se. Værktøjet er en klient-komponent, så læs den i koden indtil facit kan hentes headless. Første reelle deploy-vindue efter mergen er **6/10 21:30**.
