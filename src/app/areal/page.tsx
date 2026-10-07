@@ -124,8 +124,8 @@ export default async function ArealPage() {
             {se ? "Area är ytans storlek i m² — golvet, väggen, tomten. Det är vad den här sidan räknar. Volym är utrymmet innanför kroppen i m³ — det räknar " : "Areal er fladens størrelse i m² — gulvet, væggen, grundstykket. Det er det, denne side regner. Rumfang er pladsen inde i kroppen i m³ — det regner "}
             <Link href="/rumfang">{se ? "volymberäknaren" : "rumfangsberegneren"}</Link>
             {se
-              ? ". En låda på 2 × 1 × 0,5 m har 10 m² golv men bara 1 m³ volym."
-              : ". Den samme kasse på 2 × 1 × 0,5 m har 10 m² gulv, men kun 1 m³ rumfang."}
+              ? ". En låda på 2 × 1 × 0,5 m har 2 m² golv men bara 1 m³ volym."
+              : ". Den samme kasse på 2 × 1 × 0,5 m har 2 m² gulv, men kun 1 m³ rumfang."}
           </p>
 
           <h2>{se ? "Varför diameter och inte radie" : "Hvorfor diameter og ikke radius"}</h2>

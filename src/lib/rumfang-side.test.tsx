@@ -143,7 +143,7 @@ describe("/rumfang siden", () => {
     expect(kasse.kubikmeter).toBe(1);
     expect(kasse.liter).toBe(1000);
     expect(html).toContain("1.000 liter");
-    expect(html).toContain("10 m²");
+    expect(html).toContain("2 m²");
   });
 
   test("OG-billedet er sitets eget, ikke en ny fil", () => {

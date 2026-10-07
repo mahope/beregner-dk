@@ -113,8 +113,8 @@ export default async function RumfangPage() {
               ? `Areal är ytan storlek i m² — golvet, väggen, tomten. Det är vad ` : `Areal er fladens størrelse i m² — gulvet, væggen, grundstykket. Det er det, `}
             <Link href="/kvadratmeter">{se ? "kvadratmeterkalkylatorn" : "kvadratmeterberegneren"}</Link>
             {se
-              ? " räknar. Rumfang är utrymmet innanför kroppen i m³. Samma låda på 2 × 1 × 0,5 m har 10 m² golv och 1 m³ rumfang."
-              : " regner. Rumfang er pladsen inde i kroppen i m³. Den samme kasse på 2 × 1 × 0,5 m har 10 m² gulv og 1 m³ rumfang."}
+              ? " räknar. Rumfang är utrymmet innanför kroppen i m³. Samma låda på 2 × 1 × 0,5 m har 2 m² golv och 1 m³ rumfang."
+              : " regner. Rumfang er pladsen inde i kroppen i m³. Den samme kasse på 2 × 1 × 0,5 m har 2 m² gulv og 1 m³ rumfang."}
           </p>
 
           <h2>{se ? "Varför diameter och inte radie" : "Hvorfor diameter og ikke radius"}</h2>
