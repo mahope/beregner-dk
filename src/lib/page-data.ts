@@ -86,6 +86,11 @@ import { FLISER_EKSEMPEL, FLISER_STANDARD_SPILD_PCT, fliserEksempel, fliserPrKva
 import { GRAM_TIL_DL_EKSEMPEL, dlTilGram, formatGramTilDl, gramTilDl, gramTilDlEksempel, vareVedId } from "./gram-til-dl";
 import { PORTIONER_EKSEMPEL, beregnPortioner, formatPortion, vareVedId as portionVareVedId } from "./portioner";
 import {
+  OPSKRIFT_EKSEMPEL_DATA,
+  OPSKRIFT_META_BESKRIVELSE,
+  OPSKRIFT_META_TITEL,
+} from "./opskrift-kalorier";
+import {
   MADVARER,
   MADVARER_KILDE,
   PROTEIN_META_BESKRIVELSE,
@@ -137,6 +142,12 @@ const PORTIONER_EKS = beregnPortioner(PORTIONER_EKSEMPEL.antalPersoner);
 const PORTIONER_EKS_PASTA = PORTIONER_EKS.find((r) => r.id === "pasta-toerret")!;
 const PORTIONER_META_TITEL = `Portioner pr. person: pasta ${PORTIONER_PASTA.min}-${PORTIONER_PASTA.max} g, kartofler ${PORTIONER_KARTOFLER.min}-${PORTIONER_KARTOFLER.max} g`;
 const PORTIONER_META_BESKRIVELSE = `Hvor meget mad skal der beregnes pr. person? Se anbefalede mængder for pasta, ris, kartofler og kød, og regn mængden ud til dit antal gæster.`;
+
+/** De to opskrifter FAQ'en regner med — samme tal som sidens egen brødtekst. */
+const OPSKRIFT_CARBONARA = OPSKRIFT_EKSEMPEL_DATA[0];
+const OPSKRIFT_GROED = OPSKRIFT_EKSEMPEL_DATA[1];
+const opskriftTal = (vaerdi: number) =>
+  formatNumber(vaerdi, "da", { maximumFractionDigits: 0 });
 
 /**
  * `/fliser`s egne tal til titel, beskrivelse og FAQ. De læser `fliserEksempel()`
@@ -3476,6 +3487,33 @@ faqItems: kalorierFaqItems("da"),
         { question: "Hvorfor står mængderne som et interval?", answer: "Appetitten, antallet af retter og hvor meget tilbehør der er ved siden af flytter tallet. Er retten en hovedret med lidt tilbehør, så gå efter den høje ende; er den et tilbehør, så brug den lave." },
         { question: "Hvor meget skal jeg regne pr. barn?", answer: "Børn spiser typisk omkring halvt så meget som en voksen. Skal du både have voksne og børn med, kan du regne hvert barn som en halv person, når du lægger antallet sammen." },
         { question: "Er mængderne vejledende?", answer: "Ja. Tallene er de anbefalede mængder pr. voksen fra kildens tabel og kan variere med retten og gæsternes appetit. Brug dem som et udgangspunkt og justér efter behov." },
+      ],
+    },
+    "kalorier-i-opskrift": {
+      slug: "kalorier-i-opskrift",
+      title: "Kalorier i opskrift – beregn kcal pr. portion",
+      description:
+        "Læg opskriftens ingredienser og gram i beregneren, skriv antallet af portioner, og se kalorier og makroer for hele retten.",
+      metaTitle: OPSKRIFT_META_TITEL,
+      metaDescription: OPSKRIFT_META_BESKRIVELSE,
+      keywords: ["kalorier i opskrift", "beregn kalorier i mad", "kalorier pr portion", "kcal pr portion", "hvor mange kalorier i en portion", "beregn kalorier i opskrift", "makroer i opskrift", "kalorier i en ret"],
+      ogTitle: OPSKRIFT_META_TITEL,
+      ogDescription:
+        "Læg ingredienser og gram i beregneren, og se kcal og makroer pr. portion for hele retten.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Kalorieberegner til opskrifter",
+      schemaDescription:
+        "Beregn kalorier, protein, fedt og kulhydrat i en opskrift ved at lægge ingrediensernes gram sammen og dividere med antallet af portioner.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvordan beregner jeg kalorier i en opskrift?", answer: `Vej hver ingrediens i gram og læg mængderne i beregneren. Kalorierne lægges bare sammen, og summen divideres med antallet af portioner: ${OPSKRIFT_CARBONARA.navn.toLowerCase()} til ${OPSKRIFT_CARBONARA.portioner} giver ${opskriftTal(OPSKRIFT_CARBONARA.total.kcal)} kcal i alt og derfor ${opskriftTal(OPSKRIFT_CARBONARA.prPortion.kcal)} kcal pr. portion.` },
+        { question: `Hvor mange kalorier er der i en portion ${OPSKRIFT_CARBONARA.navn.toLowerCase()}?`, answer: `Én portion af de ${OPSKRIFT_CARBONARA.portioner} giver ${opskriftTal(OPSKRIFT_CARBONARA.prPortion.kcal)} kcal, fordelt på ${opskriftTal(OPSKRIFT_CARBONARA.prPortion.protein)} g protein, ${opskriftTal(OPSKRIFT_CARBONARA.prPortion.fedt)} g fedt og ${opskriftTal(OPSKRIFT_CARBONARA.prPortion.kulhydrat)} g kulhydrat.` },
+        { question: `Er der mange kalorier i ${OPSKRIFT_GROED.navn.toLowerCase()}?`, answer: `${OPSKRIFT_GROED.navn} til ${OPSKRIFT_GROED.portioner} giver ${opskriftTal(OPSKRIFT_GROED.prPortion.kcal)} kcal pr. portion — en let morgenmad, fordi grøden næsten er bygget af havregryn og mælk. Tallene regnes ud fra de samme rækker som kalkulatoren bruger.` },
+        { question: "Skal jeg veje pastaen tør eller kogt?", answer: "Vej den tør, hvis rækken hedder «tørret» — og kogt, hvis den hedder «kogt». Kogt pasta har optaget vand og vejer derfor mere uden at have flere kalorier, så den kaloritætte er lavere pr. 100 g. Rækkens navn er det, der afgør hvilken vægt du skal bruge." },
+        { question: "Er kaloritallet i en opskrift præcist?", answer: "Det er vejledende. Madvarernes tal er gennemsnit fra kilden, og makroernes andel af energien er regnet med de faste 4-4-9 kcal pr. gram, mens kildens eget kalorital er målt med næringsstof-specifikke faktorer. Til at følge en kurve eller holde vægten er det nok — til et laboratorium er det det ikke." },
+        { question: "Kan jeg beregne kalorier i en kage eller en suppe?", answer: "Ja, metoden er den samme: alle ingredienser lægges sammen, og resultatet divideres med antallet af stykker eller skåle. En hel kage spist i løbet af dagen er teknisk set én portion — her hjælper beregneren dig ikke med kalorierne, men den kan godt vise dem." },
       ],
     },
     "tv-storrelse": {

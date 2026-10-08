@@ -1,4 +1,5 @@
 import KalorieBeregner from "@/components/KalorieBeregner";
+import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -68,6 +69,15 @@ export default async function KalorierPage() {
             så regner den den portione, du spiser — <strong>et æg på 60 gram er{" "}
             {kcalIMadvare("Æg, helt, råt", 60)} kcal</strong>, en banan på 118
             gram er {kcalIMadvare("Banan", 118)} kcal.
+          </p>
+          <p>
+            Tabellen slår én vare ad gangen op. Skal du vide hvad en{" "}
+            <strong>hel ret</strong> giver, lægger du ingredienserne sammen i{" "}
+            <Link href="/kalorier-i-opskrift" className="underline font-medium">
+              beregneren for kalorier i opskrifter
+            </Link>{" "}
+            — den dividerer desuden summen med antallet af portioner, så du får
+            kcal pr. portion frem for kcal i hele gryden.
           </p>
           <p>
             Tallene er hentet fra{" "}

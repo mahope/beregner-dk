@@ -312,6 +312,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Fliseberegner", description: "Beregn hvor mange fliser og kasser du skal bruge", href: "/fliser", popular: false, category: "Hverdag" },
   { title: "Gram til dl", description: "Omregn gram til dl og dl til gram for mel, sukker og gryn", href: "/gram-til-dl", popular: false, category: "Hverdag" },
   { title: "Portioner pr. person", description: "Beregn hvor meget mad der skal bruges pr. person", href: "/portioner", popular: false, category: "Hverdag" },
+  { title: "Kalorier i opskrift", description: "Beregn kalorier og makroer pr. portion i en opskrift", href: "/kalorier-i-opskrift", popular: false, category: "Hverdag" },
   { title: "TV-størrelse", description: "Omregn tv'ets tommer til cm og se seerafstanden", href: "/tv-storrelse", popular: false, category: "Hverdag" },
   { title: "Lånekapacitet", description: "Se hvor meget du kan låne til bolig", href: "/laanekapacitet", popular: false, category: "Bolig" },
   { title: "Byggepris", description: "Beregn hvad det koster at bygge et hus", href: "/byggepris", popular: false, category: "Bolig" },
