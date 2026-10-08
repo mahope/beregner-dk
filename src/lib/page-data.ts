@@ -40,6 +40,7 @@ import { OMKREDS_EKSEMPEL } from "./omkreds";
 import { RETVINKLET_EKSEMPEL } from "./retvinklet-trekant";
 import { HUNDEALDER_EKSEMPEL, menneskeAar, regnestykke } from "./hundealder";
 import { SOEVN_EKSEMPEL, soevnInterval, soevnbehovFaqSvar } from "./soevnbehov";
+import { KOFFEIN_EKSEMPEL, KOFFEIN_GRAENSER, koffeinBeregning, koffeinFaqSvar } from "./koffein";
 import { BYGGEPRIS_NIVEAUER, beregnByggepris } from "./byggepris";
 import {
   GAELDSFAKTOR_STANDARD,
@@ -1353,6 +1354,32 @@ const daPages: Record<string, PageData> = {
         { question: "Er 6 timers søvn nok?", answer: "Nej, ikke for de fleste voksne. Anbefalingen er mindst 7 timer, og 7-9 timer er det typiske behov. Fast søvnunderskud er forbundet med blandt andet nedsat immunforsvar, dårligere koncentration og øget risiko for hjerte-kar-sygdom." },
         { question: "Hvornår bør jeg gå i seng, hvis jeg skal op kl. 07:00?", answer: "Søvnen skifter i cyklusser på cirka 90 minutter. Regner man baglæns fra 07:00 i hele cyklusser og med cirka 15 minutter til at falde i søvn, ligger sengetiderne omkring 21:45 (6 cyklusser), 23:15 (5) og 00:45 (4). Vælg den, der passer til dig." },
         { question: "Hvor mange søvncyklusser har man om natten?", answer: "De fleste har 4-6 cyklusser om natten, hver på cirka 90 minutter. Det svarer til 6-9 timers søvn. Vågner du midt i en cyklus, føles det ofte som at blive vækket midt i en drøm." },
+      ],
+    },
+    "koffein": {
+      slug: "koffein",
+      title: "Koffein",
+      description: `Hvor meget koffein får du om dagen? Se koffeinen i kaffe, te, cola, energidrik og chokolade — og sammenlign med EFSA's anbefalede grænser. En filterkaffe på 200 ml giver cirka ${koffeinBeregning([{ kilde: "filterkaffe", gram: 200 }], "voksen").totalMg} mg.`,
+      metaTitle: `Koffeinberegner: ${koffeinBeregning([{ kilde: "filterkaffe", gram: 200 }], "voksen").totalMg} mg i en filterkaffe`,
+      metaDescription: `Hvor meget koffein får du om dagen? Se koffeinen i kaffe, te, cola, energidrik og chokolade. Sammenlign med EFSA: 400 mg voksne, 200 mg gravide.`,
+      keywords: ["koffein", "koffeinberegner", "hvor meget koffein", "koffein i kaffe", "koffein i cola", "koffein grænse", "koffein gravid", "koffein i energidrik"],
+      ogTitle: `Koffeinberegner: ${koffeinBeregning([{ kilde: "filterkaffe", gram: 200 }], "voksen").totalMg} mg i en filterkaffe`,
+      ogDescription: "Se hvor meget koffein du får om dagen fra kaffe, te, cola, energidrik og chokolade. Sammenlign med EFSA's anbefalede grænser.",
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Koffeinberegner",
+      schemaDescription: "Beregn dit daglige koffeinindtag fra kaffe, te, cola, energidrik og chokolade. Sammenlign med EFSA's anbefalede grænser.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvor meget koffein er der i en kop kaffe?", answer: "En filterkaffe på 200 ml giver cirka 90 mg koffein, en espresso på 60 ml giver cirka 80 mg. Koffeinen varierer med kaffesort, brygning og størrelse." },
+        { question: "Hvor meget koffein er der i en cola?", answer: "En cola på 355 ml giver cirka 40 mg koffein. Det er cirka halvdelen af en filterkaffe." },
+        { question: "Hvor meget koffein er der i en energidrik?", answer: "En energidrik på 250 ml giver cirka 80 mg koffein — det svarer til en espresso. EFSA anbefaler højst 200 mg i én enkeltdosis." },
+        { question: "Hvor meget koffein må jeg have om dagen?", answer: koffeinFaqSvar("voksen", "da") },
+        { question: "Hvor meget koffein må en gravid have?", answer: koffeinFaqSvar("gravid", "da") },
+        { question: "Hvor meget koffein er der i chokolade?", answer: "50 g mørk chokolade giver cirka 25 mg koffein, 50 g mælkechokolade giver cirka 10 mg. Det er mindre end i kaffe, men det løber sammen." },
+        { question: "Hvor meget koffein er der i te?", answer: "En kop sort te på 220 ml giver cirka 50 mg koffein, grøn te giver cirka 26 mg. Te har mindre koffein end kaffe, men mere end cola." },
+        { question: "Hvornår påvirker koffein søvnen?", answer: "EFSA skriver, at en enkeltdosis på 100 mg kan påvirke søvnen, især når den indtages tæt på sengetid. Koffein har en halveringstid på cirka 4-6 timer." },
       ],
     },
     "laantype": {
@@ -4482,6 +4509,32 @@ const sePages: Record<string, PageData> = {
         { question: "Räcker 6 timmars sömn?", answer: "Nej, inte för de flesta vuxna. Rekommendationen är minst 7 timmar, och 7-9 timmar är det vanliga behovet. Återkommande sömnbrist kopplas till bland annat nedsatt immunförsvar, sämre koncentration och högre risk för hjärt- och kärlsjukdom." },
         { question: "När bör jag gå och lägga mig om jag ska upp kl. 07:00?", answer: "Sömnen rör sig i cykler på cirka 90 minuter. Räknar man bakåt från 07:00 i hela cykler och med cirka 15 minuter för att somna, ligger läggdags runt 21:45 (6 cykler), 23:15 (5) och 00:45 (4). Välj den som passar dig." },
         { question: "Hur många sömncykler har man per natt?", answer: "De flesta har 4-6 cykler per natt, var och en på cirka 90 minuter. Det motsvarar 6-9 timmars sömn. Vaknar du mitt i en cykel känns det ofta som att bli väckt mitt i en dröm." },
+      ],
+    },
+    "koffein": {
+      slug: "koffein",
+      title: "Koffein",
+      description: `Hur mycket koffein får du per dag? Se koffeinet i kaffe, te, cola, energidryck och choklad — och jämför med EFSA:s rekommenderade gränser. En filterkaffe på 200 ml ger cirka ${koffeinBeregning([{ kilde: "filterkaffe", gram: 200 }], "voksen").totalMg} mg.`,
+      metaTitle: `Koffeinkalkylator: ${koffeinBeregning([{ kilde: "filterkaffe", gram: 200 }], "voksen").totalMg} mg i en filterkaffe`,
+      metaDescription: `Hur mycket koffein får du per dag? Se koffeinet i kaffe, te, cola, energidryck och choklad. Jämför med EFSA: 400 mg vuxna, 200 mg gravida.`,
+      keywords: ["koffein", "koffeinkalkylator", "hur mycket koffein", "koffein i kaffe", "koffein i cola", "koffein gräns", "koffein gravid", "koffein i energidryck"],
+      ogTitle: `Koffeinkalkylator: ${koffeinBeregning([{ kilde: "filterkaffe", gram: 200 }], "voksen").totalMg} mg i en filterkaffe`,
+      ogDescription: "Se hur mycket koffein du får per dag från kaffe, te, cola, energidryck och choklad. Jämför med EFSA:s rekommenderade gränser.",
+      category: "Hälsa",
+      breadcrumbCategory: "Hälsa",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Koffeinkalkylator",
+      schemaDescription: "Räkna ditt dagliga koffeintag från kaffe, te, cola, energidryck och choklad. Jämför med EFSA:s rekommenderade gränser.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hur mycket koffein finns det i en kopp kaffe?", answer: "En filterkaffe på 200 ml ger cirka 90 mg koffein, en espresso på 60 ml ger cirka 80 mg. Koffeinen varierar med kaffesort, bryggning och storlek." },
+        { question: "Hur mycket koffein finns det i en cola?", answer: "En cola på 355 ml ger cirka 40 mg koffein. Det är cirka hälften av en filterkaffe." },
+        { question: "Hur mycket koffein finns det i en energidryck?", answer: "En energidryck på 250 ml ger cirka 80 mg koffein — det motsvarar en espresso. EFSA rekommenderar högst 200 mg i en endos." },
+        { question: "Hur mycket koffein får jag ha per dag?", answer: koffeinFaqSvar("voksen", "se") },
+        { question: "Hur mycket koffein får en gravid ha?", answer: koffeinFaqSvar("gravid", "se") },
+        { question: "Hur mycket koffein finns det i choklad?", answer: "50 g mörk choklad ger cirka 25 mg koffein, 50 g mjölkchoklad ger cirka 10 mg. Det är mindre än i kaffe, men det räcker ihop." },
+        { question: "Hur mycket koffein finns det i te?", answer: "En kopp svart te på 220 ml ger cirka 50 mg koffein, grönt te ger cirka 26 mg. Te har mindre koffein än kaffe, men mer än cola." },
+        { question: "När påverkar koffein sömnen?", answer: "EFSA skriver att en endos på 100 mg kan påverka sömnen, särskilt när den intas nära läggdags. Koffein har en halveringstid på cirka 4-6 timmar." },
       ],
     },
     "laantype": {

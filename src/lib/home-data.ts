@@ -276,6 +276,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", popular: false, category: "Sundhed" },
   { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", popular: false, category: "Sundhed" },
   { title: "Søvnbehov", description: "Se hvor meget søvn du har brug for efter din alder", href: "/soevnbehov", popular: false, category: "Sundhed" },
+  { title: "Koffein", description: "Se hvor meget koffein du får om dagen", href: "/koffein", popular: false, category: "Sundhed" },
 
   // Familie
   { title: "Ægløsningsberegner", description: "Find dine frugtbare dage og din ægløsning", href: "/aegloesning", popular: false, category: "Familie" },
@@ -434,6 +435,7 @@ const noCalculators: HomeCalculator[] = [
   { title: "Konfirmasjonsbudsjett", description: "Beregn budsjett for konfirmasjon med utgifter og gaver", href: "/konfirmation", popular: false, category: "Familie" },
   { title: "Vekttap Kalkulator", description: "Beregn kalorieunderskudd for vekttap", href: "/vaegttab", popular: false, category: "Helse" },
   { title: "Skritt til km", description: "Hvor langt er 10 000 skritt?", href: "/skridt", popular: false, category: "Helse" },
+  { title: "Koffein", description: "Hvor mye koffein får du per dag?", href: "/koffein", popular: false, category: "Helse" },
   { title: "Reisebudsjett", description: "Beregn reisebudsjett til populære destinasjoner", href: "/rejsebudget", popular: false, category: "Hverdag" },
   { title: "Solcelle Kalkulator", description: "Beregn besparelse og tilbakebetalingstid for solceller", href: "/solceller", popular: false, category: "Bolig" },
   { title: "Bryllupsbudsjett", description: "Beregn komplett bryllupsbudsjett", href: "/bryllup", popular: false, category: "Familie" },
@@ -593,6 +595,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Kaloriförbränning", description: "Förbrända kalorier vid motion", href: "/motion-kalorier", popular: false, category: "Hälsa" },
   { title: "Proteinbehov", description: "Beräkna ditt dagliga proteinbehov", href: "/proteinbehov", popular: false, category: "Hälsa" },
   { title: "Sömnbehov", description: "Hur mycket sömn behöver du?", href: "/soevnbehov", popular: false, category: "Hälsa" },
+  { title: "Koffein", description: "Hur mycket koffein får du per dag?", href: "/koffein", popular: false, category: "Hälsa" },
   { title: "Elbil vs. bensin", description: "Jämför elbil och bensinbil", href: "/elbil", popular: false, category: "Vardag" },
   { title: "Laddkostnad elbil", description: "Beräkna vad det kostar att ladda din elbil", href: "/elbil-lading", popular: false, category: "Vardag" },
   { title: "Jämförpris", description: "Hitta den billigaste varan per enhet", href: "/enhedspris", popular: false, category: "Vardag" },

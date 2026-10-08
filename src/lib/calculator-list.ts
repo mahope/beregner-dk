@@ -69,6 +69,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/motion-kalorier", titles: { da: "Kalorieforbrænding", no: "Kaloriforbrenning", se: "Kaloriförbränning" }, descriptions: { da: "Forbrændte kalorier ved motion", no: "Forbrente kalorier ved trening", se: "Förbrända kalorier vid motion" } },
   { href: "/proteinbehov", titles: { da: "Proteinbehov", no: "Proteinbehov", se: "Proteinbehov" }, descriptions: { da: "Beregn dit daglige proteinbehov", no: "Beregn ditt daglige proteinbehov", se: "Beräkna ditt dagliga proteinbehov" } },
   { href: "/soevnbehov", titles: { da: "Søvnbehov", no: "Søvnbehov", se: "Sömnbehov" }, descriptions: { da: "Hvor meget søvn har du brug for?", no: "Hvor mye søvn trenger du?", se: "Hur mycket sömn behöver du?" } },
+  { href: "/koffein", titles: { da: "Koffein", no: "Koffein", se: "Koffein" }, descriptions: { da: "Hvor meget koffein får du om dagen?", no: "Hvor mye koffein får du per dag?", se: "Hur mycket koffein får du per dag?" } },
   { href: "/rygestop", daOnly: true, titles: { da: "Rygestop", no: "Røykeslutt", se: "Sluta röka" }, descriptions: { da: "Se hvad du sparer på at holde op med at ryge", no: "Se hvor mye du sparer på å slutte å røyke", se: "Se vad du sparar på att sluta röka" } },
   { href: "/alkoholenheder", daOnly: true, titles: { da: "Alkoholenheder", no: "Alkoholenheter", se: "Alkoholenheter" }, descriptions: { da: "Beregn antal genstande ud fra mængde og alkoholprocent", no: "Beregn alkoholenheter ut fra mengde og alkoholprosent", se: "Beräkna alkoholenheter utifrån mängd och alkoholprocent" } },
   // Tid
@@ -231,7 +232,8 @@ const relatedMap: Record<string, string[]> = {
   "/skridt": ["/motion-kalorier", "/pace", "/kalorier", "/vaegttab", "/idealvaegt", "/soevnbehov"],
   "/motion-kalorier": ["/kalorier", "/vaegttab", "/bmi", "/vandbehov", "/skridt", "/soevnbehov"],
   "/proteinbehov": ["/kalorier", "/bmi", "/motion-kalorier", "/vandbehov", "/vaegttab"],
-  "/soevnbehov": ["/vandbehov", "/kalorier", "/motion-kalorier", "/bmi", "/skridt"],
+  "/soevnbehov": ["/vandbehov", "/kalorier", "/motion-kalorier", "/bmi", "/skridt", "/koffein"],
+  "/koffein": ["/kalorier", "/soevnbehov", "/vandbehov", "/alder", "/promille"],
   "/dato": ["/tidsberegner", "/alder", "/tidszone", "/feriepenge", "/pension", "/ugenummer"],
   "/tidsberegner": ["/dato", "/tidszone", "/alder", "/timepris", "/kalorier", "/ugenummer"],
   "/pace": ["/tidsberegner", "/fart", "/kalorier", "/dato", "/alder"],
