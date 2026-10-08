@@ -1,3 +1,4 @@
+STATUS: 8/10 12:5x. ✅ **`/portioner` — beregn hvor meget mad der skal bruges pr. person.** Datagrund: dansk autocomplete (hl=da, 8/10) giver «hvor mange gram pasta pr person» med 10 af 10 træffere (pasta til 2/3/4/6 personer, pastasalat), «hvor mange gram ris pr person» 10/10 og «hvor mange gram kartofler pr person» 10/10, plus «hvor meget kød pr person» 10/10; sitet havde køkkenomregnere, men ingen portionsberegner. Mængderne er fra én kilde (dk-kogebogen.dk's tabel «Beregnede mængder pr. person», læst 8/10), hver vare er et interval, og tabel, FAQ og metadata læser alle `portioner.ts`. Dansk (daOnly). **MÅL: /portioner baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 08:2x. ✅ **`/kulhydrater-i-madvarer` — kulhydrat pr. 100 g for 53 madvarer, med søgning, «gram for 50 g kulhydrat» og «pr. 100 kcal».** Datagrund: dansk autocomplete (hl=da, 8/10) har **10 af 10** træffere under «hvor mange kulhydrater er der i» som madvarer (banan, kartofler, øl, æble, æg, havregryn, vandmelon, gulerødder, jordbær, rugbrød), og svensk «kolhydrater i» gentager mønstret (potatis, ägg, ris, pasta). Tallene er de samme som på `/kalorier` (USDA FoodData Central, SR Legacy 2018-04, `fdcId` pr. række) — siden skriver ingen tal selv, og tabel, FAQ og metadata læser alle `kulhydrater-i-madvarer.ts`. Samtidig rettet «Australien ochNya Zeeland» → «och Nya Zeeland» på beraknare.se. Dansk (daOnly). **MÅL: /kulhydrater-i-madvarer baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 07:5x. ✅ **`/protein-i-madvarer` — protein pr. 100 g for 53 madvarer, med søgning, «gram for 20 g» og «pr. 100 kcal».** Datagrund: dansk autocomplete (hl=da, 8/10) giver «protein i æg», «protein i kylling», «protein i havregryn», «protein i hytteost», «protein i mælk» og «hvor meget protein er der i et æg» som ti træffere under «protein i»/«hvor meget protein»; `/proteinbehov` svarede på behovet, men ikke på opslaget. Tallene er de samme som på `/kalorier` (USDA FoodData Central, SR Legacy 2018-04, `fdcId` pr. række) — siden skriver ingen tal selv, og FAQ, tabeller og metadata læser alle `protein-i-madvarer.ts`. Den håndskrevne sætning på `/proteinbehov` («100 g kylling ca. 25 g», usourcet) er samtidig rettet til tabellens tal (kylling 21,4 g, hytteost 11,1 g) med link til den nye side. Dansk (daOnly). **MÅL: /protein-i-madvarer baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 07:1x. ✅ **`/gram-til-dl` — omregn gram til dl og dl til gram for 21 ingredienser.** Datagrund: dansk autocomplete (hl=da) giver **10 af 10** træffere under «gram til dl» (mel, sukker, havregryn, hvedemel, brun farin, ris, creme fraiche, græsk yoghurt) og svensk «gram till dl»; sitet havde enheds- og kvadratmeterberegnere, men intet køkkenværktøj. Tabellen (21 varer, 1 dl = X g) er fra Illustreret Videnskabs omregningstabel; værktøjet omregner begge veje, og tabel, FAQ og metadata læser alle `gram-til-dl.ts`, så ingen kopi kan glide fra beregningen. Værktøjet er markeret **vejledende** (vægten varierer med fyldningen). Dansk (daOnly — creme fraiche/yoghurt er ikke i kilden). **MÅL: /gram-til-dl baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
@@ -44,6 +45,7 @@ STATUS: 8/10 05:5x. ✅ **`/uger-i-aret` — hvor mange uger er der på et år, 
 | `/uger-i-aret` (8/10, ny) | **0** | — | — | — |
 | `/veckor-i-aret` (8/10, ny) | **0** | — | — | — |
 | `/gram-til-dl` (8/10, ny) | **0** | — | — | — |
+| `/portioner` (8/10, ny) | **0** | — | — | — |
 | `/protein-i-madvarer` (8/10, ny) | **0** | — | — | — |
 | `/kulhydrater-i-madvarer` (8/10, ny) | **0** | — | — | — |
 | `/laantype` (6/10, ny) | **0** | — | — | — |
@@ -100,14 +102,18 @@ svensk «procent skillnad mellan två tal» har 10 af 10 relaterede. Siden lære
 allerede de to formler, men værktøjet kunne kun den ensidige — nu får
 læseren begge tal fra ét talpar.
 
-**F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
+**F0d. [~I] To sider måler deres nye titel i 14 dage, før der røres ved den.**
 `/rentefradrag` (5,8 %) og `/boligstoette` (2,5 %) er GSC-uddragtets to højeste
 CTR, så deres **danske** titler får ikke et regnet eksempel, før målingen er
-læst. **Accept:** tallene fra GSC 17/10 står i tabellen; bagefter enten regnet
-eksempel eller en skriftlig begrundelse for at lade være. De svenske
-pendanttitler er rettet 3/10. Lukket herfra: `/arveafgift`, `/renteberegner`,
-`/alder`, `/tidszone`, `/boernepenge`, `/dato` — alle med regnet eksempel i
-porten.
+læst. **Ac/tbaseline:** CTR målt 8/10 08:2x: /rentefradrag 5,8 % (pos. 5,4),
+/boligstoette 2,5 % (pos. 8,7). GSC-eksport dækker 8/9 → 6/10. Måles igen ~22/10.
+Deploy: /kulhydrater-i-madvarer VERIFICÉR DEPLOY note Åben 8/10 08:2x — siden
+er endnu ikke live (404), vent på batch-deploy ved 12:30/17:30. Første reelle
+deploy-vindue efter mergen var 8/10 12:30.
+**Accept:** tallene fra GSC 17/10 står i tabellen; bagefter enten regnet eksempel
+eller en skriftlig begrundelse for at lade være. De svenske pendanttitler er
+rettet 3/10. Lukket herfra: `/arveafgift`, `/renteberegner`, /alder, /tidszone,
+/boernepenge, /dato — alle med regnet eksempel i portalen.
 
 **F1. [x] FÆRDIG 7/10 Søgeniveau-data for `/procent`** — 150.470 visninger, 0,1 %, pos 7,4.
 Titel/beskrivelse matcher nu «10 procent af» og rabat-spørgsmålet (1125 kr ned fra 9000 kr).
@@ -137,6 +143,7 @@ Leveret 8/10 05:5x: **`/uger-i-aret` — hvor mange uger er der på et år, uger
 Leveret 8/10 07:1x: **`/gram-til-dl` — omregn gram til dl og dl til gram for 21 ingredienser**, med en vægt-pr.-dl-tabel grupperet i fire kategorier og en vejledende-markering. Datagrund: 10 af 10 danske autocomplete-træffere under «gram til dl». Kilden (Illustreret Videnskabs omregningstabel) er den ene kilde for alle varer; creme fraiche og græsk yoghurt er ikke med, fordi de ikke står i den. Dansk (daOnly).
 Leveret 8/10 07:5x: **`/protein-i-madvarer` — protein pr. 100 g for 53 madvarer**, med søgning, «gram for 20 g» og «pr. 100 kcal». Datagrund: ti danske autocomplete-træffere under «protein i»/«hvor meget protein». Tallene er de samme som på `/kalorier` (USDA FoodData Central, `fdcId` pr. række). Dansk (daOnly).
 Leveret 8/10 08:2x: **`/kulhydrater-i-madvarer` — kulhydrat pr. 100 g for 53 madvarer**, med søgning, «gram for 50 g kulhydrat» og «pr. 100 kcal». Datagrund: 10 af 10 danske autocomplete-træffere under «hvor mange kulhydrater er der i» er madvarer. Tallene er de samme som på `/kalorier` (USDA FoodData Central, `fdcId` pr. række). Dansk (daOnly).
+Leveret 8/10 12:5x: **`/portioner` — beregn hvor meget mad der skal bruges pr. person**, med et antal-personer-felt, en tabel pr. kategori (kød og fisk, kartofler og grønt, pasta/ris/tilbehør) og en fremhævet boks med de mest søgte varer. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor mange gram pasta/ris/kartofler pr person» og «hvor meget kød pr person». Mængderne er fra én kilde (dk-kogebogen.dk), hver vare er et interval, og tabel, FAQ og metadata læser `portioner.ts`. Dansk (daOnly).
 
 - **[x] FÆRDIG 7/10 01:2x — «Læg til / træk fra procent» på `/procent`** (syvende
   tilstand, dansk og svensk). Datagrund: 10 af 10 danske autocomplete-træffere
@@ -192,6 +199,8 @@ Leveret 8/10 08:2x: **`/kulhydrater-i-madvarer` — kulhydrat pr. 100 g for 53 m
   borger.dk (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 8/10 12:5x:** `VERIFICÉR DEPLOY: /portioner svarer 200 og viser titlen «Portioner pr. person: pasta 75-100 g, kartofler 150-250 g», overskrifterne «Hvor meget mad skal der beregnes pr. person?» og «Hvad betyder intervallet?», tabelkolonnerne «Pr. person» og «I alt», rækken «Pasta, tørret» med «75-100 g» og «300-400 g», og på /gram-til-dl linket til portioner-siden; siden skal også stå i sitemap.xml. ceo/portioner 8/10 12:5x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/portioner | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Hvor meget mad skal der beregnes», «Pasta, tørret» og «300-400 g». Første reelle deploy-vindue efter mergen er **8/10 17:30** (sker mergen efter 17:30, er det 21:30).
 
 **Åben 8/10 07:5x:** `VERIFICÉR DEPLOY: /protein-i-madvarer svarer 200 og viser titlen «Protein i madvarer: æg 12,6 g, kylling 21,4 g pr. 100 g», overskrifterne «Protein i madvarer», «Hvor meget protein er der i …?» og «Madvarer med mest protein pr. 100 g», tabelkolonnerne «Gram for 20 g» og «Pr. 100 kcal», rækken «Æg, helt, råt» med «12,6 g», og på /proteinbehov «21,4 g» og linket «proteinindholdet i 53 madvarer»; siden skal også stå i sitemap.xml. ceo/protein-i-madvarer 8/10 07:5x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/protein-i-madvarer | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Hvor meget protein er der i», «Gram for 20 g» og «12,6 g». Første reelle deploy-vindue efter mergen er **8/10 12:30** (sker mergen før 12:30, er det 12:30).
 

@@ -185,6 +185,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/maling": PaintRoller,
   "/fliser": Grid3x3,
   "/gram-til-dl": CookingPot,
+  "/portioner": Utensils,
   "/laaneberegner": Landmark,
   "/laanekapacitet": HandCoins,
   "/leasing": Repeat,

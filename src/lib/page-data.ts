@@ -84,6 +84,7 @@ import { KOMMUNER, KOMMUNER_SNIT } from "./kommuner";
 import { MALING_DAEKNING_M2_PR_LITER, MALING_STANDARD_SPILD_PCT } from "./maling";
 import { FLISER_EKSEMPEL, FLISER_STANDARD_SPILD_PCT, fliserEksempel, fliserPrKvadratmeter } from "./fliser";
 import { GRAM_TIL_DL_EKSEMPEL, dlTilGram, formatGramTilDl, gramTilDl, gramTilDlEksempel, vareVedId } from "./gram-til-dl";
+import { PORTIONER_EKSEMPEL, beregnPortioner, formatPortion, vareVedId as portionVareVedId } from "./portioner";
 import {
   MADVARER,
   MADVARER_KILDE,
@@ -116,6 +117,19 @@ const GRAM_TIL_DL_META_BESKRIVELSE = `Omregn gram til dl og dl til gram for mel,
 const GRAM_TIL_DL_SUKKER_2DL = formatGramTilDl(dlTilGram(2, vareVedId("sukker")!.gramPrDl), 0);
 const GRAM_TIL_DL_HAVREGRYN_100G = formatGramTilDl(gramTilDl(100, vareVedId("havregryn")!.gramPrDl), 1);
 const GRAM_TIL_DL_MEL_100G = formatGramTilDl(gramTilDl(100, vareVedId("hvedemel")!.gramPrDl), 2);
+
+/**
+ * `/portioner`s egne tal til titel, beskrivelse og FAQ. De læser
+ * `beregnPortioner()` — samme modul som værktøjet — så eksemplet i metadata og
+ * svarene i FAQ'en ikke kan glide fra beregningen (punkt 11).
+ */
+const PORTIONER_PASTA = portionVareVedId("pasta-toerret")!;
+const PORTIONER_KARTOFLER = portionVareVedId("kartofler")!;
+const PORTIONER_RIS = portionVareVedId("ris")!;
+const PORTIONER_EKS = beregnPortioner(PORTIONER_EKSEMPEL.antalPersoner);
+const PORTIONER_EKS_PASTA = PORTIONER_EKS.find((r) => r.id === "pasta-toerret")!;
+const PORTIONER_META_TITEL = `Portioner pr. person: pasta ${PORTIONER_PASTA.min}-${PORTIONER_PASTA.max} g, kartofler ${PORTIONER_KARTOFLER.min}-${PORTIONER_KARTOFLER.max} g`;
+const PORTIONER_META_BESKRIVELSE = `Hvor meget mad skal der beregnes pr. person? Se anbefalede mængder for pasta, ris, kartofler og kød, og regn mængden ud til dit antal gæster.`;
 
 /**
  * `/fliser`s egne tal til titel, beskrivelse og FAQ. De læser `fliserEksempel()`
@@ -3403,6 +3417,31 @@ faqItems: kalorierFaqItems("da"),
         { question: "Hvor mange dl er 100 g havregryn?", answer: `1 dl havregryn vejer ca. ${vareVedId("havregryn")!.gramPrDl} g, så 100 g er ca. ${GRAM_TIL_DL_HAVREGRYN_100G} dl. Grovvalsede gryn vejer lidt mere end finvalsede.` },
         { question: "Hvorfor vejer 1 dl ikke det samme for alle varer?", answer: "Gram er vægt, og dl er rumfang. Lette varer som havregryn og kokosmel fylder meget for lidt vægt, mens sirup og honning er tunge. Derfor har hver ingrediens sin egen værdi pr. dl." },
         { question: "Er tallene præcise nok til bagning?", answer: "De er vejledende. Mel og pulver kan veje forskelligt alt efter, hvordan de fyldes i målet, så skal opskriften ramme præcist, er en køkkenvægt det sikreste." },
+      ],
+    },
+    "portioner": {
+      slug: "portioner",
+      title: "Portioner pr. person – hvor meget mad skal du beregne?",
+      description:
+        "Beregn hvor meget mad der skal bruges pr. person. Skriv antallet af gæster, og se mængden af pasta, ris, kartofler og kød for hele selskabet.",
+      metaTitle: PORTIONER_META_TITEL,
+      metaDescription: PORTIONER_META_BESKRIVELSE,
+      keywords: ["portioner pr person", "hvor mange gram pasta pr person", "hvor mange gram kartofler pr person", "hvor meget ris pr person", "hvor meget kød pr person", "mængder pr person", "hvor meget mad pr person", "beregn portioner"],
+      ogTitle: PORTIONER_META_TITEL,
+      ogDescription: "Skriv antallet af gæster og se, hvor meget pasta, ris, kartofler og kød der skal bruges.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Portionsberegner",
+      schemaDescription: "Beregn hvor meget mad der skal bruges pr. person for pasta, ris, kartofler, kød og grønt ud fra antallet af gæster.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvor meget pasta skal jeg beregne pr. person?", answer: `${PORTIONER_PASTA.min}-${PORTIONER_PASTA.max} g tørret pasta pr. voksen, når pastaen er hovedretten. Til ${PORTIONER_EKSEMPEL.antalPersoner} personer bliver det ${formatPortion(PORTIONER_EKS_PASTA.totalMin, "g")}–${formatPortion(PORTIONER_EKS_PASTA.totalMax, "g")}. Er pastaen frisk i stedet for tørret, regner du med ${portionVareVedId("pasta-frisk")!.min}-${portionVareVedId("pasta-frisk")!.max} g pr. person.` },
+        { question: "Hvor mange kartofler skal jeg beregne pr. person?", answer: `${PORTIONER_KARTOFLER.min}-${PORTIONER_KARTOFLER.max} g uskrællede kartofler pr. voksen. Skal kartoflerne moses, stiger mængden til ${portionVareVedId("kartoffelmos")!.min}-${portionVareVedId("kartoffelmos")!.max} g, fordi der også skal smør og mælk i.` },
+        { question: "Hvor meget ris pr. person?", answer: `Kilden regner med ${PORTIONER_RIS.min} dl ris pr. person — det svarer til omkring 70-100 g tørrede ris, alt efter riskornets størrelse. Til ${PORTIONER_EKSEMPEL.antalPersoner} personer bliver det ${formatPortion(PORTIONER_EKS.find((r) => r.id === "ris")!.totalMin, "dl")}.` },
+        { question: "Hvorfor står mængderne som et interval?", answer: "Appetitten, antallet af retter og hvor meget tilbehør der er ved siden af flytter tallet. Er retten en hovedret med lidt tilbehør, så gå efter den høje ende; er den et tilbehør, så brug den lave." },
+        { question: "Hvor meget skal jeg regne pr. barn?", answer: "Børn spiser typisk omkring halvt så meget som en voksen. Skal du både have voksne og børn med, kan du regne hvert barn som en halv person, når du lægger antallet sammen." },
+        { question: "Er mængderne vejledende?", answer: "Ja. Tallene er de anbefalede mængder pr. voksen fra kildens tabel og kan variere med retten og gæsternes appetit. Brug dem som et udgangspunkt og justér efter behov." },
       ],
     },
     "tv-storrelse": {
