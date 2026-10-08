@@ -213,6 +213,8 @@ ceo/sentry-uselocale-fix 5/10 17:5x`. **Lukket 5/10 21:3x** for det der kan
 måles udefra. **Åben:** at fejlen er væk afgør kun Sentrys egen hændelsestæller
 (2 hændelser / 0 brugere på 14 dage) — læs den 14/10.
 
+**Åben 8/10 02:5x:** `VERIFICÉR DEPLOY: Emoji-erstattelse på 7 sider (6 blogindlæg + 404-side) viser lucide-react ikoner i stedet for emojis: CheckCircle, AlertTriangle, Lightbulb, Calendar, Sun, Search. Verificér på minberegner.dk/blog/30-procent-reglen-husleje, /blog/bmi-for-boern-saadan-tjekker-du, /blog/guide-feriepenge-hvornaar-og-hvor-meget, /blog/hvordan-beregner-man-moms, /blog/pension-hvor-meget-skal-du-spare-op, /blog/saadan-finder-du-din-timepris-som-freelancer og 404-siden. ceo/emoji-replacement 8/10 02:5x`. Første reelle deploy-vindue efter mergen er **8/10 07:30**.
+
 ## ❓ Til Mads
 
 - ⛔ **GitHub Actions kunne ikke starte job på minberegner.dk** (5/10 19:35–20:37,
