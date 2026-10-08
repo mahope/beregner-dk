@@ -81,6 +81,23 @@ import { KIRKESKAT_EKSEMPLER, KIRKESKAT_SNIT, KIRKESKAT_EKSEMPEL_INDKOMST, bereg
 import { beregnSkat } from "./skattefordeling";
 import { KOMMUNER, KOMMUNER_SNIT } from "./kommuner";
 import { MALING_DAEKNING_M2_PR_LITER, MALING_STANDARD_SPILD_PCT } from "./maling";
+import { FLISER_EKSEMPEL, FLISER_STANDARD_SPILD_PCT, fliserEksempel, fliserPrKvadratmeter } from "./fliser";
+
+/**
+ * `/fliser`s egne tal til titel, beskrivelse og FAQ. De læser `fliserEksempel()`
+ * — samme modul som værktøjet — så eksemplet i metadata og svarene i FAQ'en
+ * ikke kan glide fra beregningen (punkt 11).
+ */
+const FLISER_EKS = fliserEksempel();
+const FLISER_FORMAT = `${FLISER_EKSEMPEL.fliseBreddeCm}x${FLISER_EKSEMPEL.fliseHoejdeCm}`;
+const FLISER_META_TITEL = `Fliseberegner: ${formatNumber(FLISER_EKS.arealM2, "da")} m² i ${FLISER_FORMAT} = ${FLISER_EKS.fliserMedSpild} fliser`;
+const FLISER_META_BESKRIVELSE = `Beregn antal fliser til gulv eller væg. Et rum på ${FLISER_EKSEMPEL.laengdeM} x ${FLISER_EKSEMPEL.breddeM} m med ${FLISER_FORMAT}-fliser kræver ${FLISER_EKS.fliserMedSpild} fliser.`;
+/** Fliser pr. m² for de formater FAQ'en nævner, regnet af modulet. */
+const FLISER_PR_M2_60 = formatNumber(fliserPrKvadratmeter(60, 60), "da", { maximumFractionDigits: 2 });
+const FLISER_AREAL_60_M2 = formatNumber((60 * 60) / 10000, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const FLISER_PR_M2_30 = formatNumber(fliserPrKvadratmeter(30, 30), "da", { maximumFractionDigits: 1 });
+const FLISER_PR_M2_20 = formatNumber(fliserPrKvadratmeter(20, 20), "da", { maximumFractionDigits: 0 });
+const FLISER_PR_M2_10 = formatNumber(fliserPrKvadratmeter(10, 10), "da", { maximumFractionDigits: 0 });
 
 /**
  * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
@@ -3227,6 +3244,29 @@ faqItems: kalorierFaqItems("da"),
         { question: "Skal jeg regne med ét eller to strøg?", answer: "Regn med to strøg, når du skifter farve, eller når underlaget er sugende eller ujævnt. Skal du kun friske en ensfarvet væg op, kan ét strøg være nok — vælger du ét strøg i beregneren, halveres forbruget." },
         { question: "Hvorfor skal jeg lægge spild til?", answer: `Der skal altid lidt maling til hjørner, kanter og opretning bagefter. Branchen anbefaler ${MALING_STANDARD_SPILD_PCT} % ekstra, og det er den værdi, beregneren bruger.` },
         { question: "Skal døre og vinduer trækkes fra?", answer: "Ja, de skal ikke males. Mål dem og skriv det samlede areal i feltet «Døre og vinduer». Skal loftet også males, sætter du flueben i «Medregn loftet»." },
+      ],
+    },
+    "fliser": {
+      slug: "fliser",
+      title: "Fliseberegner – hvor mange fliser skal du bruge?",
+      description: "Beregn hvor mange fliser og kasser du skal bruge til gulv eller væg. Indtast rummets mål, flisens størrelse og spild, så får du antallet med det samme.",
+      metaTitle: FLISER_META_TITEL,
+      metaDescription: FLISER_META_BESKRIVELSE,
+      keywords: ["fliseberegner", "hvor mange fliser skal jeg bruge", "beregn fliser", "fliser pr m2", "fliser beregner", "hvor mange fliser går der til 1 m2", "fliser til badeværelse"],
+      ogTitle: FLISER_META_TITEL,
+      ogDescription: "Skriv rummets mål og flisens størrelse og se antallet af fliser og kasser med det samme.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Fliseberegner",
+      schemaDescription: "Beregn hvor mange fliser og kasser der skal bruges til et rum ud fra areal, flisestørrelse og spild.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvor mange fliser skal jeg bruge til et rum?", answer: `Regn rummets areal ud som længde gange bredde, og del med flisens areal. Et rum på ${FLISER_EKSEMPEL.laengdeM} x ${FLISER_EKSEMPEL.breddeM} m er ${formatNumber(FLISER_EKS.arealM2, "da")} m², og med ${FLISER_FORMAT}-fliser (${formatNumber(FLISER_EKS.fliseArealM2, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m² pr. flise) skal der ${FLISER_EKS.fliserUdenSpild} fliser til — ${FLISER_EKS.fliserMedSpild} med ${FLISER_STANDARD_SPILD_PCT} % spild.` },
+        { question: "Hvor mange 60x60-fliser går der på en m²?", answer: `En 60 x 60-flise fylder ${FLISER_AREAL_60_M2} m², så der går 1 ÷ ${FLISER_AREAL_60_M2} = ${FLISER_PR_M2_60} fliser på én m². Del 10.000 med flisens mål i cm ganget sammen for at finde tallet for dit format.` },
+        { question: "Hvor mange fliser går der til 1 m²?", answer: `Det afhænger af formatet: en 30 x 30-flise giver ${FLISER_PR_M2_30} fliser pr. m², en 20 x 20-flise ${FLISER_PR_M2_20} og en 10 x 10-flise ${FLISER_PR_M2_10}. Del 10.000 med flisens bredde gange højde i cm.` },
+        { question: "Hvor meget spild skal jeg regne med?", answer: `Branchen anbefaler ${FLISER_STANDARD_SPILD_PCT} % til tilskæring langs kanter og hjørner, og det er den værdi, beregneren bruger. Ved diagonalt mønster eller mange vinkler bør du gå op til 15 %.` },
+        { question: "Skal jeg købe hele kasser?", answer: "Ja, fliser sælges i kasser. Beregneren runder op til hele kasser og viser det samlede købsareal, som ofte er lidt større end behovet, fordi den sidste kasse ikke kan deles. Antal fliser pr. kasse står på kassen." },
       ],
     },
     "tv-storrelse": {

@@ -118,6 +118,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Boligsalg Beregner", description: "Beregn nettoprovenu ved salg af bolig — alle omkostninger", href: "/boligsalg", category: "Bolig" },
   { title: "Nutidskroner", description: "Omregn et gammelt beløb til dagens prisniveau", href: "/nutidskroner", category: "Økonomi" },
   { title: "Malingberegner", description: "Beregn hvor mange liter maling du skal bruge", href: "/maling", category: "Hverdag" },
+  { title: "Fliseberegner", description: "Beregn hvor mange fliser og kasser du skal bruge", href: "/fliser", category: "Hverdag" },
 ];
 
 export const categories: CategoryData[] = [
