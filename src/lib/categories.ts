@@ -123,6 +123,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Nutidskroner", description: "Omregn et gammelt beløb til dagens prisniveau", href: "/nutidskroner", category: "Økonomi" },
   { title: "Malingberegner", description: "Beregn hvor mange liter maling du skal bruge", href: "/maling", category: "Hverdag" },
   { title: "Fliseberegner", description: "Beregn hvor mange fliser og kasser du skal bruge", href: "/fliser", category: "Hverdag" },
+  { title: "Sand og grus", description: "Beregn hvor meget sand og grus du skal bruge", href: "/sand-og-grus", category: "Hverdag" },
   { title: "Gram til dl", description: "Omregn gram til dl og dl til gram for mel, sukker og gryn", href: "/gram-til-dl", category: "Hverdag" },
   { title: "Portioner pr. person", description: "Beregn hvor meget mad der skal bruges pr. person", href: "/portioner", category: "Hverdag" },
 ];

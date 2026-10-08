@@ -83,6 +83,13 @@ import { beregnSkat } from "./skattefordeling";
 import { KOMMUNER, KOMMUNER_SNIT } from "./kommuner";
 import { MALING_DAEKNING_M2_PR_LITER, MALING_STANDARD_SPILD_PCT } from "./maling";
 import { FLISER_EKSEMPEL, FLISER_STANDARD_SPILD_PCT, fliserEksempel, fliserPrKvadratmeter } from "./fliser";
+import {
+  GRUS_EKSEMPEL,
+  GRUS_MATERIALER,
+  beregnGrus,
+  grusEksempel,
+  grusMaterialeVedId,
+} from "./sand-og-grus";
 import { GRAM_TIL_DL_EKSEMPEL, dlTilGram, formatGramTilDl, gramTilDl, gramTilDlEksempel, vareVedId } from "./gram-til-dl";
 import { PORTIONER_EKSEMPEL, beregnPortioner, formatPortion, vareVedId as portionVareVedId } from "./portioner";
 import {
@@ -173,6 +180,17 @@ const FLISER_AREAL_60_M2 = formatNumber((60 * 60) / 10000, "da", { minimumFracti
 const FLISER_PR_M2_30 = formatNumber(fliserPrKvadratmeter(30, 30), "da", { maximumFractionDigits: 1 });
 const FLISER_PR_M2_20 = formatNumber(fliserPrKvadratmeter(20, 20), "da", { maximumFractionDigits: 0 });
 const FLISER_PR_M2_10 = formatNumber(fliserPrKvadratmeter(10, 10), "da", { maximumFractionDigits: 0 });
+
+const GRUS_EKS = grusEksempel();
+const GRUS_META_TITEL = `Sandberegner: ${formatNumber(GRUS_EKS.arealM2, "da")} m² i ${formatNumber(GRUS_EKS.lagCm, "da")} cm = ${formatNumber(GRUS_EKS.volumenMedSpildM3, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m³`;
+const GRUS_META_BESKRIVELSE = `Beregn hvor meget sand eller grus du skal bruge. ${formatNumber(GRUS_EKS.arealM2, "da")} m² med ${formatNumber(GRUS_EKS.lagCm, "da")} cm lag kræver ${formatNumber(GRUS_EKS.volumenMedSpildM3, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m³ — cirka ${formatNumber(GRUS_EKS.tonMedSpild, "da", { maximumFractionDigits: 1 })} ton.`;
+/** En indkørsel på 30 m² med 15 cm stabilgrus, som FAQ'en regner på. */
+const GRUS_INDRIVE = beregnGrus({ laengdeM: 6, breddeM: 5, materialeId: "stabilgrus", lagCm: 15, spildPct: 10 });
+const GRUS_AFRETNINGSSAND = grusMaterialeVedId("afretningssand");
+const GRUS_STABILGRUS = grusMaterialeVedId("stabilgrus");
+const GRUS_BUNDSIKRING = grusMaterialeVedId("bundsikring");
+const grus2 = (n: number) => formatNumber(n, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const grus1 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 1 });
 
 /**
  * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
@@ -3477,6 +3495,30 @@ faqItems: kalorierFaqItems("da"),
         { question: "Hvor mange fliser går der til 1 m²?", answer: `Det afhænger af formatet: en 30 x 30-flise giver ${FLISER_PR_M2_30} fliser pr. m², en 20 x 20-flise ${FLISER_PR_M2_20} og en 10 x 10-flise ${FLISER_PR_M2_10}. Del 10.000 med flisens bredde gange højde i cm.` },
         { question: "Hvor meget spild skal jeg regne med?", answer: `Branchen anbefaler ${FLISER_STANDARD_SPILD_PCT} % til tilskæring langs kanter og hjørner, og det er den værdi, beregneren bruger. Ved diagonalt mønster eller mange vinkler bør du gå op til 15 %.` },
         { question: "Skal jeg købe hele kasser?", answer: "Ja, fliser sælges i kasser. Beregneren runder op til hele kasser og viser det samlede købsareal, som ofte er lidt større end behovet, fordi den sidste kasse ikke kan deles. Antal fliser pr. kasse står på kassen." },
+      ],
+    },
+    "sand-og-grus": {
+      slug: "sand-og-grus",
+      title: "Sand og grus – hvor meget skal du bruge?",
+      description: "Beregn hvor mange m³ og ton sand, grus eller bundsikring du skal bruge til et areal. Skriv målene, vælg materialet og få mængden med det samme.",
+      metaTitle: GRUS_META_TITEL,
+      metaDescription: GRUS_META_BESKRIVELSE,
+      keywords: ["hvor meget sand skal jeg bruge", "hvor meget grus skal jeg bruge", "sandberegner", "grusberegner", "hvor meget sand under fliser", "hvor meget grus til indkørsel", "beregn sand og grus", "m3 sand beregner", "stabilgrus beregner"],
+      ogTitle: GRUS_META_TITEL,
+      ogDescription: "Skriv arealet, vælg materialet og se hvor mange m³ og ton du skal bruge.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Sand- og grusberegner",
+      schemaDescription: "Beregn mængden af sand, grus og bundsikring i m³ og ton ud fra areal, lagtykkelse og materialets densitet.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvor meget sand skal jeg bruge til 10 m²?", answer: `Et areal på ${formatNumber(GRUS_EKS.arealM2, "da")} m² med ${formatNumber(GRUS_EKS.lagCm, "da")} cm afretningssand er ${grus2(GRUS_EKS.volumenM3)} m³ uden spild og ${grus2(GRUS_EKS.volumenMedSpildM3)} m³ med 10 % spild. Sand vejer omkring ${grus1(GRUS_AFRETNINGSSAND.densitetTPerM3)} ton pr. m³, så det er cirka ${grus1(GRUS_EKS.tonMedSpild)} ton.` },
+        { question: "Hvor meget grus skal jeg bruge til en indkørsel?", answer: `En indkørsel på ${formatNumber(GRUS_INDRIVE.arealM2, "da")} m² med ${formatNumber(GRUS_INDRIVE.lagCm, "da")} cm stabilgrus kræver ${grus1(GRUS_INDRIVE.volumenM3)} m³ — ${grus2(GRUS_INDRIVE.volumenMedSpildM3)} m³ med spild — altså omkring ${grus1(GRUS_INDRIVE.tonMedSpild)} ton. Skal der bundsikring under, regner du det lag for sig.` },
+        { question: "Hvor tykt et lag sand skal der under fliser?", answer: `Afretningssand lægges i ${GRUS_AFRETNINGSSAND.lagCmMin}–${GRUS_AFRETNINGSSAND.lagCmMax} cm under fliser og belægningssten. Lægger du det tykkere, kan fliserne med tiden rykke sig. Under en indkørsel bruges stabilgrus i ${GRUS_STABILGRUS.lagCmMin}–${GRUS_STABILGRUS.lagCmMax} cm.` },
+        { question: "Hvor meget vejer 1 m³ sand og grus?", answer: `1 m³ afretningssand vejer omkring ${grus1(GRUS_AFRETNINGSSAND.densitetTPerM3)} ton, stabilgrus omkring ${grus1(GRUS_STABILGRUS.densitetTPerM3)} ton og bundsikring omkring ${grus1(GRUS_BUNDSIKRING.densitetTPerM3)} ton. Vægten afhænger af fugtindholdet, så tallene er vejledende.` },
+        { question: "Skal jeg regne ekstra til komprimering?", answer: "Ja. Sand og grus synker, når det stampes med en pladevibrator, og leverandørerne anbefaler derfor at regne med omkring 20 % ekstra, før laget stampes. Sæt spildfeltet op til 20 %, hvis du vil have det med." },
+        { question: "Er mængden præcis?", answer: "Mængden er et skøn. Arealet er sjældent helt rektangulært, og densiteten afhænger af fugtindholdet, så bestil hellere lidt for meget end for lidt." },
       ],
     },
     "gram-til-dl": {
