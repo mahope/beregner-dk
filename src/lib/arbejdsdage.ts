@@ -38,6 +38,8 @@ import { iDagPaSiden, parseIsoDato } from "./lokal-dato";
 import {
   taellArbejdsdage,
   taellHelligdage,
+  taellHelligdagePaaHverdag,
+  taellNytarsaften,
   taellWeekender,
 } from "./helligdage";
 
@@ -198,10 +200,19 @@ export function arbejdsdageFaq(
   const da = locale === "da";
   const ferie = o.ferie[0];
   if (da) {
+    const helligdageHverdag = taellHelligdagePaaHverdag(
+      new Date(o.aar, 0, 1),
+      new Date(o.aar, 11, 31),
+      "da"
+    );
+    const nytarsaften = taellNytarsaften(
+      new Date(o.aar, 0, 1),
+      new Date(o.aar, 11, 31)
+    );
     return [
       {
         question: "Hvor mange arbejdsdage er der på et år?",
-        answer: `${o.aar} har ${tal(o.arbejdsdage, locale)} arbejdsdage, når weekender og helligdage er trukket fra. Året har ${tal(o.dage, locale)} kalenderdage, og forskellen er ${dagetal(o.weekenddage, locale, "weekenddag", "weekenddage")} og ${dagetal(o.helligdage, locale, "helligdag", "helligdage")}.`,
+        answer: `${o.aar} har ${tal(o.arbejdsdage, locale)} arbejdsdage, når weekender og helligdage er trukket fra. Året har ${tal(o.dage, locale)} kalenderdage, og forskellen er ${dagetal(o.weekenddage, locale, "weekenddag", "weekenddage")}, ${dagetal(helligdageHverdag, locale, "helligdag", "helligdage")} der falder på hverdage og ${dagetal(nytarsaften, locale, "nytårsaften", "nytårsaftener")}.`,
       },
       {
         question: "Hvor mange arbejdsdage er der tilbage i år?",
@@ -217,10 +228,19 @@ export function arbejdsdageFaq(
       },
     ];
   }
+  const helligdageHverdagSe = taellHelligdagePaaHverdag(
+    new Date(o.aar, 0, 1),
+    new Date(o.aar, 11, 31),
+    "se"
+  );
+  const nytarsaftenSe = taellNytarsaften(
+    new Date(o.aar, 0, 1),
+    new Date(o.aar, 11, 31)
+  );
   return [
     {
       question: "Hur många arbetsdagar är det på ett år?",
-      answer: `${o.aar} har ${tal(o.arbejdsdage, locale)} arbetsdagar, när helger och helgdagar är borträknade. Året har ${tal(o.dage, locale)} kalenderdagar, och skillnaden är ${dagetal(o.weekenddage, locale, "helg", "helger")} och ${dagetal(o.helligdage, locale, "helgdag", "helgdagar")}.`,
+      answer: `${o.aar} har ${tal(o.arbejdsdage, locale)} arbetsdagar, när helger och helgdagar är borträknade. Året har ${tal(o.dage, locale)} kalenderdagar, och skillnaden är ${dagetal(o.weekenddage, locale, "helg", "helger")}, ${dagetal(helligdageHverdagSe, locale, "helgdag", "helgdagar")} som faller på vardagar och ${dagetal(nytarsaftenSe, locale, "nyårsafton", "nyårsaftnar")}.`,
     },
     {
       question: "Hur många arbetsdagar är det kvar i år?",

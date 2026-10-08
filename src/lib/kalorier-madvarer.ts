@@ -123,9 +123,9 @@ export const MADVARER: readonly Madvare[] = [
   { navn: "Bulgur, tørret", gruppe: "brød", kcal100g: 342, protein100g: 12.3, fedt100g: 1.3, kulhydrat100g: 75.9, fdcId: 170688 }, // Bulgur, dry
   { navn: "Quinoa, kogt", gruppe: "brød", kcal100g: 120, protein100g: 4.4, fedt100g: 1.9, kulhydrat100g: 21.3, fdcId: 168917 }, // Quinoa, cooked
   // mejeri
-  { navn: "Mælk, letmælk 1,5 %", gruppe: "mejeri", kcal100g: 42, protein100g: 3.4, fedt100g: 1.0, kulhydrat100g: 5.0, fdcId: 170872 }, // Milk, lowfat, fluid, 1% milkfat, with added vitamin A and vitamin D
+  { navn: "Mælk, letmælk 1,5 %", gruppe: "mejeri", kcal100g: 46, protein100g: 3.4, fedt100g: 1.5, kulhydrat100g: 5.0, fdcId: 170872 }, // Dansk letmælk 1,5 % — fedtindholdet er 1,5 g pr. 100 g ifølge mærkningen; USDA's 1 % milkfat (1,0 g) er et andet produkt
   { navn: "Mælk, sødmælk", gruppe: "mejeri", kcal100g: 61, protein100g: 3.1, fedt100g: 3.2, kulhydrat100g: 4.8, fdcId: 171265 }, // Milk, whole, 3.25% milkfat, with added vitamin D
-  { navn: "Fløde, 38 %", gruppe: "mejeri", kcal100g: 340, protein100g: 2.8, fedt100g: 36.1, kulhydrat100g: 2.8, fdcId: 170859 }, // Cream, fluid, heavy whipping
+  { navn: "Fløde, 38 %", gruppe: "mejeri", kcal100g: 364, protein100g: 2.8, fedt100g: 38.0, kulhydrat100g: 2.8, fdcId: 170859 }, // Dansk fløde 38 % — fedtindholdet er 38 g pr. 100 g ifølge mærkningen; USDA's heavy whipping cream (36,1 g) er et andet produkt
   { navn: "Yoghurt, natur", gruppe: "mejeri", kcal100g: 61, protein100g: 3.5, fedt100g: 3.2, kulhydrat100g: 4.7, fdcId: 171284 }, // Yogurt, plain, whole milk
   { navn: "Hytteost", gruppe: "mejeri", kcal100g: 98, protein100g: 11.1, fedt100g: 4.3, kulhydrat100g: 3.4, fdcId: 172179 }, // Cheese, cottage, creamed, large or small curd
   { navn: "Gouda", gruppe: "mejeri", kcal100g: 356, protein100g: 24.9, fedt100g: 27.4, kulhydrat100g: 2.2, fdcId: 171241 }, // Cheese, gouda

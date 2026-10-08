@@ -279,7 +279,7 @@ export function ugerFaq(locale: UgerLocale, today: Date): UgerFaq[] {
       },
       {
         question: "Hvor mange uger er der på en måned?",
-        answer: `En måned er mellem ${korteste.dage} og ${laengste.dage} dage. ${korteste.name} har ${korteste.dage} dage, altså præcis ${ugerTal(Math.floor(korteste.dage / DAGE_PER_UGE), locale)} uger, mens ${laengste.name} har ${laengste.dage} dage, altså ${ugerTal(Math.floor(laengste.dage / DAGE_PER_UGE), locale)} uger og ${dagetal(laengste.dage % DAGE_PER_UGE, locale)}.`,
+        answer: `En måned er mellem ${korteste.dage} og ${laengste.dage} dage. ${korteste.name} har ${korteste.dage} dage, altså ${korteste.dage % DAGE_PER_UGE === 0 ? "præcis " : ""}${ugerTal(Math.floor(korteste.dage / DAGE_PER_UGE), locale)} uger${korteste.dage % DAGE_PER_UGE > 0 ? ` og ${dagetal(korteste.dage % DAGE_PER_UGE, locale)}` : ""}, mens ${laengste.name} har ${laengste.dage} dage, altså ${laengste.dage % DAGE_PER_UGE === 0 ? "præcis " : ""}${ugerTal(Math.floor(laengste.dage / DAGE_PER_UGE), locale)} uger${laengste.dage % DAGE_PER_UGE > 0 ? ` og ${dagetal(laengste.dage % DAGE_PER_UGE, locale)}` : ""}.`,
       },
       {
         question: "Hvor mange uger arbejder man om året?",
@@ -442,7 +442,7 @@ export function ugerAfsnit(locale: UgerLocale, today: Date): UgerAfsnit[] {
         },
         {
           overskrift: "Hur många veckor är det på en månad?",
-          brødtekst: `Det finns ingen månad med samma antal dagar: ${korteste.name} har ${korteste.dage} dagar och ${laengste.name} har ${laengste.dage} dagar. Det är ${ugerTal(Math.floor(korteste.dage / DAGE_PER_UGE), locale)} veckor mot ${ugerTal(Math.floor(laengste.dage / DAGE_PER_UGE), locale)} veckor och ${dagetal(laengste.dage % DAGE_PER_UGE, locale)}.`,
+          brødtekst: `Det finns ingen månad med samma antal dagar: ${korteste.name} har ${korteste.dage} dagar och ${laengste.name} har ${laengste.dage} dagar. Det är ${korteste.dage % DAGE_PER_UGE === 0 ? "exakt " : ""}${ugerTal(Math.floor(korteste.dage / DAGE_PER_UGE), locale)} veckor${korteste.dage % DAGE_PER_UGE > 0 ? ` och ${dagetal(korteste.dage % DAGE_PER_UGE, locale)}` : ""} mot ${laengste.dage % DAGE_PER_UGE === 0 ? "exakt " : ""}${ugerTal(Math.floor(laengste.dage / DAGE_PER_UGE), locale)} veckor${laengste.dage % DAGE_PER_UGE > 0 ? ` och ${dagetal(laengste.dage % DAGE_PER_UGE, locale)}` : ""}.`,
         },
         {
           overskrift: "Hur många veckor är det till jul?",
