@@ -197,6 +197,7 @@ export interface DageIAaretCopy {
   linkUgenummer: string;
   linkDageTil: string;
   linkMellem: string;
+  linkArbejdsdage: string;
   /** Overskrift over tabellen med de tolv måneder. */
   tabelOverskrift: string;
   /** Kolonnehoveder — de skal være korte, de ligger i en smal tabel. */
@@ -225,6 +226,7 @@ export const dageIAaretCopy: Record<DageIAaretLocale, DageIAaretCopy> = {
     linkUgenummer: "Hvilken uge er det?",
     linkDageTil: "Hvor mange dage er der til …?",
     linkMellem: "Dage mellem to datoer",
+    linkArbejdsdage: "Hvor mange arbejdsdage er der på et år?",
     tabelOverskrift: "Så mange dage har hver måned",
     kolonneMaaned: "Måned",
     kolonneDage: "Dage",
@@ -246,6 +248,7 @@ export const dageIAaretCopy: Record<DageIAaretLocale, DageIAaretCopy> = {
     linkUgenummer: "Vilken vecka är det?",
     linkDageTil: "Hur många dagar är det till …?",
     linkMellem: "Dagar mellan två datum",
+    linkArbejdsdage: "Hur många arbetsdagar är det på ett år?",
     tabelOverskrift: "Så många dagar har varje månad",
     kolonneMaaned: "Månad",
     kolonneDage: "Dagar",

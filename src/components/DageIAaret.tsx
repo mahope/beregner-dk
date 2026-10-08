@@ -16,6 +16,7 @@ import {
 } from "@/lib/dage-i-aaret";
 import { getDageTilHubPath } from "@/lib/dage-til";
 import { getDageMellemPath } from "@/lib/dage-mellem-datoer";
+import { getArbejdsdagePath } from "@/lib/arbejdsdage";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -86,6 +87,7 @@ export async function DageIAaretRoute({ prefix }: { prefix: string }) {
   const sti = DAGE_I_AARET_PATH[locale];
   const dageTilSti = getDageTilHubPath(locale);
   const dageMellemSti = getDageMellemPath(locale);
+  const arbejdsdageSti = getArbejdsdagePath(locale);
 
   return (
     <div>
@@ -217,6 +219,14 @@ export async function DageIAaretRoute({ prefix }: { prefix: string }) {
             className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium"
           >
             {c.linkMellem}
+          </Link>
+        )}
+        {arbejdsdageSti && (
+          <Link
+            href={arbejdsdageSti}
+            className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium"
+          >
+            {c.linkArbejdsdage}
           </Link>
         )}
       </div>

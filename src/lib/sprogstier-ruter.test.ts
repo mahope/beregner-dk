@@ -7,6 +7,7 @@ import { DAGE_I_AARET_PATH } from "@/lib/dage-i-aaret";
 import { DAGE_MELLEM_PATH } from "@/lib/dage-mellem-datoer";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { TIMER_I_ARET_PATH, timerCopy } from "@/lib/timer-i-aret";
+import { ARBEJDSDAGE_PATH } from "@/lib/arbejdsdage";
 import { buildSitemap } from "@/app/sitemap";
 
 /**
@@ -48,6 +49,11 @@ const PARREDE_STIER: { navn: string; sti: string; locale: "da" | "se" }[] = [
     sti: TIMER_I_ARET_PATH[locale],
     locale,
   })),
+  ...(["da", "se"] as const).map((locale) => ({
+    navn: `ARBEJDSDAGE_PATH.${locale}`,
+    sti: ARBEJDSDAGE_PATH[locale],
+    locale,
+  })),
 ];
 
 function ruteFindes(sti: string): boolean {
@@ -55,11 +61,11 @@ function ruteFindes(sti: string): boolean {
 }
 
 describe("sprogslagte stier er rigtige ruter", () => {
-  it("dømmer alle seks stier, ikke to", () => {
-    // Nøglen i stikortene er sproget, så de tre kort må ikke spredes sammen:
-    // da ville de to seneste overskrive `da`/`se` fra det første, og porten
-    // ville dømme to stier i stedet for seks.
-    expect(PARREDE_STIER).toHaveLength(6);
+  it("dømmer alle otte stier, ikke to", () => {
+    // Nøglen i stikortene er sproget, så de fire kort må ikke spredes sammen:
+    // da ville de seneste overskrive `da`/`se` fra de tidligere, og porten
+    // ville dømme to stier i stedet for otte.
+    expect(PARREDE_STIER).toHaveLength(8);
   });
 
   for (const { navn, sti } of PARREDE_STIER) {

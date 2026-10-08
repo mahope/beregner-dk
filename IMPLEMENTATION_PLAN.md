@@ -1,3 +1,4 @@
+STATUS: 8/10 05:2x. ✅ **`/arbejdsdage` — hvor mange arbejdsdage er der på et år, og hvor mange er der tilbage.** Datagrund: dansk autocomplete (hl=da, 8/10) har **10 af 10** træffere under «hvor mange arbejdsdage» (… på et år / i 2026 / på en måned / tilbage i 2026 / i august 2026 / på et år minus ferie) og svensk «hur många arbetsdagar» gentager mønsteret. Ordet «arbejdsdage» fandtes ikke som titel, `<h1>` eller adresse nogen steder — `/dage-i-aaret` kalder de samme dage «hverdage». Værktøjet viser årets arbejdsdage, arbejdsdage tilbage fra i dag, en tolv-måneders-tabel med arbejdsdage/weekend/helligdage og «et år minus ferie» for 5 og 6 ugers ferie; alle tal læses fra `dato-eksempler.ts` og `helligdage.ts`, så ingen er håndskrevet. Dansk og svensk. Gate 8/10 05:2x: typecheck 0, lint 0 (896 filer), **5.153 tests i 308 filer grønne**, `next build` grøn med `/arbejdsdage` og `/arbetsdagar` i ruteoversigten. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 04:3x. ✅ **`/koffein` — hvor meget koffein får du om dagen, og hvornår er du over grænsen.** Datagrund: 10 af 10 danske autocomplete-træffere under «hvor meget koffein» er «… er der i en kop kaffe / en monster / en pepsi max / en red bull / en booster / en cola / en coca cola / en faxe kondi / en cola zero»; svensk «koffein i en kopp kaffe», «koffein i cola zero», «koffein i monster». Værktøjet lægger koffeinen sammen fra 13 kilder (kaffe, te, cola, energidrik, chokolade, kakao) og sammenligner med EFSA's grænser (400 mg voksne, 200 mg gravide, 3 mg/kg børn). Kilder: EFSA Scientific Opinion 2015 + USDA FDC SR Legacy 2018-04 næringsstof 1057. Dansk, svensk og norsk. Gate 8/10 04:3x: typecheck 0, lint 0 (891 filer), **5.136 tests i 307 filer grønne**, `next build` grøn med `/koffein` i ruteoversigten. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 03:5x. ✅ **Fjernet to løfter om betalt fri på beraknare.se.** CEO-kø punkt 0 fjernede 6/10 «fri med løn»-påstanden fra midsommarsiden (`a32e82f`), men den samme fejlklasse stod stadig på to andre sider: skærtorsdagen lovede at «många kollektivavtal ger dig ledigt med løn» (og koblede det til at det er derfor den kaldes en röd dag), og nationaldagen at «de flesta ger ledigt med lön». Ingen af delene kan dokumenteres, og `/dagar-till/skartorsdagen` og `/dagar-till/nationaldagen` er danske-svenske landesider i Google. Teksten siger nu kun hvad loven (1989:253) siger, og skelnen mellem röd dag og allmän helgdag står på begge sider. Nyt snært snit i `dage-til.test.ts` dømmer generaliseringer (många/de flesta/mest/alla) i samme klausul som lön eller ledig; det fangede præcis de to fund, da det blev skrevet. Gate 8/10 03:5x: typecheck 0, lint 0 (887 filer), **5.107 tests i 306 filer grønne**, `next build` grøn. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 7/10 22:1x. ✅ **`/retvinklet-trekant` — hypotenuse, katete og vinkler med Pythagoras.** Datagrund: dansk autocomplete (hl=da, 7/10) svarer «pythagoras beregner», «pythagoras beregner vinkel», «retvinklet trekant beregner/formler/areal/vinkler» og «trekant beregner retvinklet»; sitet havde areal, rumfang og omkreds, men intet sted hvor læseren kan have to sider og mangle den tredje. Værktøjet løser trekanten ud fra to af de tre sider, viser de to spidse vinkler (tan⁻¹), areal, omkreds og regnestykket; formeltabellen, eksemplet og FAQ'en læser alle `retvinklet-trekant.ts`, så ingen kopi kan glide fra formlen. 3-4-5 er prøvet i porten sammen med 5-12-13, 8-15-17 og den ligebenede 1-1-√2. Dansk og svensk. **MÅL: /retvinklet-trekant baseline 0 Plausible/GSC pr. 7/10** — måles igen ~21/10. Se VERIFICÉR DEPLOY-note nedenfor.
@@ -42,6 +43,7 @@ STATUS: 8/10 00:1x. ✅ Seks åbne VERIFICÉR DEPLOY-noter lukket med DEPLOY OK 
 | `/omkreds` (7/10, ny) | **0** | — | — | — |
 | `/retvinklet-trekant` (7/10, ny) | **0** | — | — | — |
 | `/fliser` (8/10, ny) | **0** | — | — | — |
+| `/arbejdsdage` (8/10, ny) | **0** | — | — | — |
 | `/laantype` (6/10, ny) | **0** | — | — | — |
 | `/brokost` (6/10, ny) | **0** | — | — | — |
 | `/nutidskroner` (7/10, ny) | **0** | — | — | — |
@@ -127,34 +129,8 @@ sitets eget navn) og `/moms` (de 3 lovgrænser).
 
 ## Feature-kø
 
-Leveret 8/10 03:3x: **`/fliser` — hvor mange fliser og kasser skal du bruge**, med rummets areal, flisens areal, antal fliser med spild og hele kasser, samt en tabel over fliser pr. m² for ti formater og FAQ der alle læser `fliser.ts`. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor mange fliser», svensk «hur många kakel»/«kakel kalkylator».
-Leveret 8/10 00:1x: **`/soevnbehov` — hvor meget søvn har du brug for, og hvornår bør du gå i seng**, med den anbefalede søvn pr. alder efter Sleep Foundation/AASM-tabellen (baby 14-17, spædbarn 12-16, småbarn 11-14, børnehave 10-13, skole 9-12, teen 8-10, voksen 7-9) og sengetider ud fra 90-minutters cyklusser; tabel, FAQ og metadata læser alle `soevnbehov.ts`. Datagrund: dansk autocomplete «hvor meget søvn skal man have» med ti aldersvarianter, svensk «sömnbehov».
-Leveret 7/10 22:1x: **`/retvinklet-trekant` — hypotenuse, katete og vinkler med Pythagoras**, med de tre sider, de to spidse vinkler, areal, omkreds og regnestykket, samt en formeltabel og FAQ der alle læser `retvinklet-trekant.ts`. Datagrund: dansk autocomplete «pythagoras beregner», «retvinklet trekant beregner/formler/vinkler», «trekant beregner retvinklet».
-Leveret 7/10 21:0x: **`/omkreds` — omkredsen af cirkel, kvadrat, rektangel, trekant, trapez, parallelogram og rombe i m og cm**, med formlerne, et gennemregnet eksempel pr. figur og FAQ der alle læser `omkreds.ts`. Datagrund: 10 af 10 danske autocomplete-træffere under «omkreds af» og under «hvordan regner man omkreds».
-Leveret 7/10 20:3x: **`/byggepris` — hvad koster det at bygge et hus?**, med byggepris for typehus, totalentreprise og arkitekttegnet hus ud fra boligareal, en eksempeltabel og FAQ der alle læser `byggepris.ts`. Datagrund: dansk autocomplete «hvad koster det at bygge et hus», «byggepris beregner».
-Leveret 7/10 16:3x: **`/hundealder` — hundeår til menneskeår for lille, mellem, stor og kæmpe hund**, med AVMA's 15 + 9 + 4-7-metode, livsfaser, en 15-rækkers tabel og FAQ der alle læser `hundealder.ts`. Datagrund: dansk autocomplete «hvor gammel er hunden i menneskeår», «hund alder i menneskeår», «hvor gammel er min hund i menneskeår» (svensk «kalkulator alder hund»).
-Leveret 7/10 13:1x: **`/areal` — arealet af cirkel, trekant, rektangel, kvadrat, trapez, parallelogram og rombe i m² og cm²**, med formlerne, et gennemregnet eksempel pr. figur og FAQ der alle læser `areal.ts`. Datagrund: 10 af 10 danske autocomplete-træffere under «areal af» og under «arealet af en».
-Leveret 7/10 12:3x: **`/kirkeskat` — hvor meget du betaler i kirkeskat, og hvad du sparer ved at melde dig ud af folkekirken**, med kommunens sats (98 kommuner, 0,42-1,10 %), en eksempeltabel, FAQ og metadata der alle læser `kommuner.ts` og `SATSER_2026.kirkeskatSnit`. Datagrund: «kirkeskat»/«kirkeskat 2026»/«melde ud af folkekirken».
-Leveret 7/10 08:5x: **`/elbil-lading` — hvad koster det at lade en elbil fra A til B**, med kWh til opladning, pris pr. opladning, pr. 100 km og pr. måned, dansk og svensk. Datagrund: 10 danske autocomplete-træffere under «hvad koster det at lade …».
-Leveret 7/10 04:0x: **`/laanekapacitet` — hvor meget du kan låne til bolig, og hvad du kan købe for**, med den laveste af gældsfaktor og 5 %-udbetaling som svar og fordelingen realkredit/banklån/udbetaling. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor meget kan jeg låne» og tre søsterformuleringer.
-Leveret 7/10 02:5x: **`/maling` — hvor mange liter maling skal du bruge til vægge og loft**, med væg-/loftareal, fradrag for døre og vinduer, liter pr. strøg og en dækkevne der læses fra dåsen. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor meget maling skal jeg bruge».
-Leveret 7/10 02:1x: **`/gaveafgift` — hvor meget du må give skattefrit i 2026, og
-hvad afgiften bliver af resten** (Skattestyrelsens satser: nær familie 80.600 kr /
-15 %, svigerbørn 28.200 kr / 15 %, bedsteforældre 36,25 %), med værktøj,
-eksempeltabel og FAQ der alle læser samme satser. Datagrund: dansk autocomplete
-«hvor meget må jeg give mine børn» og «gaveafgift 2026».
-Leveret 7/10 01:1x: **`/nutidskroner` — omregn et beløb fra 1900 og frem til dagens
-prisniveau** med Danmarks Statistiks forbrugerprisindeks (PRIS8 + august 2026),
-eksempeltabel og en titel med et regnet eksempel (8 af 8 danske autocomplete-træffere).
-Leveret 6/10 21:3x: **«Rabat i procent» på `/procent`** — sjette
-tilstand, dansk og svensk, med synlige prisfelter og et kort der både siger
-«Du sparer 1.125 kr.» og «Rabatten er 12,5 %». Leveret 6/10 15:4x: **`/skridt` — skridt til km, gangtid og kalorier** (7+10 autocomplete-træffere). Leveret 6/10: **`/brokost` med Storebælts prisliste 2026** (26 køretøjstyper,
-ekspres-/kortpris, fritidsrabatter, årsforbrug), **«hvad er klokken om N
-timer» + summering af tidsrum på `/tidsberegner`** og **«hvornår kan jeg køre
-bil igen» på `/promille`** (se `docs/plan-arkiv.md`). De seks punkter nedenfor er alle
-⛔ blokeret af en ❓. Den hurtigste målemetode uden
-en menneskekilde er dansk autocomplete (`suggestqueries.google.com`); den er
-brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
+Tolv leverede features siden 6/10 står i `docs/plan-arkiv.md` (fliser, soevnbehov, retvinklet-trekant, omkreds, byggepris, hundealder, areal, kirkeskat, elbil-lading, laanekapacitet, maling, gaveafgift, nutidskroner, skridt, brokost).
+Leveret 8/10 05:2x: **`/arbejdsdage` — hvor mange arbejdsdage er der på et år, hvor mange er der tilbage, og et år minus ferie**, med en tolv-måneders-tabel (arbejdsdage, weekend, helligdage) og en ferietabel; alle tal læser `dato-eksempler.ts` og `helligdage.ts`. Dansk og svensk. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor mange arbejdsdage», svensk «hur många arbetsdagar».
 
 - **[x] FÆRDIG 7/10 01:2x — «Læg til / træk fra procent» på `/procent`** (syvende
   tilstand, dansk og svensk). Datagrund: 10 af 10 danske autocomplete-træffere
@@ -167,35 +143,7 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   `oresundsbron.com/da/priser` er læsbar fra maskinen (den danske `.dk`-host
   giver curl 000). **MÅL: /brokost under top-15 Plausible/GSC pr. 7/10** — måles
   igen ~21/10.
-- **[ ] `/koffein` — hvor meget koffein får du om dagen, og hvornår er du over
-  grænsen.** Datagrund (målt 8/10 03:4x, dansk autocomplete, hl=da): **10 af 10**
-  træffere under «hvor meget koffein» er *hvor meget koffein er der i* en kop
-  kaffe / en monster / en pepsi max / en red bull / en booster / en cola / en
-  coca cola / en faxe kondi / en cola zero — altså ni additive svar på ét spørgsmål,
-  ikke definitioner. Under «kaffe koffein» ligger «kaffe koffein pr 100 ml» og
-  «kaffe koffein per kopp»; under «koffein grænse» «koffein grænse danmark» og
-  «koffein grænse gravid». Svensk «koffein i en kopp kaffe», «koffein i cola
-  zero», «koffein i monster» bekræfter mønsteret. Sitet har `/kalorier` (kcal og
-  makronæringsstoffer pr. 100 g) og `/proteinbehov`, men intet koffein — og det
-  er præcis den vinkel `/kalorier` ikke dækker.
-  **Kilder læst 8/10 2026, talene skal ikke genfindes i husviden:**
-  EFSA's koffeinside (`efsa.europa.eu/en/topics/topic/caffeine`, Scientific
-  Opinion on the safety of caffeine 27/10 2015) giver *grænserne*: 400 mg/dag for
-  sunde voksne, 200 mg i én enkeltdose (ca. 3 mg/kg), 200 mg/dag for gravide og
-  ammende, 3 mg/kg for børn og unge, og «single doses of 100 mg may affect
-  sleep duration and patterns in some adults, particularly when consumed close
-  to bedtime». Samme side giver *portionerne*: espresso 60 ml = 80 mg,
-  filterkaffe 200 ml = 90 mg, sort te 220 ml = 50 mg, cola 355 ml = 40 mg,
-  energidrik 250 ml = 80 mg, mørk chokolade 50 g = 25 mg, mælkechokolade 50 g =
-  10 mg. **Pr. 100 g** kommer fra USDA FoodData Central, SR Legacy 2018-04,
-  næringsstof 1057 (Caffeine, MG) — samme datasæt som `/kalorier`, hentet
-  8/10 2026 fra `fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip`.
-  *Accept:* logik i `src/lib/koffein.ts` med hver drikkes `fdcId` ved siden af
-  tallet, enhedstest der dømmer mod EFSA's egne portionstal, en dansk side med
-  tabel og mindst tre FAQ, intern linking til `/kalorier`, `/soevnbehov` og
-  `/vandbehov`, i `page-data.ts`, `calculator-list.ts`, sitemap. ⛔ Påstandene i
-  brødteksten skal kunne efterprøves mod de to kilder — ingen tredje kilde til
-  koffeinindhold (punkt 11). Svensk oversættelse kan udelades, som med `/fliser`.
+
 - **[ ] BMI-percentil for børn.** «bmi for børn», «bmi skala børn» er danske
   autocomplete-træffere, på svensk «bmi barn tabell». WHO's BMI-for-alder-tabeller
   er ~150 tal pr. køn — for mange at transskribere uden uafhængig kontrol, og en
@@ -224,6 +172,8 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 8/10 05:2x:** `VERIFICÉR DEPLOY: /arbejdsdage svarer 200 på begge domæner og viser titlen «Hvor mange arbejdsdage er der på et år? Se alle 12 måneder», overskriften «Arbejdsdage i hver måned», tabellen med «Arbejdsdage»/«Weekend»/«Helligdage», overskriften «Et år minus ferie» og resultatet «251 arbejdsdage» for 2026; siden skal også stå i sitemap.xml. På beraknare.se «Hur många arbetsdagar är det på ett år? Se alla 12 månader» og «Arbetsdagar i varje månad». ceo/arbejdsdage 8/10 05:2x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/arbejdsdage | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Arbejdsdage i hver måned», «Et år minus ferie» og «251 arbejdsdage». Første reelle deploy-vindue efter mergen er **8/10 12:30** (sker mergen før 12:30, er det 12:30).
 
 **Åben 8/10 04:3x:** `VERIFICÉR DEPLOY: /koffein svarer 200 på begge domæner og viser titlen «Koffeinberegner: 90 mg i en filterkaffe», overskriften «Koffein i almindelige drikke og mad», tabellen med 13 kilder, resultatet «90 mg» og grænsen «400 mg»; siden skal også stå i sitemap.xml. På beraknare.se «Koffeinkalkylator: 90 mg i en filterkaffe» og «Koffein i vanliga drycker och mat». ceo/koffein 8/10 04:3x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/koffein | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Koffein i almindelige drikke og mad», «90 mg» og «400 mg». Første reelle deploy-vindue efter mergen er **8/10 07:30**.
 

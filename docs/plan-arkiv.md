@@ -30749,3 +30749,65 @@ og ingen andre — mutation målt ved at genindføre den gamle skärtorsdag-sæt
 kollektivavtal og dagpenge (`src/lib/dage-til.ts:712`), som ikke er verificeret mod
 en dansk overenskomst. Kun markeret her; næste iteration bør enten finde en
 kollektivavtalkilde eller skrive teksten, så den kun siger, hvad loven siger.
+
+
+## Flyttet fra planen 8/10 (plan-trim)
+
+Leveret 8/10 03:3x: **`/fliser` — hvor mange fliser og kasser skal du bruge**, med rummets areal, flisens areal, antal fliser med spild og hele kasser, samt en tabel over fliser pr. m² for ti formater og FAQ der alle læser `fliser.ts`. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor mange fliser», svensk «hur många kakel»/«kakel kalkylator».
+Leveret 8/10 00:1x: **`/soevnbehov` — hvor meget søvn har du brug for, og hvornår bør du gå i seng**, med den anbefalede søvn pr. alder efter Sleep Foundation/AASM-tabellen (baby 14-17, spædbarn 12-16, småbarn 11-14, børnehave 10-13, skole 9-12, teen 8-10, voksen 7-9) og sengetider ud fra 90-minutters cyklusser; tabel, FAQ og metadata læser alle `soevnbehov.ts`. Datagrund: dansk autocomplete «hvor meget søvn skal man have» med ti aldersvarianter, svensk «sömnbehov».
+Leveret 7/10 22:1x: **`/retvinklet-trekant` — hypotenuse, katete og vinkler med Pythagoras**, med de tre sider, de to spidse vinkler, areal, omkreds og regnestykket, samt en formeltabel og FAQ der alle læser `retvinklet-trekant.ts`. Datagrund: dansk autocomplete «pythagoras beregner», «retvinklet trekant beregner/formler/vinkler», «trekant beregner retvinklet».
+Leveret 7/10 21:0x: **`/omkreds` — omkredsen af cirkel, kvadrat, rektangel, trekant, trapez, parallelogram og rombe i m og cm**, med formlerne, et gennemregnet eksempel pr. figur og FAQ der alle læser `omkreds.ts`. Datagrund: 10 af 10 danske autocomplete-træffere under «omkreds af» og under «hvordan regner man omkreds».
+Leveret 7/10 20:3x: **`/byggepris` — hvad koster det at bygge et hus?**, med byggepris for typehus, totalentreprise og arkitekttegnet hus ud fra boligareal, en eksempeltabel og FAQ der alle læser `byggepris.ts`. Datagrund: dansk autocomplete «hvad koster det at bygge et hus», «byggepris beregner».
+Leveret 7/10 16:3x: **`/hundealder` — hundeår til menneskeår for lille, mellem, stor og kæmpe hund**, med AVMA's 15 + 9 + 4-7-metode, livsfaser, en 15-rækkers tabel og FAQ der alle læser `hundealder.ts`. Datagrund: dansk autocomplete «hvor gammel er hunden i menneskeår», «hund alder i menneskeår», «hvor gammel er min hund i menneskeår» (svensk «kalkulator alder hund»).
+Leveret 7/10 13:1x: **`/areal` — arealet af cirkel, trekant, rektangel, kvadrat, trapez, parallelogram og rombe i m² og cm²**, med formlerne, et gennemregnet eksempel pr. figur og FAQ der alle læser `areal.ts`. Datagrund: 10 af 10 danske autocomplete-træffere under «areal af» og under «arealet af en».
+Leveret 7/10 12:3x: **`/kirkeskat` — hvor meget du betaler i kirkeskat, og hvad du sparer ved at melde dig ud af folkekirken**, med kommunens sats (98 kommuner, 0,42-1,10 %), en eksempeltabel, FAQ og metadata der alle læser `kommuner.ts` og `SATSER_2026.kirkeskatSnit`. Datagrund: «kirkeskat»/«kirkeskat 2026»/«melde ud af folkekirken».
+Leveret 7/10 08:5x: **`/elbil-lading` — hvad koster det at lade en elbil fra A til B**, med kWh til opladning, pris pr. opladning, pr. 100 km og pr. måned, dansk og svensk. Datagrund: 10 danske autocomplete-træffere under «hvad koster det at lade …».
+Leveret 7/10 04:0x: **`/laanekapacitet` — hvor meget du kan låne til bolig, og hvad du kan købe for**, med den laveste af gældsfaktor og 5 %-udbetaling som svar og fordelingen realkredit/banklån/udbetaling. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor meget kan jeg låne» og tre søsterformuleringer.
+Leveret 7/10 02:5x: **`/maling` — hvor mange liter maling skal du bruge til vægge og loft**, med væg-/loftareal, fradrag for døre og vinduer, liter pr. strøg og en dækkevne der læses fra dåsen. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor meget maling skal jeg bruge».
+Leveret 7/10 02:1x: **`/gaveafgift` — hvor meget du må give skattefrit i 2026, og
+hvad afgiften bliver af resten** (Skattestyrelsens satser: nær familie 80.600 kr /
+15 %, svigerbørn 28.200 kr / 15 %, bedsteforældre 36,25 %), med værktøj,
+eksempeltabel og FAQ der alle læser samme satser. Datagrund: dansk autocomplete
+«hvor meget må jeg give mine børn» og «gaveafgift 2026».
+Leveret 7/10 01:1x: **`/nutidskroner` — omregn et beløb fra 1900 og frem til dagens
+prisniveau** med Danmarks Statistiks forbrugerprisindeks (PRIS8 + august 2026),
+eksempeltabel og en titel med et regnet eksempel (8 af 8 danske autocomplete-træffere).
+Leveret 6/10 21:3x: **«Rabat i procent» på `/procent`** — sjette
+tilstand, dansk og svensk, med synlige prisfelter og et kort der både siger
+«Du sparer 1.125 kr.» og «Rabatten er 12,5 %». Leveret 6/10 15:4x: **`/skridt` — skridt til km, gangtid og kalorier** (7+10 autocomplete-træffere). Leveret 6/10: **`/brokost` med Storebælts prisliste 2026** (26 køretøjstyper,
+ekspres-/kortpris, fritidsrabatter, årsforbrug), **«hvad er klokken om N
+timer» + summering af tidsrum på `/tidsberegner`** og **«hvornår kan jeg køre
+bil igen» på `/promille`** (se `docs/plan-arkiv.md`). De seks punkter nedenfor er alle
+⛔ blokeret af en ❓. Den hurtigste målemetode uden
+en menneskekilde er dansk autocomplete (`suggestqueries.google.com`); den er
+brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
+
+- **[ ] `/koffein` — hvor meget koffein får du om dagen, og hvornår er du over
+  grænsen.** Datagrund (målt 8/10 03:4x, dansk autocomplete, hl=da): **10 af 10**
+  træffere under «hvor meget koffein» er *hvor meget koffein er der i* en kop
+  kaffe / en monster / en pepsi max / en red bull / en booster / en cola / en
+  coca cola / en faxe kondi / en cola zero — altså ni additive svar på ét spørgsmål,
+  ikke definitioner. Under «kaffe koffein» ligger «kaffe koffein pr 100 ml» og
+  «kaffe koffein per kopp»; under «koffein grænse» «koffein grænse danmark» og
+  «koffein grænse gravid». Svensk «koffein i en kopp kaffe», «koffein i cola
+  zero», «koffein i monster» bekræfter mønsteret. Sitet har `/kalorier` (kcal og
+  makronæringsstoffer pr. 100 g) og `/proteinbehov`, men intet koffein — og det
+  er præcis den vinkel `/kalorier` ikke dækker.
+  **Kilder læst 8/10 2026, talene skal ikke genfindes i husviden:**
+  EFSA's koffeinside (`efsa.europa.eu/en/topics/topic/caffeine`, Scientific
+  Opinion on the safety of caffeine 27/10 2015) giver *grænserne*: 400 mg/dag for
+  sunde voksne, 200 mg i én enkeltdose (ca. 3 mg/kg), 200 mg/dag for gravide og
+  ammende, 3 mg/kg for børn og unge, og «single doses of 100 mg may affect
+  sleep duration and patterns in some adults, particularly when consumed close
+  to bedtime». Samme side giver *portionerne*: espresso 60 ml = 80 mg,
+  filterkaffe 200 ml = 90 mg, sort te 220 ml = 50 mg, cola 355 ml = 40 mg,
+  energidrik 250 ml = 80 mg, mørk chokolade 50 g = 25 mg, mælkechokolade 50 g =
+  10 mg. **Pr. 100 g** kommer fra USDA FoodData Central, SR Legacy 2018-04,
+  næringsstof 1057 (Caffeine, MG) — samme datasæt som `/kalorier`, hentet
+  8/10 2026 fra `fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip`.
+  *Accept:* logik i `src/lib/koffein.ts` med hver drikkes `fdcId` ved siden af
+  tallet, enhedstest der dømmer mod EFSA's egne portionstal, en dansk side med
+  tabel og mindst tre FAQ, intern linking til `/kalorier`, `/soevnbehov` og
+  `/vandbehov`, i `page-data.ts`, `calculator-list.ts`, sitemap. ⛔ Påstandene i
+  brødteksten skal kunne efterprøves mod de to kilder — ingen tredje kilde til
+  koffeinindhold (punkt 11). Svensk oversættelse kan udelades, som med `/fliser`.

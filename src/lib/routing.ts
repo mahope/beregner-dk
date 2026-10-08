@@ -12,6 +12,7 @@ import { getDageMellemPath } from "./dage-mellem-datoer";
 import { getUgedagPath } from "./ugedag";
 import { getDageIAaretPath } from "./dage-i-aaret";
 import { getTimerIAaretPath } from "./timer-i-aret";
+import { getArbejdsdagePath } from "./arbejdsdage";
 
 /** The section's own path in each language. Kept here, next to the rule. */
 const DAGE_TIL_HUBS = ["/dage-til", "/dagar-till"] as const;
@@ -51,6 +52,14 @@ const DAGE_I_AARET_SIDER = ["/dage-i-aaret", "/dagar-i-aret"] as const;
  * beraknare.se/timer-i-aret servere danske månedsnavne på et svensk domæne.
  */
 const TIMER_I_ARET_SIDER = ["/timer-i-aret", "/timmar-i-aret"] as const;
+
+/**
+ * Samme regel for «hvor mange arbejdsdage er der på et år»: `/arbejdsdage` og
+ * `/arbetsdagar` er den samme tolv-måneders-tabel i to sprog. Uden 301'en
+ * ville beraknare.se/arbejdsdage servere danske månedsnavne på et svensk
+ * domæne, og samme tabel ville ligge på to URL'er.
+ */
+const ARBEJDSDAGE_SIDER = ["/arbejdsdage", "/arbetsdagar"] as const;
 
 export type RouteDecision =
   | { type: "allow" }
@@ -169,6 +178,18 @@ export function getRouteDecision(
     TIMER_I_ARET_SIDER.includes(normalizedPath as (typeof TIMER_I_ARET_SIDER)[number])
   ) {
     const egenSti = getTimerIAaretPath(domainConfig.locale);
+    if (!egenSti) return { type: "not-found" };
+    if (egenSti !== normalizedPath) {
+      return { type: "redirect", destination: egenSti, status: 301 };
+    }
+  }
+
+  // Samme regel for «hvor mange arbejdsdage er der på et år»: `/arbejdsdage`
+  // og `/arbetsdagar` er den samme tolv-måneders-tabel i to sprog.
+  if (
+    ARBEJDSDAGE_SIDER.includes(normalizedPath as (typeof ARBEJDSDAGE_SIDER)[number])
+  ) {
+    const egenSti = getArbejdsdagePath(domainConfig.locale);
     if (!egenSti) return { type: "not-found" };
     if (egenSti !== normalizedPath) {
       return { type: "redirect", destination: egenSti, status: 301 };
