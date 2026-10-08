@@ -84,6 +84,16 @@ import { KOMMUNER, KOMMUNER_SNIT } from "./kommuner";
 import { MALING_DAEKNING_M2_PR_LITER, MALING_STANDARD_SPILD_PCT } from "./maling";
 import { FLISER_EKSEMPEL, FLISER_STANDARD_SPILD_PCT, fliserEksempel, fliserPrKvadratmeter } from "./fliser";
 import { GRAM_TIL_DL_EKSEMPEL, dlTilGram, formatGramTilDl, gramTilDl, gramTilDlEksempel, vareVedId } from "./gram-til-dl";
+import {
+  MADVARER,
+  MADVARER_KILDE,
+  PROTEIN_META_BESKRIVELSE,
+  PROTEIN_META_TITEL,
+  gramForProtein,
+  madvareMedNavn,
+  proteinRangliste,
+  proteinTal,
+} from "./protein-i-madvarer";
 
 /**
  * `/gram-til-dl`s egne tal til titel, beskrivelse og FAQ. De læser
@@ -1024,6 +1034,32 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er de bedste proteinkilder?", answer: "Animalske kilder (kød, fisk, æg, mejeriprodukter) indeholder alle essentielle aminosyrer. Plantebaserede kilder (bønner, linser, tofu, quinoa, nødder) kan også dække behovet ved varieret sammensætning." },
         { question: "Kan man få for meget protein?", answer: "Meget højt proteinindtag (over 2,5-3 g/kg i længere tid) kan belaste nyrerne hos sårbare personer. For raske personer er 1,5-2,0 g/kg sikkert, men følg de officielle anbefalinger og kontakt en læge ved usikkerhed." },
         { question: "Skal man tage proteinpulver?", answer: "Nej, de fleste kan dække deres proteinbehov gennem almindelig kost. Proteinpulver kan være praktisk efter træning eller ved højt behov, men er ikke nødvendigt." },
+      ],
+    },
+    "protein-i-madvarer": {
+      slug: "protein-i-madvarer",
+      title: "Protein i madvarer – se protein pr. 100 g",
+      description: `Se hvor meget protein der er i æg, kylling, havregryn, hytteost og resten af de ${MADVARER.length} madvarer. Søg i tabellen, og se hvor mange gram du skal spise for 20 g protein.`,
+      metaTitle: PROTEIN_META_TITEL,
+      metaDescription: PROTEIN_META_BESKRIVELSE,
+      keywords: ["protein i madvarer", "protein i æg", "protein i kylling", "hvor meget protein er der i et æg", "protein i havregryn", "protein i hytteost", "proteinindhold madvarer", "protein pr 100 g"],
+      ogTitle: PROTEIN_META_TITEL,
+      ogDescription: `Søg i ${MADVARER.length} madvarer, og se protein pr. 100 g og hvor mange gram du skal spise for 20 g protein.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Protein i madvarer",
+      schemaDescription: `Se proteinindholdet i ${MADVARER.length} madvarer pr. 100 g, med gram for 20 g protein og protein pr. 100 kcal.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvor meget protein er der i et æg?", answer: `Æg har ${proteinTal(madvareMedNavn("Æg, helt, råt")!.protein100g, 1)} g protein pr. 100 g. Skriv vægten på dit æg i tabellen ovenfor, så regner den proteinet for netop din portion.` },
+        { question: "Hvor meget protein er der i kylling?", answer: `Kylling har ${proteinTal(madvareMedNavn("Kylling, hel")!.protein100g, 1)} g protein pr. 100 g. For at få 20 g protein skal du spise ca. ${proteinTal(gramForProtein(madvareMedNavn("Kylling, hel")!, 20), 0)} g kylling.` },
+        { question: "Hvor meget protein er der i havregryn?", answer: `Havregryn har ${proteinTal(madvareMedNavn("Havregryn, tørrede")!.protein100g, 1)} g protein pr. 100 g tørre gryn — mere end de fleste brød og ris. Vægten gælder de tørre gryn, før de koges.` },
+        { question: "Hvor meget protein er der i hytteost?", answer: `Hytteost har ${proteinTal(madvareMedNavn("Hytteost")!.protein100g, 1)} g protein pr. 100 g og er en af de mest proteintætte mejerivarer — den giver mere protein pr. 100 kcal end fx gouda.` },
+        { question: "Hvor meget protein er der i mælk?", answer: `Sødmælk har ${proteinTal(madvareMedNavn("Mælk, sødmælk")!.protein100g, 1)} g protein pr. 100 g, altså ca. ${proteinTal(madvareMedNavn("Mælk, sødmælk")!.protein100g * 2.5, 1)} g i et glas på 2,5 dl.` },
+        { question: "Hvor meget protein er der i en banan?", answer: `Banan har ${proteinTal(madvareMedNavn("Banan")!.protein100g, 1)} g protein pr. 100 g, så en frugt er ikke en proteinkilde — den er mest kulhydrat.` },
+        { question: "Hvilke madvarer har mest protein?", answer: `${proteinRangliste().slice(0, 3).map((m) => `${m.navn} (${proteinTal(m.protein100g, 1)} g)`).join(", ")} ligger øverst blandt de ${MADVARER.length} madvarer. Mængden pr. 100 g siger dog ikke alt — kolonnen «Pr. 100 kcal» viser, hvor meget protein du får for kalorierne.` },
+        { question: "Hvor kommer tallene fra?", answer: `Alle tal er fra ${MADVARER_KILDE.database}, datasættet ${MADVARER_KILDE.dataset}, udgaven ${MADVARER_KILDE.udgave}, pr. 100 g. De samme tal bruges på kalorieberegneren, så protein- og kalorie-tallet på en madvare altid stemmer.` },
       ],
     },
     "rygestop": {

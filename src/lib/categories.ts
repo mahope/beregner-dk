@@ -73,6 +73,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Skridt til km", description: "Omregn skridt til km, tid og kalorier", href: "/skridt", category: "Sundhed" },
   { title: "Kalorieforbrænding", description: "Forbrændte kalorier ved løb, cykling m.m.", href: "/motion-kalorier", category: "Sundhed" },
   { title: "Proteinbehov", description: "Beregn dit daglige proteinbehov efter aktivitetsniveau", href: "/proteinbehov", category: "Sundhed" },
+  { title: "Protein i madvarer", description: "Protein pr. 100 g i æg, kylling og andre madvarer", href: "/protein-i-madvarer", category: "Sundhed" },
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", category: "Sundhed" },
   { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", category: "Sundhed" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", category: "Familie" },

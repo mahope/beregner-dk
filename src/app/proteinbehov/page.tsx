@@ -7,6 +7,8 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+import Link from "next/link";
+import { MADVARER, madvareMedNavn, proteinTal } from "@/lib/protein-i-madvarer";
 
 export async function generateMetadata() {
   return generatePageMetadata("proteinbehov");
@@ -61,8 +63,14 @@ export default async function ProteinbehovPage() {
             <p>
               Animalske kilder som kød, fisk, æg og mejeriprodukter indeholder alle de essentielle
               aminosyrer. Plantebaserede kilder som bønner, linser, tofu, quinoa og nødder kan også
-              dække behovet, men kræver ofte en varieret sammensætning. Et æg indeholder ca. 6-7 g
-              protein, 100 g kylling ca. 25 g, og 100 g kogte linser ca. 9 g.
+              dække behovet, men kræver ofte en varieret sammensætning. Æg har{" "}
+              {proteinTal(madvareMedNavn("Æg, helt, råt")!.protein100g, 1)} g protein pr. 100 g,
+              kylling {proteinTal(madvareMedNavn("Kylling, hel")!.protein100g, 1)} g og hytteost{" "}
+              {proteinTal(madvareMedNavn("Hytteost")!.protein100g, 1)} g. Se{" "}
+              <Link href="/protein-i-madvarer" className="underline font-medium">
+                proteinindholdet i {MADVARER.length} madvarer
+              </Link>
+              .
             </p>
             <h2>Timing og fordeling</h2>
             <p>
