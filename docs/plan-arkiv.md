@@ -30879,3 +30879,36 @@ Leveret 8/10 18:3x: **`/kalorier-i-opskrift` — kcal og makroer for en hel opsk
 Leveret 8/10 21:3x: **`/sukker-i-madvarer` — sukker pr. 100 g for 52 madvarer**, med søgning (samme logik som `/kalorier`), gram-felt pr. række, «gram for 20 g sukker» og «sukker pr. 100 kcal», topp 10-liste, tre opslags-tabeller og ni FAQ'er. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor meget sukker er der i» er madvarer. Tallene er USDA FoodData Central, SR Legacy 2018-04, næringsstof 2000, hentet på de samme `fdcId`'er som kalorietabellen; havregryn er udeladt, fordi kilden ikke opgiver sukker for den. Siden viser det samlede sukkerindhold. Dansk (daOnly).
 
 Leveret 8/10 22:3x: **`/sand-og-grus` — beregn hvor mange m³ og ton sand, grus eller bundsikring du skal bruge til et areal**, med materialevalg, lagtykkelse, spild, m³, liter og ton. Datagrund: 10/10 danske autocomplete-træffere under «hvor meget sand skal jeg bruge» og «hvor meget grus skal jeg bruge». Lagtykkelser og densiteter fra danske leverandører (sandshoppen.dk, havehandel.dk, materialeberegner.dk). Dansk (daOnly).
+
+---
+
+## Flyttet fra IMPLEMENTATION_PLAN.md 9/10 00:3x (færdige opgaver i Fase 3-sektionen)
+
+**F5f. [x] FÆRDIG 6/10 20:4x — Hastighedsomregner på `/fart`** (DEPLOY OK 6/10 21:31 på begge domæner), og **6/10 21:5x — de tre regnestykker også på svensk**. Datagrund: 10 af 10 danske autocomplete-træffere under «km i timen» er omregning mellem km/t, m/s, mph og knop; sitet havde kun `distance = fart × tid`.
+
+**F5g. [x] FÆRDIG 6/10 21:3x — «Rabat i procent» på `/procent`**, se
+`docs/plan-arkiv.md`. Datagrund: GSC-eksporten 6/10 (149.929 visninger, 0,1 %
+CTR, pos. 7,5) rummer søgningen «en telefon er sat 1125 kr. ned. normalt koster
+den 9000 kr. hvor stor er rabatten i procent?» på pos. 5, og dansk autocomplete
+(6/10 21:3x) svarer «rabat procent» med «procentvis rabat» og «procentregning
+rabat» blandt ti træffere. Siden havde formlen, tabellen og to FAQ-svar, men
+værktøjet havde ingen rabat-tilstand. **MÅL: /procent baseline 149.929
+visninger / 85 klik / 0,1 % CTR / pos. 7,5 pr. 6/10** — måles igen 20/10.
+
+**F5d. [x] FÆRDIG 6/10 — `/laantype`, se `docs/plan-arkiv.md`.**
+
+**F5e. [x] FÆRDIG 6/10 07:5x — «Forskel mellem to tal» på `/procent`**,
+se `docs/plan-arkiv.md`. Datagrund: `/procent` er sitets #1-side (149.929
+GSC-visninger, 0,1 % CTR, pos. 7,5), og dansk autocomplete (hl=da, 6/10)
+svarer «procentvis forskel» med ni træffere, otte af dem «… mellem to tal»;
+svensk «procent skillnad mellan två tal» har 10 af 10 relaterede. Siden lærer
+allerede de to formler, men værktøjet kunne kun den ensidige — nu får
+læseren begge tal fra ét talpar.
+
+
+**F1. [x] FÆRDIG 7/10 Søgeniveau-data for `/procent`** — 150.470 visninger, 0,1 %, pos 7,4.
+Titel/beskrivelse matcher nu «10 procent af» og rabat-spørgsmålet (1125 kr ned fra 9000 kr).
+GSC's tre søgninger summerer 364 visninger af 150.470. ⛔ GSC-eksport er et ❓.
+
+
+**F9. [x] FÆRDIG 7/10 `locale === "se" ? "se" : "da"` — 13 bruger-synlige steder med dansk på norske domæner rettet.** Tilføjet `src/lib/locale-text.ts` med `getTextLocale`, `getDaSeLocale`, `getLocaleText`. Opdateret `lokal-dato.ts`, `bil-omkostninger.ts`, `dato/page.tsx` med `LocaleText`-poster for bruger-synlig tekst og korrekt fallback til dansk for funktioner der kun understøtter da/se. Alle 4860 tests passerer.

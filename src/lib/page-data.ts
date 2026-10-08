@@ -129,6 +129,37 @@ import {
   sukkerTal,
   sukkerVareMedNavn,
 } from "./sukker-i-madvarer";
+import {
+  ALKOHOL_DRIKKE,
+  beregnAlkoholKalorier,
+  drikMedNavn,
+  kcalIServering,
+  alkoholGramIServering,
+  GRAM_PR_GENSTAND,
+} from "./kalorier-i-alkohol";
+
+/**
+ * `/kalorier-i-alkohol`s egne tal til titel, beskrivelse og FAQ. Alle værdier er
+ * modullets udregning for serveringen, så en sætning aldrig lover et andet tal
+ * end tabellen viser (punkt 11).
+ */
+const ALK = drikMedNavn("Øl, almindelig")!;
+const ALK_LET = drikMedNavn("Øl, let")!;
+const ALK_STAERK = drikMedNavn("Øl, stærk")!;
+const ALK_ROEDVIN = drikMedNavn("Vin, rød")!;
+const ALK_HVIDVIN = drikMedNavn("Vin, hvid")!;
+const ALK_ROSEVIN = drikMedNavn("Rosévin")!;
+const ALK_SOEDVIN = drikMedNavn("Sødvin")!;
+const ALK_SPIRIT = drikMedNavn("Spirit, 40 % (vodka, gin, rom)")!;
+const ALK_WHISKY = drikMedNavn("Whisky, 43 %")!;
+const ALK_ALKOHOLFRI = drikMedNavn("Alkoholfri øl")!;
+function tal(n: number, decimaler = 0): string {
+  return n.toLocaleString("da-DK", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimaler,
+  });
+}
+const ALK_TO_OEL_EN_VIN = beregnAlkoholKalorier({ oel: 2, roedvin: 1 });
 
 /**
  * `/gram-til-dl`s egne tal til titel, beskrivelse og FAQ. De læser
@@ -2983,6 +3014,31 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvordan regner man kirkeskat ud?", answer: "Kirkeskatten er din skattepligtige indkomst ganget med satsen for din kommune, afrundet til hele kroner. Eksempler: " + KIRKESKAT_EKSEMPEL_TEKST + "." },
       { question: "Kan man melde sig ud af folkekirken?", answer: "Ja, du kan melde dig ud af folkekirken når som helst, gratis, og altid melde dig ind igen. Det sker via skat.dk eller ved at kontakte din sognepræst." },
         { question: "Hvad er forskellen på skatteprocent og kirkeskat?", answer: "Skatteprocent er den samlede skat af din indkomst. Kirkeskat er én del af den — en skat til folkekirken, som kun medlemmer af folkekirken betaler. Se vores kirkeskat-beregner for at se, hvor meget du sparer ved at melde dig ud." },
+      ],
+    },
+    "kalorier-i-alkohol": {
+      slug: "kalorier-i-alkohol",
+      title: "Kalorier i alkohol – kcal i øl, vin og sprits",
+      description: `Se hvor mange kalorier der er i øl, vin, cider og sprits, og læg en hel aften sammen. En øl på ${ALKOHOL_DRIKKE[0].ml} ml giver ${tal(kcalIServering(ALK))} kcal og ${tal(alkoholGramIServering(ALK) / GRAM_PR_GENSTAND, 2)} genstande.`,
+      metaTitle: `Kalorier i alkohol: ${tal(kcalIServering(ALK))} kcal i en øl på ${ALKOHOL_DRIKKE[0].ml} ml`,
+      metaDescription: `Hvor mange kalorier er der i alkohol? Se kcal pr. servering for øl, vin, cider, spirit og alkoholfri øl — og læg en aften sammen i kcal og genstande.`,
+      keywords: ["kalorier i alkohol", "hvor mange kalorier er der i en øl", "kalorier i øl", "kalorier i vin", "kalorier i alkohol tabell", "kalorier i alkoholfri øl", "kcal i et glas vin", "kalorier i en shot", "alkohol kalorier beregner"],
+      ogTitle: `Kalorier i alkohol: ${tal(kcalIServering(ALK))} kcal i en øl`,
+      ogDescription: "Kcal pr. servering for øl, vin, cider, spirit og alkoholfri øl, med genstande og gram ren alkohol.",
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Kalorier i alkohol beregner",
+      schemaDescription: "Beregn kalorier og genstande i øl, vin, cider, spirit og alkoholfri øl. Tallene er fra USDA FoodData Central, SR Legacy 2018-04.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvor mange kalorier er der i en øl?", answer: `En almindelig øl på ${ALKOHOL_DRIKKE[0].ml} ml giver ${tal(kcalIServering(ALK))} kcal, heraf ${tal(alkoholGramIServering(ALK) * 6.93)} kcal fra alkoholen. En let øl giver ${tal(kcalIServering(ALK_LET))} kcal, og en stærk øl ${tal(kcalIServering(ALK_STAERK))} kcal. Se tallene for din egen drik i tabellen ovenfor.` },
+        { question: "Hvor mange kalorier er der i et glas vin?", answer: `Et glas rødvin på ${ALK_ROEDVIN.ml} ml giver ${tal(kcalIServering(ALK_ROEDVIN))} kcal, hvidvin ${tal(kcalIServering(ALK_HVIDVIN))} kcal og rosévin ${tal(kcalIServering(ALK_ROSEVIN))} kcal. Sødvin har flere kulhydrater og giver ${tal(kcalIServering(ALK_SOEDVIN))} kcal pr. ${ALK_SOEDVIN.ml} ml.` },
+        { question: "Hvor mange kalorier er der i en shot?", answer: `Et shot á ${ALK_SPIRIT.ml} ml spirit giver ${tal(kcalIServering(ALK_SPIRIT))} kcal, og whisky på 43 % giver ${tal(kcalIServering(ALK_WHISKY))} kcal. Alkoholen står for næsten alle kalorierne i en stærk drik — der er ingen kulhydrater i den.` },
+        { question: "Hvor mange kalorier er der i alkoholfri øl?", answer: `En alkoholfri øl på ${ALK_ALKOHOLFRI.ml} ml giver ${tal(kcalIServering(ALK_ALKOHOLFRI))} kcal. Alkoholen er næsten væk, men kulhydraterne er tilbage, så den er ikke kaloriefri. Det svarer til ${tal(Math.abs(kcalIServering(ALK_ALKOHOLFRI) - kcalIServering(ALK)))} kcal mindre end en almindelig øl.` },
+        { question: "Hvorfor har alkohol kalorier?", answer: `Ét gram ren ethanol giver cirka 7 kcal, så en stærk drik når hurtigt op på samme niveau som et måltid. Alkoholen ryddes i leveren, men kalorierne tæller med i din samlede energiindtag. I en alkoholfri drik er alkoholen næsten væk, mens kulhydraterne bliver tilbage, og derfor giver den stadig kalorier.` },
+        { question: "Hvad svarer to øl og et glas vin til?", answer: `To øl og et glas rødvin udgør ${tal(ALK_TO_OEL_EN_VIN.kcal)} kcal, ${tal(ALK_TO_OEL_EN_VIN.alkoholGram, 1)} g ren alkohol og ${tal(ALK_TO_OEL_EN_VIN.genstande, 2)} genstande. Det er omtrent en hel middag i kalorier.` },
+        { question: "Er kalorierne i alkohol tomme kalorier?", answer: `Ja, i den forstand at ethanol ikke indeholder vitaminer, mineralstoffer eller protein. Til gengæld tilskrives alkoholen cirka 7 kcal pr. gram — næsten lige så meget som fedt. Kropsvægten afhænger af den samlede balance, ikke af alkoholen alene.` },
       ],
     },
     "skatteprocent": {

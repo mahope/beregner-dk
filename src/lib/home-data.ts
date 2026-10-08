@@ -281,6 +281,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", popular: false, category: "Sundhed" },
   { title: "Søvnbehov", description: "Se hvor meget søvn du har brug for efter din alder", href: "/soevnbehov", popular: false, category: "Sundhed" },
   { title: "Koffein", description: "Se hvor meget koffein du får om dagen", href: "/koffein", popular: false, category: "Sundhed" },
+  { title: "Kalorier i alkohol", description: "Se kcal i øl, vin, cider og sprits", href: "/kalorier-i-alkohol", popular: false, category: "Sundhed" },
 
   // Familie
   { title: "Ægløsningsberegner", description: "Find dine frugtbare dage og din ægløsning", href: "/aegloesning", popular: false, category: "Familie" },
