@@ -2387,3 +2387,44 @@ describe("fastelavn, palmesøndag og 2. juledag (1/10)", () => {
     }
   });
 });
+
+/**
+ * Ingen kvantificeret påstand om betalt fri.
+ *
+ * "Många kollektivavtal ger dig ledigt med løn", "de flesta ger ledigt med
+ * løn" og "mest arbetsgivare giver fri med løn" er ikke noget, brødteksten
+ * kan dokumentere: den skal ved, hvilke overenskomster der er tale om. CEO'en
+ * bedt om den opfundne tekst fjernet fra midsommersiden 6/10 (`a32e82f`), fordi
+ * den lævede lønnen på en dag loven ikke kender. Samme fejlklasse stod
+ * stadig på skærtorsdagen og nationaldagen.
+ *
+ * Porten er bevidst snæver: den leder efter en generalisering (`många`,
+ * `de flesta`, `mest`, `alla`) i samme klausul som løn eller ledig. Den
+ * ændrer ikke ved de rigtige formuleringer — "Det er kollektivavtalen, ikke
+ * loven, som avgir om du får fri med løn" (nationaldagens faktaboks) siger præcis
+ * det, siden ved, og skal bestå.
+ */
+const GENERALISERER_LOEN = /(?:\bmånga\b|\bde flesta\b|\bmest\b|\balla\b)[^.?!,]{0,60}\b(?:lön|ledig)/iu;
+
+describe("ingen kvantificeret påstand om betalt fri i brødteksten", () => {
+  test("hverken skærtorsdagen eller nationaldagen loveder løn for mange", () => {
+    const fund: string[] = [];
+    for (const { hændelse, tekst } of svenskSætninger()) {
+      for (const klausul of klausler(tekst)) {
+        if (GENERALISERER_LOEN.test(klausul)) fund.push(`${hændelse}: ${klausul}`);
+      }
+    }
+    expect(fund).toEqual([]);
+  });
+
+  test("de to sider bevarer alligevel skelnen mellem röd dag og allmän helgdag", () => {
+    for (const slug of ["skartorsdagen", "nationaldagen"]) {
+      const side = DAGE_TIL_EVENTS.find((e) => e.se?.slug === slug);
+      const tekster = [
+        ...side!.se!.copy.facts,
+        ...side!.se!.copy.faq.map((f) => f.answer),
+      ];
+      expect(tekster.filter((t) => ROED_DAG.test(t)).length).toBeGreaterThanOrEqual(1);
+    }
+  });
+});

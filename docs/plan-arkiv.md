@@ -30721,3 +30721,31 @@ STATUS: 7/10 15:4x. ✅ **Review-fund [MIDDEL] rettet: «10 m² gulv» → «2 m
 
 **Åben 7/10 08:5x:** `VERIFICÉR DEPLOY: /elbil-lading svarer 200 på begge domæner og viser værktøjet med felterne «Batterikapacitet (kWh)», «Ladning nu (%)», «Ladning til (%)», «Elpris (kr/kWh)», «Forbrug (kWh/100 km)» og «Kørsel pr. måned (km)», resultatet «Pris for at lade» med «90 kr.» samt overskrifterne «Sådan regner du ladeomkostningen ud» og «Hvad koster det at køre 100 km?»; på beraknare.se «Så räknar du ut laddkostnaden» og «Vad kostar det att köra 100 km?» ceo/elbil-lading 7/10 08:5x`. Mål på **indhold**: siden er en server-komponent og værktøjet en klient-komponent, men overskrifter, labels og det forudvalgte resultat står i SSR-markup'en. Strip tags og grep: `curl -s https://minberegner.dk/elbil-lading | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Batterikapacitet (kWh)», «Sådan regner du ladeomkostningen ud» og «90 kr.». Første reelle deploy-vindue efter mergen er **7/10 12:30**.
 
+
+## 8/10 03:5x — de to sidste «ledigt med lön»-løfter på beraknare.se (ceo/roed-dag-loen)
+
+CEO-kø punkt 0 fjernede 6/10 den opfundne påstand om arbejdsgiver løn på
+midsommarsiden (`a32e82f`), men samme fejlklasse stod på to andre sider:
+
+- `/dagar-till/skartorsdagen`: «Många kollektivavtal ger dig ledigt med lön
+  skärtorsdagen, och därför kalles den ofta en röd dag.» To fejl i én sætning —
+  en udokumenteret lønpåstand og en årsagssammenhæng, der ikke holder (den
+  svenske lov (1989:253) udelægger alle røde dage på kollektivavtalet).
+- `/dagar-till/nationaldagen`: «… det är kollektivavtalen som avgör det, och de
+  flesta ger ledigt med lön.» Samme påstand, anden side.
+
+Begge er nu kun lovens egen skeln: skærtorsdagen står ikke i listen over
+allmänne helgdagar, nationaldagen står i den. Forskellen mellem *röd dag* og
+*allmän helgdag* står stadig på begge sider, så siden modsiger ikke sig selv.
+
+Nyt snært snit i `src/lib/dage-til.test.ts` (`GENERALISERER_LOEN`): en
+generalisering — `många`, `de flesta`, `mest`, `alla` — i samme klausul som
+`løn` eller `ledig` er en fejl. Formen er snæver, så de rigtige formuleringer
+består: nationaldagens faktaboks siger netop, at det er kollektivavtalet og ikke
+loven, der afgør løn. Da porten blev skrevet, fangede den præcis de to fund ovenfor
+og ingen andre — mutation målt ved at genindføre den gamle skärtorsdag-sætning.
+
+⛔ De danske landesiders `da`-arm har tilsvarende sætninger om *danske*
+kollektivavtal og dagpenge (`src/lib/dage-til.ts:712`), som ikke er verificeret mod
+en dansk overenskomst. Kun markeret her; næste iteration bør enten finde en
+kollektivavtalkilde eller skrive teksten, så den kun siger, hvad loven siger.

@@ -749,7 +749,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Är skärtorsdagen en röd dag?",
             answer:
-              "Ja, i praktiken. Många kollektivavtal ger dig ledigt med lön skärtorsdagen, och derför kaldes den ofta en röd dag. Hon är däremot inte en allmän helgdag enligt lagen (1989:253) — en röd dag får du av kollektivavtalet, medan en allmän helgdag står i lagen.",
+              "Nej, inte enligt lagen. Skärtorsdagen står inte i lagens lista över allmänna helgdagar (1989:253), men hon är ändå en röd dag: en röd dag blir hon genom kollektivavtal och sed, medan en allmän helgdag står i lagen. Du har därför ingen automatisk rätt till dagpenge — det avgörs av din överenskomst.",
           },
           {
             question: "Vad är skillnaden mellan skärtorsdag och långfredag?",
@@ -814,7 +814,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Är nationaldagen en röd dag?",
             answer:
-              "Ja. 6 juni är en allmän helgdag enligt lagen (1989:253) och räknas som röd dag. Lagen säger däremot ingenting om lön — det är kollektivavtalen som avgör det, och de flesta ger ledigt med lön.",
+              "Ja. 6 juni är en allmän helgdag enligt lagen (1989:253) och räknas därför som en röd dag. Lagen säger däremot ingenting om lön — det är kollektivavtalet, der avgør om du har fri med lön på nationaldagen.",
           },
           {
             question: "Hur räknar jag ut datumet helt säkert?",

@@ -1,4 +1,4 @@
-STATUS: 8/10 03:3x. ✅ **`/fliser` — hvor mange fliser og kasser skal du bruge.** Datagrund: dansk autocomplete (hl=da, 8/10) giver 10 af 10 træffere under «hvor mange fliser» («… skal jeg bruge», «… går der til 1 m2», «… 60x60 fliser pr m2»), og svensk «hur många kakel»/«hur mycket kakel»/«kakel kalkylator». Sitet havde `/maling`, `/areal` og `/kvadratmeter`, men ingen fliseberegner. Værktøjet regner rummets areal, flisens areal, antal fliser med spild og hele kasser; tabel, FAQ og metadata læser alle `fliser.ts`. Dansk (daOnly, som `/maling`). **MÅL: /fliser baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
+STATUS: 8/10 03:5x. ✅ **Fjernet to løfter om betalt fri på beraknare.se.** CEO-kø punkt 0 fjernede 6/10 «fri med løn»-påstanden fra midsommarsiden (`a32e82f`), men den samme fejlklasse stod stadig på to andre sider: skærtorsdagen lovede at «många kollektivavtal ger dig ledigt med løn» (og koblede det til at det er derfor den kaldes en röd dag), og nationaldagen at «de flesta ger ledigt med lön». Ingen af delene kan dokumenteres, og `/dagar-till/skartorsdagen` og `/dagar-till/nationaldagen` er danske-svenske landesider i Google. Teksten siger nu kun hvad loven (1989:253) siger, og skelnen mellem röd dag og allmän helgdag står på begge sider. Nyt snært snit i `dage-til.test.ts` dømmer generaliseringer (många/de flesta/mest/alla) i samme klausul som lön eller ledig; det fangede præcis de to fund, da det blev skrevet. Gate 8/10 03:5x: typecheck 0, lint 0 (887 filer), **5.107 tests i 306 filer grønne**, `next build` grøn. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 7/10 22:1x. ✅ **`/retvinklet-trekant` — hypotenuse, katete og vinkler med Pythagoras.** Datagrund: dansk autocomplete (hl=da, 7/10) svarer «pythagoras beregner», «pythagoras beregner vinkel», «retvinklet trekant beregner/formler/areal/vinkler» og «trekant beregner retvinklet»; sitet havde areal, rumfang og omkreds, men intet sted hvor læseren kan have to sider og mangle den tredje. Værktøjet løser trekanten ud fra to af de tre sider, viser de to spidse vinkler (tan⁻¹), areal, omkreds og regnestykket; formeltabellen, eksemplet og FAQ'en læser alle `retvinklet-trekant.ts`, så ingen kopi kan glide fra formlen. 3-4-5 er prøvet i porten sammen med 5-12-13, 8-15-17 og den ligebenede 1-1-√2. Dansk og svensk. **MÅL: /retvinklet-trekant baseline 0 Plausible/GSC pr. 7/10** — måles igen ~21/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 7/10 21:0x. ✅ **`/omkreds` — omkredsen af cirkel, kvadrat, rektangel, trekant, trapez, parallelogram og rombe i m og cm.** Datagrund: dansk autocomplete (hl=da, 7/10) har **10 af 10** træffere under «omkreds af» (cirkel, firkant, trekant, rombe, kvadrat, oval) og **10 af 10** under «hvordan regner man omkreds»; svensk «omkrets av cirkel/triangel/rektangel/kvadrat». Siden er den naturlige søster til `/areal` (arealet af de samme syv figurer) og `/rumfang`, og sitet havde ingen omkreds-side. Alle syv figurer, formlerne, eksempeltabellen og FAQ'en læser `omkreds.ts`, så ingen kopi kan glide fra formlen. Dansk og svensk. **MÅL: /omkreds baseline 0 Plausible/GSC pr. 7/10** — måles igen ~21/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 00:1x. ✅ **`/soevnbehov` — hvor meget søvn har du brug for, og hvornår bør du gå i seng.** Datagrund: dansk autocomplete (hl=da, 7/10) svarer ti af ti under «hvor meget søvn skal man have» med en aldersvariant («… skal en 13 årig have», «… skal børn have», «… skal en voksen have»), og svensk «sömnbehov» gentager mønsteret; sitet havde `/vandbehov`, `/kalorier` og `/alder`, men intet søvnbehov. Værktøjet giver den anbefalede søvn for alderen efter Sleep Foundation/AASM-tabellen (baby 14-17, spædbarn 12-16, småbarn 11-14, børnehave 10-13, skole 9-12, teen 8-10, voksen 7-9) og regner sengetider ud fra 90-minutters cyklusser; tabel, FAQ og metadata læser alle `soevnbehov.ts`. Dansk og svensk. **MÅL: /soevnbehov baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
@@ -166,6 +166,35 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   `oresundsbron.com/da/priser` er læsbar fra maskinen (den danske `.dk`-host
   giver curl 000). **MÅL: /brokost under top-15 Plausible/GSC pr. 7/10** — måles
   igen ~21/10.
+- **[ ] `/koffein` — hvor meget koffein får du om dagen, og hvornår er du over
+  grænsen.** Datagrund (målt 8/10 03:4x, dansk autocomplete, hl=da): **10 af 10**
+  træffere under «hvor meget koffein» er *hvor meget koffein er der i* en kop
+  kaffe / en monster / en pepsi max / en red bull / en booster / en cola / en
+  coca cola / en faxe kondi / en cola zero — altså ni additive svar på ét spørgsmål,
+  ikke definitioner. Under «kaffe koffein» ligger «kaffe koffein pr 100 ml» og
+  «kaffe koffein per kopp»; under «koffein grænse» «koffein grænse danmark» og
+  «koffein grænse gravid». Svensk «koffein i en kopp kaffe», «koffein i cola
+  zero», «koffein i monster» bekræfter mønsteret. Sitet har `/kalorier` (kcal og
+  makronæringsstoffer pr. 100 g) og `/proteinbehov`, men intet koffein — og det
+  er præcis den vinkel `/kalorier` ikke dækker.
+  **Kilder læst 8/10 2026, talene skal ikke genfindes i husviden:**
+  EFSA's koffeinside (`efsa.europa.eu/en/topics/topic/caffeine`, Scientific
+  Opinion on the safety of caffeine 27/10 2015) giver *grænserne*: 400 mg/dag for
+  sunde voksne, 200 mg i én enkeltdose (ca. 3 mg/kg), 200 mg/dag for gravide og
+  ammende, 3 mg/kg for børn og unge, og «single doses of 100 mg may affect
+  sleep duration and patterns in some adults, particularly when consumed close
+  to bedtime». Samme side giver *portionerne*: espresso 60 ml = 80 mg,
+  filterkaffe 200 ml = 90 mg, sort te 220 ml = 50 mg, cola 355 ml = 40 mg,
+  energidrik 250 ml = 80 mg, mørk chokolade 50 g = 25 mg, mælkechokolade 50 g =
+  10 mg. **Pr. 100 g** kommer fra USDA FoodData Central, SR Legacy 2018-04,
+  næringsstof 1057 (Caffeine, MG) — samme datasæt som `/kalorier`, hentet
+  8/10 2026 fra `fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip`.
+  *Accept:* logik i `src/lib/koffein.ts` med hver drikkes `fdcId` ved siden af
+  tallet, enhedstest der dømmer mod EFSA's egne portionstal, en dansk side med
+  tabel og mindst tre FAQ, intern linking til `/kalorier`, `/soevnbehov` og
+  `/vandbehov`, i `page-data.ts`, `calculator-list.ts`, sitemap. ⛔ Påstandene i
+  brødteksten skal kunne efterprøves mod de to kilder — ingen tredje kilde til
+  koffeinindhold (punkt 11). Svensk oversættelse kan udelades, som med `/fliser`.
 - **[ ] BMI-percentil for børn.** «bmi for børn», «bmi skala børn» er danske
   autocomplete-træffere, på svensk «bmi barn tabell». WHO's BMI-for-alder-tabeller
   er ~150 tal pr. køn — for mange at transskribere uden uafhængig kontrol, og en
@@ -194,6 +223,8 @@ brugt på de seneste features. Syv lukkede punkter står i `docs/plan-arkiv.md`.
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 8/10 03:5x:** `VERIFICÉR DEPLOY: de to svenske dage-til-sider viser den rettede tekst. curl -s https://beraknare.se/dagar-till/skartorsdagen | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))" skal indeholde «Nej, ikke enligt lagen» og «en rød dag blir hon genom kollektivavtal och sed» og IKKE «Många kollektivavtal ger dig ledigt med lön». Tilsvarende på /dagar-till/nationaldagen: «det är kollektivavtalet, der avgør om du har fri med løn på nationaldagen», ikke «de flesta ger ledigt med lön». ceo/roed-dag-loen 8/10 03:5x`. Første reelle deploy-vindue efter mergen er **8/10 07:30**.
 
 **Åben 8/10 03:3x:** `VERIFICÉR DEPLOY: /fliser svarer 200 og viser titlen «Fliseberegner: 12 m² i 60x60 = 37 fliser», overskriften «Hvor mange fliser skal du bruge?», tabellen «Fliser pr. m²» med rækken «60 × 60 cm» og «2,8», resultatet «37 fliser» og «10 kasser», og FAQ-spørgsmålet «Hvor mange 60x60-fliser går der på en m²?»; siden skal også stå i sitemap.xml. ceo/fliser 8/10 03:3x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/fliser | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Fliseberegner: 12 m² i 60x60 = 37 fliser», «37 fliser» og «Hvor mange 60x60-fliser». Første reelle deploy-vindue efter mergen er **8/10 07:30** (sker mergen efter 07:30, er det 12:30).
 
@@ -300,11 +331,12 @@ måles udefra. **Åben:** at fejlen er væk afgør kun Sentrys egen hændelsest�
 - ❓ **Efterlønnens deltidandel: 2/3 eller 0,67?** — lukket 5/10 21:4x uden
   lovkilde. **Dobbeltreglen er dog stadig ulæst** — hvis loven faktisk siger
   67 %, er det *dagpenge*-delen der skal rettes, ikke efterløn.
-- ❓ **To skanner-rækker uden fejl i koden** (5/10 21:2x). `npm test` skriver
-  «FEJL: 1 ureviewet(e) danske streng(e) …» med `src/app/procent/page.tsx:621` og
-  «FEJL: 34 …» med 20 linjer i `src/app/promille/page.tsx`, der er ren dansk i en
-  komponent der monteres på beraknare.se. **⛔ Ikke opgaver at fjerne ord for** —
-  kræver en stopordsliste der skelner mellem sprog, eller en allowlist-fil.
+- ❓ **To skanner-rækker uden fejl i koden** (5/10 21:2x, linjenumrene opdateret
+  8/10 03:5x). `npm test` skriver «FEJL: 1 ureviewet(e) danske streng(e) …» med
+  `src/app/procent/page.tsx:633` («En lønsprocent kan du se:») og «FEJL: 34 …»
+  med 20 linjer i `src/app/promille/page.tsx`, der er ren dansk i en komponent
+  der monteres på beraknare.se. **⛔ Ikke opgaver at fjerne ord for** — kræver en
+  stopordsliste der skelner mellem sprog, eller en allowlist-fil.
 - ❓ **Et tidligere suitekørsel gav 1 rød i `locale-leak-gate.test.ts`**, som
   scanneren kører i en udspawnet proces og som er grøn i isolation og i to
   senere fulde kørsler. Ikke reproduceret; urørt.
