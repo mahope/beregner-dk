@@ -75,6 +75,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Proteinbehov", description: "Beregn dit daglige proteinbehov efter aktivitetsniveau", href: "/proteinbehov", category: "Sundhed" },
   { title: "Protein i madvarer", description: "Protein pr. 100 g i æg, kylling og andre madvarer", href: "/protein-i-madvarer", category: "Sundhed" },
   { title: "Kulhydrater i madvarer", description: "Kulhydrat pr. 100 g i banan, kartoffel og andre madvarer", href: "/kulhydrater-i-madvarer", category: "Sundhed" },
+  { title: "Salt i madvarer", description: "Natrium pr. 100 g i rugbrød, smør og skinke — omregnet til salt", href: "/salt-i-madvarer", category: "Sundhed" },
   { title: "Fedt i madvarer", description: "Fedt pr. 100 g i æg, avocado og andre madvarer", href: "/fedt-i-madvarer", category: "Sundhed" },
   { title: "Sukker i madvarer", description: "Sukker pr. 100 g i banan, æble og andre madvarer", href: "/sukker-i-madvarer", category: "Sundhed" },
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", category: "Sundhed" },

@@ -30912,3 +30912,52 @@ GSC's tre søgninger summerer 364 visninger af 150.470. ⛔ GSC-eksport er et �
 
 
 **F9. [x] FÆRDIG 7/10 `locale === "se" ? "se" : "da"` — 13 bruger-synlige steder med dansk på norske domæner rettet.** Tilføjet `src/lib/locale-text.ts` med `getTextLocale`, `getDaSeLocale`, `getLocaleText`. Opdateret `lokal-dato.ts`, `bil-omkostninger.ts`, `dato/page.tsx` med `LocaleText`-poster for bruger-synlig tekst og korrekt fallback til dansk for funktioner der kun understøtter da/se. Alle 4860 tests passerer.
+
+**F5h. [x] FÆRDIG 9/10 00:3x — `/kalorier-i-alkohol`** (squashet til master i
+9f65ec3, ceo/kalorier-i-alkohol). 11 drikke fra USDA FoodData Central, SR Legacy
+2018-04 (fdcId pr. række): øl almindelig 143 kcal, let øl 95, stærk øl 198,
+cider 185, alkoholfri øl 122, rødvin 101, hvidvin 98, rosé 102, spirit 87,
+whisky 94, sødvin 96. Vægten pr. servering er kildens egen portionvægt
+(1 fl oz = 29,5735 ml), så et shot vurderes til 37,6 g og ikke 40 g.
+Serveringerne (33 cl øl, 12 cl vin, 4 cl sprits) er de samme `/alkoholenheder`
+bruger. Værktøjet lægger kcal, gram alkohol og genstande (12 g pr. genstand)
+sammen; tabel, brødtekst, FAQ og metadata læser alle `kalorier-i-alkohol.ts`.
+*Accept:* 200 med «Kalorier i alkohol: 143 kcal i en øl på 330 ml» i titlen,
+rækkerne «Øl, almindelig 330 ml 143 kcal», «Alkoholfri øl 330 ml 122 kcal» og
+«Spirit, 40 % (vodka, gin, rom) 40 ml 87 kcal», teksterne «40 ml sprits er
+37,6 g, ikke 40 g» og «3,21 genstande», kort på forsiden (Sundhed) og URL i
+sitemap.xml. Gate 9/10 00:3x: typecheck 0, lint 0 (942 filer), 5.343 tests i
+320 filer grønne (9 nye i `kalorier-i-alkohol.test.ts`, mutation målt:
+`gramPr100ml: 100` for spirit giver 2 røde), `next build` grøn med
+`/kalorier-i-alkohol` i ruteoversigten. Bredder tjekket: 390 px (tabellen
+scroller vandret, ingen afskåret tekst) og 1280 px.
+
+**F5i. [x] FÆRDIG 9/10 01:4x — `/salt-i-madvarer`** (ceo/salt-i-madvarer,
+squashet til master 9/10 01:4x). Datagrund: dansk autocomplete (hl=da, 9/10
+01:1x, `suggestqueries.google.com`) har «hvor meget salt er der i rugbrød»,
+«… i smør» og «… i en bouillonterning» blandt de første ti forslag under «hvor
+meget salt er der i» (øvrige forslag er hav og søer). Natrium pr. 100 g for
+alle 53 madvarer er hentet fra USDA FoodData Central, SR Legacy 2018-04,
+næringsstof 1058 (Sodium, Na), via `POST https://api.nal.usda.gov/fdc/v1/foods`
+i tre kald; hver række bærer sin `fdcId`. Salt = natrium × 2,5 ÷ 1000
+(23 g natrium i et 58,5 g NaCl-molekyle), så 603 mg i rugbrød giver 1,5 g salt,
+643 mg i smør 1,6 g, 1.500 mg i skinke 3,8 g og 1.139 mg i feta 2,8 g.
+Kolonnerne «Salt», «Gram for 5 g salt» og «Andel af 5 g» er regnet af samme
+tabel; FAQ, brødtekst, rangliste og metadata læser `salt-i-madvarer.ts`, så
+ingen sætning skriver et tal selv. WHO's daglige anbefaling (under 2.000 mg
+natrium = under 5 g salt, faktabladet «Sodium reduction» opdateret 11. maj
+2026) er sidens eneste ydre værdi. Dansk (daOnly). Kort på forsiden og i
+/kategori/sundhed, i sitemap, interne links til /kalorier og de øvrige fire
+«i madvarer»-sider. *Accept:* 200 med «Salt i madvarer: 1,5 g i rugbrød, 1,6 g i
+smør» i titlen, rækken «Rugbrød» med 603 mg natrium og 1,5 g salt, rækkerne
+«Skinke» (1.500 mg, 3,8 g) og «Feta» (1.139 mg, 2,8 g), formlen «salt i gram =
+natrium i mg × 2,5 ÷ 1000», FAQ-svaret «Rugbrød har 603 mg natrium pr. 100 g»,
+kort på forsiden og under Sundhed, URL i sitemap.xml, 404 på beraknare.se.
+Gate 9/10 01:4x: typecheck 0, lint 0 (946 filer), **5.359 tests i 321 filer
+grønne** (+14 i `salt-i-madvarer.test.ts`), `next build` grøn med
+`/salt-i-madvarer` i ruteoversigten; siden svarede 200 lokalt med «Salt i
+madvarer: 1,5 g i rugbrød, 1,6 g i smør», «603», «Skinke» og «Feta» i SSR, og
+`Host: beraknare.se` gav 404 (daOnly). Mutation målt: `natrium100g` for rugbrød
+603→0 giver **6 røde** i `salt-i-madvarer.test.ts`. Bredder: 390 px (tabellen
+scroller vandret via `overflow-x-auto`, de to ekstra kolonner skjules under md)
+og 1280 px.
