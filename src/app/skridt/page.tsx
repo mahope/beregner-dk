@@ -30,6 +30,11 @@ export default async function SkridtPage() {
     kvinde: beregnSkridt(s, "kvinde")!.km,
     mand: beregnSkridt(s, "mand")!.km,
   }));
+  const kmRaekker = Array.from({ length: 10 }, (_, i) => i + 1).map((km) => ({
+    km,
+    kvinde: skridtFraKm(km, "kvinde")!,
+    mand: skridtFraKm(km, "mand")!,
+  }));
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -72,10 +77,35 @@ export default async function SkridtPage() {
                 </li>
               ))}
             </ul>
+            <h2>Hvor mange skridt er der på X km?</h2>
             <p>
-              Det omvendte spørgsmål — <strong>hvor mange skridt er en kilometer</strong> — svarer
-              til ca. <strong>{tal(skridt1kmKvinde)} skridt</strong> for kvinder og{" "}
-              <strong>{tal(skridt1kmMand)}</strong> for mænd.
+              Det omvendte spørgsmål — <strong>hvor mange skridt er der på en kilometer</strong> —
+              kommer ofte i søgningerne. Her er svaret for 1-10 km:
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-2 pr-4 font-semibold">Kilometer</th>
+                    <th className="text-right py-2 pr-4 font-semibold">Kvinder</th>
+                    <th className="text-right py-2 font-semibold">Mænd</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kmRaekker.map((r) => (
+                    <tr key={r.km} className="border-b border-gray-100 dark:border-gray-800">
+                      <td className="py-2 pr-4">{r.km} km</td>
+                      <td className="py-2 pr-4 text-right">{tal(r.kvinde)}</td>
+                      <td className="py-2 text-right">{tal(r.mand)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Kvinder tager ca. <strong>{tal(skridt1kmKvinde)} skridt pr. kilometer</strong> og
+              mænd ca. <strong>{tal(skridt1kmMand)}</strong> med de gennemsnitlige skridtlængder
+              på 66 og 79 cm.
             </p>
             <h2>Hvor lang tid tager {tal(10_000)} skridt?</h2>
             <p>
@@ -109,10 +139,35 @@ export default async function SkridtPage() {
                 </li>
               ))}
             </ul>
+            <h2>Hur många steg är det på X km?</h2>
             <p>
-              Den omvända frågan — <strong>hur många steg är en kilometer</strong> — svarar mot ca{" "}
-              <strong>{tal(skridt1kmKvinde)} steg</strong> för kvinnor och{" "}
-              <strong>{tal(skridt1kmMand)}</strong> för män.
+              Den omvända frågan — <strong>hur många steg är det på en kilometer</strong> — kommer
+              ofta i sökningarna. Här är svaret för 1-10 km:
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-2 pr-4 font-semibold">Kilometer</th>
+                    <th className="text-right py-2 pr-4 font-semibold">Kvinnor</th>
+                    <th className="text-right py-2 font-semibold">Män</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kmRaekker.map((r) => (
+                    <tr key={r.km} className="border-b border-gray-100 dark:border-gray-800">
+                      <td className="py-2 pr-4">{r.km} km</td>
+                      <td className="py-2 pr-4 text-right">{tal(r.kvinde)}</td>
+                      <td className="py-2 text-right">{tal(r.mand)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Kvinnor tar ca <strong>{tal(skridt1kmKvinde)} steg per kilometer</strong> och män
+              ca <strong>{tal(skridt1kmMand)}</strong> med de genomsnittliga steglängderna 66
+              och 79 cm.
             </p>
             <h2>Hur lång tid tar {tal(10_000)} steg?</h2>
             <p>

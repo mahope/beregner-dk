@@ -179,10 +179,7 @@ Leveret 8/10 05:5x: **`/uger-i-aret` — hvor mange uger er der på et år, uger
   fraiche, græsk yoghurt) og svensk «gram till dl». *Accept:* gram↔dl for de
   8-10 mest søgte madvarer, hver med kildeført densitet (punkt 11). ⛔ kræver én
   troværdig densitetstabel pr. vare (❓).
-- **[ ] `km → skridt`-tabel på `/skridt`.** 7 af 10 danske autocomplete-træffere
-  under «hvor mange skridt er» er «… 1/2/3/4/5/6/10 km». *Accept:* en tabel der
-  viser skridt for 1-10 km for kvinde og mand, regnet af `skridtFraKm`, så tal
-  og værktøj ikke kan glide fra hinanden. Ingen ny kilde nødvendig.
+- **[x] FÆRDIG 8/10 06:4x — `km → skridt`-tabel på `/skridt`.** 7 af 10 danske autocomplete-træffere under «hvor mange skridt er» er «… 1/2/3/4/5/6/10 km». Tabellen viser skridt for 1-10 km for kvinder og mænd, regnet af `skridtFraKm`. Test låser værdierne for alle 10 kilometer. Dansk og svensk.
 - **[ ] «kvadratmeterpris» pr. by.** «kvadratmeterpris københavn/odense» er 3 af
   10 træffere under «kvadratmeter», og vi har 98 kommuner i `kommuner.ts` —
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
@@ -193,6 +190,8 @@ Leveret 8/10 05:5x: **`/uger-i-aret` — hvor mange uger er der på et år, uger
   borger.dk (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 8/10 06:4x:** `VERIFICÉR DEPLOY: /skridt viser km-til-skridt-tabellen med overskriften «Hvor mange skridt er der på X km?», tabelrækkerne «1 km» / «1.515» / «1.266» og «10 km» / «15.152» / «12.658», og teksten «Kvinder tager ca. 1.515 skridt pr. kilometer»; på beraknare.se «Hur många steg är det på X km?» og «Kvinnor tar ca 1.515 steg per kilometer». ceo/skridt-km-tabel 8/10 06:4x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/skridt | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Hvor mange skridt er der på X km?», «15.152» og «1.515 skridt pr. kilometer». Første reelle deploy-vindue efter mergen er **8/10 07:30**.
 
 **Åben 8/10 05:5x:** `VERIFICÉR DEPLOY: /uger-i-aret svarer 200 på begge domæner og viser titlen «Hvor mange uger er der på et år? Se ugerne i hver måned», overskrifterne «Så mange uger er der i hver periode» og «Så mange uger er der i hver måned», perioderækkerne «En uge», «To uger» og «Et halvt år», ferietabellen «Et år minus ferie» med rækkerne «5 uger» og «6 uger», og ISO-tallet «53 uger» for 2026; siden skal også stå i sitemap.xml. På beraknare.se «Hur många veckor är det på ett år? Se veckorna i varje månad» og «Så många veckor är det i varje månad». ceo/uger-i-aret 8/10 05:5x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/uger-i-aret | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Så mange uger er der i hver periode», «Et år minus ferie» og «53 uger». Første reelle deploy-vindue efter mergen er **8/10 07:30** (sker mergen efter 07:30, er det 12:30).
 

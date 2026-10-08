@@ -73,6 +73,25 @@ describe("skridtFraKm", () => {
     expect(skridtFraKm(-2, "mand")).toBeNull();
     expect(skridtFraKm(Number.NaN, "kvinde")).toBeNull();
   });
+
+  it("giver de forventede skridt for 1-10 km for kvinder og mænd", () => {
+    const forventet: Record<number, { kvinde: number; mand: number }> = {
+      1: { kvinde: 1515, mand: 1266 },
+      2: { kvinde: 3030, mand: 2532 },
+      3: { kvinde: 4545, mand: 3797 },
+      4: { kvinde: 6061, mand: 5063 },
+      5: { kvinde: 7576, mand: 6329 },
+      6: { kvinde: 9091, mand: 7595 },
+      7: { kvinde: 10606, mand: 8861 },
+      8: { kvinde: 12121, mand: 10127 },
+      9: { kvinde: 13636, mand: 11392 },
+      10: { kvinde: 15152, mand: 12658 },
+    };
+    for (const [km, v] of Object.entries(forventet)) {
+      expect(skridtFraKm(Number(km), "kvinde")).toBe(v.kvinde);
+      expect(skridtFraKm(Number(km), "mand")).toBe(v.mand);
+    }
+  });
 });
 
 describe("konstanter", () => {
