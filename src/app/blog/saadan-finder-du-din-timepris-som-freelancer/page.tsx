@@ -13,6 +13,7 @@ import {
   freelancerTimeprisFaqSvar,
   markedspriser,
 } from "@/lib/timepris-markedspriser";
+import { Lightbulb } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -175,7 +176,10 @@ export default function TimeprisGuidePage() {
         </div>
 
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-yellow-800">💡 Rund op!</p>
+          <p className="font-medium text-yellow-800 flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-yellow-500 shrink-0" aria-hidden="true" />
+            Rund op!
+          </p>
           <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
             I praksis ville du runde op til 550 eller 600 kr for at have buffer. 
             Husk at dette er ekskl. moms - for virksomhedskunder tillægges 25%. 

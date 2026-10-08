@@ -5,6 +5,7 @@ import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
+import { Calendar, Sun, Lightbulb } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -117,8 +118,14 @@ export default function FeriepengeGuidePage() {
         <div className="bg-blue-50 dark:bg-blue-900/30 p-6 rounded-lg not-prose my-6">
           <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">Ferieåret 2025/2026</h3>
           <ul className="space-y-1 text-gray-700 dark:text-gray-300">
-            <li>📅 <strong>Optjeningsperiode:</strong> 1. sept 2024 - 31. aug 2025</li>
-            <li>🏖️ <strong>Ferieafholdelse:</strong> 1. sept 2025 - 31. dec 2026</li>
+            <li className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-500 shrink-0" aria-hidden="true" />
+              <strong>Optjeningsperiode:</strong> 1. sept 2024 - 31. aug 2025
+            </li>
+            <li className="flex items-center gap-2">
+              <Sun className="h-5 w-5 text-yellow-500 shrink-0" aria-hidden="true" />
+              <strong>Ferieafholdelse:</strong> 1. sept 2025 - 31. dec 2026
+            </li>
           </ul>
         </div>
 
@@ -223,7 +230,10 @@ export default function FeriepengeGuidePage() {
         </p>
 
         <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-gray-900 dark:text-white">💡 Husk den 5. ferieuge</p>
+          <p className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-yellow-500 shrink-0" aria-hidden="true" />
+            Husk den 5. ferieuge
+          </p>
           <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
             Du kan få den 5. ferieuge (de sidste 5 dage) udbetalt kontant, hvis du ikke kan 
             nå at afholde dem inden ferieårets udløb. Det kræver ansøgning.

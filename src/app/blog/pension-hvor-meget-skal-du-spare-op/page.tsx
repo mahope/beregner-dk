@@ -8,6 +8,7 @@ import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SATSER_2026 } from "@/lib/satser-2026";
 import { OG_IMAGE } from "@/lib/page-helpers";
+import { AlertTriangle } from "lucide-react";
 
 /**
  * Loftene for ratepension og aldersopsparing leses fra SATSER_2026, saa denne
@@ -193,9 +194,10 @@ export default function PensionGuidePage() {
               </tr>
             </tbody>
           </table>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-            ⚠️ Pensionstillægget modregnes i anden indkomst (arbejdsmarkedspension, etc.)
-          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0" aria-hidden="true" />
+              Pensionstillægget modregnes i anden indkomst (arbejdsmarkedspension, etc.)
+            </p>
         </div>
 
         <h3>Søjle 2: Arbejdsmarkedspension</h3>

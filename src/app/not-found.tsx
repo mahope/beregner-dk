@@ -3,6 +3,7 @@ import NotFoundSearch from "@/components/NotFoundSearch";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPopularCalculators } from "@/lib/calculator-list";
 import { CalcIcon } from "@/components/ui/icons";
+import { Search } from "lucide-react";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import type { Locale } from "@/lib/i18n";
 import type { DomainConfig } from "@/lib/domain-config";
@@ -37,7 +38,9 @@ export default async function NotFound() {
   return (
     <LocaleProvider locale={locale} domainConfig={domainConfig}>
       <div className="max-w-2xl mx-auto py-12 text-center">
-        <div className="text-6xl mb-4">🔍</div>
+        <div className="text-6xl mb-4">
+          <Search className="mx-auto text-gray-400 dark:text-gray-500" strokeWidth={1.5} aria-hidden="true" />
+        </div>
         <h1 className="text-3xl font-bold mb-2 dark:text-white">
           {texts.title}
         </h1>

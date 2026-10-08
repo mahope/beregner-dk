@@ -5,6 +5,7 @@ import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
+import { AlertTriangle, CheckCircle } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -365,7 +366,10 @@ export default function BMIBoernGuidePage() {
           tegn, du bør være opmærksom på:
         </p>
 
-        <h3>🚩 Vær opmærksom hvis:</h3>
+        <h3 className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0" aria-hidden="true" />
+          Vær opmærksom hvis:
+        </h3>
         <ul>
           <li>Barnets BMI er <strong>vedvarende</strong> over 85. eller under 5. percentil</li>
           <li>Kurven <strong>ændrer sig markant</strong> - fx springer fra 50. til 85. percentil på kort tid</li>
@@ -373,7 +377,10 @@ export default function BMIBoernGuidePage() {
           <li>Der er <strong>pludselige ændringer</strong> i spisevaner</li>
         </ul>
 
-        <h3>✅ Husk også:</h3>
+        <h3 className="flex items-center gap-2">
+          <CheckCircle className="h-5 w-5 text-green-500 shrink-0" aria-hidden="true" />
+          Husk også:
+        </h3>
         <ul>
           <li>Børn vokser i &quot;spring&quot; - udsving er normale</li>
           <li>Puberteten medfører store ændringer i kort tid</li>
@@ -382,7 +389,10 @@ export default function BMIBoernGuidePage() {
         </ul>
 
         <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-gray-900 dark:text-white">⚠️ Vigtigt at huske</p>
+          <p className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500 shrink-0" aria-hidden="true" />
+            Vigtigt at huske
+          </p>
           <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
             Tal aldrig negativt om vægt foran barnet. Fokuser på sundhed, energi og trivsel 
             - ikke på tal eller udseende. Hvis du er bekymret, tal med lægen eller 
