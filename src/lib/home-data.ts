@@ -307,6 +307,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Nutidskroner", description: "Omregn et gammelt beløb til dagens prisniveau", href: "/nutidskroner", popular: false, category: "Økonomi" },
   { title: "Malingberegner", description: "Beregn hvor mange liter maling du skal bruge", href: "/maling", popular: false, category: "Hverdag" },
   { title: "Fliseberegner", description: "Beregn hvor mange fliser og kasser du skal bruge", href: "/fliser", popular: false, category: "Hverdag" },
+  { title: "Gram til dl", description: "Omregn gram til dl og dl til gram for mel, sukker og gryn", href: "/gram-til-dl", popular: false, category: "Hverdag" },
   { title: "TV-størrelse", description: "Omregn tv'ets tommer til cm og se seerafstanden", href: "/tv-storrelse", popular: false, category: "Hverdag" },
   { title: "Lånekapacitet", description: "Se hvor meget du kan låne til bolig", href: "/laanekapacitet", popular: false, category: "Bolig" },
   { title: "Byggepris", description: "Beregn hvad det koster at bygge et hus", href: "/byggepris", popular: false, category: "Bolig" },

@@ -83,6 +83,23 @@ import { beregnSkat } from "./skattefordeling";
 import { KOMMUNER, KOMMUNER_SNIT } from "./kommuner";
 import { MALING_DAEKNING_M2_PR_LITER, MALING_STANDARD_SPILD_PCT } from "./maling";
 import { FLISER_EKSEMPEL, FLISER_STANDARD_SPILD_PCT, fliserEksempel, fliserPrKvadratmeter } from "./fliser";
+import { GRAM_TIL_DL_EKSEMPEL, dlTilGram, formatGramTilDl, gramTilDl, gramTilDlEksempel, vareVedId } from "./gram-til-dl";
+
+/**
+ * `/gram-til-dl`s egne tal til titel, beskrivelse og FAQ. De læser
+ * `gramTilDlEksempel()` — samme modul som værktøjet — så eksemplet i metadata
+ * og svarene i FAQ'en ikke kan glide fra beregningen (punkt 11).
+ */
+const GRAM_TIL_DL_EKS = gramTilDlEksempel();
+const GRAM_TIL_DL_EKS_VARE = vareVedId(GRAM_TIL_DL_EKSEMPEL.vareId)!;
+const GRAM_TIL_DL_EKS_MAENGDE = formatGramTilDl(GRAM_TIL_DL_EKSEMPEL.maengde, 0);
+const GRAM_TIL_DL_EKS_SVAR = formatGramTilDl(GRAM_TIL_DL_EKS.svar, 2);
+const GRAM_TIL_DL_META_TITEL = `Gram til dl: ${GRAM_TIL_DL_EKS_MAENGDE} g ${GRAM_TIL_DL_EKS_VARE.navn.toLowerCase()} = ${GRAM_TIL_DL_EKS_SVAR} dl`;
+const GRAM_TIL_DL_META_BESKRIVELSE = `Omregn gram til dl og dl til gram for mel, sukker, havregryn og 18 andre ingredienser. 1 dl ${GRAM_TIL_DL_EKS_VARE.navn.toLowerCase()} vejer ca. ${GRAM_TIL_DL_EKS_VARE.gramPrDl} g.`;
+/** Et par af de mest søgte omregninger, regnet af modulet. */
+const GRAM_TIL_DL_SUKKER_2DL = formatGramTilDl(dlTilGram(2, vareVedId("sukker")!.gramPrDl), 0);
+const GRAM_TIL_DL_HAVREGRYN_100G = formatGramTilDl(gramTilDl(100, vareVedId("havregryn")!.gramPrDl), 1);
+const GRAM_TIL_DL_MEL_100G = formatGramTilDl(gramTilDl(100, vareVedId("hvedemel")!.gramPrDl), 2);
 
 /**
  * `/fliser`s egne tal til titel, beskrivelse og FAQ. De læser `fliserEksempel()`
@@ -3294,6 +3311,29 @@ faqItems: kalorierFaqItems("da"),
         { question: "Hvor mange fliser går der til 1 m²?", answer: `Det afhænger af formatet: en 30 x 30-flise giver ${FLISER_PR_M2_30} fliser pr. m², en 20 x 20-flise ${FLISER_PR_M2_20} og en 10 x 10-flise ${FLISER_PR_M2_10}. Del 10.000 med flisens bredde gange højde i cm.` },
         { question: "Hvor meget spild skal jeg regne med?", answer: `Branchen anbefaler ${FLISER_STANDARD_SPILD_PCT} % til tilskæring langs kanter og hjørner, og det er den værdi, beregneren bruger. Ved diagonalt mønster eller mange vinkler bør du gå op til 15 %.` },
         { question: "Skal jeg købe hele kasser?", answer: "Ja, fliser sælges i kasser. Beregneren runder op til hele kasser og viser det samlede købsareal, som ofte er lidt større end behovet, fordi den sidste kasse ikke kan deles. Antal fliser pr. kasse står på kassen." },
+      ],
+    },
+    "gram-til-dl": {
+      slug: "gram-til-dl",
+      title: "Gram til dl – omregn mel, sukker og havregryn",
+      description: "Omregn gram til dl og dl til gram for 21 ingredienser. Vælg ingrediensen og skriv mængden, så får du svaret med det samme.",
+      metaTitle: GRAM_TIL_DL_META_TITEL,
+      metaDescription: GRAM_TIL_DL_META_BESKRIVELSE,
+      keywords: ["gram til dl", "dl til gram", "hvor mange gram er 1 dl", "1 dl mel i gram", "1 dl sukker i gram", "omregn gram til dl", "hvor meget vejer 1 dl", "gram til deciliter"],
+      ogTitle: GRAM_TIL_DL_META_TITEL,
+      ogDescription: "Skriv mængden, vælg ingrediensen, og se svaret i gram eller dl med det samme.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Gram til dl-beregner",
+      schemaDescription: "Omregn gram til dl og dl til gram for mel, sukker, gryn og andre ingredienser ud fra vægten pr. deciliter.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvor mange gram er 1 dl mel?", answer: `1 dl hvedemel vejer ca. ${GRAM_TIL_DL_EKS_VARE.gramPrDl} g, så 100 g er ${GRAM_TIL_DL_MEL_100G} dl. Vægten afhænger af, om melet er løst eller presset i målet.` },
+        { question: "Hvor mange gram er 1 dl sukker?", answer: `1 dl hvidt sukker vejer ca. ${vareVedId("sukker")!.gramPrDl} g, så 2 dl er ${GRAM_TIL_DL_SUKKER_2DL} g. Brun farin og flormelis vejer mindre og har egne rækker i tabellen.` },
+        { question: "Hvor mange dl er 100 g havregryn?", answer: `1 dl havregryn vejer ca. ${vareVedId("havregryn")!.gramPrDl} g, så 100 g er ca. ${GRAM_TIL_DL_HAVREGRYN_100G} dl. Grovvalsede gryn vejer lidt mere end finvalsede.` },
+        { question: "Hvorfor vejer 1 dl ikke det samme for alle varer?", answer: "Gram er vægt, og dl er rumfang. Lette varer som havregryn og kokosmel fylder meget for lidt vægt, mens sirup og honning er tunge. Derfor har hver ingrediens sin egen værdi pr. dl." },
+        { question: "Er tallene præcise nok til bagning?", answer: "De er vejledende. Mel og pulver kan veje forskelligt alt efter, hvordan de fyldes i målet, så skal opskriften ramme præcist, er en køkkenvægt det sikreste." },
       ],
     },
     "tv-storrelse": {
