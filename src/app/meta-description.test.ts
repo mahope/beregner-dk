@@ -60,6 +60,7 @@ const SIDER_UDEN_DESCRIPTION = new Set([
   "/arbetsdagar",
   "/veckor-i-aret",
   "/klockan-i",
+  "/helgdagar",
 ]);
 
 /**

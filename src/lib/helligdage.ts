@@ -1,4 +1,5 @@
 import { easterSunday } from "./dage-til";
+import { formatDatoTekst, ugedagsnavn } from "./ugedag";
 
 export type HelligdagLocale = "da" | "se";
 
@@ -294,4 +295,184 @@ export function foegArbejdsdage(
     if (erArbejdsdag(fromUtcDayNumber(dayNumber), locale)) remaining--;
   }
   return fromUtcDayNumber(dayNumber);
+}
+
+// ─── /helligdage ─────────────────────────────────────────────────────────
+
+/**
+ * `/helligdage` («helligdage 2026/2027») og `/helgdagar` ligger hver på sin
+ * egen sti, fordi svensken skal have svenske navne så vel som svenske datoer.
+ * Stien vælger sproget, samme regel som `/dage-til` og `/ugedag` — et kald til
+ * den anden sprogs sti er routingens 301.
+ */
+export const HELLIGDAG_PATH: Record<HelligdagLocale, string> = {
+  da: "/helligdage",
+  se: "/helgdagar",
+};
+
+export function getHelligdagPath(locale: string): string | null {
+  if (locale !== "da" && locale !== "se") return null;
+  return HELLIGDAG_PATH[locale];
+}
+
+/**
+ * Hver helligdag til sin egen «dage til»-side, så listen ikke bliver en blind
+ * ende. Slugs'ne er de, `/dage-til` allerede har (se `DAGE_TIL_EVENTS`), og
+ * dem har testen forpligtet sig til at finde igen — en helligdag uden et
+ * link står blot som `null`.
+ */
+const HELLIGDAG_TIL_DAGE_TIL: Record<HelligdagLocale, Record<string, string>> = {
+  da: {
+    "Nytårsdag": "nytaarsdag",
+    "Grundlovsdag": "grundlovsdag",
+    "Juleaftensdag": "24-december",
+    "Juledag": "juledagen",
+    "2. juledag": "2-juledag",
+    "Palmesøndag": "palmesondag",
+    "Skærtorsdag": "skaertorsdag",
+    "Langfredag": "langfredag",
+    "Påskedag": "paskedag",
+    "Kristi himmelfartsdag": "kristi-himmelfartsdag",
+    "2. pinsedag": "2-pinsedag",
+  },
+  se: {
+    "Nyårsdagen": "nyarsdagen",
+    "Sveriges nationaldag": "nationaldagen",
+    "Julafton": "24-december",
+    "Juldagen": "juldagen",
+    "Annandag jul": "annandag-jul",
+    "Palmsöndagen": "palmsondagen",
+    "Skärtorsdagen": "skartorsdagen",
+    "Påskdagen": "paskdagen",
+    "Kristi himmelsfärdsdag": "kristi-himmelsfardsdag",
+    "Pingstdagen": "pingstdagen",
+  },
+};
+
+/** Helligdage med en fast kalenderdato — de øvrige følger påsken. */
+const FASTE_HELLIGDAGE = new Map<HelligdagLocale, ReadonlySet<string>>([
+  [
+    "da",
+    new Set([
+      "Nytårsdag",
+      "Grundlovsdag",
+      "Juleaftensdag",
+      "Juledag",
+      "2. juledag",
+    ]),
+  ],
+  [
+    "se",
+    new Set([
+      "Nyårsdagen",
+      "Trettondedag jul",
+      "Första maj",
+      "Sveriges nationaldag",
+      "Midsommarafton",
+      "Midsommardagen",
+      "Alla helgons dag",
+      "Julafton",
+      "Juldagen",
+      "Annandag jul",
+      "Nyårsafton",
+    ]),
+  ],
+]);
+
+export interface HelligdagRad {
+  /** ISO-dato (ÅÅÅÅ-MM-DD), så ugedagsnavnet kan slås op lokalt. */
+  iso: string;
+  navn: string;
+  /** «26. december 2026» / «26 december 2026». */
+  datoTekst: string;
+  ugedag: string;
+  /** Fast kalenderdato (jul, nytår, grundlovsdag) mod påskeafhængig. */
+  fast: boolean;
+  /** Falder dagen på en hverdag, giver den en ekstra fri dag. */
+  paaHverdag: boolean;
+  /** `/dage-til/<slug>` for den samme helligdag, hvis siden den har. */
+  dageTilSlug: string | null;
+}
+
+function isoDato(date: Date): string {
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${m}-${d}`;
+}
+
+/**
+ * Årets helligdage som tabelrækker, i den rækkefølge de falder.
+ *
+ * `datoTekst` og `ugedag` læses af de samme funktioner som `/ugedag` bruger,
+ * så en dato ikke kan stå i to formater på to sider (punkt 11).
+ */
+export function helligdagRaekker(
+  year: number,
+  locale: HelligdagLocale
+): HelligdagRad[] {
+  return getHelligdage(year, locale).map((h) => {
+    const iso = isoDato(h.date);
+    return {
+      iso,
+      navn: h.name,
+      datoTekst: formatDatoTekst(iso, locale),
+      ugedag: ugedagsnavn(iso, locale) ?? "",
+      fast: FASTE_HELLIGDAGE.get(locale)?.has(h.name) ?? false,
+      paaHverdag: !WEEKEND_DAYS.has(h.date.getDay()),
+      dageTilSlug: HELLIGDAG_TIL_DAGE_TIL[locale][h.name] ?? null,
+    };
+  });
+}
+
+export interface HelligdagNesteRad extends HelligdagRad {
+  dageTil: number;
+}
+
+/**
+ * De næste helligdage fra `fra`, også når året skifter: listen slutter først,
+ * når `antal` af dem er fundet i indeværende og efterfølgende år.
+ */
+export function naesteHelligdage(
+  fra: Date,
+  locale: HelligdagLocale,
+  antal = 3
+): HelligdagNesteRad[] {
+  const fraDag = new Date(fra.getFullYear(), fra.getMonth(), fra.getDate());
+  const fundet: HelligdagNesteRad[] = [];
+  for (const year of [fra.getFullYear(), fra.getFullYear() + 1]) {
+    for (const rad of helligdagRaekker(year, locale)) {
+      if (fundet.length >= antal) return fundet;
+      const dato = new Date(rad.iso + "T00:00:00");
+      if (dato.getTime() < fraDag.getTime()) continue;
+      fundet.push({
+        ...rad,
+        dageTil: Math.round(
+          (dato.getTime() - fraDag.getTime()) / MS_PER_DAY
+        ),
+      });
+    }
+  }
+  return fundet;
+}
+
+export interface HelligdagAntal {
+  /** Alle helligdage på listen. */
+  total: number;
+  /** Dem der falder på en hverdag og derfor giver en ekstra fri dag. */
+  paaHverdag: number;
+  /** Dem der falder i weekenden og dermed er "gemt". */
+  paaWeekend: number;
+}
+
+export function helligdagAntal(
+  year: number,
+  locale: HelligdagLocale
+): HelligdagAntal {
+  const raekker = helligdagRaekker(year, locale);
+  const paaHverdag = raekker.filter((r) => r.paaHverdag).length;
+  return {
+    total: raekker.length,
+    paaHverdag,
+    paaWeekend: raekker.length - paaHverdag,
+  };
 }

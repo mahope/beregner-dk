@@ -1,9 +1,13 @@
 import { describe, expect, test } from "vitest";
 import {
   erArbejdsdag,
+  getHelligdagPath,
+  getHelligdage,
+  helligdagAntal,
+  helligdagRaekker,
+  naesteHelligdage,
   erHelligdag,
   foegArbejdsdage,
-  getHelligdage,
   taellArbejdsdage,
   taellHelligdage,
   taellHelligdagePaaHverdag,
@@ -12,6 +16,10 @@ import {
   type HelligdagLocale,
 } from "./helligdage";
 import { helligdagsnavne } from "./helligdage";
+import { getDageTilSlugs } from "./dage-til";
+
+const tilIso = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 const da: HelligdagLocale = "da";
 const se: HelligdagLocale = "se";
@@ -549,5 +557,109 @@ describe("dagstallene dækker hver dag mellem to datoer én gang", () => {
 
       expect(summeret).toBe(antalDage);
     }
+  });
+});
+
+describe("/helligdage — årets helligdage som tabelrækker", () => {
+  // 2026-10-09, fast klokkeslæt så «dage til næste helligdag» kan måles.
+  const FRA = new Date(2026, 9, 9, 12, 0, 0);
+
+  test("rækkerne er getHelligdage, bare med ugedag og type", () => {
+    for (const locale of ["da", "se"] as const) {
+      const raekker = helligdagRaekker(2026, locale);
+      const kilden = getHelligdage(2026, locale);
+      expect(raekker).toHaveLength(kilden.length);
+      expect(raekker.map((r) => r.navn)).toEqual(kilden.map((k) => k.name));
+      expect(raekker.map((r) => r.iso)).toEqual(kilden.map((k) => tilIso(k.date)));
+      // Rækkefølgen er kalenderens, ikke alfabetisk.
+      expect(raekker[0].iso < raekker[raekker.length - 1].iso).toBe(true);
+    }
+  });
+
+  test("1. januar 2026 er en torsdag med fast dato og et link", () => {
+    const rad = helligdagRaekker(2026, "da").find((r) => r.iso === "2026-01-01");
+    expect(rad).toBeDefined();
+    expect(rad!.navn).toBe("Nytårsdag");
+    expect(rad!.ugedag).toBe("Torsdag");
+    expect(rad!.datoTekst).toBe("1. januar 2026");
+    expect(rad!.fast).toBe(true);
+    expect(rad!.paaHverdag).toBe(true);
+    expect(rad!.dageTilSlug).toBe("nytaarsdag");
+  });
+
+  test("de 13 danske helligdage 2026: 9 på en hverdag, 4 i weekenden", () => {
+    // Fire af dem (palmesøndag, påskedag, pinsedag, 2. juledag 2026) falder i
+    // weekenden — det er forklaringen på at «251 arbejdsdage + 104
+    // weekenddage + 13 helligdage» ikke summerer til 365.
+    const a = helligdagAntal(2026, "da");
+    expect(a.total).toBe(13);
+    expect(a.paaHverdag).toBe(9);
+    expect(a.paaWeekend).toBe(4);
+    expect(a.paaHverdag + a.paaWeekend).toBe(a.total);
+    expect(helligdagRaekker(2026, "da").filter((r) => r.paaHverdag)).toHaveLength(
+      a.paaHverdag
+    );
+  });
+
+  test("påskeafhængige helligdage er ikke markeret som faste", () => {
+    const navne = helligdagRaekker(2026, "da").filter((r) => !r.fast).map((r) => r.navn);
+    expect(navne).toEqual([
+      "Palmesøndag",
+      "Skærtorsdag",
+      "Langfredag",
+      "Påskedag",
+      "2. påskedag",
+      "Kristi himmelfartsdag",
+      "Pinsedag",
+      "2. pinsedag",
+    ]);
+    // …og deres datoer flytter sig, mens juleaftensdag står.
+    expect(helligdagRaekker(2027, "da").find((r) => r.navn === "Juleaftensdag")!.iso).toBe("2027-12-24");
+    expect(helligdagRaekker(2027, "da").find((r) => r.navn === "Påskedag")!.iso).not.toBe(
+      helligdagRaekker(2026, "da").find((r) => r.navn === "Påskedag")!.iso
+    );
+  });
+
+  test("hvert link til en «dage til»-side findes i /dage-til", () => {
+    for (const locale of ["da", "se"] as const) {
+      const slugs = getDageTilSlugs(locale);
+      for (const year of [2026, 2027]) {
+        for (const rad of helligdagRaekker(year, locale)) {
+          if (rad.dageTilSlug === null) continue;
+          expect(slugs, `${locale} ${rad.navn}`).toContain(rad.dageTilSlug);
+        }
+      }
+    }
+  });
+
+  test("næste helligdage fra 9. oktober 2026 er juleaftensdag", () => {
+    const naeste = naesteHelligdage(FRA, "da", 3);
+    expect(naeste.map((r) => r.navn)).toEqual([
+      "Juleaftensdag",
+      "Juledag",
+      "2. juledag",
+    ]);
+    expect(naeste.map((r) => r.dageTil)).toEqual([76, 77, 78]);
+    expect(naeste[0].datoTekst).toBe("24. december 2026");
+  });
+
+  test("listen kører over årsskiftet", () => {
+    const naeste = naesteHelligdage(new Date(2026, 11, 30, 12, 0, 0), "da", 2);
+    expect(naeste.map((r) => r.navn)).toEqual(["Nytårsdag", "Palmesøndag"]);
+    expect(naeste[0].iso).toBe("2027-01-01");
+    expect(naeste[1].iso.startsWith("2027-03")).toBe(true);
+  });
+
+  test("en helligdag der falder i dag har 0 dage til sig", () => {
+    const naeste = naesteHelligdage(new Date(2026, 11, 24, 1, 0, 0), "da", 1);
+    expect(naeste[0].navn).toBe("Juleaftensdag");
+    expect(naeste[0].dageTil).toBe(0);
+  });
+
+  test("stierne er adskilt pr. sprog, og norsk er ikke i drift", () => {
+    expect(getHelligdagPath("da")).toBe("/helligdage");
+    expect(getHelligdagPath("se")).toBe("/helgdagar");
+    expect(getHelligdagPath("no")).toBeNull();
+    expect(getHelligdagPath("en")).toBeNull();
   });
 });

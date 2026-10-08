@@ -280,6 +280,7 @@ export interface ArbejdsdageCopy {
   linkDageIAaret: string;
   linkDato: string;
   linkTimer: string;
+  linkHelligdage: string;
 }
 
 /** Copy uden årstal — alle tal regnes i `arbejdsdageOversigt` og FAQ'en. */
@@ -309,6 +310,7 @@ export const arbejdsdageCopy: Record<ArbejdsdageLocale, ArbejdsdageCopy> = {
     linkDageIAaret: "Dage i året, måned for måned",
     linkDato: "Datoberegner",
     linkTimer: "Timer i året",
+    linkHelligdage: "Helligdage med dato og ugedag",
   },
   se: {
     h1: "Hur många arbetsdagar är det på ett år?",
@@ -335,5 +337,6 @@ export const arbejdsdageCopy: Record<ArbejdsdageLocale, ArbejdsdageCopy> = {
     linkDageIAaret: "Dagar i året, månad för månad",
     linkDato: "Datumräknare",
     linkTimer: "Timmar i året",
+    linkHelligdage: "Helgdagar med datum och veckodag",
   },
 };

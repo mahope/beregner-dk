@@ -12,6 +12,7 @@ import { getUgedagPath } from "@/lib/ugedag";
 import { getDageIAaretPath } from "@/lib/dage-i-aaret";
 import { getTimerIAaretPath } from "@/lib/timer-i-aret";
 import { getArbejdsdagePath } from "@/lib/arbejdsdage";
+import { getHelligdagPath } from "@/lib/helligdage";
 import { getUgerIAaretPath } from "@/lib/uger-i-aret";
 
 // The sitemap route is rendered per request (it resolves the host from
@@ -206,6 +207,21 @@ export function buildSitemap(
       ]
     : [];
 
+  // «Helligdage i Danmark» / «Helgdagar i Sverige» har en tabel over årets
+  // helligdage med dato, ugedag og om de giver en ekstra fridag — og den
+  // følger dagens årstal, så siden re-crawles dagligt.
+  const helligdagPath = getHelligdagPath(locale);
+  const helligdagEntries: MetadataRoute.Sitemap = helligdagPath
+    ? [
+        {
+          url: `${baseUrl}${helligdagPath}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+      ]
+    : [];
+
   return [
     {
       url: baseUrl,
@@ -222,6 +238,7 @@ export function buildSitemap(
     ...timerIAaretEntries,
     ...arbejdsdageEntries,
     ...ugerIAaretEntries,
+    ...helligdagEntries,
     ...klokkenEntries,
     ...infoEntries,
   ];

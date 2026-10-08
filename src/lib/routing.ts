@@ -14,6 +14,7 @@ import { getDageIAaretPath } from "./dage-i-aaret";
 import { getTimerIAaretPath } from "./timer-i-aret";
 import { getArbejdsdagePath } from "./arbejdsdage";
 import { getUgerIAaretPath } from "./uger-i-aret";
+import { getHelligdagPath } from "./helligdage";
 
 /** The section's own path in each language. Kept here, next to the rule. */
 const DAGE_TIL_HUBS = ["/dage-til", "/dagar-till"] as const;
@@ -68,6 +69,13 @@ const ARBEJDSDAGE_SIDER = ["/arbejdsdage", "/arbetsdagar"] as const;
  * beraknare.se/uger-i-aret servere danske månedsnavne på et svensk domæne.
  */
 const UGER_I_ARET_SIDER = ["/uger-i-aret", "/veckor-i-aret"] as const;
+
+/**
+ * Samme regel for «helligdage»: `/helligdage` og `/helgdagar` er den samme
+ * liste i to sprog. Uden 301'en ville beraknare.se/helligdage servere danske
+ * helligdagsnavne på et svensk domæne.
+ */
+const HELLIGDAGE_SIDER = ["/helligdage", "/helgdagar"] as const;
 
 export type RouteDecision =
   | { type: "allow" }
@@ -210,6 +218,18 @@ export function getRouteDecision(
     UGER_I_ARET_SIDER.includes(normalizedPath as (typeof UGER_I_ARET_SIDER)[number])
   ) {
     const egenSti = getUgerIAaretPath(domainConfig.locale);
+    if (!egenSti) return { type: "not-found" };
+    if (egenSti !== normalizedPath) {
+      return { type: "redirect", destination: egenSti, status: 301 };
+    }
+  }
+
+  // Samme regel for «helligdage»: `/helligdage` og `/helgdagar` er den samme
+  // liste i to sprog.
+  if (
+    HELLIGDAGE_SIDER.includes(normalizedPath as (typeof HELLIGDAGE_SIDER)[number])
+  ) {
+    const egenSti = getHelligdagPath(domainConfig.locale);
     if (!egenSti) return { type: "not-found" };
     if (egenSti !== normalizedPath) {
       return { type: "redirect", destination: egenSti, status: 301 };

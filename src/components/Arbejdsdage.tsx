@@ -14,6 +14,7 @@ import {
   type ArbejdsdageLocale,
 } from "@/lib/arbejdsdage";
 import { getDageIAaretPath } from "@/lib/dage-i-aaret";
+import { getHelligdagPath } from "@/lib/helligdage";
 import { getTimerIAaretPath } from "@/lib/timer-i-aret";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
@@ -84,6 +85,7 @@ export async function ArbejdsdageRoute({ prefix }: { prefix: string }) {
   const sti = ARBEJDSDAGE_PATH[locale];
   const dageIAaretSti = getDageIAaretPath(locale);
   const timerSti = getTimerIAaretPath(locale);
+  const helligdagSti = getHelligdagPath(locale);
   const da = locale === "da";
 
   return (
@@ -233,6 +235,14 @@ export async function ArbejdsdageRoute({ prefix }: { prefix: string }) {
             className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium"
           >
             {c.linkTimer}
+          </Link>
+        )}
+        {helligdagSti && (
+          <Link
+            href={helligdagSti}
+            className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium"
+          >
+            {c.linkHelligdage}
           </Link>
         )}
         <Link
