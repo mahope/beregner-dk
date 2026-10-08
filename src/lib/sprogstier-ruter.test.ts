@@ -8,6 +8,7 @@ import { DAGE_MELLEM_PATH } from "@/lib/dage-mellem-datoer";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { TIMER_I_ARET_PATH, timerCopy } from "@/lib/timer-i-aret";
 import { ARBEJDSDAGE_PATH } from "@/lib/arbejdsdage";
+import { UGER_I_ARET_PATH } from "@/lib/uger-i-aret";
 import { buildSitemap } from "@/app/sitemap";
 
 /**
@@ -54,6 +55,11 @@ const PARREDE_STIER: { navn: string; sti: string; locale: "da" | "se" }[] = [
     sti: ARBEJDSDAGE_PATH[locale],
     locale,
   })),
+  ...(["da", "se"] as const).map((locale) => ({
+    navn: `UGER_I_ARET_PATH.${locale}`,
+    sti: UGER_I_ARET_PATH[locale],
+    locale,
+  })),
 ];
 
 function ruteFindes(sti: string): boolean {
@@ -61,11 +67,11 @@ function ruteFindes(sti: string): boolean {
 }
 
 describe("sprogslagte stier er rigtige ruter", () => {
-  it("dømmer alle otte stier, ikke to", () => {
+  it("dømmer alle ti stier, ikke to", () => {
     // Nøglen i stikortene er sproget, så de fire kort må ikke spredes sammen:
     // da ville de seneste overskrive `da`/`se` fra de tidligere, og porten
-    // ville dømme to stier i stedet for otte.
-    expect(PARREDE_STIER).toHaveLength(8);
+    // ville dømme to stier i stedet for ti.
+    expect(PARREDE_STIER).toHaveLength(10);
   });
 
   for (const { navn, sti } of PARREDE_STIER) {

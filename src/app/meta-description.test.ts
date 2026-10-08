@@ -58,6 +58,7 @@ const SIDER_UDEN_DESCRIPTION = new Set([
   "/dagar-i-aret",
   "/timmar-i-aret",
   "/arbetsdagar",
+  "/veckor-i-aret",
   "/klockan-i",
 ]);
 

@@ -12,6 +12,7 @@ import { getUgedagPath } from "@/lib/ugedag";
 import { getDageIAaretPath } from "@/lib/dage-i-aaret";
 import { getTimerIAaretPath } from "@/lib/timer-i-aret";
 import { getArbejdsdagePath } from "@/lib/arbejdsdage";
+import { getUgerIAaretPath } from "@/lib/uger-i-aret";
 
 // The sitemap route is rendered per request (it resolves the host from
 // headers), so a wall-clock default would stamp every URL with the moment
@@ -191,6 +192,20 @@ export function buildSitemap(
       ]
     : [];
 
+  // «Hvor mange uger er der på et år» har en uge-tabel og et «uger tilbage»-tal,
+  // og begge følger dagens dato, så siden re-crawles dagligt.
+  const ugerIAaretPath = getUgerIAaretPath(locale);
+  const ugerIAaretEntries: MetadataRoute.Sitemap = ugerIAaretPath
+    ? [
+        {
+          url: `${baseUrl}${ugerIAaretPath}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+      ]
+    : [];
+
   return [
     {
       url: baseUrl,
@@ -206,6 +221,7 @@ export function buildSitemap(
     ...dageIAaretEntries,
     ...timerIAaretEntries,
     ...arbejdsdageEntries,
+    ...ugerIAaretEntries,
     ...klokkenEntries,
     ...infoEntries,
   ];

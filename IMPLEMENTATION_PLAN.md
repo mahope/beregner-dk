@@ -1,3 +1,4 @@
+STATUS: 8/10 05:5x. ✅ **`/uger-i-aret` — hvor mange uger er der på et år, hvor mange er der tilbage, og hvor mange uger har hver måned.** Datagrund: dansk autocomplete (hl=da, 8/10) har «hvor mange uger er der på et år» som **nr. 1** under «hvor mange uger er der», og ni træffere mere spørger om det samme («… på en måned», «… i 2026», «… på et skoleår», «… til jul», «… tilbage i år», «… på et halvt år»); svensk «hur många veckor på ett år» gentager mønsteret. Værktøjet viser 52 uger + 1-2 dage, ISO-ugerne (53 i 2026), uger pr. måned, et år minus ferie (5 og 6 uger → 47/46 arbejdsuger) og uger til juleaften; alle tal læses fra `dato-eksempler.ts`, `ugenummer.ts` og `lokal-dato.ts`, så ingen er håndskrevet. Dansk og svensk. **MÅL: /uger-i-aret baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 05:2x. ✅ **`/arbejdsdage` — hvor mange arbejdsdage er der på et år, og hvor mange er der tilbage.** Datagrund: dansk autocomplete (hl=da, 8/10) har **10 af 10** træffere under «hvor mange arbejdsdage» (… på et år / i 2026 / på en måned / tilbage i 2026 / i august 2026 / på et år minus ferie) og svensk «hur många arbetsdagar» gentager mønsteret. Ordet «arbejdsdage» fandtes ikke som titel, `<h1>` eller adresse nogen steder — `/dage-i-aaret` kalder de samme dage «hverdage». Værktøjet viser årets arbejdsdage, arbejdsdage tilbage fra i dag, en tolv-måneders-tabel med arbejdsdage/weekend/helligdage og «et år minus ferie» for 5 og 6 ugers ferie; alle tal læses fra `dato-eksempler.ts` og `helligdage.ts`, så ingen er håndskrevet. Dansk og svensk. Gate 8/10 05:2x: typecheck 0, lint 0 (896 filer), **5.153 tests i 308 filer grønne**, `next build` grøn med `/arbejdsdage` og `/arbetsdagar` i ruteoversigten. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 04:3x. ✅ **`/koffein` — hvor meget koffein får du om dagen, og hvornår er du over grænsen.** Datagrund: 10 af 10 danske autocomplete-træffere under «hvor meget koffein» er «… er der i en kop kaffe / en monster / en pepsi max / en red bull / en booster / en cola / en coca cola / en faxe kondi / en cola zero»; svensk «koffein i en kopp kaffe», «koffein i cola zero», «koffein i monster». Værktøjet lægger koffeinen sammen fra 13 kilder (kaffe, te, cola, energidrik, chokolade, kakao) og sammenligner med EFSA's grænser (400 mg voksne, 200 mg gravide, 3 mg/kg børn). Kilder: EFSA Scientific Opinion 2015 + USDA FDC SR Legacy 2018-04 næringsstof 1057. Dansk, svensk og norsk. Gate 8/10 04:3x: typecheck 0, lint 0 (891 filer), **5.136 tests i 307 filer grønne**, `next build` grøn med `/koffein` i ruteoversigten. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 03:5x. ✅ **Fjernet to løfter om betalt fri på beraknare.se.** CEO-kø punkt 0 fjernede 6/10 «fri med løn»-påstanden fra midsommarsiden (`a32e82f`), men den samme fejlklasse stod stadig på to andre sider: skærtorsdagen lovede at «många kollektivavtal ger dig ledigt med løn» (og koblede det til at det er derfor den kaldes en röd dag), og nationaldagen at «de flesta ger ledigt med lön». Ingen af delene kan dokumenteres, og `/dagar-till/skartorsdagen` og `/dagar-till/nationaldagen` er danske-svenske landesider i Google. Teksten siger nu kun hvad loven (1989:253) siger, og skelnen mellem röd dag og allmän helgdag står på begge sider. Nyt snært snit i `dage-til.test.ts` dømmer generaliseringer (många/de flesta/mest/alla) i samme klausul som lön eller ledig; det fangede præcis de to fund, da det blev skrevet. Gate 8/10 03:5x: typecheck 0, lint 0 (887 filer), **5.107 tests i 306 filer grønne**, `next build` grøn. Se VERIFICÉR DEPLOY-note nedenfor.
@@ -44,6 +45,8 @@ STATUS: 8/10 00:1x. ✅ Seks åbne VERIFICÉR DEPLOY-noter lukket med DEPLOY OK 
 | `/retvinklet-trekant` (7/10, ny) | **0** | — | — | — |
 | `/fliser` (8/10, ny) | **0** | — | — | — |
 | `/arbejdsdage` (8/10, ny) | **0** | — | — | — |
+| `/uger-i-aret` (8/10, ny) | **0** | — | — | — |
+| `/veckor-i-aret` (8/10, ny) | **0** | — | — | — |
 | `/laantype` (6/10, ny) | **0** | — | — | — |
 | `/brokost` (6/10, ny) | **0** | — | — | — |
 | `/nutidskroner` (7/10, ny) | **0** | — | — | — |
@@ -131,6 +134,7 @@ sitets eget navn) og `/moms` (de 3 lovgrænser).
 
 Tolv leverede features siden 6/10 står i `docs/plan-arkiv.md` (fliser, soevnbehov, retvinklet-trekant, omkreds, byggepris, hundealder, areal, kirkeskat, elbil-lading, laanekapacitet, maling, gaveafgift, nutidskroner, skridt, brokost).
 Leveret 8/10 05:2x: **`/arbejdsdage` — hvor mange arbejdsdage er der på et år, hvor mange er der tilbage, og et år minus ferie**, med en tolv-måneders-tabel (arbejdsdage, weekend, helligdage) og en ferietabel; alle tal læser `dato-eksempler.ts` og `helligdage.ts`. Dansk og svensk. Datagrund: 10 af 10 danske autocomplete-træffere under «hvor mange arbejdsdage», svensk «hur många arbetsdagar».
+Leveret 8/10 05:5x: **`/uger-i-aret` — hvor mange uger er der på et år, uger pr. måned, et år minus ferie og uger til jul**, med periodetabel (dage/uger/dage ud over), tolv-måneders-tabel og ISO-ugerne (53 i 2026). Dansk og svensk. Datagrund: «hvor mange uger er der på et år» er nr. 1 under «hvor mange uger er der», svensk «hur många veckor på ett år».
 
 - **[x] FÆRDIG 7/10 01:2x — «Læg til / træk fra procent» på `/procent`** (syvende
   tilstand, dansk og svensk). Datagrund: 10 af 10 danske autocomplete-træffere
@@ -164,14 +168,33 @@ Leveret 8/10 05:2x: **`/arbejdsdage` — hvor mange arbejdsdage er der på et å
 - **[ ] Svensk dækning af manglende kalkulatorer** — beraknare.se har 89
   sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og
   `/boernepenge`. ⛔ Opgave 187, 13/10.
-- **[ ] «promillegrænse» i udlandet.** 5 af 10 danske træffere under «promille»
-  er danmark/sverige/tyskland/italien/norge; vi har dansk og svensk grænse og
-  ingen sammenligning. ⛔ tre landes love skal leveres (❓).
+- **[x] FÆRDIG (allerede bygget) — «promillegrænse» i udlandet på `/promille`.**
+  `PROMILLEGRANSE_UDLAND` i `src/lib/promille.ts` har 12 lande (Danmark, Sverige,
+  Norge, Polen, Tyskland, Frankrig, Spanien, Italien, Grækenland, Holland,
+  Østrig, Storbritannien), og `/promille` har tabellen «Promillegrænsen i
+  udlandet» med «strengere regel»-kolonnen. Tyskland 0,5 ‰ er ført til StVG
+  § 24a. Punkt 0's oprindelige ⛔ er dermed lukket af koden, ikke af en ny kilde.
+- **[ ] `/gram-til-dl` — køkkenomregner.** «gram til dl» har **10 af 10** danske
+  autocomplete-træffere (mel, sukker, havregryn, hvedemel, brun farin, ris, creme
+  fraiche, græsk yoghurt) og svensk «gram till dl». *Accept:* gram↔dl for de
+  8-10 mest søgte madvarer, hver med kildeført densitet (punkt 11). ⛔ kræver én
+  troværdig densitetstabel pr. vare (❓).
+- **[ ] `km → skridt`-tabel på `/skridt`.** 7 af 10 danske autocomplete-træffere
+  under «hvor mange skridt er» er «… 1/2/3/4/5/6/10 km». *Accept:* en tabel der
+  viser skridt for 1-10 km for kvinde og mand, regnet af `skridtFraKm`, så tal
+  og værktøj ikke kan glide fra hinanden. Ingen ny kilde nødvendig.
 - **[ ] «kvadratmeterpris» pr. by.** «kvadratmeterpris københavn/odense» er 3 af
   10 træffere under «kvadratmeter», og vi har 98 kommuner i `kommuner.ts` —
   men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
+- **[ ] `/pensionsalder` — hvornår kan jeg gå på pension?** «hvad er min
+  pensionsalder» og «beregn min pensionsalder» er danske autocomplete-træffere;
+  sitet har `/pension` og `/efterloen`, men ingen side der svarer på
+  folkepensionsalderen. ⛔ kræver den officielle fødselsdato→alder-tabel fra
+  borger.dk (❓).
 
 ## VERIFICÉR DEPLOY-noter
+
+**Åben 8/10 05:5x:** `VERIFICÉR DEPLOY: /uger-i-aret svarer 200 på begge domæner og viser titlen «Hvor mange uger er der på et år? Se ugerne i hver måned», overskrifterne «Så mange uger er der i hver periode» og «Så mange uger er der i hver måned», perioderækkerne «En uge», «To uger» og «Et halvt år», ferietabellen «Et år minus ferie» med rækkerne «5 uger» og «6 uger», og ISO-tallet «53 uger» for 2026; siden skal også stå i sitemap.xml. På beraknare.se «Hur många veckor är det på ett år? Se veckorna i varje månad» og «Så många veckor är det i varje månad». ceo/uger-i-aret 8/10 05:5x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/uger-i-aret | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Så mange uger er der i hver periode», «Et år minus ferie» og «53 uger». Første reelle deploy-vindue efter mergen er **8/10 07:30** (sker mergen efter 07:30, er det 12:30).
 
 **Åben 8/10 05:2x:** `VERIFICÉR DEPLOY: /arbejdsdage svarer 200 på begge domæner og viser titlen «Hvor mange arbejdsdage er der på et år? Se alle 12 måneder», overskriften «Arbejdsdage i hver måned», tabellen med «Arbejdsdage»/«Weekend»/«Helligdage», overskriften «Et år minus ferie» og resultatet «251 arbejdsdage» for 2026; siden skal også stå i sitemap.xml. På beraknare.se «Hur många arbetsdagar är det på ett år? Se alla 12 månader» og «Arbetsdagar i varje månad». ceo/arbejdsdage 8/10 05:2x`. Mål på **indhold**: strip tags og grep: `curl -s https://minberegner.dk/arbejdsdage | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` skal indeholde «Arbejdsdage i hver måned», «Et år minus ferie» og «251 arbejdsdage». Første reelle deploy-vindue efter mergen er **8/10 12:30** (sker mergen før 12:30, er det 12:30).
 
