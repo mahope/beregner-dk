@@ -101,6 +101,13 @@ import {
   kulhydratRangliste,
   kulhydratTal,
 } from "./kulhydrater-i-madvarer";
+import {
+  FEDT_META_BESKRIVELSE,
+  FEDT_META_TITEL,
+  fedtRangliste,
+  fedtTal,
+  gramForFedt,
+} from "./fedt-i-madvarer";
 
 /**
  * `/gram-til-dl`s egne tal til titel, beskrivelse og FAQ. De læser
@@ -1107,6 +1114,33 @@ const daPages: Record<string, PageData> = {
         { question: "Hvilke madvarer har mest kulhydrat?", answer: `${kulhydratRangliste().slice(0, 3).map((m) => `${m.navn} (${kulhydratTal(m.kulhydrat100g, 1)} g)`).join(", ")} ligger øverst blandt de ${MADVARER.length} madvarer. Mængden pr. 100 g siger dog ikke alt — kolonnen «Pr. 100 kcal» viser, hvor meget kulhydrat du får for kalorierne.` },
         { question: "Hvor mange kulhydrater skal man have om dagen?", answer: `Der er ikke ét fast tal — behovet følger dit energibehov. En tommelfingerregel er, at omkring halvdelen af kalorierne kommer fra kulhydrater, og 1 g kulhydrat giver 4 kcal. Har du fx brug for 2.000 kcal om dagen, svarer det til ca. 250 g kulhydrat. Beregn dit eget kaloriebehov på kalorieberegneren og regn derfra.` },
         { question: "Hvor kommer tallene fra?", answer: `Alle tal er fra ${MADVARER_KILDE.database}, datasættet ${MADVARER_KILDE.dataset}, udgaven ${MADVARER_KILDE.udgave}, pr. 100 g. De samme tal bruges på kalorieberegneren og på protein i madvarer, så tallene på en madvare altid stemmer.` },
+      ],
+    },
+    "fedt-i-madvarer": {
+      slug: "fedt-i-madvarer",
+      title: "Fedt i madvarer – se fedt pr. 100 g",
+      description: `Se hvor meget fedt der er i æg, avocado, sødmælk, fløde og resten af de ${MADVARER.length} madvarer. Søg i tabellen, og se hvor mange gram du skal spise for 20 g fedt.`,
+      metaTitle: FEDT_META_TITEL,
+      metaDescription: FEDT_META_BESKRIVELSE,
+      keywords: ["fedt i madvarer", "hvor meget fedt er der i et æg", "fedt i avocado", "fedt i sødmælk", "fedt i fløde", "fedt i smør", "fedtindhold madvarer", "fedt pr 100 g"],
+      ogTitle: FEDT_META_TITEL,
+      ogDescription: `Søg i ${MADVARER.length} madvarer, og se fedt pr. 100 g og hvor mange gram du skal spise for 20 g fedt.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Fedt i madvarer",
+      schemaDescription: `Se fedtindholdet i ${MADVARER.length} madvarer pr. 100 g, med gram for 20 g fedt og fedt pr. 100 kcal.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvor meget fedt er der i et æg?", answer: `Æg har ${fedtTal(madvareMedNavn("Æg, helt, råt")!.fedt100g, 1)} g fedt pr. 100 g. Det er det samlede fedtindhold — skriv vægten på dit æg i tabellen ovenfor, så regner den fedtet for netop din portion.` },
+        { question: "Hvor meget fedt er der i avocado?", answer: `Avocado har ${fedtTal(madvareMedNavn("Avocado")!.fedt100g, 1)} g fedt pr. 100 g og er den mest fedtrige frugt i tabellen. Skriv vægten i tabellen ovenfor, så regner den fedtet for netop din portion.` },
+        { question: "Hvor meget fedt er der i sødmælk?", answer: `Sødmælk har ${fedtTal(madvareMedNavn("Mælk, sødmælk")!.fedt100g, 1)} g fedt pr. 100 g, mens letmælk med 1,5 % har ${fedtTal(madvareMedNavn("Mælk, letmælk 1,5 %")!.fedt100g, 1)} g pr. 100 g. Et glas på 2,5 dl sødmælk indeholder derfor omkring ${fedtTal(madvareMedNavn("Mælk, sødmælk")!.fedt100g * 2.5, 0)} g fedt.` },
+        { question: "Hvor meget fedt er der i fløde?", answer: `Fløde med 38 % fedt har ${fedtTal(madvareMedNavn("Fløde, 38 %")!.fedt100g, 1)} g fedt pr. 100 g. En spiseskefuld på ca. 15 g indeholder derfor omkring ${fedtTal(madvareMedNavn("Fløde, 38 %")!.fedt100g * 0.15, 1)} g fedt.` },
+        { question: "Hvor meget fedt er der i smør?", answer: `Smør har ${fedtTal(madvareMedNavn("Smør")!.fedt100g, 1)} g fedt pr. 100 g og er næsten rent fedt. For at få 20 g fedt skal du spise ca. ${fedtTal(gramForFedt(madvareMedNavn("Smør")!, 20), 0)} g smør.` },
+        { question: "Hvor meget fedt er der i en banan?", answer: `Banan har ${fedtTal(madvareMedNavn("Banan")!.fedt100g, 1)} g fedt pr. 100 g, så frugt er ikke en fedtkilde — den er mest kulhydrat.` },
+        { question: "Hvilke madvarer har mest fedt?", answer: `${fedtRangliste().slice(0, 3).map((m) => `${m.navn} (${fedtTal(m.fedt100g, 1)} g)`).join(", ")} ligger øverst blandt de ${MADVARER.length} madvarer. Mængden pr. 100 g siger dog ikke alt — kolonnen «Pr. 100 kcal» viser, hvor meget fedt du får for kalorierne.` },
+        { question: "Hvor mange kalorier er der i 1 g fedt?", answer: `9 kcal. Det er mere end både protein og kulhydrat, der hver giver 4 kcal pr. gram. Derfor har fedtrige madvarer mange kalorier, selv når portionen er lille.` },
+        { question: "Hvor kommer tallene fra?", answer: `Alle tal er fra ${MADVARER_KILDE.database}, datasættet ${MADVARER_KILDE.dataset}, udgaven ${MADVARER_KILDE.udgave}, pr. 100 g. De samme tal bruges på kalorieberegneren, protein i madvarer og kulhydrater i madvarer, så tallene på en madvare altid stemmer.` },
       ],
     },
     "rygestop": {
