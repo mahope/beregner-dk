@@ -113,6 +113,15 @@ import {
   fedtTal,
   gramForFedt,
 } from "./fedt-i-madvarer";
+import {
+  SUKKER_MADVARER,
+  SUKKER_META_BESKRIVELSE,
+  SUKKER_META_TITEL,
+  gramForSukker,
+  sukkerRangliste,
+  sukkerTal,
+  sukkerVareMedNavn,
+} from "./sukker-i-madvarer";
 
 /**
  * `/gram-til-dl`s egne tal til titel, beskrivelse og FAQ. De læser
@@ -1152,6 +1161,35 @@ const daPages: Record<string, PageData> = {
         { question: "Hvilke madvarer har mest fedt?", answer: `${fedtRangliste().slice(0, 3).map((m) => `${m.navn} (${fedtTal(m.fedt100g, 1)} g)`).join(", ")} ligger øverst blandt de ${MADVARER.length} madvarer. Mængden pr. 100 g siger dog ikke alt — kolonnen «Pr. 100 kcal» viser, hvor meget fedt du får for kalorierne.` },
         { question: "Hvor mange kalorier er der i 1 g fedt?", answer: `9 kcal. Det er mere end både protein og kulhydrat, der hver giver 4 kcal pr. gram. Derfor har fedtrige madvarer mange kalorier, selv når portionen er lille.` },
         { question: "Hvor kommer tallene fra?", answer: `Alle tal er fra ${MADVARER_KILDE.database}, datasættet ${MADVARER_KILDE.dataset}, udgaven ${MADVARER_KILDE.udgave}, pr. 100 g. De samme tal bruges på kalorieberegneren, protein i madvarer og kulhydrater i madvarer, så tallene på en madvare altid stemmer.` },
+      ],
+    },
+    "sukker-i-madvarer": {
+      slug: "sukker-i-madvarer",
+      title: "Sukker i madvarer – se sukker pr. 100 g",
+      description: `Se hvor meget sukker der er i banan, æble, chokolade, vandmelon og resten af de ${SUKKER_MADVARER.length} madvarer. Søg i tabellen, og se hvor mange gram du skal spise for 20 g sukker.`,
+      metaTitle: SUKKER_META_TITEL,
+      metaDescription: SUKKER_META_BESKRIVELSE,
+      keywords: ["sukker i madvarer", "hvor meget sukker er der i en banan", "sukker i et æble", "sukker i chokolade", "sukker i vandmelon", "sukker i druer", "sukkerindhold madvarer", "sukker pr 100 g"],
+      ogTitle: SUKKER_META_TITEL,
+      ogDescription: `Søg i ${SUKKER_MADVARER.length} madvarer, og se sukker pr. 100 g og hvor mange gram du skal spise for 20 g sukker.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Sukker i madvarer",
+      schemaDescription: `Se sukkerindholdet i ${SUKKER_MADVARER.length} madvarer pr. 100 g, med gram for 20 g sukker og sukker pr. 100 kcal.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvor meget sukker er der i en banan?", answer: `Banan har ${sukkerTal(sukkerVareMedNavn("Banan")!.sukker100g, 1)} g sukker pr. 100 g. En mellemstor banan vejer ca. 120 g, altså omkring ${sukkerTal(sukkerVareMedNavn("Banan")!.sukker100g * 1.2, 0)} g sukker. Skriv vægten i tabellen ovenfor, så regner siden sukkeret for netop din portion.` },
+        { question: "Hvor meget sukker er der i et æble?", answer: `Æble har ${sukkerTal(sukkerVareMedNavn("Æble")!.sukker100g, 1)} g sukker pr. 100 g. Et mellemstort æble vejer ca. 150 g, altså omkring ${sukkerTal(sukkerVareMedNavn("Æble")!.sukker100g * 1.5, 0)} g sukker.` },
+        { question: "Hvor meget sukker er der i chokolade?", answer: `Mælkechokolade har ${sukkerTal(sukkerVareMedNavn("Chokolade, mælke")!.sukker100g, 1)} g sukker pr. 100 g, så en lille bar på 25 g svarer til ca. ${sukkerTal(sukkerVareMedNavn("Chokolade, mælke")!.sukker100g * 0.25, 0)} g sukker. Sukker i ren form har ${sukkerTal(sukkerVareMedNavn("Sukker")!.sukker100g, 1)} g pr. 100 g.` },
+        { question: "Hvor meget sukker er der i cola?", answer: `Cola står ikke i tabellen, for kilden dækker råvarer og ikke drikkevarer. Den er heller ikke én størrelse — brusen varierer fra almindelig til sukkerfri. Søg i stedet på de varer, du kan veje selv, eller brug kalorieberegneren.` },
+        { question: "Hvor meget sukker er der i kød og æg?", answer: `Kylling, svinekød, oksekød og skinke har 0,0 g sukker pr. 100 g, og et æg har ${sukkerTal(sukkerVareMedNavn("Æg, helt, råt")!.sukker100g, 1)} g. Sukkeret i køleskabet sidder i de søde og planteædende varer, ikke i animalske.` },
+        { question: "Hvor meget sukker er der i mælk og yoghurt?", answer: `Sødmælk har ${sukkerTal(sukkerVareMedNavn("Mælk, sødmælk")!.sukker100g, 1)} g sukker pr. 100 g, letmælk ${sukkerTal(sukkerVareMedNavn("Mælk, letmælk 1,5 %")!.sukker100g, 1)} g og natur yoghurt ${sukkerTal(sukkerVareMedNavn("Yoghurt, natur")!.sukker100g, 1)} g. Det er laktosen — mælkesukker — som står, også i usøde produkter.` },
+        { question: "Hvor meget sukker er der i vandmelon?", answer: `Vandmelon har ${sukkerTal(sukkerVareMedNavn("Vandmelon")!.sukker100g, 1)} g sukker pr. 100 g, for den er mest vand. For at få 20 g sukker skal du indtage ca. ${sukkerTal(gramForSukker(sukkerVareMedNavn("Vandmelon")!, 20), 0)} g.` },
+        { question: "Hvor meget sukker er der i tørrede frugter?", answer: `Tørrede druer har ${sukkerTal(sukkerVareMedNavn("Druer, tørrede")!.sukker100g, 1)} g sukker pr. 100 g — næsten tre gange så meget som friske vindruer (${sukkerTal(sukkerVareMedNavn("Vindrue")!.sukker100g, 1)} g), for vandet er forduftet.` },
+        { question: "Hvilke madvarer har mest sukker?", answer: `${sukkerRangliste().slice(0, 3).map((m) => `${m.navn} (${sukkerTal(m.sukker100g, 1)} g)`).join(", ")} ligger øverst blandt de ${SUKKER_MADVARER.length} madvarer. Mængden pr. 100 g siger dog ikke alt — kolonnen «Pr. 100 kcal» viser, hvor meget sukker du får for kalorierne.` },
+        { question: "Hvorfor står havregryn ikke i tabellen?", answer: `Kilden opgiver ikke sukker for havregryn, og siden opfinder ikke et tal. Havregryn har ${sukkerTal(madvareMedNavn("Havregryn, tørrede")!.kulhydrat100g, 1)} g kulhydrat pr. 100 g, som du kan se på kulhydrater i madvarer.` },
+        { question: "Hvor kommer tallene fra?", answer: `Alle tal er fra ${MADVARER_KILDE.database}, datasættet ${MADVARER_KILDE.dataset}, udgaven ${MADVARER_KILDE.udgave}, pr. 100 g, og de samme madvarer bruges på kalorieberegneren, protein i madvarer, kulhydrater i madvarer og fedt i madvarer, så tallene på en madvare altid stemmer.` },
       ],
     },
     "rygestop": {
