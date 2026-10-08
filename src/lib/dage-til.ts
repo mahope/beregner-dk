@@ -737,8 +737,8 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         question: "Hur många dagar är det till skärtorsdagen?",
         facts: [
           "Skärtorsdagen är 3 dagar före påskdagen och alltid en torsdag.",
-          "Långfredag, påskdagen och annandag påsk är alla allmänna helgdagar enligt lagen (1989:253). Skärtorsdag är det inte — det är en vanlig arbetsdag, och det är kollektivavtalet som avgör om du har ledigt.",
-          "Om du arbetar skärtorsdagen har du inte automatiskt rätt till dagpenning — det beror på ditt avtal.",
+          "Långfredag, påskdagen och annandag påsk är alla allmänna helgdagar enligt lagen (1989:253). Skärtorsdag är det inte — det är en vanlig arbetsdag enligt lagen.",
+          "Om du arbetar skärtorsdagen har du inte automatisk rätt till dagpenning — det beror på din överenskomst.",
         ],
         faq: [
           {
@@ -802,7 +802,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         question: "Hur många dagar är det till nationaldagen?",
         facts: [
           "Sveriges nationaldag är 6 juni, och datumet är fast — det flyttar inte beroende på vilken veckodag det infaller på.",
-          "Nationaldagen har varit 6 juni sedan 2005 och är en allmän helgdag enligt lagen (1989:253). Det är kollektivavtalen, inte lagen, som avgör om du får fri med lön.",
+          "Nationaldagen har varit 6 juni sedan 2005 och är en allmän helgdag enligt lagen (1989:253).",
           "Nationaldagen är inte samma sak som midsommarafton, som ligger mellan 19 och 25 juni.",
         ],
         faq: [
@@ -814,7 +814,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Är nationaldagen en röd dag?",
             answer:
-              "Ja. 6 juni är en allmän helgdag enligt lagen (1989:253) och räknas därför som en röd dag. Lagen säger däremot ingenting om lön — det är kollektivavtalet, der avgør om du har fri med lön på nationaldagen.",
+              "Ja. 6 juni är en allmän helgdag enligt lagen (1989:253) och räknas därför som en röd dag. Lagen säger ingenting om lön — om du har ledigt med lön beror på din överenskomst.",
           },
           {
             question: "Hur räknar jag ut datumet helt säkert?",
