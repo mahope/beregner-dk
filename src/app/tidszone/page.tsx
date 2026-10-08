@@ -641,9 +641,9 @@ export default async function TidszonePage() {
           skillnaden är densamma hela året. <strong>Thailand, Japan och Kina
           använder inte sommartid</strong>, så de ligger en timme tidigare, när
           Sverige har sommartid. Det är fällan som ger det felaktiga mötet.{" "}
-          <strong>Australien ochNya Zeeland går åt andra hållet</strong>: de har
+          <strong>Australien och Nya Zeeland går åt andra hållet</strong>: de har
           sommartid när Sverige har vintertid, så Australien går från 10 timmar
-          framåt till 8, ochNya Zeeland från 12 till 10.
+          framåt till 8, och Nya Zeeland från 12 till 10.
         </p>
 
         <h2>Vad är klockan i ett annat land?</h2>

@@ -94,6 +94,12 @@ import {
   proteinRangliste,
   proteinTal,
 } from "./protein-i-madvarer";
+import {
+  KULHYDRAT_META_BESKRIVELSE,
+  KULHYDRAT_META_TITEL,
+  kulhydratRangliste,
+  kulhydratTal,
+} from "./kulhydrater-i-madvarer";
 
 /**
  * `/gram-til-dl`s egne tal til titel, beskrivelse og FAQ. De læser
@@ -1060,6 +1066,33 @@ const daPages: Record<string, PageData> = {
         { question: "Hvor meget protein er der i en banan?", answer: `Banan har ${proteinTal(madvareMedNavn("Banan")!.protein100g, 1)} g protein pr. 100 g, så en frugt er ikke en proteinkilde — den er mest kulhydrat.` },
         { question: "Hvilke madvarer har mest protein?", answer: `${proteinRangliste().slice(0, 3).map((m) => `${m.navn} (${proteinTal(m.protein100g, 1)} g)`).join(", ")} ligger øverst blandt de ${MADVARER.length} madvarer. Mængden pr. 100 g siger dog ikke alt — kolonnen «Pr. 100 kcal» viser, hvor meget protein du får for kalorierne.` },
         { question: "Hvor kommer tallene fra?", answer: `Alle tal er fra ${MADVARER_KILDE.database}, datasættet ${MADVARER_KILDE.dataset}, udgaven ${MADVARER_KILDE.udgave}, pr. 100 g. De samme tal bruges på kalorieberegneren, så protein- og kalorie-tallet på en madvare altid stemmer.` },
+      ],
+    },
+    "kulhydrater-i-madvarer": {
+      slug: "kulhydrater-i-madvarer",
+      title: "Kulhydrater i madvarer – se kulhydrat pr. 100 g",
+      description: `Se hvor mange kulhydrater der er i banan, kartoffel, havregryn, rugbrød og resten af de ${MADVARER.length} madvarer. Søg i tabellen, og se hvor mange gram du skal spise for 50 g kulhydrat.`,
+      metaTitle: KULHYDRAT_META_TITEL,
+      metaDescription: KULHYDRAT_META_BESKRIVELSE,
+      keywords: ["kulhydrater i madvarer", "hvor mange kulhydrater er der i en banan", "kulhydrater i kartofler", "kulhydrater i æg", "kulhydrater i havregryn", "kulhydrater i rugbrød", "kulhydratindhold madvarer", "kulhydrater pr 100 g"],
+      ogTitle: KULHYDRAT_META_TITEL,
+      ogDescription: `Søg i ${MADVARER.length} madvarer, og se kulhydrat pr. 100 g og hvor mange gram du skal spise for 50 g kulhydrat.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Kulhydrater i madvarer",
+      schemaDescription: `Se kulhydratindholdet i ${MADVARER.length} madvarer pr. 100 g, med gram for 50 g kulhydrat og kulhydrat pr. 100 kcal.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvor mange kulhydrater er der i en banan?", answer: `Banan har ${kulhydratTal(madvareMedNavn("Banan")!.kulhydrat100g, 1)} g kulhydrat pr. 100 g. En mellemstor banan vejer ca. 120 g, altså omkring ${kulhydratTal(madvareMedNavn("Banan")!.kulhydrat100g * 1.2, 0)} g kulhydrat. Skriv vægten i tabellen ovenfor, så regner den kulhydraterne for netop din portion.` },
+        { question: "Hvor mange kulhydrater er der i kartofler?", answer: `Kogt kartoffel har ${kulhydratTal(madvareMedNavn("Kartoffel, kogt")!.kulhydrat100g, 1)} g kulhydrat pr. 100 g. Rå kartoffel har ${kulhydratTal(madvareMedNavn("Kartoffel, rå")!.kulhydrat100g, 1)} g, og bagt kartoffel ${kulhydratTal(madvareMedNavn("Kartoffel, bagt")!.kulhydrat100g, 1)} g — vandet fordamper under tilberedningen, så tørstoffet stiger.` },
+        { question: "Hvor mange kulhydrater er der i æg?", answer: `Æg har kun ${kulhydratTal(madvareMedNavn("Æg, helt, råt")!.kulhydrat100g, 1)} g kulhydrat pr. 100 g, så et æg er stort set kulhydratfrit. Æggeblomme har ${kulhydratTal(madvareMedNavn("Æggeblomme")!.kulhydrat100g, 1)} g pr. 100 g.` },
+        { question: "Hvor mange kulhydrater er der i havregryn?", answer: `Havregryn har ${kulhydratTal(madvareMedNavn("Havregryn, tørrede")!.kulhydrat100g, 1)} g kulhydrat pr. 100 g tørre gryn. Vægten gælder de tørre gryn, før de koges — koger du dem i vand, falder kulhydrattallet pr. 100 g, fordi grøden får vand.` },
+        { question: "Hvor mange kulhydrater er der i rugbrød?", answer: `Rugbrød har ${kulhydratTal(madvareMedNavn("Rugbrød")!.kulhydrat100g, 1)} g kulhydrat pr. 100 g. En skive på ca. 35 g indeholder altså omkring ${kulhydratTal(madvareMedNavn("Rugbrød")!.kulhydrat100g * 0.35, 0)} g kulhydrat.` },
+        { question: "Hvor mange kulhydrater er der i et æble?", answer: `Æble har ${kulhydratTal(madvareMedNavn("Æble")!.kulhydrat100g, 1)} g kulhydrat pr. 100 g. Et mellemstort æble vejer ca. 150 g, altså omkring ${kulhydratTal(madvareMedNavn("Æble")!.kulhydrat100g * 1.5, 0)} g kulhydrat.` },
+        { question: "Hvilke madvarer har mest kulhydrat?", answer: `${kulhydratRangliste().slice(0, 3).map((m) => `${m.navn} (${kulhydratTal(m.kulhydrat100g, 1)} g)`).join(", ")} ligger øverst blandt de ${MADVARER.length} madvarer. Mængden pr. 100 g siger dog ikke alt — kolonnen «Pr. 100 kcal» viser, hvor meget kulhydrat du får for kalorierne.` },
+        { question: "Hvor mange kulhydrater skal man have om dagen?", answer: `Der er ikke ét fast tal — behovet følger dit energibehov. En tommelfingerregel er, at omkring halvdelen af kalorierne kommer fra kulhydrater, og 1 g kulhydrat giver 4 kcal. Har du fx brug for 2.000 kcal om dagen, svarer det til ca. 250 g kulhydrat. Beregn dit eget kaloriebehov på kalorieberegneren og regn derfra.` },
+        { question: "Hvor kommer tallene fra?", answer: `Alle tal er fra ${MADVARER_KILDE.database}, datasættet ${MADVARER_KILDE.dataset}, udgaven ${MADVARER_KILDE.udgave}, pr. 100 g. De samme tal bruges på kalorieberegneren og på protein i madvarer, så tallene på en madvare altid stemmer.` },
       ],
     },
     "rygestop": {

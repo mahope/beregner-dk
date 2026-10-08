@@ -274,6 +274,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Kalorieforbrænding", description: "Forbrændte kalorier ved løb, cykling m.m.", href: "/motion-kalorier", popular: false, category: "Sundhed" },
   { title: "Proteinbehov", description: "Beregn dit daglige proteinbehov efter aktivitetsniveau", href: "/proteinbehov", popular: false, category: "Sundhed" },
   { title: "Protein i madvarer", description: "Protein pr. 100 g i æg, kylling og andre madvarer", href: "/protein-i-madvarer", popular: false, category: "Sundhed" },
+  { title: "Kulhydrater i madvarer", description: "Kulhydrat pr. 100 g i banan, kartoffel og andre madvarer", href: "/kulhydrater-i-madvarer", popular: false, category: "Sundhed" },
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", popular: false, category: "Sundhed" },
   { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", popular: false, category: "Sundhed" },
   { title: "Søvnbehov", description: "Se hvor meget søvn du har brug for efter din alder", href: "/soevnbehov", popular: false, category: "Sundhed" },

@@ -30820,3 +30820,18 @@ STATUS: 7/10 22:1x. ✅ **`/retvinklet-trekant` — hypotenuse, katete og vinkle
 STATUS: 7/10 21:0x. ✅ **`/omkreds` — omkredsen af cirkel, kvadrat, rektangel, trekant, trapez, parallelogram og rombe i m og cm.** Datagrund: dansk autocomplete (hl=da, 7/10) har **10 af 10** træffere under «omkreds af» (cirkel, firkant, trekant, rombe, kvadrat, oval) og **10 af 10** under «hvordan regner man omkreds»; svensk «omkrets av cirkel/triangel/rektangel/kvadrat». Siden er den naturlige søster til `/areal` (arealet af de samme syv figurer) og `/rumfang`, og sitet havde ingen omkreds-side. Alle syv figurer, formlerne, eksempeltabellen og FAQ'en læser `omkreds.ts`, så ingen kopi kan glide fra formlen. Dansk og svensk. **MÅL: /omkreds baseline 0 Plausible/GSC pr. 7/10** — måles igen ~21/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 00:1x. ✅ **`/soevnbehov` — hvor meget søvn har du brug for, og hvornår bør du gå i seng.** Datagrund: dansk autocomplete (hl=da, 7/10) svarer ti af ti under «hvor meget søvn skal man have» med en aldersvariant («… skal en 13 årig have», «… skal børn have», «… skal en voksen have»), og svensk «sömnbehov» gentager mønsteret; sitet havde `/vandbehov`, `/kalorier` og `/alder`, men intet søvnbehov. Værktøjet giver den anbefalede søvn for alderen efter Sleep Foundation/AASM-tabellen (baby 14-17, spædbarn 12-16, småbarn 11-14, børnehave 10-13, skole 9-12, teen 8-10, voksen 7-9) og regner sengetider ud fra 90-minutters cyklusser; tabel, FAQ og metadata læser alle `soevnbehov.ts`. Dansk og svensk. **MÅL: /soevnbehov baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 00:1x. ✅ Seks åbne VERIFICÉR DEPLOY-noter lukket med DEPLOY OK 8/10 (byggepris, omkreds, hundealder, areal, kirkeskat, elbil-lading) — alle målt på indhold på begge domæner efter 7/10 21:30-vinduet. `/retvinklet-trekant` (merget 7/10 22:1x) venter fortsat på 8/10 07:30-vinduet.
+
+## VERIFICÉR DEPLOY-noter lukket 8/10 08:2x (målt på live-indhold)
+
+- `/koffein` (ceo/koffein 8/10 04:3x): «Koffein i almindelige drikke og mad», «90 mg», «400 mg» — alle fundet på minberegner.dk.
+- `/fliser` (ceo/fliser 8/10 03:3x): titel «Fliseberegner: 12 m² i 60x60 = 37 fliser», «37 fliser», «Hvor mange 60x60-fliser» — fundet.
+- `/retvinklet-trekant` (ceo/retvinklet-trekant 7/10 22:1x): «Pythagoras og de fem formler», «Hypotenusen c = 5 i m» (værdi og enhed i hvert sit tag), «36,87 °» — fundet.
+- `/soevnbehov` (ceo/soevnbehov 8/10 00:1x): «Søvnbehov pr. alder», «7-9 timer i døgnet», «21:45» — fundet.
+- `/skridt` (ceo/skridt-km-tabel 8/10 06:4x): «Hvor mange skridt er der på X km?», «15.152», «1.515 skridt pr. kilometer» — fundet.
+- `/gram-til-dl` (ceo/gram-til-dl 8/10 07:1x): «Sådan omregner du gram til dl», «Hvor meget vejer 1 dl?», «2,5 dl» — fundet.
+- `/arbejdsdage` (ceo/arbejdsdage 8/10 05:2x): «Arbejdsdage i hver måned», «Et år minus ferie», «251 arbejdsdage» — fundet.
+- `/uger-i-aret` (ceo/uger-i-aret 8/10 05:5x): «Så mange uger er der i hver periode», «Et år minus ferie», «53 uger» — fundet.
+- Svensk dage-til (ceo/roed-dag-loen 8/10 03:5x): den falske «ledigt med lön»-tekst er væk fra `/dagar-till/skartorsdagen`, som nu siger at det afhænger af överenskomsten — fundet.
+- Emoji-erstattelse (ceo/emoji-replacement 8/10 02:5x): blogindlæg og 404-side serverer lucide-ikoner (69 `lucide`-forekomster på `/blog/30-procent-reglen-husleje`) — fundet.
+
+`/protein-i-madvarer` (merget 8/10 07:55) har første deploy-vindue 8/10 12:30 og er stadig åben.
