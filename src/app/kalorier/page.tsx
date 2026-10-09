@@ -192,9 +192,45 @@ export default async function KalorierPage() {
           500.
         </p>
 
-        <h2>Makronæringsstoffer</h2>
+         <h2>Makronæringsstoffer</h2>
 
-        <h3>Protein</h3>
+         <p>
+           Vil du vide, hvad du får i skeen: se{" "}
+           <Link href="/kalorier-i-opskrift" className="text-blue-700 underline dark:text-blue-300">
+             kalorier i opskrifter
+           </Link>{" "}
+           og{" "}
+           <Link href="/kalorier-i-alkohol" className="text-blue-700 underline dark:text-blue-300">
+             kalorier i alkohol
+           </Link>
+           . Derudover står der, hvor meget{" "}
+           <Link href="/protein-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             protein
+           </Link>
+           ,{" "}
+           <Link href="/sukker-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             sukker
+           </Link>
+           ,{" "}
+           <Link href="/kulhydrater-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             kulhydrat
+           </Link>
+           ,{" "}
+           <Link href="/fedt-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             fedt
+           </Link>
+           ,{" "}
+           <Link href="/fiber-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             fiber
+           </Link>{" "}
+           og{" "}
+           <Link href="/salt-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             salt
+           </Link>{" "}
+           madvarerne har pr. 100 g.
+         </p>
+
+         <h3>Protein</h3>
         <p>
           <strong>Protein</strong> er essentielt for muskler, hår, hud og hundredvis af
           kropsprocesser.
