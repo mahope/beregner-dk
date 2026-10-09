@@ -31101,3 +31101,41 @@ STATUS: 8/10 18:3x. ✅ `/kalorier-i-opskrift` (live, DEPLOY OK 9/10 02:1x). Det
 
 ### Opgave lukket 9/10 23:0x — kalorielæserne til indholdssiderne (ceo/kalorier-nutrienter-links)
 `/kalorier` (244 besøgende/28d, +16 %, GSC 8.759 visninger, 1,2 % CTR, pos. 8,4) sendte aldrig en læser videre til otte indholdssider, der alle stod på 0 trafik. Makro-sektionen linker nu til `/kalorier-i-alkohol`, `/kalorier-i-opskrift` og de seks «-i-madvarer»-sider. Første forsøg brugte `RELATED_CALCULATORS`, men testen `/kalorier points at the calorie cluster, not at a copy of /bmi's row` (`calculator-list.test.ts:161-176`) låser rækken til seks naboer og `MAX_RELATED` er 6, så linksene lå i brødteksten. MÅL: /kalorier baseline 244 besøgende/28d pr. 9/10; udgående klik til /kalorier-i-alkohol og /fiber-i-madvarer fra 0 — måles igen ~23/10.
+
+---
+
+## F6 — fakta og FAQ på /dage-til viste markdownstjerner (løst 10/10 01:3x, ceo/dage-til-fakta-fedback)
+
+`DageTilPage` rendrede `facts` som ren tekst i `<li>`, og den delte `FAQ`
+rendrede `answer` som ren tekst i `<p>`, så `**fed**`-markøren i `dage-til.ts`
+stod bogstaveligt for læseren. Live 9/10: `/dage-til/sommerferien` viste «mensen
+**slutdatoen** er kommunal», `/dage-til/efteraarsferien` viste «i **uge 42**» og
+«den **første skoledag**», `/dage-til/skolestart` havde seks stjerner, og to
+FAQ-svar bar dem. FAQPage-JSON-LD'en (`FAQSchema`) bar samme markup, og det er
+den, Google citerer i sit svar.
+
+**Rettelse.** Nyt `src/components/inline-markdown.tsx`:
+- `renderInlineMarkdown(text)` splitter på `/\*\*([^*]+)\*\*/g` og giver odd-led
+  til `<strong>`; bruges af `DageTilPage` (facts) og `FAQ` (svar).
+- `stripInlineMarkdown(text)` fjerner markøren og bruges af `FAQSchema` til
+  JSON-LD'ens `question` og `answer`.
+
+Det åbne spørgsmål («ret FAQ'en for alle 124 sider eller kun dage-til?») blev
+afgjort til **alle**: `FAQ` er delt, og en gennemgang viste at ingen FAQ-svar i
+`page-data.ts` indeholder synlig `**` (de 72 forekomster ligger i kommentarer),
+så uden for dage-til er ændringen en no-op.
+
+**Porte.** `src/app/dage-til-fakta.test.tsx` rendrer den rigtige side med de
+rigtige komponenter for alle datoer på begge sprog og kræver at `**` ikke når
+outputtet, at FAQPage-JSON-LD'en matcher de stemplede svar, og at de tre sider
+viser fed tekst. `src/components/inline-markdown.test.tsx` dækker helperen
+(incl. et ensomt `**` der ikke skal fjernes). Mod master: 4/4 røde i
+dage-til-porten (helperen findes ikke, og JSON-LD'en bar `**`).
+
+**Verifikation.** Gate: typecheck 0, lint 0 (985 filer), 5.529 tests i 332 filer
+grønne, `next build` grøn. SSR på lokal prod-build (port 3000):
+`<strong>slutdatoen</strong>` på sommerferien, `<strong>uge 42</strong>` og
+`<strong>første skoledag</strong>` på efteraarsferien, `<strong>1. august</strong>`
+og `<strong>nedtællingen følger den første skoledag</strong>` på skolestart, og
+FAQPage-JSON-LD'en med 0 `**`. RSC-payloaden (Next's flight-data) bærer stadig
+de rå strenge, men den er hverken synlig for brugeren eller i JSON-LD'en.

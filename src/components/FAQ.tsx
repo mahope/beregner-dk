@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { renderInlineMarkdown } from "@/components/inline-markdown";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
@@ -45,7 +46,7 @@ export function FAQ({ items, title }: FAQProps) {
             </button>
             {openIndex === index && (
               <div className="px-6 pb-4 text-gray-600 dark:text-gray-300">
-                <p>{item.answer}</p>
+                <p>{renderInlineMarkdown(item.answer)}</p>
               </div>
             )}
           </div>

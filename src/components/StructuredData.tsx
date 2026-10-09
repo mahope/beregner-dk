@@ -1,5 +1,6 @@
 // JSON-LD Structured Data Components for SEO
 
+import { stripInlineMarkdown } from "@/components/inline-markdown";
 import { getDomainConfig } from "@/lib/domain-config";
 import { OG_IMAGE_URL } from "@/lib/page-helpers";
 
@@ -83,10 +84,10 @@ export function FAQSchema({ items }: FAQSchemaProps) {
     "@type": "FAQPage",
     mainEntity: items.map((item) => ({
       "@type": "Question",
-      name: item.question,
+      name: stripInlineMarkdown(item.question),
       acceptedAnswer: {
         "@type": "Answer",
-        text: item.answer,
+        text: stripInlineMarkdown(item.answer),
       },
     })),
   };

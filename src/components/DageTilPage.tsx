@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
+import { renderInlineMarkdown } from "@/components/inline-markdown";
 import { FAQSchema } from "@/components/StructuredData";
 import {
   formatTargetDate,
@@ -287,7 +288,7 @@ export async function DageTilRoute({
         <p>{c.methodBody}</p>
         <ul>
           {eventCopy.facts.map((fact) => (
-            <li key={fact}>{fact}</li>
+            <li key={fact}>{renderInlineMarkdown(fact)}</li>
           ))}
         </ul>
       </div>
