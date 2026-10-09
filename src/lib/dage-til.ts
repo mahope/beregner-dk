@@ -11,7 +11,8 @@ export type DageTilKind =
   | "advent"
   | "summerferie"
   | "efteraarsferie"
-  | "skoleaar";
+  | "skoleaar"
+  | "blackfriday";
 
 export interface DageTilAnchor {
   kind: DageTilKind;
@@ -1409,6 +1410,73 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    id: "black-friday",
+    anchor: {
+      da: { kind: "blackfriday", month: 11, day: 0, offsetDays: 0 },
+      se: { kind: "blackfriday", month: 11, day: 0, offsetDays: 0 },
+    },
+    da: {
+      slug: "black-friday",
+      copy: {
+        short: "Black Friday",
+        question: "Hvor mange dage er der til Black Friday?",
+        facts: [
+          "Black Friday er fredagen efter den amerikanske Thanksgiving, og Thanksgiving er altid den fjerde torsdag i november. I 2026 er Black Friday 27. november, i 2027 26. november og i 2028 24. november.",
+          "Dagen har sit udspring i den amerikanske detailhandel, hvor den markerer starten på julesalgene. I Danmark og Sverige kører både fysiske butikker og webshops deres største efterårstilbud samme uge.",
+          "Black Friday er ikke en helligdag, så butikkerne har normalt åbent, og der er heller ingen lov, der siger, hvornår et tilbud må begynde — det enkelte firma bestemmer det selv.",
+          "Cyber Monday er mandagen efter Black Friday, altså 30. november 2026. Det er den dag, hvor mange af de online tilbud slutter.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er Black Friday?",
+            answer:
+              "Black Friday er altid dagen efter Thanksgiving i USA, og Thanksgiving er den fjerde torsdag i november. Derfor falder Black Friday altid mellem 23. og 29. november: 27. november 2026, 26. november 2027 og 24. november 2028.",
+          },
+          {
+            question: "Er Black Friday en helligdag?",
+            answer:
+              "Nej. Black Friday er en handelsdag, ikke en helligdag, så butikker har normalt åbent. Det er heller ikke en fast dansk dato — den følger den amerikanske Thanksgiving — så ugedagen skifter fra år til år.",
+          },
+          {
+            question: "Hvad er Cyber Monday?",
+            answer:
+              "Cyber Monday er mandagen efter Black Friday — 30. november i 2026 — og er betegnelsen for den mandag, hvor mange handler online i stedet for i butikken. Det er ofte den sidste dag for de store Black Friday-tilbud.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "black-friday",
+      copy: {
+        short: "Black Friday",
+        question: "Hur många dagar är det kvar till Black Friday?",
+        facts: [
+          "Black Friday är fredagen efter den amerikanska thanksgiving, och thanksgiving är alltid den fjärde torsdagen i november. År 2026 är Black Friday den 27 november, 2027 den 26 november och 2028 den 24 november.",
+          "Dagen kommer från den amerikanska detaljhandeln, där den markerar starten på julhandeln. I Sverige och Danmark kör både butiker och nätbutiker sina största hösterbjudanden samma vecka.",
+          "Black Friday är inte en helgdag, så butikerna har normalt öppet, och det finns ingen lag som styr när ett erbjudande får börja — varje företag bestämmer det självt.",
+          "Cyber Monday är måndagen efter Black Friday, alltså 30 november 2026. Det är den dag då många av näterbjudandena tar slut.",
+        ],
+        faq: [
+          {
+            question: "När är Black Friday?",
+            answer:
+              "Black Friday är alltid dagen efter thanksgiving i USA, och thanksgiving är den fjärde torsdagen i november. Därför faller Black Friday alltid mellan 23 och 29 november: 27 november 2026, 26 november 2027 och 24 november 2028.",
+          },
+          {
+            question: "Är Black Friday en helgdag?",
+            answer:
+              "Nej. Black Friday är en handelsdag och inte en helgdag, så butikerna har normalt öppet. Det är inte heller ett fast datum — det följer den amerikanska thanksgiving — så veckodagen växlar från år till år.",
+          },
+          {
+            question: "Vad är Cyber Monday?",
+            answer:
+              "Cyber Monday är måndagen efter Black Friday — 30 november 2026 — och är benämningen på den måndag då många handlar på nätet i stället för i butik. Det är ofta sista dagen för de stora Black Friday-erbjudandena.",
+          },
+        ],
+      },
+    },
+  },
+  {
     id: "sommerferien",
     anchor: {
       da: { kind: "summerferie", month: 6, day: 0, offsetDays: 0 },
@@ -1678,6 +1746,32 @@ export function forstaAdvent(year: number, adventOffsetDays = 0): Date {
 }
 
 /**
+ * Black Friday for a year: the Friday after US Thanksgiving, which is the
+ * fourth Thursday in November. The rule is a calendar rule, so the date can
+ * be computed rather than looked up — it always falls between 23 and 29
+ * November.
+ *
+ * The Danish and Swedish countdowns people actually search for
+ * ("hvor mange dage til black friday" / "hur många dagar till black friday"
+ * are both Google suggestions, 9/10) count down to the same day: the date is
+ * the American one in both countries, because the retail event is. Cyber
+ * Monday is the Monday after, so it is three days on from this function.
+ */
+export function blackFriday(year: number): Date {
+  let torsdage = 0;
+  for (let day = 1; day <= 30; day++) {
+    const candidate = new Date(Date.UTC(year, 10, day));
+    if (candidate.getUTCDay() !== 4) continue;
+    torsdage++;
+    if (torsdage === 4) {
+      return new Date(candidate.getTime() + MS_PER_DAY);
+    }
+  }
+  // Unreachable: November has at least four Thursdays in every year.
+  throw new Error(`Ingen fjerde torsdag i november ${year}`);
+}
+
+/**
  * Mandagen i en ISO-uge for a year, from the same ISO definition used by the
  * kalender: uge 1 er den uge med torsdagen i januar, så mandagen i uge 1 er
  * den mandag mellem 29. december og 4. januar.
@@ -1740,6 +1834,9 @@ function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   }
   if (anchor.kind === "advent") {
     return forstaAdvent(year, anchor.adventOffsetDays ?? 0);
+  }
+  if (anchor.kind === "blackfriday") {
+    return blackFriday(year);
   }
   const easter = easterSunday(year);
   return new Date(easter.getTime() + anchor.offsetDays * MS_PER_DAY);

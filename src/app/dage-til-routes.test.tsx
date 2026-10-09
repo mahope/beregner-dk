@@ -250,9 +250,11 @@ describe("dage-til side", () => {
     ["da", "2-juledag", "2026-12-26", "26. december 2026", "lørdag", 345],
     ["da", "fastelavn", "2026-02-17", "17. februar 2026", "tirsdag", 33],
     ["da", "palmesondag", "2026-03-29", "29. marts 2026", "søndag", 73],
+    ["da", "black-friday", "2026-11-27", "27. november 2026", "fredag", 316],
     ["se", "annandag-jul", "2026-12-26", "26 december 2026", "lördag", 345],
     ["se", "fettisdagen", "2026-02-17", "17 februari 2026", "tisdag", 33],
     ["se", "palmsondagen", "2026-03-29", "29 mars 2026", "söndag", 73],
+    ["se", "black-friday", "2026-11-27", "27 november 2026", "fredag", 316],
   ] as const)(
     "%s-siden /%s rammer %s i dag og %i dage",
     async (locale, slug, isoTarget, dato, ugedag, dage) => {

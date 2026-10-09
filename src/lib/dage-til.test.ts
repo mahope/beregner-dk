@@ -4,6 +4,7 @@ import {
   type DageTilAnchor,
   type DageTilEvent,
   type DageTilLocaleArm,
+  blackFriday,
   dageTilbageIAaret,
   daysBetween,
   easterSunday,
@@ -197,6 +198,62 @@ describe("forstaAdvent", () => {
     expect(getDageTilSlugs("da")).toContain("1-advent");
     expect(getDageTilSlugs("se")).toContain("1-advent");
     expect(getDageTilEventBySlug("1-advent", "se")?.id).toBe("advent");
+  });
+});
+
+describe("blackFriday", () => {
+  // Reference-datoerne er årets fjerde torsdag i november + én dag, slået op i
+  // en kalender: 2024 fjerde torsdag 28. november → black friday 29. november.
+  test.each([
+    [2024, "2024-11-29"],
+    [2025, "2025-11-28"],
+    [2026, "2026-11-27"],
+    [2027, "2027-11-26"],
+    [2028, "2028-11-24"],
+    [2030, "2030-11-29"],
+  ])("black friday i %i er %s", (year, expected) => {
+    expect(toISO(blackFriday(year))).toBe(expected);
+  });
+
+  test("er altid en fredag mellem 23. og 29. november", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const date = blackFriday(year);
+      expect(date.getUTCDay()).toBe(5);
+      expect(date.getUTCMonth()).toBe(10);
+      expect(date.getUTCDate()).toBeGreaterThanOrEqual(23);
+      expect(date.getUTCDate()).toBeLessThanOrEqual(29);
+    }
+  });
+
+  test("er dagen efter den fjerde torsdag i november", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const torsdage: number[] = [];
+      for (let day = 1; day <= 30; day++) {
+        if (new Date(Date.UTC(year, 10, day)).getUTCDay() === 4) {
+          torsdage.push(day);
+        }
+      }
+      // November har 30 dage, altså fire eller fem torsdage — den femte er
+      // ligegyldig, for Thanksgiving er den fjerde.
+      expect(torsdage.length).toBeGreaterThanOrEqual(4);
+      expect(blackFriday(year).getUTCDate()).toBe(torsdage[3] + 1);
+    }
+  });
+
+  test("eventet findes på begge sprog, og cyber monday er tre dage senere", () => {
+    const event = DAGE_TIL_EVENTS.find((e) => e.id === "black-friday");
+    expect(event).toBeDefined();
+    for (const locale of ["da", "se"] as const) {
+      const anchor = anchorOf(event!, locale);
+      expect(anchor.kind).toBe("blackfriday");
+      const dato = getNextAnchorDate(anchor, iso("2026-01-15"));
+      expect(toISO(dato)).toBe("2026-11-27");
+      // Cyber monday er mandagen efter black friday.
+      expect(new Date(dato.getTime() + 3 * dayMs).getUTCDay()).toBe(1);
+    }
+    expect(getDageTilSlugs("da")).toContain("black-friday");
+    expect(getDageTilSlugs("se")).toContain("black-friday");
+    expect(getDageTilEventBySlug("black-friday", "da")?.id).toBe("black-friday");
   });
 });
 
