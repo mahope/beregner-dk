@@ -44,6 +44,12 @@ const blogPosts = [
     category: "Økonomi & Skat",
   },
   {
+    slug: "boernebidrag-2026-satser-og-regler",
+    title: "Børnebidrag 2026: Satser, regler og skattefradrag",
+    description: "Normalbidraget, regnestykket bag et forhøjet bidrag, de vejledende indkomstgrænser og hvad du får tilbage i skat.",
+    category: "Familie & Økonomi",
+  },
+  {
     slug: "su-2026-satser-og-regler",
     title: "SU 2026: Nye satser og regler for studerende",
     description: "Komplet guide til SU i 2026: Satser for hjemmeboende og udeboende, fribeløb, SU-lån og nye regler.",

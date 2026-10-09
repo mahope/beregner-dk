@@ -87,6 +87,14 @@ export const BEREGNER_ARTIKLER: Record<string, ArtikelKobling[]> = {
         "Hvornår BMI kan bruges for børn, hvad grænserne er, og hvornår du skal bruge vægt og højde.",
     },
   ],
+  "/boernebidrag": [
+    {
+      slug: "boernebidrag-2026-satser-og-regler",
+      titel: "Børnebidrag 2026: satser og regler",
+      beskrivelse:
+        "Normalbidraget, regnestykket bag et forhøjet bidrag, de vejledende indkomstgrænser og skattefradraget.",
+    },
+  ],
   /**
    * `/alder` og `/bmi` deler emne, men ikke læser: en forælder slår barnets
    * alder op for at finde den rigtige percentil, en voksen slår BMI op for

@@ -6,6 +6,7 @@ import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Sidebar from "@/components/Sidebar";
 import {
   BOERNEBIDRAG_2026,
@@ -166,6 +167,7 @@ export default async function BoernebidragPage() {
 
         <section className="mt-12">
           <RelatedCalculators current="/boernebidrag" />
+          <RelateredeArtikler current="/boernebidrag" locale={locale} />
         </section>
       </div>
 

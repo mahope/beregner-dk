@@ -32,6 +32,7 @@ export const BLOG_ARTIKLER: BlogArtikkel[] = [
   { slug: "bmi-for-boern-saadan-tjekker-du", publiceret: "2026-02-13", opdateret: null, laesetidMinutter: 9 },
   { slug: "bmi-voksen-saadan-tolk-er-du-tallet", publiceret: "2026-10-01", opdateret: null, laesetidMinutter: 6 },
   { slug: "boernepenge-2026-satser-og-regler", publiceret: "2026-08-24", opdateret: null, laesetidMinutter: 8 },
+  { slug: "boernebidrag-2026-satser-og-regler", publiceret: "2026-10-09", opdateret: null, laesetidMinutter: 6 },
   { slug: "boliglaan-2026-renter-og-afdrag", publiceret: "2026-02-17", opdateret: null, laesetidMinutter: 9 },
   { slug: "boligsalg-2026-guide-til-omkostninger-og-provenu", publiceret: "2026-08-24", opdateret: null, laesetidMinutter: 9 },
   { slug: "boligstoette-2026-nye-regler", publiceret: "2026-09-24", opdateret: "2026-09-24", laesetidMinutter: 8 },
