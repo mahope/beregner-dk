@@ -192,6 +192,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/maling": PaintRoller,
   "/fliser": Grid3x3,
   "/beton": Layers,
+  "/isolation": ShieldCheck,
   "/sand-og-grus": Shovel,
   "/gram-til-dl": CookingPot,
   "/kalorier-i-opskrift": ChefHat,

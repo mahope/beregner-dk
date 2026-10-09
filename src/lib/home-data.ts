@@ -315,6 +315,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Malingberegner", description: "Beregn hvor mange liter maling du skal bruge", href: "/maling", popular: false, category: "Hverdag" },
   { title: "Fliseberegner", description: "Beregn hvor mange fliser og kasser du skal bruge", href: "/fliser", popular: false, category: "Hverdag" },
   { title: "Betonberegner", description: "Beregn hvor meget beton du skal bruge i m³ og poser", href: "/beton", popular: false, category: "Hverdag" },
+  { title: "Isolationsberegner", description: "Beregn hvor tyk isoleringen skal være i cm pr. materiale", href: "/isolation", popular: false, category: "Hverdag" },
   { title: "Sand og grus", description: "Beregn hvor meget sand og grus du skal bruge", href: "/sand-og-grus", popular: false, category: "Hverdag" },
   { title: "Gram til dl", description: "Omregn gram til dl og dl til gram for mel, sukker og gryn", href: "/gram-til-dl", popular: false, category: "Hverdag" },
   { title: "Portioner pr. person", description: "Beregn hvor meget mad der skal bruges pr. person", href: "/portioner", popular: false, category: "Hverdag" },

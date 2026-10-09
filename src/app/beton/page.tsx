@@ -265,7 +265,11 @@ export default async function BetonPage() {
               <Link href="/fliser" className="underline font-medium">
                 fliseberegneren
               </Link>
-              .
+              . Skal pladen eller fundamentet efterisoleres, viser{" "}
+              <Link href="/isolation" className="underline font-medium">
+                isolationsberegneren
+              </Link>{" "}
+              hvor tykt laget skal være.
             </p>
           </div>
 

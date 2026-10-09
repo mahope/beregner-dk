@@ -173,6 +173,15 @@ import {
   STOEBEMIX_POSE_LITER,
   beregnBeton,
 } from "./beton";
+import {
+  BR18_OMBYGNING,
+  BYGNINGSDELER,
+  ISOLERINGSMATERIALER,
+  ISOLERING_EKSEMPEL,
+  beregnIsolering,
+  materialeVedId,
+  tykkelseForU,
+} from "./isolation";
 
 /**
  * `/kalorier-i-alkohol`s egne tal til titel, beskrivelse og FAQ. Alle værdier er
@@ -282,6 +291,20 @@ const beton0 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 0 }
 /** Sidens egne tal til titel og beskrivelse: 20 kg-posens udbytte i liter. */
 const BETON_META_TITEL = `Betonberegner: 4 × 4 m i 10 cm = ${beton2(BETON_TERRASSE.volumenM3)} m³ (${beton0(BETON_TERRASSE.poser20kg)} poser à ${STOEBEMIX_POSE_KG} kg)`;
 const BETON_META_BESKRIVELSE = `Beregn hvor meget beton du skal bruge. En 20 kg-pose støbemix giver ca. ${beton0(STOEBEMIX_POSE_LITER)} liter, så 1 m³ er ${beton0(1000 / STOEBEMIX_POSE_LITER)} poser. Se m³, liter og vægt for plade, fundament og søjler.`;
+
+/** Sidens egne tal til `/isolation`, beregnet med samme funktion som værktøjet. */
+const ISOLERING_LOFT_STENULD = beregnIsolering(ISOLERING_EKSEMPEL);
+const ISOLERING_LOFT_GLASULD = tykkelseForU("loft", "glasuld", 0.2);
+const ISOLERING_LOFT_PIR = tykkelseForU("loft", "pir", 0.2);
+const ISOLERING_VAEG_STENULD = tykkelseForU("vaeg", "stenuld", 0.3);
+const ISOLERING_GULV_STENULD = tykkelseForU("gulv", "stenuld", 0.2);
+const ISOLERING_OMBYG = tykkelseForU("loft", "stenuld", BR18_OMBYGNING.loft);
+const iso2 = (n: number) => formatNumber(n, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const iso1 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 1 });
+const iso3 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 3 });
+const iso0 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 0 });
+const ISOLERING_META_TITEL = `Isolationsberegner: ${iso1(ISOLERING_LOFT_STENULD.tykkelseCm)} cm stenuld på loftet`;
+const ISOLERING_META_BESKRIVELSE = `Beregn hvor tyk isoleringen skal være. Regnestykket er U = 1 / (Rsi + d/λ + Rse), så 100 m² loft til ${iso2(BYGNINGSDELER[0].brKrav)} W/m²K kræver ${iso1(ISOLERING_LOFT_STENULD.tykkelseCm)} cm stenuld eller ${iso1(ISOLERING_LOFT_PIR)} cm PIR.`;
 
 /**
  * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
@@ -3929,6 +3952,33 @@ faqItems: kalorierFaqItems("da"),
         { question: "Hvor meget beton skal der være over gulvvarmeslanger?", answer: "Leverandørerne angiver minimum 3 cm beton over gulvvarmeslangerne, og at laget som hovedregel skal ligge mellem 3 og 9 cm. Laget skal dække slangerne, armeringsnettet og laget under, så pladen sjældent bliver tyndere end 7–8 cm." },
         { question: "Hvor meget beton skal der til et randfundament?", answer: `Et randfundament regnes med grundens omkreds: 2 × (længde + bredde). For en 8 × 6 m grund med et 20 cm bredt og 50 cm dybt fundament giver det ${beton2(BETON_FUNDAMENT.volumenM3Uden)} m³ uden spild og ${beton2(BETON_FUNDAMENT.volumenM3)} m³ med spild — ${beton0(BETON_FUNDAMENT.poser20kg)} poser à 20 kg.` },
         { question: "Er mængden præcis?", answer: "Mængden er et skøn. Formen er sjældent helt rektangulær, spildet afhænger af arbejdet, og vægten afhænger af betonens tæthed. Til bærende konstruktioner skal betonmængden altid beregnes af en ingeniør." },
+      ],
+    },
+    "isolation": {
+      slug: "isolation",
+      title: "Isolationsberegner – hvor tyk skal isoleringen være?",
+      description:
+        "Beregn hvor tyk isoleringen skal være på loft, ydervæg og gulv mod jord. Skriv areal og materiale, og få cm tykkelse, R-værdi, U-værdi og m³ materiale.",
+      metaTitle: ISOLERING_META_TITEL,
+      metaDescription: ISOLERING_META_BESKRIVELSE,
+      keywords: ["isolationsberegner", "hvor tyk isolering skal jeg bruge", "hvor meget isolering i loft", "isolering beregner", "u værdi beregner", "tykkelse isolering loft", "efterisolering loft", "stenuld glasuld lambda"],
+      ogTitle: "Isolationsberegner – cm tykkelse pr. materiale",
+      ogDescription: "Skriv hvilken bygningsdel og hvilket materiale, og se hvor mange cm det skal være for at nå bygningsreglementets U-værdi.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Isolationsberegner",
+      schemaDescription: "Beregn nødvendig isoleringstykkelse i cm pr. materiale ud fra ønsket U-værdi, λ-værdi og bygningsreglementets krav til loft, ydervæg og gulv.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvor tyk skal isoleringen være på loftet?", answer: `Til bygningsreglementets krav på ${iso2(BYGNINGSDELER[0].brKrav)} W/m²K skal isoleringen på et loft have en modstand på 1/0,20 − 0,14 = ${iso2(ISOLERING_LOFT_STENULD.rIsolering)} m²K/W. Det svarer til ${iso1(ISOLERING_LOFT_STENULD.tykkelseCm)} cm stenuld (λ ${iso3(0.037)}), ${iso1(ISOLERING_LOFT_GLASULD)} cm glasuld eller ${iso1(ISOLERING_LOFT_PIR)} cm PIR. Luften i tagloftet tager nemlig en del af arbejdet.` },
+        { question: "Hvor meget isolering skal der være i en ydervæg?", answer: `Et loft og en ydervæg skal isoleres, fordi de afgiver mest varme til det udendørs. Ydervæggen skal kunne ${iso2(BYGNINGSDELER[1].brKrav)} W/m²K, og det giver ${iso1(ISOLERING_VAEG_STENULD)} cm stenuld. Ved ombygning og efterisolering er kravet skarpere — ${iso2(BR18_OMBYGNING.vaeg)} W/m²K.` },
+        { question: "Hvornår skal jeg bruge en lavere U-værdi end bygningsreglementet kræver?", answer: `Når du ombygger eller efterisolerer: så gælder § 279, og kravet er ${iso2(BR18_OMBYGNING.loft)} W/m²K på loftet mod ${iso2(BYGNINGSDELER[0].brKrav)} til nybyggeri. Vil du have en lavere varmeregning, kan du gå under begge — ${iso1(ISOLERING_OMBYG)} er tykkelsen i ${iso2(BR18_OMBYGNING.loft)} W/m²K i stenuld.` },
+        { question: "Hvad betyder lambda og U-værdi?", answer: `Lambda (λ) er materialets varmeledningsevne i W/(m·K) — jo lavere, jo bedre isolerer det pr. cm. U-værdien er hele bygningsdel: U = 1 / (Rsi + d/λ + Rse), hvor luftlagene giver Rsi ${iso2(0.1)}–${iso2(0.17)} og Rse ${iso2(0.04)} m²K/W alt efter hvilken vej varmen går.` },
+        { question: "Er en tynd PIR-plade lige så god som tyk stenuld?", answer: `På modstandens regning ja: ${iso1(ISOLERING_LOFT_PIR)} cm PIR (λ ${iso3(0.024)}) giver nogenlunde det samme som ${iso1(ISOLERING_LOFT_STENULD.tykkelseCm)} cm stenuld på et loft. PIR er knapt halvt så tykt, men dyrere pr. m², og det skal have en fordampningsspærre og rigtig montering for at holde på lang sigt.` },
+        { question: "Hvor meget materiale skal jeg købe til 100 m² loft?", answer: `Til ${iso2(BYGNINGSDELER[0].brKrav)} W/m²K skal du bruge ${iso1(ISOLERING_LOFT_STENULD.tykkelseCm)} cm stenuld, dvs. ${iso2(ISOLERING_LOFT_STENULD.volumenM3)} m³ på ${iso0(ISOLERING_LOFT_STENULD.arealM2)} m². Varmetabet bliver ${iso1(ISOLERING_LOFT_STENULD.varmetabPrGrad)} W pr. grads temperaturforskel mellem inde og ude.` },
+        { question: "Kommer tallet til at passe på mit hus?", answer: "Beregneren regner et enkelt isoleringslag i en plan konstruktion. Bjælker, gips, beklædning og varmebroer tæller også med i den rigtige U-værdi, og fastholdt fugt i mineraluld sænker effekten. Regnestykket er vejledende — brug det til at vurdere, om et tilbud er rimeligt, ikke som dokumentation for myndighederne." },
+        { question: "Hvor kommer lambda- og kravstallene fra?", answer: `λ-intervallerne er gennemgåede materialeoversigter fra bygdinbolig.dk og bygzone.dk, og kravstallene er BR18 § 257 bilag 2 tabel 1 (loft og tag ${iso2(0.2)}, ydervægge ${iso2(0.3)}, terrændæk og kældergulve ${iso2(0.2)} W/m²K) og § 279 ved ombygning. Enkeltprodukters deklarerede λ står på databladet.` },
       ],
     },
 };
