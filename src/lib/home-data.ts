@@ -284,6 +284,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", popular: false, category: "Sundhed" },
   { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", popular: false, category: "Sundhed" },
   { title: "Søvnbehov", description: "Se hvor meget søvn du har brug for efter din alder", href: "/soevnbehov", popular: false, category: "Sundhed" },
+  { title: "Hjerterytme beregner", description: "Beregn max puls og dine fem træningszoner", href: "/hjerterytme", popular: false, category: "Sundhed" },
   { title: "Koffein", description: "Se hvor meget koffein du får om dagen", href: "/koffein", popular: false, category: "Sundhed" },
   { title: "Kalorier i alkohol", description: "Se kcal i øl, vin, cider og sprits", href: "/kalorier-i-alkohol", popular: false, category: "Sundhed" },
 
