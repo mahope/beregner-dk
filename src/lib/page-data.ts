@@ -78,6 +78,7 @@ import {
   oresundKategori,
 } from "./oresundsbroen";
 import { NUTIDSKRONER_EKSEMPEL_AAR, omregnTilNutidskroner } from "./nutidskroner";
+import { PORTO_REKOMMANDERET_FRA_KR, beregnPorto } from "./porto";
 import { GAVE_RELATIONER, beregnGaveafgift } from "./gaveafgift";
 import { KIRKESKAT_EKSEMPLER, KIRKESKAT_SNIT, KIRKESKAT_EKSEMPEL_INDKOMST, beregnKirkeskat, kirkeskatSats } from "./kirkeskat";
 import { beregnSkat } from "./skattefordeling";
@@ -512,6 +513,25 @@ const UGEDAG_JULEAFTEN_SE = ugedagResultat("2026-12-24", "se")!;
 /** 1. januar 2027 er 365 dage efter 1. januar 2026 — 2026 er ikke et skudår. */
 const UGEDAG_AAR_2026 = dageIAar(2026);
 const UGEDAG_DAGE_2026_2027 = dageMellemIsoDatoer("2026-01-01", "2027-01-01")!;
+
+/**
+ * Alle tal paa `/porto` er regnet af `beregnPorto` selv — altsaa af den samme
+ * funktion værktøjet kalder (punkt 11: en påstand i tekst er kode). Priserne
+ * kommer fra dao's egen prisliste, læst pr. 9. oktober 2026; skifter dao
+ * prisliste, flytter titlen, tabellen og hvert FAQ-svar med ét ændring.
+ */
+const PORTO_DA_100 = beregnPorto({ destination: "danmark", type: "almindelig", vaegtGram: 50 });
+const PORTO_DA_250 = beregnPorto({ destination: "danmark", type: "almindelig", vaegtGram: 200 });
+const PORTO_PLUS_100 = beregnPorto({ destination: "danmark", type: "plus", vaegtGram: 50 });
+const PORTO_PLUS_250 = beregnPorto({ destination: "danmark", type: "plus", vaegtGram: 200 });
+const PORTO_UDLAND_100 = beregnPorto({ destination: "udlandet", type: "almindelig", vaegtGram: 50 });
+const PORTO_UDLAND_250 = beregnPorto({ destination: "udlandet", type: "almindelig", vaegtGram: 200 });
+const PORTO_JULEKORT = beregnPorto({
+  destination: "danmark",
+  type: "almindelig",
+  vaegtGram: 20,
+  antal: 10,
+});
 
 /**
  * Formateringen i de to momssvar, der laeser et tal ud af `MOMS_LANDE`. Den er
@@ -2607,6 +2627,32 @@ faqItems: kalorierFaqItems("da"),
       { question: "Største udgift?", answer: "Værditab: en ny bil mister 20-25 % det første år." },
       { question: "Elbil billigere?", answer: "Lavere drift, men højere købspris. Over tid ofte billigere." },
       { question: "Pris per km?", answer: "Saml alle årlige udgifter og divider med kørte km." },
+      ],
+    },
+    "porto": {
+      slug: "porto",
+      title: "Portoberegner",
+      description: "Beregn hvad et brev koster hos dao efter vægt og destination — almindeligt brev, hurtigt PLUS-brev og udlandsbrev.",
+      metaTitle: `Portoberegner: Et brev i Danmark koster ${PORTO_DA_100.pris} kr.`,
+      metaDescription: `Hvad koster det at sende et brev? Almindeligt brev i Danmark ${PORTO_DA_100.pris} kr. op til 100 g og ${PORTO_DA_250.pris} kr. op til 250 g, PLUS ${PORTO_PLUS_100.pris} kr., udland ${PORTO_UDLAND_100.pris} kr. Dao's brevpriser 2026.`,
+      keywords: ["porto beregner", "portoberegner", "hvad koster et brev", "brevporto 2026", "hvad koster det at sende et brev", "frimærke pris 2026", "dao brevpriser", "porto til udlandet", "porto sverige", "porto tyskland"],
+      ogTitle: `Portoberegner: Et brev i Danmark koster ${PORTO_DA_100.pris} kr.`,
+      ogDescription: `Se dao's brevpriser og beregn porto efter vægt og destination. Almindeligt brev ${PORTO_DA_100.pris} kr. op til 100 g, udland ${PORTO_UDLAND_100.pris} kr.`,
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Portoberegner",
+      schemaDescription: `Gratis portoberegner. Beregn hvad et brev koster hos dao efter vægt og destination, med dao's brevpriser gældende fra 1. januar 2026.`,
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+      { question: "Hvad koster det at sende et brev i Danmark?", answer: `Et almindeligt brev op til 100 g koster ${PORTO_DA_100.pris} kr., og et brev på 101-250 g koster ${PORTO_DA_250.pris} kr. Prisen er den samme uanset om modtageren bor i København eller i Thy, for dao leverer til hele landet.` },
+      { question: "Hvad koster et hurtigt brev?", answer: `Et PLUS-brev til dansk adresse koster ${PORTO_PLUS_100.pris} kr. op til 100 g og ${PORTO_PLUS_250.pris} kr. op til 250 g. Forskellen på ${PORTO_PLUS_100.pris - PORTO_DA_100.pris} kr. op til 100 g er leveringsfristen: et almindeligt brev ligger fremme inden for ${PORTO_DA_100.levering}, et PLUS-brev inden for ${PORTO_PLUS_100.levering}.` },
+      { question: "Hvad koster det at sende et brev til udlandet?", answer: `Et almindeligt brev til udlandet koster ${PORTO_UDLAND_100.pris} kr. op til 100 g og ${PORTO_UDLAND_250.pris} kr. op til 250 g. Det er den samme pris til Tyskland, Norge, Sverige og resten af verden, og leveringstiden er typisk ${PORTO_UDLAND_100.levering} afhængig af landet.` },
+      { question: "Hvor meget må et brev veje?", answer: `Et brev må højst veje ${PORTO_DA_250.vaegtKlasse} g og være højst 1 cm tykt. Vejer det mere, skal det sendes som pakke, og så bestemmer pakkens format — ikke brevets prisliste. Derfor er ${PORTO_DA_250.pris} kr. det dyreste brev i beregneren.` },
+      { question: "Hvem leverer breve i Danmark nu?", answer: `Fra 1. januar 2026 leverer dao breve i hele landet. PostNord stoppede brevomdelingen samme dato og står kun for pakker og for værdiforsendelser. Et rekommanderet brev til dansk adresse koster fra ${PORTO_REKOMMANDERET_FRA_KR} kr. op til 100 g og købes hos dao, mens et rekommanderet brev til udlandet stadig indleveres hos PostNord.` },
+      { question: "Kan jeg købe ti frimærker?", answer: `Ja, dao sælger brevmærker i ark à 10 og 50, opdelt i vægtklasserne op til 100 g og 101-250 g. Sæt mærket på brevets øverste højre hjørne og aflever brevet i den røde kasse i en daoSHOP. Ti almindelige breve til dansk adresse koster ${PORTO_JULEKORT.total} kr. i alt.` },
+      { question: "Hvad skal jeg gøre med gamle Post Danmark-frimærker?", answer: `De kan ikke bruges fra 1. januar 2026, for brevomdelingen er flyttet til dao. PostNord refunderer ubrugte frimærker i en begrænset periode — kontakt kundeservice, hvis du har ubrugte frimærker hjemme.` },
+      { question: "Er portoet med i prisen når jeg sender fra en daoSHOP?", answer: `Ja. Du køber portoet som brevkode online eller i appen, eller som fysisk brevmærke. Skriver du koden øverst til højre på kuverten, er afsendelsen frankeret. Aflevering i den røde kasse i en daoSHOP koster ikke ekstra.` },
       ],
     },
     "valuta": {

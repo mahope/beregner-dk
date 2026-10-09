@@ -297,6 +297,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Elbil-lading", description: "Beregn hvad det koster at lade din elbil", href: "/elbil-lading", popular: false, category: "Hverdag" },
   { title: "Enhedspris", description: "Find den billigste vare pr. kilo, liter eller stk", href: "/enhedspris", popular: false, category: "Hverdag" },
   { title: "Brokost Storebælt og Øresund", description: "Se prisen for at krydse Storebælt og Øresund og dit årsforbrug", href: "/brokost", popular: false, category: "Hverdag" },
+  { title: "Portoberegner", description: "Beregn hvad et brev koster hos dao, når PostNord er stoppet", href: "/porto", popular: false, category: "Hverdag" },
   { title: "Rabatberegner", description: "Beregn pris efter rabat og se din besparelse", href: "/rabat", popular: false, category: "Hverdag" },
   { title: "Fartberegner", description: "Beregn fart, distance og tid — plus tempo i min/km", href: "/fart", popular: false, category: "Hverdag" },
   { title: "Løbetidsberegner", description: "Beregn tempo i min/km og holdtider pr. kilometer", href: "/pace", popular: false, category: "Hverdag" },

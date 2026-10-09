@@ -101,6 +101,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Lånetype", description: "Annuitetslån, serielån og stående lån side om side", href: "/laantype", category: "Økonomi" },
   { title: "Enhedspris", description: "Find den billigste vare pr. kilo, liter eller stk", href: "/enhedspris", category: "Hverdag" },
   { title: "Brokost Storebælt og Øresund", description: "Pris for at krydse Storebæltsbroen og Øresundsbroen", href: "/brokost", category: "Hverdag" },
+  { title: "Portoberegner", description: "Beregn hvad et brev koster hos dao", href: "/porto", category: "Hverdag" },
   { title: "Rabatberegner", description: "Beregn pris efter rabat og se din besparelse", href: "/rabat", category: "Hverdag" },
   { title: "Befordringsfradrag", description: "Beregn dit kørselsfradrag 2026 og se skattebesparelsen", href: "/befordringsfradrag", category: "Økonomi" },
   { title: "Fartberegner", description: "Beregn fart, distance og tid — plus tempo i min/km", href: "/fart", category: "Hverdag" },
