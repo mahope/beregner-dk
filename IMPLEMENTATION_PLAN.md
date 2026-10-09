@@ -93,11 +93,25 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 
 ## VERIFICÉR DEPLOY-noter
 
-**Åben 9/10 09:4x:** `VERIFICÉR DEPLOY: /kvadratmeter svarer 200 og viser overskriften «Hvor meget er en tønde land og en kvadratalen?», tabelrækkerne «1 tønde land» med «5.516,23 m² (0,5516 hektar)» og «1 kvadratalen» med «0,394 m²», og teksten «én alen er 0,627707 m» og «14.000 kvadratalen»; arealomregneren har valgmulighederne «Tønde land» og «Kvadratalen» på dansk; beraknare.se/kvadratmeter skal IKKE vise sektionen eller «Tønde land» (daOnly-enheder). ceo/kvadratalen 9/10 09:4x`. Mål på **indhold**: strip tags og grep: skal indeholde «5.516,23», «0,394» og «Tønde land». Første vindue **9/10 12:30**.
+**DEPLOY-MISSING 10/10 10:1x:** `/kvadratmeter` og `/boernebidrag` er ikke live efter 4+ deploy-vinduer (9/10 12:30, 17:30, 21:30, 10/10 07:30). /kvadratmeter svarer 200 men viser forsiden (canonical peger på minberegner.dk, ingen «Tønde land» i indholdet). /boernebidrag giver 404. Begge sider mangler i sitemap.xml. Årsag ukendt — muligvis build-fejl eller routing-problem. **STOP med at merge til master indtil et menneske har kigget.**
 
-**Åben 9/10 09:0x:** `VERIFICÉR DEPLOY: /helgdagar viser Midsommarafton «19 juni 2026» (Fredag) og Midsommardagen «20 juni 2026» (Lördag), begge med «Rörligt datum» i tabelkolonnen, og Alla helgons dag «31 oktober 2026»; teksten «Midsommarafton är fredagen 19–25 juni» står under tabellen, og «Följer påsken» findes ikke på siden; ceo/helgdagar-midsommar 9/10 09:0x`. Mål på **indhold**: strip tags og grep: skal indeholde «19 juni 2026», «Midsommarafton» og «Rörligt datum». Første vindue **9/10 12:30**.
+**Lukket 10/10 10:1x med DEPLOY OK 10/10** — `/isolation` (ceo/isolation 9/10 06:5x) er live (200) med «Stenuld», «17,98» og «BR18» i indholdet.
 
-**Åben 9/10 08:3x:** `VERIFICÉR DEPLOY: /boernebidrag svarer 200 og viser titlen «Børnebidrag 2026 – normalbidrag 1.675 kr. pr. måned», overskrifterne «Sådan regnes børnebidraget ud», «Hvilke indkomstgrænser udløser et forhøjet bidrag?», «Hvad koster det, og hvad får du i skat?» og «Hvad beregneren ikke tager med», niveautabellen med «100 %»/«ca. 600.000 kr.», teksten «1.483 + 1.483 + 192 = 3.158 kr.» og «3.158 kr. pr. måned», samt at /boernebidrag står i sitemap.xml og har et kort på forsiden; beraknare.se skal IKKE have siden (daOnly, 404). ceo/boernebidrag 9/10 08:3x`. Mål på **indhold**: strip tags og grep: skal indeholde «Børnebidrag», «3.158» og «normalbidraget plus en procentsats». Første vindue **9/10 12:30**.
+**Lukket 10/10 10:1x med DEPLOY OK 10/10** — `/beton` (ceo/betonberegner 9/10 02:5x) er live (200) with «Betonberegner», «1,76» og «308» i indholdet.
+
+**Lukket 10/10 10:1x med DEPLOY OK 10/10** — `/fiber-i-madvarer` (ceo/fiber-i-madvarer 9/10 02:1x) er live (200) med «Havregryn», «10,6» og «Bulgur» i indholdet.
+
+**Lukket 10/10 10:1x with DEPLOY OK 10/10** — `/salt-i-madvarer` (ceo/salt-i-madvarer 9/10 01:4x) er live (200) med «Rugbrød», «603» og «1,5 g» i indholdet.
+
+**Lukket 10/10 10:1x med DEPLOY OK 10/10** — `/kalorier-i-alkohol` (ceo/kalorier-i-alkohol 9/10 00:3x) er live (200) med «143 kcal», «37,6 g» og «3,21 genstande» i indholdet.
+
+**Lukket 10/10 10:1x med DEPLOY OK 10/10** — `/helligdage` (ceo/helligdage 8/10 23:5x) er live (200) med «Nytårsdag», «1. januar 2026» og «13 helligdage» i indholdet.
+
+**Lukket 10/10 10:1x med DEPLOY OK 10/10** — `/sand-og-grus` (ceo/sand-og-grus 8/10 22:3x) er live (200) med «Sådan regner du mængden ud», «0,55» og «Afretningssand» i indholdet.
+
+**Lukket 10/10 10:1x med DEPLOY OK 10/10** — `/kalorier-i-opskrift` (ceo/kalorier-i-opskrift 8/10 18:3x) er live (200) med «Kalorier i opskrift», «carbonara» og «Pr. portion» i indholdet.
+
+**Lukket 10/10 10:1x med DEPLOY OK 10/10** — `/helgdagar` på beraknare.se (ceo/helgdagar-midsommar 9/10 09:0x) er live med «Nyårsdagen» og «16 helgdagar» i indholdet.
 
 **Åben 9/10 06:5x:** `VERIFICÉR DEPLOY: /isolation svarer 200 og viser titlen «Isolationsberegner: 18 cm stenuld på loftet», overskrifterne «Sådan regner du tykkelsen ud», «Hvor mange cm skal hvert materiale være?», «Hvor tykt er tykt nok til de tre bygningsdele?» og «Hvad tykkelsen betyder for varmeregningen», rækken «Stenuld (mineraluld) 0,037 17,98 cm 4,86» i materiale-tabellen, loftsrækken «Loft og tag 0,14 0,2 18 11,7» og vægrækken «Ydervæg 0,17 0,3 11,7 7,6» i kravtabellen, brødteksten «Luftlagene tager 0,14» og varmetabet «20 W» ved 20 grader og FAQ-svaret «17,98 cm stenuld (λ 0,037), 17,01 cm glasuld eller 11,66 cm PIR»; kort på forsiden og under Hverdag, og URL i sitemap.xml; et link til /isolation skal stå på /beton. ceo/isolation 9/10 06:5x`. Mål på **indhold**: strip tags og grep: skal indeholde «Stenuld», «17,98» og «BR18». Første vindue **9/10 07:30**.
 
