@@ -56,6 +56,12 @@ const blogPosts = [
     category: "Familie & Økonomi",
   },
   {
+    slug: "rentefradrag-2026-satser-og-regler",
+    title: "Rentefradrag 2026: Sats, regler og hvad du sparer",
+    description: "Satsen for 2026, eksempel på store renteudgifter, og hvilke lån der giver fradrag.",
+    category: "Økonomi & Skat",
+  },
+  {
     slug: "su-2026-satser-og-regler",
     title: "SU 2026: Nye satser og regler for studerende",
     description: "Komplet guide til SU i 2026: Satser for hjemmeboende og udeboende, fribeløb, SU-lån og nye regler.",

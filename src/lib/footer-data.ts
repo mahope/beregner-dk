@@ -232,6 +232,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
 
 const blogLinks: Record<Locale, FooterBlogLink[]> = {
   da: [
+    { name: "Rentefradrag 2026: Sats og regler", href: "/blog/rentefradrag-2026-satser-og-regler" },
     { name: "Børnebidrag 2026: Satser og regler", href: "/blog/boernebidrag-2026-satser-og-regler" },
     { name: "Hvor mange kalorier skal jeg have?", href: "/blog/hvor-mange-kalorier-skal-jeg-have" },
     { name: "Børnepenge 2026: Satser og regler", href: "/blog/boernepenge-2026-satser-og-regler" },

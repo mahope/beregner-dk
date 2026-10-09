@@ -1,7 +1,7 @@
 /**
  * Central kobling mellem blogindlæg og beregnere.
  *
- * Alle 26 indlæg linker allerede til deres beregner, så den retning er dækket.
+ * Alle 27 indlæg linker allerede til deres beregner, så den retning er dækket.
  * Retningen *tilbage* — fra beregneren til indlægget — var spredt i ni siders
  * brødtekst og manglede på resten. Her står koblingen ét sted, så
  * `RelateredeArtikler` og testen i `blog-kobling.test.ts` læser samme sandhed.
@@ -60,6 +60,12 @@ export const BEREGNER_ARTIKLER: Record<string, ArtikelKobling[]> = {
     },
   ],
   "/rentefradrag": [
+    {
+      slug: "rentefradrag-2026-satser-og-regler",
+      titel: "Rentefradrag 2026: sats og regler",
+      beskrivelse:
+        "33,6 % af de første 50.000 kr., eksempel på 80.000 kr., og hvilke lån der giver fradrag.",
+    },
     {
       slug: "fradrag-2026-komplet-guide",
       titel: "Fradrag 2026: komplet guide",
