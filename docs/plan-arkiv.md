@@ -31028,3 +31028,35 @@ kolonne under md, to spalter fra md og op, resultatkort stikkende fra md).
 (200) med titlen «Sukker i madvarer: banan 12,2 g, chokolade 51,5 g», «Hvor meget sukker er der
 i», rækken «Banan» 12,2 g og teksten «Kilden opgiver ikke sukker for havregryn»; strippet HTML
 lest fra minberegner.dk.
+
+
+## 9/10 11:3x — /blog/boernebidrag-2026-satser-og-regler (ceo/boernebidrag-indlaeg → 4c09406)
+
+Blogindlæg om børnebidrag 2026, koblet til /boernebidrag. Datagrund: dansk
+autocomplete (hl=da, 9/10) har 10/10 træffere under «børnebidrag sats 2026»,
+«børnebidrag 2026» og «hvor meget skal man betale i børnebidrag 2026»;
+søsterartiklen /blog/boernepenge-2026-satser-og-regler har 4.940 GSC-visninger
+pr. 28 dage.
+
+Alle tal læses af `src/lib/boernebidrag.ts` (ingen hårdkodede beløb i strengene):
+normalbidrag 1.675 kr./md = grundbeløb 1.483 + tillæg 192; forhøjet bidrag =
+normalbidraget + procenttillæg af *grundbeløbet* (Familieretshusets egen
+formulering, citeret i `BOERNEBIDRAG_KILDE.beregning`), så 610.000 kr. indkomst
+og ét barn giver 1.483 + 1.483 + 192 = 3.158 kr./md, mens det forkerte
+regnestykke (procenten af 1.675) giver 3.350 kr. — forskellen 192 kr. står i
+artiklen. Skattefradrag 1.483 kr./md for normalbidraget, aftalt bidrag minus
+192 kr., ca. 27 % fradragsværdi = 400 kr./md og 4.800 kr./år i eksemplet.
+
+Koblingen er gensidig: indlægget har `<NaesteSkridt href="/boernebidrag">` plus
+et stille link til /skattefradrag, og /boernebidrag fik
+`<RelateredeArtikler current="/boernebidrag">` fra `blog-kobling.ts`.
+Registreret i `blog-artikler.ts` (publiceret 2026-10-09), `footer-data.ts` (da)
+og `/blog`'s liste. daOnly.
+
+Gate: typecheck 0, lint 0 (963 filer), 5.438 tests grønne, next build grøn;
+lokal prod-build 200 med «Børnebidrag 2026: 1.675 kr. pr. måned og forhøjet
+bidrag». MÅL: 0 Plausible/GSC pr. 9/10, måles igen ~23/10.
+
+Porte der fangede tre fejl undervejs: `meta-description.test.ts` (199 tegn →
+kortet til 108), `regnestykker.test.ts` (beløb i strengen i /blog-listen → tal
+fjernet fra beskrivelsen), `myndighedsnavn.test.ts` («SKAT» → «Skattestyrelsen»).
