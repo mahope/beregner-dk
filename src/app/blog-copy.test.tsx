@@ -15,12 +15,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { formatNumber } from "@/lib/format";
 import { AKTIVITETS_FAKTORER, type AktivitetsNiveau } from "@/lib/makroer";
 import BoernebidragBlogPage from "./blog/boernebidrag-2026-satser-og-regler/page";
+import BarselBlogPage from "./blog/barsel-2026-regler-og-satser/page";
 import KaloriebehovBlogPage from "./blog/hvor-mange-kalorier-skal-jeg-have/page";
 
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 
 const kalorieHtml = renderToStaticMarkup(<KaloriebehovBlogPage />);
 const boernebidragHtml = renderToStaticMarkup(<BoernebidragBlogPage />);
+const barselHtml = renderToStaticMarkup(<BarselBlogPage />);
 
 /** Faktoren præcis som modulet har den — ingen afrunding. */
 const faktor = (niveau: AktivitetsNiveau) =>
@@ -55,5 +57,15 @@ describe("børnebidrag-indlæggets FAQ", () => {
   test("svarer på spørgsmålet om tallene er bindende uden sammenlimede ord", () => {
     expect(boernebidragHtml).toContain("Tallene giver dig et solidt udgangspunkt");
     expect(boernebidragHtml).not.toContain("BeregnTallene");
+  });
+});
+
+describe("barselsindlæggets planlægningsliste", () => {
+  test("fører læseren videre til graviditetsuge-beregneren", () => {
+    // /graviditetsuge blev lanceret 9/10 og havde kun relaterede-kort: det
+    // mest læste indlæg på sitet (175 besøgende/28d, +77 %) nævnte den ikke,
+    // så en læser der planlægger barsel aldrig fandt den.
+    expect(barselHtml).toContain('href="/graviditetsuge"');
+    expect(barselHtml).toContain("Se hvor langt du er henne");
   });
 });

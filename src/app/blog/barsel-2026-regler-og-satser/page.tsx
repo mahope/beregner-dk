@@ -368,6 +368,7 @@ export default function BarselGuidePage() {
         <h2>Planlægning af barsel</h2>
         <ul>
           <li><strong>Planlæg tidligt:</strong> Lav en barselsplan med din partner og arbejdsgiver – fx i vores <Link href="/barselsplanlaegger" className="text-blue-600 hover:underline">barselsplanlægger</Link>, der viser uger, frister og økonomi. Den kan også regne på flerlinger, indlæggelse og adoption.</li>
+          <li><strong>Se hvor langt du er henne:</strong> <Link href="/graviditetsuge" className="text-blue-600 hover:underline">Graviditetsuge-beregneren</Link> regner ugen ud fra den dato, du kender — sidste menstruation, terminsdato eller ægløsning — og viser trimester og dage til termin.</li>
           <li><strong>Tjek overenskomsten:</strong> Den aftaler, om du har løn under barsel.</li>
           <li><strong>Fordel øremærket orlov:</strong> Reserver de {BARSEL_2026.earmarkedWeeks} uger til den rigtige forælder.</li>
           <li><strong>Beregn økonomien:</strong> Brug vores <Link href="/barselsdagpenge" className="text-blue-600 hover:underline">barselsdagpenge-beregner</Link> som et vejledende estimat.</li>
