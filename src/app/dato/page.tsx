@@ -712,8 +712,8 @@ export default async function DatoPage() {
           <p className="font-medium text-blue-800">Tips</p>
           <p className="text-blue-700">
             Arbetsdagar räknas måndag till fredag och hoppar över Sveriges
-            rödagar: {helligdagsnavne(tilbage.year, "se")}. Midsommar och
-            alla helgons dag är alltid den lördag de infaller på.
+            rödagar: {helligdagsnavne(tilbage.year, "se")}. Midsommardagen och
+            alla helgons dag infaller alltid på en lördag.
           </p>
         </div>
 

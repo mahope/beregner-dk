@@ -404,9 +404,9 @@ describe("dato page — antal dagar mellan datum i Excel", () => {
       const dageOrd = locale === "da" ? "dage" : "dagar";
       expect(sumDage).toBe(365);
       expect(html).toContain(`<strong>${sumDage} ${dageOrd}</strong>`);
-      // 251 dansk, 252 svensk \u2014 fordi danskerne har kristi himmelfartsdag og
-      // 2. pinsedag som hverdage i 2026, og svenskerne ikke har dem.
-      expect(sumArbejdsdage).toBe(locale === "da" ? 251 : 252);
+      // 251 i b\u00e5de Danmark og Sverige i 2026. Midsommarafton er fredag
+      // 19. juni og er derfor en svensk hverdag, ikke en l\u00f8rdag.
+      expect(sumArbejdsdage).toBe(251);
       expect(html).toContain(
         locale === "da" ? `${sumArbejdsdage} arbejdsdage` : `${sumArbejdsdage} arbetsdagar`
       );

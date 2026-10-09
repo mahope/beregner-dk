@@ -15,6 +15,7 @@ import { getRouteDecision } from "@/lib/routing";
 import {
   getHelligdagPath,
   helligdagAntal,
+  helligdagRaekker,
   naesteHelligdage,
   type HelligdagLocale,
 } from "@/lib/helligdage";
@@ -97,6 +98,24 @@ describe("helligdagssiden regner datoerne, den skriver dem ikke", () => {
     host.locale = "se";
     const meta = await buildHelligdagMetadata("/helligdage", new Date());
     expect(meta.robots).toEqual({ index: false, follow: false });
+    host.locale = "da";
+  });
+
+  // Den svenske tabel kaldte midsommar og alla helgons dag «Fast datum», og
+  // midsommarafton stod på en lørdag. Porten læser den viste tabel, ikke kun
+  // modulet, så en forkert dato eller et forkert label ikke kan stå live.
+  test("svenska tabellen viser midsommarafton som rörligt datum på en fredag", async () => {
+    const html = await render("se");
+    const ar = new Date().getFullYear();
+    expect(html).not.toContain("Följer påsken");
+    expect(html).toContain("Rörligt datum");
+    const afton = helligdagRaekker(ar, "se").find((r) => r.navn === "Midsommarafton")!;
+    const dag = helligdagRaekker(ar, "se").find((r) => r.navn === "Midsommardagen")!;
+    expect(afton.fast).toBe(false);
+    expect(afton.ugedag).toBe("Fredag");
+    expect(dag.ugedag).toBe("Lördag");
+    expect(html).toContain(afton.datoTekst);
+    expect(html).toContain(dag.datoTekst);
     host.locale = "da";
   });
 });

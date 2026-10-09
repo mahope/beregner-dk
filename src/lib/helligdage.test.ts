@@ -191,20 +191,42 @@ describe("getHelligdage", () => {
     }
   });
 
-  test("midsommar og alla helgons dag ligger på en lørdag", () => {
+  // Midsommarafton är fredagen 19–25 juni, midsommardagen lördagen 20–26 juni,
+  // och alla helgons dag lördagen 31 oktober–6 november. Den gamle koden räknade
+  // afton som en lördag (alltid en dag för sent) och midsommardagen ur fel
+  // fönster, så 2026 fick 27 juni i stället för 20 juni.
+  test("midsommar och alla helgons dag följer veckodagsvinduer", () => {
     for (let year = 2024; year <= 2035; year++) {
-      for (const name of ["Midsommarafton", "Midsommardagen", "Alla helgons dag"]) {
-        const holiday = getHelligdage(year, se).find((h) => h.name === name)!;
-        expect(holiday.date.getDay()).toBe(6);
-      }
+      const list = getHelligdage(year, se);
+      const find = (n: string) => list.find((h) => h.name === n)!;
+      expect(find("Midsommarafton").date.getDay(), `afton ${year}`).toBe(5);
+      expect(find("Midsommardagen").date.getDay(), `dag ${year}`).toBe(6);
+      expect(find("Alla helgons dag").date.getDay(), `helgon ${year}`).toBe(6);
+      const afton = find("Midsommarafton").date;
+      const dag = find("Midsommardagen").date;
+      expect(afton.getMonth(), `månad ${year}`).toBe(5);
+      expect(dag.getMonth(), `månad ${year}`).toBe(5);
+      expect(afton.getDate(), `afton-datum ${year}`).toBeGreaterThanOrEqual(19);
+      expect(afton.getDate(), `afton-datum ${year}`).toBeLessThanOrEqual(25);
+      expect(dag.getDate(), `dag-datum ${year}`).toBeGreaterThanOrEqual(20);
+      expect(dag.getDate(), `dag-datum ${year}`).toBeLessThanOrEqual(26);
+      // Midsommardagen är dagen efter midsommarafton.
+      const diff = Math.round((dag.getTime() - afton.getTime()) / 86400000);
+      expect(diff, `midsommar ${year}`).toBe(1);
+      // Alla helgons dag ligger 31 oktober–6 november.
+      const helgon = find("Alla helgons dag").date;
+      const iVinduet =
+        (helgon.getMonth() === 9 && helgon.getDate() === 31) ||
+        (helgon.getMonth() === 10 && helgon.getDate() <= 6);
+      expect(iVinduet, `helgon ${year}`).toBe(true);
     }
   });
 
-  test("midsommarafton 2026 er 20. juni", () => {
-    const midsommar = getHelligdage(2026, se).find(
-      (h) => h.name === "Midsommarafton"
-    )!;
-    expect(iso(midsommar.date)).toBe("2026-06-20");
+  test("midsommarafton 2026 er 19. juni og midsommardagen 20. juni", () => {
+    const list = getHelligdage(2026, se);
+    expect(iso(list.find((h) => h.name === "Midsommarafton")!.date)).toBe("2026-06-19");
+    expect(iso(list.find((h) => h.name === "Midsommardagen")!.date)).toBe("2026-06-20");
+    expect(iso(list.find((h) => h.name === "Alla helgons dag")!.date)).toBe("2026-10-31");
   });
 
   test("nationaldagen er forskellig per domæne", () => {
@@ -618,6 +640,29 @@ describe("/helligdage — årets helligdage som tabelrækker", () => {
     expect(helligdagRaekker(2027, "da").find((r) => r.navn === "Påskedag")!.iso).not.toBe(
       helligdagRaekker(2026, "da").find((r) => r.navn === "Påskedag")!.iso
     );
+  });
+
+  // Midsommar och alla helgons dag styrdes av en veckodag, ikke en fast
+  // kalenderdag, så de får inte kallas «Fast datum» i tabellen.
+  test("svenska rörliga helgdagar är inte markerade som faste", () => {
+    const raekker = helligdagRaekker(2026, "se");
+    const ikkeFaste = raekker.filter((r) => !r.fast).map((r) => r.navn);
+    expect(ikkeFaste).toEqual([
+      "Långfredagen",
+      "Påskdagen",
+      "Annandag påsk",
+      "Kristi himmelsfärdsdag",
+      "Pingstdagen",
+      "Midsommarafton",
+      "Midsommardagen",
+      "Alla helgons dag",
+    ]);
+    for (const navn of ["Midsommarafton", "Midsommardagen", "Alla helgons dag"]) {
+      expect(raekker.find((r) => r.navn === navn)!.fast, navn).toBe(false);
+    }
+    for (const navn of ["Nyårsdagen", "Julafton", "Juldagen", "Nyårsafton"]) {
+      expect(raekker.find((r) => r.navn === navn)!.fast, navn).toBe(true);
+    }
   });
 
   test("hvert link til en «dage til»-side findes i /dage-til", () => {

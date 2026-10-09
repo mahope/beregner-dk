@@ -131,17 +131,17 @@ const COPY: Record<
     kolonneDageTil: "Dagar kvar",
     kolonneFri: "Extra ledig dag?",
     fast: "Fast datum",
-    flydende: "Följer påsken",
+    flydende: "Rörligt datum",
     friJa: "Ja",
     friNej: "Nej, i helgen",
     sum: "Totalt",
     antalSetning: (aar, total, paaHverdag) =>
       `${aar} har ${total} helgdagar. ${paaHverdag} av dem faller på en vardag och ger dig en extra ledig dag — de övriga ligger i helgen.`,
-    typeOverskrift: "Fasta och påskberoende helgdagar",
+    typeOverskrift: "Fasta och rörliga helgdagar",
     typeFastTekst:
-      "De fasta helgdagarna faller på samma datum varje år: nyårsdagen, trettondedag jul, första maj, Sveriges nationaldag, midsommarafton, midsommardagen, alla helgons dag, julafton, juldagen, annandag jul och nyårsafton.",
+      "De fasta helgdagarna faller på samma datum varje år: nyårsdagen, trettondedag jul, första maj, Sveriges nationaldag, julafton, juldagen, annandag jul och nyårsafton.",
     typeFlydendeTekst:
-      "De övriga följer påsken, som rör sig mellan 22 mars och 25 april. Långfredagen, påskdagen, annandag påsk, kristi himmelsfärdsdag och pingstdagen ligger därför på olika veckodagar från år till år.",
+      "De rörliga helgdagarna byter datum från år till år. Långfredagen, påskdagen, annandag påsk, kristi himmelsfärdsdag och pingstdagen följer påsken, som rör sig mellan 22 mars och 25 april. Midsommarafton är fredagen 19–25 juni, midsommardagen är lördagen 20–26 juni, och alla helgons dag är lördagen 31 oktober–6 november.",
     linkDageTil: "Hur många dagar är det kvar till …?",
     linkArbejdsdage: "Hur många arbetsdagar finns det på ett år?",
     linkDageIAaret: "Hur många dagar finns det på ett år?",
@@ -150,7 +150,7 @@ const COPY: Record<
         question: "Hur många helgdagar finns det i Sverige?",
         answer: (aar) => {
           const { total, paaHverdag } = helligdagAntal(aar, "se");
-          return `Sverige har ${total} helgdagar i år, men ${paaHverdag} av dem faller på en vardag — de övriga faller i helgen och ger ingen extra ledig dag. Midsommarafton och midsommardagen är i grunden helgdagar, men faller alltid på lörård respektive söndag.`;
+          return `Sverige har ${total} helgdagar i år, men ${paaHverdag} av dem faller på en vardag — de övriga faller i helgen och ger ingen extra ledig dag.`;
         },
       },
       {

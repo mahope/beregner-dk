@@ -31,10 +31,21 @@ function saturdayInWindow(year: number, month: number, day: number): Date {
   return localDate(year, month, day + shift);
 }
 
+/** Friday falling in the window [firstDayOfWindow, firstDayOfWindow + 6]. */
+function fredagInWindow(year: number, month: number, day: number): Date {
+  const candidate = localDate(year, month, day);
+  const shift = (5 - candidate.getDay() + 7) % 7;
+  return localDate(year, month, day + shift);
+}
+
 /**
  * Fixed-date holidays per locale. Store bededag is deliberately absent: it was
  * abolished as a public holiday from 2024. Nytårsaften is also absent on the
  * Danish side because it is not an official holiday, only a non-working day.
+ *
+ * Midsommarafton, midsommardagen och alla helgons dag står også her, men deres
+ * dato styres af en ugedag i et vindue og er derfor ikke faste — se
+ * `FASTE_HELLIGDAGE`, som afgør hvad tabellen kalder «fast».
  */
 function getFixedHelligdage(
   year: number,
@@ -54,8 +65,11 @@ function getFixedHelligdage(
     { date: localDate(year, 1, 6), name: "Trettondedag jul" },
     { date: localDate(year, 5, 1), name: "Första maj" },
     { date: localDate(year, 6, 6), name: "Sveriges nationaldag" },
-    { date: saturdayInWindow(year, 6, 20), name: "Midsommarafton" },
-    { date: saturdayInWindow(year, 6, 21), name: "Midsommardagen" },
+    // Midsommarafton är fredagen 19–25 juni och midsommardagen lördagen
+    // 20–26 juni; alla helgons dag är lördagen 31 oktober–6 november. De är
+    // rörliga (veckodagen styr datumet), inte fasta kalenderdatoer.
+    { date: fredagInWindow(year, 6, 19), name: "Midsommarafton" },
+    { date: saturdayInWindow(year, 6, 20), name: "Midsommardagen" },
     { date: saturdayInWindow(year, 10, 31), name: "Alla helgons dag" },
     { date: localDate(year, 12, 24), name: "Julafton" },
     { date: localDate(year, 12, 25), name: "Juldagen" },
@@ -349,7 +363,11 @@ const HELLIGDAG_TIL_DAGE_TIL: Record<HelligdagLocale, Record<string, string>> = 
   },
 };
 
-/** Helligdage med en fast kalenderdato — de øvrige følger påsken. */
+/**
+ * Helligdage med en fast kalenderdato. De øvrige er rörliga: enten följer de
+ * påsken, eller de falder på en bestemt ugedag i et vindue (midsommar, alla
+ * helgons dag), og de skal derfor ikke stå her.
+ */
 const FASTE_HELLIGDAGE = new Map<HelligdagLocale, ReadonlySet<string>>([
   [
     "da",
@@ -368,9 +386,6 @@ const FASTE_HELLIGDAGE = new Map<HelligdagLocale, ReadonlySet<string>>([
       "Trettondedag jul",
       "Första maj",
       "Sveriges nationaldag",
-      "Midsommarafton",
-      "Midsommardagen",
-      "Alla helgons dag",
       "Julafton",
       "Juldagen",
       "Annandag jul",
@@ -386,7 +401,7 @@ export interface HelligdagRad {
   /** «26. december 2026» / «26 december 2026». */
   datoTekst: string;
   ugedag: string;
-  /** Fast kalenderdato (jul, nytår, grundlovsdag) mod påskeafhængig. */
+  /** Fast kalenderdato (jul, nytår, grundlovsdag) mod rörlig (påske eller ugedag). */
   fast: boolean;
   /** Falder dagen på en hverdag, giver den en ekstra fri dag. */
   paaHverdag: boolean;
