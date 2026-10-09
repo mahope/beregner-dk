@@ -106,6 +106,7 @@ import {
   boernebidragEksempel,
   formaterGrae,
 } from "./boernebidrag";
+import { PENSIONSALDER_EKSEMPEL, pensionsalderEksempel } from "./pensionsalder";
 import {
   MADVARER,
   MADVARER_KILDE,
@@ -3018,6 +3019,67 @@ faqItems: kalorierFaqItems("da"),
       schemaDescription: "Gratis pensionsberegner. Beregn folkepensionen for 2026 og se hvor meget din opsparing giver pr. måned, når du går på pension.",
       schemaCategory: "FinanceApplication",
       faqItems: pensionFaqItems(),
+    },
+    "pensionsalder": {
+      slug: "pensionsalder",
+      title: "Beregn din folkepensionsalder",
+      description:
+        "Beregn din folkepensionsalder ud fra din fødselsdato. Se din kohort, hvornår du fylder alderen, og den første dag du kan få udbetalt folkepension.",
+      metaTitle: `Pensionsalder beregner: født i ${PENSIONSALDER_EKSEMPEL.getFullYear()} giver ${pensionsalderEksempel().alderTekst}`,
+      metaDescription:
+        "Find din folkepensionsalder ud fra fødselsdatoen: 67 år født 1955-1962, 68 år 1963-1966, 69 år 1967-1970 og 70 år fra 1971. Kilde: borger.dk.",
+      keywords: [
+        "folkepensionsalder",
+        "pensionsalder beregner",
+        "pensionsalder født 1964",
+        "pensionsalder født 1967",
+        "hvornår kan jeg gå på pension",
+        "pensionsalder danmark",
+        "folkepensionsalder 2026",
+        "pensionsalderskema",
+      ],
+      ogTitle: "Folkepensionsalder beregner - se din alder ud fra din fødselsdato",
+      ogDescription:
+        "Slå din folkepensionsalder op i skemaet fra borger.dk og se, hvornår du kan få udbetalt folkepension.",
+      category: "Økonomi",
+      breadcrumbCategory: "Økonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Folkepensionsalder beregner",
+      schemaDescription:
+        "Beregn din folkepensionsalder ud fra fødselsdatoen og se den første dag, du kan få udbetalt folkepension.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        {
+          question: "Hvornår kan jeg gå på folkepension?",
+          answer:
+            "Det afhænger af, hvornår du er født. Alderen følger fødselårgangene: 67 år for dem født fra 1955 til 1962, 68 år for 1963-1966, 69 år for 1967-1970 og 70 år for dem født i 1971 eller senere. Indtast din fødselsdato i beregneren, og den viser både alderen og den første dag, du kan få udbetalt.",
+        },
+        {
+          question: "Hvad er min folkepensionsalder, hvis jeg er født i 1967?",
+          answer:
+            "Hvis du er født i 1967 eller senere i perioden frem til 1970, er din folkepensionsalder 69 år — uanset hvilken dag i året du er født. Folkepension kan udbetales fra den første dag i den måned, du fylder 69 år.",
+        },
+        {
+          question: "Hvad gælder der, hvis jeg er født i 1971 eller senere?",
+          answer:
+            "Ifølge skemaet fra borger.dk er folkepensionsalderen 70 år for årgangene fra 1971. Så sent som 2026 er tallet 70 år for disse årgange, men folkepensionsalderen tilpasses løbende den gennemsnitlige levealder, så alderen kan blive sat op igen.",
+        },
+        {
+          question: "Får jeg udbetalt på min fødselsdag?",
+          answer:
+            "Nej, en måned før eller senere: folkepension udbetales fra den første dag i den måned, du fylder din folkepensionsalder. Er du født den 15. i en måned, kan du altså få udbetalt allerede den 1. i samme måned, i det år du fylder.",
+        },
+        {
+          question: "Kan jeg gå på pension før folkepensionsalderen?",
+          answer:
+            "Ja, hvis du opfylder kravene til tidlig pension: du kan gå op til 3 år før, hvis du har været på arbejdsmarkedet i 42-44 år, fra du fyldte 16. Retten afhænger af din anciennitet, og beregneren til folkepensionsalder viser kun, hvornår folkepensionen kan indgå.",
+        },
+        {
+          question: "Er folkepensionsalderen det samme for alle i min familie?",
+          answer:
+            "Nej, alderen følger fødselsåret, så du og dine søskende eller din ægtefælle kan have forskellig alder. Når I er født i samme kalenderår, har I derimod samme kohort, også selv I har fødselsdag forskellige dage.",
+        },
+      ],
     },
     "efterloen": {
       slug: "efterloen",

@@ -38,6 +38,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", category: "Økonomi" },
   { title: "Sygedagpenge", description: "Beregn sygedagpenge og se arbejdsgiverperiode", href: "/sygedagpenge", category: "Økonomi" },
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", category: "Økonomi" },
+  { title: "Folkepensionsalder", description: "Se hvornår du kan gå på folkepension ud fra din fødselsdato", href: "/pensionsalder", category: "Økonomi" },
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", category: "Økonomi" },
   { title: "Rentefradrag", description: "Beregn din skattebesparelse på rentefradrag", href: "/rentefradrag", category: "Økonomi" },
   { title: "Arveafgift", description: "Beregn bo- og tillægsafgift ved arv", href: "/arveafgift", category: "Økonomi" },

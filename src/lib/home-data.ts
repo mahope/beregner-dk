@@ -194,6 +194,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: true, category: "Familie" },
   { title: "Børnebidrag", description: "Beregn børnebidrag ud fra antal børn og din indkomst", href: "/boernebidrag", popular: false, category: "Familie" },
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: true, category: "Økonomi" },
+  { title: "Folkepensionsalder", description: "Se hvornår du kan gå på folkepension", href: "/pensionsalder", popular: false, category: "Økonomi" },
   // /procent, /tidszone og /moms stod i den ikke-populære halvdel, selv om de er
   // de tre danske sider med mest uopfyldt søgning: Search Console 5/10 (28 dage)
   // giver /procent 151.008 visninger på 0,1 % CTR og pos. 7,5, /tidszone 24.829

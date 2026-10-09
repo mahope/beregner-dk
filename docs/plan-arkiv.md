@@ -31060,3 +31060,10 @@ bidrag». MÅL: 0 Plausible/GSC pr. 9/10, måles igen ~23/10.
 Porte der fangede tre fejl undervejs: `meta-description.test.ts` (199 tegn →
 kortet til 108), `regnestykker.test.ts` (beløb i strengen i /blog-listen → tal
 fjernet fra beskrivelsen), `myndighedsnavn.test.ts` («SKAT» → «Skattestyrelsen»).
+
+## Arkiveret 9/10 14:2x — ældre færdige STATUS-linjer
+
+STATUS: 8/10 21:3x. ✅ `/sukker-i-madvarer` — sukker pr. 100 g i 52 madvarer (0e5aef2). Detaljer i `docs/plan-arkiv.md`.
+
+STATUS: 8/10 18:3x. ✅ `/kalorier-i-opskrift` (live, DEPLOY OK 9/10 02:1x). Detaljer i `docs/plan-arkiv.md`.
+

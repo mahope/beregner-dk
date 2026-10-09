@@ -164,7 +164,9 @@ export default function PensionGuidePage() {
         <h3>Søjle 1: Folkepension og ATP</h3>
         <p>
           Alle danske statsborgere med bopæl i Danmark får <strong>folkepension</strong> fra 
-          folkepensionsalderen. Derudover får de fleste <strong>ATP</strong> (Arbejdsmarkedets 
+          folkepensionsalderen. Alderen følger dit fødselsårgang — 68 år for dem født 1963-1966, 
+          69 år for 1967-1970 og 70 år fra 1971 — og du kan se din egen alder i vores{" "}
+          <Link href="/pensionsalder">folkepensionsalder-beregner</Link>. Derudover får de fleste <strong>ATP</strong> (Arbejdsmarkedets 
           Tillægspension), som du har indbetalt til gennem dit arbejdsliv.
         </p>
 
