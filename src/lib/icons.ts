@@ -160,6 +160,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/billaan": CarFront,
   "/bmi": Scale,
   "/boernepenge": HandCoins,
+  "/boernebidrag": HandCoins,
   "/bolan": House,
   "/boliglaan": House,
   "/boligstoette": Building2,

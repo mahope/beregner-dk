@@ -192,6 +192,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Lånetype", description: "Sammenlign annuitetslån, serielån og stående lån", href: "/laantype", popular: false, category: "Økonomi" },
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", popular: true, category: "Økonomi" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: true, category: "Familie" },
+  { title: "Børnebidrag", description: "Beregn børnebidrag ud fra antal børn og din indkomst", href: "/boernebidrag", popular: false, category: "Familie" },
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: true, category: "Økonomi" },
   // /procent, /tidszone og /moms stod i den ikke-populære halvdel, selv om de er
   // de tre danske sider med mest uopfyldt søgning: Search Console 5/10 (28 dage)

@@ -98,6 +98,14 @@ import {
   OPSKRIFT_META_TITEL,
 } from "./opskrift-kalorier";
 import {
+  BOERNEBIDRAG_2026,
+  BOERNEBIDRAG_AAR,
+  FRADRAGSVAERDI_PCT,
+  INDKOMSTNIVEUER_2026,
+  boernebidragEksempel,
+  formaterGrae,
+} from "./boernebidrag";
+import {
   MADVARER,
   MADVARER_KILDE,
   PROTEIN_META_BESKRIVELSE,
@@ -1123,6 +1131,19 @@ const TV_65 = beregnSkarmMaal(65, "16:9")!;
 const TV_55_AFSTAND = beregnSeerafstand(TV_55.breddeCm);
 const tvTal = (n: number, dec = 1) =>
   formatNumber(n, "da", { maximumFractionDigits: dec });
+
+/**
+ * Børnebidragets FAQ og metadata læser deres tal fra samme modul som
+ * værktøjet (`boernebidrag.ts`), så satser og regneeksempel ikke kan glide fra
+ * det, beregneren viser (punkt 11).
+ */
+const BOERNEBIDRAG_FAKTA = boernebidragEksempel();
+const boernebidragKr = (n: number) => n.toLocaleString("da-DK");
+const BOERNEBIDRAG_NORMAL_TEKST = `${boernebidragKr(BOERNEBIDRAG_2026.grundbeloebMaaned)} kr. i grundbeløb + ${boernebidragKr(BOERNEBIDRAG_2026.tillaegMaaned)} kr. i tillæg = ${boernebidragKr(BOERNEBIDRAG_2026.normalbidragMaaned)} kr. pr. måned`;
+const BOERNEBIDRAG_HUNDREDE_TEKST = `${boernebidragKr(BOERNEBIDRAG_2026.grundbeloebMaaned)} + ${boernebidragKr(BOERNEBIDRAG_2026.grundbeloebMaaned)} + ${boernebidragKr(BOERNEBIDRAG_2026.tillaegMaaned)} = ${boernebidragKr(BOERNEBIDRAG_2026.grundbeloebMaaned * 2 + BOERNEBIDRAG_2026.tillaegMaaned)} kr.`;
+const BOERNEBIDRAG_BESPARELSE_TEKST = boernebidragKr(
+  Math.round((BOERNEBIDRAG_2026.grundbeloebMaaned * FRADRAGSVAERDI_PCT) / 100)
+);
 
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
@@ -3979,6 +4000,30 @@ faqItems: kalorierFaqItems("da"),
         { question: "Hvor meget materiale skal jeg købe til 100 m² loft?", answer: `Til ${iso2(BYGNINGSDELER[0].brKrav)} W/m²K skal du bruge ${iso1(ISOLERING_LOFT_STENULD.tykkelseCm)} cm stenuld, dvs. ${iso2(ISOLERING_LOFT_STENULD.volumenM3)} m³ på ${iso0(ISOLERING_LOFT_STENULD.arealM2)} m². Varmetabet bliver ${iso1(ISOLERING_LOFT_STENULD.varmetabPrGrad)} W pr. grads temperaturforskel mellem inde og ude.` },
         { question: "Kommer tallet til at passe på mit hus?", answer: "Beregneren regner et enkelt isoleringslag i en plan konstruktion. Bjælker, gips, beklædning og varmebroer tæller også med i den rigtige U-værdi, og fastholdt fugt i mineraluld sænker effekten. Regnestykket er vejledende — brug det til at vurdere, om et tilbud er rimeligt, ikke som dokumentation for myndighederne." },
         { question: "Hvor kommer lambda- og kravstallene fra?", answer: `λ-intervallerne er gennemgåede materialeoversigter fra bygdinbolig.dk og bygzone.dk, og kravstallene er BR18 § 257 bilag 2 tabel 1 (loft og tag ${iso2(0.2)}, ydervægge ${iso2(0.3)}, terrændæk og kældergulve ${iso2(0.2)} W/m²K) og § 279 ved ombygning. Enkeltprodukters deklarerede λ står på databladet.` },
+      ],
+    },
+    "boernebidrag": {
+      slug: "boernebidrag",
+      title: "Børnebidrag 2026 – beregn hvad du skal betale",
+      description: `Beregn børnebidraget for ${BOERNEBIDRAG_AAR} ud fra antal børn og din årlige indkomst. Normalbidraget er ${BOERNEBIDRAG_NORMAL_TEKST}, og et forhøjet bidrag lægger op til 300 % af grundbeløbet oveni.`,
+      metaTitle: `Børnebidrag 2026 – normalbidrag ${boernebidragKr(BOERNEBIDRAG_2026.normalbidragMaaned)} kr. pr. måned`,
+      metaDescription: `Beregn dit børnebidrag for 2026. Normalbidraget er ${boernebidragKr(BOERNEBIDRAG_2026.normalbidragMaaned)} kr. pr. måned pr. barn, og et forhøjet bidrag lægger op til 100 % af grundbeløbet oveni.`,
+      keywords: ["børnebidrag", "børnebidrag 2026", "beregn børnebidrag", "børnebidrag beregner", "normalbidrag 2026", "forhøjet børnebidrag", "børnebidrag indkomstgrænser", "fradrag børnebidrag"],
+      ogTitle: `Børnebidrag 2026 – normalbidrag ${boernebidragKr(BOERNEBIDRAG_2026.normalbidragMaaned)} kr. pr. måned`,
+      ogDescription: `Beregn børnebidraget for 2026 ud fra antal børn og indkomst. Normalbidraget er ${BOERNEBIDRAG_NORMAL_TEKST}, og et forhøjet bidrag regnes af grundbeløbet.`,
+      category: "Familie",
+      breadcrumbCategory: "Familie",
+      breadcrumbCategoryHref: "/kategori/familie",
+      schemaName: "Børnebidragsberegner",
+      schemaDescription: "Beregn børnebidrag for 2026 ud fra antal børn og den bidragsbetalendes årlige indkomst, med normalbidrag, forhøjet bidrag og skattefradrag.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: `Hvad er normalbidraget for et barn i ${BOERNEBIDRAG_AAR}?`, answer: `Normalbidraget for ${BOERNEBIDRAG_AAR} er ${BOERNEBIDRAG_NORMAL_TEKST}. Det er det beløb, der gælder, når indkomsten ikke udløser et forhøjet bidrag.` },
+        { question: `Hvor meget skal jeg betale med ${boernebidragKr(BOERNEBIDRAG_FAKTA.aarligIndomst)} kr. i indkomst?`, answer: `Det er Familieretshusets eget regneeksempel: én bidragsbetaler med ${boernebidragKr(BOERNEBIDRAG_FAKTA.aarligIndomst)} kr. i årlig indkomst og ét barn rammer 100 %-niveauet, og bidraget bliver ${boernebidragKr(BOERNEBIDRAG_FAKTA.bidragPrBarnMaaned)} kr. pr. måned pr. barn — altså ${boernebidragKr(BOERNEBIDRAG_FAKTA.bidragSamletMaaned)} kr. pr. måned for ét barn.` },
+        { question: "Hvordan regnes et forhøjet børnebidrag ud?", answer: `Et forhøjet bidrag er altid normalbidraget plus en procentsats af grundbeløbet — ikke af hele normalbidraget. Ved 100 % er regnestykket ${BOERNEBIDRAG_HUNDREDE_TEKST}. Regnede man af hele normalbidraget i stedet, ville beløbet blive for højt.` },
+        { question: "Hvilke indkomstgrænser udløser et forhøjet bidrag?", answer: `For ét barn udløser en årlig indkomst fra ${formaterGrae(INDKOMSTNIVEUER_2026[100][0])} et tillæg på 100 %, fra ${formaterGrae(INDKOMSTNIVEUER_2026[200][0])} på 200 % og fra ${formaterGrae(INDKOMSTNIVEUER_2026[300][0])} på 300 %. Grænserne stiger med antallet af børn, og beløbene er vejledende.` },
+        { question: "Hvor meget kan jeg trække fra i skat?", answer: `Betaler du normalbidraget, kan du trække grundbeløbet fra: ${boernebidragKr(BOERNEBIDRAG_2026.grundbeloebMaaned)} kr. pr. måned pr. barn. Er bidraget aftalt i stedet, er fradraget beløbet minus tillægget på ${boernebidragKr(BOERNEBIDRAG_2026.tillaegMaaned)} kr. Ved ca. ${FRADRAGSVAERDI_PCT} % fradragsværdi svarer det til omkring ${BOERNEBIDRAG_BESPARELSE_TEKST} kr. pr. måned.` },
+        { question: "Er det beløb, beregneren viser, det endelige?", answer: "Nej. Tallene er vejledende: det er Familieretshuset eller en aftale mellem forældrene, der fastsætter det endelige bidrag, og samvær, hjemmetilskud og andre forhold kan ændre det. Brug beregneren til at forstå størrelsen, ikke som en afgørelse." },
       ],
     },
 };

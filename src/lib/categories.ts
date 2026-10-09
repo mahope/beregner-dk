@@ -82,6 +82,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", category: "Sundhed" },
   { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", category: "Sundhed" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", category: "Familie" },
+  { title: "Børnebidrag", description: "Beregn børnebidrag ud fra antal børn og din indkomst", href: "/boernebidrag", category: "Familie" },
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", category: "Familie" },
   { title: "Barselsplanlægger", description: "Planlæg barsel uge for uge med kalender og økonomi", href: "/barselsplanlaegger", category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", category: "Familie" },

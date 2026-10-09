@@ -28,6 +28,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/barselsplanlaegger", daOnly: true, titles: { da: "Barselsplanlægger", no: "Barselsplanlægger", se: "Barselsplanlægger" }, descriptions: { da: "Planlæg barsel uge for uge", no: "Planlæg barsel uge for uge", se: "Planlæg barsel uge for uge" } },
   { href: "/barselsdagpenge", daOnly: true, titles: { da: "Barselsdagpenge", no: "Foreldrepenger", se: "Föräldrapenning" }, descriptions: { da: "Beregn barselsdagpenge", no: "Beregn foreldrepenger", se: "Beräkna föräldrapenning" } },
   { href: "/boernepenge", daOnly: true, titles: { da: "Børnepenge", no: "Barnetrygd", se: "Barnbidrag" }, descriptions: { da: "Se børne- og ungeydelse", no: "Se barnetrygden din", se: "Se ditt barnbidrag" } },
+  { href: "/boernebidrag", daOnly: true, titles: { da: "Børnebidrag", no: "Bidrag", se: "Underhåll" }, descriptions: { da: "Beregn børnebidrag ud fra antal børn og indkomst", no: "Beregn bidrag ut fra antall barn og inntekt", se: "Beräkna underhåll utifrån antal barn och inkomst" } },
   { href: "/timepris", titles: { da: "Timepris", no: "Timepris", se: "Timpris" }, descriptions: { da: "Beregn din timepris", no: "Beregn timeprisen din", se: "Beräkna ditt timpris" } },
   { href: "/loen-konverter", titles: { da: "Lønberegner", no: "Lønnkalkulator", se: "Lönekalkylator" }, descriptions: { da: "Omregn timeløn, månedsløn og årsløn", no: "Omregn timelønn, månedslønn og årslønn", se: "Omvandla timlön, månadslön och årslön" } },
   // Lån & Bolig
@@ -189,6 +190,7 @@ const relatedMap: Record<string, string[]> = {
   "/barselsplanlaegger": ["/barselsdagpenge", "/boernepenge", "/termin", "/loen-efter-skat", "/feriepenge"],
   "/barselsdagpenge": ["/barselsplanlaegger", "/boernepenge", "/dagpenge", "/loen-efter-skat", "/feriepenge", "/boligstoette"],
   "/boernepenge": ["/barselsdagpenge", "/su", "/boligstoette", "/loen-efter-skat", "/dagpenge"],
+  "/boernebidrag": ["/boernepenge", "/barselsdagpenge", "/termin", "/loen-efter-skat", "/skattefradrag", "/budget"],
   "/timepris": ["/loen-efter-skat", "/moms", "/procent", "/feriepenge", "/dagpenge"],
   "/loen-konverter": ["/loen-efter-skat", "/timepris", "/brutto-netto", "/feriepenge", "/procent"],
   "/enhedspris": ["/procent", "/moms", "/rabat", "/valuta", "/budget"],
