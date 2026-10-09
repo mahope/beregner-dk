@@ -289,6 +289,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Kalorier i alkohol", description: "Se kcal i øl, vin, cider og sprits", href: "/kalorier-i-alkohol", popular: false, category: "Sundhed" },
 
   // Familie
+  { title: "Hvor langt er jeg henne?", description: "Beregn din graviditetsuge ud fra den dato, du kender", href: "/graviditetsuge", popular: false, category: "Familie" },
   { title: "Ægløsningsberegner", description: "Find dine frugtbare dage og din ægløsning", href: "/aegloesning", popular: false, category: "Familie" },
 
   // Hverdag
