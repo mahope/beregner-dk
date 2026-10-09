@@ -165,6 +165,15 @@ import {
   GRAM_PR_GENSTAND,
 } from "./kalorier-i-alkohol";
 
+import {
+  BETON_STANDARD_SPILD_PCT,
+  BETON_TOM_MAKS_PR_M3,
+  BETON_TOM_MIN_PR_M3,
+  STOEBEMIX_POSE_KG,
+  STOEBEMIX_POSE_LITER,
+  beregnBeton,
+} from "./beton";
+
 /**
  * `/kalorier-i-alkohol`s egne tal til titel, beskrivelse og FAQ. Alle værdier er
  * modullets udregning for serveringen, så en sætning aldrig lover et andet tal
@@ -249,6 +258,30 @@ const GRUS_STABILGRUS = grusMaterialeVedId("stabilgrus");
 const GRUS_BUNDSIKRING = grusMaterialeVedId("bundsikring");
 const grus2 = (n: number) => formatNumber(n, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const grus1 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 1 });
+
+/** En terrasseplade på 4 × 4 m i 10 cm, som FAQ'en regner på. */
+const BETON_TERRASSE = beregnBeton({
+  elementId: "plade",
+  laengdeM: 4,
+  breddeM: 4,
+  tykkelseCm: 10,
+  spildPct: BETON_STANDARD_SPILD_PCT,
+});
+/** Et randfundament på en 8 × 6 m grund, 20 × 50 cm tværsnit. */
+const BETON_FUNDAMENT = beregnBeton({
+  elementId: "fundament",
+  laengdeM: 8,
+  breddeM: 6,
+  fundamentBreddeCm: 20,
+  fundamentDybdeCm: 50,
+  spildPct: BETON_STANDARD_SPILD_PCT,
+});
+const beton2 = (n: number) => formatNumber(n, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const beton1 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 1 });
+const beton0 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 0 });
+/** Sidens egne tal til titel og beskrivelse: 20 kg-posens udbytte i liter. */
+const BETON_META_TITEL = `Betonberegner: 4 × 4 m i 10 cm = ${beton2(BETON_TERRASSE.volumenM3)} m³ (${beton0(BETON_TERRASSE.poser20kg)} poser à ${STOEBEMIX_POSE_KG} kg)`;
+const BETON_META_BESKRIVELSE = `Beregn hvor meget beton du skal bruge. En 20 kg-pose støbemix giver ca. ${beton0(STOEBEMIX_POSE_LITER)} liter, så 1 m³ er ${beton0(1000 / STOEBEMIX_POSE_LITER)} poser. Se m³, liter og vægt for plade, fundament og søjler.`;
 
 /**
  * Sidens egne tal til `/brokost`. De læser samme konstanter som værktøjet, så
@@ -3871,6 +3904,31 @@ faqItems: kalorierFaqItems("da"),
         { question: "Hvad koster det at lade en elbil pr. måned?", answer: `Kører du ${krHelt(elbilLadingStandarder.da.kmPrMaaned)} km pr. måned ved ${krTal(elbilLadingStandarder.da.forbrugKwh100km)} kWh/100 km, bruger det ${krHelt(elbilLadingEksempel.kwhPrMaaned)} kWh og koster det ${krTal(elbilLadingEksempel.maanedligPris)} kr. pr. måned at lade bilen hjemme.` },
         { question: "Er regningen præcis?", answer: "Beregningen viser energien bilen bruger. En hjemmeoplader er typisk omkring 85-90 % effektiv, så den reelle regning fra stikkontakten kan være lidt højere end beregnet. Elprisen kan også svinge gennem dagen, så en nat- eller spotprisaftale kan halvere regningen." },
         { question: "Hvad koster en hurtigladning?", answer: `Offentlig hurtigladning koster typisk mere end hjemmeladning — ofte 4-6 kr/kWh mod din elpris på ${krTal(elbilLadingStandarder.da.elpris)} kr/kWh. Skriv den pris du betaler i elpris-feltet for at se forskellen.` },
+      ],
+    },
+    "beton": {
+      slug: "beton",
+      title: "Betonberegner – hvor meget beton skal du bruge?",
+      description:
+        "Beregn hvor meget beton du skal bruge til plade, gulv, terrasse, randfundament og punktfundamenter. Få mængden i m³, liter og poser støbemix.",
+      metaTitle: BETON_META_TITEL,
+      metaDescription: BETON_META_BESKRIVELSE,
+      keywords: ["betonberegner", "hvor meget beton skal jeg bruge", "beregn beton", "hvor mange poser støbemix", "beton til gulv", "beton til fundament", "støbemix beregner", "hvor meget støbemix pr m3", "beton til terrasse"],
+      ogTitle: "Betonberegner – beregn m³, liter og antal poser",
+      ogDescription: "Skriv elementets mål, og se mængden beton i m³, liter og poser støbemix à 20 kg.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Betonberegner",
+      schemaDescription: "Beregn mængden beton til plade, randfundament og søjler i m³, liter, poser støbemix og ton ud fra elementernes mål.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvor meget beton skal jeg bruge til en terrasse?", answer: `Regn pladens volumen ud som længde gange bredde gange tykkelse. En terrasseplade på 4 × 4 m i 10 cm er ${beton2(1.6)} m³ uden spild og ${beton2(BETON_TERRASSE.volumenM3)} m³ med 10 % spild — altså ${beton0(BETON_TERRASSE.poser20kg)} poser à 20 kg. Er pladen fladere end 5 cm, kræver den armeringsnet, så den ikke revner.` },
+        { question: "Hvor mange poser støbemix svarer til 1 m³ beton?", answer: `En 20 kg-pose færdigblandet støbemix giver ca. 10 liter færdigblandet beton, så 1 m³ svarer til 100 poser. Regner beregneren mere end 1 m³ ud, er det typisk billigere at lade betonen komme med en bil.` },
+        { question: "Hvor meget vejer 1 m³ beton?", answer: `Hærdet beton vejer ca. ${beton1(BETON_TOM_MIN_PR_M3)}–${beton1(BETON_TOM_MAKS_PR_M3)} ton pr. m³. Se vægten som et rettesnor til transport og bæreevne — den præcise vægt afhænger af betonens tæthed.` },
+        { question: "Hvor meget beton skal der være over gulvvarmeslanger?", answer: "Leverandørerne angiver minimum 3 cm beton over gulvvarmeslangerne, og at laget som hovedregel skal ligge mellem 3 og 9 cm. Laget skal dække slangerne, armeringsnettet og laget under, så pladen sjældent bliver tyndere end 7–8 cm." },
+        { question: "Hvor meget beton skal der til et randfundament?", answer: `Et randfundament regnes med grundens omkreds: 2 × (længde + bredde). For en 8 × 6 m grund med et 20 cm bredt og 50 cm dybt fundament giver det ${beton2(BETON_FUNDAMENT.volumenM3Uden)} m³ uden spild og ${beton2(BETON_FUNDAMENT.volumenM3)} m³ med spild — ${beton0(BETON_FUNDAMENT.poser20kg)} poser à 20 kg.` },
+        { question: "Er mængden præcis?", answer: "Mængden er et skøn. Formen er sjældent helt rektangulær, spildet afhænger af arbejdet, og vægten afhænger af betonens tæthed. Til bærende konstruktioner skal betonmængden altid beregnes af en ingeniør." },
       ],
     },
 };

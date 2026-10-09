@@ -30972,3 +30972,59 @@ STATUS: 9/10 00:3x. ✅ **`/kalorier-i-alkohol` — kcal i øl, vin, cider og sp
 STATUS: 8/10 23:5x. ✅ **`/helligdage` og `/helgdagar` — alle helligdage med dato, ugedag, om de falder på en hverdag, og hvor mange dage der er til de næste.** Datagrund: dansk autocomplete (hl=da, 8/10 23:2x) har «helligdage 2026», «helligdage 2027», «hvilke helligdage er der i 2026», «hvilke dage er helligdage i 2026», «faste helligdage» og «hvor mange helligdage er der i danmark» blandt ti træffere for næsten hvert «helligdage»-forslag; svensk har «helgdagar 2026»/«helgdagar 2027». Sitets egen kalender (`src/lib/helligdage.ts`) regnede allerede hver dato — `/dato`, `/arbejdsdage` og `/dage-til/*` brugte den — men ingen side viste listen. Nye funktioner i `helligdage.ts` (`helligdagRaekker`, `helligdagAntal`, `naesteHelligdage`, `HELLIGDAG_PATH`) samler årets helligdage til tabelrækker med ugedag (af `ugedag.ts`), datoformat (af `formatDatoTekst`), «fast dato» mod «følger påsken», om dagen giver ekstra fri, og link videre til den tilsvarende `/dage-til/<slug>`-side (testen har forpligtet sig til at finde hvert link). To route-filer over én komponent, 301 mellem domænerne, `force-dynamic`, i sitemap som `daily`, og indgående link fra `/arbejdsdage` på begge domæner. Dansk og svensk (daOnly er opgivet her, fordi Sverige har egen helligdagsliste). **MÅL: /helligdage + /helgdagar baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
 STATUS: 8/10 22:3x. ✅ **`/sand-og-grus` — beregn m³ og ton sand, grus eller bundsikring for et areal.** Datagrund: dansk autocomplete (hl=da, 8/10) har 10/10 træffere under «hvor meget sand skal jeg bruge» (til fliser, sandkasse) og «hvor meget grus skal jeg bruge» (til fliser, indkørsel); sitet havde fliser, maling og kvadratmeter, men intet sted selve materialemængden. Værktøjet regner `volumen = areal × lagtykkelse` og `vægt = volumen × densitet`, med materialevalg (afretningssand, stabilgrus, bundsikring), redigerbar lagtykkelse og spild. Lagtykkelser og densiteter er danske leverandørers anbefalinger (sandshoppen.dk, havehandel.dk, materialeberegner.dk, verificeret 8/10); tabel, FAQ, metadata og brødtekst læser alle `sand-og-grus.ts`, så ingen tal står i en sætning uden at stå i beregningen. Dansk (daOnly). **MÅL: /sand-og-grus baseline 0 Plausible/GSC pr. 8/10** — måles igen ~22/10. Se VERIFICÉR DEPLOY-note nedenfor.
 **Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste målinger (ældre i `docs/plan-arkiv.md`): 7/10 02:1x: typecheck 0, lint 0 (834 filer), **4.841 tests i 293 filer grønne**, `next build` grøn med `/gaveafgift` i ruteoversigten. Mutation målt: `beregnGaveafgift` uden bundfradraget i grundlaget giver **8 røde** i `gaveafgift.test.ts`. 7/10 02:5x: typecheck 0, lint 0 (838 filer), **4.860 tests i 294 filer grønne**, `next build` grøn med `/maling` i ruteoversigten, og `/maling` svarede 200 lokalt med «45 m² væg» og «10 liter» i SSR. Mutation målt: `beregnMalingLiter` uden `× stroeg` giver **4 røde** i `maling.test.ts`. 7/10 04:0x: typecheck 0, lint 0 (843 filer), **4.872 tests i 295 filer grønne**, `next build` grøn med `/laanekapacitet` i ruteoversigten, og `/laanekapacitet` svarede 200 lokalt med «Du kan købe bolig for op til» og «2.105.263 kr.» i SSR. Mutation målt: `maksPrisEfterGaeldsfaktor` uden `÷ (1 − 5 %)` giver **1 rød** i `laanekapacitet.test.ts`. 7/10 04:3x: typecheck 0, lint 0 (847 filer), **4.888 tests i 296 filer grønne**, `next build` grøn med `/tv-storrelse` i ruteoversigten, og `/tv-storrelse` svarede 200 lokalt med «121,8 × 68,5 cm» og «139,7 cm» i SSR. Mutation målt: `beregnSkarmMaal` der altid bruger 16:9 i stedet for det valgte format giver **2 røde** i `skaermstorrelse.test.ts`. 7/10 08:5x: typecheck 0, lint 0 (851 filer), **4.899 tests i 297 filer grønne**, `next build` grøn med `/elbil-lading` i ruteoversigten, og `/elbil-lading` svarede 200 lokalt med «Batterikapacitet (kWh)» og «90 kr.» i SSR (svensk via `Host: beraknare.se`: «Så räknar du ut laddkostnaden» og «72 kr.»). Mutation målt: `beregnElbilLading` uden `× elpris` giver **4 røde** i `elbil-lading.test.ts`. 7/10 12:3x: typecheck 0, lint 0 (855 filer), **4.911 tests i 298 filer grønne**, `next build` grøn med `/kirkeskat` i ruteoversigten, og `/kirkeskat` svarede 200 lokalt med «1.980 kr.», «0,44 %» og «ganget med» i SSR (sitemap indeholder `/kirkeskat`). Mutation målt: `kirkeskatSats` uden `× 100` på snittet giver **1 rød** i `kirkeskat.test.ts` (ukendt kommune får 0,00639 i stedet for 0,639 %). 7/10 13:1x: typecheck 0, lint 0 (859 filer), **4.942 tests i 299 filer grønne**, `next build` grøn med `/areal` i ruteoversigten, og `/areal` svarede 200 lokalt med «Formlerne for de syv figurer», «π × (d ÷ 2)²» og «Samme areal i cm²» i SSR (svensk via `Host: beraknare.se`: «Areaberäknare» og «trapets med sidor 2 och 4 m»). Mutation målt: `areal` der læser diameteren som radius giver **5 røde** i `areal.test.ts`. 7/10 16:3x: typecheck 0, lint 0 (863 filer), **4.972 tests i 300 filer grønne**, `next build` grøn med `/hundealder` i ruteoversigten, og `/hundealder` svarede 200 lokalt med «Hundeår til menneskeår: 7 år = 49 (mellemstor)», «15 + 9 + 5 × 5 = 49» og «Menneskeår» i SSR (svensk via `Host: beraknare.se`: «Hundår till människoår: 7 år = 49 (mellanstor)» og tabellen «10 år 56 64 72 80»). Mutation målt: `HUNDE_STORRELSER.kaempe.aarEfterTo` 7→6 giver **2 røde** i `hundealder.test.ts`. PR-TJEK 6/10 06:5x (ingen åbne PR'er). BRANCH-TJEK 4/10. Åbne målinger: /procent-rabat 20/10; /fart-titler 20/10; /rentefradrag + /boligstoette titler 17/10; Sentry MINBEREGNER-2-tæller 14/10. 7/10 20:3x: typecheck 0, lint 0 (867 filer), **4.981 tests i 301 filer grønne**, `next build` grøn med `/byggepris` i ruteoversigten, og `/byggepris` svarede 200 lokalt med «2.250.000-3.000.000 kr.» og «Så mange kroner til et givent areal» i SSR. Mutation målt: `beregnByggepris` uden `Number.isFinite`- og `> 0`-værnet giver **2 røde** i `byggepris.test.ts`. 8/10 03:3x: typecheck 0, lint 0 (887 filer), **5.105 tests i 306 filer grønne**, `next build` grøn med `/fliser` i ruteoversigten, og `/fliser` svarede 200 lokalt med «Fliseberegner: 12 m² i 60x60 = 37 fliser» og «10 kasser» i SSR. Mutation målt: `beregnFliser` uden `× (1 + spild/100)` giver **4 røde** i `fliser.test.ts`. 8/10 07:5x: typecheck 0, lint 0 (910 filer), **5.215 tests i 312 filer grønne**, `next build` grøn med `/protein-i-madvarer` i ruteoversigten, og `/protein-i-madvarer` svarede 200 lokalt med «Protein i madvarer: æg 12,6 g, kylling 21,4 g pr. 100 g», «Gram for 20 g» og «12,6 g» i SSR (404 på beraknare.se, daOnly; sitemap indeholder `/protein-i-madvarer`), og `/proteinbehov` viste «21,4 g» og «proteinindholdet i 53 madvarer». Mutation målt: `proteinPer100Kcal` uden `÷ kcal100g` giver **1 rød** i `protein-i-madvarer.test.ts`. 8/10 22:2x: typecheck 0, lint 0 (934 filer), **5.314 tests i 318 filer grønne**, `next build` grøn med `/sand-og-grus` i ruteoversigten, og `/sand-og-grus` svarede 200 lokalt med «Sandberegner: 10 m² i 5 cm = 0,55 m³», «Sådan regner du mængden ud» og «Afretningssand (flisesand)» i SSR. Mutation målt: `beregnGrus` uden `× densitet` giver **2 røde** i `sand-og-grus.test.ts` (vægt- og eksempel-testen). 8/10 23:5x: typecheck 0, lint 0 (938 filer), **5.333 tests i 319 filer grønne**, `next build` grøn med `/helligdage` og `/helgdagar` i ruteoversigten.
+
+
+---
+
+## 9/10 02:5x — `/beton` betonberegner (ceo/betonberegner)
+
+**`/beton` — beregn m³, liter, poser støbemix og ton til plade, randfundament og søjler.**
+Datagrund: dansk autocomplete (hl=da, 9/10 02:3x) har 10/10 træffere under «hvor meget beton»
+(«hvor meget beton skal jeg bruge», «… til gulv», «… går der i en 19 cm fundablok», «… kan der
+være i en betonbil») og 8/10 under «hvor meget støbemix» («… til 1 m3 beton», «… pr m3», «… pr
+m2»). Sitets byggesider dækkede fliser, maling, sand/grus, kvadratmeter og byggepris — men ikke
+selve betonmængden. Søgeordene er klassiske «hvor meget»-spørgsmål, som er det, denne slags site
+fanger.
+
+Geometri (ren mængdeberegning, ingen pris på post): plade = længde × bredde × tykkelse,
+randfundament = omkreds 2 × (længde + bredde) × tværsnit, søjle = antal × tværsnit × højde;
+spild (standard 10 %) lægges til sidst. Voluminet afrundes til liter-præcision (0,001 m³), så
+flydetal som 4 × 3 × 0,1 ikke giver 133 poser i stedet for 132.
+
+Eksterne værdier (alle fire citet i `BETON_KILDE` på siden, verificeret 9/10):
+- 20 kg-pose færdigblandet støbemix giver **ca. 10 liter** færdigblandet beton → 1 m³ = 100
+  poser (byggmax.dk, Skalflex-produktside).
+- Hærdet beton vejer **ca. 2,2-2,4 ton pr. m³** (calcly.dk 2.200 kg/m³; whiz.tools 2.400
+  kg/m³). Sidens vægt er et interval, ikke ét tal.
+- Færdigbeton i sække er typisk kun betalende op til **ca. 1 m³** — derover betonbil;
+  frostfri dybde **typisk 90 cm**; C20/25 til privat byggeri; tyndt lag under 5 cm kræver
+  armeringsnet (materialeberegner.dk/kategori/beton).
+- Over gulvvarmeslanger skal der **mindst 3 cm** beton, som hovedregel 3-9 cm (Uponor
+  projekthåndbog). Sidens FAQ svarer på «hvor meget beton skal der være over
+  gulvvarmeslanger», som er en af de ti autocomplete-forslag.
+
+Gemt i `src/lib/beton.ts` (logik, TRE elementtyper, `omregnBeton`, kildeliste) +
+`src/lib/beton.test.ts` (15 tests). Værktøjet `src/components/BetonBeregner.tsx` med
+elementvalg, pr. element egne felter, m³/liter/poser/ton, advarsel over 1 m³, reset, copy og
+delbar link. Siden `/beton` er server-component med tabel «Fra kubikmeter til poser og vægt»
+(0,25-5 m³), typiske støbninger (terrasse, garageplade, randfundament, carportstolper), FAQ,
+JSON-LD og brødkrummer. Alle tal i brødtekst, tabel, FAQ og metadata beregnes af modulet.
+**DaOnly** (bygningsmateriale indgår ikke i svenske slug-opgave 187). Registreret i
+calculator-list (med `/beton` i related for /maling, /fliser, /sand-og-grus, /kvadratmeter,
+/rumfang), categories, home-data og `/beton`: `Layers` i icons.ts. I sitemap.
+
+**MÅL: /beton baseline 0 Plausible/GSC pr. 9/10** — måles igen ~23/10.
+
+**Gate 9/10 02:5x:** typecheck 0, lint 0 (954 filer), **5.391 tests i 323 filer grønne** (+15 i
+`beton.test.ts`), `next build` grøn med `/beton` i ruteoversigten. `/beton` svarede 200 på
+lokal prod-server med «Betonberegner: 4 × 4 m i 10 cm = 1,76 m³ (176 poser à 20 kg)», «1,32
+m³», «132 poser», «3,08 m³», «308» og FAQ'en om støbemix i SSR; sitemap.xml indeholder
+`/beton`; `Host: beraknare.se` gav 404 (daOnly). Mutation: uden `Math.ceil` på poserne giver **1 rød** i
+`beton.test.ts`. Repoet har intet Playwright (se ❓ i planen), så UI'et er ikke
+skærmbilledverificeret; layoutet følger de samme klasser som /sand-og-grus (feltkort i én
+kolonne under md, to spalter fra md og op, resultatkort stikkende fra md).
+
+**9/10 02:3x — DEPLOY OK på `/sukker-i-madvarer`** (ceo/sukker-i-madvarer 8/10 21:3x): live
+(200) med titlen «Sukker i madvarer: banan 12,2 g, chokolade 51,5 g», «Hvor meget sukker er der
+i», rækken «Banan» 12,2 g og teksten «Kilden opgiver ikke sukker for havregryn»; strippet HTML
+lest fra minberegner.dk.
