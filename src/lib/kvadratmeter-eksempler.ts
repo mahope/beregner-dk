@@ -258,6 +258,9 @@ const OMREGNINGS_ETIKET: Record<ArealEnhedId, Record<Locale, string>> = {
   hektar: { da: "hektar", se: "hektar", no: "hektar" },
   kvadratfod: { da: "kvadratfod", se: "kvadratfot", no: "kvadratfot" },
   acre: { da: "acre", se: "acre", no: "acre" },
+  // Gamle danske enheder: bruges ikke i eksemplerne, men typen kræver dem.
+  "tonder-land": { da: "tønde land", se: "tønde land", no: "tønde land" },
+  kvadratalen: { da: "kvadratalen", se: "kvadratalen", no: "kvadratalen" },
 };
 
 /**

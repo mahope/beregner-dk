@@ -34,7 +34,45 @@ export const KVADRATFOD_PR_ACRE = 43_560;
 /** 1 acre (international) i m². Præcis, fordi kvadratfoden er præcis. */
 export const ACRE_I_M2 = KVADRATFOD_I_M2 * KVADRATFOD_PR_ACRE;
 
-export type ArealEnhedId = "m2" | "cm2" | "km2" | "hektar" | "kvadratfod" | "acre";
+/**
+ * Den danske alen i meter. Foden er 0,3138535 m i loven af 4. maj 1907 om
+ * indførelsen af metersystemet, og en alen er to fod: 2 × 0,3138535 = 0,627707
+ * m. Kilde: Teknisk Kulturarvs metertabeller (1907-loven).
+ */
+export const ALEN_I_METER = 0.627707;
+
+/**
+ * 1 kvadratalen i m². Én kvadratalen er én alen i anden: 0,627707² ≈ 0,3940
+ * m². Kilden er den danske alen ovenfor; lex.dk angiver 3.940,07 cm² for
+ * 1835-alen, altså 0,3940 m².
+ */
+export const KVADRATALEN_I_M2 = ALEN_I_METER * ALEN_I_METER;
+
+/**
+ * Antal kvadratalen i én tønde land. Enheden var oprindeligt 13.824
+ * kvadratalen, men blev i 1683 afrundet til 14.000. Kilde: Wikipedia «Tønde
+ * land» og jomark.dk.
+ */
+export const KVADRATALEN_PR_TONDE_LAND = 14_000;
+
+/**
+ * 1 tønde land i m². Enheden er historisk: den var 13.824 kvadratalen, men
+ * blev allerede i 1683 afrundet til 14.000 kvadratalen, og den blev afskaffet
+ * ved metersystemets indførelse i 1907. Værdien regnes derfor som 14.000
+ * kvadratalen ≈ 5.516,2 m², som er det tal Wikipedia og jomark.dk angiver.
+ * Kilde: Wikipedia «Tønde land» og jomark.dk (verificeret 9. oktober 2026).
+ */
+export const TONDE_LAND_I_M2 = KVADRATALEN_PR_TONDE_LAND * KVADRATALEN_I_M2;
+
+export type ArealEnhedId =
+  | "m2"
+  | "cm2"
+  | "km2"
+  | "hektar"
+  | "kvadratfod"
+  | "acre"
+  | "tonder-land"
+  | "kvadratalen";
 
 export interface ArealEnhed {
   id: ArealEnhedId;
@@ -42,6 +80,12 @@ export interface ArealEnhed {
   faktorM2: number;
   /** Antal decimaler enheden vises med i værktøjet og i brødteksten. */
   decimaler: number;
+  /**
+   * En gammel dansk enhed (tønde land, kvadratalen). Den vises kun på dansk,
+   * fordi den svenske side har sine egne gamle arealenheder (tunnland), og en
+   * dansk enhed på beraknare.se ville være et sproglæk.
+   */
+  danskKun?: boolean;
 }
 
 /**
@@ -55,7 +99,18 @@ export const AREAL_ENHEDER: readonly ArealEnhed[] = [
   { id: "hektar", faktorM2: 10_000, decimaler: 4 },
   { id: "kvadratfod", faktorM2: KVADRATFOD_I_M2, decimaler: 2 },
   { id: "acre", faktorM2: ACRE_I_M2, decimaler: 6 },
+  { id: "tonder-land", faktorM2: TONDE_LAND_I_M2, decimaler: 2, danskKun: true },
+  { id: "kvadratalen", faktorM2: KVADRATALEN_I_M2, decimaler: 4, danskKun: true },
 ] as const;
+
+/**
+ * De enheder der må vises i en given sprogudgave. De gamle danske
+ * landmålingsenheder filtreres fra på svensk, så `tønde land` ikke optræder på
+ * beraknare.se (samme regel som `daOnly` på siderne).
+ */
+export function synligeArealEnheder(dansk: boolean): readonly ArealEnhed[] {
+  return dansk ? AREAL_ENHEDER : AREAL_ENHEDER.filter((enhed) => !enhed.danskKun);
+}
 
 export function arealEnhed(id: ArealEnhedId): ArealEnhed {
   const fundet = AREAL_ENHEDER.find((enhed) => enhed.id === id);

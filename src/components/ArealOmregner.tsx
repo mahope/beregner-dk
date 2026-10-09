@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import { useLocale } from "@/components/LocaleProvider";
 import { kvadratmeterOmregningsFakta } from "@/lib/kvadratmeter-eksempler";
 import {
-  AREAL_ENHEDER,
   erGyldigArealvaerdi,
   omregnTilAlle,
   rundAreal,
+  synligeArealEnheder,
   type ArealEnhedId,
 } from "@/lib/areal-omregner";
 
@@ -18,6 +18,8 @@ const enhedLabels: Record<ArealEnhedId, { da: string; se: string }> = {
   hektar: { da: "Hektar (ha)", se: "Hektar (ha)" },
   kvadratfod: { da: "Kvadratfod (sq ft)", se: "Kvadratfot (sq ft)" },
   acre: { da: "Acre", se: "Acre" },
+  "tonder-land": { da: "Tønde land", se: "Tønde land" },
+  kvadratalen: { da: "Kvadratalen", se: "Kvadratalen" },
 };
 
 const labels = {
@@ -53,6 +55,10 @@ export default function ArealOmregner() {
 
   const [vaerdi, setVaerdi] = useState<string>("500");
   const [enhed, setEnhed] = useState<ArealEnhedId>("kvadratfod");
+
+  // Gamle danske landmålingsenheder hører kun til på dansk, så den svenske
+  // udgave af /kvadratmeter ikke viser «tønde land».
+  const synlige = synligeArealEnheder(lang === "da");
 
   const tal = Number(vaerdi.replace(",", "."));
   const gyldig = vaerdi.trim() !== "" && erGyldigArealvaerdi(tal);
@@ -103,7 +109,7 @@ export default function ArealOmregner() {
             onChange={(e) => setEnhed(e.target.value as ArealEnhedId)}
             className={feltCls}
           >
-            {AREAL_ENHEDER.map((e) => (
+            {synlige.map((e) => (
               <option key={e.id} value={e.id}>
                 {enhedLabels[e.id][lang]}
               </option>
@@ -116,7 +122,7 @@ export default function ArealOmregner() {
         <>
           <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{l.resultat}</h3>
           <ul className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {AREAL_ENHEDER.map((e) => {
+            {synlige.map((e) => {
               const valgt = e.id === enhed;
               return (
                 <li

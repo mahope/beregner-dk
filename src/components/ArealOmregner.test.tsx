@@ -22,7 +22,7 @@ describe("ArealOmregner", () => {
   // er denne omregning, og «500 kvadratfod» er første træffer under
   // «kvadratfod». Værktøjet på /kvadratmeter viste kun den ene vej, så den
   // omvende var umulig at løse på sitet.
-  test("500 kvadratfod viser alle fem andre enheder, da er standardvalget", () => {
+  test("500 kvadratfod viser alle de andre enheder, da er standardvalget", () => {
     renderMed("da");
 
     expect(screen.getByText("46,45")).toBeInTheDocument();
@@ -30,14 +30,26 @@ describe("ArealOmregner", () => {
     expect(screen.getByText("0,0046")).toBeInTheDocument();
     expect(screen.getByText("0,000046")).toBeInTheDocument();
     expect(screen.getByText("0,011478")).toBeInTheDocument();
+    // Gamle danske enheder: 500 kvadratfod = 0,01 tønde land = 117,8924 kvadratalen.
+    expect(screen.getByText("0,01")).toBeInTheDocument();
+    expect(screen.getByText("117,8924")).toBeInTheDocument();
   });
 
-  test("alle seks enheder er valgbare, og m² står først", () => {
+  test("alle otte danske enheder er valgbare, og m² står først", () => {
     renderMed("da");
 
     const valg = screen.getByLabelText("Enhed") as HTMLSelectElement;
     const muligheder = Array.from(valg.options).map((o) => o.value);
-    expect(muligheder).toEqual(["m2", "cm2", "km2", "hektar", "kvadratfod", "acre"]);
+    expect(muligheder).toEqual([
+      "m2",
+      "cm2",
+      "km2",
+      "hektar",
+      "kvadratfod",
+      "acre",
+      "tonder-land",
+      "kvadratalen",
+    ]);
     expect(valg.value).toBe("kvadratfod");
   });
 
@@ -81,6 +93,17 @@ describe("ArealOmregner", () => {
     expect(screen.getByText(/exakt 0,09290304/)).toBeInTheDocument();
     expect(screen.getByText(/1 kvadratfot är exakt/)).toBeInTheDocument();
     expect(document.body.innerHTML).not.toContain("Omregn areal");
+    // De gamle danske landmålingsenheder hører kun til på dansk.
+    const valg = screen.getByLabelText("Enhet") as HTMLSelectElement;
+    expect(Array.from(valg.options).map((o) => o.value)).toEqual([
+      "m2",
+      "cm2",
+      "km2",
+      "hektar",
+      "kvadratfod",
+      "acre",
+    ]);
+    expect(document.body.innerHTML).not.toContain("Tønde land");
     unmount();
 
     renderMed("no");

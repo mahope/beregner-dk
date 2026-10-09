@@ -36,6 +36,7 @@ import { BMI_BAAND, vaegtInterval } from "./bmi-voksen-grænser";
 import { idealvaegtResultat, rundIdealvaegt } from "./idealvaegt";
 import { RUMFANG_EKSEMPEL, LITER_PR_KUBIKMETER } from "./rumfang";
 import { AREAL_EKSEMPEL, KVADRATCENTIMETER_PR_KVADRATMETER } from "./areal";
+import { KVADRATALEN_I_M2, TONDE_LAND_I_M2, omregnAreal } from "./areal-omregner";
 import { OMKREDS_EKSEMPEL } from "./omkreds";
 import { RETVINKLET_EKSEMPEL } from "./retvinklet-trekant";
 import { HUNDEALDER_EKSEMPEL, menneskeAar, regnestykke } from "./hundealder";
@@ -2223,6 +2224,9 @@ faqItems: kalorierFaqItems("da"),
       { question: "Hvad er forskellen på m² og m?", answer: "Meter måler længde. Kvadratmeter måler areal/flade." },
       { question: "Omregning?", answer: kvadratmeterFaqSvar("da").omregning! },
       { question: "Hvad koster gulv pr. m²?", answer: kvadratmeterFaqSvar("da").materialer! },
+      { question: "Hvor mange m² er en tønde land?", answer: `En tønde land er 14.000 kvadratalen, altså ${TONDE_LAND_I_M2.toLocaleString("da-DK", { maximumFractionDigits: 0 })} m² eller cirka 0,55 hektar. Enheden blev afskaffet i 1907, men står stadig i ældre skøder og matrikelkort.` },
+      { question: "Hvor mange m² er en kvadratalen?", answer: `En kvadratalen er én alen i anden. Den danske alen er 0,627707 m, så én kvadratalen er cirka ${KVADRATALEN_I_M2.toLocaleString("da-DK", { maximumFractionDigits: 3 })} m². En tønde land er 14.000 af dem.` },
+      { question: "Hvor mange tønde land er en hektar?", answer: `En hektar er 10.000 m², altså cirka ${omregnAreal(1, "hektar", "tonder-land").toLocaleString("da-DK", { maximumFractionDigits: 2 })} tønde land.` },
       { question: "Hvor kommer arealet fra?", answer: "Når du slår en adresse op, henter vi boligareal, antal værelser og byggeår fra BBR (Bygnings- og Boligregistret) og grundarealet fra matriklen via Datafordeleren. For lejligheder bruges den konkrete lejligheds areal. BBR-arealet er målt til ydersiden af ydervæggene, så det er typisk lidt større end dine indvendige mål. Vi gemmer ikke adressen." },
       ],
     },

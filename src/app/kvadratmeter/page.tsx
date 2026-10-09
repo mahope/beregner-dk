@@ -21,6 +21,12 @@ import {
   kvadratmeterPrisPrM2,
   kvadratmeterUdtryk,
 } from "@/lib/kvadratmeter-eksempler";
+import {
+  KVADRATALEN_I_M2,
+  KVADRATALEN_PR_TONDE_LAND,
+  TONDE_LAND_I_M2,
+  omregnAreal,
+} from "@/lib/areal-omregner";
 
 export async function generateMetadata() {
   return generatePageMetadata("kvadratmeter");
@@ -31,6 +37,18 @@ export default async function KvadratmeterPage() {
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("kvadratmeter", locale) || getPageData("kvadratmeter", "da")!;
   const fakta = kvadratmeterOmregningsFakta(locale);
+
+  // Gamle danske landmålingsenheder. Tallene læses fra `areal-omregner`, samme
+  // modul som omregneren ovenfor bruger, så tabellen og værktøjet ikke kan
+  // vise to forskellige svar. Kun på dansk: enhederne er danske, og den
+  // svenske side har sine egne.
+  const gammelNum = (vaerdi: number, decimaler: number) =>
+    vaerdi.toLocaleString("da-DK", { maximumFractionDigits: decimaler });
+  const tondeLandM2 = gammelNum(TONDE_LAND_I_M2, 2);
+  const tondeLandHektar = gammelNum(omregnAreal(1, "tonder-land", "hektar"), 4);
+  const kvadratalenM2 = gammelNum(KVADRATALEN_I_M2, 4);
+  const hektarTonder = gammelNum(omregnAreal(1, "hektar", "tonder-land"), 2);
+  const m2Kvadratalen = gammelNum(omregnAreal(1, "m2", "kvadratalen"), 3);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -190,6 +208,67 @@ export default async function KvadratmeterPage() {
           {kvadratmeterPrisPrM2("da")} er{" "}
           <strong>{kvadratmeterPrisBeloeb("da")}</strong>, og så lægger du 5-10 %
           til for tilskæring og spild.
+        </p>
+      </div>
+      )}
+
+      {/* Gamle danske arealenheder. Dansk autocomplete 9/10: «tønder land til
+          hektar», «tønder land til m2», «hektar til tønder» og «kvadratalen
+          til kvadratmeter». Enhederne blev afskaffet i 1907, men står stadig i
+          ældre skøder og matrikelkort, og sitet havde dem slet ikke. */}
+      {locale === "da" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Hvor meget er en tønde land og en kvadratalen?</h2>
+        <p>
+          Ældre skøder og matrikelkort opgiver grundens størrelse i enheder, der
+          blev afskaffet, da Danmark gik over til metersystemet i 1907. En{" "}
+          <strong>tønde land</strong> var oprindeligt det areal, man kunne tilså
+          med en tønde korn, og en <strong>kvadratalen</strong> er én alen i
+          anden. Omregneren ovenfor kan regne dem, og de faste tal er disse:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Gammel enhed</th>
+                <th>Svarer til</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1 tønde land</td>
+                <td>{tondeLandM2} m² ({tondeLandHektar} hektar)</td>
+              </tr>
+              <tr>
+                <td>1 kvadratalen</td>
+                <td>{kvadratalenM2} m²</td>
+              </tr>
+              <tr>
+                <td>1 hektar</td>
+                <td>{hektarTonder} tønde land</td>
+              </tr>
+              <tr>
+                <td>1 m²</td>
+                <td>{m2Kvadratalen} kvadratalen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Tallene er regnet fra alen: den danske alen er to fod, og loven af 4.
+          maj 1907 fastsætter foden til 0,3138535 m, så én alen er 0,627707 m og
+          én kvadratalen {kvadratalenM2} m². En tønde land er{" "}
+          {gammelNum(KVADRATALEN_PR_TONDE_LAND, 0)} kvadratalen, altså{" "}
+          {tondeLandM2} m². Kilde: Teknisk Kulturarvs metertabeller
+          (1907-loven), Wikipedia «Tønde land» og jomark.dk (verificeret 9.
+          oktober 2026).
+        </p>
+        <p>
+          <strong>Brug tallet fra matriklen, ikke fra skødet.</strong> Er grunden
+          blevet udstykket eller sammenlagt, siden skødet blev skrevet, er det
+          gamle areal forældet. Til en byggesag eller en bebyggelsesprocent er
+          det altid det nuværende areal i BBR og matriklen, der gælder — ikke
+          tallet i tønder land.
         </p>
       </div>
       )}

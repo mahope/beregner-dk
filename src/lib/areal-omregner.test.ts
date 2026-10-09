@@ -1,16 +1,20 @@
 import { describe, expect, test } from "vitest";
 import {
   ACRE_I_M2,
+  ALEN_I_METER,
   AREAL_ENHEDER,
   FOD_I_METER,
+  KVADRATALEN_I_M2,
   KVADRATFOD_I_M2,
   OMREGNINGS_EKSEAMPLER,
+  TONDE_LAND_I_M2,
   arealEnhed,
   erGyldigArealvaerdi,
   omregnAreal,
   omregnTilAlle,
   omregnTilM2,
   rundAreal,
+  synligeArealEnheder,
   type ArealEnhedId,
 } from "./areal-omregner";
 
@@ -38,7 +42,7 @@ describe("areal-omregnerens enheder", () => {
     expect(arealEnhed("m2").faktorM2).toBe(1);
   });
 
-  test("enhederne er de seks, siden lover om, og m² står først", () => {
+  test("enhederne er de otte, siden lover om, og m² står først", () => {
     expect(AREAL_ENHEDER.map((e) => e.id)).toEqual<ArealEnhedId[]>([
       "m2",
       "cm2",
@@ -46,7 +50,29 @@ describe("areal-omregnerens enheder", () => {
       "hektar",
       "kvadratfod",
       "acre",
+      "tonder-land",
+      "kvadratalen",
     ]);
+  });
+
+  test("kvadratalen og tønde land følger alen: 0,627707² m² og 14.000 af dem", () => {
+    // Alen er to fod à 0,3138535 m fra 1907-loven.
+    expect(ALEN_I_METER).toBe(2 * 0.3138535);
+    expect(KVADRATALEN_I_M2).toBe(ALEN_I_METER * ALEN_I_METER);
+    expect(TONDE_LAND_I_M2).toBe(14_000 * KVADRATALEN_I_M2);
+    // 5.516,23 m², tæt på de 5.516,2 / 5.516,24 kilderne angiver.
+    expect(rundAreal(TONDE_LAND_I_M2, "tonder-land")).toBe(5516.23);
+    expect(rundAreal(KVADRATALEN_I_M2, "kvadratalen")).toBe(0.394);
+  });
+
+  test("de gamle danske enheder er kun med på dansk, ikke på svensk", () => {
+    const dansk = synligeArealEnheder(true).map((e) => e.id);
+    const svensk = synligeArealEnheder(false).map((e) => e.id);
+    expect(dansk).toContain("tonder-land");
+    expect(dansk).toContain("kvadratalen");
+    expect(svensk).not.toContain("tonder-land");
+    expect(svensk).not.toContain("kvadratalen");
+    expect(svensk).toHaveLength(6);
   });
 
   test("ukendt enhed kaster, så en tastefejl ikke regner på 1 m²", () => {
@@ -82,6 +108,15 @@ describe("omregning mellem enheder", () => {
     expect(omregnTilM2(10_000, "cm2")).toBe(1);
   });
 
+  test("en tønde land er 0,5516 hektar, og en hektar er 1,81 tønde land", () => {
+    expect(rundAreal(omregnAreal(1, "tonder-land", "hektar"), "hektar")).toBe(0.5516);
+    expect(rundAreal(omregnAreal(1, "hektar", "tonder-land"), "tonder-land")).toBe(1.81);
+  });
+
+  test("en kvadratmeter er 2,538 kvadratalen", () => {
+    expect(rundAreal(omregnAreal(1, "m2", "kvadratalen"), "kvadratalen")).toBe(2.538);
+  });
+
   test("at omregne samme vej frem og tilbage giver det indtastede tal", () => {
     for (const enhed of AREAL_ENHEDER) {
       tætPå(omregnAreal(omregnAreal(37.5, "m2", enhed.id), enhed.id, "m2"), 37.5, 4);
@@ -104,18 +139,21 @@ describe("gyldige værdier", () => {
 });
 
 describe("alle enheder på én gang", () => {
-  test("500 kvadratfod læses i alle seks enheder, og m² er præcis", () => {
+  test("500 kvadratfod læses i alle otte enheder, og m² er præcis", () => {
     const alle = omregnTilAlle(500, "kvadratfod");
     tætPå(alle.m2, 46.45152);
     expect(rundAreal(alle.cm2, "cm2")).toBe(464_515);
     tætPå(alle.hektar, 0.004645152);
     tætPå(alle.km2, 0.00004645152);
     tætPå(alle.acre, 0.011478, 6);
+    // De gamle danske enheder er også med i optællingen.
+    tætPå(alle["tonder-land"], 46.45152 / TONDE_LAND_I_M2, 6);
+    tætPå(alle.kvadratalen, 46.45152 / KVADRATALEN_I_M2, 4);
     // Den enhed brugeren skrev, danner sig selv frem igen.
     expect(rundAreal(alle.kvadratfod, "kvadratfod")).toBe(500);
   });
 
-  test("et ugyldigt tal giver NaN i alle seks, ikke kun i den valgte", () => {
+  test("et ugyldigt tal giver NaN i alle otte, ikke kun i den valgte", () => {
     const alle = omregnTilAlle(-1, "kvadratfod");
     for (const enhed of AREAL_ENHEDER) {
       expect(Number.isNaN(alle[enhed.id])).toBe(true);
