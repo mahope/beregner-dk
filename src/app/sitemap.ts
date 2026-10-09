@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import type { DomainConfig } from "@/lib/domain-config";
+import { BLOG_ARTIKLER } from "@/lib/blog-artikler";
 import { isCalculatorAvailable } from "@/lib/calculator-list";
 import { getFooterBlogLinks } from "@/lib/footer-data";
 import type { Locale } from "@/lib/i18n";
@@ -250,36 +251,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 function getBlogSlugs(locale: Locale): string[] {
   if (locale !== "da") return [];
-  return [
-    "hvor-mange-kalorier-skal-jeg-have",
-    "boernebidrag-2026-satser-og-regler",
-    "pension-hvor-meget-skal-du-spare-op",
-    "boligstoette-2026-nye-regler",
-    "bmi-for-boern-saadan-tjekker-du",
-    "bmi-voksen-saadan-tolk-er-du-tallet",
-    "guide-feriepenge-hvornaar-og-hvor-meget",
-    "saadan-beregner-du-din-reelle-timeloen",
-    "hvordan-beregner-man-moms",
-    "30-procent-reglen-husleje",
-    "saadan-finder-du-din-timepris-som-freelancer",
-    "guide-til-laan-og-renter",
-    "spar-penge-paa-braendstof",
-    "skat-2026-alt-du-skal-vide",
-    "su-2026-satser-og-regler",
-    "dagpenge-saadan-finder-du-din-sats",
-    "boliglaan-2026-renter-og-afdrag",
-    "fradrag-2026-komplet-guide",
-    "barsel-2026-regler-og-satser",
-    "arveafgift-regler-og-satser",
-    "elpriser-2026-beregn-dit-forbrug",
-    "privatoekonomi-for-unge",
-    "koeb-af-bolig-2026-omkostninger",
-    "biloekonomi-2026-hvad-koster-det-at-eje-bil",
-    "leasing-af-bil-2026-pris-og-guide",
-    "maanedsbudget-2026-komplet-guide",
-    "boernepenge-2026-satser-og-regler",
-    "boligsalg-2026-guide-til-omkostninger-og-provenu",
-    "kvadratmeter-saadan-regner-du-ud",
-    "hvad-er-klokken-i-usa-naar-den-er-12-i-danmark",
-  ];
+  // Derived from `BLOG_ARTIKLER`, the list the blog index and every byline
+  // already read. This was a second, hand-maintained array of the same 31
+  // slugs, and `/blog/rentefradrag-2026-satser-og-regler` shipped without
+  // being added to it: live and in the footer, but never in the sitemap.
+  // `blog-artikler.test.ts` locks that list to the article directories, so
+  // this array is now locked by the same test.
+  return BLOG_ARTIKLER.map((artikel) => artikel.slug);
 }

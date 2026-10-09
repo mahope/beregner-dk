@@ -131,7 +131,7 @@ const faqItems = [
   {
     question: "Kan jeg gå ned under mit stofskifte?",
     answer:
-      `BeregnTallene sætter aldrig et mål under dit stofskifte på ${da(tal.mandBmr)} kcal, for kroppen ` +
+      `Beregneren sætter aldrig et mål under dit stofskifte på ${da(tal.mandBmr)} kcal, for kroppen ` +
       `bruger det alene for at holde dig i live. Som tommelfingerregel skal du holde dig over ` +
       `${da(VAEGTTAB_MIN_KVINDER)} kcal som kvinde og ${da(VAEGTTAB_MIN_MAEND)} kcal som mand, ` +
       `medmindre en læge har sat en kureplan op for dig.`,
@@ -200,7 +200,7 @@ export default function KaloriebehovBlogPage() {
             <strong>{da(formelBmr)} kcal</strong> for eksemplets mand.
           </li>
           <li>
-            Ganget med aktivitetsfaktoren {da(AKTIVITETS_FAKTORER[eksempel.aktivitet])}{" "}
+            Ganget med aktivitetsfaktoren {da(AKTIVITETS_FAKTORER[eksempel.aktivitet], 3)}{" "}
             bliver det <strong>{da(tal.mandTdee)} kcal</strong> — det tal, du holder
             vægten på.
           </li>
@@ -246,7 +246,7 @@ export default function KaloriebehovBlogPage() {
             {aktivitetRaekker.map((raekke) => (
               <tr key={raekke.niveau}>
                 <td>{raekke.label}</td>
-                <td>{da(AKTIVITETS_FAKTORER[raekke.niveau])}</td>
+                <td>{da(AKTIVITETS_FAKTORER[raekke.niveau], 3)}</td>
                 <td>{raekke.forklaring}</td>
               </tr>
             ))}
@@ -318,7 +318,7 @@ export default function KaloriebehovBlogPage() {
         <p>
           Formelen ligger typisk {da(KALORIER_USIKKERHED_PCT.min)}-
           {da(KALORIER_USIKKERHED_PCT.maks)} % ved siden af for den enkelte, og{" "}
-          {da(AKTIVITETS_FAKTORER[eksempel.aktivitet])} er en
+          {da(AKTIVITETS_FAKTORER[eksempel.aktivitet], 3)} er en
           gennemsnitsfaktor — ikke en måling af din krop. Derfor er tallene her
           vejledende. Den bedste kontrol er din egen vægtkurve: spis efter målet
           i to uger, vej dig ugentligt, og justér med 100-200 kcal, hvis vægten

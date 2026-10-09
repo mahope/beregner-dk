@@ -120,7 +120,7 @@ const faqItems = [
     question: "Er tallene fra beregneren bindende?",
     answer:
       `Nej. Normalbidraget er et fast beløb, men indkomstgrænserne for forhøjet bidrag er vejledende, og det endelige bidrag fastsættes af Familieretshuset eller aftales mellem forældrene. ` +
-      `BeregnTallene giver dig et solidt udgangspunkt for en aftale eller en sag.`,
+      `Tallene giver dig et solidt udgangspunkt for en aftale eller en sag.`,
   },
   {
     question: "Regner beregneren med alt, jeg betaler?",

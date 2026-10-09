@@ -1,4 +1,7 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "vitest";
+import { BLOG_ARTIKLER } from "@/lib/blog-artikler";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getAvailableSlugs } from "@/lib/page-data";
 import { buildRobots } from "./robots";
@@ -92,6 +95,41 @@ describe("sitemap lastmod hygiene", () => {
         );
       expect(strip(late), locale).toBe(strip(early));
     }
+  });
+});
+
+describe("blog articles in the sitemap", () => {
+  /**
+   * `getBlogSlugs` was a second, hand-maintained copy of `BLOG_ARTIKLER`, and
+   * `/blog/rentefradrag-2026-satser-og-regler` shipped without ever being added
+   * to the copy: the article was live and in the footer, but never in the
+   * sitemap. It now reads the shared list, and these tests hold it there.
+   */
+  test("lists every article that exists as a directory", () => {
+    const da = getDomainConfigByLocale("da");
+    const kataloger = readdirSync(join(__dirname, "blog"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+      .map((entry) => entry.name);
+    const urls = buildSitemap(da).map((entry) => String(entry.url));
+    for (const slug of kataloger) {
+      expect(urls, `${slug} mangler i sitemapet`).toContain(`${da.baseUrl}/blog/${slug}`);
+    }
+    expect(kataloger).toHaveLength(BLOG_ARTIKLER.length);
+  });
+
+  test("has no blog URL that is not a registered article", () => {
+    const da = getDomainConfigByLocale("da");
+    const urls = buildSitemap(da).map((entry) => String(entry.url));
+    const registreret = new Set(BLOG_ARTIKLER.map((artikel) => artikel.slug));
+    const slugs = urls
+      .filter((url) => url.startsWith(`${da.baseUrl}/blog/`))
+      .map((url) => url.slice(`${da.baseUrl}/blog/`.length));
+    expect(slugs.filter((slug) => !registreret.has(slug))).toEqual([]);
+  });
+
+  test("the Swedish sitemap has no blog articles", () => {
+    const urls = buildSitemap(getDomainConfigByLocale("se")).map((entry) => String(entry.url));
+    expect(urls.filter((url) => url.includes("beraknare.se/blog/"))).toEqual([]);
   });
 });
 
