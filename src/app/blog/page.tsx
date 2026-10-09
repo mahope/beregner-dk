@@ -38,6 +38,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const blogPosts = [
   {
+    slug: "hvor-mange-kalorier-skal-jeg-have",
+    title: "Hvor mange kalorier skal jeg have om dagen?",
+    description: "Dit kaloriebehov er stofskifte ganget med aktivitet. Se regnestykket for at tabe dig, holde vægten og bygge muskler.",
+    category: "Sundhed",
+  },
+  {
     slug: "skat-2026-alt-du-skal-vide",
     title: "Skat 2026: Alt du skal vide om skatteændringer",
     description: "Komplet overblik over skat i 2026: Nye satser for personfradrag, topskat, AM-bidrag, kommuneskat og beskæftigelsesfradrag.",

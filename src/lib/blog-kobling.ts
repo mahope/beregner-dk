@@ -110,6 +110,14 @@ export const BEREGNER_ARTIKLER: Record<string, ArtikelKobling[]> = {
         "WHO's grænser for voksne, hvornår BMI ikke kan bruges, og hvad taljemål fortælder ud over tallet.",
     },
   ],
+  "/kalorier": [
+    {
+      slug: "hvor-mange-kalorier-skal-jeg-have",
+      titel: "Hvor mange kalorier skal jeg have om dagen?",
+      beskrivelse:
+        "Regnestykket bag tallet: stofskifte i hvile, aktivitetsfaktorer, kalorieunderskud og hvor meget protein du skal have, når du taber dig.",
+    },
+  ],
   "/kvadratmeter": [
     {
       slug: "kvadratmeter-saadan-regner-du-ud",

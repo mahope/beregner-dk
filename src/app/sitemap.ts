@@ -251,6 +251,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 function getBlogSlugs(locale: Locale): string[] {
   if (locale !== "da") return [];
   return [
+    "hvor-mange-kalorier-skal-jeg-have",
+    "boernebidrag-2026-satser-og-regler",
     "pension-hvor-meget-skal-du-spare-op",
     "boligstoette-2026-nye-regler",
     "bmi-for-boern-saadan-tjekker-du",

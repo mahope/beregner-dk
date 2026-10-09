@@ -31,6 +31,7 @@ export const BLOG_ARTIKLER: BlogArtikkel[] = [
   { slug: "biloekonomi-2026-hvad-koster-det-at-eje-bil", publiceret: "2026-08-23", opdateret: null, laesetidMinutter: 10 },
   { slug: "bmi-for-boern-saadan-tjekker-du", publiceret: "2026-02-13", opdateret: null, laesetidMinutter: 9 },
   { slug: "bmi-voksen-saadan-tolk-er-du-tallet", publiceret: "2026-10-01", opdateret: null, laesetidMinutter: 6 },
+  { slug: "hvor-mange-kalorier-skal-jeg-have", publiceret: "2026-10-09", opdateret: null, laesetidMinutter: 7 },
   { slug: "boernepenge-2026-satser-og-regler", publiceret: "2026-08-24", opdateret: null, laesetidMinutter: 8 },
   { slug: "boernebidrag-2026-satser-og-regler", publiceret: "2026-10-09", opdateret: null, laesetidMinutter: 6 },
   { slug: "boliglaan-2026-renter-og-afdrag", publiceret: "2026-02-17", opdateret: null, laesetidMinutter: 9 },

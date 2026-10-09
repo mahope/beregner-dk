@@ -5,6 +5,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { PROTEIN_G_PER_KG, kaloriePrAlderRaekker, kaloriePrDagRaekker, type KalorieMaal } from "@/lib/makroer";
@@ -426,6 +427,8 @@ export default async function KalorierPage() {
       )}
 
       <FAQ items={pageData.faqItems} />
+
+      <RelateredeArtikler current="/kalorier" locale={locale} />
 
       <RelatedCalculators current="/kalorier" />
     </div>

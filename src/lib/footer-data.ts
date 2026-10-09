@@ -233,6 +233,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
 const blogLinks: Record<Locale, FooterBlogLink[]> = {
   da: [
     { name: "Børnebidrag 2026: Satser og regler", href: "/blog/boernebidrag-2026-satser-og-regler" },
+    { name: "Hvor mange kalorier skal jeg have?", href: "/blog/hvor-mange-kalorier-skal-jeg-have" },
     { name: "Børnepenge 2026: Satser og regler", href: "/blog/boernepenge-2026-satser-og-regler" },
     { name: "Månedsbudget 2026: Komplet guide", href: "/blog/maanedsbudget-2026-komplet-guide" },
     { name: "Biløkonomi 2026: Guide til eje bil", href: "/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil" },

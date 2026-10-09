@@ -88,7 +88,7 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 
 ## Feature-kø
 
-- **[ ] `/kaloriebehov` — hvor mange kalorier skal jeg have for at tabe/holde/bygge?** Dansk autocomplete (8/10): «hvor mange kalorier skal jeg have for at tabe mig / holde vægten / bygge muskler» 10/10. Sitet har `/kalorier` med kaloriebehov. ⛔ kræver en kilde til kaloriebehov pr. mål (❓).
+- **[ ] `/kaloriebehov` — hvor mange kalorier skal jeg have for at tabe/holde/bygge?** (9/10: spørgsmålet er beskrevet i blogindlægget `hvor-mange-kalorier-skal-jeg-have`; en egen side afventer stadig en kilde til behov pr. mål.) Dansk autocomplete (8/10): «hvor mange kalorier skal jeg have for at tabe mig / holde vægten / bygge muskler» 10/10. Sitet har `/kalorier` med kaloriebehov. ⛔ kræver en kilde til kaloriebehov pr. mål (❓).
 - **[ ] BMI-percentil for børn.** «bmi for børn», «bmi skala børn» (da), «bmi barn tabell» (se). WHO's BMI-for-alder-tabeller er ~150 tal pr. køn. ⛔ ét skærmbillede af WHO's tabel (fejltransskription værre end ingen side).
 - **[ ] Kogetider** — GSCs 2. største søgning på `/tidsberegner` er «hvor lang tid» (824 visninger, pos. 6,8), og 10/10 danske completioner er madvarer med koge-/bagetid. ⛔ `frbs.foodsearch.lex.dk` og `sst.dk` er uafgængelige (❓).
 - **[ ] Svensk dækning af manglende kalkulatorer** — beraknare.se har 89 sitemap-URL mod 158 på minberegner.dk, bl.a. uden `/dagpenge` og `/boernepenge`. ⛔ Opgave 187, 13/10.
@@ -138,6 +138,8 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 **Åben 5/10 17:5x (Sentry):** MINBEREGNER-2 «useLocale must be used within a LocaleProvider» på POST / er rettet ved at wrappe NotFoundSearch i LocaleProvider (ceo/sentry-uselocale-fix 5/10 17:5x). Kun Sentrys hændelsestæller afgør, om den er væk (2 hændelser / 0 brugere på 14 dage) — læs den 14/10.
 
 ⚠️ **Læs tal på strippet HTML, ikke rå markup.** Next leverer HTML'en som én linje, og der står et tag mellem tal og enhed. Strip med `curl -s URL | python3 -c "import sys,re,html;t=sys.stdin.read();t=re.sub(r'<[^>]+>',' ',t);print(re.sub(r'\s+',' ',html.unescape(t)))"` og grep på teksten. Interpolerede tal skrives som `1.515<!-- --> skridt` — tjek tal og enhed hver for sig.
+
+**Åben 9/10 12:5x:** `VERIFICÉR DEPLOY: /blog/hvor-mange-kalorier-skal-jeg-have svarer 200 og viser titlen «Hvor mange kalorier skal jeg have? 2.759 kcal om dagen», overskrifterne «Kort svar», «De to tal, der bestemmer dit behov», «Sådan regner du ud, hvad du skal spise for at tabe dig», «Hvor langt ned må du gå?» og «Protein, når kalorierne falder», aktivitetstabellen med 1,2/1,375/1,55/1,725/1,9, regnestykket «10 × 80 + 6,25 × 180 − 5 × 30 + 5 = 1.780 kcal», målet «2.759 − 500 = 2.259 kcal», kgPrUgeRegnet «0,45», vægtabseksemplet «46.200 kcal» «550 kcal» «2.209 kcal», protein «96-128 g», FAQ'en og knappen «Beregn dit kaloriebehov»; /kalorier skal vise «Guides om emnet» med linket til indlægget; begge nye URL'er skal stå i sitemap.xml, og beraknare.se skal IKKE have indlægget (daOnly). ceo/kalorieblog 9/10 12:5x`. Mål på indhold med strip-grep: skal indeholde «Hvor mange kalorier», «2.759» og «2.259». Første reelle vindue efter mergen: **9/10 17:30**.
 
 ## ❓ Til Mads
 
