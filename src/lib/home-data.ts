@@ -276,6 +276,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Protein i madvarer", description: "Protein pr. 100 g i æg, kylling og andre madvarer", href: "/protein-i-madvarer", popular: false, category: "Sundhed" },
   { title: "Kulhydrater i madvarer", description: "Kulhydrat pr. 100 g i banan, kartoffel og andre madvarer", href: "/kulhydrater-i-madvarer", popular: false, category: "Sundhed" },
   { title: "Salt i madvarer", description: "Natrium pr. 100 g i rugbrød, smør og skinke — omregnet til salt", href: "/salt-i-madvarer", popular: false, category: "Sundhed" },
+  { title: "Fiber i madvarer", description: "Fiber pr. 100 g i havregryn, rugbrød og andre madvarer", href: "/fiber-i-madvarer", popular: false, category: "Sundhed" },
   { title: "Fedt i madvarer", description: "Fedt pr. 100 g i æg, avocado og andre madvarer", href: "/fedt-i-madvarer", popular: false, category: "Sundhed" },
   { title: "Sukker i madvarer", description: "Sukker pr. 100 g i banan, æble og andre madvarer", href: "/sukker-i-madvarer", popular: false, category: "Sundhed" },
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", popular: false, category: "Sundhed" },
