@@ -11,9 +11,38 @@ export interface NedtaellingResultat {
   uger: number;
   restDage: number;
   erFortid: boolean;
+  /**
+   * Måldatoen som UTC-midnat. Den skal med ud, fordi timetallet regnes fra et
+   * nu-tidspunkt (den besøgendes ur) frem til datoens *lokale* midnat, og det
+   * kan kun lade sig gøre, når kalenderdagen kendes — ikke bare antal dage.
+   */
+  tilTid: number;
 }
 
 const MS_PR_DAG = 24 * 60 * 60 * 1000;
+const MS_PR_TIME = 60 * 60 * 1000;
+const MS_PR_MINUT = 60 * 1000;
+
+/**
+ * Hele timer og resterende minutter fra et nu-tidspunkt frem til datoen. Kun
+ * meningsfyldt når datoen ligger frem i tid; fortiden får 0/0 i stedet for et
+ * negativt tal, så værdien aldrig skal filtreres af kallet.
+ */
+export function nedtaellingTimer(
+  tilTid: number,
+  nu: Date
+): { timer: number; minutter: number } {
+  const d = new Date(tilTid);
+  // Samme regel som kalenderdagen på `/dage-til`: nedtællingen slutter ved
+  // midnat inden datoen, og den besøgendes eget ur måler — ikke serverens, der
+  // typisk kører UTC og ville svare to timer forkert for en dansk læser.
+  const maal = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  const rest = Math.max(0, maal.getTime() - nu.getTime());
+  return {
+    timer: Math.floor(rest / MS_PR_TIME),
+    minutter: Math.floor((rest % MS_PR_TIME) / MS_PR_MINUT),
+  };
+}
 
 function tilMidnat(iso: string): number | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
@@ -43,5 +72,6 @@ export function beregnNedtaelling(fraISO: string, tilISO: string): NedtaellingRe
     uger: Math.floor(abs / 7),
     restDage: abs % 7,
     erFortid: diffDage < 0,
+    tilTid: til,
   };
 }

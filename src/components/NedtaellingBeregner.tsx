@@ -7,7 +7,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { beregnNedtaelling } from "@/lib/nedtaelling";
+import { beregnNedtaelling, nedtaellingTimer } from "@/lib/nedtaelling";
 
 const labels = {
   da: {
@@ -19,6 +19,11 @@ const labels = {
     ago: "siden",
     today: "Det er i dag!",
     name: "Nedtælling",
+    hours: "timer",
+    oneHour: "time",
+    minutes: "minutter",
+    oneMinute: "minut",
+    hoursTo: "til den valgte dato",
     note: "Tæl dage til en fødselsdag, ferie, eksamen eller en anden vigtig dato. Beregningen tæller fra dags dato.",
   },
   se: {
@@ -30,7 +35,12 @@ const labels = {
     ago: "sedan",
     today: "Det är idag!",
     name: "Nedräkning",
-    note: "Räkna dagar till en födelsedag, semester, tenta eller ett annat viktigt datum. Beräkningen räknar från dagens datum.",
+    hours: "timmar",
+    oneHour: "timme",
+    minutes: "minuter",
+    oneMinute: "minut",
+    hoursTo: "till det valda datumet",
+    note: "Räkna dagar till en födelsedag, semester, tenta eller ett annat viktigt datum. Beräkningen räknas från dagens datum.",
   },
 } as const;
 
@@ -41,6 +51,28 @@ function todayISO(): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
+function TimerLinje({
+  tilTid,
+  nu,
+  l,
+  format,
+}: {
+  tilTid: number;
+  nu: Date;
+  l: (typeof labels)[keyof typeof labels];
+  format: (n: number) => string;
+}) {
+  const { timer, minutter } = nedtaellingTimer(tilTid, nu);
+  const t = timer === 1 ? l.oneHour : l.hours;
+  const m = minutter === 1 ? l.oneMinute : l.minutes;
+  return (
+    <p className="text-xs text-gray-600 dark:text-gray-300" data-testid="nedtaelling-timer">
+      {format(timer)} {t} {l.andDays}{" "}
+      {minutter} {m} {l.hoursTo}.
+    </p>
+  );
+}
+
 export default function NedtaellingBeregner() {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
@@ -48,6 +80,16 @@ export default function NedtaellingBeregner() {
 
   const [target, setTarget] = useState<string>("");
   const [today, setToday] = useState<string>("");
+  // Den besøgendes eget ur til timetallet. Det skifter hvert minut, så det skal
+  // tælles ned i klienten; et tal sat i HTML'en ville være forkert for den
+  // næste besøgende. Intet `aria-live` — et live-område læste hvert minut op igen.
+  const [nuTid, setNuTid] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setNuTid(new Date());
+    const id = window.setInterval(() => setNuTid(new Date()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -140,6 +182,7 @@ export default function NedtaellingBeregner() {
               </div>
             )}
             <p className="text-xs text-gray-500 dark:text-gray-400">{l.note}</p>
+            {r && !r.erFortid && nuTid && <TimerLinje tilTid={r.tilTid} nu={nuTid} l={l} format={fmt} />}
           </div>
         </div>
       </div>

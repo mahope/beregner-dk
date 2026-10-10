@@ -124,7 +124,9 @@ describe("dage-til hub: rendering", () => {
       "da",
       new Date()
     );
-    expect(html).toContain(`>${dage.days} dage</span>`);
+    // Enheden bøjes som komponentens count(): "1 dag", ellers "N dage" —
+    // hærdkodet "dage" går rød, så snart næste række er netop 1 dag væk.
+    expect(html).toContain(`>${dage.days} ${dage.days === 1 ? "dag" : "dage"}</span>`);
     expect(html).not.toContain("NaN");
   });
 

@@ -17,6 +17,7 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import {
   DAGE_TILBAGE_PATH,
   aaretTilbage,
+  dageTilbageIAaretAfsnit,
   dageTilbageIAaretCopy,
   dageTilbageIAaretFaq,
   isDageTilbageLocale,
@@ -123,24 +124,42 @@ describe("dage tilbage i året: siden peger på sit eget spørgsmål", () => {
 
   test("alle tal i den svenske række findes i den danske tekst", async () => {
     const html = await render("da");
-    const o = aaretTilbage("da", I_DAG);
+    // Rutetegneren regner på `new Date()`, ikke på `I_DAG`, så forventningerne
+    // skal udledes af den samme kilde som siden. De var hærdkodede til
+    // 2026-10-10 (82 dage) og blev røde ved midnat den 11. oktober, uden at
+    // siden var gatøj — testen målte et gammelt klokkeslæt.
+    const nu = new Date();
+    const o = aaretTilbage("da", nu);
+    // Dagetallet i svarboksen.
+    expect(html).toContain(`${o.dageTilbage.toLocaleString("da-DK")} dage`);
     expect(html).toContain(`Der er tilbage af året efter i dag:`);
-    expect(html).toContain("82 dage");
-    expect(html).toContain("11 hele uger og 5 dage");
-    expect(html).toContain("1.968 timer");
-    expect(html).toContain("77,3 % af 2026");
+    // Alle afsnitternes brødtekster skal stå på siden, ord til ord: de bærer
+    // uger, dage, timer og procent, og hvert af dem er et tal regnet i
+    // `aaretTilbage` — den samme funktion siden tegner med.
+    for (const afsnit of dageTilbageIAaretAfsnit("da", nu)) {
+      expect(html, afsnit.overskrift).toContain(afsnit.brødtekst);
+    }
+    expect(html).toContain(`${o.uger.toLocaleString("da-DK")} hele uger`);
+    expect(html).toContain(`${o.timer.toLocaleString("da-DK")} timer`);
     expect(html).toContain("56");
-    // Resten af dage tilbage pr. måned — den uafhængige optælling i
-    // `dage-tilbage-i-aaret.test.ts` fastlægger 21/30/31.
+    // Månedstabellen skal vise de samme tal som aaretTilbage regner i dag.
+    // Hærdkodet [21, 30, 31] var frosset til 10/10 og gik rød ved midnat; den
+    // uafhængige optælling af selve mattet ligger i dage-tilbage-i-aaret.test.ts.
     expect(html).toContain("oktober");
     expect(html).toContain("december");
-    expect(o.maaneder.map((m) => m.dageTilbage)).toEqual([21, 30, 31]);
-    expect(o.maaneder.map((m) => m.hverdageTilbage)).toEqual([15, 21, 20]);
+    for (const m of o.maaneder) {
+      const raekke = new RegExp(
+        `${m.name}</th><td[^>]*>${m.dageTilbage}</td><td[^>]*>${m.hverdageTilbage}</td>`
+      );
+      expect(html, m.name).toMatch(raekke);
+    }
   });
 
   test("de fire målte spørgsmål står i den synlige tekst og i FAQPage-JSON-LD", async () => {
     for (const sprog of ["da", "se"] as const) {
-      const faq = dageTilbageIAaretFaq(sprog, I_DAG);
+      // Sidens FAQ tegnes med new Date(), så forventningerne skal have det
+      // samme nu — I_DAG (10/10) gav «82 dage» mod sidens «81 dage» ved midnat.
+      const faq = dageTilbageIAaretFaq(sprog, new Date());
       expect(faq.length, sprog).toBe(4);
       const forventet =
         sprog === "da"
