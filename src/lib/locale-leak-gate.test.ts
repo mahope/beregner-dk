@@ -154,8 +154,20 @@ describe("locale-leak scanner", () => {
     // carries it: a broken exclusion reports locale-object copy that has *no*
     // port to be judged by, so the share the verdict layer dismisses collapses.
     // 0.9 sits under today's 0.95 and far above a broken exclusion.
+    //
+    // Moved a fourth time, 900 → 960, for the same reason C163 moved it: the
+    // scan set got sharper, not the rule. `/dato`'s dage-til block carried a
+    // comment quoting "`/dage-til/*`", and `stripNoise` runs the block-comment
+    // regex before the line-comment one — so that `/*` paired with the first
+    // `*/` 750 lines below and blanked the whole page body out of the scan
+    // (10/10, ceo/tidsberegner-dage-til-links). Extracting the block into
+    // `DageTilLinks.tsx` removed the comment and 39 Danish strings on `/dato`
+    // became visible for the first time. All 39 are the da-port verdict
+    // (checked against the live Swedish page: none renders), unreviewed stayed
+    // at 0. A broken exclusion still adds hundreds — that is what the bound is
+    // for — so 960 leaves it the headroom it needs without going deaf.
     const result = repo.json;
-    expect(result.candidates).toBeLessThan(900);
+    expect(result.candidates).toBeLessThan(960);
     expect(result.dead / result.candidates).toBeGreaterThan(0.9);
   });
 

@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -29,6 +29,13 @@ import {
 } from "@/lib/tids-summer";
 import { PLUS_TID_EKSEMPLER, plusTid } from "@/lib/plus-tid";
 import TidsberegnerPage from "./page";
+import {
+  getDageTilSlugs,
+  getDageTilEvents,
+  getDageTilAnswer,
+  dageTilArm,
+  formatTargetDate,
+} from "@/lib/dage-til";
 
 vi.mock("@/components/TidsBeregner", () => ({
   default: () => <div>Tidsværktøj</div>,
@@ -134,6 +141,77 @@ describe("tidsberegner page", () => {
     }
   });
 
+});
+
+/**
+ * Search Console (2026-09-10 → 10-08): /tidsberegner er sidens tredjestørste
+ * side med 79.641 visninger, CTR 0,2 % på pos. 6,7, og dens egne søgninger er
+ * «hvor lang tid er der til» og «hvad er klokken om 13 timer». Alligevel
+ * linkede siden til **0** dage-til-sider, mens /dato har 25 — selv om
+ * dage-til-siderne svarer præcis på de to søgninger. Blokken er den samme
+ * komponent, /dato bruger, så rækkerne og tallene ikke kan slæbe hen.
+ */
+describe("tidsberegner page — dage-til-listen", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-29T12:00:00Z"));
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("da linker til alle dage-til-sider og videre til datoberegneren", async () => {
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    expect(html).toContain("Hvor mange dage er der til …?");
+    for (const slug of getDageTilSlugs("da")) {
+      expect(html, slug).toContain(`href="/dage-til/${slug}"`);
+    }
+    expect(html).toContain('href="/dato"');
+    // Siden har intet tidsværktøj til at tælle dage, så den må ikke sige
+    // «ovenfor» om et værktøj, der ikke findes på siden.
+    expect(html).not.toContain("værktøjet «Dage til dato» ovenfor");
+  });
+
+  test("hver række bærer dagens antal og datoen", async () => {
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    for (const event of getDageTilEvents("da")) {
+      const answer = getDageTilAnswer(event, "da", new Date());
+      const target = formatTargetDate(answer.targetDate, "da");
+      const li = new RegExp(
+        `href="/dage-til/${dageTilArm(event, "da").slug}".*?${target}.*?${answer.days} dage`,
+        "s",
+      );
+      expect(html, event.id).toMatch(li);
+    }
+  });
+
+  test("se får dagar-till-rækkerne på svensk", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    expect(html).toContain("Hur många dagar är det till …?");
+    for (const slug of getDageTilSlugs("se")) {
+      expect(html, slug).toContain(`href="/dagar-till/${slug}"`);
+    }
+    expect(html).toContain('href="/dato"');
+    expect(html).not.toMatch(/href="\/dage-til\//);
+  });
+
+  test("no faar ingen dage-til-links", async () => {
+    vi.mocked(getLocale).mockResolvedValue("no");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("no"));
+
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    expect(html).not.toContain("/dage-til/");
+    expect(html).not.toContain("/dagar-till/");
+  });
 });
 
 /**

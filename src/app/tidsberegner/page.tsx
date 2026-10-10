@@ -38,6 +38,7 @@ import {
 } from "@/lib/tidsberegner";
 import { PLUS_TID_EKSEMPLER, plusTid } from "@/lib/plus-tid";
 import FAQ from "@/components/FAQ";
+import DageTilLinks from "@/components/DageTilLinks";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
@@ -1088,6 +1089,13 @@ export default async function TidsberegnerPage() {
         </ul>
       </div>
       )}
+
+      {/* Search Console: /tidsberegner er sidens tredjestørste side (79.641
+          visninger, pos. 6,7) og dens egne søgninger er «hvor lang tid er der
+          til» og «hvad er klokken om 13 timer» — men siden havde **0** links
+          til /dage-til/*, mod /dato's 25. Blokken er den samme som på /dato
+          (DageTilLinks), så tallene ikke kan slæbe hen mellem siderne. */}
+      <DageTilLinks locale={locale} vaerktoej="datoberegner" />
 
       <FAQ items={pageData.faqItems} />
 
