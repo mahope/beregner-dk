@@ -183,6 +183,23 @@ import {
   jernVareMedNavn,
 } from "./jern-i-madvarer";
 import {
+  VITAMIN_D_ANBEFALING_UG,
+  VITAMIN_D_AR_UG,
+  VITAMIN_D_RI_75_PLUS_UG,
+  VITAMIN_D_RI_UG,
+  VITAMIN_D_RI_UDEN_SOL_UG,
+  VITAMIN_D_UL_UG,
+  VITAMIN_D_VARER,
+  VITAMIN_D_KILDE,
+  andelAfAnbefaling as dAndelAfAnbefaling,
+  d100g,
+  dIgram,
+  gramForAnbefaling as dGramForAnbefaling,
+  rangliste as dRangliste,
+  vareMedNavn as dVareMedNavn,
+  vitaminDTal,
+} from "./vitamin-d";
+import {
   ALKOHOL_DRIKKE,
   beregnAlkoholKalorier,
   drikMedNavn,
@@ -1460,6 +1477,56 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad tjener mest jern pr. 100 g?", answer: `${jernRangliste().slice(0, 3).map((m) => `${m.navn} (${jernTal(jern100g(m))} mg)`).join(", ")} ligger øverst blandt de ${JERN_MADVARER.length} madvarer. Brød, gryn og tørrede varer har mest pr. 100 g, mens kød og fisk har mindre men samtidig er bedst til at optage jern fra.` },
         { question: "Er der jern i frugt?", answer: `Ja, men små mængder. Et æble har ${jernTal(jern100g(jernVareMedNavn("Æble")!))} mg jern pr. 100 g og en banan ${jernTal(jern100g(jernVareMedNavn("Banan")!))} mg. Frugt er ikke den måde, du typisk dækker dit dagsbehov på — det skal brød, kød, fisk, havregryn og grøntsager til.` },
         { question: "Hvor kommer tallene fra?", answer: `Jerntallet pr. ${JERN_KILDE.naeringsstof} er fra ${JERN_KILDE.database}, datasættet ${JERN_KILDE.dataset}, udgaven ${JERN_KILDE.udgave}, pr. 100 g, og det er de samme madvarer som på kalorieberegneren og de øvrige «i madvarer»-sider, så tallene altid stemmer overens.` },
+      ],
+    },
+    "vitamin-d": {
+      slug: "vitamin-d",
+      title: "D-vitamin – hvor meget skal du have om dagen?",
+      description: `Svar på et af tidens mest søgte spørgsmål: voksne skal have ${vitaminDTal(VITAMIN_D_RI_UG, 0)} µg D-vitamin om dagen. Se hvilke madvarer der giver mest, og hvor meget portionen dækker.`,
+      metaTitle: `D-vitamin: ${vitaminDTal(VITAMIN_D_RI_UG, 0)} µg om dagen for voksne`,
+      metaDescription: `Nordic Nutrition Recommendations 2023 anbefaler ${vitaminDTal(VITAMIN_D_RI_UG, 0)} µg D-vitamin dagligt for voksne, ${vitaminDTal(VITAMIN_D_RI_75_PLUS_UG, 0)} µg over 75 år. Se D-vitamin i makrel, laks og æg pr. 100 g.`,
+      keywords: ["hvor meget vitamin d skal man have om dagen", "d-vitamin anbefaling", "vitamin d tilskud", "hvor meget d vitamin", "vitamin d i madvarer", "d vitamin mængde", "vitamin d3 anbefaling"],
+      ogTitle: `D-vitamin: ${vitaminDTal(VITAMIN_D_RI_UG, 0)} µg om dagen for voksne`,
+      ogDescription: `Anbefalingen for voksne er ${vitaminDTal(VITAMIN_D_RI_UG, 0)} µg om dagen. Makrel har ${vitaminDTal(d100g(dRangliste()[0]))} µg pr. 100 g.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "D-vitamin anbefaling og D-vitamin i madvarer",
+      schemaDescription: `Se NNR2023's anbefaling på ${vitaminDTal(VITAMIN_D_RI_UG, 0)} µg D-vitamin om dagen for voksne, og D-vitamin pr. 100 g i de madvarer, der rent faktisk indeholder det.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        {
+          question: "Hvor meget D-vitamin skal man have om dagen?",
+          answer: `Nordic Nutrition Recommendations 2023 anbefaler ${vitaminDTal(VITAMIN_D_RI_UG, 0)} µg om dagen for voksne kvinder og mænd. Gennemsnitsbehovet (AR) er ${vitaminDTal(VITAMIN_D_AR_UG)} µg, og den øvre sikkerhedsgrænse (UL) er ${vitaminDTal(VITAMIN_D_UL_UG, 0)} µg pr. dag.`,
+        },
+        {
+          question: "Skal man have mere D-vitamin om vinteren?",
+          answer: `Anbefalingen på ${vitaminDTal(VITAMIN_D_RI_UG, 0)} µg tager højde for noget D-vitamin fra sommerens soleksponering. Har du lidt eller ingen sol — om vinteren, eller fordi du er dækket til eller har mørk hud — anbefaler NNR2023 i stedet ${vitaminDTal(VITAMIN_D_RI_UDEN_SOL_UG, 0)} µg dagligt. Personer over 75 år anbefales ${vitaminDTal(VITAMIN_D_RI_75_PLUS_UG, 0)} µg.`,
+        },
+        {
+          question: `Hvor meget D-vitamin er der i makrel?`,
+          answer: `Makrel, atlantic, rå, har ${vitaminDTal(d100g(dVareMedNavn("Makrel, atlantic, rå")!))} µg D-vitamin pr. 100 g. En portion på ${vitaminDTal(125, 0)} g giver ${vitaminDTal(dIgram(dVareMedNavn("Makrel, atlantic, rå")!, 125))} µg — ${vitaminDTal(dAndelAfAnbefaling(dVareMedNavn("Makrel, atlantic, rå")!), 0)} % af voksnes anbefalede dagsindtag.`,
+        },
+        {
+          question: "Hvor meget D-vitamin er der i laks?",
+          answer: `Opdrættet atlantisk laks har ${vitaminDTal(d100g(dVareMedNavn("Laks, atlantic, opdrættet, rå")!))} µg pr. 100 g rå og ${vitaminDTal(d100g(dVareMedNavn("Laks, atlantic, opdrættet, kogt")!))} µg kogt. En normal fiskefilet på ${vitaminDTal(125, 0)} g rå giver ${vitaminDTal(dIgram(dVareMedNavn("Laks, atlantic, opdrættet, rå")!, 125))} µg.`,
+        },
+        {
+          question: "Er der D-vitamin i æg og mælk?",
+          answer: `Et helt råt æg har ${vitaminDTal(d100g(dVareMedNavn("Æg, helt, råt")!))} µg pr. 100 g, og det sidder næsten alt sammen i æggeblommen (${vitaminDTal(d100g(dVareMedNavn("Æggeblomme")!))} µg). Dansk mælk er beriget med D-vitamin: sødmælk har ${vitaminDTal(d100g(dVareMedNavn("Mælk, sødmælk, m. tilsat D-vitamin")!))} µg pr. 100 g. Smør og yoghurt bidrader næsten intet.`,
+        },
+        {
+          question: "Hvad er den øvre sikkerhedsgrænse for D-vitamin?",
+          answer: `NNR2023 sætter den øvre sikkerhedsgrænse (UL) ved ${vitaminDTal(VITAMIN_D_UL_UG, 0)} µg dagligt for voksne. Meget høje indtager kan give for meget kalcium i blodet. Tal med din læge, før du tager støre daglige doser end anbefalingen.`,
+        },
+        {
+          question: "Hvad giver mest D-vitamin pr. 100 g?",
+          answer: `${dRangliste().slice(0, 3).map((v) => `${v.navn} (${vitaminDTal(d100g(v))} µg)`).join(", ")} ligger øverst. Torskeleverolie er en særklasse med ${vitaminDTal(d100g(dVareMedNavn("Torskeleverolie")!))} µg pr. 100 g — men den spises i teskeer, ikke i portioner på 100 g.`,
+        },
+        {
+          question: "Hvor kommer tallene fra?",
+          answer: `D-vitamintallet pr. 100 g er fra ${VITAMIN_D_KILDE.database}, datasættet ${VITAMIN_D_KILDE.dataset}, udgaven ${VITAMIN_D_KILDE.udgave}, næringsstof ${VITAMIN_D_KILDE.naeringsstof}, med ${VITAMIN_D_VARER.length} madvarer. Anbefalingerne er NNR2023's egne. Alle tal på siden er regnet af de samme kildetal.`,
+        },
       ],
     },
     "rygestop": {
