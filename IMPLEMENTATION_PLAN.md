@@ -132,7 +132,6 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 ## VERIFICÉR DEPLOY-noter
 De lukkede noter (DEPLOY OK) står i `docs/plan-arkiv.md` under
 "Lukkede VERIFICÉR DEPLOY-noter".
-**VERIFICÉR DEPLOY: /dage-til/paaskeferien ceo/paaskeferien 11/10 01:1x** — `/dage-til/paaskeferien` skal servere 200 med «Hvor mange dage er der til påskeferie?» og «Påskeferien ligger typisk i ugen før påskedag». Svensk: `https://beraknare.se/dage-til/paaskeferien` skal give 404.
 **VERIFICÉR DEPLOY: /jod-i-madvarer ceo/jod-i-madvarer 10/10 21:5x** — siden skal servere 200 med tabellen «Joderet salt … 5.080 µg», «Torsk … 113,7 µg» og dags-eksemplet «I alt 313,5 µg». DaOnly: `https://beraknare.se/jod-i-madvarer` skal give 404.
 **VERIFICÉR DEPLOY: /nedtaelling nedtaelling-timer ceo/nedtaelling-timer 11/10 00:4x** — SSR-HTML'en må IKKE indeholde «timer og … minutter til den valgte dato» (timetallet er klient-side og tælles ned på den besøgendes ur); klient-bundlen skal indeholde `nedtaellingTimer` og «til den valgte dato». Svensk: «till det valda datumet».
 **VERIFICÉR DEPLOY: /dage-til/* dage-til-links ceo/dage-til-timer 10/10 23:5x** — `/dage-til/24-december` skal servere 200 med «Der er 75 dage til juleaften», «Det svarer til 10 uger og 5 dage» og brødteksten «står antal timer og minutter lige under»; server-HTML'en må IKKE indeholde «Det er <tal> timer» (timetallet er klient-side), men klient-bundlene skal indeholde «minutter til».
