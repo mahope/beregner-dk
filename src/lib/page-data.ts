@@ -265,6 +265,20 @@ import {
   vitaminDTal,
 } from "./vitamin-d";
 import {
+  JODVARER,
+  JOD_AI_UG,
+  JOD_AR_UG,
+  JOD_KILDE,
+  JOD_UL_UG,
+  andelAfAnbefaling as jodAndelAfAnbefaling,
+  gramForAnbefaling as jodGramForAnbefaling,
+  jod100g as jod100gVare,
+  jodIgram,
+  jodTal,
+  rangliste as jodRangliste,
+  vareMedNavn as jodVareMedNavn,
+} from "./jod-i-madvarer";
+import {
   VITAMIN_C_ANBEFALING_MG,
   VITAMIN_C_AR_KVINDE_MG,
   VITAMIN_C_AR_MAND_MG,
@@ -1727,6 +1741,60 @@ const daPages: Record<string, PageData> = {
         {
           question: "Hvor kommer tallene fra?",
           answer: `D-vitamintallet pr. 100 g er fra ${VITAMIN_D_KILDE.database}, datasættet ${VITAMIN_D_KILDE.dataset}, udgaven ${VITAMIN_D_KILDE.udgave}, næringsstof ${VITAMIN_D_KILDE.naeringsstof}, med ${VITAMIN_D_VARER.length} madvarer. Anbefalingerne er NNR2023's egne. Alle tal på siden er regnet af de samme kildetal.`,
+        },
+      ],
+    },
+    "jod-i-madvarer": {
+      slug: "jod-i-madvarer",
+      title: "Jod i madvarer – hvor meget er der i mælk, fisk og æg?",
+      description: `Voksne skal have ${jodTal(JOD_AI_UG, 0)} µg jod om dagen. Se jod pr. 100 g i torsk, mælk, æg, ost og joderet salt, og hvor meget portionen dækker.`,
+      metaTitle: `Jod i madvarer: ${jodTal(JOD_AI_UG, 0)} µg om dagen for voksne`,
+      metaDescription: `Torsk har ${jodTal(jod100gVare(jodVareMedNavn("Torsk, atlantic, rå")!))} µg jod pr. 100 g, letmælk ${jodTal(jod100gVare(jodVareMedNavn("Mælk, letmælk")!))} µg. Se jodindholdet i ${JODVARER.length} madvarer.`,
+      keywords: ["hvor meget jod skal man have om dagen", "jod i madvarer", "hvor meget jod er der i mælk", "jod anbefaling", "jod tilskud", "hvor meget jod er der i fisk", "joderet salt"],
+      ogTitle: `Jod i madvarer: ${jodTal(JOD_AI_UG, 0)} µg om dagen for voksne`,
+      ogDescription: `Anbefalingen for voksne er ${jodTal(JOD_AI_UG, 0)} µg jod om dagen. Torsk har ${jodTal(jod100gVare(jodVareMedNavn("Torsk, atlantic, rå")!))} µg pr. 100 g.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Jod i madvarer og NNR2023's jodanbefaling",
+      schemaDescription: `Se anbefalingen på ${jodTal(JOD_AI_UG, 0)} µg jod om dagen for voksne, og jod pr. 100 g i torsk, mælk, æg, ost, skaldyr og joderet salt.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        {
+          question: "Hvor meget jod skal man have om dagen?",
+          answer: `Nordic Nutrition Recommendations 2023 anbefaler ${jodTal(JOD_AI_UG, 0)} µg jod om dagen for voksne kvinder og mænd. Gennemsnitsbehovet (AR) er ${jodTal(JOD_AR_UG, 0)} µg, og den øvre sikkerhedsgrænse (UL) er ${jodTal(JOD_UL_UG, 0)} µg pr. dag. NNR2023 sætter ikke en særskilt anbefaling for gravide og ammende; WHO anbefaler ${jodTal(250, 0)} µg om dagen i graviditet og amning.`,
+        },
+        {
+          question: "Hvor meget jod er der i mælk?",
+          answer: `I USA's fødevaredatabase har letmælk ${jodTal(jod100gVare(jodVareMedNavn("Mælk, letmælk")!))} µg jod pr. 100 g, sødmælk ${jodTal(jod100gVare(jodVareMedNavn("Mælk, sødmælk")!))} µg og minimælk ${jodTal(jod100gVare(jodVareMedNavn("Minimælk")!))} µg. Et glas på ${jodTal(250, 0)} g letmælk giver altså ${jodTal(jodIgram(jodVareMedNavn("Mælk, letmælk")!, 250))} µg. Danske malkeprodukter ligger lavere, så brug tallene som overslag.`,
+        },
+        {
+          question: "Hvor meget jod er der i fisk?",
+          answer: `Torsk, atlantic, rå, har ${jodTal(jod100gVare(jodVareMedNavn("Torsk, atlantic, rå")!))} µg pr. 100 g. En portion på ${jodTal(150, 0)} g giver ${jodTal(jodIgram(jodVareMedNavn("Torsk, atlantic, rå")!, 150))} µg — ${jodTal(jodAndelAfAnbefaling(jodVareMedNavn("Torsk, atlantic, rå")!, 150), 0)} % af voksnes anbefalede dagsindtag. Opdrættet laks er langt lavere, ${jodTal(jod100gVare(jodVareMedNavn("Laks, atlantic, opdrættet, rå")!))} µg, mens vild sockeye-laks har ${jodTal(jod100gVare(jodVareMedNavn("Laks, sockeye, vild, rå")!))} µg.`,
+        },
+        {
+          question: "Hvor meget jod er der i æg?",
+          answer: `Et helt amerikansk æg har ${jodTal(jod100gVare(jodVareMedNavn("Æg, helt")!))} µg pr. 100 g, så to æg på ${jodTal(60, 0)} g giver ${jodTal(jodIgram(jodVareMedNavn("Æg, helt")!, 60))} µg. Æggeblommen har ${jodTal(jod100gVare(jodVareMedNavn("Æggeblomme")!))} µg pr. 100 g — jod sidder i årerne, ikke i æggehvideo.`,
+        },
+        {
+          question: "Er der jod i ost og yoghurt?",
+          answer: `Ja, men mindre end i mælk, fordi jod holder sig i den vandige del. Feta har ${jodTal(jod100gVare(jodVareMedNavn("Feta, helmælk")!))} µg pr. 100 g, hytteost ${jodTal(jod100gVare(jodVareMedNavn("Hytteost")!))} µg og græsk yoghurt ${jodTal(jod100gVare(jodVareMedNavn("Yoghurt, græsk, naturlig")!))} µg. En portion græsk yoghurt på ${jodTal(200, 0)} g giver ${jodTal(jodIgram(jodVareMedNavn("Yoghurt, græsk, naturlig")!, 200))} µg.`,
+        },
+        {
+          question: "Hvor meget jod er der i joderet salt?",
+          answer: `Joderet salt har ${jodTal(jod100gVare(jodVareMedNavn("Joderet salt")!))} µg pr. 100 g, så en teskefuld på ${jodTal(6, 0)} g giver ${jodTal(jodIgram(jodVareMedNavn("Joderet salt")!, 6))} µg — mere end dobbelt så meget som anbefalingen. Tag derfor ikke jodtilskud, hvis du spiser rigeligt med joderet salt.`,
+        },
+        {
+          question: "Kan man få for meget jod?",
+          answer: `Ja. NNR2023 sætter den øvre sikkerhedsgrænse (UL) ved ${jodTal(JOD_UL_UG, 0)} µg dagligt for voksne. De fleste kommer aldrig i nærheden fra mad alene, men tang er så jodrig, at færre gram nærmer sig grænsen, og meget store daglige doser i tilskud kan give problemer med skjoldbruskkirtlen. Spørg din læge, hvis du kombinerer tilskud med tang og joderet salt.`,
+        },
+        {
+          question: "Hvad giver mest jod pr. 100 g?",
+          answer: `${jodRangliste().slice(0, 3).map((v) => `${v.navn} (${jodTal(jod100gVare(v))} µg)`).join(", ")} ligger øverst. Joderet salt er den mest koncentrerede kilde, men portionen er en teskefuld; af almindelige madvarer er torsk bedst — det tager ${jodTal(jodGramForAnbefaling(jodVareMedNavn("Torsk, atlantic, rå")!), 0)} g for at nå ${jodTal(JOD_AI_UG, 0)} µg.`,
+        },
+        {
+          question: "Hvor kommer tallene fra?",
+          answer: `Jodtallet pr. 100 g er fra ${JOD_KILDE.database}, datasættet ${JOD_KILDE.dataset}, udgaven ${JOD_KILDE.udgave}, næringsstof ${JOD_KILDE.naeringsstof}, med ${JODVARER.length} madvarer. Tallene er amerikanske målinger og ligger i mælk og æg højere end danske. Anbefalingerne er Nordic Nutrition Recommendations 2023's egne.`,
         },
       ],
     },
