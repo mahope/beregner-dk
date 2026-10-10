@@ -2,6 +2,8 @@ import type { Locale } from "./i18n";
 import { getIntlLocale } from "./format";
 
 const MS_PER_DAY = 86_400_000;
+const MS_PER_HOUR = 3_600_000;
+const MS_PER_MINUTE = 60_000;
 
 export type DageTilKind =
   | "fixed"
@@ -2156,6 +2158,33 @@ export function getDageTilAnswer(
     daysLeft: days % 7,
     targetDate,
     isToday: days === 0,
+  };
+}
+
+/**
+ * Hele timer og resterende minutter fra et nu-tidspunkt til en
+ * kalenderdato — svaret på «hvor mange timer er der til juleaften».
+ *
+ * Dagen i dag tælles ikke med, så nedtællingen slutter ved midnat inden
+ * datoen. Det er den samme afgrænsning `getDageTilAnswer` bruger, så
+ * timerne og dagtallet altid peger på det samme mål: kl. 00.00 lokal tid på
+ * kalenderdagen. Tallet skal regnes på den besøgendes ur, ikke på
+ * serverens — en container kører typisk UTC, og ville ellers svare to timer
+ * forkert for en dansk læser.
+ */
+export function dageTilTimerOgMinutter(
+  targetDate: Date,
+  now: Date
+): { timer: number; minutter: number } {
+  const target = new Date(
+    targetDate.getUTCFullYear(),
+    targetDate.getUTCMonth(),
+    targetDate.getUTCDate()
+  );
+  const restMs = Math.max(0, target.getTime() - now.getTime());
+  return {
+    timer: Math.floor(restMs / MS_PER_HOUR),
+    minutter: Math.floor((restMs % MS_PER_HOUR) / MS_PER_MINUTE),
   };
 }
 

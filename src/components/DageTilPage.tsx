@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import DageTilTimer from "@/components/DageTilTimer";
 import FAQ from "@/components/FAQ";
 import { renderInlineMarkdown } from "@/components/inline-markdown";
 import { FAQSchema } from "@/components/StructuredData";
@@ -55,7 +56,7 @@ export const copy: Record<
     updated: "Tallet er beregnet ud fra dagens dato og opdateres automatisk.",
     methodHeading: "Sådan er tallet beregnet",
     methodBody:
-      "Tallet er forskellen mellem dagens dato og datoen i overskriften, målt i hele dage. Dagen i dag tælles ikke med, så der er 1 dag tilbage dagen før. Skriver du bare 1. december, juledagen eller påskedag i søgefeltet, får du samme svar.",
+      "Tallet er forskellen mellem dagens dato og datoen i overskriften, målt i hele dage. Dagen i dag tælles ikke med, så der er 1 dag tilbage dagen før. Skriver du bare 1. december, juledagen eller påskedag i søgefeltet, får du samme svar. Vil du have det finere end dage, står antal timer og minutter lige under — det tæller ned på din egen ur og opdaterer sig hvert minut.",
     ctaHeading: "Andre datoer",
     ctaBody: "De næste datoer, der bliver søgt på",
     weekday: (index) =>
@@ -70,7 +71,7 @@ export const copy: Record<
     updated: "Talet räknas ut från dagens datum och uppdateras automatiskt.",
     methodHeading: "Så här räknas talet ut",
     methodBody:
-      "Talet är skillnaden mellan dagens datum och datumet i rubriken, mätt i hela dagar. Dagen i dag räknas inte med, så det finns 1 dag kvar dagen innan. Skriver du bara 1 december, juldagen eller påskdagen i sökfältet får du samma svar.",
+      "Talet är skillnaden mellan dagens datum och datumet i rubriken, mätt i hela dagar. Dagen i dag räknas inte med, så det finns 1 dag kvar dagen innan. Skriver du bara 1 december, juldagen eller påskdagen i sökfältet får du samma svar. Vill du veta det finare än dagar står antal timmar och minuter precis under — det räknas ner på ditt eget ur och uppdateras varje minut.",
     ctaHeading: "Andra datum",
     ctaBody: "Nästa datum som blir sökta på",
     weekday: (index) =>
@@ -277,6 +278,11 @@ export async function DageTilRoute({
           {headline}
         </p>
         <p className="text-lg text-blue-800 dark:text-blue-200 mt-2">{equivalent}</p>
+        <DageTilTimer
+          targetDate={answer.targetDate}
+          short={eventCopy.short}
+          locale={dageLocale}
+        />
         <p className="text-blue-800 dark:text-blue-200 mt-2">
           <time dateTime={targetIso}>{target}</time>
         </p>

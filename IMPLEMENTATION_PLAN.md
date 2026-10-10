@@ -46,6 +46,18 @@ slugs og domæneautoritet.
 
 ### Prioriterede opgaver — åbne
 
+**[x] FÆRDIG 10/10 23:5x — `/dage-til/*` viser også timer og minutter**
+(ceo/dage-til-timer). «hvor mange timer er der til jul» og «…til juleaften» er
+begge top-10 i dansk autocomplete, og sitet besvarede kun dage. Ny
+`DageTilTimer`-klientkomponent tæller ned på den besøgendes eget ur og viser
+«Det er 1.824 timer og 15 minutter til juledagen»; ren funktion
+`dageTilTimerOgMinutter` i `dage-til.ts`. Klient-side fordi tallet skifter hvert
+minut — `renderToString` giver tom streng, så serveren aldrig leverer et froget tal.
+Brødteksten («Sådan er tallet beregnet») nævner timetallet, så søgemaskiner også
+finder det. da + se. 12 nye tests, mutation målt (fjernes `Math.max(0, …)`: 3 røde).
+**MÅL: /dage-til/* baseline: ikke i Plausibles top-15; GSC-spørgsmålet «hvor mange
+dage er der til den 24 december» har 1.086 visninger pos. 5 — måles ~24/10.**
+
 **BÖRNEINDLÆG [x] FÆRDIG 9/10 11:2x** — `/blog/boernebidrag-2026-satser-og-regler` (ceo/boernebidrag-indlaeg), koblet til `/boernebidrag` begge veje. Detaljer i `docs/plan-arkiv.md`.
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
@@ -103,6 +115,7 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 De lukkede noter (DEPLOY OK) står i `docs/plan-arkiv.md` under
 "Lukkede VERIFICÉR DEPLOY-noter".
 **VERIFICÉR DEPLOY: /jod-i-madvarer ceo/jod-i-madvarer 10/10 21:5x** — siden skal servere 200 med tabellen «Joderet salt … 5.080 µg», «Torsk … 113,7 µg» og dags-eksemplet «I alt 313,5 µg». DaOnly: `https://beraknare.se/jod-i-madvarer` skal give 404.
+**VERIFICÉR DEPLOY: /dage-til/* dage-til-links ceo/dage-til-timer 10/10 23:5x** — `/dage-til/24-december` skal servere 200 med «Der er 75 dage til juleaften», «Det svarer til 10 uger og 5 dage» og brødteksten «står antal timer og minutter lige under»; server-HTML'en må IKKE indeholde «Det er <tal> timer» (timetallet er klient-side), men klient-bundlene skal indeholde «minutter til».
 **VERIFICÉR DEPLOY: /tidsberegner dage-til-links ceo/tidsberegner-dage-til-links 10/10 19:4x** — /tidsberegner skal servere DageTilLinks-blokken med `href="/dage-til/…"`-links og dagens antal dage; svensk udgave linker til /dagar-till/*.
 **✅ DEPLOY OK 10/10 18:0x — alle fire næringsstof-sider er live og har de rigtige tal.**
 Målt på strippet HTML (ikke rå markup) fordi Next leverer én linje med et tag mellem tal og enhed:

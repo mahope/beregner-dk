@@ -6,6 +6,7 @@ import {
   type DageTilLocaleArm,
   blackFriday,
   dageTilbageIAaret,
+  dageTilTimerOgMinutter,
   daysBetween,
   easterSunday,
   formatTargetDate,
@@ -2583,5 +2584,78 @@ describe("ingen kvantificeret påstand om betalt fri i brødteksten", () => {
       ];
       expect(tekster.filter((t) => ROED_DAG.test(t)).length).toBeGreaterThanOrEqual(1);
     }
+  });
+});
+
+/**
+ * «Hvor mange timer er der til juleaften» er et af de hyppigste
+ * autocomplete-forslag under både «hvor mange timer er der til jul» og
+ * «…til juleaften», og sitet besvarede det ikke. Porten låser derfor både
+ * opløsningen (hele timer + resterende minutter) og afgrænsningen: nedtællingen
+ * slutter ved midnat inden datoen, og den besøgendes eget ur er det, der
+ * afgør tallet — ikke serverens.
+ *
+ * Testenes `now` bygges som en forskydning fra datoens *lokale* midnat, så de
+ * giver det samme svar uanset hvilken tidszone maskinen kører i.
+ */
+describe("dageTilTimerOgMinutter", () => {
+  /** Sådan ser en mål-dato ud, når serveren har bygget den: UTC-midnat. */
+  function maal(datoIso: string): Date {
+    return new Date(datoIso);
+  }
+
+  /** Den samme kalenderdag som lokal midnat — der slutter nedtællingen. */
+  function lokalMidnat(utcMidnat: Date): Date {
+    return new Date(
+      utcMidnat.getUTCFullYear(),
+      utcMidnat.getUTCMonth(),
+      utcMidnat.getUTCDate()
+    );
+  }
+
+  function foer(datoen: Date, timer: number, minutter: number): Date {
+    return new Date(
+      lokalMidnat(datoen).getTime() - timer * 3_600_000 - minutter * 60_000
+    );
+  }
+
+  test("regner hele timer og resterende minutter", () => {
+    const juleaften = maal("2026-12-25T00:00:00Z");
+    expect(dageTilTimerOgMinutter(juleaften, foer(juleaften, 2, 30))).toEqual({
+      timer: 2,
+      minutter: 30,
+    });
+  });
+
+  test("minutterne runder aldrig timerne op", () => {
+    const nytaarsaften = maal("2026-12-31T00:00:00Z");
+    // Én time og ét sekund er stadig én hel time, ikke to.
+    expect(dageTilTimerOgMinutter(nytaarsaften, foer(nytaarsaften, 1, 0))).toEqual({
+      timer: 1,
+      minutter: 0,
+    });
+    expect(dageTilTimerOgMinutter(nytaarsaften, foer(nytaarsaften, 0, 59))).toEqual({
+      timer: 0,
+      minutter: 59,
+    });
+  });
+
+  test("dagen i dag tælles ikke med: midnat giver 0 timer til dagen selv", () => {
+    const juleaften = maal("2026-12-25T00:00:00Z");
+    expect(dageTilTimerOgMinutter(juleaften, juleaften)).toEqual({ timer: 0, minutter: 0 });
+  });
+
+  test("en dato der allerede er passeret giver 0, aldrig et negativt tal", () => {
+    const juleaften = maal("2026-12-25T00:00:00Z");
+    expect(dageTilTimerOgMinutter(juleaften, foer(juleaften, -30, 0))).toEqual({
+      timer: 0,
+      minutter: 0,
+    });
+  });
+
+  test("et langt mål giver præcis 24 timer pr. dag frem", () => {
+    const juleaften = maal("2026-12-25T00:00:00Z");
+    // Ellers pegede timetallet og dagtallet på to forskellige mål.
+    expect(dageTilTimerOgMinutter(juleaften, foer(juleaften, 24 * 76, 0)).timer).toBe(24 * 76);
   });
 });
