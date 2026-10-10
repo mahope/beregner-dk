@@ -12,7 +12,8 @@ export type DageTilKind =
   | "summerferie"
   | "efteraarsferie"
   | "skoleaar"
-  | "blackfriday";
+  | "blackfriday"
+  | "weekdayNth";
 
 export interface DageTilAnchor {
   kind: DageTilKind;
@@ -32,6 +33,17 @@ export interface DageTilAnchor {
    * fast i uge 42, så `week: 42` peger på den mandag.
    */
   week?: number;
+  /**
+   * Ugedag som `Date.getUTCDay()` tæller den (0=søndag..6=lørdag), kun
+   * relevant for kind "weekdayNth" — fx dansk mors dag (søndag i maj).
+   */
+  weekday?: number;
+  /**
+   * Hvilken af månedens ugedage, kun relevant for kind "weekdayNth".
+   * 1-4 er 1.-4. ugedag i måneden, -1 er den sidste — så svensk mors dag
+   * (sista söndagen i maj) er `weekday: 0, nth: -1`.
+   */
+  nth?: number;
 }
 
 export interface DageTilCopy {
@@ -1410,6 +1422,160 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    id: "mors-dag",
+    anchor: {
+      da: { kind: "weekdayNth", month: 5, day: 0, offsetDays: 0, weekday: 0, nth: 2 },
+      se: { kind: "weekdayNth", month: 5, day: 0, offsetDays: 0, weekday: 0, nth: -1 },
+    },
+    da: {
+      slug: "mors-dag",
+      copy: {
+        short: "mors dag",
+        question: "Hvor mange dage er der til mors dag?",
+        facts: [
+          "Mors dag falder altid på den 2. søndag i maj, altså mellem den 8. og den 14. maj. I 2027 er det den 9. maj, i 2028 den 14. maj.",
+          "Dagen er ikke en helligdag, selv om den altid falder på en søndag — det er reglen om ugedagen, der gør datoen, ikke en lov om frihed fra arbejdet.",
+          "Traditionen kom til Danmark i 1929 fra USA, hvor Anna Jarvis havde kæmpet for en dag til minde om sin egen mor.",
+          "I Sverige er mors dag senere: der falder den på den sidste søndag i maj, i 2027 den 30. maj.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er mors dag?",
+            answer:
+              "Altid den 2. søndag i maj, så datoen skifter fra år til år — men ugedagen gør det ikke. Det er altid en søndag, og derfor falder dagen altid mellem den 8. og den 14. maj.",
+          },
+          {
+            question: "Er mors dag en helligdag?",
+            answer:
+              "Nej. Mors dag er en mindedag uden lovgrundlag, og den er ikke markeret som helligdag i kalenderen. At den falder på en søndag, skyldes reglen om ugedagen — ikke at loven giver fri for dagen.",
+          },
+          {
+            question: "Hvornår begyndte Danmark at fejre mors dag?",
+            answer:
+              "I 1929, da ideen kom hjem fra USA og første gang blev vist på en blomsterudstilling i Forum i København. Siden har dagen holdt fast på den 2. søndag i maj.",
+          },
+          {
+            question: "Er mors dag samme dato i Sverige?",
+            answer:
+              "Nej. I Sverige falder mors dag på den sidste søndag i maj, altså typisk to til tre uger senere end den danske dato.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "mors-dag",
+      copy: {
+        short: "mors dag",
+        question: "Hur många dagar är det kvar till mors dag?",
+        facts: [
+          "Mors dag infaller alltid sista söndagen i maj, alltså mellan 25 och 31 maj. År 2027 blir det den 30 maj, 2028 den 28 maj.",
+          "Dagen är inte en röd dag och inte upptagen i lagen (1989:253) om allmänna helgdagar — att den ändå innebär ledigt för många beror på att den alltid faller på en söndag.",
+          "Dagen instiftades 1919 av Cecilia Bååth-Holmberg efter amerikansk förebild, och hon valde med flit den sista söndagen i maj — just då det finns blommor och grönska att plocka i hela landet.",
+          "I Danmark infaller mors dag redan andra söndagen i maj, alltså två till tre veckor tidigare än i Sverige.",
+        ],
+        faq: [
+          {
+            question: "När är mors dag?",
+            answer:
+              "Alltid sista söndagen i maj. Därför kan dagen tidigast infalla den 25 maj och senast den 31 maj, beroende på vilken veckodag månaden slutar på.",
+          },
+          {
+            question: "Är mors dag en röd dag?",
+            answer:
+              "Nej. Mors dag är inte en allmän helgdag och inte heller en flaggdag. Dagen firas ändå, och det har blivit en sedvända i många familjer.",
+          },
+          {
+            question: "Varför infaller mors dag sista söndagen i maj?",
+            answer:
+              "Därför att Cecilia Bååth-Holmberg valde det datumet, när hon instiftade dagen 1919. Hon ville ha en dag då det fanns blommor och grönska att plocka i hela landet.",
+          },
+          {
+            question: "När är mors dag i Danmark?",
+            answer:
+              "Andra söndagen i maj — alltså tidigare än i Sverige, där dagen ligger sist i månaden.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "fars-dag",
+    anchor: {
+      da: { kind: "fixed", month: 6, day: 5, offsetDays: 0 },
+      se: { kind: "weekdayNth", month: 11, day: 0, offsetDays: 0, weekday: 0, nth: 2 },
+    },
+    da: {
+      slug: "fars-dag",
+      copy: {
+        short: "fars dag",
+        question: "Hvor mange dage er der til fars dag?",
+        facts: [
+          "Fars dag falder altid den 5. juni — samme dato som grundlovsdagen, som Danmark har fejret siden 1849. Fars dag har været fejret sammen med grundlovsdagen siden 1935.",
+          "Datoen er fast, så det er kun ugedagen, der skifter: i 2026 falder fars dag på en fredag, i 2027 på en lørdag.",
+          "Dagen er ikke en helligdag, så du skal tage almindelig fri, hvis du vil fejre den på en hverdag.",
+          "I Sverige er fars dag flyttet til november: der falder den på 2. søndag i november, i 2026 den 8. november, mens USA fejrer fars dag den 3. søndag i juni.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er fars dag?",
+            answer:
+              "Altid den 5. juni i Danmark. Datoen er fast, så det er kun ugedagen, der skifter fra år til år.",
+          },
+          {
+            question: "Er fars dag en helligdag?",
+            answer:
+              "Nej. Fars dag er en mindedag, ikke en helligdag, så den giver ikke fri i sig selv. Falder den på en hverdag, skal du tage almindelig fri for at fejre den — uanset at dagen også er grundlovsdag.",
+          },
+          {
+            question: "Hvorfor falder fars dag på grundlovsdagen?",
+            answer:
+              "Danmark har fejret fars dag den 5. juni siden 1935, og det er samme dato som grundlovsdagen. De to dage fejres derfor samme dag.",
+          },
+          {
+            question: "Er fars dag samme dag i Sverige?",
+            answer:
+              "Nej. I Sverige falder fars dag på den 2. søndag i november — i 2026 den 8. november — og i USA på den 3. søndag i juni.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "fars-dag",
+      copy: {
+        short: "fars dag",
+        question: "Hur många dagar är det kvar till fars dag?",
+        facts: [
+          "Fars dag infaller alltid andra söndagen i november, alltså mellan 8 och 14 november. År 2026 blir det den 8 november, 2027 den 14 november.",
+          "Dagen kom till Sverige 1931 och firade först i juni, men flyttades till november av kommersiella skäl för att inte konkurrera med mors dag i slutet av maj.",
+          "Fars dag är inte en röd dag och inte allmän flaggdag — den finns inte med i förordningen (1982:270) om allmänna flaggdagar.",
+          "I Danmark firas fars dag redan den 5 juni, på grundlovsdagen, och i USA tredje söndagen i juni.",
+        ],
+        faq: [
+          {
+            question: "När är fars dag?",
+            answer:
+              "Alltid andra söndagen i november. Därför hamnar dagen alltid mellan 8 och 14 november, aldrig tidigare och aldrig senare.",
+          },
+          {
+            question: "Är fars dag en röd dag?",
+            answer:
+              "Nej. Fars dag är inte en allmän helgdag och inte en allmän flaggdag. Dagen infaller alltid på en söndag, och många firar den ändå med ett långt samtal eller ett besök.",
+          },
+          {
+            question: "Varför firas fars dag i november?",
+            answer:
+              "Dagen firade först i juni, men flyttades till november för att inte ligga för nära mors dag månaden före. Det blev en höstdag med kort och presenter i stället för en vårdag.",
+          },
+          {
+            question: "När är fars dag i Danmark?",
+            answer:
+              "Den 5 juni — på grundlovsdagen. Danmark håller fars dag i juni, i grannländerna i november i stället.",
+          },
+        ],
+      },
+    },
+  },
+  {
     id: "black-friday",
     anchor: {
       da: { kind: "blackfriday", month: 11, day: 0, offsetDays: 0 },
@@ -1816,6 +1982,35 @@ export function foersteSkoledag(year: number): Date {
   return august;
 }
 
+/**
+ * Den n'te valgte ugedag i en måned — fx 2. søndag i maj (dansk mors dag)
+ * eller sista söndagen i maj (svensk mors dag). `weekday` tælles som
+ * `Date.getUTCDay()` (0=søndag..6=lørdag), `nth` er 1-4 eller -1 for sidste.
+ *
+ * Reglen er ordinal og ikke en fast dato, så dagen vandrer — men den vandrer
+ * inden for en fast ramme: 2. søndag i maj er altid 8.-14. maj, sista
+ * söndagen altid 25.-31. maj, 2. søndag i november altid 8.-14. november.
+ */
+export function ugedagIMaaned(
+  year: number,
+  month: number,
+  weekday: number,
+  nth: number
+): Date {
+  const foersteIMaaned = new Date(Date.UTC(year, month - 1, 1));
+  const foersteUgedag = (weekday - foersteIMaaned.getUTCDay() + 7) % 7;
+  const foerste = new Date(foersteIMaaned.getTime() + foersteUgedag * MS_PER_DAY);
+  if (nth >= 1) {
+    return new Date(foerste.getTime() + (nth - 1) * 7 * MS_PER_DAY);
+  }
+  // Sidste: månedens sidste dato (`Date.UTC(year, month, 0)` er dagen før den
+  // 1. i næste måned), og alle ugedage ligger 7 dage fra hinanden.
+  const sidsteDag = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return new Date(
+    foerste.getTime() + Math.floor((sidsteDag - 1 - foersteUgedag) / 7) * 7 * MS_PER_DAY
+  );
+}
+
 function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   if (anchor.kind === "fixed") {
     return new Date(Date.UTC(year, anchor.month - 1, anchor.day));
@@ -1837,6 +2032,9 @@ function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   }
   if (anchor.kind === "blackfriday") {
     return blackFriday(year);
+  }
+  if (anchor.kind === "weekdayNth") {
+    return ugedagIMaaned(year, anchor.month, anchor.weekday ?? 0, anchor.nth ?? 1);
   }
   const easter = easterSunday(year);
   return new Date(easter.getTime() + anchor.offsetDays * MS_PER_DAY);

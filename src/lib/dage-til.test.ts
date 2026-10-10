@@ -22,6 +22,7 @@ import {
   midsommarafton,
   resolveDageTilSlug,
   sommerferieStart,
+  ugedagIMaaned,
 } from "./dage-til";
 import { erArbejdsdag, erHelligdag } from "./helligdage";
 
@@ -254,6 +255,105 @@ describe("blackFriday", () => {
     expect(getDageTilSlugs("da")).toContain("black-friday");
     expect(getDageTilSlugs("se")).toContain("black-friday");
     expect(getDageTilEventBySlug("black-friday", "da")?.id).toBe("black-friday");
+  });
+});
+
+/**
+ * Mors dag og fars dag er de to søgninger Google selv slår ind under
+ * "hvor mange dage er der til …" (da 10/10), men datoerne er forskellige i de
+ * to lande: dansk mors dag er 2. søndag i maj, svensk den sidste; dansk fars
+ * dag er fast 5. juni, svensk 2. søndag i november. Derfor får hvert sprog sin
+ * egen anker, og reglerne låses her mod kalenderen, ikke mod side-teksten.
+ */
+describe("mors dag og fars dag", () => {
+  test.each([
+    // [år, måned, ugedag (0=søndag), n'te (-1 = sidste), forventet dato]
+    [2026, 5, 0, 2, "2026-05-10"],
+    [2027, 5, 0, 2, "2027-05-09"],
+    [2028, 5, 0, 2, "2028-05-14"],
+    [2029, 5, 0, 2, "2029-05-13"],
+    [2030, 5, 0, 2, "2030-05-12"],
+    [2026, 5, 0, -1, "2026-05-31"],
+    [2027, 5, 0, -1, "2027-05-30"],
+    [2028, 5, 0, -1, "2028-05-28"],
+    [2031, 5, 0, -1, "2031-05-25"],
+    [2026, 11, 0, 2, "2026-11-08"],
+    [2027, 11, 0, 2, "2027-11-14"],
+    [2028, 11, 0, 2, "2028-11-12"],
+  ])(
+    "ugedagIMaaned(%i, %i, %i, %i) rammer %s",
+    (year, month, weekday, nth, forventet) => {
+      const dato = ugedagIMaaned(year, month, weekday, nth);
+      expect(toISO(dato)).toBe(forventet);
+      expect(dato.getUTCDay(), `${forventet} skal være valgte ugedag`).toBe(weekday);
+    }
+  );
+
+  test("dansk mors dag er altid en søndag mellem 8. og 14. maj", () => {
+    const event = eventById("mors-dag");
+    for (const aar of Array.from({ length: 61 }, (_, i) => 2020 + i)) {
+      const dato = getNextAnchorDate(anchorOf(event, "da"), new Date(Date.UTC(aar, 0, 1)));
+      expect(dato.getUTCDay(), `${aar}`).toBe(0);
+      expect(dato.getUTCMonth(), `${aar}`).toBe(4);
+      expect(dato.getUTCDate(), `${aar}`).toBeGreaterThanOrEqual(8);
+      expect(dato.getUTCDate(), `${aar}`).toBeLessThanOrEqual(14);
+    }
+  });
+
+  test("svensk mors dag er altid en søndag mellem 25. og 31. maj", () => {
+    const event = eventById("mors-dag");
+    for (const aar of Array.from({ length: 61 }, (_, i) => 2020 + i)) {
+      const dato = getNextAnchorDate(anchorOf(event, "se"), new Date(Date.UTC(aar, 0, 1)));
+      expect(dato.getUTCDay(), `${aar}`).toBe(0);
+      expect(dato.getUTCMonth(), `${aar}`).toBe(4);
+      expect(dato.getUTCDate(), `${aar}`).toBeGreaterThanOrEqual(25);
+      expect(dato.getUTCDate(), `${aar}`).toBeLessThanOrEqual(31);
+    }
+  });
+
+  test("svensk fars dag er altid en søndag mellem 8. og 14. november", () => {
+    const event = eventById("fars-dag");
+    for (const aar of Array.from({ length: 61 }, (_, i) => 2020 + i)) {
+      const dato = getNextAnchorDate(anchorOf(event, "se"), new Date(Date.UTC(aar, 0, 1)));
+      expect(dato.getUTCDay(), `${aar}`).toBe(0);
+      expect(dato.getUTCMonth(), `${aar}`).toBe(10);
+      expect(dato.getUTCDate(), `${aar}`).toBeGreaterThanOrEqual(8);
+      expect(dato.getUTCDate(), `${aar}`).toBeLessThanOrEqual(14);
+    }
+  });
+
+  test("dansk fars dag er fast 5. juni i alle år", () => {
+    const event = eventById("fars-dag");
+    expect(anchorOf(event, "da")).toMatchObject({ kind: "fixed", month: 6, day: 5 });
+    for (const aar of Array.from({ length: 61 }, (_, i) => 2020 + i)) {
+      const dato = getNextAnchorDate(anchorOf(event, "da"), new Date(Date.UTC(aar, 0, 1)));
+      expect(toISO(dato), `${aar}`).toBe(`${aar}-06-05`);
+    }
+  });
+
+  test("begge events findes på begge sprog under deres egne slugs", () => {
+    for (const id of ["mors-dag", "fars-dag"]) {
+      const event = eventById(id);
+      expect(armOf(event, "da").slug).toBe(id);
+      expect(armOf(event, "se").slug).toBe(id);
+      expect(getDageTilSlugs("da")).toContain(id);
+      expect(getDageTilSlugs("se")).toContain(id);
+      expect(getDageTilEventBySlug(id, "da")?.id).toBe(id);
+      expect(getDageTilEventBySlug(id, "se")?.id).toBe(id);
+    }
+  });
+
+  test("spørgsmålet nævner dagens navn, så titlen kan bære det", () => {
+    // Gate: `question + " N dage"` skal være under 60 tegn — de to nye
+    // spørgsmål er de længste i den ordinale familie.
+    for (const id of ["mors-dag", "fars-dag"]) {
+      for (const locale of ["da", "se"] as const) {
+        const arm = armOf(eventById(id), locale);
+        expect(arm.copy.question).toContain(arm.copy.short);
+        expect(`${arm.copy.question} 364 ${locale === "da" ? "dage" : "dagar"}`.length)
+          .toBeLessThanOrEqual(60);
+      }
+    }
   });
 });
 
