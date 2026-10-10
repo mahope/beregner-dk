@@ -11,6 +11,7 @@ import { getKlokkenHubPath } from "./klokken-i";
 import { getDageMellemPath } from "./dage-mellem-datoer";
 import { getUgedagPath } from "./ugedag";
 import { getDageIAaretPath } from "./dage-i-aaret";
+import { getDageIManedenPath } from "./dage-i-maaneden";
 import { getTimerIAaretPath } from "./timer-i-aret";
 import { getArbejdsdagePath } from "./arbejdsdage";
 import { getUgerIAaretPath } from "./uger-i-aret";
@@ -47,6 +48,8 @@ const UGEDAG_SIDER = ["/ugedag", "/veckodag"] as const;
  * månedsnavne på et svensk domæne, og samme tabel ville ligge på to URL'er.
  */
 const DAGE_I_AARET_SIDER = ["/dage-i-aaret", "/dagar-i-aret"] as const;
+
+const DAGE_I_MAANEDEN_SIDER = ["/dage-i-maaneden", "/dagar-i-manaden"] as const;
 
 /**
  * Samme regel for «hvor mange timer er der på et år»: `/timer-i-aret` og
@@ -182,6 +185,18 @@ export function getRouteDecision(
     DAGE_I_AARET_SIDER.includes(normalizedPath as (typeof DAGE_I_AARET_SIDER)[number])
   ) {
     const egenSti = getDageIAaretPath(domainConfig.locale);
+    if (!egenSti) return { type: "not-found" };
+    if (egenSti !== normalizedPath) {
+      return { type: "redirect", destination: egenSti, status: 301 };
+    }
+  }
+
+  // Samme regel for «hvor mange dage er der i en måned»: `/dage-i-maaneden` og
+  // `/dagar-i-manaden` er den samme tolv-måneders-tabel i to sprog.
+  if (
+    DAGE_I_MAANEDEN_SIDER.includes(normalizedPath as (typeof DAGE_I_MAANEDEN_SIDER)[number])
+  ) {
+    const egenSti = getDageIManedenPath(domainConfig.locale);
     if (!egenSti) return { type: "not-found" };
     if (egenSti !== normalizedPath) {
       return { type: "redirect", destination: egenSti, status: 301 };

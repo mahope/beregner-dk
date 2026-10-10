@@ -200,7 +200,9 @@ export default async function DatoPage() {
           Et kalenderår har 365 dage, men de tolv måneder er ikke lige lange.
           Alle 12 med dage, hverdage og weekenddage står på en{" "}
           <Link href="/dage-i-aaret">egen side med hele årets oversigt</Link>,
-          sammen med hvor mange dage der er tilbage af året.
+          sammen med hvor mange dage der er tilbage af året. Hvis du vil vide
+          hvor mange dage der er i en bestemt måned, står det på{" "}
+          <Link href="/dage-i-maaneden">en side for hver måned</Link>.
         </p>
 
         <h2>Sådan tæller du dage mellem to datoer i Excel</h2>
@@ -524,6 +526,8 @@ export default async function DatoPage() {
           Alla 12 med dagar, vardagar och helvdagar står på en{" "}
           <Link href="/dagar-i-aret">egen sida med hela årets översikt</Link>,
           tillsammans med hur många dagar som är kvar av året.
+          Om du vill veta hur många dagar som är i en viss månad står det på{" "}
+          <Link href="/dagar-i-manaden">en sida för varje månad</Link>.
         </p>
 
         <h2>Så räknar du ut dagar mellan två datum i Excel</h2>

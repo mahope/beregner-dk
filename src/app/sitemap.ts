@@ -11,6 +11,7 @@ import { getKlokkenHubPath, getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klok
 import { getDageMellemPath } from "@/lib/dage-mellem-datoer";
 import { getUgedagPath } from "@/lib/ugedag";
 import { getDageIAaretPath } from "@/lib/dage-i-aaret";
+import { getDageIManedenPath } from "@/lib/dage-i-maaneden";
 import { getTimerIAaretPath } from "@/lib/timer-i-aret";
 import { getArbejdsdagePath } from "@/lib/arbejdsdage";
 import { getHelligdagPath } from "@/lib/helligdage";
@@ -165,6 +166,20 @@ export function buildSitemap(
       ]
     : [];
 
+  // «Hvor mange dage er der i en måned» har en tolv-måneders-tabel og et
+  // «denne måned»-tal, og begge følger dagens dato, så siden re-crawles dagligt.
+  const dageIManedenPath = getDageIManedenPath(locale);
+  const dageIManedenEntries: MetadataRoute.Sitemap = dageIManedenPath
+    ? [
+        {
+          url: `${baseUrl}${dageIManedenPath}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+      ]
+    : [];
+
   // «Hvor mange timer er der på et år» har en periodetabel og et «timer
   // tilbage»-tal, og begge følger dagens dato, så siden re-crawles dagligt.
   const timerIAaretPath = getTimerIAaretPath(locale);
@@ -236,6 +251,7 @@ export function buildSitemap(
     ...dageMellemEntries,
     ...ugedagEntries,
     ...dageIAaretEntries,
+    ...dageIManedenEntries,
     ...timerIAaretEntries,
     ...arbejdsdageEntries,
     ...ugerIAaretEntries,

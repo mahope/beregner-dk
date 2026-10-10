@@ -56,6 +56,7 @@ const SIDER_UDEN_DESCRIPTION = new Set([
   "/dagar-mellan-datum",
   "/veckodag",
   "/dagar-i-aret",
+  "/dagar-i-manaden",
   "/timmar-i-aret",
   "/arbetsdagar",
   "/veckor-i-aret",
