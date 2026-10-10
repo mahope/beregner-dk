@@ -200,6 +200,24 @@ import {
   vitaminDTal,
 } from "./vitamin-d";
 import {
+  VITAMIN_C_ANBEFALING_MG,
+  VITAMIN_C_AR_KVINDE_MG,
+  VITAMIN_C_AR_MAND_MG,
+  VITAMIN_C_RI_KVINDE_MG,
+  VITAMIN_C_RI_MAND_MG,
+  VITAMIN_C_RYGENDE_EKSTRA_MG,
+  VITAMIN_C_KILDE,
+  VITAMIN_C_VARER,
+  KARTOFFEL_KOGT_C_MG_100G,
+  andelAfAnbefaling as cAndelAfAnbefaling,
+  c100g,
+  cIgram,
+  gramForAnbefaling as cGramForAnbefaling,
+  rangliste as cRangliste,
+  vareMedNavn as cVareMedNavn,
+  vitaminCTal,
+} from "./vitamin-c";
+import {
   ALKOHOL_DRIKKE,
   beregnAlkoholKalorier,
   drikMedNavn,
@@ -1526,6 +1544,56 @@ const daPages: Record<string, PageData> = {
         {
           question: "Hvor kommer tallene fra?",
           answer: `D-vitamintallet pr. 100 g er fra ${VITAMIN_D_KILDE.database}, datasættet ${VITAMIN_D_KILDE.dataset}, udgaven ${VITAMIN_D_KILDE.udgave}, næringsstof ${VITAMIN_D_KILDE.naeringsstof}, med ${VITAMIN_D_VARER.length} madvarer. Anbefalingerne er NNR2023's egne. Alle tal på siden er regnet af de samme kildetal.`,
+        },
+      ],
+    },
+    "vitamin-c": {
+      slug: "vitamin-c",
+      title: "C-vitamin – hvor meget skal du have om dagen?",
+      description: `Svar på et af de mest søgte spørgsmål: kvinder skal have ${vitaminCTal(VITAMIN_C_RI_KVINDE_MG, 0)} mg C-vitamin om dagen og mænd ${vitaminCTal(VITAMIN_C_RI_MAND_MG, 0)} mg. Se hvilke madvarer der giver mest, og hvor meget portionen dækker.`,
+      metaTitle: `C-vitamin: ${vitaminCTal(VITAMIN_C_RI_KVINDE_MG, 0)} mg for kvinder, ${vitaminCTal(VITAMIN_C_RI_MAND_MG, 0)} mg for mænd`,
+      metaDescription: `Nordic Nutrition Recommendations 2023 anbefaler ${vitaminCTal(VITAMIN_C_RI_KVINDE_MG, 0)} mg C-vitamin dagligt for kvinder, ${vitaminCTal(VITAMIN_C_RI_MAND_MG, 0)} mg for mænd. Se indholdet i peberfrugt, solbær og kiwi pr. 100 g.`,
+      keywords: ["hvor meget vitamin c skal man have om dagen", "c-vitamin anbefaling", "c vitamin tilskud", "hvor meget c vitamin", "vitamin c i madvarer", "c-vitamin indhold", "vitamin c kilder"],
+      ogTitle: `C-vitamin: ${vitaminCTal(VITAMIN_C_RI_KVINDE_MG, 0)} mg for kvinder, ${vitaminCTal(VITAMIN_C_RI_MAND_MG, 0)} mg for mænd`,
+      ogDescription: `Anbefalingen for voksne er ${vitaminCTal(VITAMIN_C_RI_KVINDE_MG, 0)}-${vitaminCTal(VITAMIN_C_RI_MAND_MG, 0)} mg om dagen. Peberfrugt har ${vitaminCTal(c100g(cVareMedNavn("Peberfrugt, rød, rå")!))} mg pr. 100 g.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "C-vitamin anbefaling og C-vitamin i madvarer",
+      schemaDescription: `Se NNR2023's anbefaling på ${vitaminCTal(VITAMIN_C_RI_KVINDE_MG, 0)}-${vitaminCTal(VITAMIN_C_RI_MAND_MG, 0)} mg C-vitamin om dagen for voksne, og C-vitamin pr. 100 g i de madvarer, der rent faktisk indeholder det.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        {
+          question: "Hvor meget C-vitamin skal man have om dagen?",
+          answer: `Nordic Nutrition Recommendations 2023 anbefaler ${vitaminCTal(VITAMIN_C_RI_KVINDE_MG, 0)} mg om dagen for voksne kvinder og ${vitaminCTal(VITAMIN_C_RI_MAND_MG, 0)} mg for voksne mænd. Gennemsnitsbehovet (AR) er ${vitaminCTal(VITAMIN_C_AR_KVINDE_MG, 0)} mg for kvinder og ${vitaminCTal(VITAMIN_C_AR_MAND_MG, 0)} mg for mænd. Rygere skal have ca. ${vitaminCTal(VITAMIN_C_RYGENDE_EKSTRA_MG, 0)} mg mere dagen fra kosten.`,
+        },
+        {
+          question: "Hvor meget C-vitamin er der i peberfrugt?",
+          answer: `Rød peberfrugt har ${vitaminCTal(c100g(cVareMedNavn("Peberfrugt, rød, rå")!))} mg C-vitamin pr. 100 g. En portion på ${vitaminCTal(cVareMedNavn("Peberfrugt, rød, rå")!.portionGram, 0)} g giver ${vitaminCTal(cIgram(cVareMedNavn("Peberfrugt, rød, rå")!, 80))} mg — ${vitaminCTal(cAndelAfAnbefaling(cVareMedNavn("Peberfrugt, rød, rå")!), 0)} % af kvinders anbefalede dagsindtag.`,
+        },
+        {
+          question: "Hvor meget C-vitamin er der i appelsin?",
+          answer: `En appelsin har ${vitaminCTal(c100g(cVareMedNavn("Appelsin, rå")!))} mg pr. 100 g, så en almindelig appelsin på ${vitaminCTal(130, 0)} g giver ${vitaminCTal(cIgram(cVareMedNavn("Appelsin, rå")!, 130))} mg — ${vitaminCTal(cAndelAfAnbefaling(cVareMedNavn("Appelsin, rå")!, 130), 0)} % af kvinders anbefaling.`,
+        },
+        {
+          question: "Er kartofler en god kilde til C-vitamin?",
+          answer: `Ja, på grund af mængden. Kartoffel har ${vitaminCTal(c100g(cVareMedNavn("Kartoffel, rå")!))} mg pr. 100 g rå, og 200 g giver ${vitaminCTal(cIgram(cVareMedNavn("Kartoffel, rå")!, 200))} mg. Koges de, falder indholdet til ${vitaminCTal(KARTOFFEL_KOGT_C_MG_100G)} mg pr. 100 g, fordi C-vitamin er opløseligt i vand.`,
+        },
+        {
+          question: "Kan man få for meget C-vitamin?",
+          answer: `NNR2023 sætter ingen øvre sikkerhedsgrænse (UL) for C-vitamin, fordi der ikke findes et mål for skadelig effekt. Meget høje indtager fra tilskud kan give diaré og maveforstyrrelser, og C-vitamin er opløseligt i vand, så overskuddet skilles typisk ud med urinen.`,
+        },
+        {
+          question: "Skal rygere have mere C-vitamin?",
+          answer: `Ja. NNR2023 skriver, at rygning øger omsætningen, og at rygere skal have ca. ${vitaminCTal(VITAMIN_C_RYGENDE_EKSTRA_MG, 0)} mg mere om dagen fra kosten. Det svarer til fx ${vitaminCTal((VITAMIN_C_RYGENDE_EKSTRA_MG / c100g(cVareMedNavn("Jordbær, rå")!)) * 100, 0)} g jordbær eller ${vitaminCTal((VITAMIN_C_RYGENDE_EKSTRA_MG / c100g(cVareMedNavn("Kiwi, grøn, rå")!)) * 100, 0)} g kiwi.`,
+        },
+        {
+          question: "Hvad giver mest C-vitamin pr. 100 g?",
+          answer: `${cRangliste().slice(0, 3).map((v) => `${v.navn} (${vitaminCTal(c100g(v))} mg)`).join(", ")} ligger øverst. Solbær og persille topper listen, men spises i små mængder — på almindelige danske portioner er det rød peberfrugt, grønkål og kartofler, der løfter den daglige mængde.`,
+        },
+        {
+          question: "Hvor kommer tallene fra?",
+          answer: `C-vitamintallet pr. 100 g er fra ${VITAMIN_C_KILDE.database}, datasættet ${VITAMIN_C_KILDE.dataset}, udgaven ${VITAMIN_C_KILDE.udgave}, næringsstof ${VITAMIN_C_KILDE.naeringsstof}, med ${VITAMIN_C_VARER.length} madvarer. Anbefalingerne er NNR2023's egne. Alle tal på siden er regnet af de samme kildetal, andelstabellen fra kvinders anbefaling på ${vitaminCTal(VITAMIN_C_ANBEFALING_MG, 0)} mg.`,
         },
       ],
     },
