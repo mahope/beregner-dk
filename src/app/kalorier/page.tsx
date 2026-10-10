@@ -223,12 +223,28 @@ export default async function KalorierPage() {
            <Link href="/fiber-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
              fiber
            </Link>{" "}
-           og{" "}
-           <Link href="/salt-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
-             salt
-           </Link>{" "}
-           madvarerne har pr. 100 g.
-         </p>
+            og{" "}
+            <Link href="/salt-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              salt
+            </Link>{" "}
+            madvarerne har pr. 100 g. Derudover kan du se, hvor meget{" "}
+            <Link href="/jern-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              jern
+            </Link>
+            ,{" "}
+            <Link href="/vitamin-d" className="text-blue-700 underline dark:text-blue-300">
+              D-vitamin
+            </Link>
+            ,{" "}
+            <Link href="/vitamin-c" className="text-blue-700 underline dark:text-blue-300">
+              C-vitamin
+            </Link>{" "}
+            og{" "}
+            <Link href="/vitamin-b12" className="text-blue-700 underline dark:text-blue-300">
+              B12-vitamin
+            </Link>{" "}
+            du får i dem.
+          </p>
 
          <h3>Protein</h3>
         <p>

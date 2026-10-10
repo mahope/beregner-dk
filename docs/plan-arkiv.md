@@ -31186,3 +31186,4 @@ STATUS: 10/10 10:0x. ✅ **`/dage-til/mors-dag`, `/dage-til/fars-dag`, `/dagar-t
 - `/vitamin-c` (ceo/vitamin-c-anbefaling 10/10 08:1x): NNR2023 RI 95/110 mg, AR 75/90, rygere +40, ingen UL; 23 madkilder fra USDA næringsstof 1162. 11 tests, daOnly.
 - `/dage-i-maaneden` + `/dagar-i-manaden` (ceo/dage-i-maaneden 10/10 02:1x): 12-måneders tabel med dage/hverdage/weekenddage. 12 tests.
 - `/jern-i-madvarer` (ceo/jern-i-madvarer 10/10 03:1x): USDA næringsstof 1089, 53 madvarer, NNR2023-anbefalinger. 13 tests, daOnly.
+- `/kalorier` mikronæringslinks (ceo/kalorier-mikro-links 10/10 12:2x): «Makronæringsstoffer»-afsnittet peger nu også på `/jern-i-madvarer`, `/vitamin-d`, `/vitamin-c` og `/vitamin-b12`. 1 port (`kalorier-mikro-links.test.tsx`) renderer siden server-side; verificeret rød uden ændringen.
