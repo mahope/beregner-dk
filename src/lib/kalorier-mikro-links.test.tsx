@@ -12,9 +12,9 @@ vi.mock("@/lib/get-locale", () => ({
 }));
 
 // `/kalorier` er sitets hub for madindhold. Porten renderer siden server-side
-// og låser, at mikronæringsstofferne (jern og de tre vitaminer) er til at
-// nå fra brødteksten — de tre vitaminsider er daOnly og blev ellers kun
-// fundet gennem relaterede-kort.
+// og låser, at mikronæringsstofferne (jern, calcium og de tre vitaminer) er til
+// at nå fra brødteksten — siderne er daOnly og blev ellers kun fundet gennem
+// relaterede-kort.
 vi.mock("@/components/KalorieBeregner", () => ({ default: () => <div>Kalorieværktøj</div> }));
 vi.mock("@/components/KalorieTabel", () => ({ default: () => null }));
 vi.mock("@/components/RelateredeArtikler", () => ({ default: () => null }));
@@ -32,10 +32,11 @@ async function markup(): Promise<string> {
 }
 
 describe("/kalorier mikronæringsstoffer", () => {
-  test("brødteksten linker til jern og de tre vitaminsider", async () => {
+  test("brødteksten linker til jern, calcium og de tre vitaminsider", async () => {
     const html = await markup();
     for (const href of [
       "/jern-i-madvarer",
+      "/calcium-i-madvarer",
       "/vitamin-d",
       "/vitamin-c",
       "/vitamin-b12",

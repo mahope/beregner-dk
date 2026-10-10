@@ -232,6 +232,10 @@ export default async function KalorierPage() {
               jern
             </Link>
             ,{" "}
+            <Link href="/calcium-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              calcium
+            </Link>
+            ,{" "}
             <Link href="/vitamin-d" className="text-blue-700 underline dark:text-blue-300">
               D-vitamin
             </Link>
