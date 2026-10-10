@@ -281,6 +281,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Fiber i madvarer", description: "Fiber pr. 100 g i havregryn, rugbrød og andre madvarer", href: "/fiber-i-madvarer", popular: false, category: "Sundhed" },
   { title: "Jern i madvarer", description: "Jern pr. 100 g i havregryn, spinat, æg og andre madvarer", href: "/jern-i-madvarer", popular: false, category: "Sundhed" },
   { title: "Calcium i madvarer", description: "Calcium pr. 100 g i mælk, ost, yoghurt og andre madvarer", href: "/calcium-i-madvarer", popular: false, category: "Sundhed" },
+  { title: "Magnesium i madvarer", description: "Magnesium pr. 100 g i havregryn, spinat, banan og andre madvarer", href: "/magnesium-i-madvarer", popular: false, category: "Sundhed" },
   { title: "D-vitamin", description: "Hvor meget D-vitamin skal du have om dagen?", href: "/vitamin-d", popular: false, category: "Sundhed" },
   { title: "C-vitamin", description: "Hvor meget C-vitamin skal du have om dagen?", href: "/vitamin-c", popular: false, category: "Sundhed" },
   { title: "B12-vitamin", description: "Hvor meget B12 skal du have om dagen?", href: "/vitamin-b12", popular: false, category: "Sundhed" },
