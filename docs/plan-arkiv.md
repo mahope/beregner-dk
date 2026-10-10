@@ -31213,3 +31213,64 @@ STATUS: 10/10 01:3x. ✅ **Fakta og FAQ på `/dage-til/*` og `/dagar-till/*` vis
 
 STATUS: 9/10 23:0x. ✅ **Barselsindlægget fører nu videre til graviditetsuge-beregneren.** Datagrund: `/graviditetsuge` blev lanceret 9/10 og stod på 0 Plausible/GSC; den var kun til at finde gennem relaterede-kort, mens `/blog/barsel-2026-regler-og-satser` har 175 besøgende/28d (+77 %) læsere, der netop skal svare på præcis det spørgsmål (hvor langt er jeg henne?). Planlægningslisten «Planlægning af barsel» forklarer nu, at beregneren regner ugen ud fra sidste menstruation, terminsdato eller ægløsning og viser trimester og dage til termin. **MÅL: /blog/barsel-2026-regler-og-satser baseline 175 besøgende/28d, 86 % bounce pr. 9/10; udgående klik til /graviditetsuge fra 0 — måles igen ~23/10.** Gate: typecheck 0, lint 0 (982 filer), **5.509 tests i 330 filer grønne**, `next build` grøn; testen rendrer indlægget server-side og låser `href="/graviditetsuge"`. Merger til master ceo/graviditetsuge-link 9/10 23:0x — første deploy-vindue 10/10 07:30, se VERIFICÉR-note nedenfor.
 
+
+---
+
+## 2026-10-10 18:0x — fire deploy-noter lukket + jod-siden fundet og blokeret
+
+**Verificeret live (ikke på HTTP-kode, men på indhold).** De fire næringsstof-sider fra de
+sidste fire iterationer er alle på plads i produktion. Målt på **strippet HTML**, fordi Next
+serverer siden som én linje med et tag mellem tal og enhed:
+
+| Side | `<title>` i live | Tabelrække | Dags-eksempel | sitemap | beraknare.se |
+|---|---|---|---|---|---|
+| `/kalium-i-madvarer` | «Kalium i madvarer: 535 mg i kartoffel, 358 mg i banan» | `Banan 358 mg 358 mg 978 g 10 %` | «I alt 3.534 mg» | ja | 404 |
+| `/zink-i-madvarer` | «Zink i madvarer: 3,97 mg i havregryn, 3,32 mg i oksekød» | «13 mg om dagen for voksne mænd og 10 mg for kvinder» | «I alt 11,08 mg» | ja | 404 |
+| `/magnesium-i-madvarer` | «Magnesium i madvarer: 177 mg i havregryn, 79 mg i spinat» | — | «I alt 357,6 mg» | ja | 404 |
+| `/calcium-i-madvarer` | «Calcium i madvarer: 700 mg i gouda, 125 mg i letmælk» | — | «I alt 1.046,8 mg» | ja | 404 |
+
+Kaliums række blev læst helt ud som kontrol af kolonnen «gram for 3.500 mg»: 3.500 / 358 × 100
+= 977,65 g, som kilden viser som **978 g** — altså er kolonnen regnet på `AI_ANBEFALING_MG`,
+ikke på noget håndskrevet tal. Samme gange viste den at banan **10 %** af anbefalingen dækker.
+
+**Metodeændring: `Host: beraknare.se` virker ikke længere som daOnly-port.** Header-metoden
+gav **403** på alle fire sider i denne iteration (den gav 404 i de foregående). Porten er
+derfor skrevet om til at slå `https://beraknare.se/<slug>` direkte, som giver det forventede
+404. Naivt at tro på 403 = «daOnly virker ikke»; 403 er et TLS-/proxy-svar på en
+værtsheader der ikke matcher certifikatet, ikke et svar på ruten.
+
+**Jod-siden: alle forudsætninger på plads, én kilde låst.** NNR2023's jodafsnit er læst
+direkte af kilden (`pub.norden.org/nord2023-003/iodine-.html` — **URL'en har en bindestreg**
+foran `.html`; `iodine.html` er 404, og den rigtige sti står i `contents.html`'s
+`prefetch`-liste som `data-page-title="Iodine " href="iodine-.html"`). AI 150 µg/dag for voksne
+kvinder og mænd, foreløbigt AR 120 µg/dag, UL 600 µg/dag, spædning 80–90 µg/dag for spædbørn.
+Kilden siger desuden, at hovedkilderne er mejeri **undtagen ost**, saltvandsfisk, æg, joderet
+salt og brød, at gennemsnitsindtaget er 30–270 µg/dag, at der **ikke findes en god
+individuel markør** (median urin-jod er kun gyldig på gruppeniveau), at veganere og vegetarer
+uden tilskud er risikogrupper, og at tangforbrugere er i risiko for overdosering.
+
+⛔ **USDA FoodData Central: 429 `OVER_RATE_LIMIT` med `DEMO_KEY`.** Bekræftet fra to
+uafhængige egress — `curl` fra maskinen og `webfetch` — så det er timekvoten på den delte
+`DEMO_KEY`, ikke maskinens netværk. Dermed er de 53 jodtal utilgængelige, og siden blev
+**ikke** bygget: en næringsstofside uden kilde ville være 53 opfundne tal i en tabel, som er
+præcis den fejl kvalitetsregel 11 forbyder. **Næste iteration skal bruge ét kald, ikke 53** —
+`POST https://api.nal.usda.gov/fdc/v1/foods` med alle 53 `fdcId`s, `format=abridged` og
+`nutrients=[1274]` (Iodine, µg), henter hele tabellen i én request.
+
+**Kolesterol-hullet er lukket som kilde-spørgsmål.** NNR2023's indholdsfortegnelse er læst i
+sin helhed: de 34 næringsstofafsnit er listet, og **Cholesterol står ikke mellem Choline og
+Vitamin C**. Der er altså ingen nordisk anbefaling, så `/kolesterol-i-madvarer` kan ikke bygges
+på samme mønster som de ni andre.
+
+**To fund fra samme research, begge skrevet op som opgaver:**
+
+1. **`/dage-til/paaskeferien` mangler.** `DAGE_TIL_EVENTS` har 25 danske events, og ferierækken
+   er `sommerferien`, `efteraarsferien`, `skolestart` — men ikke påskeferien, selv om dansk
+   autocomplete under «hvor mange dage er der til» har «påskeferien» og «påskeferien 2026»
+   som selvstændige forslag. Mønstret er kendt: `anchor: { kind: … }` og kun en `da`-arm,
+   fordi ferier er kommunale — og feriedatoer har stadig ingen lovkilde (❓).
+2. **`/tidsberegner` har nul links til `/dage-til/*`.** Talt på den strippede live-HTML:
+   `/dato` har 25, `/tidsberegner` har 0 — på GSC's tredjestørste side (79.641 visninger,
+   pos. 6,7), hvis søgninger netop er «hvor lang tid er der til». Blokken på `/dato` er ~40
+   linjer og bruger `getDageTilHubRækker`, så den skal **ud** i `src/components/` og bruges
+   af begge sider — en kopieret blok ville give to steder at vedligeholde.
