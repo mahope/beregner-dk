@@ -218,6 +218,20 @@ import {
   vitaminCTal,
 } from "./vitamin-c";
 import {
+  VITAMIN_B12_AI_UG,
+  VITAMIN_B12_AR_UG,
+  VITAMIN_B12_KILDE,
+  VITAMIN_B12_NORDISK_INDTAG,
+  VITAMIN_B12_VARER,
+  andelAfAnbefaling as bAndelAfAnbefaling,
+  b100g,
+  b12Tal,
+  bIgram,
+  gramForAnbefaling as bGramForAnbefaling,
+  rangliste as bRangliste,
+  vareMedNavn as bVareMedNavn,
+} from "./vitamin-b12";
+import {
   ALKOHOL_DRIKKE,
   beregnAlkoholKalorier,
   drikMedNavn,
@@ -1594,6 +1608,56 @@ const daPages: Record<string, PageData> = {
         {
           question: "Hvor kommer tallene fra?",
           answer: `C-vitamintallet pr. 100 g er fra ${VITAMIN_C_KILDE.database}, datasættet ${VITAMIN_C_KILDE.dataset}, udgaven ${VITAMIN_C_KILDE.udgave}, næringsstof ${VITAMIN_C_KILDE.naeringsstof}, med ${VITAMIN_C_VARER.length} madvarer. Anbefalingerne er NNR2023's egne. Alle tal på siden er regnet af de samme kildetal, andelstabellen fra kvinders anbefaling på ${vitaminCTal(VITAMIN_C_ANBEFALING_MG, 0)} mg.`,
+        },
+      ],
+    },
+    "vitamin-b12": {
+      slug: "vitamin-b12",
+      title: "B12-vitamin – hvor meget skal du have om dagen?",
+      description: `Svar på et meget søgte spørgsmål: voksne skal have ${b12Tal(VITAMIN_B12_AI_UG, 0)} µg B12-vitamin om dagen. Se hvilke madvarer der giver mest, og hvor meget portionen dækker.`,
+      metaTitle: `B12-vitamin: ${b12Tal(VITAMIN_B12_AI_UG, 0)} µg om dagen for voksne`,
+      metaDescription: `Nordic Nutrition Recommendations 2023 anbefaler ${b12Tal(VITAMIN_B12_AI_UG, 0)} µg B12 dagligt for voksne. Se B12 i okselever, sild, makrel og æg pr. 100 g.`,
+      keywords: ["hvor meget b12 skal man have om dagen", "b12 vitamin anbefaling", "vitamin b12 tilskud", "hvor meget b12", "b12 i madvarer", "b12 mangel", "b12 indhold"],
+      ogTitle: `B12-vitamin: ${b12Tal(VITAMIN_B12_AI_UG, 0)} µg om dagen for voksne`,
+      ogDescription: `Anbefalingen for voksne er ${b12Tal(VITAMIN_B12_AI_UG, 0)} µg om dagen. Okselever har ${b12Tal(b100g(bRangliste()[0]))} µg pr. 100 g.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "B12-vitamin anbefaling og B12 i madvarer",
+      schemaDescription: `Se NNR2023's anbefaling på ${b12Tal(VITAMIN_B12_AI_UG, 0)} µg B12 om dagen for voksne, og B12 pr. 100 g i de madvarer, der rent faktisk indeholder det.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        {
+          question: "Hvor meget B12 skal man have om dagen?",
+          answer: `Nordic Nutrition Recommendations 2023 sætter et anbefalet indtagelse (AI) på ${b12Tal(VITAMIN_B12_AI_UG, 0)} µg om dagen for voksne kvinder og mænd — afledt af det AI, EFSA (2015c) har fastsat. Det provisoriske gennemsnitsbehov (AR) er ${b12Tal(VITAMIN_B12_AR_UG)} µg pr. dag.`,
+        },
+        {
+          question: "Er der en øvre sikkerhedsgrænse for B12?",
+          answer: `Nej. NNR2023 fandt hverken en kvalificeret biomarkør for skadelig effekt eller en kvalificeret skadevirkning ved høje indtager, og kilden sætter derfor ingen øvre sikkerhedsgrænse (UL) for B12.`,
+        },
+        {
+          question: "Hvor meget B12 er der i æg?",
+          answer: `Et helt råt æg har ${b12Tal(b100g(bVareMedNavn("Æg, helt, råt")!))} µg pr. 100 g. Et æg på ${b12Tal(bVareMedNavn("Æg, helt, råt")!.portionGram, 0)} g giver ${b12Tal(bIgram(bVareMedNavn("Æg, helt, råt")!, bVareMedNavn("Æg, helt, råt")!.portionGram))} µg — ${b12Tal(bAndelAfAnbefaling(bVareMedNavn("Æg, helt, råt")!), 0)} % af voksnes anbefalede dagsindtag. Indholdet sidder næsten alt sammen i æggeblommen.`,
+        },
+        {
+          question: "Hvor meget B12 er der i kylling?",
+          answer: `Kyllingekød har ${b12Tal(b100g(bVareMedNavn("Kylling, kød, rå")!))} µg pr. 100 g, så en portion på ${b12Tal(bVareMedNavn("Kylling, kød, rå")!.portionGram, 0)} g giver ${b12Tal(bIgram(bVareMedNavn("Kylling, kød, rå")!, bVareMedNavn("Kylling, kød, rå")!.portionGram))} µg. Kalkun har ${b12Tal(b100g(bVareMedNavn("Kalkun, hel, rå")!))} µg pr. 100 g og hakket oksekød ${b12Tal(b100g(bVareMedNavn("Hakket oksekød, 85/15, rå")!))} µg.`,
+        },
+        {
+          question: "Hvad giver mest B12 pr. 100 g?",
+          answer: `${bRangliste().slice(0, 3).map((v) => `${v.navn} (${b12Tal(b100g(v))} µg)`).join(", ")} ligger øverst. Okselever er en særklasse, der spises i små mængder — på almindelige danske portioner er det fed fisk, muslinger og sardiner, der løfter den daglige mængde.`,
+        },
+        {
+          question: "Får vegetarianere og veganere nok B12?",
+          answer: `B12 findes naturligt kun i animalske fødevarer: havregryn, rugbrød og de øvrige plantefødevarer på tabellen har ${b12Tal(0, 0)} µg pr. 100 g. NNR2023 peger på, at mennesker med langvarig indskrænkning af animalske fødevarer er i risiko for at få for lidt B12, medmindre de spiser berigede fødevarer eller tilskud.`,
+        },
+        {
+          question: "Hvorfor kan ældre få for lidt B12?",
+          answer: `NNR2023 skriver, at manglende optagelse af det B12, der er bundet i kosten, som følge af tarmkatarr (atrophisk gastritis), er en hyppig årsag til, at ældre får en faldende B12-status. Symptomer på mangel er bl.a. blodmangel og neurologiske gener.`,
+        },
+        {
+          question: "Hvor kommer tallene fra?",
+          answer: `B12-tallet pr. 100 g er fra ${VITAMIN_B12_KILDE.database}, datasættet ${VITAMIN_B12_KILDE.dataset}, udgaven ${VITAMIN_B12_KILDE.udgave}, næringsstof ${VITAMIN_B12_KILDE.naeringsstof}, med ${VITAMIN_B12_VARER.length} madvarer. Anbefalingerne er NNR2023's egne (AI ${b12Tal(VITAMIN_B12_AI_UG, 0)} µg, provisorisk AR ${b12Tal(VITAMIN_B12_AR_UG)} µg). Alle tal på siden er regnet af de samme kildetal.`,
         },
       ],
     },
