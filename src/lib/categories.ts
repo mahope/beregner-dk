@@ -78,6 +78,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Kulhydrater i madvarer", description: "Kulhydrat pr. 100 g i banan, kartoffel og andre madvarer", href: "/kulhydrater-i-madvarer", category: "Sundhed" },
   { title: "Salt i madvarer", description: "Natrium pr. 100 g i rugbrød, smør og skinke — omregnet til salt", href: "/salt-i-madvarer", category: "Sundhed" },
   { title: "Fiber i madvarer", description: "Fiber pr. 100 g i havregryn, rugbrød og andre madvarer", href: "/fiber-i-madvarer", category: "Sundhed" },
+  { title: "Jern i madvarer", description: "Jern pr. 100 g i havregryn, spinat, æg og andre madvarer", href: "/jern-i-madvarer", category: "Sundhed" },
   { title: "Fedt i madvarer", description: "Fedt pr. 100 g i æg, avocado og andre madvarer", href: "/fedt-i-madvarer", category: "Sundhed" },
   { title: "Sukker i madvarer", description: "Sukker pr. 100 g i banan, æble og andre madvarer", href: "/sukker-i-madvarer", category: "Sundhed" },
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", category: "Sundhed" },
