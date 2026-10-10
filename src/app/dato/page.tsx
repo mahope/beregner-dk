@@ -201,7 +201,9 @@ export default async function DatoPage() {
           Alle 12 med dage, hverdage og weekenddage står på en{" "}
           <Link href="/dage-i-aaret">egen side med hele årets oversigt</Link>,
           sammen med hvor mange dage der er tilbage af året. Hvis du vil vide
-          hvor mange dage der er i en bestemt måned, står det på{" "}
+          hvor mange dage der er tilbage af i år, står der en{" "}
+          <Link href="/dage-tilbage-i-aaret">egen nedtælling for året</Link>.
+          Skal du bruge hvor mange dage der er i en bestemt måned, står det på{" "}
           <Link href="/dage-i-maaneden">en side for hver måned</Link>.
         </p>
 

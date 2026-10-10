@@ -11,6 +11,7 @@ import { getKlokkenHubPath } from "./klokken-i";
 import { getDageMellemPath } from "./dage-mellem-datoer";
 import { getUgedagPath } from "./ugedag";
 import { getDageIAaretPath } from "./dage-i-aaret";
+import { getDageTilbagePath } from "./dage-tilbage-i-aaret";
 import { getDageIManedenPath } from "./dage-i-maaneden";
 import { getTimerIAaretPath } from "./timer-i-aret";
 import { getArbejdsdagePath } from "./arbejdsdage";
@@ -173,6 +174,24 @@ export function getRouteDecision(
   // have to URL'er med samme svar.
   if (UGEDAG_SIDER.includes(normalizedPath as (typeof UGEDAG_SIDER)[number])) {
     const egenSti = getUgedagPath(domainConfig.locale);
+    if (!egenSti) return { type: "not-found" };
+    if (egenSti !== normalizedPath) {
+      return { type: "redirect", destination: egenSti, status: 301 };
+    }
+  }
+
+  /**
+   * Samme regel for «hvor mange dage er der tilbage af året»:
+   * `/dage-tilbage-i-aaret` og `/dagar-kvar-i-aret` er den samme nedtælling i
+   * to sprog. Uden 301'en ville beraknare.se/dage-tilbage-i-aaret servere
+   * danske månedsnavne på et svensk domæne.
+   */
+  const DAGE_TILBAGE_SIDER = ["/dage-tilbage-i-aaret", "/dagar-kvar-i-aret"] as const;
+
+  if (
+    DAGE_TILBAGE_SIDER.includes(normalizedPath as (typeof DAGE_TILBAGE_SIDER)[number])
+  ) {
+    const egenSti = getDageTilbagePath(domainConfig.locale);
     if (!egenSti) return { type: "not-found" };
     if (egenSti !== normalizedPath) {
       return { type: "redirect", destination: egenSti, status: 301 };

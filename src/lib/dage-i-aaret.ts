@@ -194,6 +194,7 @@ export interface DageIAaretCopy {
   /** Uden årstal, fordi det følger dagens dato og derfor ikke må stå her. */
   lead: string;
   linkDato: string;
+  linkDageTilbage: string;
   linkUgenummer: string;
   linkDageTil: string;
   linkMellem: string;
@@ -223,6 +224,7 @@ export const dageIAaretCopy: Record<DageIAaretLocale, DageIAaretCopy> = {
     lead:
       "Et kalenderår har 365 dage, men de tolv måneder er ikke lige lange. Her er alle 12 med dage, hverdage og weekenddage, og hvor mange dage der er tilbage af året.",
     linkDato: "Datoberegner med alle fire værktøjer",
+    linkDageTilbage: "Hvor mange dage er der tilbage af året?",
     linkUgenummer: "Hvilken uge er det?",
     linkDageTil: "Hvor mange dage er der til …?",
     linkMellem: "Dage mellem to datoer",
@@ -245,6 +247,7 @@ export const dageIAaretCopy: Record<DageIAaretLocale, DageIAaretCopy> = {
     lead:
       "Ett kalenderår har 365 dagar, men de tolv månaderna är inte lika långa. Här är alla 12 med dagar, vardagar och helvdagar, och hur många dagar som är kvar av året.",
     linkDato: "Datumräknare med alla fyra verktyg",
+    linkDageTilbage: "Hur många dagar är det kvar av året?",
     linkUgenummer: "Vilken vecka är det?",
     linkDageTil: "Hur många dagar är det till …?",
     linkMellem: "Dagar mellan två datum",

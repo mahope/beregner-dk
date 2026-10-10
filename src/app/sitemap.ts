@@ -11,6 +11,7 @@ import { getKlokkenHubPath, getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klok
 import { getDageMellemPath } from "@/lib/dage-mellem-datoer";
 import { getUgedagPath } from "@/lib/ugedag";
 import { getDageIAaretPath } from "@/lib/dage-i-aaret";
+import { getDageTilbagePath } from "@/lib/dage-tilbage-i-aaret";
 import { getDageIManedenPath } from "@/lib/dage-i-maaneden";
 import { getTimerIAaretPath } from "@/lib/timer-i-aret";
 import { getArbejdsdagePath } from "@/lib/arbejdsdage";
@@ -151,6 +152,20 @@ export function buildSitemap(
       ]
     : [];
 
+  // «Hvor mange dage er der tilbage af året» er en ren nedtælling, der følger
+  // dagens dato, så siden re-crawles dagligt lige som dage-til-siderne.
+  const dageTilbagePath = getDageTilbagePath(locale);
+  const dageTilbageEntries: MetadataRoute.Sitemap = dageTilbagePath
+    ? [
+        {
+          url: `${baseUrl}${dageTilbagePath}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+      ]
+    : [];
+
   // «Hvor mange dage er der på et år» har både en tolv-måneders-tabel og et
   // «dage tilbage»-tal, og begge følger dagens dato, så siden re-crawles
   // dagligt lige som dage-til- og dage-mellem-siderne.
@@ -250,6 +265,7 @@ export function buildSitemap(
     ...dageTilEntries,
     ...dageMellemEntries,
     ...ugedagEntries,
+    ...dageTilbageEntries,
     ...dageIAaretEntries,
     ...dageIManedenEntries,
     ...timerIAaretEntries,
