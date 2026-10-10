@@ -240,6 +240,10 @@ export default async function KalorierPage() {
               magnesium
             </Link>
             ,{" "}
+            <Link href="/zink-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              zink
+            </Link>
+            ,{" "}
             <Link href="/vitamin-d" className="text-blue-700 underline dark:text-blue-300">
               D-vitamin
             </Link>

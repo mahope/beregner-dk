@@ -81,6 +81,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Jern i madvarer", description: "Jern pr. 100 g i havregryn, spinat, æg og andre madvarer", href: "/jern-i-madvarer", category: "Sundhed" },
   { title: "Calcium i madvarer", description: "Calcium pr. 100 g i mælk, ost, yoghurt og andre madvarer", href: "/calcium-i-madvarer", category: "Sundhed" },
   { title: "Magnesium i madvarer", description: "Magnesium pr. 100 g i havregryn, spinat, banan og andre madvarer", href: "/magnesium-i-madvarer", category: "Sundhed" },
+  { title: "Zink i madvarer", description: "Zink pr. 100 g i oksekød, havregryn, gouda og andre madvarer", href: "/zink-i-madvarer", category: "Sundhed" },
   { title: "Fedt i madvarer", description: "Fedt pr. 100 g i æg, avocado og andre madvarer", href: "/fedt-i-madvarer", category: "Sundhed" },
   { title: "Sukker i madvarer", description: "Sukker pr. 100 g i banan, æble og andre madvarer", href: "/sukker-i-madvarer", category: "Sundhed" },
   { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", category: "Sundhed" },
