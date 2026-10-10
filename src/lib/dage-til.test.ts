@@ -737,6 +737,7 @@ describe("slug-opløsning", () => {
       "sommerferien",
       "efteraarsferien",
       "skolestart",
+      "paaskeferien",
     ]);
     // Slugs er ikke et sæt, der indeholder hinanden: de to december-aftener er
     // begge daterede i URL'en ("24-december"/"31-december"), mens påskeaften
@@ -1433,6 +1434,62 @@ describe("skolestart som dansk dato", () => {
     const haverdag = getDageTilAnswer(start!, "da", iso("2028-01-05"));
     expect(formatTargetDate(haverdag.targetDate, "da")).toBe("1. august");
     expect(formatTargetYear(haverdag.targetDate)).toBe("2028");
+  });
+});
+
+describe("paaskeferien som dansk dato", () => {
+  const paaskeferien = DAGE_TIL_EVENTS.find((e) => e.id === "paaskeferien");
+
+  test("findes i listen", () => {
+    expect(paaskeferien).toBeDefined();
+  });
+
+  test("har et dansk slug og en dansk spørgsmål", () => {
+    expect(paaskeferien?.da.slug).toBe("paaskeferien");
+    expect(paaskeferien?.da.copy.question).toBe(
+      "Hvor mange dage er der til påskeferie?"
+    );
+  });
+
+  test("har INGEN svensk udgave", () => {
+    expect(paaskeferien?.se).toBeUndefined();
+    expect(paaskeferien?.anchor.se).toBeUndefined();
+    expect(getDageTilEvents("se").some((e) => e.id === "paaskeferien")).toBe(false);
+    expect(getDageTilSlugs("se")).not.toContain("paaskeferien");
+  });
+
+  test("løser ikke det danske slug på beraknare.se", () => {
+    expect(resolveDageTilSlug("paaskeferien", "se")).toBeUndefined();
+    expect(resolveDageTilSlug("paaskeferien", "da")?.isOwnLocale).toBe(true);
+  });
+
+  test("tæller til mandagen før påskedag", () => {
+    const svar = getDageTilAnswer(paaskeferien!, "da", iso("2026-01-01"));
+    expect(toISO(svar.targetDate)).toBe("2026-03-30");
+  });
+
+  test("tæller til mandagen før påskedag 2027", () => {
+    const svar = getDageTilAnswer(paaskeferien!, "da", iso("2027-01-01"));
+    expect(toISO(svar.targetDate)).toBe("2027-03-22");
+  });
+
+  test("på selve startdagen er svaret 0 dage", () => {
+    const svar = getDageTilAnswer(paaskeferien!, "da", iso("2027-03-22"));
+    expect(svar.days).toBe(0);
+    expect(svar.isToday).toBe(true);
+  });
+
+  test("FAQ-spørgsmålet er ikke bundet til et årstal eller en dato", () => {
+    const faq = paaskeferien?.da.copy.faq ?? [];
+    for (const punkt of faq) {
+      expect(punkt.question).not.toMatch(/\d{4}/);
+      expect(punkt.question).not.toMatch(/\d+\. (marts|april)/);
+    }
+  });
+
+  test("brødteksten nævner at datoen er kommunal", () => {
+    const tekst = paaskeferien?.da.copy.facts.join(" ") ?? "";
+    expect(tekst).toContain("kommune");
   });
 });
 

@@ -1780,6 +1780,41 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       },
     },
   },
+  {
+    id: "paaskeferien",
+    anchor: {
+      da: { kind: "easterOffset", month: 0, day: 0, offsetDays: -6 },
+    },
+    da: {
+      slug: "paaskeferien",
+      copy: {
+        short: "påskeferien",
+        question: "Hvor mange dage er der til påskeferie?",
+        facts: [
+          "Påskeferien ligger typisk i ugen før påskedag, men datoen er ikke fastlagt i loven — hver kommune fastsætter den selv.",
+          "De fleste kommuner giver fri i hele ugen før påskedag (mandag til fredag), mens andre vælger kun at give fri på skærtorsdag og langfredag.",
+          "Tjek altid din egen kommunes ferieplan, for datoen kan variere fra kommune til kommune.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er påskeferien?",
+            answer:
+              "Påskeferien ligger typisk i ugen før påskedag, men det er ikke en fast dato i loven. Hver kommune fastsætter selv, hvilke dage der er fri, så tjek din egen kommunes ferieplan.",
+          },
+          {
+            question: "Er påskeferien den samme dato i alle kommuner?",
+            answer:
+              "Nej. Påskeferien er ikke fastlagt i loven, så hver kommune fastsætter selv. De fleste giver fri i hele ugen før påskedag, men nogle vælger kun at give fri på skærtorsdag og langfredag.",
+          },
+          {
+            question: "Hvor lang er påskeferien?",
+            answer:
+              "Det afhænger af kommunen. De fleste giver fri i hele ugen før påskedag (mandag til fredag), altså 5 dage, mens andre kun giver fri på skærtorsdag og langfredag (2 dage).",
+          },
+        ],
+      },
+    },
+  },
 ];
 
 /** Locales that have a real dage-til landing page. */

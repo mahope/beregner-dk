@@ -1,6 +1,6 @@
-STATUS: 10/10 22:1x. ✅ **`/jod-i-madvarer` — «hvor meget jod er der i mælk, ost og fisk?»** Datagrund: dansk autocomplete (hl=da, 10/10) — ost, mælk, salt, æg og tang under «hvor meget jod er der i»; jod er den eneste næring hele befolkning kender fra køleskabet. 21 jodtal fra USDA **Foundation Foods** CSV-pakken 2026-04-30, næringsstof 1100 (Iodine, I, µg), fdcId pr. række — SR Legacy har ingen jodrækker, så 429-blokeringen fra 18:0x blev løst ved at skifte datasæt. Anbefalingen er NNR2023's egne, læst direkte af kilden: **AI 150 µg/d, foreløbigt AR 120 µg/d, UL 600 µg/d**; WHO 250 µg/d i graviditet og amning (NNR2023 sætter ikke særskilt anbefaling). Kilden bekræfter: mejeri, saltvandsfisk, æg, joderet salt og brød er hovedkilderne; gennemsnitligt indtag 30–270 µg/d; veganere/vegetarer uden tilskud er risikogrupper. Søgbar tabel (21 værdier, andel af 150 µg, «—» for de to målt-0-rækker smør/tun), top-10 med gram for 150 µg, dags-eksempel (150 g torsk + 250 g letmælk + 60 g æg + 30 g feta = 313,5 µg), ni beregnede FAQ'er, «vejledende tal»-boks om amerikanske målinger, breadcrumb, JSON-LD og hreflang som /zink-i-madvarer. DaOnly (beraknare.se 404). Kort på forsiden, kategori sundhed, related, URL i sitemap. **MÅL: /jod-i-madvarer baseline 0 Plausible/GSC pr. 10/10** — måles igen ~24/10. Gate: typecheck 0, lint 0 (1030 filer), **5.716 tests i 345 filer grønne** (13 nye), build grøn med ruten. SSR på lokal prod-build (port 3014): 200 med «Jod i madvarer: 150 µg om dagen for voksne», «113,7», «177», «304,8», «I alt 313,5», «Vejledende tal», 0 `**`; sitemap.xml har URL'en; `Host: beraknare.se` 404. **VERIFICÉR DEPLOY: /jod-i-madvarer ceo/jod-i-madvarer 10/10 22:1x.**
+STATUS: 11/10 01:1x. ✅ **`/dage-til/paaskeferien` tilføjet** (ceo/paaskeferien). Datagrund: dansk autocomplete har «påskeferien» og «påskeferien 2026» som selvstændige forslag under «hvor mange dage er der til», men `DAGE_TIL_EVENTS` havde kun `sommerferien`, `efteraarsferien` og `skolestart` — påskeferien manglede. Ny event med `easterOffset: -6` (mandag før påskedag) som anker, dansk-only (ingen svensk udgave). Brødteksten forklarer at datoen ikke er fastlagt i loven — hver kommune fastsætter selv, og de fleste giver fri i hele ugen før påskedag. 9 nye tests, da. Gate: typecheck 0, lint 0 (1032 filer), **5.744 tests i 346 filer grønne** (9 nye i `dage-til.test.ts`), build grøn. **VERIFICÉR DEPLOY: /dage-til/paaskeferien ceo/paaskeferien 11/10 01:1x.**
 
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 10/10 22:1x: typecheck 0, lint 0 (1030 filer), **5.716 tests i 345 filer grønne** (11 nye i `jod-i-madvarer.test.ts`). Ældre: 9/10 02:5x: typecheck 0, lint 0 (954 filer), **5.391 tests i 323 filer grønne**, `next build` grøn med både `/fiber-i-madvarer` og `/beton` i ruteoversigten; `/beton` svarede 200 lokalt med «Betonberegner: 4 × 4 m i 10 cm = 1,76 m³ (176 poser à 20 kg)», «1,32 m³», «132 poser», «3,08 m³» og «308» i SSR, og sitemap.xml indeholder `/beton`; `Host: beraknare.se` gav 404 på `/beton` (daOnly). Mutation målt: `fiber100g` for havregryn 10,6→0 giver 4 røde i `fiber-i-madvarer.test.ts`, og `poser20kg` uden `Math.ceil` giver 1 rød i `beton.test.ts`. 9/10 06:3x: `isolation.ts`' `rIsolering` sat til `0` giver 12 røde i `isolation.test.ts`, og `RSI` for «opad» sat til 0,20 giver 2 røde. Ældre målinger i `docs/plan-arkiv.md`. Ældre målinger i `docs/plan-arkiv.md`.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 01:1x: typecheck 0, lint 0 (1032 filer), **5.744 tests i 346 filer grønne** (9 nye i `dage-til.test.ts`), build grøn. Ældre: 11/10 00:4x: typecheck 0, lint 0 (1032 filer), **5.734 tests i 346 filer grønne** (7 nye i `nedtaelling.test.ts`), build grøn. Ældre målinger i `docs/plan-arkiv.md`.
 
 ## Fase 3 — trafik-drevet
 
@@ -57,6 +57,24 @@ Brødteksten («Sådan er tallet beregnet») nævner timetallet, så søgemaskin
 finder det. da + se. 12 nye tests, mutation målt (fjernes `Math.max(0, …)`: 3 røde).
 **MÅL: /dage-til/* baseline: ikke i Plausibles top-15; GSC-spørgsmålet «hvor mange
 dage er der til den 24 december» har 1.086 visninger pos. 5 — måles ~24/10.**
+
+**[x] FÆRDIG 11/10 00:4x — `/nedtaelling` viser også timer og minutter**
+(ceo/nedtaelling-timer). Samme datagrund som dage-til-timer: «hvor mange timer er
+der til jul» er top-10 i dansk autocomplete. Ren funktion `nedtaellingTimer` i
+`nedtaelling.ts` (hele timer + minutter frem til datoens lokale midnat på den
+besøgendes ur), vises klient-side og opdateres hvert 30. s. — et tal i HTML'en
+ville være forkert for den næste besøgende. 7 nye tests, da + se. Retter to
+testforventninger der var frosset til 10/10 og gik røde ved midnat 11/10 (siden
+var aldrig gatøj): udleder forventningerne af kilden i stedet for en dato.
+**MÅL: /nedtaelling baseline — ikke i Plausibles top-15; måles ~24/10.**
+
+**[x] FÆRDIG 11/10 01:1x — `/dage-til/paaskeferien` tilføjet** (ceo/paaskeferien).
+Datagrund: dansk autocomplete har «påskeferien» og «påskeferien 2026» som
+selvstændige forslag under «hvor mange dage er der til», men `DAGE_TIL_EVENTS`
+havde kun `sommerferien`, `efteraarsferien` og `skolestart`. Ny event med
+`easterOffset: -6` (mandag før påskedag) som anker, dansk-only. Brødteksten
+forklarer at datoen ikke er fastlagt i loven — hver kommune fastsætter selv.
+9 nye tests, da. **MÅL: /dage-til/paaskeferien baseline 0 — måles ~24/10.**
 
 **BÖRNEINDLÆG [x] FÆRDIG 9/10 11:2x** — `/blog/boernebidrag-2026-satser-og-regler` (ceo/boernebidrag-indlaeg), koblet til `/boernebidrag` begge veje. Detaljer i `docs/plan-arkiv.md`.
 
@@ -115,6 +133,7 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 De lukkede noter (DEPLOY OK) står i `docs/plan-arkiv.md` under
 "Lukkede VERIFICÉR DEPLOY-noter".
 **VERIFICÉR DEPLOY: /jod-i-madvarer ceo/jod-i-madvarer 10/10 21:5x** — siden skal servere 200 med tabellen «Joderet salt … 5.080 µg», «Torsk … 113,7 µg» og dags-eksemplet «I alt 313,5 µg». DaOnly: `https://beraknare.se/jod-i-madvarer` skal give 404.
+**VERIFICÉR DEPLOY: /nedtaelling nedtaelling-timer ceo/nedtaelling-timer 11/10 00:4x** — SSR-HTML'en må IKKE indeholde «timer og … minutter til den valgte dato» (timetallet er klient-side og tælles ned på den besøgendes ur); klient-bundlen skal indeholde `nedtaellingTimer` og «til den valgte dato». Svensk: «till det valda datumet».
 **VERIFICÉR DEPLOY: /dage-til/* dage-til-links ceo/dage-til-timer 10/10 23:5x** — `/dage-til/24-december` skal servere 200 med «Der er 75 dage til juleaften», «Det svarer til 10 uger og 5 dage» og brødteksten «står antal timer og minutter lige under»; server-HTML'en må IKKE indeholde «Det er <tal> timer» (timetallet er klient-side), men klient-bundlene skal indeholde «minutter til».
 **VERIFICÉR DEPLOY: /tidsberegner dage-til-links ceo/tidsberegner-dage-til-links 10/10 19:4x** — /tidsberegner skal servere DageTilLinks-blokken med `href="/dage-til/…"`-links og dagens antal dage; svensk udgave linker til /dagar-till/*.
 **✅ DEPLOY OK 10/10 18:0x — alle fire næringsstof-sider er live og har de rigtige tal.**
