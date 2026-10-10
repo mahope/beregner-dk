@@ -244,6 +244,10 @@ export default async function KalorierPage() {
               zink
             </Link>
             ,{" "}
+            <Link href="/kalium-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              kalium
+            </Link>
+            ,{" "}
             <Link href="/vitamin-d" className="text-blue-700 underline dark:text-blue-300">
               D-vitamin
             </Link>

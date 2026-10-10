@@ -39,6 +39,7 @@ describe("/kalorier mikronæringsstoffer", () => {
       "/calcium-i-madvarer",
       "/magnesium-i-madvarer",
       "/zink-i-madvarer",
+      "/kalium-i-madvarer",
       "/vitamin-d",
       "/vitamin-c",
       "/vitamin-b12",
