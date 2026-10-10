@@ -29,10 +29,12 @@
  * runde figur.
  */
 import { describe, expect, test } from "vitest";
+import { rabatProcent, procentAf, RABAT_EKSEMPEL, PROCENT_10_AF_FAQ } from "@/lib/procent";
 import { beregnBmr, beregnTdee } from "@/lib/makroer";
 import { dageTilDecember } from "@/lib/dage-mellem-datoer";
 import { beregnMoms } from "@/lib/moms";
 import { getPageData } from "@/lib/page-data";
+import { formatBelob } from "./format";
 import { beregnTidsinterval } from "@/lib/tidsberegner";
 
 /**
@@ -132,11 +134,31 @@ describe("tallene i titlerne er rigtige", () => {
     expect(titel).toMatch(/1\.?250/);
   });
 
-  test("procent: 10 % af et tal", () => {
-    expect(10 * 0.1).toBe(1);
+  // /procent er sitets største impressionsblok: GSC 9/9–7/10 viser 141.167
+  // visninger, 77 klik, CTR 0,1 % på pos. 7,5. Den gamle titel skrev
+  // "10 % af et tal" — et tal uden et regnestykke, og de to største
+  // søgninger på siden er netop "procentberegner" og "10 procent af". Nu
+  // skriver titlen hele opgaven med svaret, regnet af den samme funktion,
+  // siden bruger. De to andre tal i titlen/beskrivelsen er rabatspørgsmålet,
+  // som Google selv har registreret på siden ("en telefon er sat 1125 kr.
+  // ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?").
+  test("procent: 10 % af 1.600 kr. = 160 kr. og rabaten 9.000 → 7.875 = 12,5 %", () => {
+    const svar = procentAf(PROCENT_10_AF_FAQ, 10);
+    const rabat = rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+    expect(svar).toBe(160);
+    expect(rabat).toBe(12.5);
+
     const titel = getPageData("procent", "da")!.metaTitle;
     expect(titel).toMatch(/10 % af/);
-    expect(titel).toMatch(/et tal/);
+    expect(titel).toContain(`${formatBelob(PROCENT_10_AF_FAQ, "da")} kr.`);
+    // Resultatet skal stå med enhed lige efter tallet, så det læses som svar.
+    expect(titel).toContain(`${formatBelob(svar, "da")} kr.`);
+    expect(titel).toContain("=");
+
+    const beskrivelse = getPageData("procent", "da")!.metaDescription;
+    expect(beskrivelse).toContain(`${formatBelob(RABAT_EKSEMPEL.normalPris, "da")} kr.`);
+    expect(beskrivelse).toContain(`${formatBelob(RABAT_EKSEMPEL.nedsatPris, "da")} kr.`);
+    expect(beskrivelse).toContain(`${formatBelob(rabat, "da", 1)} %`);
   });
 
   // Titlen på /dato (131.320 visninger, 0,7 % CTR) skrev før 4/10

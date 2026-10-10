@@ -224,10 +224,10 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Procentberegner: 10 % af et tal, rabat og stigning/fald",
-      intent: "10 procent af",
-      descriptionAnswer: "Beregn procent af et tal",
-      metaAnswer: "rabatten på 1125 kr",
+      title: "Procentberegner: 10 % af 1.600 kr. = 160 kr.",
+      intent: "10 % af",
+      descriptionAnswer: "Hvad er 10 % af",
+      metaAnswer: "rabatten i procent",
     },
     {
       locale: "se" as const,
@@ -260,11 +260,21 @@ describe("getPageData", () => {
   // beregner" ligger alle under "procent beregner". En titel der kun lovede ét
   // eksempel ("10 % af 250 kr. = 25 kr.") matcher derfor højst én af dem — de
   // øvrige ni har ingen grund til at blive klikket.
-  test("/procent-titlen dækker opgaverne i den danske langhale", () => {
-    const { metaTitle } = getPageData("procent", "da")!;
+  // GSC 9/9–7/10: /procent har 141.167 visninger, 77 klik, CTR 0,1 % på
+  // pos. 7,5. Autocomplete (hl=da, 2026-09-30) delte langhalsopgaverne
+  // ("stigning", "rabat", "fald"), og GSC viser at de to største søgninger er
+  // "procentberegner" og "10 procent af". Derfor bærer titlen nu det største
+  // regnestykke med svaret, mens rabat/stigning/fald er flyttet til
+  // beskrivelsen, hvor alle tre har plads på én gang — uden at fortynde det
+  // konkrete svar, som sidens egne data vejer højst (title-eksempel.test.ts:
+  // regnestykke-titler 0,9 % CTR mod 0,3 % for kategorinavne).
+  test("/procent-titlen viser det største regnestykke, beskrivelsen dækker langhalsopgaverne", () => {
+    const data = getPageData("procent", "da")!;
 
-    for (const opgave of ["10 % af", "stigning", "fald", "rabat"]) {
-      expect(metaTitle.toLowerCase()).toContain(opgave);
+    expect(data.metaTitle).toContain("10 % af");
+    expect(data.metaTitle).toContain("=");
+    for (const opgave of ["rabat", "stigning", "fald"]) {
+      expect(data.metaDescription.toLowerCase()).toContain(opgave);
     }
   });
 

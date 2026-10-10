@@ -5,7 +5,8 @@ import { kvadratmeterEksempelLignelse } from "./kvadratmeter-eksempler";
 import { alderLevet } from "./alder-levet";
 import { dageTilDecember } from "./dage-mellem-datoer";
 import { iDagISidensTidszone } from "./lokal-dato";
-import { formatNumber } from "./format";
+import { formatBelob, formatNumber } from "./format";
+import { procentAf, PROCENT_10_AF_FAQ } from "./procent";
 import type { Locale } from "./i18n";
 
 /**
@@ -69,6 +70,15 @@ import type { Locale } from "./i18n";
 const KVADRATMETER_EKSEMPEL = kvadratmeterEksempelLignelse("da");
 
 /**
+ * /procent (da). 141.167 GSC-visninger, 77 klik, CTR 0,1 % på pos. 7,5
+ * (9/9–7/10). Titlen lovede «10 % af et tal» — det største regnestykke på
+ * siden, men uden at vise svaret. Nu skriver den hele opgaven, regnet af
+ * `procentAf`, samme funktion siden bruger. Tallet er `PROCENT_10_AF_FAQ`
+ * (1.600), som FAQ'en allerede har regnet på — ikke et nyt.
+ */
+const PROCENT_TITEL_DA = `10 % af ${formatBelob(PROCENT_10_AF_FAQ, "da")} kr. = ${formatBelob(procentAf(PROCENT_10_AF_FAQ, 10), "da")} kr.`;
+
+/**
  * Hver række er det resultat, titlen **skal** indeholde — ikke «et tal».
  * Uden `se`/`no` betyder «sproget findes ikke», og `getPageData` returnerer
  * da `undefined`; det dømmer porten med sit eget `toBeDefined`.
@@ -82,7 +92,7 @@ const REGNETE_EKSEMPLER: {
   { slug: "kvadratmeter", resulter: { da: KVADRATMETER_EKSEMPEL, se: KVADRATMETER_EKSEMPEL, no: KVADRATMETER_EKSEMPEL } },
   { slug: "promille", resulter: { da: "4 øl på 80 kg = 0,88 ‰", se: "4 öl på 80 kg = 0,88 ‰" } },
   { slug: "braendstof", resulter: { da: "500 km benzin koster 450 kr.", se: "500 km bensin kostar 585 kr.", no: "500 km bensin koster 450 kr." } },
-  { slug: "procent", resulter: { da: "10 % af et tal", se: "10 % av ett tal" } },
+  { slug: "procent", resulter: { da: PROCENT_TITEL_DA, se: "10 % av ett tal" } },
   {
     slug: "dato",
     // Titlens dagstal skifter hver dag, så porten regner dem med samme

@@ -43,9 +43,9 @@ describe("buildPageMetadata", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Procentberegner: 10 % af et tal, rabat og stigning/fald",
+      title: "Procentberegner: 10 % af 1.600 kr. = 160 kr.",
       description:
-        "Beregn procent af et tal, rabatprocent og procentvis ændring mellem to tal. F.eks. rabatten på 1125 kr. ned fra 9000 kr.",
+        "Hvad er 10 % af et tal, og hvor stor er rabatten i procent? Se regnestykket bag svaret: 9.000 kr. → 7.875 kr. = 12,5 %. Beregn også stigning og fald.",
     },
     {
       locale: "se" as const,
