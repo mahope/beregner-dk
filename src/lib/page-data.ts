@@ -279,6 +279,17 @@ import {
   vareMedNavn as jodVareMedNavn,
 } from "./jod-i-madvarer";
 import {
+  AEG_MG,
+  KOLESTEROL_ANBEFALING_KILDE,
+  KOLESTEROL_KILDE,
+  KOLESTEROLVARER,
+  antalAeg,
+  kolesterol100gForNavn,
+  kolesterolIgram,
+  kolesterolTal,
+  vareMedNavn as kolesterolVareMedNavn,
+} from "./kolesterol-i-madvarer";
+import {
   VITAMIN_C_ANBEFALING_MG,
   VITAMIN_C_AR_KVINDE_MG,
   VITAMIN_C_AR_MAND_MG,
@@ -1795,6 +1806,48 @@ const daPages: Record<string, PageData> = {
         {
           question: "Hvor kommer tallene fra?",
           answer: `Jodtallet pr. 100 g er fra ${JOD_KILDE.database}, datasættet ${JOD_KILDE.dataset}, udgaven ${JOD_KILDE.udgave}, næringsstof ${JOD_KILDE.naeringsstof}, med ${JODVARER.length} madvarer. Tallene er amerikanske målinger og ligger i mælk og æg højere end danske. Anbefalingerne er Nordic Nutrition Recommendations 2023's egne.`,
+        },
+      ],
+    },
+    "kolesterol-i-madvarer": {
+      slug: "kolesterol-i-madvarer",
+      title: "Kolesterol i madvarer – hvor meget er der i æg, ost og kød?",
+      description: `Et helt æg indeholder ${kolesterolTal(AEG_MG)} mg cholesterol. Se cholesterol pr. 100 g i æg, ost, smør, kylling, rejer og fisk — og hvor meget en portion svarer til.`,
+      metaTitle: `Kolesterol i madvarer: ${kolesterolTal(AEG_MG)} mg i ét æg`,
+      metaDescription: `Ét helt æg har ${kolesterolTal(AEG_MG)} mg cholesterol. Ost ${kolesterolTal(kolesterol100gForNavn("Cheddar"))} mg, smør ${kolesterolTal(kolesterol100gForNavn("Smør, saltet"))} mg pr. 100 g. Se cholesterol i ${KOLESTEROLVARER.length} madvarer.`,
+      keywords: ["hvor meget cholesterol er der i et æg", "kolesterol i madvarer", "hvor meget cholesterol må man spise", "kolesterolindhold", "hvor meget cholesterol er der i ost", "cholesterol i smør", "mættet fedt"],
+      ogTitle: `Kolesterol i madvarer: ${kolesterolTal(AEG_MG)} mg i ét æg`,
+      ogDescription: `Der findes ingen dansk anbefaling for cholesterol i mad. Ét helt æg har ${kolesterolTal(AEG_MG)} mg. Se tallene i ${KOLESTEROLVARER.length} madvarer.`,
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Kolesterolindhold i madvarer",
+      schemaDescription: `Se cholesterol pr. 100 g i æg, ost, smør, kød, fisk og skaldyr, og omregn en portion til antal æg.`,
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        {
+          question: "Hvor meget cholesterol må man spise?",
+          answer: `Der findes ingen dansk anbefaling for, hvor meget cholesterol man må spise fra mad. ${KOLESTEROL_ANBEFALING_KILDE} Det, der anbefales at begrænse, er mættet fedt til højst ${KOLESTEROL_KILDE.maettetFedtLoftProcent} % af energien — det er derfor, denne side ikke viser en «andel af anbefalingen».`,
+        },
+        {
+          question: "Hvor meget cholesterol er der i et æg?",
+          answer: `Et helt råt æg har ${kolesterolTal(kolesterol100gForNavn("Æg, helt, rå"))} mg cholesterol pr. 100 g, så ét æg på ${kolesterolTal(60, 0)} g giver ${kolesterolTal(AEG_MG)} mg. Æggeblommen alene har ${kolesterolTal(kolesterol100gForNavn("Æggeblomme, rå"))} mg pr. 100 g — næsten alle cholesterolet sidder i blommen, fordi æggevidet er vand og fedt.`,
+        },
+        {
+          question: "Hvor meget cholesterol er der i ost, smør og mælk?",
+          answer: `Cheddar har ${kolesterolTal(kolesterol100gForNavn("Cheddar"))} mg pr. 100 g, flødeost ${kolesterolTal(kolesterol100gForNavn("Flødeost"))} mg og smør ${kolesterolTal(kolesterol100gForNavn("Smør, saltet"))} mg. Mælk ligger langt lavere: letmælk ${kolesterolTal(kolesterol100gForNavn("Mælk, letmælk"))} mg og skummet mælk ${kolesterolTal(kolesterol100gForNavn("Mælk, skummet"))} mg pr. 100 g, fordi cholesterol sidder i fløden.`,
+        },
+        {
+          question: "Er der cholesterol i plantemad?",
+          answer: `Nej. Cholesterol dannes i dyr og findes derfor ikke i planter. Kilden har målt havregryn, rugbrød, gulerødder og olivenolie til 0 mg pr. 100 g, og det er alle vegetabilske madvarer. En vegetar spiser altså intet cholesterol direkte fra maden.`,
+        },
+        {
+          question: "Hvad skal man så overhøje i stedet?",
+          answer: `Det danske kostråd går på mættet fedt: højst ${KOLESTEROL_KILDE.maettetFedtLoftProcent} % af energien, ifølge Sundhedsstyrelsens kost.dk. Mættet fedt kommer især fra fedt kød, smør, ost og fløde, så det er dér det normalt er noget at skære ned — ikke nødvendigvis i æg, fisk eller vegetabilsk mad.`,
+        },
+        {
+          question: "Hvor kommer tallene fra?",
+          answer: `Kolesteroltallet pr. 100 g er fra ${KOLESTEROL_KILDE.database}, datasættet ${KOLESTEROL_KILDE.dataset}, udgaven ${KOLESTEROL_KILDE.udgave}, næringsstof ${KOLESTEROL_KILDE.naeringsstof}, med ${KOLESTEROLVARER.length} madvarer. Tallene er amerikanske målinger.`,
         },
       ],
     },
