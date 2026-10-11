@@ -31392,3 +31392,19 @@ Plausible/GSC pr. 11/10** — måles igen ~25/10. Se VERIFICÉR DEPLOY-note i pl
   grønne, `next build` grøn, `scripts/locale-leak.mjs --gate` exit 0.
 - **Deploy:** VERIFICÉR DEPLOY-noten står i planen; næste batchvindue var
   12:30 11/10.
+
+
+## Arkiveret fra planen 11/10 11:2x (ceo/boligsikring)
+
+- `/boligsikring` er færdig. Satserne fandtes i Beskæftigelsesministeriets
+  vejledning om regulering pr. 1. januar 2026 (retsinformation.dk, VEJ nr 9336 af
+  24/03/2026, Tabel 2: Individuel boligstøtte – boligsikring) og hos STAR
+  (star.dk/…/boligsikring). Boligsikring er boligstøtte til lejere, der ikke er
+  pensionister, og til førtidpensionister tilkendt efter 1. januar 2003.
+- To reguleringsvejledninger fra januar 2026 har forskellige tal (VEJ 9032 af
+  05/01/2026 viser 171.500/50.760/96.200). bm.dk's egen «Satser for 2026»-side
+  og borger.dk's 2026-tabel (4.201 kr./md = 50.412 kr./år for førtidspensionister
+  på ny ordning) følger VEJ nr 9336 af 24/03/2026, så det er de tal, siden
+  bruger. Husk at tjekke begge dokumenter, når 2027-satserne skal ind.
+- Ældre VERIFICÉR DEPLOY-noter og den fulde boligsikring-dokumentation: se
+  commit-beskederne for ceo/boligsikring.

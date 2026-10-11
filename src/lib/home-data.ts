@@ -176,6 +176,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", popular: true, category: "Praktisk" },
   { title: "BMI Beregner for voksne", description: "Beregn BMI for voksne ud fra vægt og højde", href: "/bmi", popular: true, category: "Sundhed" },
   { title: "Boligstøtte", description: "Se standardmaksima og formuegrænser for boligstøtte", href: "/boligstoette", popular: true, category: "Bolig" },
+  { title: "Boligsikring", description: "Beregn boligsikring ud fra husleje, indkomst og formue", href: "/boligsikring", popular: false, category: "Bolig" },
   { title: "Kvadratmeterberegner", description: "Beregn areal af rum, haver og grunde", href: "/kvadratmeter", popular: true, category: "Matematik" },
   { title: "Rentefradrag", description: "Beregn din skattebesparelse på rentefradrag", href: "/rentefradrag", popular: true, category: "Økonomi" },
   { title: "Renteprognose", description: "Se hvad dit boliglån koster om 5, 10 og 30 år", href: "/renteprognose", popular: false, category: "Økonomi" },

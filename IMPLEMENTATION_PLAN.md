@@ -13,13 +13,17 @@ Datagrund: `/boligstoette` har 494 besøgende/28d (+45 %) og 7.465 GSC-visninger
 (CTR 2,4 %, pos. 8,7), så den forkerte sætning stod i Google. Testen låste fejlen
 fast (den krævede netop «Realkredit Danmark»); den er skrevet om til at fejle på
 gammel tekst.
-**Næste opgave i dette spor: `/boligsikring`** — «beregn boligsikring» har seks
-selvstændige autocomplete-forslag (bl.a. «til pensionister», «som
-førtidspensionist»), og GSC har «boligsikring beregner» 208 visninger pos. 10 på
-`/boligstoette`. ⛔ mangler de 2026-regulerede satser (indkomstgrænse, mindste-
-tilskud) fra bekendtgørelsen — kræver verification før beregneren bygges (❓).
+🟢 **`/boligsikring` er færdig** (ceo/boligsikring). Blokeringen var satserne, og
+de findes: Beskæftigelsesministeriets vejledning om regulering pr. 1. januar 2026
+(retsinformation.dk, VEJ nr 9336 af 24/03/2026, Tabel 2) giver indkomstgrænsen
+170.300 kr., forøgelsen 44.900 pr. 2.-4. barn, mindste-egenbetalingen 28.700 kr.,
+maksimummet 50.412 kr. og huslejemaksimummet 95.500 kr.; STAR (star.dk/Boligsikring)
+giver hvem der kan få den, formlen 60/18 pct., arealgrænsen 65 + 20 m² og
+15 pct.-loftet uden børn. Alle beløb læses af ét modul (`boligsikring.ts`), som
+siden, FAQ'en og testen også læser. Dét ophævede blokeringen — den er ikke
+længere et ❓.
 
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 08:5x: typecheck 0, lint 0 (1039 filer), **5.786 tests i 348 filer grønne**, build grøn, `locale-leak.mjs --gate` exit 0 (0 ureviewet). Ældre: 11/10 06:5x: 5.766 tests i 347 filer.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 11:2x: typecheck 0, lint 0 (1044 filer), **5.818 tests i 350 filer grønne**, build grøn. Ældre: 11/10 08:5x: 5.786 tests i 348 filer.
 
 ## Fase 3 — trafik-drevet
 
@@ -86,6 +90,23 @@ ville være forkert for den næste besøgende. 7 nye tests, da + se. Retter to
 testforventninger der var frosset til 10/10 og gik røde ved midnat 11/10 (siden
 var aldrig gatøj): udleder forventningerne af kilden i stedet for en dato.
 **MÅL: /nedtaelling baseline — ikke i Plausibles top-15; måles ~24/10.**
+
+**[x] FÆRDIG 11/10 11:2x — `/boligsikring`: beregn boligsikring 2026**
+(ceo/boligsikring). Datagrund: GSC har «boligsikring beregner» 208 visninger pos.
+10 på `/boligstoette`, og «beregn boligsikring» har seks selvstændige
+autocomplete-forslag (bl.a. «til pensionister», «som førtidspensionist»).
+Beregneren regner 60 pct. af huslejen minus 18 pct. af husstandsindkomsten over
+indkomstgrænsen (LBK 995 § 22) og lægger de tre loft oveni: mindste-egenbetaling
+28.700 kr., 15 pct. af huslejen når der ikke er børn under 18 (undtaget
+førtidpension, stærkt bevægelseshæmmet, døgnhjælp) og maksimummet 50.412 kr.
+Huslejemaksimummet 95.500 kr. og arealgrænsen 65 + 20 m² pr. person medgår.
+Siden er daOnly og forklarer at det er en ydelse, ikke en opsparing. 24 nye
+modultests + 5 sidetests (bl.a. 4.201 kr./md = maksimummet, 1.194 kr./md =
+15 pct. af huslejemaksimummet — begge matcher borger.dk's egen 2026-tabel), og
+mutation-kontrol (0,6 → 0,55 giver 2 røde). Tals fejl: 50.412 = 4.201 × 12, så
+seks enheder afrundes ned i månedstallet.
+**MÅL: /boligsikring baseline 0 besøgende/28d pr. 11/10 — måles ~25/10.**
+**MÅL: GSC «beregn boligsikring» 208 visninger pos. 10 — måles ~25/10.**
 
 **[x] FÆRDIG 11/10 01:1x — `/dage-til/paaskeferien` tilføjet** (ceo/paaskeferien).
 Datagrund: dansk autocomplete har «påskeferien» og «påskeferien 2026» som
@@ -164,6 +185,12 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 - **[ ] «kvadratmeterpris» pr. by.** «kvadratmeterpris københavn/odense» er 3 af 10 træffere under «kvadratmeter»; 98 kommuner i `kommuner.ts`, men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+**VERIFICÉR DEPLOY: /boligsikring ceo/boligsikring 11/10 11:2x** —
+`https://minberegner.dk/boligsikring` skal servere 200 med `<title>` «Beregn
+boligsikring 2026 — formel, satser og loft», afsnittet «60 pct. af huslejen»,
+tabellens række «170.300», «50.412» og «95.500», og sætningen «ikke en
+opsparingsordning». `/boligsikring` skal stå i sitemap.xml. DaOnly:
+`https://beraknare.se/boligsikring` skal give 404.
 **VERIFICÉR DEPLOY: /aldersopsparing ceo/aldersopsparing 11/10 08:5x** —
 `https://minberegner.dk/aldersopsparing` skal servere 200 med
 «Aldersopsparing beregner 2026», beløbsgrænserne 9.900 kr. og 64.200 kr.,

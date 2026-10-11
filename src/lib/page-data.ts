@@ -1,5 +1,6 @@
 import type { Locale } from "./i18n";
 import { BARSEL_2026, BOLIGSTOETTE_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
+import { BOLIGSIKRING_2026 } from "./boligsikring";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
 import { beregnElbilLading, elbilLadingStandard } from "./elbil-lading";
@@ -4017,6 +4018,33 @@ faqItems: kalorierFaqItems("da"),
       { question: "Påvirker min formue boligstøtten?", answer: "Der er ingen øvre ret til at få boligstøtte alene på grund af formue. Formuen kan dog regnes med i vurderingen af indkomsten. Ikke-pensionister og førtidspensionister efter nye regler har én gruppe grænser, mens folkepensionister og førtidspensionister før 2003 har en anden." },
       { question: "Hvad sker der, hvis min indkomst ændrer sig?", answer: "Du skal give Udbetaling Danmark besked om ændringer i indkomst, husstandens størrelse eller husleje. Beregningen og eventuel efterregulering sker derefter ud fra de nye oplysninger." },
       { question: "Hvor kommer arealet fra?", answer: "Hvis du slår din adresse op, henter vi boligens areal fra BBR (Bygnings- og Boligregistret) via Datafordeleren. For lejligheder bruges den konkrete lejligheds areal. Tjek, at tallet passer med din lejekontrakt, og ret det, hvis det ikke gør. Vi gemmer ikke adressen." },
+      ],
+    },
+    "boligsikring": {
+      slug: "boligsikring",
+      title: "Beregn boligsikring 2026: 60 pct. af huslejen minus 18 pct. af indkomsten",
+      description: `Beregn boligsikring 2026: ${BOLIGSIKRING_2026.huslejeandelPct * 100} pct. af huslejen minus ${BOLIGSIKRING_2026.indkomstandelPct * 100} pct. af husstandsindkomsten over ${kr(BOLIGSIKRING_2026.indkomstGraense)}. Med arealgrænse, formuegrænser og de 2026-satser. Vejledende.`,
+      metaTitle: "Beregn boligsikring 2026 — formel, satser og loft",
+      metaDescription: "Beregn din boligsikring for 2026. Indtast husleje, indkomst, børn og formue, og se beløbet pr. måned med formlen fra loven og de nye satser.",
+      keywords: ["beregn boligsikring", "boligsikring beregner", "boligsikring 2026", "boligsikring sats", "boligsikring til pensionister", "boligsikring som førtidspensionist", "boligsikring husleje", "hvor meget kan jeg få i boligsikring", "boligsikring maksimum"],
+      ogTitle: "Beregn boligsikring 2026",
+      ogDescription: "Se hvor meget du kan få i boligsikring i 2026 med formlen fra loven og de nye satser.",
+      category: "Bolig",
+      breadcrumbCategory: "Bolig",
+      breadcrumbCategoryHref: "/kategori/bolig",
+      schemaName: "Boligsikringsberegner 2026",
+      schemaDescription: "Beregn boligsikring ud fra husleje, husstandsindkomst, børn, formue og areal med de 2026-satser fra loven.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+      { question: "Hvem kan få boligsikring?", answer: "Boligsikring er boligstøtte til lejere, der ikke er pensionister. Førtidspensionister, der er tilkendt efter 1. januar 2003, kan også få den. Boligen skal som udgangspunkt have eget køkken, og du skal søge hos Udbetaling Danmark." },
+      { question: "Hvordan beregnes boligsikring?", answer: `Boligsikring er forskellen mellem ${BOLIGSIKRING_2026.huslejeandelPct * 100} pct. af huslejen og ${BOLIGSIKRING_2026.indkomstandelPct * 100} pct. af husstandsindkomsten over indkomstgrænsen på ${kr(BOLIGSIKRING_2026.indkomstGraense)}. Indkomstgrænsen forhøjes med ${kr(BOLIGSIKRING_2026.indkomstGraensePrBarn)} for hvert barn fra det 2. til det 4. Kilde: LBK 995 § 22.` },
+      { question: "Hvor mange kan jeg højst få i boligsikring?", answer: `Højst ${kr(BOLIGSIKRING_2026.maksBoligsikring)} om året, svarende til ${kr(BOLIGSIKRING_2026.maksBoligsikring / 12)} pr. måned. Ved fire børn eller flere forhøjes beløbet med 25 pct. Derudover skal du selv betale mindst ${kr(BOLIGSIKRING_2026.mindstEgenbetaling)} af boligudgiften om året.` },
+      { question: "Er der et loft, hvis jeg ikke har børn?", answer: "Ja. Er der ikke børn under 18 år i husstanden, kan boligsikringen uanset indkomst ikke være højere end 15 pct. af huslejen. Undtaget er husstande med førtidpension eller seniorpension, stærkt bevægelseshæmmede i en egnet bolig, og husstande med døgnhjælp." },
+      { question: "Tæller min formue med?", answer: `Ja. Er formuen over ${kr(BOLIGSIKRING_2026.formueGraenseLav)}, regnes 10 pct. af hele formuen som en del af husstandsindkomsten. Er den over ${kr(BOLIGSIKRING_2026.formueGraenseHoej)} bliver det 20 pct. Kilde: LBK 995 § 8 a.` },
+      { question: "Hvor meget af huslejen regnes der med?", answer: `Højst ${kr(BOLIGSIKRING_2026.maksHusleje)} om året, og beløbet forhøjes med 5 pct. pr. barn op til 4 børn. Desuden medtælles kun 65 m² til den første beboer og 20 m² til hver af de følgende — en bolig på 100 m² med to personer giver altså kun 85 m² i beregningen.` },
+      { question: "Er boligsikring det samme som boligstøtte?", answer: "De er to dele af samme ordning, lov om individuel boligstøtte. Boligstøtte beregnes med faste maksimalbeløb pr. husstand, mens boligsikring beregnes med 60 pct. af huslejen og 18 pct. af indkomsten. Udbetaling Danmark vurderer, hvilken del du falder under." },
+      { question: "Hvordan søger jeg boligsikring?", answer: "På borger.dk. Der er også en vejledende beregner på boligstoette.dk, hvor du kan fortsætte uden login. Boligsikring udbetales fra den 1. i måneden efter, at ansøgningen er indgivet — ved indflytning fra indflytningsdagen, hvis du søger inden en måned." },
+      { question: "Bliver tallene nøjagtige?", answer: "Beregneren er vejledende. Udbetaling Danmark foretager den endelige beregning ud fra din faktiske boligudgift, din husstandsindkomst fra indkomstregisteret og din formue." },
       ],
     },
     "husleje": {

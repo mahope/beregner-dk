@@ -41,6 +41,7 @@ const navigationData: Record<Locale, NavItem[]> = {
       children: [
         { name: "Boliglån", href: "/boliglaan" },
         { name: "Boligstøtte", href: "/boligstoette" },
+        { name: "Boligsikring", href: "/boligsikring" },
         { name: "Husleje", href: "/husleje" },
         { name: "Andelsbolig", href: "/andelsbolig" },
         { name: "Rentefradrag", href: "/rentefradrag" },

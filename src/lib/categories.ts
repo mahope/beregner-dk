@@ -47,6 +47,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Topskat Beregner", description: "Beregn om du betaler mellemskat eller topskat", href: "/topskat", category: "Økonomi" },
   { title: "Brutto/Netto Beregner", description: "Find bruttoløn ud fra ønsket udbetaling", href: "/brutto-netto", category: "Økonomi" },
   { title: "Boligstøtte", description: "Se standardmaksima og formuegrænser for boligstøtte", href: "/boligstoette", category: "Bolig" },
+  { title: "Boligsikring", description: "Beregn boligsikring ud fra husleje og indkomst", href: "/boligsikring", category: "Bolig" },
   { title: "Bolån", description: "Beräkna månadskostnad för bolån", href: "/bolan", category: "Bolig" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", category: "Bolig" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", category: "Bolig" },
