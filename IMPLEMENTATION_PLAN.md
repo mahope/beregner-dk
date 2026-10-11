@@ -1,6 +1,6 @@
-STATUS: 11/10 06:1x. 🟢 **`/dage-til/1-november` og `/dagar-till/1-november` landet** (ceo/dage-til-1-november) — fast dato i begge sprog, sitemap på begge domæner, og et slug på det andet domænes form stopper som 301 til dets egen. Datagrund: GSC 11/10 har på beraknare.se «hur många dagar är det kvar till 1 november» (45 visninger, pos. 5) og på minberegner.dk «hvor mange dage er der til 1 december» (928 visninger) — december havde sin side, november manglede sin. Svensk copy rettet i samme iteration: alla helgons dag er lördagen mellan 31 oktober och 6 november, ikke 1 november. Detaljer i `docs/plan-arkiv.md`.
+STATUS: 11/10 06:3x. 🟢 **`/dage-til/valentinsdag` + `/dagar-till/alla-hjartans-dag` landet** (ceo/dage-til-valentinsdag) — fast dato i begge sprog, sitemap, 301 på kryds-slug. Datagrund: Google-autocomplete 11/10 har «hvor mange dage er der til valentinsdag» (da) og «hur många dagar är det kvar till alla hjärtans dag» (se) som selvstændige forslag. To porte fangede to fejl undervejs: svensk vardag-påstand uden forbehold, og at 2027→2028 ikke indeholder skuddagen (365, ikke 366). Detaljer i `docs/plan-arkiv.md`.
 
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 06:1x: typecheck 0, lint 0 (1035 filer), **5.763 tests i 347 filer grønne**, build grøn, `locale-leak.mjs --gate` exit 0 (0 ureviewet). Ældre: 11/10 02:5x: 5.760 tests i 347 filer. Ældre målinger i `docs/plan-arkiv.md`.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 06:3x: typecheck 0, lint 0 (1035 filer), **5.766 tests i 347 filer grønne**, build grøn, `locale-leak.mjs --gate` exit 0 (0 ureviewet). Ældre: 11/10 02:5x: 5.760 tests i 347 filer. Ældre målinger i `docs/plan-arkiv.md`.
 
 ## Fase 3 — trafik-drevet
 
@@ -84,6 +84,14 @@ dage til juleaften). Svensk FAQ rettet til den korrekte regel: alla helgons dag
 er lördagen mellan 31 oktober och 6 november. 1 ny test + mutation-kontrol (uden
 eventet går testen rød). **MÅL: /dage-til/1-november + /dagar-till/1-november
 baseline 0 — måles ~25/10.**
+
+**[x] FÆRDIG 11/10 06:3x — `/dage-til/valentinsdag` (da) + `/dagar-till/alla-hjartans-dag` (se)**
+(ceo/dage-til-valentinsdag). Datagrund: Google-autocomplete (suggestqueries.google.com
+11/10, hl=da/gl=dk og hl=sv/gl=se) har begge spørgsmål som selvstændige forslag.
+Fast dato 14. februar, eget copy pr. sprog, svensk titel forkortet til ≤60 tegn.
+To porte var grønne og fandt to rigtige fejl: svensk vardag-påstand uden
+weekend-forbehold, og at 14/2 2027→2028 giver 365 dage (skuddagen 29/2 2028
+ligger efter anden dato). 1 ny test + mutation-kontrol. **MÅL: baseline 0 — måles ~25/10.**
 
 **BÖRNEINDLÆG [x] FÆRDIG 9/10 11:2x** — `/blog/boernebidrag-2026-satser-og-regler` (ceo/boernebidrag-indlaeg), koblet til `/boernebidrag` begge veje. Detaljer i `docs/plan-arkiv.md`.
 

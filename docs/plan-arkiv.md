@@ -31333,3 +31333,43 @@ så UI'et er ikke skærmbilledverificeret; siden bruger den delte `DageTilPage`.
 
 **MÅL: /dage-til/1-november + /dagar-till/1-november baseline 0 Plausible/GSC pr.
 11/10** — måles igen ~25/10. Se VERIFICÉR DEPLOY-note i planen.
+
+## 11/10 06:3x — `/dage-til/valentinsdag` + `/dagar-till/alla-hjartans-dag` (ceo/dage-til-valentinsdag)
+
+**Valentinsdag fik sin nedtællingsside på begge sprog.** Datagrund:
+Google-autocomplete (suggestqueries.google.com, 11/10) har «hvor mange dage er der
+til valentinsdag» (hl=da, gl=dk) og «hur många dagar är det kvar till alla
+hjärtans dag» (hl=sv, gl=se) som selvstændige forslag — samme klasse som
+halloween: en fast dato, folk tæller ned til. Fast dato 14. februar, da-slug
+«valentinsdag», se-slug «alla-hjartans-dag».
+
+**To porte fangede to rigtige fejl undervejs, begge blev rettet:**
+1. `dage-til-routes.test.tsx` — den svenske titel «Hur många dagar är det kvar
+   till alla hjärtans dag? 330 dagar» blev målt til 61 tegn over Googles 60-tegns
+   afkortningsgrænse. Spørgsmålet er forkortet til «Hur många dagar är det till
+   alla hjärtans dag?».
+2. Porten «en dato der også kan ligge i en weekend kaldes ikke hverdag uden
+   forbehold» fandt at svensk FAQ påstod «en vanlig vardag för både skola och
+   jobb» — og 14. februar kan falde på en lørdag. Begge sprogs copy siger nu
+   eksplicit, at datoen kan falde på både hverdag og weekend / på en lördag eller
+   söndag, som alle andre fasta datoer.
+3. Regnestykket bag «365 dage, 366 i skudår» var forkert i første udgave:
+   14. februar 2027 → 14. februar 2028 giver **365** dage, fordi skuddagen 29.
+   februar 2028 ligger *efter* anden dato. Det rigtige eksempel er 14. februar
+   2028 → 14. februar 2029 (366), og testen låser begge mål.
+
+**Gate 11/10 06:3x:** typecheck 0, lint 0 (1035 filer), **5.766 tests i 347 filer
+grønne** (+3 mod 5.763 — ny test + to porte opdateret), build grøn,
+locale-leak exit 0. SSR på lokal prod-build (`next start` :4812/:4813,
+dræbt bagefter): `/dage-til/valentinsdag` (Host: minberegner.dk) 200 med titlen
+«Hvor mange dage er der til valentinsdag? 126 dage» (11/10 → 14/2 = 20+30+31+31+14
+= 126), «365 dage mellem to valentinsdage», «14. februar 2028 til 14. februar
+2029», FAQ-svaret «kan falde på både hverdag og weekend»;
+`/dagar-till/alla-hjartans-dag` (Host: beraknare.se) 200 med titlen «Hur många
+dagar är det till alla hjärtans dag? 126 dagar» og «365 dagar mellan två alla
+hjärtans dagar»; `beraknare.se/dage-til/valentinsdag` giver 301 til
+`/dagar-till/alla-hjartans-dag`; begge slugs i sitemap.xml på deres domæne.
+Mutation: uden eventet går den nye test rød.
+
+**MÅL: /dage-til/valentinsdag + /dagar-till/alla-hjartans-dag baseline 0
+Plausible/GSC pr. 11/10** — måles igen ~25/10. Se VERIFICÉR DEPLOY-note i planen.

@@ -579,6 +579,76 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    // Valentinsdag er den 14. februar, og begge autocomplete-sprog har
+    // spørgsmålet som selvstændigt forslag: da «hvor mange dage er der til
+    // valentinsdag» (suggestqueries.google.com 11/10, hl=da gl=dk) og se
+    // «hur många dagar är det kvar till alla hjärtans dag» (hl=sv gl=se).
+    // Samme klasse som halloween: en fast dato folk tæller ned til.
+    id: "valentinsdag",
+    anchor: {
+      da: { kind: "fixed", month: 2, day: 14, offsetDays: 0 },
+      se: { kind: "fixed", month: 2, day: 14, offsetDays: 0 },
+    },
+    da: {
+      slug: "valentinsdag",
+      copy: {
+        short: "valentinsdag",
+        question: "Hvor mange dage er der til valentinsdag?",
+        facts: [
+          "Valentinsdag er den 14. februar, og datoen flytter sig aldrig.",
+          "Dagen er hverken en helligdag eller en fridag i Danmark, uanset om den falder på en hverdag eller i en weekend.",
+          "Der er 365 dage mellem to valentinsdage, og 366 når mellemrummet indeholder en 29. februar — sådan er det fra 14. februar 2028 til 14. februar 2029.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er valentinsdag?",
+            answer:
+              "Valentinsdag er altid den 14. februar. Datoen er fast, så den falder på en ny ugedag hvert år.",
+          },
+          {
+            question: "Er valentinsdag en fridag i Danmark?",
+            answer:
+              "Nej. Valentinsdag er ikke en af Danmarks helligdage, og der er ingen fri rettet mod datoen — datoen kan falde på både hverdag og weekend.",
+          },
+          {
+            question: "Kan jeg tælle dage frem til en anden dato?",
+            answer:
+              "Ja. Datoberegneren tæller dage mellem to valgte datoer og viser også uger, arbejdsdage og weekenddage.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "alla-hjartans-dag",
+      copy: {
+        short: "alla hjärtans dag",
+        question: "Hur många dagar är det till alla hjärtans dag?",
+        facts: [
+          "Alla hjärtans dag firas den 14 februari, och datumet flyttar sig aldrig.",
+          "Dagen är varken en röd dag eller en helgdag i Sverige, men den kan infalla på en lördag eller söndag som alla andra fasta datum.",
+          "Det är exakt 365 dagar mellan två alla hjärtans dagar, och 366 när skottårets 29 februari ligger mellan — som från 14 februari 2028 till 14 februari 2029.",
+        ],
+        faq: [
+          {
+            question: "När är alla hjärtans dag?",
+            answer:
+              "Alla hjärtans dag firas alltid den 14 februari. Datumet är fast, så veckodagen skiftar från år till år.",
+          },
+          {
+            question: "Är alla hjärtans dag en röd dag?",
+            answer:
+              "Nej. Alla hjärtans dag är inte en av Sveriges 13 röda dagar, men datumet kan infalla på en lördag eller söndag som alla andra fasta datum.",
+          },
+          {
+            question: "Kan jag räkna dagar fram till ett annat datum?",
+            answer:
+              "Ja. Datumräknaren räknar dagar mellan två valda datum och visar också veckor, arbetsdagar och helgdagar.",
+          },
+        ],
+      },
+    },
+  },
+  {
     // Påskedagen minus 47 dage. Dansk "fastelavn" og svensk "fettisdagen" er
     // samme tirsdag. Dansk autocomplete målt 1/10 har "hvor mange dage er der
     // til fastelavn" (3 completioner, ordet selv plus … 2026 plus "…tilbage

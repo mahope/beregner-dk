@@ -138,6 +138,23 @@ describe("midsommarafton", () => {
     expect(daysBetween(iso("2026-11-01"), iso("2026-12-24"))).toBe(53);
   });
 
+  test("valentinsdag er en fast dato i begge sprog", () => {
+    const event = eventById("valentinsdag");
+    for (const locale of ["da", "se"] as const) {
+      const anchor = anchorOf(event, locale);
+      expect(anchor.kind).toBe("fixed");
+      expect(toISO(getNextAnchorDate(anchor, iso("2026-02-13")))).toBe("2026-02-14");
+      // Dagen selv tæller med (0 dage til), så først dagen efter ruller til næste år.
+      expect(toISO(getNextAnchorDate(anchor, iso("2026-02-14")))).toBe("2026-02-14");
+      expect(toISO(getNextAnchorDate(anchor, iso("2026-02-15")))).toBe("2027-02-14");
+    }
+    expect(getDageTilSlugs("da")).toContain("valentinsdag");
+    expect(getDageTilSlugs("se")).toContain("alla-hjartans-dag");
+    // Skudårets 29. februar 2028 ligger mellem de to datoer, så der er 366 dage.
+    expect(daysBetween(iso("2028-02-14"), iso("2029-02-14"))).toBe(366);
+    expect(daysBetween(iso("2026-02-14"), iso("2027-02-14"))).toBe(365);
+  });
+
   test("begge sprog har deres eget slug med sit eget spørgsmål", () => {
     const afton = DAGE_TIL_EVENTS.find((e) => e.id === "midsommarafton");
     const dagen = DAGE_TIL_EVENTS.find((e) => e.id === "midsommardagen");
