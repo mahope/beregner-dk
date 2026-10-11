@@ -1,5 +1,5 @@
 import type { Locale } from "./i18n";
-import { BARSEL_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
+import { BARSEL_2026, BOLIGSTOETTE_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
 import { beregnElbilLading, elbilLadingStandard } from "./elbil-lading";
@@ -3983,7 +3983,7 @@ faqItems: kalorierFaqItems("da"),
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Hvem kan få boligstøtte?", answer: "Boligstøtte gælder som udgangspunkt lejere i en egnet bolig med eget køkken, der bor fast i boligen. Udbetaling Danmark vurderer også indkomst, formue, antal børn og voksne, husleje og areal." },
-      { question: "Hvad er forskellen på boligstøtte og boligsikring?", answer: "Boligstøtte er et tilskud fra staten til lejere i den private boligsektor, og det er det denne beregner viser. Boligsikring er en obligatorisk opsparingsordning for købere af eksisterende bolig: du lånter mod din egen opsparing og betaler tilbage på vilkår, og du får ingen månedlig ydelse. Den administreres af Realkredit Danmark, ikke af Udbetaling Danmark." },
+      { question: "Hvad er forskellen på boligstøtte og boligsikring?", answer: `Boligstøtte og boligsikring er to dele af samme ordning — lov om individuel boligstøtte (LBK 229). Boligstøtte beregnes efter fastsatte maksimalbeløb pr. husstand, og det er hvad beregneren her viser: maksimalt ${kr(BOLIGSTOETTE_2026.maximumMonthly.nonPensioner.noChildren)} kr. om måneden for en husstand uden børn. Boligsikring beregnes derimod som 60 pct. af den årlige boligudgift fratrukket 18 pct. af husstandsindkomsten over indkomstgrænsen, og formuen medgår (§ 8 a). Begge ordninger administreres af Udbetaling Danmark, og du søger om dem på borger.dk — boligsikring er altså en ydelse, ikke en opsparing. Beløbet kan først fastsættes, når Udbetaling Danmark kender din husleje, din indkomst og din formue. Kilde: LBK 229 § 8 a, § 9 b og § 22.` },
       { question: "Hvordan søger jeg boligstøtte?", answer: "Brug først den officielle vejledende beregner på boligstoette.dk. Du kan fortsætte uden login og senere sende en ansøgning. Udbetaling Danmark afgør det endelige beløb." },
       { question: "Hvornår får jeg boligstøtte udbetalt?", answer: "Når ansøgningen er godkendt, udbetales boligstøtte månedsvist forud. Udbetaling Danmarks beregning og besked om din ansøgning afgør den konkrete udbetaling." },
       { question: "Påvirker min formue boligstøtten?", answer: "Der er ingen øvre ret til at få boligstøtte alene på grund af formue. Formuen kan dog regnes med i vurderingen af indkomsten. Ikke-pensionister og førtidspensionister efter nye regler har én gruppe grænser, mens folkepensionister og førtidspensionister før 2003 har en anden." },

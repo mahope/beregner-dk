@@ -234,22 +234,26 @@ export default async function BoligstoettePage() {
             med andre regler. Den officielle beregner afgør, hvilken ordning der gælder.
           </p>
 
-          <h2>Boligstøtte er ikke boligsikring</h2>
+          <h2>Boligstøtte og boligsikring er to ord for huslejestøtte</h2>
           <p>
-            De to ord bliver ofte blandet sammen, men de handler om hver sit:{" "}
-            <strong>boligstøtte</strong> er en{" "}
-            <strong>tilskud fra staten</strong> til lejere i den private boligsektor, og
-            det er denne side beregner. <strong>Boligsikring</strong> er derimod en{" "}
-            <strong>obligatorisk opsparingsordning</strong>, du skal gennem som køber af en
-            eksisterende bolig — du lånter mod din egen opsparing og betaler det tilbage
-            på vilkår, ligesom et andet lån. Boligsikring er altså ikke en støtte, du kan
-            søge om, og den giver ingen månedlig ydelse.
+            De to ord bliver ofte blandet sammen, og med rette: de handler om den
+            samme lov om individuel boligstøtte, men de beregnes forskelligt.{" "}
+            <strong>Boligstøtte</strong> er den del af ordningen, der beregnes efter
+            fastsatte maksimalbeløb pr. husstandstype, og det er denne side regner
+            ud. <strong>Boligsikring</strong> er beregnet efter en anden formel: 60 %
+            af den årlige boligudgift fratrukket 18 % af husstandsindkomsten over
+            indkomstgrænsen, hvor formuen medgår.
           </p>
           <p>
-            Er du ved at købe bolig, er det <strong>Realkredit Danmark</strong> du skal
-            have fat i, fordi de administrerer ordningen. Regler og beløb for boligsikring
-            står hos dem, og de ændres uafhængigt af boligstøtten — så læs ikke den ene
-            ordning ind i den anden.
+            Boligsikring er altså en <strong>ydelse, du søger om hos Udbetaling
+            Danmark via borger.dk</strong> — ikke en opsparingsordning. Udbetaling
+            Danmark fastsætter og udbetaler både boligsikring og boligstøtte (lov om
+            individuel boligstøtte, LBK 229, § 9 b), og reglerne står i selve loven,
+            ikke hos en kreditgiver. Kilden til formlerne er{" "}
+            <a href="https://www.retsinformation.dk/eli/lta/2021/229" target="_blank" rel="noopener noreferrer" className="underline">
+              lov om individuel boligstøtte på retsinformation.dk
+            </a>
+            .
           </p>
 
           <div className="not-prose my-6 rounded-lg border-l-4 border-blue-400 bg-blue-50 p-4">

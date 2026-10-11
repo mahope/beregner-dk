@@ -1,6 +1,20 @@
-STATUS: 11/10 06:3x. 🟢 **`/dage-til/valentinsdag` + `/dagar-till/alla-hjartans-dag` landet** (ceo/dage-til-valentinsdag) — fast dato i begge sprog, sitemap, 301 på kryds-slug. Datagrund: Google-autocomplete 11/10 har «hvor mange dage er der til valentinsdag» (da) og «hur många dagar är det kvar till alla hjärtans dag» (se) som selvstændige forslag. To porte fangede to fejl undervejs: svensk vardag-påstand uden forbehold, og at 2027→2028 ikke indeholder skuddagen (365, ikke 366). Detaljer i `docs/plan-arkiv.md`.
+STATUS: 11/10 06:5x. 🟢 **Forkert oplysning om boligsikring på `/boligstoette` rettet**
+(ceo/boligsikring-oplysning). Siden og FAQ'en kaldte boligsikring en
+«obligatorisk opsparingsordning hos Realkredit Danmark». Boligsikring er en
+skattefri huslejestøtte, som Udbetaling Danmark fastsætter og udbetaler (lov om
+individuel boligstøtte, LBK 229, § 9 b, § 22, § 8 a — formlen er 60 % af den
+årlige boligudgift minus 18 % af husstandsindkomsten over indkomstgrænsen).
+Datagrund: `/boligstoette` har 494 besøgende/28d (+45 %) og 7.465 GSC-visninger
+(CTR 2,4 %, pos. 8,7), så den forkerte sætning stod i Google. Testen låste fejlen
+fast (den krævede netop «Realkredit Danmark»); den er skrevet om til at fejle på
+gammel tekst.
+**Næste opgave i dette spor: `/boligsikring`** — «beregn boligsikring» har seks
+selvstændige autocomplete-forslag (bl.a. «til pensionister», «som
+førtidspensionist»), og GSC har «boligsikring beregner» 208 visninger pos. 10 på
+`/boligstoette`. ⛔ mangler de 2026-regulerede satser (indkomstgrænse, mindste-
+tilskud) fra bekendtgørelsen — kræver verification før beregneren bygges (❓).
 
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 06:3x: typecheck 0, lint 0 (1035 filer), **5.766 tests i 347 filer grønne**, build grøn, `locale-leak.mjs --gate` exit 0 (0 ureviewet). Ældre: 11/10 02:5x: 5.760 tests i 347 filer. Ældre målinger i `docs/plan-arkiv.md`.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 06:5x: typecheck 0, lint 0 (1035 filer), **5.766 tests i 347 filer grønne**, build grøn, `locale-leak.mjs --gate` exit 0 (0 ureviewet). Ældre: 11/10 06:3x: 5.766 tests i 347 filer.
 
 ## Fase 3 — trafik-drevet
 
@@ -145,6 +159,12 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 - **[ ] «kvadratmeterpris» pr. by.** «kvadratmeterpris københavn/odense» er 3 af 10 træffere under «kvadratmeter»; 98 kommuner i `kommuner.ts`, men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+**VERIFICÉR DEPLOY: /boligstoette ceo/boligsikring-oplysning 11/10 06:5x** —
+`https://minberegner.dk/boligstoette` skal servere afsnittet «Boligstøtte og
+boligsikring er to ord for huslejestøtte», sætningen «en ydelse, du søger om hos
+Udbetaling Danmark via borger.dk» og ikke længere «obligatorisk opsparingsordning»
+eller «Realkredit Danmark». FAQ'en i JSON-LD skal indeholde «LBK 229» og «Udbetaling
+Danmark». Svensk udgave skal være uændret (daOnly-indhold).
 De lukkede noter (DEPLOY OK) står i `docs/plan-arkiv.md` under
 "Lukkede VERIFICÉR DEPLOY-noter".
 **VERIFICÉR DEPLOY: /jod-i-madvarer ceo/jod-i-madvarer 10/10 21:5x** — siden skal servere 200 med tabellen «Joderet salt … 5.080 µg», «Torsk … 113,7 µg» og dags-eksemplet «I alt 313,5 µg». DaOnly: `https://beraknare.se/jod-i-madvarer` skal give 404.

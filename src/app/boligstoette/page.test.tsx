@@ -92,42 +92,47 @@ describe("boligstoette page", () => {
     });
   });
 
-  test("siger at boligstøtte ikke er boligsikring, og peger på Realkredit Danmark", async () => {
-    const page = await BoligstoettePage();
-    const html = renderToStaticMarkup(
-      <LocaleProvider
-        locale="da"
-        domainConfig={{
-          locale: "da",
-          baseUrl: "https://minberegner.dk",
-          siteName: "MinBeregner.dk",
-          ogLocale: "da_DK",
-          analyticsDataDomain: "minberegner.dk",
-          countryFlag: "",
-          countryName: "danskere",
-          currency: "DKK",
-          hreflangCode: "da",
-        }}
-      >
-        {page}
-      </LocaleProvider>,
-    );
+   test("siger at boligsikring er en ydelse hos Udbetaling Danmark, ikke en opsparing", async () => {
+     const page = await BoligstoettePage();
+     const html = renderToStaticMarkup(
+       <LocaleProvider
+         locale="da"
+         domainConfig={{
+           locale: "da",
+           baseUrl: "https://minberegner.dk",
+           siteName: "MinBeregner.dk",
+           ogLocale: "da_DK",
+           analyticsDataDomain: "minberegner.dk",
+           countryFlag: "",
+           countryName: "danskere",
+           currency: "DKK",
+           hreflangCode: "da",
+         }}
+       >
+         {page}
+       </LocaleProvider>,
+     );
 
-    expect(html).toContain("Boligstøtte er ikke boligsikring");
-    expect(html).toContain("tilskud fra staten");
-    expect(html).toContain("obligatorisk opsparingsordning");
-    expect(html).toContain("Realkredit Danmark");
-    // Det afgørende: boligsikring må ikke fremstilles som en ydelse, man kan søge om.
-    expect(html).toContain("ikke en støtte, du kan søge om");
-  });
+     expect(html).toContain("Boligstøtte og boligsikring");
+     expect(html).toContain("du søger om hos Udbetaling Danmark via borger.dk");
+     expect(html).toContain("ikke en opsparingsordning");
+     expect(html).toContain("lov om individuel boligstøtte");
+     // Det afgørende: boligsikring må ikke kaldes en ordning hos en kreditgiver.
+     expect(html).not.toContain("obligatorisk opsparingsordning");
+     expect(html).not.toContain("Realkredit Danmark");
+     expect(html).not.toContain("du lånter mod din egen opsparing");
+   });
 
-  test("spørgsmålet om forskellen ligger i FAQ'en, så det kommer i JSON-LD", async () => {
-    const { getPageData } = await import("@/lib/page-data");
-    const faq = getPageData("boligstoette", "da")!.faqItems;
+   test("spørgsmålet om forskellen ligger i FAQ'en, så det kommer i JSON-LD", async () => {
+     const { getPageData } = await import("@/lib/page-data");
+     const faq = getPageData("boligstoette", "da")!.faqItems;
 
-    const fundet = faq.find((f) => f.question.includes("boligsikring"));
-    expect(fundet).toBeDefined();
-    expect(fundet!.answer).toContain("Realkredit Danmark");
-    expect(fundet!.answer).toContain("ingen månedlig ydelse");
-  });
+     const fundet = faq.find((f) => f.question.includes("boligsikring"));
+     expect(fundet).toBeDefined();
+     expect(fundet!.answer).toContain("Udbetaling Danmark");
+     expect(fundet!.answer).toContain("60 pct.");
+     expect(fundet!.answer).toContain("LBK 229");
+     expect(fundet!.answer).not.toContain("Realkredit Danmark");
+     expect(fundet!.answer).not.toContain("obligatorisk opsparingsordning");
+   });
 });
