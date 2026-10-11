@@ -31293,3 +31293,43 @@ STATUS: 10/10 15:1x. ✅ **`/zink-i-madvarer`** (ceo/zink-i-madvarer). 53 zinkta
 STATUS: 10/10 12:2x. ✅ **`/kalorier` fører videre til mikronæringsstofferne** — nyt link til jern, D-, C- og B12-vitamin fra makro-afsnittet. Ny port `src/lib/kalorier-mikro-links.test.tsx`. Gate: 5.639 tests i 340 filer grønne.
 
 STATUS: 11/10 02:5x. ✅ **`/kolesterol-i-madvarer`** (ceo/kolesterol-i-madvarer). 58 kolesteroltal fra USDA SR Legacy 2018-04 næringsstof 1253, hver med fdcId. Datagrund: dansk autocomplete 10/10 har «hvor meget kolesterol er der i æg/rejer/ost/kylling/smør/skyr/mælk». NNR2023 har intet kolesterolafsnit, og kost.dk-rammeplanen (FaKD 2024) skriver «Der er findes ikke anbefaling for kolesterol» — så siden regner om til ét råt æg (223,2 mg) i stedet for en opdigtet anbefalingsandel, og viser mættet-fedt-loftet (10 E %) som det råd der faktisk findes. 14 tests, daOnly, top-10-sektion, alle tal i brødteksten læst fra tabellen via `kolesterol100gForNavn`, der kaster på ukendt navn. Gate: typecheck 0, lint 0 (1035 filer), 5.760 tests i 347 filer, build grøn. Første iteration slog fast at sidens oprindelige fejl var et feltnavn: `Kolesterolvare` erklærede `Cholesterol100g`, mens alle rækker og alle læsere brugte `kolesterol100g` — så hvert opslag gav `undefined` og teksten skal have stået med «0 mg». Samme race mellem engelsk og dansk navn fandtes i `cholesterolIgram`/`cholesterol100g` (eksportnavne) og i FAQ'ens `kol100g("Æggeblommer, rå")` ud for tabellens «Æggeblomme, rå».
+
+## 11/10 06:1x — `/dage-til/1-november` + `/dagar-till/1-november` (ceo/dage-til-1-november)
+
+**November fik sin egen nedtællingsside på begge sprog.** Datagrund: GSC-udsnittet
+10/9→10/8 (givet i prompten 11/10) har på beraknare.se «hur många dagar är det kvar
+till 1 november» med 45 visninger på pos. 5, og på minberegner.dk «hvor mange dage
+er der til 1 december» med 928 visninger på pos. 4 — december havde allerede sin
+egen `/dage-til/1-december`, så november manglede sin. Begge sprog får samme side,
+fordi ankeret er en fast dato (`kind: "fixed"`, måned 11 dag 1), der er stavet ens
+på begge sprog — præcis mønstret fra `1-december` og `halloween`.
+
+Selve ændringen er én hændelse i `DAGE_TIL_EVENTS` (`src/lib/dage-til.ts`) med eget
+copy pr. sprog: tre fakta + tre FAQ'er. Dansk: november har 30 dage, datoen er ikke
+helligdag i Danmark, og der er præcis 53 dage til juleaftensdagen 24. december
+(Nov 1 → Dec 24: 29 + 24). Svensk: 53 dagar till julafton, datumräknarens FAQ.
+
+**Fejl rettet i samme iteration (regel 11 i review-tjeklisten).** Den første
+svenske udgave skrev «1 november är alla helgons dag i Sverige … datumet flyttar
+sig aldrig». Det er forkert: i Sverige infaller alla helgons dag på **lördagen
+mellan 31 oktober och 6 november** (sv.wikipedia «Helgdagar i Sverige»,
+publicholidays.se: 2026 = 31 okt, 2027 = 6 nov, 2028 = 4 nov), och det har den
+gjort siden 1953 — 1 november är allhelgonadagen i kyrkoåret. Copy er rettet til
+den korrekte regel i både faktalinket og FAQ'en; halloween-eventets nabo erklærer
+allerede reglen rigtigt.
+
+**Gate 11/10 06:1x:** typecheck 0, lint 0 (1035 filer), **5.763 tests i 347 filer
+grønne** (+1 i `dage-til.test.ts`), build grøn, `locale-leak.mjs --gate` exit 0
+(0 ureviewet). SSR på lokal prod-build (`next start` :4811, serveren dræbt bagefter):
+`/dage-til/1-november` (Host: minberegner.dk) 200 med titlen «Hvor mange dage er
+der til 1. november? 21 dage» (11/10 → 1/11 = 21 dage), «1. november er ikke en
+helligdag i Danmark» og «53 dage til juleaftensdagen»; `/dagar-till/1-november`
+(Host: beraknare.se) 200 med «Hur många dagar är det till 1 november? 21 dagar» og
+«lördagen mellan 31 oktober och 6 november»; `beraknare.se/dage-til/1-november`
+giver **301** til `/dagar-till/1-november`; begge slugs står i sitemap.xml på
+deres domæne. Mutation-kontrol: med master-koden (eventet fjernet) går den nye
+test rød (1 rød i `dage-til.test.ts`). Repoet har intet Playwright (❓ i planen),
+så UI'et er ikke skærmbilledverificeret; siden bruger den delte `DageTilPage`.
+
+**MÅL: /dage-til/1-november + /dagar-till/1-november baseline 0 Plausible/GSC pr.
+11/10** — måles igen ~25/10. Se VERIFICÉR DEPLOY-note i planen.

@@ -510,6 +510,75 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    // 1. november er en fast dato, og den er efterspurgt: GSC 11/10 har
+    // 45 visninger på beraknare.se for «hur många dagar är det kvar till
+    // 1 november» (pos. 5), og datoberegnerne på begge sprog får den type
+    // spørgsmål. December har sin egen side, så november manglede sin.
+    id: "1-november",
+    anchor: {
+      da: { kind: "fixed", month: 11, day: 1, offsetDays: 0 },
+      se: { kind: "fixed", month: 11, day: 1, offsetDays: 0 },
+    },
+    da: {
+      slug: "1-november",
+      copy: {
+        short: "1. november",
+        question: "Hvor mange dage er der til 1. november?",
+        facts: [
+          "November har 30 dage, så 1. november er månedens første dag.",
+          "1. november er ikke en helligdag i Danmark, men datoen er fast og flytter sig aldrig.",
+          "Fra 1. november er der præcis 53 dage til juleaftensdagen den 24. december.",
+        ],
+        faq: [
+          {
+            question: "Er 1. november en fridag i Danmark?",
+            answer:
+              "Nej. 1. november er ikke en helligdag i Danmark, og der er ingen fri rettet mod datoen — uanset om den falder i en weekend eller på en hverdag.",
+          },
+          {
+            question: "Hvor mange dage er der fra 1. november til jul?",
+            answer:
+              "Der er præcis 53 dage fra 1. november til juleaftensdagen den 24. december.",
+          },
+          {
+            question: "Kan jeg tælle dage frem til en anden dato?",
+            answer:
+              "Ja. Datoberegneren tæller dage mellem to valgte datoer og viser også uger, arbejdsdage og weekenddage.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "1-november",
+      copy: {
+        short: "1 november",
+        question: "Hur många dagar är det till 1 november?",
+        facts: [
+          "1 november är första dagen i november, och november har 30 dagar.",
+          "1 november är allhelgonadagen i kyrkoåret. I Sverige ligger alla helgons dag — den röda dagen — på lördagen mellan 31 oktober och 6 november, år 2026 den 31 oktober.",
+          "Från 1 november är det exakt 53 dagar till julafton den 24 december.",
+        ],
+        faq: [
+          {
+            question: "Hur många dagar är det från 1 november till jul?",
+            answer:
+              "Det är exakt 53 dagar från 1 november till julafton den 24 december.",
+          },
+          {
+            question: "Vad är alla helgons dag?",
+            answer:
+              "Alla helgons dag är en röd dag i Sverige som infaller på lördagen mellan 31 oktober och 6 november — år 2026 den 31 oktober. Allhelgonadagen i kyrkoåret är den 1 november, och det är det datumet den här nedräkningen går till.",
+          },
+          {
+            question: "Kan jag räkna dagar fram till ett annat datum?",
+            answer:
+              "Ja. Datumräknaren räknar dagar mellan två valda datum och visar också veckor, arbetsdagar och helgdagar.",
+          },
+        ],
+      },
+    },
+  },
+  {
     // Påskedagen minus 47 dage. Dansk "fastelavn" og svensk "fettisdagen" er
     // samme tirsdag. Dansk autocomplete målt 1/10 har "hvor mange dage er der
     // til fastelavn" (3 completioner, ordet selv plus … 2026 plus "…tilbage

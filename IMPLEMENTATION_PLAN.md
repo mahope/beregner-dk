@@ -1,6 +1,6 @@
-STATUS: 11/10 02:5x. 🟢 **`/kolesterol-i-madvarer` landet** (ceo/kolesterol-i-madvarer) — 58 tal fra USDA SR Legacy 2018-04, daOnly. Det afgørende var, at siden ikke er blokeret på en anbefaling: kost.dk (FaKD 2024) siger «Der er findes ikke anbefaling for kolesterol», så den omregner til ét æg i stedet for en opdigtet andel. Fejlen der blokerede landing var et feltnavn og en stavefejl — begge er nu låst med tests. Detaljer i `docs/plan-arkiv.md`.
+STATUS: 11/10 06:1x. 🟢 **`/dage-til/1-november` og `/dagar-till/1-november` landet** (ceo/dage-til-1-november) — fast dato i begge sprog, sitemap på begge domæner, og et slug på det andet domænes form stopper som 301 til dets egen. Datagrund: GSC 11/10 har på beraknare.se «hur många dagar är det kvar till 1 november» (45 visninger, pos. 5) og på minberegner.dk «hvor mange dage er der til 1 december» (928 visninger) — december havde sin side, november manglede sin. Svensk copy rettet i samme iteration: alla helgons dag er lördagen mellan 31 oktober och 6 november, ikke 1 november. Detaljer i `docs/plan-arkiv.md`.
 
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 02:5x: typecheck 0, lint 0 (1035 filer), **5.760 tests i 347 filer grønne**, build grøn. Ældre: 11/10 01:1x: 5.744 tests i 346 filer. Ældre målinger i `docs/plan-arkiv.md`.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 06:1x: typecheck 0, lint 0 (1035 filer), **5.763 tests i 347 filer grønne**, build grøn, `locale-leak.mjs --gate` exit 0 (0 ureviewet). Ældre: 11/10 02:5x: 5.760 tests i 347 filer. Ældre målinger i `docs/plan-arkiv.md`.
 
 ## Fase 3 — trafik-drevet
 
@@ -76,6 +76,15 @@ havde kun `sommerferien`, `efteraarsferien` og `skolestart`. Ny event med
 forklarer at datoen ikke er fastlagt i loven — hver kommune fastsætter selv.
 9 nye tests, da. **MÅL: /dage-til/paaskeferien baseline 0 — måles ~24/10.**
 
+**[x] FÆRDIG 11/10 06:1x — `/dage-til/1-november` (da) + `/dagar-till/1-november` (se)**
+(ceo/dage-til-1-november). Datagrund: GSC 11/10 — beraknare.se «hur många dagar
+är det kvar till 1 november» 45 visninger pos. 5, minberegner.dk «hvor mange dage
+er der til 1 december» 928 visninger. Fast dato i begge sprog med eget copy (53
+dage til juleaften). Svensk FAQ rettet til den korrekte regel: alla helgons dag
+er lördagen mellan 31 oktober och 6 november. 1 ny test + mutation-kontrol (uden
+eventet går testen rød). **MÅL: /dage-til/1-november + /dagar-till/1-november
+baseline 0 — måles ~25/10.**
+
 **BÖRNEINDLÆG [x] FÆRDIG 9/10 11:2x** — `/blog/boernebidrag-2026-satser-og-regler` (ceo/boernebidrag-indlaeg), koblet til `/boernebidrag` begge veje. Detaljer i `docs/plan-arkiv.md`.
 
 **F0d. [~] To sider måler deres nye titel i 14 dage, før der røres ved den.**
@@ -132,6 +141,7 @@ De lukkede noter (DEPLOY OK) står i `docs/plan-arkiv.md` under
 "Lukkede VERIFICÉR DEPLOY-noter".
 **VERIFICÉR DEPLOY: /jod-i-madvarer ceo/jod-i-madvarer 10/10 21:5x** — siden skal servere 200 med tabellen «Joderet salt … 5.080 µg», «Torsk … 113,7 µg» og dags-eksemplet «I alt 313,5 µg». DaOnly: `https://beraknare.se/jod-i-madvarer` skal give 404.
  **VERIFICÉR DEPLOY: /kolesterol-i-madvarer ceo/kolesterol-i-madvarer 11/10 02:5x** — siden skal servere 200 med tabellen «Kolesterol i madvarer: 223,2 mg i ét æg» i titlen, «Ingen» som anbefalet dagsmængde, rækken `Æggeblomme, rå 1.085 mg` og dags-eksemplet «I alt». DaOnly: `https://beraknare.se/kolesterol-i-madvarer` skal give 404.
+**VERIFICÉR DEPLOY: /dage-til/1-november + /dagar-till/1-november ceo/dage-til-1-november 11/10 06:1x** — begge skal servere 200. DA: `<title>` «Hvor mange dage er der til 1. november? 21 dage», faktalinjen «1. november er ikke en helligdag i Danmark» og «53 dage til juleaftensdagen». SE: `<title>` «Hur många dagar är det till 1 november? 21 dagar» og faktalinjen «lördagen mellan 31 oktober och 6 november». `https://beraknare.se/dage-til/1-november` skal give 301 til `/dagar-till/1-november`. Begge slugs i sitemap.xml på deres domæne.
 **VERIFICÉR DEPLOY: /nedtaelling nedtaelling-timer ceo/nedtaelling-timer 11/10 00:4x** — SSR-HTML'en må IKKE indeholde «timer og … minutter til den valgte dato» (timetallet er klient-side og tælles ned på den besøgendes ur); klient-bundlen skal indeholde `nedtaellingTimer` og «til den valgte dato». Svensk: «till det valda datumet».
 **VERIFICÉR DEPLOY: /dage-til/* dage-til-links ceo/dage-til-timer 10/10 23:5x** — `/dage-til/24-december` skal servere 200 med «Der er 75 dage til juleaften», «Det svarer til 10 uger og 5 dage» og brødteksten «står antal timer og minutter lige under»; server-HTML'en må IKKE indeholde «Det er <tal> timer» (timetallet er klient-side), men klient-bundlene skal indeholde «minutter til».
 **VERIFICÉR DEPLOY: /tidsberegner dage-til-links ceo/tidsberegner-dage-til-links 10/10 19:4x** — /tidsberegner skal servere DageTilLinks-blokken med `href="/dage-til/…"`-links og dagens antal dage; svensk udgave linker til /dagar-till/*.

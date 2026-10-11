@@ -123,6 +123,21 @@ describe("midsommarafton", () => {
     expect(toISO(getNextAnchorDate(anchorOf(dagen!, "se"), iso("2027-01-15")))).toBe("2027-06-26");
   });
 
+  test("1. november er en fast dato i begge sprog", () => {
+    const event = eventById("1-november");
+    for (const locale of ["da", "se"] as const) {
+      const anchor = anchorOf(event, locale);
+      expect(anchor.kind).toBe("fixed");
+      expect(toISO(getNextAnchorDate(anchor, iso("2026-10-11")))).toBe("2026-11-01");
+      // Dagen selv er nået, så den næste 1. november er næste år.
+      expect(toISO(getNextAnchorDate(anchor, iso("2026-11-02")))).toBe("2027-11-01");
+    }
+    expect(getDageTilSlugs("da")).toContain("1-november");
+    expect(getDageTilSlugs("se")).toContain("1-november");
+    // Den korte afstand til juleaften står i brødteksten på begge sprog.
+    expect(daysBetween(iso("2026-11-01"), iso("2026-12-24"))).toBe(53);
+  });
+
   test("begge sprog har deres eget slug med sit eget spørgsmål", () => {
     const afton = DAGE_TIL_EVENTS.find((e) => e.id === "midsommarafton");
     const dagen = DAGE_TIL_EVENTS.find((e) => e.id === "midsommardagen");
