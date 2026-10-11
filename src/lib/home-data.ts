@@ -219,6 +219,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "SU Beregner", description: "Beregn din SU og fribeløb baseret på din situation", href: "/su", popular: false, category: "Uddannelse" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", popular: false, category: "Økonomi" },
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", popular: false, category: "Økonomi" },
+  { title: "Aldersopsparing", description: "Se hvor meget du må indbetale i 2026", href: "/aldersopsparing", popular: false, category: "Økonomi" },
   { title: "Barselsplanlægger", description: "Planlæg barsel uge for uge med kalender og økonomi", href: "/barselsplanlaegger", popular: false, category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", popular: false, category: "Familie" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", popular: false, category: "Bolig" },

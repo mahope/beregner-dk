@@ -31373,3 +31373,22 @@ Mutation: uden eventet går den nye test rød.
 
 **MÅL: /dage-til/valentinsdag + /dagar-till/alla-hjartans-dag baseline 0
 Plausible/GSC pr. 11/10** — måles igen ~25/10. Se VERIFICÉR DEPLOY-note i planen.
+
+## 2026-10-11 08:5x — `/aldersopsparing` (ceo/aldersopsparing)
+
+- **Hvad:** ny daOnly-beregner `/aldersopsparing` med
+  `src/lib/aldersopsparing.ts`, `src/app/aldersopsparing/page.tsx`,
+  `src/components/AldersopsparingsBeregner.tsx`, nye tests og opslag i
+  `calculator-list.ts`, `home-data.ts` og `page-data.ts`.
+- **Satser (alle læst af kilden 11/10-2026):** grundbeløb 9.900 kr., højt
+  beløb 64.200 kr. fra det syvende indkomstår før folkepensionsalderen,
+  afgift 20 %/40 % over grænsen, PAL 15,3 %, skattekode 33, seneste
+  udbetaling 20 år efter pensionsudbetalingsalderen. Kilder står i
+  `ALDERSOPSPARING_KILDER` (skat.dk og info.skat.dk).
+- **Tests:** 11 nye, herunder kanttilfælde med negative tal, afgift over
+  begge grænser, PAL-år-for-år, sammenligning med frie midler, og at
+  `aarTilFolkepension` følger `beregnPensionsalder` i modulet.
+- **Gate:** typecheck 0, lint 0 (1039 filer), 5.786 tests i 348 filer
+  grønne, `next build` grøn, `scripts/locale-leak.mjs --gate` exit 0.
+- **Deploy:** VERIFICÉR DEPLOY-noten står i planen; næste batchvindue var
+  12:30 11/10.

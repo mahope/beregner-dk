@@ -1,4 +1,9 @@
-STATUS: 11/10 06:5x. 🟢 **Forkert oplysning om boligsikring på `/boligstoette` rettet**
+STATUS: 11/10 08:5x. 🟢 **`/aldersopsparing` er liveklar** (ceo/aldersopsparing):
+beløbsgrænse 9.900/64.200 kr., afgift 20/40 %, PAL 15,3 % og skattefri
+udbetaling, alt læst af skat.dk og info.skat.dk 11/10. Siden slår fast, at
+der er intet fradrag. 11 nye tests, daOnly. Status for boligsikring nedenfor.
+
+🟢 **Forkert oplysning om boligsikring på `/boligstoette` rettet**
 (ceo/boligsikring-oplysning). Siden og FAQ'en kaldte boligsikring en
 «obligatorisk opsparingsordning hos Realkredit Danmark». Boligsikring er en
 skattefri huslejestøtte, som Udbetaling Danmark fastsætter og udbetaler (lov om
@@ -14,7 +19,7 @@ førtidspensionist»), og GSC har «boligsikring beregner» 208 visninger pos. 1
 `/boligstoette`. ⛔ mangler de 2026-regulerede satser (indkomstgrænse, mindste-
 tilskud) fra bekendtgørelsen — kræver verification før beregneren bygges (❓).
 
-**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 06:5x: typecheck 0, lint 0 (1035 filer), **5.766 tests i 347 filer grønne**, build grøn, `locale-leak.mjs --gate` exit 0 (0 ureviewet). Ældre: 11/10 06:3x: 5.766 tests i 347 filer.
+**Gate:** `npm run typecheck && npm run lint && npm run test` (+ `npm run build` på kodeændringer). Seneste: 11/10 08:5x: typecheck 0, lint 0 (1039 filer), **5.786 tests i 348 filer grønne**, build grøn, `locale-leak.mjs --gate` exit 0 (0 ureviewet). Ældre: 11/10 06:5x: 5.766 tests i 347 filer.
 
 ## Fase 3 — trafik-drevet
 
@@ -159,6 +164,13 @@ fibertal fra USDA næringsstof 1079, WHO 25 g/dag som eneste ydre tal. Detaljer 
 - **[ ] «kvadratmeterpris» pr. by.** «kvadratmeterpris københavn/odense» er 3 af 10 træffere under «kvadratmeter»; 98 kommuner i `kommuner.ts`, men ingen salgsdata. ⛔ kun de 5-10 største byer er realistiske (❓).
 
 ## VERIFICÉR DEPLOY-noter
+**VERIFICÉR DEPLOY: /aldersopsparing ceo/aldersopsparing 11/10 08:5x** —
+`https://minberegner.dk/aldersopsparing` skal servere 200 med
+«Aldersopsparing beregner 2026», beløbsgrænserne 9.900 kr. og 64.200 kr.,
+sætningen «Der er intet fradrag» og 15,3 % PAL-skat. `/aldersopsparing`
+skal stå i sitemap.xml. DaOnly: `https://beraknare.se/aldersopsparing`
+skal give 404. **MÅL: /aldersopsparing baseline 0 besøgende/28d pr.
+11/10 — måles ~25/10.**
 **VERIFICÉR DEPLOY: /boligstoette ceo/boligsikring-oplysning 11/10 06:5x** —
 `https://minberegner.dk/boligstoette` skal servere afsnittet «Boligstøtte og
 boligsikring er to ord for huslejestøtte», sætningen «en ydelse, du søger om hos
