@@ -28,6 +28,8 @@ jobs:
         uses: treosh/lighthouse-ci-action@v12
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          # Jobbet kører som root i en container, hvor Chromes sandbox ikke kan starte.
+          LHCI_COLLECT__SETTINGS__CHROME_FLAGS: "--no-sandbox --headless=new --disable-dev-shm-usage"
         with:
           urls: |
             http://localhost:3000/
