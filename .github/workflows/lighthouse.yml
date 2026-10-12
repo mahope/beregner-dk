@@ -33,7 +33,8 @@ jobs:
         with:
           urls: |
             http://localhost:3000/
-          uploadArtifacts: true
+          # actions/artifact v2 understøttes ikke af Forgejo; rapporten deles via temporaryPublicStorage.
+          uploadArtifacts: false
           temporaryPublicStorage: true
       - name: Stop server
         if: always()
