@@ -10,6 +10,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # Job-imaget på Forgejo-runneren har ingen Chrome.
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
       - name: Install deps
         run: npm ci
       - name: Build
@@ -21,6 +24,8 @@ jobs:
           for i in {1..60}; do curl -fsS http://localhost:3000 && exit 0 || sleep 2; done; exit 1
       - name: Run Lighthouse
         uses: treosh/lighthouse-ci-action@v12
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         with:
           urls: |
             http://localhost:3000/
