@@ -13,6 +13,8 @@ jobs:
       # Job-imaget på Forgejo-runneren har ingen Chrome.
       - uses: browser-actions/setup-chrome@v1
         id: chrome
+        with:
+          install-dependencies: true
       - name: Install deps
         run: npm ci
       - name: Build
