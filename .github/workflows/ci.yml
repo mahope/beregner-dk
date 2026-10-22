@@ -23,5 +23,8 @@ jobs:
       - name: Lint (non-blocking)
         run: npm run lint --if-present
         continue-on-error: true
+      # Højst to workers og 30 s i stedet for standardens 5 s: runneren har 8 kerner, der deles
+      # med andre jobs, og vitest starter som standard en jsdom-worker pr. kerne minus én. Under belastning løb
+      # tests ind i 5 s-grænsen (regnestykker, MomsBeregner) uden at være fejlbehæftede.
       - name: Test
-        run: npm test --if-present
+        run: npm test --if-present -- --maxWorkers=2 --testTimeout=30000
