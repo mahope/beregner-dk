@@ -11,8 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Link check (Markdown + MDX)
-        uses: lycheeverse/lychee-action@v1.11.0
+        uses: lycheeverse/lychee-action@v2.9.0
         with:
+          # Kun rapport, blokerer ikke (tidligere fail = false i .lychee.toml, som lychee 0.24 afviser)
+          fail: false
+          output: .lychee/out.md
           args: >-
             --config .lychee.toml
             --accept 200,206,429
@@ -20,10 +23,8 @@ jobs:
             --verbose
             --no-progress
             "**/*.md" "**/*.mdx"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload lychee report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: lychee-report

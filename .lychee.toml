@@ -9,5 +9,3 @@ exclude = [
 ]
 # Accept some flaky hosts without failing CI
 accept = [200, 206, 429]
-# Don't fail the build (report-only mode); set to true later
-fail = false

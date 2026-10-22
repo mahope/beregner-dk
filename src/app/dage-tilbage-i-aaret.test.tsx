@@ -141,7 +141,7 @@ describe("dage tilbage i året: siden peger på sit eget spørgsmål", () => {
     }
     expect(html).toContain(`${o.uger.toLocaleString("da-DK")} hele uger`);
     expect(html).toContain(`${o.timer.toLocaleString("da-DK")} timer`);
-    expect(html).toContain("56");
+    expect(html).toContain(`${o.hverdageTilbage.toLocaleString("da-DK")} af dem er hverdage`);
     // Månedstabellen skal vise de samme tal som aaretTilbage regner i dag.
     // Hærdkodet [21, 30, 31] var frosset til 10/10 og gik rød ved midnat; den
     // uafhængige optælling af selve mattet ligger i dage-tilbage-i-aaret.test.ts.
