@@ -9,8 +9,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = locale === "se" ? "Cookiepolicy" : "Cookiepolitik";
   const desc =
     locale === "se"
-      ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible Analytics (cookiefritt) och Google AdSense (annonscookies efter samtycke).`
-      : `Læs om vores brug af cookies og localStorage på ${dc.siteName}. Vi bruger Plausible Analytics (cookiefrit) og Google AdSense (annoncecookies efter samtykke).`;
+      ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible Analytics och Umami (cookiefritt) och Google AdSense (annonscookies efter samtycke).`
+      : `Læs om vores brug af cookies og localStorage på ${dc.siteName}. Vi bruger Plausible Analytics og Umami (cookiefrit) og Google AdSense (annoncecookies efter samtykke).`;
   const canonicalUrl = `${dc.baseUrl}/cookiepolitik`;
   return {
     title,
@@ -63,19 +63,19 @@ function DaContent() {
         Disse data forbliver i din browser og sendes ikke til vores servere.
       </p>
 
-      <h2>2. Analyse (Plausible Analytics)</h2>
+      <h2>2. Analyse (Plausible Analytics og Umami)</h2>
       <p>
-        Vi bruger <strong>Plausible Analytics</strong> til anonym trafikmåling.
-        Plausible er et privacy-fokuseret analyseværktøj, der:
+        Vi bruger <strong>Plausible Analytics</strong> og <strong>Umami</strong> til
+        anonym trafikmåling. Begge er privacy-fokuserede analyseværktøjer, der:
       </p>
       <ul>
         <li>Ikke bruger cookies</li>
         <li>Ikke indsamler personhenførbare oplysninger</li>
         <li>Ikke tracker brugere på tværs af sider</li>
-        <li>Er hostet på vores egen server (ingen tredjepartsdata)</li>
+        <li>Er hostet på vores egne servere i EU (ingen tredjepartsdata)</li>
       </ul>
       <p>
-        Da Plausible er cookiefrit, kræver det ikke samtykke under
+        Da Plausible og Umami er cookiefrie, kræver de ikke samtykke under
         ePrivacy-direktivet. Data er aggregerede og bruges udelukkende til at
         forbedre siden.
       </p>
@@ -181,19 +181,19 @@ function SeContent() {
         Dessa data stannar i din webbläsare och skickas inte till våra servrar.
       </p>
 
-      <h2>2. Analys (Plausible Analytics)</h2>
+      <h2>2. Analys (Plausible Analytics och Umami)</h2>
       <p>
-        Vi använder <strong>Plausible Analytics</strong> för anonym trafikmätning.
-        Plausible är ett integritetsanpassat analysverktyg som:
+        Vi använder <strong>Plausible Analytics</strong> och <strong>Umami</strong> för
+        anonym trafikmätning. Båda är integritetsanpassade analysverktyg som:
       </p>
       <ul>
         <li>Inte använder cookies</li>
         <li>Inte samlar in personidentifierbar information</li>
         <li>Inte spårar användare mellan webbplatser</li>
-        <li>Hostas på vår egen server (ingen tredjepartsdata)</li>
+        <li>Hostas på våra egna servrar i EU (ingen tredjepartsdata)</li>
       </ul>
       <p>
-        Eftersom Plausible är cookiefritt kräver det inte samtycke enligt
+        Eftersom Plausible och Umami är cookiefria kräver de inte samtycke enligt
         ePrivacy-direktivet. Data är aggregerade och används uteslutande för att
         förbättra webbplatsen.
       </p>
