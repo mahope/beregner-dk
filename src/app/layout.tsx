@@ -107,6 +107,17 @@ export default async function RootLayout({
           src="https://analytics.holstjensen.eu/js/script.js"
         />
 
+        {/* Umami Analytics - Self-hosted, runs alongside Plausible */}
+        {domainConfig.umamiWebsiteId && (
+          <Script
+            src="https://stats.mahoje.dk/s.js"
+            data-website-id={domainConfig.umamiWebsiteId}
+            data-exclude-search="true"
+            data-exclude-hash="true"
+            strategy="afterInteractive"
+          />
+        )}
+
         {/* Google AdSense */}
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1902871361369866"
