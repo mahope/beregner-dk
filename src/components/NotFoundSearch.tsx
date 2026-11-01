@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
 import { getCalculatorsByLocale } from "@/lib/calculator-list";
 import type { Locale } from "@/lib/i18n";
+import { trackEvent } from "@/lib/analytics";
 import { CalcIcon } from "@/components/ui/icons";
 
 function fuzzyMatch(query: string, text: string): boolean {
@@ -47,8 +48,8 @@ export default function NotFoundSearch() {
       setUrlHint(hint);
       setQuery(hint);
     }
-    if (typeof window !== "undefined" && window.plausible) {
-      window.plausible("404", { props: { path: window.location.pathname } });
+    if (typeof window !== "undefined") {
+      trackEvent("404", { path: window.location.pathname });
     }
   }, []);
 

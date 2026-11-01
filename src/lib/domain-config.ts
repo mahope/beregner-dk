@@ -6,6 +6,8 @@ export interface DomainConfig {
   siteName: string;
   ogLocale: string;
   analyticsDataDomain: string;
+  /** Umami website id; undefined = no Umami tracking for this domain. */
+  umamiWebsiteId?: string;
   countryFlag: string;
   countryName: string;
   currency: string;
@@ -20,6 +22,7 @@ const domainConfigs: Record<string, DomainConfig> = {
     siteName: "MinBeregner.dk",
     ogLocale: "da_DK",
     analyticsDataDomain: "minberegner.dk",
+    umamiWebsiteId: "961644ef-839c-432c-bfd9-c4ad125c2ecc",
     countryFlag: "🇩🇰",
     countryName: "danskere",
     currency: "DKK",
@@ -42,6 +45,7 @@ const domainConfigs: Record<string, DomainConfig> = {
     siteName: "Beräknare.se",
     ogLocale: "sv_SE",
     analyticsDataDomain: "beraknare.se",
+    umamiWebsiteId: "d10e4474-6a54-4206-a5d0-5211a3249693",
     countryFlag: "🇸🇪",
     countryName: "svenskar",
     currency: "SEK",

@@ -160,7 +160,7 @@ function DaContent() {
           <li>Next.js 15 med React 19</li>
           <li>TypeScript for bedre kodekvalitet</li>
           <li>Tailwind CSS for responsivt design</li>
-          <li>Privacy-fokuseret analytics (Plausible — ingen persondata, ingen cookies)</li>
+          <li>Privacy-fokuseret analytics (Plausible og Umami — ingen persondata, ingen cookies)</li>
           <li>Alle beregninger sker lokalt i din browser</li>
         </ul>
       </div>
@@ -264,7 +264,7 @@ function SeContent() {
           <li>Next.js 15 med React 19</li>
           <li>TypeScript för bättre kodkvalitet</li>
           <li>Tailwind CSS för responsiv design</li>
-          <li>Integritetsanpassad analys (Plausible — inga personuppgifter, inga cookies)</li>
+          <li>Integritetsanpassad analys (Plausible och Umami — inga personuppgifter, inga cookies)</li>
           <li>Beräkningar sker lokalt i din webbläsare; uppgifter sparas inte i vår databas. Query-baserade dellänkar kan skickas när de öppnas och externa delningstjänster mottar länken när du väljer dem</li>
         </ul>
       </div>

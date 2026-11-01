@@ -129,16 +129,17 @@ function DaContent() {
 
         <h2>Analytics</h2>
         <p>
-          Vi bruger <strong>Plausible Analytics</strong> (self-hosted) til at
+          Vi bruger <strong>Plausible Analytics</strong> og <strong>Umami</strong>{" "}
+          (begge self-hosted på vores egne servere i EU) til at
           forstå hvilke beregnere der er populære og hvordan vi kan forbedre
-          sitet. Plausible er valgt fordi det:
+          sitet. Vi har valgt dem fordi de:
         </p>
         <ul>
           <li><strong>Ikke bruger cookies</strong> — ingen cookie-banner nødvendig for analytics</li>
           <li><strong>Ikke tracker individuelle brugere</strong> — ingen personprofiler</li>
           <li><strong>Ikke indsamler persondata</strong> — ingen IP-adresser, fingerprints eller device IDs</li>
-          <li><strong>Er GDPR-kompatibelt</strong> uden samtykke, da det ikke er personhenførbart</li>
-          <li><strong>Er self-hosted</strong> — data forlader ikke vores egen server</li>
+          <li><strong>Er GDPR-kompatible</strong> uden samtykke, da de ikke er personhenførbare</li>
+          <li><strong>Er self-hosted</strong> — data forlader ikke vores egne servere</li>
         </ul>
         <p>
           Vi måler aggregerede tal som sidevisninger, mest besøgte beregnere,
@@ -268,16 +269,17 @@ function SeContent() {
 
         <h2>Analys</h2>
         <p>
-          Vi använder <strong>Plausible Analytics</strong> (self-hosted) för att
+          Vi använder <strong>Plausible Analytics</strong> och <strong>Umami</strong>{" "}
+          (båda self-hosted på våra egna servrar i EU) för att
           förstå vilka beräkningsverktyg som är populära och hur vi kan förbättra
-          webbplatsen. Plausible är valt eftersom det:
+          webbplatsen. Vi har valt dem eftersom de:
         </p>
         <ul>
           <li><strong>Inte använder cookies</strong> — ingen cookie-banner krävs för analys</li>
           <li><strong>Inte spårar enskilda användare</strong> — inga personprofiler</li>
           <li><strong>Inte samlar in persondata</strong> — inga IP-adresser, fingeravtryck eller enhets-ID:n</li>
-          <li><strong>Är GDPR-kompatibelt</strong> utan samtycke, eftersom det inte är personidentifierbart</li>
-          <li><strong>Är self-hosted</strong> — data lämnar inte vår egen server</li>
+          <li><strong>Är GDPR-kompatibla</strong> utan samtycke, eftersom de inte är personidentifierbara</li>
+          <li><strong>Är self-hosted</strong> — data lämnar inte våra egna servrar</li>
         </ul>
         <p>
           Vi mäter aggregerade tal som sidvisningar, mest besökta beräkningsverktyg

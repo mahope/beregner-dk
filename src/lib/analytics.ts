@@ -1,6 +1,6 @@
 /**
- * Plausible Analytics Event Tracking
- * Self-hosted at analytics.holstjensen.eu
+ * Analytics event tracking: Plausible (analytics.holstjensen.eu) and
+ * Umami (stats.mahoje.dk) run side by side during a transition period.
  */
 
 // Event names as defined in backlog
@@ -20,11 +20,39 @@ type PlausibleArgs = {
 declare global {
   interface Window {
     plausible?: (event: string, args?: PlausibleArgs) => void;
+    umami?: { track: (event: string, data?: Record<string, unknown>) => void };
+  }
+}
+
+const UMAMI_RETRY_INTERVAL_MS = 500;
+const UMAMI_MAX_WAIT_MS = 15000;
+
+/**
+ * Send an event to Umami. Umami has no queue before its script has loaded,
+ * so retry for up to 15 s instead of dropping the event. Never throws.
+ */
+export function umamiTrack(
+  event: string,
+  data?: Record<string, unknown>,
+  waited = 0
+): void {
+  if (typeof window === 'undefined') return;
+  if (window.umami) {
+    try {
+      window.umami.track(event, data);
+    } catch {
+      // Analytics failures must never affect the page
+    }
+  } else if (waited < UMAMI_MAX_WAIT_MS) {
+    setTimeout(
+      () => umamiTrack(event, data, waited + UMAMI_RETRY_INTERVAL_MS),
+      UMAMI_RETRY_INTERVAL_MS
+    );
   }
 }
 
 /**
- * Track a custom event with Plausible
+ * Track a custom event with Plausible and Umami
  * @param event - Event name
  * @param props - Optional event properties
  */
@@ -32,9 +60,15 @@ export function trackEvent(
   event: string,
   props?: Record<string, string | number | boolean>
 ): void {
-  if (typeof window !== 'undefined' && window.plausible) {
-    window.plausible(event, { props });
+  if (typeof window === 'undefined') return;
+  if (window.plausible) {
+    try {
+      window.plausible(event, { props });
+    } catch {
+      // A Plausible failure must not block Umami
+    }
   }
+  umamiTrack(event, props);
 }
 
 /**
