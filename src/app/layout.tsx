@@ -112,6 +112,8 @@ export default async function RootLayout({
           <Script
             src="https://stats.mahoje.dk/s.js"
             data-website-id={domainConfig.umamiWebsiteId}
+            data-exclude-search="true"
+            data-exclude-hash="true"
             strategy="afterInteractive"
           />
         )}

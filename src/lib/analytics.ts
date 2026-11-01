@@ -52,7 +52,7 @@ export function umamiTrack(
 }
 
 /**
- * Track a custom event with Plausible
+ * Track a custom event with Plausible and Umami
  * @param event - Event name
  * @param props - Optional event properties
  */

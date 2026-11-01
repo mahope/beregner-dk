@@ -9,8 +9,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = locale === "se" ? "Cookiepolicy" : "Cookiepolitik";
   const desc =
     locale === "se"
-      ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible Analytics och Umami (cookiefritt) och Google AdSense (annonscookies efter samtycke).`
-      : `Læs om vores brug af cookies og localStorage på ${dc.siteName}. Vi bruger Plausible Analytics og Umami (cookiefrit) og Google AdSense (annoncecookies efter samtykke).`;
+      ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible och Umami (cookiefritt) och Google AdSense (annonscookies efter samtycke).`
+      : `Læs om vores brug af cookies og localStorage på ${dc.siteName}. Vi bruger Plausible og Umami (cookiefrit) og Google AdSense (annoncecookies efter samtykke).`;
   const canonicalUrl = `${dc.baseUrl}/cookiepolitik`;
   return {
     title,
