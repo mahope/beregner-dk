@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest";
+import { afterEach, beforeEach, describe, test, expect, vi } from "vitest";
 import {
   getHomePageData,
   getHomeCalculators,
@@ -354,7 +354,17 @@ describe("populærrækken er forsidens eneste liste", () => {
 });
 
 describe("getDageTilKort", () => {
-  const idag = new Date();
+  let idag: Date;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-28T12:00:00Z"));
+    idag = new Date();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   test("forsiden linker hver dage-til-side dens eget sprog serverer", () => {
     // The expected prefix is written out literally on purpose. Deriving it from
@@ -405,22 +415,27 @@ describe("getDageTilKort", () => {
     }
   });
 
-  test("dage-tallet i beskrivelsen er beregnet, ikke skrevet i hånden", () => {
-    for (const locale of ["da", "se"] as const) {
-      const sprog = locale as DageTilLocale;
-      const ord = sprog === "da" ? "dage" : "dagar";
-      const events = getDageTilEvents(locale);
-      for (const [i, event] of events.entries()) {
-        const svar = getDageTilAnswer(event, sprog, idag);
-        const forventet = svar.isToday
-          ? `det er idag.`
-          : `${svar.days} ${ord} till`.replace("till", sprog === "da" ? "til" : "till");
-        expect(getDageTilKort(locale, idag)[i].description).toContain(
-          forventet
-        );
+  test.each(["2026-09-28T12:00:00Z", "2026-12-25T12:00:00Z"])(
+    "dage-tallet i beskrivelsen er beregnet, ikke skrevet i hånden (%s)",
+    (dato) => {
+      vi.setSystemTime(new Date(dato));
+      idag = new Date();
+      for (const locale of ["da", "se"] as const) {
+        const sprog = locale as DageTilLocale;
+        const ord = sprog === "da" ? "dage" : "dagar";
+        const events = getDageTilEvents(locale);
+        for (const [i, event] of events.entries()) {
+          const svar = getDageTilAnswer(event, sprog, idag);
+          const forventet = svar.isToday
+            ? `det er i dag.`
+            : `${svar.days} ${ord} till`.replace("till", sprog === "da" ? "til" : "till");
+          expect(getDageTilKort(locale, idag)[i].description).toContain(
+            forventet
+          );
+        }
       }
-    }
-  });
+    },
+  );
 
   test("kortene er hverken populære eller i en kategori, så de ikke havner i kataloggitteret", () => {
     for (const kort of getDageTilKort("da", idag)) {

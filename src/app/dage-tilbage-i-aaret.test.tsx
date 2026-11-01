@@ -11,7 +11,7 @@
  * kalender eller et nyt sprog ikke kan få løfte-sætninger uden at porten ser
  * det. Punkt 11: en påstand i tekst er kode.
  */
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import {
@@ -73,6 +73,15 @@ async function render(sprog: "da" | "se") {
 }
 
 describe("dage tilbage i året: siden peger på sit eget spørgsmål", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(I_DAG);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   test("begge sprog har egen sti, egen titel og egen h1", async () => {
     for (const sprog of ["da", "se"] as const) {
       const c = dageTilbageIAaretCopy[sprog];
@@ -124,10 +133,6 @@ describe("dage tilbage i året: siden peger på sit eget spørgsmål", () => {
 
   test("alle tal i den svenske række findes i den danske tekst", async () => {
     const html = await render("da");
-    // Rutetegneren regner på `new Date()`, ikke på `I_DAG`, så forventningerne
-    // skal udledes af den samme kilde som siden. De var hærdkodede til
-    // 2026-10-10 (82 dage) og blev røde ved midnat den 11. oktober, uden at
-    // siden var gatøj — testen målte et gammelt klokkeslæt.
     const nu = new Date();
     const o = aaretTilbage("da", nu);
     // Dagetallet i svarboksen.
@@ -142,9 +147,6 @@ describe("dage tilbage i året: siden peger på sit eget spørgsmål", () => {
     expect(html).toContain(`${o.uger.toLocaleString("da-DK")} hele uger`);
     expect(html).toContain(`${o.timer.toLocaleString("da-DK")} timer`);
     expect(html).toContain(`${o.hverdageTilbage.toLocaleString("da-DK")} af dem er hverdage`);
-    // Månedstabellen skal vise de samme tal som aaretTilbage regner i dag.
-    // Hærdkodet [21, 30, 31] var frosset til 10/10 og gik rød ved midnat; den
-    // uafhængige optælling af selve mattet ligger i dage-tilbage-i-aaret.test.ts.
     expect(html).toContain("oktober");
     expect(html).toContain("december");
     for (const m of o.maaneder) {
@@ -157,8 +159,6 @@ describe("dage tilbage i året: siden peger på sit eget spørgsmål", () => {
 
   test("de fire målte spørgsmål står i den synlige tekst og i FAQPage-JSON-LD", async () => {
     for (const sprog of ["da", "se"] as const) {
-      // Sidens FAQ tegnes med new Date(), så forventningerne skal have det
-      // samme nu — I_DAG (10/10) gav «82 dage» mod sidens «81 dage» ved midnat.
       const faq = dageTilbageIAaretFaq(sprog, new Date());
       expect(faq.length, sprog).toBe(4);
       const forventet =
