@@ -32,7 +32,7 @@ interface AffiliateBoxProps {
  */
 const EKSEMPEL = { hovedstol: 10000, maaneder: 12, rente: 0.2 };
 
-export function kreditEksempel({ hovedstol, maaneder, rente }: typeof EKSEMPEL = EKSEMPEL) {
+function kreditEksempel({ hovedstol, maaneder, rente }: typeof EKSEMPEL = EKSEMPEL) {
   const r = rente / 12;
   const ydelse = (hovedstol * r) / (1 - Math.pow(1 + r, -maaneder));
   return {
@@ -112,15 +112,16 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = fals
         ))}
       </div>
 
+      {credit && (
+        <div className="bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+          {KREDIT_ADVARSEL}
+        </div>
+      )}
+
       {/* Footer disclaimer */}
       <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 text-xs text-gray-500 dark:text-gray-400">
         Vi kan modtage kommission fra vores partnere. Dette påvirker ikke vores anbefalinger.
       </div>
-      {credit && (
-        <div className="bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300">
-          {KREDIT_ADVARSEL}
-        </div>
-      )}
     </div>
   );
 }

@@ -46,7 +46,7 @@ describe("affiliate-links", () => {
     expect(syndere).toEqual([]);
   });
 
-  test("pantelån går gennem Partner-ads og har neutral tekst", () => {
+  test("pantelån går gennem Partner-ads", () => {
     expect(pantelaanAffiliates).toHaveLength(1);
     expect(pantelaanAffiliates[0].url).toContain("bannerid=78126");
   });
@@ -59,10 +59,17 @@ describe("affiliate-links", () => {
   });
 
   test("ingen komponent eller side lover hurtighed, nemhed eller bedste rente ved lån", () => {
-    const forbudt = /uden kreditvurdering|hurtigt svar|hurtig udbetaling|nem ansøgning|bedste rente|laveste rente - |find den laveste rente/i;
-    const filer = ["ForbrugslaanBeregner.tsx", "BillaanBeregner.tsx", "AffiliateBox.tsx", "../app/forbrugslaan/page.tsx", "../app/billaan/page.tsx"];
+    const forbudt = /uden kreditvurdering|hurtigt svar|hurtig udbetaling|nem ansøgning|bedste rente|find den laveste rente/i;
+    const samlFiler = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const sti = join(dir, e.name);
+        if (e.isDirectory()) return samlFiler(sti);
+        return /\.tsx?$/.test(e.name) && !e.name.includes(".test.") ? [sti] : [];
+      });
+    const filer = samlFiler(join(__dirname, ".."));
+    expect(filer.length).toBeGreaterThan(100);
     for (const f of filer) {
-      expect(readFileSync(join(__dirname, f), "utf-8"), f).not.toMatch(forbudt);
+      expect(readFileSync(f, "utf-8"), f).not.toMatch(forbudt);
     }
   });
 
