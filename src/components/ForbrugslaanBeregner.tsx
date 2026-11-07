@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
-import { AffiliateBox } from "./AffiliateBox";
+import { AffiliateBox, PantelaanAffiliate } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
 import { CopyResultButton, ResetButton } from "@/components/ui";
@@ -10,51 +10,6 @@ import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
-import { adtractionLink } from "@/lib/adtraction";
-
-interface AffiliateLink {
-  name: string;
-  description: string;
-  url: string;
-  cta: string;
-  highlight?: boolean;
-}
-
-// Real Adtraction tracking links (channel "Min Beregner" 2056156501).
-// Programs applied for 2026-06-27 — go live the moment each is approved.
-const forbrugslaanAffiliates: AffiliateLink[] = [
-  {
-    name: "Lendo",
-    description: "Sammenlign forbrugslån fra 20+ banker med én ansøgning - find den laveste rente",
-    url: adtractionLink("1562731450", "https://www.lendo.dk"),
-    cta: "Sammenlign lån",
-    highlight: true,
-  },
-  {
-    name: "Mybanker",
-    description: "Uvildig sammenligning af forbrugslån - se hvad du kan spare",
-    url: adtractionLink("1740042344", "https://www.mybanker.dk"),
-    cta: "Sammenlign",
-  },
-  {
-    name: "Bank Norwegian",
-    description: "Forbrugslån uden gebyrer - nem ansøgning på 2 minutter",
-    url: adtractionLink("1888483286", "https://www.banknorwegian.dk"),
-    cta: "Søg nu",
-  },
-  {
-    name: "Facit Bank",
-    description: "Forbrugslån med konkurrencedygtig rente og hurtigt svar",
-    url: adtractionLink("1820677672", "https://facitbank.dk"),
-    cta: "Få tilbud",
-  },
-  {
-    name: "CapitalBox",
-    description: "Fleksibelt lån med hurtig udbetaling",
-    url: adtractionLink("1808759797", "https://www.capitalbox.dk"),
-    cta: "Læs mere",
-  },
-];
 
 const defaultInputs = {
   laanebelob: 50000,
@@ -99,8 +54,6 @@ export default function ForbrugslaanBeregner() {
       tip4: "boliglån er ofte billigere hvis du har sikkerhed",
       tip5Title: "Lån kun hvad du har råd til",
       tip5: "undgå at bruge mere end 30-40 % af din rådighedsbeløb",
-      affiliateTitle: "Sammenlign forbrugslån",
-      affiliateSubtitle: "Find den bedste rente til dit behov",
       tableTitle: "Ydelsestabel",
       monthCol: "Måned",
       paymentCol: "Ydelse",
@@ -142,8 +95,6 @@ export default function ForbrugslaanBeregner() {
       tip4: "bolån är ofta billigare om du har säkerhet",
       tip5Title: "Låna bara vad du har råd med",
       tip5: "undvik att använda mer än 30–40 % av ditt disponibla belopp",
-      affiliateTitle: "Jämför konsumtionslån",
-      affiliateSubtitle: "Hitta den bästa räntan för ditt behov",
       tableTitle: "Betalningsplan",
       monthCol: "Månad",
       paymentCol: "Betalning",
@@ -185,8 +136,6 @@ export default function ForbrugslaanBeregner() {
       tip4: "boliglån er ofte billigere hvis du har sikkerhet",
       tip5Title: "Lån bare det du har råd til",
       tip5: "unngå å bruke mer enn 30–40 % av ditt disponible beløp",
-      affiliateTitle: "Sammenlign forbrukslån",
-      affiliateSubtitle: "Finn den beste renten for ditt behov",
       tableTitle: "Betalingsplan",
       monthCol: "Måned",
       paymentCol: "Betaling",
@@ -404,23 +353,16 @@ export default function ForbrugslaanBeregner() {
         </ul>
       </div>
 
-      {/* Affiliate box */}
       <AffiliateBox
-        title={`${l.affiliateTitle}`}
-        subtitle={l.affiliateSubtitle}
-        links={forbrugslaanAffiliates}
-        className="mt-6"
-      />
-
-      <AffiliateBox
-        title="Forsikring & økonomi"
-        subtitle="Sammenlign forsikringer og se flere lånemuligheder"
+        title="Forsikring"
+        subtitle="Sammenlign forsikringer"
         links={[
-          { name: "Findforsikring.dk", description: "Danmarks største forsikringsportal — sammenlign og find den billigste forsikring.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true },
-          { name: "Pantsat.dk", description: "Lån med pant i værdigenstande — hurtigt svar uden kreditvurdering.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=78126&uid=minberegner", cta: "Se pantelån" },
+          { name: "Findforsikring.dk", description: "Sammenlign forsikringer fra flere selskaber.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true },
         ]}
         className="mt-6"
       />
+
+      <PantelaanAffiliate className="mt-6" />
 
       {/* Ydelsestabel */}
       <div className="overflow-x-auto">

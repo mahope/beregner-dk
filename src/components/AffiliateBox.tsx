@@ -19,15 +19,39 @@ interface AffiliateBoxProps {
   subtitle?: string;
   icon?: LucideIcon;
   links: AffiliateLink[];
+  /** Sæt på bokse med kreditprodukter: viser den lovpligtige advarsel. */
+  credit?: boolean;
   className?: string;
 }
+
+/**
+ * Lovpligtig advarsel ved markedsføring af forbrugslån (Markedsføringsloven og
+ * Forbrugerkreditloven): "Det koster penge at låne penge" og et ÅOP-eksempel.
+ * Eksemplet er en illustration (annuitetslån, ingen gebyrer), ikke en bestemt
+ * långivers vilkår. Tallene regnes ud, så teksten og regnestykket ikke kan skilles.
+ */
+const EKSEMPEL = { hovedstol: 10000, maaneder: 12, rente: 0.2 };
+
+export function kreditEksempel({ hovedstol, maaneder, rente }: typeof EKSEMPEL = EKSEMPEL) {
+  const r = rente / 12;
+  const ydelse = (hovedstol * r) / (1 - Math.pow(1 + r, -maaneder));
+  return {
+    renteomkostning: Math.round(ydelse * maaneder - hovedstol),
+    aop: (Math.pow(1 + r, 12) - 1) * 100,
+  };
+}
+
+const eksempel = kreditEksempel();
+const kr = (n: number) => n.toLocaleString("da-DK", { maximumFractionDigits: 0 });
+
+export const KREDIT_ADVARSEL = `Det koster penge at låne penge. Eksempel: Et lån på ${kr(EKSEMPEL.hovedstol)} kr. over ${EKSEMPEL.maaneder} måneder med ${EKSEMPEL.rente * 100} % i årlig rente og uden gebyrer koster ca. ${kr(eksempel.renteomkostning)} kr. i renter og har en ÅOP på ca. ${eksempel.aop.toLocaleString("da-DK", { maximumFractionDigits: 1 })} %. Eksemplet er en illustration. Långiverens egne vilkår gælder.`;
 
 /**
  * AffiliateBox - Viser affiliate links med tydelig disclosure
  * 
  * Kræver "Annonce" label per dansk markedsføringslov.
  */
-export function AffiliateBox({ title, subtitle, icon: Icon, links, className = "" }: AffiliateBoxProps) {
+export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = false, className = "" }: AffiliateBoxProps) {
   const { locale } = useLocale();
   // Every affiliate partner is Danish (.dk links, "Annonce" disclosure per
   // dansk markedsføringslov), so only show these on the Danish site.
@@ -60,7 +84,7 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, className = "
             key={index}
             href={link.url}
             target="_blank"
-            rel="noreferrer noopener sponsored"
+            rel="sponsored nofollow noopener noreferrer"
             onClick={() => trackAffiliateClick(title, link.url)}
             className={`block p-4 transition-colors ${
               link.highlight 
@@ -92,6 +116,11 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, className = "
       <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 text-xs text-gray-500 dark:text-gray-400">
         Vi kan modtage kommission fra vores partnere. Dette påvirker ikke vores anbefalinger.
       </div>
+      {credit && (
+        <div className="bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+          {KREDIT_ADVARSEL}
+        </div>
+      )}
     </div>
   );
 }
@@ -179,6 +208,29 @@ export const testamenteAffiliates: AffiliateLink[] = [
 ];
 
 // Convenience komponenter
+
+const PANTSAT = "78126"; // Pantsat.dk
+
+export const pantelaanAffiliates: AffiliateLink[] = [
+  {
+    name: "Pantsat.dk",
+    description: "Pantelån, hvor du stiller en værdigenstand som sikkerhed for lånet.",
+    url: partnerAdsLink(PANTSAT),
+    cta: "Se pantelån",
+  },
+];
+
+export function PantelaanAffiliate({ className = "" }: { className?: string }) {
+  return (
+    <AffiliateBox
+      title="Lån med pant"
+      subtitle="Én af flere måder at låne på"
+      links={pantelaanAffiliates}
+      credit
+      className={className}
+    />
+  );
+}
 
 export function BoliglaanAffiliate({ className = "" }: { className?: string }) {
   return (
