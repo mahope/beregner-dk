@@ -96,7 +96,7 @@ function getAnswerText(
     return {
       headline: `${copy[locale].today} ${dageTilArm(event, locale).copy.short} — 0 ${u.days}`,
       equivalent: locale === "da" ? "Der er 0 dage tilbage." : "Det finns 0 dagar kvar.",
-      target: `${target} ${formatTargetYear(answer.targetDate)} er en ${weekday}`,
+      target: `${target} ${formatTargetYear(answer.targetDate)} ${locale === "da" ? "er" : "är"} en ${weekday}`,
       targetIso: answer.targetDate.toISOString().slice(0, 10),
     };
   }
@@ -107,12 +107,14 @@ function getAnswerText(
     equivalent:
       answer.daysLeft === 0
         ? `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)}.`
-        : `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)} og ${count(
+        : `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)} ${
+            locale === "da" ? "og" : "och"
+          } ${count(
             answer.daysLeft,
             u.day,
             u.days
           )}.`,
-    target: `${target} ${formatTargetYear(answer.targetDate)} er en ${weekday}`,
+    target: `${target} ${formatTargetYear(answer.targetDate)} ${locale === "da" ? "er" : "är"} en ${weekday}`,
     targetIso: answer.targetDate.toISOString().slice(0, 10),
   };
 }
@@ -135,7 +137,7 @@ export async function buildDageTilMetadata(
   if (!event) {
     return { robots: { index: false, follow: false } };
   }
-  const { headline, target, targetIso } = getAnswerText(event, dageLocale, today);
+  const { headline, equivalent, target, targetIso } = getAnswerText(event, dageLocale, today);
   const canonical = `${baseUrl}${prefix}${slug}`;
   const u = units[dageLocale];
   const days = getDageTilAnswer(event, dageLocale, today).days;
@@ -171,10 +173,10 @@ export async function buildDageTilMetadata(
   // does not say — and lands under Google's ~160-character cut.
   return {
     title: { absolute: titleText },
-    description: `${headline}. ${target}. ${
+    description: `${headline}. ${target}. ${equivalent} ${
       dageLocale === "da"
-        ? "Tallet opdateres hver dag."
-        : "Talet uppdateras varje dag."
+        ? "Gratis nedtælling, der opdateres hver dag."
+        : "Gratis nedräkning som uppdateras varje dag."
     }`,
     openGraph: {
       title: titleText,

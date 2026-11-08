@@ -267,7 +267,7 @@ describe("dage-til side", () => {
       const html = renderToStaticMarkup(
         await ROUTE_FOR[locale]({ params: Promise.resolve({ dato: slug }) })
       );
-      expect(html, slug).toContain(`<time dateTime="${isoTarget}">${dato} er en ${ugedag}</time>`);
+      expect(html, slug).toContain(`<time dateTime="${isoTarget}">${dato} ${locale === "da" ? "er" : "är"} en ${ugedag}</time>`);
       expect(
         new RegExp(`${dage} (?:dage|dagar) (?:til|till) `).test(html),
         `${slug}: ${dage} dage fra 15. januar 2026 skal stå i svaret`
@@ -533,7 +533,7 @@ describe("dage-til meta descriptions", () => {
     )!;
     const description = String((await metadataFor("da", "grundlovsdag")).description);
     expect(description).toBe(
-      "Der er 251 dage til grundlovsdag. 5. juni 2027 er en lørdag. Tallet opdateres hver dag."
+      "Der er 251 dage til grundlovsdag. 5. juni 2027 er en lørdag. Det svarer til 35 uger og 6 dage. Gratis nedtælling, der opdateres hver dag."
     );
   });
 
@@ -545,7 +545,7 @@ describe("dage-til meta descriptions", () => {
     const juleaften = await metadataFor("da", "24-december", new Date("2026-12-24T09:00:00.000Z"));
     const description = String(juleaften.description);
     expect(description).toBe(
-      "Det er juleaften — 0 dage. 24. december 2026 er en torsdag. Tallet opdateres hver dag."
+      "Det er juleaften — 0 dage. 24. december 2026 er en torsdag. Der er 0 dage tilbage. Gratis nedtælling, der opdateres hver dag."
     );
     expect(description.length).toBeLessThanOrEqual(160);
   });

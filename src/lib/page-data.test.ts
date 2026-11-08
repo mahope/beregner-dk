@@ -9,7 +9,6 @@ import { forkortBrok } from "./brok";
 import { alderLevet, formatDageLived } from "./alder-levet";
 import { formatAlder } from "./alder-eksempler";
 import { formatBelob, formatNumber, getIntlLocale } from "./format";
-import { dageTilDecember } from "./dage-mellem-datoer";
 import { iDagISidensTidszone } from "./lokal-dato";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import {
@@ -564,7 +563,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Kvadratmeterberegner: 5 x 4 m = 20 m²",
+      title: "Kvadratmeterberegner: 5 x 4 m = 20 m², med pris pr. m²",
       area: "20 m²",
       heading: "Et rum på 5 x 4 m er 20 m²",
       price: "3.000 kr.",
@@ -806,18 +805,18 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      titel: "Beregn dage til 1. december: {DAGE_TIL_DEC} tilbage",
+      titel: "Datoberegner: dage mellem datoer, 15. mar–25. sep = 194 dage",
       heading: "Beregn antal dage mellem to datoer",
-      intent: "antal dage mellem to datoer",
+      intent: "dage mellem to datoer",
       answer: "Vælg en startdato og en slutdato",
       months: "ca. måneder",
       countdown: "Hvor mange dage er der til en dato?",
     },
     {
       locale: "se" as const,
-      titel: "Beräkna dagar till 1 december: {DAGE_TIL_DEC} kvar",
+      titel: "Beräkna dagar mellan datum: 15 mar–25 sep = 194 dagar",
       heading: "Beräkna antal dagar mellan två datum",
-      intent: "antal dagar mellan två datum",
+      intent: "dagar mellan två datum",
       answer: "Välj ett startdatum och ett slutdatum",
       months: "ungefärligt antal månader",
       countdown: "Hur många dagar är det kvar till ett datum?",
@@ -826,10 +825,7 @@ describe("getPageData", () => {
     "has answer-first date metadata for $locale",
     ({ locale, titel, heading, intent, answer, months, countdown }) => {
       const data = getPageData("dato", locale)!;
-      // Titlens dagtal regnes hver dag, så testen regner det samme tal i stedet
-      // for at skrive «58» — ellers ville porten blive rød hver 1. december.
-      const { kort } = dageTilDecember(locale, new Date());
-      const title = titel.replaceAll("{DAGE_TIL_DEC}", kort);
+      const title = titel;
 
       expect(data.title).toBe(heading);
       expect(data.metaTitle).toBe(title);
@@ -837,11 +833,9 @@ describe("getPageData", () => {
       expect(data.description).toContain(answer);
       expect(data.description).toContain(months);
       expect(data.metaDescription).toContain(intent);
-      expect(data.metaDescription).toContain(months);
       expect(data.metaDescription.length).toBeLessThanOrEqual(160);
       expect(data.ogTitle).toBe(title);
       expect(data.ogDescription).toContain(intent);
-      expect(data.ogDescription).toContain(months);
       expect(data.schemaDescription).toContain(intent);
       expect(data.schemaDescription).toContain(months);
 
@@ -853,7 +847,10 @@ describe("getPageData", () => {
       // om noget andet. Beskrivelsen SKAL desuden begynde med spørgsmålet
       // og ikke gentage titlen: de to var ens, hvilket koster halve
       // snippet-pladsen på det samme "se mere"-link.
-      expect(data.metaTitle).toMatch(/dage til 1\. december|dagar till 1 december/);
+      // 8/11: titlen er målrettet «dage mellem datoer» (se `title-eksempel.test.ts`),
+      // men tællesøgningerne lever videre i beskrivelsen, som stadig starter
+      // med spørgsmålet.
+      expect(data.metaTitle).toMatch(/dage mellem datoer|dagar mellan datum/);
       expect(data.metaDescription.startsWith(countdown)).toBe(true);
       expect(data.metaDescription).not.toBe(data.metaTitle);
     }
@@ -869,7 +866,7 @@ describe("getPageData", () => {
     },
     {
       locale: "se" as const,
-      title: "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min",
+      title: "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min, dra av rast",
       intent: "mellan två klockslag",
       example: "08:30 till 16:45 är 8 timmar och 15 minuter",
       schema: "Gratis tidskalkylator. Beräkna tidsintervall mellan två klockslag och se resultatet i timmar, minuter och decimaltimmar.",

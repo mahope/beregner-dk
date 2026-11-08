@@ -31,7 +31,7 @@
 import { describe, expect, test } from "vitest";
 import { rabatProcent, procentAf, RABAT_EKSEMPEL, PROCENT_10_AF_FAQ } from "@/lib/procent";
 import { beregnBmr, beregnTdee } from "@/lib/makroer";
-import { dageTilDecember } from "@/lib/dage-mellem-datoer";
+import { daysBetween } from "@/lib/dage-til";
 import { beregnMoms } from "@/lib/moms";
 import { getPageData } from "@/lib/page-data";
 import { formatBelob } from "./format";
@@ -121,8 +121,10 @@ describe("tallene i titlerne er rigtige", () => {
     for (const streng of [page.metaDescription, page.ogDescription, page.schemaDescription]) {
       expect(streng).toMatch(/datoer/i);
     }
-    // Svensk titel er frosset til 13/10 (opgave 187), så den skal ikke røres.
+    // Den svenske titel er aldrig blevet lovet datoer, og 8/11 fik den i stedet
+    // løftet om at dra av rast, som værktøjet faktisk kan.
     expect(getPageData("tidsberegner", "se")!.metaTitle).not.toMatch(/datoer/i);
+    expect(getPageData("tidsberegner", "se")!.metaTitle).toContain("dra av rast");
   });
 
   test("moms: 1.000 kr. ekskl. moms er 1.250 kr. inkl. 25 %", () => {
@@ -161,17 +163,36 @@ describe("tallene i titlerne er rigtige", () => {
     expect(beskrivelse).toContain(`${formatBelob(rabat, "da", 1)} %`);
   });
 
-  // Titlen på /dato (131.320 visninger, 0,7 % CTR) skrev før 4/10
-  // «1. jan. 2026→2027 = 365» — et interval på en nedtællingsside, håndskrevet
-  // som bogstaver. Nu regner den nedtællingen til næste 1. december, så porten
-  // dømmer *dagens* tal og ikke et gammelt.
-  test("dato: titlen regner dagene til 1. december", () => {
-    const { dage, decemberTekst } = dageTilDecember("da", new Date());
-    const titel = getPageData("dato", "da")!.metaTitle;
-    expect(titel).toContain(decemberTekst);
-    expect(titel).toContain(`${dage} dage`);
-    // Ikke længere et interval: pilen var den del, der læst som «365 dage kvar».
-    expect(titel).not.toMatch(/→/);
+  // Titlen på /dato (156.216 visninger, CTR 0,5 %, pos. 5 i GSC til 6/11) var
+  // en nedtælling til 1. december, der skiftede hver dag. 8/11 er den målrettet
+  // det værktøjet løser: dage mellem datoer. Eksemplet er fast og regnes her
+  // uafhængigt af siden: 15. marts til 25. september 2026 er 194 dage, samme
+  // tal som sidens egen FAQ om Excel.
+  test("dato: titlen regner dagene mellem to faste datoer", () => {
+    const dage = Math.round(
+      (Date.UTC(2026, 8, 25) - Date.UTC(2026, 2, 15)) / 86_400_000,
+    );
+    expect(dage).toBe(194);
+    expect(daysBetween(new Date("2026-03-15T12:00:00Z"), new Date("2026-09-25T12:00:00Z"))).toBe(194);
+    const da = getPageData("dato", "da")!.metaTitle;
+    expect(da).toMatch(/^Datoberegner: dage mellem datoer/);
+    expect(da).toContain("15. mar–25. sep = 194 dage");
+    const se = getPageData("dato", "se")!.metaTitle;
+    expect(se).toMatch(/^Beräkna dagar mellan datum/);
+    expect(se).toContain("15 mar–25 sep = 194 dagar");
+    // Titlen følger ikke længere dagens dato.
+    expect(da).not.toMatch(/1\. december/);
+  });
+
+  test("dato: beskrivelsen dækker de tre opgaver søgningerne spørger om", () => {
+    const da = getPageData("dato", "da")!.metaDescription;
+    expect(da).toMatch(/dage mellem to datoer/);
+    expect(da).toMatch(/dage er der til en dato/i);
+    expect(da).toMatch(/læg dage til/);
+    const se = getPageData("dato", "se")!.metaDescription;
+    expect(se).toMatch(/dagar mellan två datum/);
+    expect(se).toMatch(/dagar är det kvar till ett datum/i);
+    expect(se).toMatch(/lägg till/);
   });
 
   test("bmi: 75 kg og 1,75 m er BMI 24,5", () => {

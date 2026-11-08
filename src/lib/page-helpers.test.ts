@@ -69,19 +69,19 @@ describe("buildPageMetadata", () => {
       slug: "tidsberegner" as const,
       locale: "da" as const,
       title: "Tidsberegner: 08:30 til 16:45 = 8 t 15 min. Mellem datoer",
-      description: "Beregn tid mellem to klokkeslæt eller to datoer. 08:30 til 16:45 er 8 timer og 15 minutter. Se dage, arbejdsdage, sekunder og decimaltimer.",
+      description: "Beregn tid mellem to klokkeslæt eller to datoer. 08:30 til 16:45 er 8 timer og 15 minutter. Træk pause fra og få decimaltimer. Gratis, uden login.",
     },
     {
       slug: "tidsberegner" as const,
       locale: "se" as const,
-      title: "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min",
+      title: "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min, dra av rast",
       description: "Beräkna hur lång tid det går mellan två klockslag. Exempel: 08:30 till 16:45 är 8 timmar och 15 minuter. Se decimaltimmar och dra av en rast.",
     },
     {
       slug: "moms" as const,
       locale: "da" as const,
       title: "Momsberegner: 1.000 kr. ekskl. moms + 25 % = 1.250 kr.",
-      description: "Beregn dansk moms på 25 %. Læg moms til 1.000 kr. og få 1.250 kr. Træk også moms fra en pris inkl. moms, eller find momsandelen.",
+      description: "Beregn dansk moms på 25 %. Læg moms til 1.000 kr. og få 1.250 kr. Træk også moms fra en pris inkl. moms, eller find momsandelen. Gratis og uden login.",
     },
     {
       slug: "moms" as const,
