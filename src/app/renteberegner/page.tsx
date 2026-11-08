@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -479,7 +480,7 @@ export default async function RenteberegnerPage() {
         <p>
           Vill du hellre räkna på serielånet i stället? Där är det
           amorteringen som är fast, så varje månadsbetalning är olika.{" "}
-          <Link href="/laaneberegner">Lånekalkylatorn</Link> räknar båda
+          <Link href={localizedPath("/laaneberegner", locale)}>Lånekalkylatorn</Link> räknar båda
           sorterna, och <Link href="/rentefradrag">rentefradraget</Link> visar
           hur mycket av räntan som blir kvar.
         </p>

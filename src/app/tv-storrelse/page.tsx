@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -147,7 +148,7 @@ export default async function TvStorrelsePage() {
             <p className="font-medium text-blue-800 dark:text-blue-300">Fra tommer til centimeter</p>
             <p className="text-blue-700 dark:text-blue-400">
               Skal du omregne andre længder — fod, mil eller tommer til cm — kan du bruge{" "}
-              <Link href="/enheder" className="underline font-medium">
+              <Link href={localizedPath("/enheder", locale)} className="underline font-medium">
                 enhedsberegneren
               </Link>
               . Skal du finde arealet af en væg eller et gulv, så brug{" "}

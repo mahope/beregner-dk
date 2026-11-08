@@ -143,7 +143,7 @@ describe("klokken-i hub: rendering", () => {
   test("hubben linker videre til tidszonekonverteren", async () => {
     for (const sprog of ["da", "se"] as const) {
       const html = await render(sprog);
-      expect(html, sprog).toContain('href="/tidszone"');
+      expect(html, sprog).toContain(sprog === "se" ? 'href="/tidszon"' : 'href="/tidszone"');
     }
   });
 });

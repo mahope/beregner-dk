@@ -123,21 +123,21 @@ function HomeContentNO({ siteName }: { siteName: string }) {
       <h2>Økonomi og lån</h2>
       <p>
         Beregn <Link href="/moms">MVA (merverdiavgift)</Link> raskt, sammenlign
-        lån med vår <Link href="/laaneberegner">lånekalkulator</Link>, eller se hvordan
-        sparepengene dine vokser med <Link href="/opsparing">sparekalkulator</Link>.
+        lån med vår <Link href="/lanekalkulator">lånekalkulator</Link>, eller se hvordan
+        sparepengene dine vokser med <Link href="/sparekalkulator">sparekalkulator</Link>.
       </p>
       <ul>
         <li><Link href="/moms"><strong>MVA-kalkulator</strong></Link> — legg til eller trekk fra 25 % MVA</li>
         <li><Link href="/valuta"><strong>Valutakalkulator</strong></Link> — regn om mellom NOK, EUR, USD og andre valutaer</li>
-        <li><Link href="/renteberegner"><strong>Rentekalkulator</strong></Link> — beregn renter og avdrag på lån</li>
+        <li><Link href="/rentekalkulator"><strong>Rentekalkulator</strong></Link> — beregn renter og avdrag på lån</li>
         <li><Link href="/procent"><strong>Prosentkalkulator</strong></Link> — beregn prosent av et tall</li>
         <li><Link href="/timepris"><strong>Timepriskalkulator</strong></Link> — finn din timepris som frilanser</li>
       </ul>
 
       <h2>Bolig</h2>
       <ul>
-        <li><Link href="/boliglaan"><strong>Boliglånskalkulator</strong></Link> — beregn ytelse og kostnader</li>
-        <li><Link href="/elberegner"><strong>Strømkalkulator</strong></Link> — se hva apparatene dine koster i strøm</li>
+        <li><Link href="/boliglan"><strong>Boliglånskalkulator</strong></Link> — beregn ytelse og kostnader</li>
+        <li><Link href="/elkalkulator"><strong>Strømkalkulator</strong></Link> — se hva apparatene dine koster i strøm</li>
         <li><Link href="/solceller"><strong>Solcellekalkulator</strong></Link> — beregn besparelse og tilbakebetalingstid</li>
         <li><Link href="/kvadratmeter"><strong>Kvadratmeterkalkulator</strong></Link> — beregn areal</li>
       </ul>
@@ -146,17 +146,17 @@ function HomeContentNO({ siteName }: { siteName: string }) {
       <ul>
         <li><Link href="/bmi"><strong>BMI-kalkulator for voksne</strong></Link> — beregn BMI ut fra vekt og høyde</li>
         <li><Link href="/kalorier"><strong>Kalorikalkulator</strong></Link> — se ditt daglige kaloriforbruk</li>
-        <li><Link href="/vaegttab"><strong>Vekttap</strong></Link> — beregn kaloriunderskudd</li>
+        <li><Link href="/vekttap"><strong>Vekttap</strong></Link> — beregn kaloriunderskudd</li>
       </ul>
 
       <h2>Hverdag og praktisk</h2>
       <ul>
-        <li><Link href="/braendstof"><strong>Drivstoffkalkulator</strong></Link> — beregn kjørekostnader</li>
+        <li><Link href="/drivstoff"><strong>Drivstoffkalkulator</strong></Link> — beregn kjørekostnader</li>
         <li><Link href="/bil"><strong>Bil verditap</strong></Link> — se hva bilen koster å eie</li>
         <li><Link href="/dato"><strong>Datokalkulator</strong></Link> — beregn dager mellom datoer</li>
         <li><Link href="/tidskalkulator"><strong>Tidskalkulator</strong></Link> — beregn timer og minutter</li>
         <li><Link href="/tidssone"><strong>Tidssoner</strong></Link> — se klokken i andre land</li>
-        <li><Link href="/rejsebudget"><strong>Reisebudsjett</strong></Link> — beregn reisebudsjettet ditt</li>
+        <li><Link href="/reisebudsjett"><strong>Reisebudsjett</strong></Link> — beregn reisebudsjettet ditt</li>
       </ul>
     </section>
   );
@@ -176,21 +176,21 @@ function HomeContentSE({ siteName }: { siteName: string }) {
       <h2>Ekonomi och lån</h2>
       <p>
         Beräkna <Link href="/moms">moms</Link> snabbt, jämför lån med
-        vår <Link href="/laaneberegner">låneberäknare</Link>, eller se hur
-        ditt sparande växer med <Link href="/opsparing">sparberäknaren</Link>.
+        vår <Link href="/lanekalkylator">låneberäknare</Link>, eller se hur
+        ditt sparande växer med <Link href="/sparkalkylator">sparberäknaren</Link>.
       </p>
       <ul>
         <li><Link href="/moms"><strong>Momsberäknare</strong></Link> — lägg till eller dra av 25 % moms</li>
         <li><Link href="/valuta"><strong>Valutaberäknare</strong></Link> — räkna om mellan SEK, EUR, USD och andra valutor</li>
-        <li><Link href="/renteberegner"><strong>Ränteberäknare</strong></Link> — beräkna ränta och amortering</li>
+        <li><Link href="/rantekalkylator"><strong>Ränteberäknare</strong></Link> — beräkna ränta och amortering</li>
         <li><Link href="/procent"><strong>Procentberäknare</strong></Link> — beräkna procent av ett tal</li>
-        <li><Link href="/timepris"><strong>Timprisberäknare</strong></Link> — hitta din timpris som frilansare</li>
+        <li><Link href="/timpris"><strong>Timprisberäknare</strong></Link> — hitta din timpris som frilansare</li>
       </ul>
 
       <h2>Bostad</h2>
       <ul>
-        <li><Link href="/boliglaan"><strong>Bolåneberäknare</strong></Link> — beräkna månadskostnad och ränta</li>
-        <li><Link href="/elberegner"><strong>Elberäknare</strong></Link> — se vad dina apparater kostar i el</li>
+        <li><Link href="/bolanekalkylator"><strong>Bolåneberäknare</strong></Link> — beräkna månadskostnad och ränta</li>
+        <li><Link href="/elkalkylator"><strong>Elberäknare</strong></Link> — se vad dina apparater kostar i el</li>
         <li><Link href="/solceller"><strong>Solcellsberäknare</strong></Link> — beräkna besparing och återbetalningstid</li>
         <li><Link href="/kvadratmeter"><strong>Kvadratmeterberäknare</strong></Link> — beräkna area</li>
       </ul>
@@ -199,17 +199,17 @@ function HomeContentSE({ siteName }: { siteName: string }) {
       <ul>
         <li><Link href="/bmi"><strong>BMI-kalkylator för vuxna</strong></Link> — beräkna BMI utifrån vikt och längd</li>
         <li><Link href="/kalorier"><strong>Kaloriberäknare</strong></Link> — se ditt dagliga kaloribehov</li>
-        <li><Link href="/vaegttab"><strong>Viktnedgång</strong></Link> — beräkna kaloriunderskott</li>
+        <li><Link href="/viktminskning"><strong>Viktnedgång</strong></Link> — beräkna kaloriunderskott</li>
       </ul>
 
       <h2>Vardag och praktiskt</h2>
       <ul>
-        <li><Link href="/braendstof"><strong>Bränsleberäknare</strong></Link> — beräkna körkostnader</li>
+        <li><Link href="/bransle"><strong>Bränsleberäknare</strong></Link> — beräkna körkostnader</li>
         <li><Link href="/bil"><strong>Bil värdeminskning</strong></Link> — se vad bilen kostar att äga</li>
         <li><Link href="/datum"><strong>Datumberäknare</strong></Link> — beräkna dagar mellan datum</li>
         <li><Link href="/tidskalkylator"><strong>Tidsberäknare</strong></Link> — beräkna timmar och minuter</li>
         <li><Link href="/tidszon"><strong>Tidszoner</strong></Link> — se klockan i andra länder</li>
-        <li><Link href="/rejsebudget"><strong>Resebudget</strong></Link> — beräkna din resebudget</li>
+        <li><Link href="/resebudget"><strong>Resebudget</strong></Link> — beräkna din resebudget</li>
       </ul>
     </section>
   );

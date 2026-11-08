@@ -204,12 +204,12 @@ function SeContent() {
 
         <h3>Bostad och lån</h3>
         <ul>
-          <li><Link href="/boliglaan">Bolån</Link> - beräkna bolånekostnad</li>
-          <li><Link href="/laaneberegner">Lånekalkylator</Link> - generell lånekalkylator</li>
-          <li><Link href="/billaan">Billån</Link> - beräkna billånekostnad</li>
-          <li><Link href="/forbrugslaan">Konsumtionslån</Link> - beräkna lånekostnad</li>
-          <li><Link href="/renteberegner">Ränteberäknare</Link> - beräkna ränta och amortering</li>
-          <li><Link href="/opsparing">Sparande</Link> - se ränta-på-ränta-effekten</li>
+          <li><Link href="/bolanekalkylator">Bolån</Link> - beräkna bolånekostnad</li>
+          <li><Link href="/lanekalkylator">Lånekalkylator</Link> - generell lånekalkylator</li>
+          <li><Link href="/billan">Billån</Link> - beräkna billånekostnad</li>
+          <li><Link href="/konsumtionslan">Konsumtionslån</Link> - beräkna lånekostnad</li>
+          <li><Link href="/rantekalkylator">Ränteberäknare</Link> - beräkna ränta och amortering</li>
+          <li><Link href="/sparkalkylator">Sparande</Link> - se ränta-på-ränta-effekten</li>
         </ul>
 
         <h3>Hälsa</h3>
@@ -220,10 +220,10 @@ function SeContent() {
 
         <h3>Vardag och praktiskt</h3>
         <ul>
-          <li><Link href="/elberegner">Elberäknare</Link> - se vad dina apparater kostar</li>
-          <li><Link href="/braendstof">Bränsle</Link> - beräkna transportkostnader</li>
+          <li><Link href="/elkalkylator">Elberäknare</Link> - se vad dina apparater kostar</li>
+          <li><Link href="/bransle">Bränsle</Link> - beräkna transportkostnader</li>
           <li><Link href="/bil">Bil</Link> - beräkna bilens totala kostnader</li>
-          <li><Link href="/timepris">Timprisberäknare</Link> - hitta din frilans-timpris</li>
+          <li><Link href="/timpris">Timprisberäknare</Link> - hitta din frilans-timpris</li>
           <li><Link href="/kvadratmeter">Kvadratmeter</Link> - beräkna ytor</li>
           <li><Link href="/datum">Datumberäknare</Link> - beräkna dagar mellan datum</li>
           <li><Link href="/alder">Åldersberäknare</Link> - beräkna din exakta ålder</li>

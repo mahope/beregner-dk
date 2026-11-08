@@ -86,7 +86,7 @@ describe("procent page", () => {
     // Interne links til de svenska værktøj, der besvarar den næste
     // spørgsmål i samme klasse.
     expect(html).toContain('href="/lon-efter-skatt"');
-    expect(html).toContain('href="/loenstigning"');
+    expect(html).toContain('href="/loneokning"');
     // 37 % er en dansk sats og kan ikke dokumenteres for svensk lön.
     expect(html).not.toContain("37% skatt");
     expect(html).toContain("kommunal skatt");
@@ -156,7 +156,7 @@ describe("procent page", () => {
     expect(html).toContain("9,5 procent stora skillnaden");
     // Og fælden skal være skrevet ud, ellers er de to tal bare forvirrende.
     expect(html).toContain("De två formlerna ger aldrig samma svar");
-    expect(html).toContain('href="/loenstigning"');
+    expect(html).toContain('href="/loneokning"');
   });
 
   // De tre ovenstående forventninger lå på den *danske* tekst i den svenske

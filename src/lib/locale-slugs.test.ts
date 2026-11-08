@@ -1,6 +1,8 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
+import { HomeContent } from "@/components/HomeContent";
 import { buildSitemap } from "@/app/sitemap";
 import { getCalculatorsByLocale, getPopularCalculators, isCalculatorAvailable } from "./calculator-list";
 import { getDomainConfigByLocale } from "./domain-config";
@@ -184,4 +186,15 @@ describe("sprogstier: ingen danske slugs på de svenske sider", () => {
     expect(localizedSlug("dato", "da")).toBe("dato");
     expect(getCalculatorsByLocale("da").map((c) => c.href)).toContain("/dato");
   });
+
+  test.each(["se", "no"] as const)(
+    "forsidens tekstlinks på %s peger på det sprogs egne slugs",
+    (locale) => {
+      const html = renderToStaticMarkup(HomeContent({ locale, siteName: "Test" }));
+      const hrefs = [...html.matchAll(/href="(\/[^"]*)"/g)].map((m) => m[1]);
+      expect(hrefs.length).toBeGreaterThan(10);
+      const gamle = new Set(Object.keys(LOCALE_SLUGS[locale]));
+      expect(hrefs.filter((h) => gamle.has(h.slice(1)))).toEqual([]);
+    },
+  );
 });

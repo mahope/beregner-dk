@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -116,7 +117,7 @@ export default async function GramTilDlPage() {
             end en, der skriver «120 g». Har du en køkkenvægt, så vej de tørre varer, og brug
             dl-målet til væske, hvor 1 dl næsten altid er 100 g. Skal du omregne andre enheder som
             tommer, grader eller hektar, kan du bruge{" "}
-            <Link href="/enheder" className="underline font-medium">
+            <Link href={localizedPath("/enheder", locale)} className="underline font-medium">
               enhedsomregneren
             </Link>
             .

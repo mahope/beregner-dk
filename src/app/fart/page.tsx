@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -180,7 +181,7 @@ export default async function FartPage() {
             </table>
             <p>
               Vil du vide, hvad turen koster i brændstof, regner du videre på{" "}
-              <a href="/braendstof">brændstofberegneren</a>.
+              <a href={localizedPath("/braendstof", locale)}>brændstofberegneren</a>.
             </p>
             <h2>Tempo til løb og cykling</h2>
             <p>

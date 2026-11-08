@@ -1,10 +1,11 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DatoBeregner from "@/components/DatoBeregner";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import { getDageTilHubPath } from "@/lib/dage-til";
 import { getKlokkenHubPath } from "@/lib/klokken-i";
 import {
@@ -79,6 +80,7 @@ export async function buildDageMellemMetadata(
 
 export async function DageMellemDatoerRoute({ prefix }: { prefix: string }) {
   const { locale } = await sideLocale(prefix);
+  const { baseUrl } = await getCurrentDomainConfig();
   const today = new Date();
   const c = dageMellemCopy[locale];
   const afsnit = dageMellemAfsnit(locale, today);
@@ -89,6 +91,14 @@ export async function DageMellemDatoerRoute({ prefix }: { prefix: string }) {
 
   return (
     <div>
+      {/* The page is a calculator (DatoBeregner), so it is a WebApplication as
+          well as a FAQPage. */}
+      <CalculatorSchema
+        name={c.h1}
+        description={c.lead}
+        url={`${baseUrl}${sti}`}
+        category="UtilitiesApplication"
+      />
       <FAQSchema items={c.faq} />
       <Breadcrumbs
         items={[
@@ -130,7 +140,7 @@ export async function DageMellemDatoerRoute({ prefix }: { prefix: string }) {
 
       <div className="flex flex-wrap gap-3 mb-8">
         <Link
-          href="/dato"
+          href={localizedPath("/dato", locale)}
           className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
         >
           {c.linkDato}

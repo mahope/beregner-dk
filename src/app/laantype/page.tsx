@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
@@ -129,7 +130,7 @@ export default async function LaantypePage() {
               ? "Det är den avgörande skillnaden mot serielånet, som amorterar varje månad och därför aldrig kan ligga under 30-årsnivånen."
               : "Det er den afgørende forskel til serielånet, der afdrager hver måned og derfor aldrig kan ligge under 30-årsniveauet."}{" "}
             {se ? "Se " : "Se "}
-            <Link href="/boliglaan">{se ? "bolånkalkylatorn" : "boliglånsberegneren"}</Link>
+            <Link href={localizedPath("/boliglaan", locale)}>{se ? "bolånkalkylatorn" : "boliglånsberegneren"}</Link>
             {se
               ? " for, hvad et bolån stiller til afdrag, og "
               : " for, hvad et boliglån stiller til afdrag, og "}
@@ -146,7 +147,7 @@ export default async function LaantypePage() {
             {se
               ? `Exemplet ovan använder ${belob} kr., ${LAANETYPE_EKSEMPEL_AARSRENTE} % och ${LAANETYPE_EKSEMPEL_LOEBETID} år, vilket är själva beloppen som är vanligast i lånekalkylatorer. Räntan är ett räkneexempel och inte en marknadsnivå. Skriver du in din egen ränta och löptid visar verktyget de tre typerna på dina siffror. Vill du se vad lånet betyder for boligudgiften, står det i `
               : `Eksemplet ovenfor bruger ${belob} kr., ${LAANETYPE_EKSEMPEL_AARSRENTE} % og ${LAANETYPE_EKSEMPEL_LOEBETID} år, som er de beløb, lånekalkylatorer oftest regner på. Renten er et regneeksempel og ikke et markedstal. Skriver du din egen rente og løbetid ind, viser værktøjet de tre typer på dine tal. Vil du se, hvad lånet betyder for boligudgiften, står det i `}
-            <Link href="/renteberegner">{se ? "ränteberäknaren" : "renteberegneren"}</Link>
+            <Link href={localizedPath("/renteberegner", locale)}>{se ? "ränteberäknaren" : "renteberegneren"}</Link>
             {se ? ", som räknar på både annuitetslån och serielån." : ", som regner på både annuitetslån og serielån."}
           </p>
         </div>

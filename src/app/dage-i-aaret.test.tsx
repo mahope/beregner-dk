@@ -216,7 +216,7 @@ describe("dage i året: siden peger på sit eget spørgsmål", () => {
     expect(da).toContain('href="/dage-til"');
     expect(da).toContain('href="/dage-mellem-datoer"');
     const se = await render("se");
-    expect(se).toContain('href="/dato"');
+    expect(se).toContain('href="/datum"');
     expect(se).toContain('href="/dagar-till"');
     // De svenske slugs, ikke de danske: et dansk link på beraknare.se er en 301
     // pr. klik, altså en indgang brugeren ikke får.

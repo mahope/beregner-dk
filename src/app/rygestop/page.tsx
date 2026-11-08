@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
@@ -70,9 +71,9 @@ export default async function RygestopPage() {
             <p>
               Den mest motiverende måde at bruge beregneren på er at sætte et konkret mål.
               Læg beløbet ind i{" "}
-              <Link href="/opsparing">opsparingsberegneren</Link> og se, hvordan pengene vokser
+              <Link href={localizedPath("/opsparing", locale)}>opsparingsberegneren</Link> og se, hvordan pengene vokser
               med renters rente, eller sæt det op som et fast{" "}
-              <Link href="/sparemaal">sparemål</Link> i dit{" "}
+              <Link href={localizedPath("/sparemaal", locale)}>sparemål</Link> i dit{" "}
               <Link href="/budget">månedsbudget</Link>.
             </p>
             <p className="text-sm text-gray-500">

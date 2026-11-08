@@ -499,7 +499,7 @@ describe("minuter ↔ timmar på beraknare.se", () => {
     // modulet, så de to tabeller ikke kan komme i mellemkrig om et facit.
     expect(html).toContain("8 h 15 min");
     expect(totalMinutter(TIDS_EKSEMPEL_DAG)).toBe(495);
-    expect(html).toContain('href="/fart"');
+    expect(html).toContain('href="/hastighet"');
   });
 
   test("omvandlingen i tabellen er den samme regel som formatTidsvar", () => {
@@ -568,9 +568,9 @@ describe("minuter ↔ timmar på beraknare.se", () => {
     vi.mocked(getLocale).mockResolvedValue("da");
     const daHtml = renderToStaticMarkup(await TidsberegnerPage());
 
-    for (const html of [seHtml, daHtml]) {
+    for (const [html, fart] of [[seHtml, "/hastighet"], [daHtml, "/fart"]] as const) {
       expect(html).toContain("÷ 60 = ");
-      expect(html).toContain('href="/fart"');
+      expect(html).toContain(`href="${fart}"`);
     }
     // Svensk må ikke få danske forkortelser i tabellen (C73's R4).
     expect(seHtml).not.toContain("timer × 60 = minutter");

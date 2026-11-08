@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import PaceBeregner from "@/components/PaceBeregner";
@@ -143,7 +144,7 @@ export default async function PacePage() {
             <p>
               Tidsberegneren kan også regne klokkeslæt og timer imellem hinanden, hvis du skal finde ud af, hvornår du
               skal gå hjem for at nå en given sluttid. Vil du i stedet se gennemsnitsfarten i km/t, er det{" "}
-              <a href="/fart">fartberegneren</a>.
+              <a href={localizedPath("/fart", locale)}>fartberegneren</a>.
             </p>
           </div>
         )}

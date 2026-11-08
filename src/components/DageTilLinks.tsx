@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Link from "next/link";
 import { formatNumber } from "@/lib/format";
 import {
@@ -98,7 +99,7 @@ export default function DageTilLinks({
       {vaerktoej === "datoberegner" ? (
         <p>
           {listIntroLink[locale].foer}
-          <Link href="/dato">{listIntroLink[locale].ord}</Link>
+          <Link href={localizedPath("/dato", locale)}>{listIntroLink[locale].ord}</Link>
           {listIntroLink[locale].efter}
         </p>
       ) : (

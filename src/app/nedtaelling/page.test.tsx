@@ -90,7 +90,7 @@ describe("nedtaelling page", () => {
     expect(html).toContain("=DATEDIF(A1;IDAG();&quot;d&quot;)");
     expect(html).toContain("#NUM!");
     expect(html).toContain("ett dolt namn");
-    expect(html).toContain('href="/dato"');
+    expect(html).toContain('href="/datum"');
   });
 
   test("svensk side svarar pa 'nedrakning dagar timmar minuter sekunder'", async () => {
@@ -140,7 +140,7 @@ describe("nedtaelling page", () => {
   test("svensk krydsreference til /dato bruger verbet i grundform", async () => {
     const html = await render("se");
 
-    expect(html).toMatch(/kan du använda\s*<a href="\/dato"/);
+    expect(html).toMatch(/kan du använda\s*<a href="\/datum"/);
     expect(html).not.toMatch(/\banvänna\b/);
   });
 

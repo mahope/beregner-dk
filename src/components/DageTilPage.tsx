@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -327,13 +328,13 @@ export async function DageTilRoute({
         </ul>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/dato"
+            href={localizedPath("/dato", locale)}
             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
           >
             {dageLocale === "da" ? "Datoberegner" : "Datumräknare"}
           </Link>
           <Link
-            href="/nedtaelling"
+            href={localizedPath("/nedtaelling", locale)}
             className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium"
           >
             {dageLocale === "da" ? "Nedtæller" : "Nedräknare"}

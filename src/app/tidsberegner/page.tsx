@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import TidsBeregner from "@/components/TidsBeregner";
 import PlusTidBeregner from "@/components/PlusTidBeregner";
 import MinutterTilTimerBeregner from "@/components/MinutterTilTimerBeregner";
@@ -467,7 +468,7 @@ export default async function TidsberegnerPage() {
           for {TIDS_EKSEMPEL_PAUSE.start} til {TIDS_EKSEMPEL_PAUSE.slut} med 30
           minutters frokost. Dansk Excel bruger <strong>semikolon</strong> som
           skilletegn, fordi komma er decimaltegn — samme som i{" "}
-          <a href="/dato">datoberegnerens</a> formler.
+          <a href={localizedPath("/dato", locale)}>datoberegnerens</a> formler.
         </p>
         <p>
           Er tallet hjemme i Excel{" "}
@@ -548,7 +549,7 @@ export default async function TidsberegnerPage() {
           08:30–16:45 ovenfor — det er samme par rækker som værktøjet regner.
           Vil du vide hvor langt du kom under et løb, deler du tiden med
           tempoet i stedet, og det står under{" "}
-          <a href="/fart">fartberegneren</a>.
+          <a href={localizedPath("/fart", locale)}>fartberegneren</a>.
         </p>
 
         {/* Autocomplete (målt 2/10, hl=da gl=dk) spørger om hele perioden:
@@ -705,7 +706,7 @@ export default async function TidsberegnerPage() {
           minus 8 timer er 22:00 dagen før</strong>: trækker du bare
           minutterne fra, får du et negativt tal, som ikke er noget klokkeslæt.
           Skal du regne på en bestemt dato, skal du bruge datofelterne i{" "}
-          <a href="/dato">dato-værktøjet</a> — her er der kun klokkeslæt, og
+          <a href={localizedPath("/dato", locale)}>dato-værktøjet</a> — her er der kun klokkeslæt, og
           det er derfor svaret er det samme uanset sommer- eller vintertid.
         </p>
 
@@ -929,7 +930,7 @@ export default async function TidsberegnerPage() {
           timmar tillbaka till 08:30–16:45 ovan — det är samma par rader som
           verktyget räknar. Vill du veta hur långt du kommit under ett lopp
           delar du tiden med tempot i stället, och det står under{" "}
-          <a href="/fart">fartberäknaren</a>.
+          <a href={localizedPath("/fart", locale)}>fartberäknaren</a>.
         </p>
 
         {/* Samma klynge som den danska tabellen ovan, målt på svensk

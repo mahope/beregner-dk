@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import TidszoneBeregner from "@/components/TidszoneBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
@@ -567,7 +568,7 @@ export default async function TidszonePage() {
           timer. Og en by på den anden side af jorden kan ligge både foran og
           bagud: New York er 6 timer <em>bagefter</em>, Tokyo er 7 timer{" "}
           <em>frem</em>, selv om begge tal står som 12 minus 6 og 12 minus 9.{" "}
-          <Link href="/tidsberegner" className="underline">
+          <Link href={localizedPath("/tidsberegner", locale)} className="underline">
             Tidsberegneren
           </Link>{" "}
           tager sig af det sidste, hvis du vil se forskellen i hele døgn.
@@ -706,7 +707,7 @@ export default async function TidszonePage() {
           timmar. Och en stad på andra sidan om jorden kan ligga både före och
           efter: New York är 6 timmar <em>bakåt</em>, Tokyo är 7 timmar{" "}
           <em>framåt</em>, även om båda talen skrivs som 12 minus 6 och 12
-          minus 9. <Link href="/tidsberegner" className="underline">
+          minus 9. <Link href={localizedPath("/tidsberegner", locale)} className="underline">
             Tidskalkylatorn
           </Link>{" "}
           tar hand om det sista om du vill se skillnaden i hela dygn.

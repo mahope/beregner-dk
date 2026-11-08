@@ -123,8 +123,9 @@ describe("kalorier side - det svenska svaret paa kaloribehovet", () => {
     )!;
     expect(behovSvar.answer).toContain(formatBelob(2502, "se"));
     expect(behovSvar.answer).not.toMatch(/\d\.\d{3}/);
-    expect(html).toContain('href="/vaegttab"');
-    expect(html).toContain('href="/motion-kalorier"');
+    // Svenska länkar går till beraknare.se:s egna slugs (se locale-slugs.ts).
+    expect(html).toContain('href="/viktminskning"');
+    expect(html).toContain('href="/kaloriforbranning"');
   });
 
   test("tabellen efter alder svarar paa de aldrar søgningen spørger om", async () => {

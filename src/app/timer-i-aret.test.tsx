@@ -370,7 +370,7 @@ describe("tovejslink", () => {
   test("siden linker videre til værktøjet og til dage-i-aaret", async () => {
     for (const sprog of ["da", "se"] as const) {
       const html = await render(sprog);
-      expect(html, sprog).toContain('href="/tidsberegner"');
+      expect(html, sprog).toContain(sprog === "se" ? 'href="/tidskalkylator"' : 'href="/tidsberegner"');
       // Siden skal ikke linke til sig selv: dage-i-aaret er dens søsterside,
       // og det er den der skal have tovejslinket.
       // Søstersiden hedder `/dage-i-aaret` på dansk og `/dagar-i-aret` på
