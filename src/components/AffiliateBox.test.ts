@@ -4,7 +4,9 @@ import { describe, expect, test } from "vitest";
 import {
   bilforsikringAffiliates,
   boligforsikringAffiliates,
+  KREDIT_ADVARSEL,
   forsikringAffiliates,
+  pantelaanAffiliates,
   partnerAdsLink,
   selvstaendigAffiliates,
   testamenteAffiliates,
@@ -42,5 +44,36 @@ describe("affiliate-links", () => {
       .filter((f) => f.endsWith(".tsx") && !f.includes(".test."))
       .filter((f) => /url:\s*"https?:\/\/[^"]*[?&]ref=minberegner/.test(readFileSync(join(dir, f), "utf-8")));
     expect(syndere).toEqual([]);
+  });
+
+  test("pantelån går gennem Partner-ads", () => {
+    expect(pantelaanAffiliates).toHaveLength(1);
+    expect(pantelaanAffiliates[0].url).toContain("bannerid=78126");
+  });
+
+  test("kreditadvarslen indeholder lovpligtig tekst og ÅOP-eksempel", () => {
+    expect(KREDIT_ADVARSEL).toContain("Det koster penge at låne penge");
+    expect(KREDIT_ADVARSEL).toContain("ÅOP");
+    expect(KREDIT_ADVARSEL).toContain("ca. 1.116 kr. i renter");
+    expect(KREDIT_ADVARSEL).toContain("ÅOP på ca. 21,9 %");
+  });
+
+  test("ingen komponent eller side lover hurtighed, nemhed eller bedste rente ved lån", () => {
+    const forbudt = /uden kreditvurdering|hurtigt svar|hurtig udbetaling|nem ansøgning|bedste rente|find den laveste rente/i;
+    const samlFiler = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const sti = join(dir, e.name);
+        if (e.isDirectory()) return samlFiler(sti);
+        return /\.tsx?$/.test(e.name) && !e.name.includes(".test.") ? [sti] : [];
+      });
+    const filer = samlFiler(join(__dirname, ".."));
+    expect(filer.length).toBeGreaterThan(100);
+    for (const f of filer) {
+      expect(readFileSync(f, "utf-8"), f).not.toMatch(forbudt);
+    }
+  });
+
+  test("affiliate-links markeres sponsored nofollow", () => {
+    expect(readFileSync(join(__dirname, "AffiliateBox.tsx"), "utf-8")).toContain('rel="sponsored nofollow noopener noreferrer"');
   });
 });

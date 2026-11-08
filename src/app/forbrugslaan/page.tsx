@@ -56,8 +56,8 @@ export default async function ForbrugslaanPage() {
         <h3>Typer af forbrugslån</h3>
         <ul>
           <li><strong>Banklån:</strong> Traditionelle banker tilbyder ofte de bedste vilkår for kunder med god økonomi</li>
-          <li><strong>Online banker:</strong> Bank Norwegian, Lunar og lignende tilbyder nem online ansøgning</li>
-          <li><strong>Sammenligningstjenester:</strong> Samlino og Mybanker hjælper dig med at finde den bedste rente</li>
+          <li><strong>Online banker:</strong> Bank Norwegian, Lunar og lignende tilbyder online ansøgning</li>
+          <li><strong>Sammenligningstjenester:</strong> Samlino og Mybanker hjælper dig med at sammenligne tilbud</li>
           <li><strong>Creditforeninger:</strong> Nogle creditforeninger tilbyder forbrugslån med fordelagtige vilkår</li>
         </ul>
 

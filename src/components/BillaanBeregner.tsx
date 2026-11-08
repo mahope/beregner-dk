@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
-import { AffiliateBox } from "./AffiliateBox";
+import { AffiliateBox, PantelaanAffiliate } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
 import { CopyResultButton, ResetButton } from "@/components/ui";
@@ -11,45 +11,6 @@ import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
 import { beregnBillaan } from "@/lib/billaan";
-import { adtractionLink } from "@/lib/adtraction";
-
-interface AffiliateLink {
-  name: string;
-  description: string;
-  url: string;
-  cta: string;
-  highlight?: boolean;
-}
-
-// Real Adtraction tracking links (channel "Min Beregner" 2056156501).
-// Programs applied for 2026-06-27 — go live the moment each is approved.
-const billaanAffiliates: AffiliateLink[] = [
-  {
-    name: "Lendo",
-    description: "Sammenlign billån fra 20+ banker med én ansøgning - find den laveste rente",
-    url: adtractionLink("1562731450", "https://www.lendo.dk/billaan"),
-    cta: "Sammenlign billån",
-    highlight: true,
-  },
-  {
-    name: "Mybanker",
-    description: "Uvildig sammenligning af billån - se hvad du kan spare",
-    url: adtractionLink("1740042344", "https://www.mybanker.dk"),
-    cta: "Sammenlign",
-  },
-  {
-    name: "Bank Norwegian",
-    description: "Billån uden udbetaling - nem ansøgning på 2 minutter",
-    url: adtractionLink("1888483286", "https://www.banknorwegian.dk"),
-    cta: "Søg nu",
-  },
-  {
-    name: "Facit Bank",
-    description: "Billån med konkurrencedygtig rente og hurtigt svar",
-    url: adtractionLink("1820677672", "https://facitbank.dk"),
-    cta: "Få tilbud",
-  },
-];
 
 const defaultInputs = {
   bilpris: 250000,
@@ -98,8 +59,6 @@ export default function BillaanBeregner() {
       tip4: "den årlige omkostning i procent inkluderer alle gebyrer",
       tip5Title: "Forhandl med din bank",
       tip5: "ofte kan du få bedre vilkår hvis du har andre produkter der",
-      affiliateTitle: "Sammenlign billån",
-      affiliateSubtitle: "Find den bedste rente til din næste bil",
       tableTitle: "Ydelsestabel",
       monthCol: "Måned",
       paymentCol: "Ydelse",
@@ -144,8 +103,6 @@ export default function BillaanBeregner() {
       tip4: "den effektiva räntan inkluderar alla avgifter",
       tip5Title: "Förhandla med din bank",
       tip5: "ofta kan du få bättre villkor om du har andra produkter där",
-      affiliateTitle: "Jämför billån",
-      affiliateSubtitle: "Hitta den bästa räntan för din nästa bil",
       tableTitle: "Betalningsplan",
       monthCol: "Månad",
       paymentCol: "Betalning",
@@ -190,8 +147,6 @@ export default function BillaanBeregner() {
       tip4: "den effektive renten inkluderer alle gebyrer",
       tip5Title: "Forhandle med banken din",
       tip5: "ofte kan du få bedre vilkår hvis du har andre produkter der",
-      affiliateTitle: "Sammenlign billån",
-      affiliateSubtitle: "Finn den beste renten for din neste bil",
       tableTitle: "Betalingsplan",
       monthCol: "Måned",
       paymentCol: "Betaling",
@@ -408,23 +363,16 @@ export default function BillaanBeregner() {
         </ul>
       </div>
 
-      {/* Affiliate box */}
       <AffiliateBox
-        title={`${l.affiliateTitle}`}
-        subtitle={l.affiliateSubtitle}
-        links={billaanAffiliates}
-        className="mt-6"
-      />
-
-      <AffiliateBox
-        title="Forsikring & lån til din bil"
-        subtitle="Spar på bilforsikringen og se dine lånemuligheder"
+        title="Bilforsikring"
+        subtitle="Se din pris på bilforsikring"
         links={[
-          { name: "Cover Forsikring", description: "Skift bilforsikring på 2 minutter og se din pris — ofte markant billigere end din nuværende.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=110013&uid=minberegner", cta: "Beregn din bilforsikring", highlight: true },
-          { name: "Pantsat.dk", description: "Lån med pant i værdigenstande — hurtigt svar uden kreditvurdering.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=78126&uid=minberegner", cta: "Se pantelån" },
+          { name: "Cover Forsikring", description: "Se din pris på bilforsikring hos Cover Forsikring.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=110013&uid=minberegner", cta: "Beregn din bilforsikring", highlight: true },
         ]}
         className="mt-6"
       />
+
+      <PantelaanAffiliate className="mt-6" />
 
       {/* Ydelsestabel */}
       <div className="overflow-x-auto">
