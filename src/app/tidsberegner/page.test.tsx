@@ -199,7 +199,7 @@ describe("tidsberegner page — dage-til-listen", () => {
     for (const slug of getDageTilSlugs("se")) {
       expect(html, slug).toContain(`href="/dagar-till/${slug}"`);
     }
-    expect(html).toContain('href="/dato"');
+    expect(html).toContain('href="/datum"');
     expect(html).not.toMatch(/href="\/dage-til\//);
   });
 
@@ -313,7 +313,7 @@ describe("Excel-svaret på /tidsberegner", () => {
 
       const html = renderToStaticMarkup(await TidsberegnerPage());
 
-      expect(html).toContain('href="/dato"');
+      expect(html).toContain(locale === "se" ? 'href="/datum"' : 'href="/dato"');
     }
   });
 
