@@ -2,6 +2,7 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import LoenKonverterBeregner from "@/components/LoenKonverterBeregner";
+import TimeTrackTipBox from "@/components/TimeTrackTipBox";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -82,6 +83,8 @@ export default async function LoenKonverterPage() {
             </p>
           </div>
         )}
+
+        <TimeTrackTipBox tip="loen-konverter" locale={locale} />
 
         <div className="mb-8">
           <FAQ items={pageData.faqItems} />

@@ -1,6 +1,7 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
 import dynamic from "next/dynamic";
 const TimeprisBeregner = dynamic(() => import("@/components/TimeprisBeregner"));
+import TimeTrackTipBox from "@/components/TimeTrackTipBox";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -133,6 +134,8 @@ export default async function TimeprisPage() {
         </p>
       </div>
       )}
+
+      <TimeTrackTipBox tip="timepris" locale={locale} />
 
       {/* FAQ */}
       <div className="mb-8">
