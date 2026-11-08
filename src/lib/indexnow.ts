@@ -89,11 +89,10 @@ function parseCanonicalUrl(
     return null;
   }
 
-  if (
-    !allowUnavailable &&
-    getRouteDecision(config, url.pathname).type !== "allow"
-  ) {
-    return null;
+  if (!allowUnavailable) {
+    const decisionType = getRouteDecision(config, url.pathname).type;
+    // A public slug is served by rewrite, so it is as live as a plain "allow".
+    if (decisionType !== "allow" && decisionType !== "rewrite") return null;
   }
 
   return {

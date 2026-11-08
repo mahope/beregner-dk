@@ -38,7 +38,7 @@ describe("IndexNow deployment submission", () => {
     );
     expect(danish?.urlList).toContain("https://minberegner.dk/procent");
     expect(swedish?.urlList).toContain("https://beraknare.se/sitemap.xml");
-    expect(swedish?.urlList).toContain("https://beraknare.se/dato");
+    expect(swedish?.urlList).toContain("https://beraknare.se/datum");
     expect(swedish?.urlList).not.toContain("https://beraknare.se/su");
     expect(payloads.some((payload) => payload.host === "beregner.no")).toBe(
       false,

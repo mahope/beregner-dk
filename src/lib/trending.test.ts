@@ -1,3 +1,4 @@
+import { localizedPath } from "./locale-slugs";
 import { describe, test, expect } from "vitest";
 import { getTrendingHrefs } from "./trending";
 
@@ -107,10 +108,14 @@ describe("getTrendingHrefs", () => {
     // Danmark og Sverige deler CET/CEST, så de to lokaler er enige hele året.
     // Porten siger det eksplicit, så en fremtidig tidszone-ændring ikke kan
     // gøre de to hjemmesider uenige uden at porten bliver rød.
+    // Samme sæson, men hver side på det domænes eget slug (se locale-slugs.ts).
+    const svensk = (hrefs: string[]) => hrefs.map((href) => localizedPath(href, "se"));
     for (const { foer, efter } of SKIFTEDAGE) {
-      expect(getTrendingHrefs(new Date(foer), "se")).toEqual(getTrendingHrefs(new Date(foer), "da"));
+      expect(getTrendingHrefs(new Date(foer), "se")).toEqual(
+        svensk(getTrendingHrefs(new Date(foer), "da")),
+      );
       expect(getTrendingHrefs(new Date(efter), "se")).toEqual(
-        getTrendingHrefs(new Date(efter), "da"),
+        svensk(getTrendingHrefs(new Date(efter), "da")),
       );
     }
   });

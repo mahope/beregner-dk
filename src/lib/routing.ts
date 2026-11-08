@@ -17,6 +17,11 @@ import { getTimerIAaretPath } from "./timer-i-aret";
 import { getArbejdsdagePath } from "./arbejdsdage";
 import { getUgerIAaretPath } from "./uger-i-aret";
 import { getHelligdagPath } from "./helligdage";
+import {
+  legacyRedirectTarget,
+  localizedPath,
+  rewriteTarget,
+} from "./locale-slugs";
 
 /** The section's own path in each language. Kept here, next to the rule. */
 const DAGE_TIL_HUBS = ["/dage-til", "/dagar-till"] as const;
@@ -84,13 +89,22 @@ const HELLIGDAGE_SIDER = ["/helligdage", "/helgdagar"] as const;
 export type RouteDecision =
   | { type: "allow" }
   | { type: "not-found" }
-  | { type: "redirect"; destination: string; status: 301 | 308 };
+  | { type: "redirect"; destination: string; status: 301 | 308 }
+  /**
+   * The request is for a language's public slug (`beraknare.se/datum`); the page
+   * lives in the folder named with the internal slug (`/dato`). The URL in the
+   * address bar does not change.
+   */
+  | { type: "rewrite"; destination: string };
 
+/**
+ * Spellings Swedish visitors and Google use that are not a page. Each value is
+ * the *internal* (Danish) slug; the redirect goes to that page's public slug on
+ * the Swedish domain, so `/datumkalkylator` ends at `/datum` in one hop.
+ */
 export const swedishAliases: Record<string, string> = {
   "/loen-efter-skat": "/lon-efter-skatt",
-  "/tidskalkylator": "/tidsberegner",
   "/datumkalkylator": "/dato",
-  "/nedrakning": "/nedtaelling",
   "/leasingkalkylator": "/leasing",
   // Google indexes beraknare.se/enhudspris (the Swedish spelling) and ranks it
   // on the first page, but the page has only ever been served at the Danish
@@ -124,7 +138,31 @@ export function getRouteDecision(
 
   if (domainConfig.locale === "se") {
     const alias = swedishAliases[normalizedPath];
-    if (alias) return { type: "redirect", destination: alias, status: 301 };
+    if (alias) {
+      return {
+        type: "redirect",
+        destination: localizedPath(alias, domainConfig.locale),
+        status: 301,
+      };
+    }
+  }
+
+  // Public slugs per language (see `locale-slugs.ts`). The internal (Danish)
+  // slug is a 301 to the language's own, and the language's own is served from
+  // the internal folder — so each page answers on exactly one URL per domain.
+  if (domainConfig.locale === "se" || domainConfig.locale === "no") {
+    const own = legacyRedirectTarget(normalizedPath, domainConfig.locale);
+    if (own) return { type: "redirect", destination: own, status: 301 };
+
+    const intern = rewriteTarget(normalizedPath, domainConfig.locale);
+    if (intern) {
+      if (hasTrailingSlash) {
+        return { type: "redirect", destination: normalizedPath, status: 308 };
+      }
+      return isCalculatorAvailable(intern, domainConfig.locale)
+        ? { type: "rewrite", destination: intern }
+        : { type: "not-found" };
+    }
   }
 
   // The section's own page. `/dage-til` and `/dagar-till` are the same list in

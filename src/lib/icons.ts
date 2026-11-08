@@ -1,3 +1,4 @@
+import { internalPathAnyLocale } from "./locale-slugs";
 import {
   Timer,
   Activity,
@@ -251,5 +252,5 @@ const calculatorIcons: Record<string, LucideIcon> = {
 };
 
 export function getCalculatorIcon(href: string): LucideIcon {
-  return calculatorIcons[href] ?? Calculator;
+  return calculatorIcons[internalPathAnyLocale(href)] ?? Calculator;
 }

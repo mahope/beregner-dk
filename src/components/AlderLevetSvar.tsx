@@ -58,7 +58,7 @@ export default function AlderLevetSvar({ locale }: { locale: Locale }) {
             födelsedatumet i verktyget ovan, så räknar det ut det på en sekund — och sätter du
             &quot;Beräkna ålder per datum&quot; till ett annat datum får du hur många dagar du hade
             levt då. Det är därför den här sidan och{" "}
-            <Link href="/dato">datokalkylatorn</Link> är två olika saker: den här räknar din egen
+            <Link href="/datum">datokalkylatorn</Link> är två olika saker: den här räknar din egen
             levetid, datokalkylatorn räknar mellan två valda datum.
           </p>
         </>

@@ -851,7 +851,7 @@ export default async function TidsberegnerPage() {
           för {TIDS_EKSEMPEL_PAUSE.start} till {TIDS_EKSEMPEL_PAUSE.slut} med 30
           minuters lunch. Svensk Excel använder <strong>semikolon</strong> som
           avgränsare, eftersom komma är decimaltecken — samma som i{" "}
-          <a href="/dato">datokalkylatorns</a> formler.
+          <a href="/datum">datokalkylatorns</a> formler.
         </p>
         <p>
           Blir talet i Excel{" "}
@@ -1077,7 +1077,7 @@ export default async function TidsberegnerPage() {
           <strong> 06:00 minus 8 timmar blir 22:00 dagen innan</strong>: drar
           du bara av minuterna får du ett negativt tal, vilket inte är något
           klockslag. Räknar du på en bestämd dag använder du datumfälten i{" "}
-          <a href="/dato">datumverktyget</a> — här finns bara klockslag, och
+          <a href="/datum">datumverktyget</a> — här finns bara klockslag, och
           det är därför svaret är detsamma oavsett sommar- eller vintertid.
         </p>
 

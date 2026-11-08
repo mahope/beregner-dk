@@ -843,7 +843,7 @@ export default async function DatoPage() {
           {locale === "se" ? (
             <>
               Vill du bara räkna ner till ett datum och se det som veckor och dagar kan du
-              använda <Link href="/nedtaelling">nedräkningen</Link>.
+              använda <Link href="/nedrakning">nedräkningen</Link>.
             </>
           ) : (
             <>

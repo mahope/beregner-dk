@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { isCalculatorAvailable, isCalculatorPath } from "@/lib/calculator-list";
+import { localizedPath } from "@/lib/locale-slugs";
 import { getAvailableSlugs } from "@/lib/page-data";
 import { getRouteDecision, swedishAliases as ALIASES } from "@/lib/routing";
 import { buildSitemap } from "@/app/sitemap";
@@ -15,13 +16,13 @@ const lastModified = new Date("2026-09-29T00:00:00.000Z");
  * is measured on the same properties instead of on one bug at a time.
  */
 describe("Swedish slug aliases", () => {
-  test("/enhudspris forwards to /enhedspris instead of 404", () => {
+  test("/enhudspris forwards to the Swedish /jamforpris instead of 404", () => {
     // Google ranks beraknare.se/enhudspris on the first page, but the page has
     // only ever been served at the Danish slug, so every impression of it
     // landed on a 404 — 1.260 views a month with nowhere to go.
     expect(getRouteDecision(se, "/enhudspris")).toEqual({
       type: "redirect",
-      destination: "/enhedspris",
+      destination: "/jamforpris",
       status: 301,
     });
   });
@@ -47,7 +48,9 @@ describe("Swedish slug aliases", () => {
     for (const alias of Object.keys(ALIASES)) {
       expect(getRouteDecision(se, alias), alias).toEqual({
         type: "redirect",
-        destination: ALIASES[alias],
+        // The alias target is the internal slug; the redirect ends on the
+        // slug beraknare.se serves, in one hop.
+        destination: localizedPath(ALIASES[alias], "se"),
         status: 301,
       });
     }

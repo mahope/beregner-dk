@@ -1,3 +1,4 @@
+import { localizedPath } from "./locale-slugs";
 import { isCalculatorAvailable } from "./calculator-list";
 import {
   formatTargetDate,
@@ -691,9 +692,12 @@ export function getHomePageData(locale: Locale): HomePageData {
 }
 
 export function getHomeCalculators(locale: Locale): HomeCalculator[] {
-  return (calculatorMap[locale] ?? calculatorMap.da).filter((calculator) =>
-    isCalculatorAvailable(calculator.href, locale)
-  );
+  return (calculatorMap[locale] ?? calculatorMap.da)
+    .filter((calculator) => isCalculatorAvailable(calculator.href, locale))
+    .map((calculator) => ({
+      ...calculator,
+      href: localizedPath(calculator.href, locale),
+    }));
 }
 
 /**

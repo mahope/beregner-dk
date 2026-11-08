@@ -225,10 +225,10 @@ function SeContent() {
           <li><Link href="/bil">Bil</Link> - beräkna bilens totala kostnader</li>
           <li><Link href="/timepris">Timprisberäknare</Link> - hitta din frilans-timpris</li>
           <li><Link href="/kvadratmeter">Kvadratmeter</Link> - beräkna ytor</li>
-          <li><Link href="/dato">Datumberäknare</Link> - beräkna dagar mellan datum</li>
+          <li><Link href="/datum">Datumberäknare</Link> - beräkna dagar mellan datum</li>
           <li><Link href="/alder">Åldersberäknare</Link> - beräkna din exakta ålder</li>
-          <li><Link href="/tidsberegner">Tidsberäknare</Link> - beräkna tid mellan tidpunkter</li>
-          <li><Link href="/tidszone">Tidszonsberäknare</Link> - se klockan i andra länder</li>
+          <li><Link href="/tidskalkylator">Tidsberäknare</Link> - beräkna tid mellan tidpunkter</li>
+          <li><Link href="/tidszon">Tidszonsberäknare</Link> - se klockan i andra länder</li>
         </ul>
 
         <h2>Noggrannhet och ansvarsfriskrivning</h2>

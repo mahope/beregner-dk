@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { localizedPath } from "./locale-slugs";
 
 export interface FooterCategory {
   name: string;
@@ -245,7 +246,15 @@ const blogLinks: Record<Locale, FooterBlogLink[]> = {
 };
 
 export function getFooterCategories(locale: Locale): FooterCategory[] {
-  return footerData[locale] || footerData.da;
+  const categories = footerData[locale] || footerData.da;
+  if (locale === "da") return categories;
+  return categories.map((category) => ({
+    ...category,
+    links: category.links.map((link) => ({
+      ...link,
+      href: localizedPath(link.href, locale),
+    })),
+  }));
 }
 
 export function getFooterBlogLinks(locale: Locale): FooterBlogLink[] {

@@ -43,6 +43,17 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl, decision.status);
   }
 
+  if (decision.type === "rewrite") {
+    const rewriteUrl = new URL(decision.destination, request.url);
+    rewriteUrl.search = request.nextUrl.search;
+    const rewritten = NextResponse.rewrite(rewriteUrl, {
+      request: { headers: requestHeaders },
+    });
+    rewritten.headers.set("x-locale", locale);
+    rewritten.headers.set("x-hostname", hostname);
+    return rewritten;
+  }
+
   if (decision.type === "not-found") {
     const notFoundUrl = new URL(
       "/locale-unavailable",

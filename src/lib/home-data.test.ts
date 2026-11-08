@@ -161,11 +161,11 @@ describe("getHomeCalculators", () => {
       .filter((c) => c.popular)
       .map((c) => c.href);
     for (const href of [
-      "/tidsberegner",
-      "/dato",
+      "/tidskalkylator",
+      "/datum",
       "/leasing",
-      "/nedtaelling",
-      "/tidszone",
+      "/nedrakning",
+      "/tidszon",
       "/lon-efter-skatt",
     ]) {
       expect(sePopular, `SE popular ${href}`).toContain(href);

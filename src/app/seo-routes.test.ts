@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { BLOG_ARTIKLER } from "@/lib/blog-artikler";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
+import { localizedSlug } from "@/lib/locale-slugs";
 import { getAvailableSlugs } from "@/lib/page-data";
 import { buildRobots } from "./robots";
 import { buildSitemap } from "./sitemap";
@@ -24,15 +25,15 @@ describe("host-aware sitemap", () => {
     const sitemap = buildSitemap(getDomainConfigByLocale("se"), lastModified);
     const urls = sitemap.map((entry) => String(entry.url));
 
-    for (const slug of ["tidsberegner", "dato", "nedtaelling", "leasing", "lon-efter-skatt", "bolan"]) {
+    for (const slug of ["tidskalkylator", "datum", "nedrakning", "tidszon", "leasing", "lon-efter-skatt", "bolan"]) {
       expect(urls, slug).toContain(`https://beraknare.se/${slug}`);
     }
-    for (const slug of ["su", "loen-efter-skat", "ugenummer", "flyttebudget"]) {
+    // The Danish slugs of the renamed pages are 301s on this host, not pages.
+    for (const slug of ["su", "loen-efter-skat", "ugenummer", "flyttebudget", "tidsberegner", "dato", "nedtaelling", "tidszone"]) {
       expect(urls, slug).not.toContain(`https://beraknare.se/${slug}`);
     }
     expect(urls.some((url) => url.includes("/kategori/"))).toBe(false);
     expect(urls.some((url) => url.includes("/blog"))).toBe(false);
-    expect(urls).not.toContain("https://beraknare.se/tidskalkylator");
   });
 
   test("includes every available live-domain calculator exactly once", () => {
@@ -40,7 +41,9 @@ describe("host-aware sitemap", () => {
       const config = getDomainConfigByLocale(locale);
       const urls = buildSitemap(config, lastModified).map((entry) => String(entry.url));
       for (const slug of getAvailableSlugs(locale)) {
-        const matches = urls.filter((url) => url === `${config.baseUrl}/${slug}`);
+        const matches = urls.filter(
+          (url) => url === `${config.baseUrl}/${localizedSlug(slug, locale)}`,
+        );
         expect(matches, `${locale}/${slug}`).toHaveLength(1);
       }
     }

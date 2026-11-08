@@ -154,8 +154,8 @@ function HomeContentNO({ siteName }: { siteName: string }) {
         <li><Link href="/braendstof"><strong>Drivstoffkalkulator</strong></Link> — beregn kjørekostnader</li>
         <li><Link href="/bil"><strong>Bil verditap</strong></Link> — se hva bilen koster å eie</li>
         <li><Link href="/dato"><strong>Datokalkulator</strong></Link> — beregn dager mellom datoer</li>
-        <li><Link href="/tidsberegner"><strong>Tidskalkulator</strong></Link> — beregn timer og minutter</li>
-        <li><Link href="/tidszone"><strong>Tidssoner</strong></Link> — se klokken i andre land</li>
+        <li><Link href="/tidskalkulator"><strong>Tidskalkulator</strong></Link> — beregn timer og minutter</li>
+        <li><Link href="/tidssone"><strong>Tidssoner</strong></Link> — se klokken i andre land</li>
         <li><Link href="/rejsebudget"><strong>Reisebudsjett</strong></Link> — beregn reisebudsjettet ditt</li>
       </ul>
     </section>
@@ -206,9 +206,9 @@ function HomeContentSE({ siteName }: { siteName: string }) {
       <ul>
         <li><Link href="/braendstof"><strong>Bränsleberäknare</strong></Link> — beräkna körkostnader</li>
         <li><Link href="/bil"><strong>Bil värdeminskning</strong></Link> — se vad bilen kostar att äga</li>
-        <li><Link href="/dato"><strong>Datumberäknare</strong></Link> — beräkna dagar mellan datum</li>
-        <li><Link href="/tidsberegner"><strong>Tidsberäknare</strong></Link> — beräkna timmar och minuter</li>
-        <li><Link href="/tidszone"><strong>Tidszoner</strong></Link> — se klockan i andra länder</li>
+        <li><Link href="/datum"><strong>Datumberäknare</strong></Link> — beräkna dagar mellan datum</li>
+        <li><Link href="/tidskalkylator"><strong>Tidsberäknare</strong></Link> — beräkna timmar och minuter</li>
+        <li><Link href="/tidszon"><strong>Tidszoner</strong></Link> — se klockan i andra länder</li>
         <li><Link href="/rejsebudget"><strong>Resebudget</strong></Link> — beräkna din resebudget</li>
       </ul>
     </section>

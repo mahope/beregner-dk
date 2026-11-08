@@ -2,11 +2,12 @@ import { describe, test, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { getFooterCategories, getFooterBlogLinks } from "./footer-data";
+import { internalPathAnyLocale } from "./locale-slugs";
 
 const appDir = path.join(process.cwd(), "src/app");
 
 function routeExists(href: string): boolean {
-  const segments = href.split(/[?#]/)[0].split("/").filter(Boolean);
+  const segments = internalPathAnyLocale(href).split(/[?#]/)[0].split("/").filter(Boolean);
   const dir = path.join(appDir, ...segments);
   return ["page.tsx", "page.ts", "route.ts"].some((f) => existsSync(path.join(dir, f)));
 }

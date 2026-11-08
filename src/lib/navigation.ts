@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { localizedPath } from "./locale-slugs";
 
 export type NavChild = { name: string; href: string };
 export type NavItem = {
@@ -9,8 +10,8 @@ export type NavItem = {
 
 /**
  * Navigation items per locale.
- * Calculator URLs stay the same across locales (Danish slugs),
- * but display names are translated.
+ * The data is written with the internal (Danish) slugs and display names in
+ * each language; `getNavigation` swaps in the slug each domain serves.
  *
  * When a calculator is NOT yet available for a locale,
  * it can be removed from that locale's navigation.
@@ -223,5 +224,19 @@ const navigationData: Record<Locale, NavItem[]> = {
 };
 
 export function getNavigation(locale: Locale): NavItem[] {
-  return navigationData[locale] || navigationData.da;
+  const items = navigationData[locale] || navigationData.da;
+  if (locale === "da") return items;
+  // The data holds internal (Danish) slugs; link to the ones this domain serves.
+  return items.map((item) => ({
+    ...item,
+    ...(item.href ? { href: localizedPath(item.href, locale) } : {}),
+    ...(item.children
+      ? {
+          children: item.children.map((child) => ({
+            ...child,
+            href: localizedPath(child.href, locale),
+          })),
+        }
+      : {}),
+  }));
 }

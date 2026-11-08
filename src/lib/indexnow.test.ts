@@ -106,15 +106,15 @@ describe("IndexNow payload", () => {
       baseUrl: "https://beraknare.se",
       key: KEY,
       urls: [
-        "https://beraknare.se/dato",
+        "https://beraknare.se/datum",
         "https://beraknare.se/sitemap.xml",
-        "https://beraknare.se/dato",
+        "https://beraknare.se/datum",
       ],
     });
 
     expect(payload?.urlList).toEqual([
       "https://beraknare.se/sitemap.xml",
-      "https://beraknare.se/dato",
+      "https://beraknare.se/datum",
     ]);
   });
 

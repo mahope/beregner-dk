@@ -1,4 +1,5 @@
 import { describe, test, expect } from "vitest";
+import { localizedPath } from "./locale-slugs";
 import {
   getCalculatorsByLocale,
   getRelatedCalculators,
@@ -24,7 +25,10 @@ describe("relatedMap is the contract the renderer keeps", () => {
         const available = new Set(
           getCalculatorsByLocale(locale).map((c) => c.href),
         );
-        const expected = declared.filter((href) => available.has(href));
+        // Hrefs come back as the slug the locale serves; `declared` is internal.
+        const expected = declared
+          .map((href) => localizedPath(href, locale))
+          .filter((href) => available.has(href));
         if (expected.length === 0) continue; // falls back to a generic list
         expect(
           getRelatedCalculators(page, locale).map((c) => c.href),
@@ -315,17 +319,18 @@ describe("getPopularCalculators", () => {
     // Plausible 2026-10-05, 28 dage: /tidsberegner 181, /dato 145,
     // /leasing 49, /alder 32, /nedtaelling 25, /tidszone 14, /kalorier 14,
     // /elberegner 12, /loenstigning 11, /timepris 11.
+    // The hrefs are the Swedish slugs beraknare.se serves (see locale-slugs.ts).
     expect(getPopularCalculators("se").map((c) => c.href)).toEqual([
-      "/tidsberegner",
-      "/dato",
+      "/tidskalkylator",
+      "/datum",
       "/leasing",
       "/alder",
-      "/nedtaelling",
-      "/tidszone",
+      "/nedrakning",
+      "/tidszon",
       "/kalorier",
-      "/elberegner",
-      "/loenstigning",
-      "/timepris",
+      "/elkalkylator",
+      "/loneokning",
+      "/timpris",
       "/lon-efter-skatt",
       "/bolan",
     ]);

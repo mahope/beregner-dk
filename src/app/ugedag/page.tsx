@@ -93,8 +93,8 @@ export default async function UgedagPage() {
                 <Link href="/dagar-mellan-datum">dagar mellan datum</Link> ut det.
                 Och för att räkna ut vilken veckodag det <em>er</em> just nu,
                 utan att skriva in något, finns{" "}
-                <Link href="/nedtaelling">nedräkningen till dagens datum</Link> og{" "}
-                <Link href="/dato">datumsidan</Link>, som begge viser dagens dato
+                <Link href="/nedrakning">nedräkningen till dagens datum</Link> og{" "}
+                <Link href="/datum">datumsidan</Link>, som begge viser dagens dato
                 med ugedagsnavn.
               </p>
             </>

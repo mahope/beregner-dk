@@ -76,7 +76,8 @@ test("canonical og hreflang peger på /laantype på begge domæner", async () =>
     expect(meta.alternates?.canonical).toBe("https://minberegner.dk/laantype");
     const sprog = meta.alternates?.languages as Record<string, string>;
     expect(sprog.da).toBe("https://minberegner.dk/laantype");
-    expect(sprog.sv).toBe("https://beraknare.se/laantype");
+    // beraknare.se serves the Swedish slug (see locale-slugs.ts).
+    expect(sprog.sv).toBe("https://beraknare.se/annuitetslan-serielan");
   });
 
   test("keywords dækker de tre variationer dansk autocomplete målte", () => {
@@ -207,9 +208,10 @@ describe("/laantype — svensk", () => {
 
 describe("/laantype — registrering", () => {
   test("værktøjet er i kalkulatorlisten på begge domæner", () => {
+    const forventet = { da: "/laantype", se: "/annuitetslan-serielan" } as const;
     for (const locale of ["da", "se"] as const) {
       const hrefs = getCalculatorsByLocale(locale).map((c) => c.href);
-      expect(hrefs).toContain("/laantype");
+      expect(hrefs).toContain(forventet[locale]);
     }
   });
 

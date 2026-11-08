@@ -2,6 +2,7 @@
 
 import { stripInlineMarkdown } from "@/components/inline-markdown";
 import { getDomainConfig } from "@/lib/domain-config";
+import { localizedPath } from "@/lib/locale-slugs";
 import { OG_IMAGE_URL } from "@/lib/page-helpers";
 
 interface FAQItem {
@@ -53,7 +54,8 @@ export function CalculatorSchema({
     "@type": "WebApplication",
     name,
     description,
-    url,
+    // Callers pass the internal slug; the schema names the URL this domain serves.
+    url: `${pageUrl.origin}${localizedPath(pageUrl.pathname, domainConfig.locale)}${pageUrl.search}`,
     applicationCategory: category,
     operatingSystem: "All",
     browserRequirements: "Requires JavaScript",

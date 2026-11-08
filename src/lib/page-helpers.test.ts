@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { getDomainConfigByLocale } from "./domain-config";
+import { localizedSlug } from "./locale-slugs";
 import { buildPageMetadata, OG_IMAGE_URL } from "./page-helpers";
 
 describe("buildPageMetadata", () => {
@@ -9,12 +10,12 @@ describe("buildPageMetadata", () => {
       for (const locale of ["da", "se"] as const) {
         const config = getDomainConfigByLocale(locale);
         const metadata = buildPageMetadata(slug, config);
-        const canonical = `${config.baseUrl}/${slug}`;
+        const canonical = `${config.baseUrl}/${localizedSlug(slug, locale)}`;
 
         expect(metadata.alternates?.canonical).toBe(canonical);
         expect(metadata.alternates?.languages).toMatchObject({
           da: `https://minberegner.dk/${slug}`,
-          sv: `https://beraknare.se/${slug}`,
+          sv: `https://beraknare.se/${localizedSlug(slug, "se")}`,
           "x-default": `https://minberegner.dk/${slug}`,
         });
         expect(metadata.alternates?.languages).not.toHaveProperty("nb");
