@@ -141,6 +141,18 @@ export default async function Footer() {
           ))}
         </div>
 
+        {locale === "da" && (
+          <p className="mb-4 text-center text-xs text-gray-500">
+            Flere værktøjer fra Mahoje:{" "}
+            <a
+              href="https://timetrack.dk/?utm_source=minberegner&utm_medium=referral&utm_campaign=sostersites&utm_content=footer"
+              className="hover:text-white transition-colors"
+            >
+              TimeTrack – tidsregistrering til freelancere
+            </a>
+          </p>
+        )}
+
         <div className="text-center text-sm">
           <p>{t.footer.copyright.replace("{year}", String(year))}</p>
           <p className="mt-2 text-xs text-gray-500">
