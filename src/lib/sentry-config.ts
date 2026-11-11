@@ -17,7 +17,7 @@
  * apart between the two runtimes.
  */
 export const FALLBACK_SENTRY_DSN =
-  "https://bd169c02c4b43044caafd04bfd324a72@o1087332.ingest.us.sentry.io/4512180031717376";
+  "https://c7cdb0180c524aad8266807af5e5c533@fejlspor.mahoje.dk/22";
 
 export const SENTRY_TRACES_SAMPLE_RATE = 0.1;
 
