@@ -9,8 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = locale === "se" ? "Cookiepolicy" : "Cookiepolitik";
   const desc =
     locale === "se"
-      ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible och Umami (cookiefritt) och Google AdSense (annonscookies efter samtycke).`
-      : `Læs om vores brug af cookies og localStorage på ${dc.siteName}. Vi bruger Plausible og Umami (cookiefrit) og Google AdSense (annoncecookies efter samtykke).`;
+      ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible och Umami (cookiefritt).`
+      : locale === "da"
+        ? `Læs om cookies og localStorage på ${dc.siteName}. Google AdSense bruges på udvalgte beregnersider efter samtykke.`
+        : `Læs om vores brug af cookies og localStorage på ${dc.siteName}.`;
   const canonicalUrl = `${dc.baseUrl}/cookiepolitik`;
   return {
     title,
@@ -31,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function DaContent() {
+function DaContent({ showAdPolicy }: { showAdPolicy: boolean }) {
   return (
     <div className="prose dark:prose-invert max-w-3xl">
       <h1>Cookiepolitik</h1>
@@ -41,7 +43,7 @@ function DaContent() {
         bestræber os på at indsamle så lidt data som muligt.
       </p>
       <p>
-        <strong>Sidst opdateret:</strong> 24. september 2026
+        <strong>Sidst opdateret:</strong> 17. november 2026
       </p>
 
       <h2>1. Nødvendige cookies og localStorage</h2>
@@ -55,7 +57,7 @@ function DaContent() {
           valg af lyst/mørkt tema, så det huskes mellem besøg.
         </li>
         <li>
-          <strong>Cookie-samtykke</strong> (<code>cookie-consent</code>) — gemmer
+          <strong>Cookie-samtykke</strong> (<code>mb_cookie_consent_v1</code>) — gemmer
           om du har accepteret eller afvist cookies, så du ikke bliver spurgt igen.
         </li>
       </ul>
@@ -80,30 +82,21 @@ function DaContent() {
         forbedre siden.
       </p>
 
-      <h2>3. Annoncecookies (Google AdSense)</h2>
-      <p>
-        Vi bruger <strong>Google AdSense</strong> til at vise annoncer på
-        siden. Google kan sætte cookies til følgende formål:
-      </p>
-      <ul>
-        <li>Vise relevante annoncer baseret på dit besøg</li>
-        <li>Begrænse antallet af gange du ser en annonce</li>
-        <li>Måle annoncers effektivitet</li>
-      </ul>
-      <p>
-        Disse cookies aktiveres, når du interagerer med siden. Du kan til enhver
-        tid administrere dine annoncepræferencer via{" "}
-        <a
-          href="https://adssettings.google.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Googles annonceindstillinger
-        </a>
-        .
-      </p>
+      {showAdPolicy && (
+        <>
+          <h2>3. Annoncecookies (Google AdSense)</h2>
+          <p>
+            Når annoncer er slået til på MinBeregner.dk, kan Google AdSense vise
+            én annonce under resultatet på udvalgte beregnersider. Vi indlæser
+            først Google AdSense, når du har accepteret annoncecookies i
+            cookiebanneret. Vi beder kun Google om ikke-personaliserede annoncer.
+            Google kan bruge cookies til blandt andet at begrænse, hvor ofte du
+            ser en annonce, og til at måle annoncer.
+          </p>
+        </>
+      )}
 
-      <h2>4. Beregninger og brugerdata</h2>
+      <h2>{showAdPolicy ? 4 : 3}. Beregninger og brugerdata</h2>
       <p>
         Når du ikke bruger &quot;Del beregning&quot;, sker alle beregninger på
         MinBeregner.dk lokalt i din browser, og de tal, du indtaster, sendes ikke i
@@ -114,32 +107,25 @@ function DaContent() {
         Vælg derfor kun at dele links med data, du har tilladelse til at videregive.
       </p>
 
-      <h2>5. Sådan styrer du cookies</h2>
+      <h2>{showAdPolicy ? 5 : 4}. Sådan styrer du cookies</h2>
       <p>
         Du kan til enhver tid:
       </p>
       <ul>
         <li>Blokere eller slette cookies via dine browserindstillinger</li>
-        <li>Rydde localStorage via browserens udviklerværktøjer</li>
         <li>
-          Fravælge personaliserede annoncer via{" "}
-          <a
-            href="https://adssettings.google.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Googles annonceindstillinger
-          </a>
+          Trække dit samtykke tilbage ved at rydde sidens gemte data i
+          browseren, genindlæse siden og vælge Afvis i cookiebanneret.
         </li>
       </ul>
 
-      <h2>6. Kontakt</h2>
+      <h2>{showAdPolicy ? 6 : 5}. Kontakt</h2>
       <p>
         Har du spørgsmål til vores cookiepolitik, er du velkommen til at
         kontakte os via siden <a href="/om">Om MinBeregner.dk</a>.
       </p>
 
-      <h2>7. Opdateringer</h2>
+      <h2>{showAdPolicy ? 7 : 6}. Opdateringer</h2>
       <p>
         Denne cookiepolitik kan blive opdateret ved ændringer i vores brug af
         cookies eller teknologier. Den seneste version vil altid være
@@ -173,7 +159,7 @@ function SeContent() {
           val av ljust/mörkt tema, så att inställningen behålls mellan besök.
         </li>
         <li>
-          <strong>Cookie-samtycke</strong> (<code>cookie-consent</code>) — sparar
+          <strong>Cookie-samtycke</strong> (<code>mb_cookie_consent_v1</code>) — sparar
           om du har godkänt eller avvisat cookies, så att du inte tillfrågas igen.
         </li>
       </ul>
@@ -198,30 +184,7 @@ function SeContent() {
         förbättra webbplatsen.
       </p>
 
-      <h2>3. Annonscookies (Google AdSense)</h2>
-      <p>
-        Vi använder <strong>Google AdSense</strong> för att visa annonser på
-        webbplatsen. Google kan sätta cookies för följande ändamål:
-      </p>
-      <ul>
-        <li>Visa relevanta annonser baserat på ditt besök</li>
-        <li>Begränsa antalet gånger du ser en annons</li>
-        <li>Mäta annonsers effektivitet</li>
-      </ul>
-      <p>
-        Dessa cookies aktiveras när du interagerar med webbplatsen. Du kan när som helst
-        hantera dina annonsinställningar via{" "}
-        <a
-          href="https://adssettings.google.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Googles annonsinställningar
-        </a>
-        .
-      </p>
-
-      <h2>4. Beräkningar och användardata</h2>
+      <h2>3. Beräkningar och användardata</h2>
       <p>
         När du inte använder &quot;Dela beräkning&quot; sker beräkningarna lokalt i din
         webbläsare, och siffrorna du anger skickas inte i beräkningsprocessen. Delelänkar
@@ -232,32 +195,22 @@ function SeContent() {
         vidarebefordra.
       </p>
 
-      <h2>5. Så hanterar du cookies</h2>
+      <h2>4. Så hanterar du cookies</h2>
       <p>
         Du kan när som helst:
       </p>
       <ul>
         <li>Blockera eller radera cookies via dina webbläsarinställningar</li>
         <li>Rensa localStorage via webbläsarens utvecklarverktyg</li>
-        <li>
-          Välja bort personanpassade annonser via{" "}
-          <a
-            href="https://adssettings.google.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Googles annonsinställningar
-          </a>
-        </li>
       </ul>
 
-      <h2>6. Kontakt</h2>
+      <h2>5. Kontakt</h2>
       <p>
         Har du frågor om vår cookiepolicy är du välkommen att
         kontakta oss via sidan <a href="/om">Om Beräknare.se</a>.
       </p>
 
-      <h2>7. Uppdateringar</h2>
+      <h2>6. Uppdateringar</h2>
       <p>
         Denna cookiepolicy kan uppdateras vid ändringar i vår användning av
         cookies eller teknologier. Den senaste versionen finns alltid
@@ -274,7 +227,7 @@ export default async function CookiePolitikPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <Breadcrumbs items={[{ name: breadcrumbName, href: "/cookiepolitik" }]} />
-      {locale === "se" ? <SeContent /> : <DaContent />}
+      {locale === "se" ? <SeContent /> : <DaContent showAdPolicy={locale === "da"} />}
     </div>
   );
 }

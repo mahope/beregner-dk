@@ -21,6 +21,13 @@ declare global {
 
 let scriptLoaded = false;
 
+function nonPersonalizedQueue() {
+  const queue: AdQueue = window.adsbygoogle ?? ([] as Record<string, never>[]);
+  window.adsbygoogle = queue;
+  queue.requestNonPersonalizedAds = 1;
+  return queue;
+}
+
 function AdUnit({ slot }: { slot: string }) {
   const accepted = useSyncExternalStore(subscribeToCookieConsent, hasAdConsent, () => false);
   const adRef = useRef<HTMLModElement>(null);
@@ -32,8 +39,7 @@ function AdUnit({ slot }: { slot: string }) {
 
     const requestAd = () => {
       if (!hasAdConsent()) return;
-      const queue = (window.adsbygoogle ??= []);
-      queue.requestNonPersonalizedAds = 1;
+      const queue = nonPersonalizedQueue();
       try {
         queue.push({});
         requestedAd.current = ad;
@@ -47,7 +53,7 @@ function AdUnit({ slot }: { slot: string }) {
       return;
     }
 
-    (window.adsbygoogle ??= []).requestNonPersonalizedAds = 1;
+    nonPersonalizedQueue();
     const script = document.createElement("script");
     script.src = SCRIPT_URL;
     script.async = true;
