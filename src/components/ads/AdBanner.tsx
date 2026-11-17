@@ -73,7 +73,7 @@ function AdUnit({ slot }: { slot: string }) {
   if (!accepted) return null;
 
   return (
-    <div className="my-8 min-h-[280px] text-center md:min-h-[270px]">
+    <div className="mx-auto my-8 min-h-[280px] w-fit text-center md:min-h-[270px]">
       <p className="mb-1 text-xs text-gray-600 dark:text-gray-300">Annonce</p>
       <ins
         ref={adRef}
