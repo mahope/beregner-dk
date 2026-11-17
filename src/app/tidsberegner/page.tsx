@@ -242,7 +242,6 @@ export default async function TidsberegnerPage() {
       <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
         <TidsBeregner />
       </div>
-      <ResultAd page="/tidsberegner" />
 
       {/* Plus tid: «hvad er klokken om 8 timer». Målt 6/10 05:1x har dansk
           autocomplete 10 af 10 træffere under «hvad er klokken om» i formen
@@ -1091,6 +1090,8 @@ export default async function TidsberegnerPage() {
         </ul>
       </div>
       )}
+
+      <ResultAd page="/tidsberegner" />
 
       {/* Search Console: /tidsberegner er sidens tredjestørste side (79.641
           visninger, pos. 6,7) og dens egne søgninger er «hvor lang tid er der

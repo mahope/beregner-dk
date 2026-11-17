@@ -83,6 +83,29 @@ test("en udvalgt side viser først annoncen, når brugeren accepterer i banneret
   expect(getScript()).not.toBeNull();
 });
 
+test("banner og annonce følger accept og afslag fra en anden fane", async () => {
+  await renderPage(TidsberegnerPage);
+  expect(screen.getByRole("button", { name: "Accepter" })).toBeInTheDocument();
+  expectNoAds();
+
+  storeConsent(true);
+  fireEvent(window, new StorageEvent("storage", { key: consentKey }));
+
+  expect(screen.getByText("Annonce", { exact: true })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Accepter" })).not.toBeInTheDocument();
+
+  storeConsent(false);
+  fireEvent(window, new StorageEvent("storage", { key: consentKey }));
+
+  expectNoAds();
+  expect(screen.queryByRole("button", { name: "Accepter" })).not.toBeInTheDocument();
+
+  localStorage.removeItem(consentKey);
+  fireEvent(window, new StorageEvent("storage", { key: consentKey }));
+
+  expect(screen.getByRole("button", { name: "Accepter" })).toBeInTheDocument();
+});
+
 test("afvisning i banneret indlæser intet", async () => {
   await renderPage(TidsberegnerPage);
   fireEvent.click(screen.getByRole("button", { name: "Afvis" }));

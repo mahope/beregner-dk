@@ -76,7 +76,6 @@ export default async function KvadratmeterPage() {
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <KvadratmeterBeregner />
       </div>
-      <ResultAd page="/kvadratmeter" />
 
       {/* BBR lookup: Danish register, Danish locale only */}
       {locale === "da" && <BoligOpslag />}
@@ -86,6 +85,7 @@ export default async function KvadratmeterPage() {
           m²» — første danske træffer under «kvadratfod», jf. autocomplete 6/10 —
           var umulig at løse på sitet. */}
       <ArealOmregner />
+      <ResultAd page="/kvadratmeter" />
 
       {/* Teksten under værktøjet, så brødteksten og facit læser de samme tal. */}
       {(locale === "da" || locale === "se") && (

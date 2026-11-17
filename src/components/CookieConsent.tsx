@@ -4,18 +4,28 @@ import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
 
-import { CONSENT_VERSION, readCookieConsent, saveCookieConsent } from "@/lib/cookie-consent";
+import {
+  CONSENT_VERSION,
+  readCookieConsent,
+  saveCookieConsent,
+  subscribeToCookieConsent,
+} from "@/lib/cookie-consent";
 
 export default function CookieConsent() {
   const { locale } = useLocale();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const consent = readCookieConsent();
-    setVisible(
-      consent?.accepted !== false &&
-      (consent?.accepted !== true || (locale === "da" && consent.version !== CONSENT_VERSION)),
-    );
+    function syncVisibility() {
+      const consent = readCookieConsent();
+      setVisible(
+        consent?.accepted !== false &&
+        (consent?.accepted !== true || (locale === "da" && consent.version !== CONSENT_VERSION)),
+      );
+    }
+
+    syncVisibility();
+    return subscribeToCookieConsent(syncVisibility);
   }, [locale]);
 
   const choose = (accepted: boolean) => {

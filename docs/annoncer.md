@@ -2,11 +2,13 @@
 
 AdSense er begrænset til én manuel annonce på 250 × 250 px under
 beregnerresultatet på `/dato`, `/afstand-mellem-adresser`, `/tidsberegner` og
-`/kvadratmeter`. De fire sider har Google-trafik og ingen affiliatebokse.
+`/kvadratmeter`. På tidsberegneren og kvadratmetersiden ligger annoncen efter
+sidens sidste værktøj. De fire sider har Google-trafik og ingen affiliatebokse.
 Placeringerne godkendes via `ADSENSE_PAGES` i `src/lib/ads.ts`. Kun det danske
 site bruger annonceenheden.
 
-Scriptet indlæses først efter accept i det danske cookiebanner. Tidligere
+Scriptet indlæses først efter accept i det danske cookiebanner. Banneret og
+annonceenheden følger samtykkeændringer på tværs af åbne faner. Tidligere
 afslag gælder stadig. Tidligere accept før teksten om Googles annoncecookies
 kræver et nyt valg. Annonceenheden beder om ikke-personaliserede annoncer.
 Google kan levere et begrænset udvalg afhængigt af trafikken og kontoens
