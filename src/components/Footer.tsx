@@ -155,16 +155,6 @@ export default async function Footer() {
 
         <div className="text-center text-sm">
           <p>{t.footer.copyright.replace("{year}", String(year))}</p>
-          <p className="mt-2 text-xs text-gray-500">
-            Lavet af{" "}
-            <a
-              href="https://mahoje.dk"
-              rel="noopener"
-              className="hover:text-white transition-colors"
-            >
-              Mahoje
-            </a>
-          </p>
         </div>
 
         <FooterAd />

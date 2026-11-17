@@ -12,10 +12,9 @@ import {
   testamenteAffiliates,
 } from "./AffiliateBox";
 
-const presets = [
+const partnerAdsPresets = [
   ...bilforsikringAffiliates,
   ...boligforsikringAffiliates,
-  ...forsikringAffiliates,
   ...selvstaendigAffiliates,
   ...testamenteAffiliates,
 ];
@@ -33,8 +32,14 @@ describe("affiliate-links", () => {
     );
   });
 
-  test.each(presets.map((p) => [p.name, p.url]))("%s går gennem Partner-ads med vores id", (_navn, url) => {
+  test.each(partnerAdsPresets.map((p) => [p.name, p.url]))("%s går gennem Partner-ads med vores id", (_navn, url) => {
     expect(url).toMatch(/^https:\/\/www\.partner-ads\.com\/dk\/klikbanner\.php\?partnerid=42553&bannerid=\d+&uid=minberegner/);
+  });
+
+  test("Findforsikring.dk i boligbudgettet går gennem Adtraction", () => {
+    expect(forsikringAffiliates[0].url).toBe(
+      "https://go.findforsikring.dk/t/t?a=1873805483&as=2056156501&t=2&tk=1&url=https%3A%2F%2Fwww.findforsikring.dk%2F",
+    );
   });
 
   // Links med en hjemmelavet ?ref= giver ingen kommission (sådan så de gamle presets ud).
