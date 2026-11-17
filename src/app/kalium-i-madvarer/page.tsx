@@ -284,7 +284,7 @@ export default async function KaliumIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/kalium-i-madvarer" adSlotId="kalium-i-madvarer-sidebar" />
+      <Sidebar currentHref="/kalium-i-madvarer" />
     </div>
   );
 }

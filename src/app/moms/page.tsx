@@ -653,7 +653,7 @@ export default async function MomsPage() {
 
       <RelateredeArtikler current="/moms" locale={locale} />
       </div>
-      <Sidebar currentHref="/moms" adSlotId="moms-sidebar" />
+      <Sidebar currentHref="/moms" />
     </div>
   );
 }

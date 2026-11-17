@@ -153,7 +153,7 @@ export default async function SoevnbehovPage() {
 
         <RelatedCalculators current="/soevnbehov" />
       </div>
-      <Sidebar currentHref="/soevnbehov" adSlotId="soevnbehov-sidebar" />
+      <Sidebar currentHref="/soevnbehov" />
     </div>
   );
 }

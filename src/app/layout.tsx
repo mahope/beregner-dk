@@ -118,13 +118,6 @@ export default async function RootLayout({
           />
         )}
 
-        {/* Google AdSense */}
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1902871361369866"
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
-        />
-
         <OrganizationSchema
           name={domainConfig.siteName}
           url={domainConfig.baseUrl}

@@ -192,7 +192,7 @@ export default async function SkridtPage() {
 
         <RelatedCalculators current="/skridt" />
       </div>
-      <Sidebar currentHref="/skridt" adSlotId="skridt-sidebar" />
+      <Sidebar currentHref="/skridt" />
     </div>
   );
 }

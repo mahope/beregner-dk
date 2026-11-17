@@ -66,7 +66,7 @@ export default async function SygedagpengePage() {
         <RelatedCalculators current="/sygedagpenge" />
       </div>
 
-      <Sidebar currentHref="/sygedagpenge" adSlotId="sygedagpenge-sidebar" />
+      <Sidebar currentHref="/sygedagpenge" />
     </div>
   );
 }

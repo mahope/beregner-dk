@@ -88,7 +88,7 @@ export default async function AegloesningPage() {
 
         <RelatedCalculators current="/aegloesning" />
       </div>
-      <Sidebar currentHref="/aegloesning" adSlotId="aegloesning-sidebar" />
+      <Sidebar currentHref="/aegloesning" />
     </div>
   );
 }

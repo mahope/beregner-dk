@@ -89,7 +89,7 @@ export default async function MotionKalorierPage() {
 
         <RelatedCalculators current="/motion-kalorier" />
       </div>
-      <Sidebar currentHref="/motion-kalorier" adSlotId="motion-kalorier-sidebar" />
+      <Sidebar currentHref="/motion-kalorier" />
     </div>
   );
 }

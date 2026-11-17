@@ -290,7 +290,7 @@ export default async function FiberIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/fiber-i-madvarer" adSlotId="fiber-i-madvarer-sidebar" />
+      <Sidebar currentHref="/fiber-i-madvarer" />
     </div>
   );
 }

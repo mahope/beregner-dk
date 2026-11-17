@@ -92,7 +92,7 @@ export default async function LoenKonverterPage() {
 
         <RelatedCalculators current="/loen-konverter" />
       </div>
-      <Sidebar currentHref="/loen-konverter" adSlotId="loen-konverter-sidebar" />
+      <Sidebar currentHref="/loen-konverter" />
     </div>
   );
 }

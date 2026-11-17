@@ -72,7 +72,7 @@ export default async function AndelsboligPage() {
         <RelatedCalculators current="/andelsbolig" />
       </div>
 
-      <Sidebar currentHref="/andelsbolig" adSlotId="andelsbolig-sidebar" />
+      <Sidebar currentHref="/andelsbolig" />
     </div>
   );
 }

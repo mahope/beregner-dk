@@ -129,7 +129,7 @@ export default async function IdealvaegtPage() {
 
         <RelatedCalculators current="/idealvaegt" />
       </div>
-      <Sidebar currentHref="/idealvaegt" adSlotId="idealvaegt-sidebar" />
+      <Sidebar currentHref="/idealvaegt" />
     </div>
   );
 }

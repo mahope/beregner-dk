@@ -87,7 +87,7 @@ export default async function GennemsnitPage() {
 
         <RelatedCalculators current="/gennemsnit" />
       </div>
-      <Sidebar currentHref="/gennemsnit" adSlotId="gennemsnit-sidebar" />
+      <Sidebar currentHref="/gennemsnit" />
     </div>
   );
 }

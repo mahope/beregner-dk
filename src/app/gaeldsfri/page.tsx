@@ -92,7 +92,7 @@ export default async function GaeldsfriPage() {
         <RelatedCalculators current="/gaeldsfri" />
       </div>
 
-      <Sidebar currentHref="/gaeldsfri" adSlotId="gaeldsfri-sidebar" />
+      <Sidebar currentHref="/gaeldsfri" />
     </div>
   );
 }

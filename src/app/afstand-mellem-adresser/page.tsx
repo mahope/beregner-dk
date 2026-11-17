@@ -107,7 +107,7 @@ export default async function AfstandMellemAdresserPage() {
 
         <RelatedCalculators current={`/${SLUG}`} />
       </div>
-      <Sidebar currentHref={`/${SLUG}`} adSlotId="afstand-mellem-adresser-sidebar" />
+      <Sidebar currentHref={`/${SLUG}`} />
     </div>
   );
 }

@@ -10,7 +10,6 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { InlineAd } from "@/components/ads/AdBanner";
 import Sidebar from "@/components/Sidebar";
 import { formatNumber } from "@/lib/format";
 import { KOMMUNER, KOMMUNER_ANTAL, KOMMUNER_SNIT } from "@/lib/kommuner";
@@ -85,9 +84,6 @@ export default async function LoenPage() {
       </p>
 
       <LoenBeregner />
-
-      {/* Inline Ad - After calculator */}
-      <InlineAd slotId="loen-after-calculator" />
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none dark:prose-invert">
@@ -248,7 +244,7 @@ export default async function LoenPage() {
       <RelatedCalculators current="/loen-efter-skat" />
       </div>
 
-      <Sidebar currentHref="/loen-efter-skat" adSlotId="loen-sidebar" />
+      <Sidebar currentHref="/loen-efter-skat" />
     </div>
   );
 }

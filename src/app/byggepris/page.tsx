@@ -154,7 +154,7 @@ export default async function ByggeprisPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/byggepris" adSlotId="byggepris-sidebar" />
+      <Sidebar currentHref="/byggepris" />
     </div>
   );
 }

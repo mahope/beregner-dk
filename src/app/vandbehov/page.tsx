@@ -87,7 +87,7 @@ export default async function VandbehovPage() {
 
         <RelatedCalculators current="/vandbehov" />
       </div>
-      <Sidebar currentHref="/vandbehov" adSlotId="vandbehov-sidebar" />
+      <Sidebar currentHref="/vandbehov" />
     </div>
   );
 }

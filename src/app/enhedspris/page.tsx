@@ -84,7 +84,7 @@ export default async function EnhedsprisPage() {
 
         <RelatedCalculators current="/enhedspris" />
       </div>
-      <Sidebar currentHref="/enhedspris" adSlotId="enhedspris-sidebar" />
+      <Sidebar currentHref="/enhedspris" />
     </div>
   );
 }

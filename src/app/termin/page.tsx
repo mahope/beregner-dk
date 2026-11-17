@@ -111,7 +111,7 @@ export default async function TerminPage() {
         <RelatedCalculators current="/termin" />
       </div>
 
-      <Sidebar currentHref="/termin" adSlotId="termin-sidebar" />
+      <Sidebar currentHref="/termin" />
     </div>
   );
 }

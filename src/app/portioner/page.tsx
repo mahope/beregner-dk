@@ -145,7 +145,7 @@ export default async function PortionerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/portioner" adSlotId="portioner-sidebar" />
+      <Sidebar currentHref="/portioner" />
     </div>
   );
 }

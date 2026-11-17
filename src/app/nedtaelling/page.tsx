@@ -346,7 +346,7 @@ export default async function NedtaellingPage() {
 
         <RelatedCalculators current="/nedtaelling" />
       </div>
-      <Sidebar currentHref="/nedtaelling" adSlotId="nedtaelling-sidebar" />
+      <Sidebar currentHref="/nedtaelling" />
     </div>
   );
 }

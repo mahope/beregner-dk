@@ -140,7 +140,7 @@ export default async function SkatteprocentPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/skatteprocent" adSlotId="skatteprocent-sidebar" />
+      <Sidebar currentHref="/skatteprocent" />
     </div>
   );
 }

@@ -12,7 +12,6 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { InlineAd } from "@/components/ads/AdBanner";
 import Sidebar from "@/components/Sidebar";
 
 export async function generateMetadata() {
@@ -62,9 +61,6 @@ export default async function BMIPage() {
           </Link>
         </div>
       )}
-
-      {/* Inline Ad - Between calculator and content */}
-      <InlineAd slotId="bmi-after-calculator" />
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">
@@ -250,8 +246,6 @@ export default async function BMIPage() {
       </div>
       )}
 
-      <InlineAd slotId="bmi-before-faq" />
-
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/bmi" />
@@ -259,7 +253,7 @@ export default async function BMIPage() {
       </div>
 
       {/* Sidebar - Right Column (Desktop only) */}
-      <Sidebar currentHref="/bmi" adSlotId="bmi-sidebar" />
+      <Sidebar currentHref="/bmi" />
     </div>
   );
 }

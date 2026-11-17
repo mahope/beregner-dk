@@ -96,7 +96,7 @@ export default async function VaegttabPage() {
         <RelatedCalculators current="/vaegttab" />
       </div>
 
-      <Sidebar currentHref="/vaegttab" adSlotId="vaegttab-sidebar" />
+      <Sidebar currentHref="/vaegttab" />
     </div>
   );
 }
