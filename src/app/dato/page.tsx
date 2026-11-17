@@ -1,3 +1,4 @@
+import { ResultAd } from "@/components/ads/AdBanner";
 import dynamic from "next/dynamic";
 const DatoBeregner = dynamic(() => import("@/components/DatoBeregner"));
 import { generatePageMetadata } from "@/lib/page-helpers";
@@ -145,7 +146,7 @@ export default async function DatoPage() {
         {pageData.description}
       </p>
 
-      <DatoBeregner />
+      <DatoBeregner resultAd={<ResultAd page="/dato" />} />
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">

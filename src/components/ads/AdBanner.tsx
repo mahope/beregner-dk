@@ -1,0 +1,90 @@
+"use client";
+
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useLocaleOptional } from "@/components/LocaleProvider";
+import { ADSENSE_PAGES } from "@/lib/ads";
+import { hasAdConsent, subscribeToCookieConsent } from "@/lib/cookie-consent";
+
+const AD_CLIENT = "ca-pub-1902871361369866";
+const SCRIPT_URL = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CLIENT}`;
+
+type AdQueue = {
+  requestNonPersonalizedAds?: 1;
+  push: (request: Record<string, never>) => unknown;
+};
+
+declare global {
+  interface Window {
+    adsbygoogle?: AdQueue;
+  }
+}
+
+let scriptLoaded = false;
+
+function AdUnit({ slot }: { slot: string }) {
+  const accepted = useSyncExternalStore(subscribeToCookieConsent, hasAdConsent, () => false);
+  const adRef = useRef<HTMLModElement>(null);
+  const requestedAd = useRef<HTMLModElement>(null);
+
+  useEffect(() => {
+    const ad = adRef.current;
+    if (!accepted || !ad || requestedAd.current === ad || !hasAdConsent()) return;
+
+    const requestAd = () => {
+      if (!hasAdConsent()) return;
+      const queue = (window.adsbygoogle ??= []);
+      queue.requestNonPersonalizedAds = 1;
+      try {
+        queue.push({});
+        requestedAd.current = ad;
+      } catch {
+        // En blokeret eller afvist annonce må ikke påvirke beregneren.
+      }
+    };
+
+    if (scriptLoaded) {
+      requestAd();
+      return;
+    }
+
+    (window.adsbygoogle ??= []).requestNonPersonalizedAds = 1;
+    const script = document.createElement("script");
+    script.src = SCRIPT_URL;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.onload = () => {
+      scriptLoaded = true;
+      requestAd();
+    };
+    document.head.append(script);
+
+    return () => {
+      script.onload = null;
+      script.remove();
+    };
+  }, [accepted]);
+
+  if (!accepted) return null;
+
+  return (
+    <div className="my-8 min-h-[280px] text-center md:min-h-[270px]">
+      <p className="mb-1 text-xs text-gray-600 dark:text-gray-300">Annonce</p>
+      <ins
+        ref={adRef}
+        className="adsbygoogle"
+        style={{ display: "block", marginInline: "auto", width: 250, height: 250 }}
+        data-ad-client={AD_CLIENT}
+        data-ad-slot={slot}
+      />
+    </div>
+  );
+}
+
+export function ResultAd({ page }: { page: string }) {
+  const locale = useLocaleOptional()?.locale;
+  const enabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED;
+  const slot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT;
+  if (locale !== "da" || !ADSENSE_PAGES.has(page)) return null;
+  if ((enabled !== "1" && enabled !== "true") || !slot || !/^\d+$/.test(slot)) return null;
+  return <AdUnit key={slot} slot={slot} />;
+}

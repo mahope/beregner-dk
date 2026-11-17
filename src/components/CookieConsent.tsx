@@ -4,30 +4,22 @@ import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
 
-const STORAGE_KEY = "mb_cookie_consent_v1";
+import { CONSENT_VERSION, readCookieConsent, saveCookieConsent } from "@/lib/cookie-consent";
 
 export default function CookieConsent() {
   const { locale } = useLocale();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      const val = localStorage.getItem(STORAGE_KEY);
-      if (!val) setVisible(true);
-    } catch (_) {}
-  }, []);
+    const consent = readCookieConsent();
+    setVisible(
+      consent?.accepted !== false &&
+      (consent?.accepted !== true || (locale === "da" && consent.version !== CONSENT_VERSION)),
+    );
+  }, [locale]);
 
-  const accept = () => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: Date.now(), accepted: true }));
-    } catch (_) {}
-    setVisible(false);
-  };
-
-  const decline = () => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: Date.now(), accepted: false }));
-    } catch (_) {}
+  const choose = (accepted: boolean) => {
+    saveCookieConsent(accepted);
     setVisible(false);
   };
 
@@ -53,8 +45,8 @@ export default function CookieConsent() {
               </p>
             </div>
             <div role="group" aria-labelledby="cookie-titel" className="shrink-0 flex gap-2 mt-3 md:mt-0">
-              <button type="button" onClick={decline} className="px-3 py-2 border dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">{t(l, "ui.cookieDecline")}</button>
-              <button type="button" onClick={accept} className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">{t(l, "ui.cookieAccept")}</button>
+              <button type="button" onClick={() => choose(false)} className="px-3 py-2 border dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">{t(l, "ui.cookieDecline")}</button>
+              <button type="button" onClick={() => choose(true)} className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">{t(l, "ui.cookieAccept")}</button>
             </div>
           </div>
         </div>

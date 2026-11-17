@@ -1,3 +1,4 @@
+import { ResultAd } from "@/components/ads/AdBanner";
 import BoligOpslag from "@/components/BoligOpslag";
 import KvadratmeterBeregner from "@/components/KvadratmeterBeregner";
 import ArealOmregner from "@/components/ArealOmregner";
@@ -75,6 +76,7 @@ export default async function KvadratmeterPage() {
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <KvadratmeterBeregner />
       </div>
+      <ResultAd page="/kvadratmeter" />
 
       {/* BBR lookup: Danish register, Danish locale only */}
       {locale === "da" && <BoligOpslag />}
