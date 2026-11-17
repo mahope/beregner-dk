@@ -18,7 +18,7 @@ vi.mock("@/lib/get-locale", () => ({
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));
 
-const consentKey = "mb_cookie_consent_v1";
+const consentKey = "mb_cookie_consent_v2";
 const getScript = () =>
   document.querySelector<HTMLScriptElement>('script[src*="pagead2.googlesyndication.com"]');
 
@@ -119,8 +119,12 @@ test("et tidligere afslag indlæser intet", async () => {
   expect(screen.queryByRole("button", { name: "Accepter" })).not.toBeInTheDocument();
 });
 
-test("gammel accept uden information om annoncecookies indlæser intet", async () => {
-  localStorage.setItem(consentKey, JSON.stringify({ date: Date.now(), accepted: true }));
+test.each([
+  { accepted: true },
+  { accepted: true, version: 2 },
+  { accepted: false },
+])("gammelt samtykke på v1-nøglen åbner banneret uden annoncer (%j)", async (consent) => {
+  localStorage.setItem("mb_cookie_consent_v1", JSON.stringify(consent));
   await renderPage(TidsberegnerPage);
   expectNoAds();
   expect(screen.getByRole("button", { name: "Accepter" })).toBeInTheDocument();

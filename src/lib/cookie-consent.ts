@@ -1,4 +1,4 @@
-export const CONSENT_STORAGE_KEY = "mb_cookie_consent_v1";
+export const CONSENT_STORAGE_KEY = "mb_cookie_consent_v2";
 export const CONSENT_CHANGED_EVENT = "mb-consent-changed";
 export const CONSENT_VERSION = 2;
 

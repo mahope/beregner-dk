@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { CONSENT_STORAGE_KEY } from "@/lib/cookie-consent";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -57,7 +58,7 @@ function DaContent({ showAdPolicy }: { showAdPolicy: boolean }) {
           valg af lyst/mørkt tema, så det huskes mellem besøg.
         </li>
         <li>
-          <strong>Cookie-samtykke</strong> (<code>mb_cookie_consent_v1</code>) — gemmer
+          <strong>Cookie-samtykke</strong> (<code>{CONSENT_STORAGE_KEY}</code>) — gemmer
           om du har accepteret eller afvist cookies, så du ikke bliver spurgt igen.
         </li>
       </ul>
@@ -159,7 +160,7 @@ function SeContent() {
           val av ljust/mörkt tema, så att inställningen behålls mellan besök.
         </li>
         <li>
-          <strong>Cookie-samtycke</strong> (<code>mb_cookie_consent_v1</code>) — sparar
+          <strong>Cookie-samtycke</strong> (<code>{CONSENT_STORAGE_KEY}</code>) — sparar
           om du har godkänt eller avvisat cookies, så att du inte tillfrågas igen.
         </li>
       </ul>
