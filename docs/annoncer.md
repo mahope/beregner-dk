@@ -5,7 +5,8 @@ beregnerresultatet på `/dato`, `/afstand-mellem-adresser`, `/tidsberegner` og
 `/kvadratmeter`. På tidsberegneren og kvadratmetersiden ligger annoncen efter
 sidens sidste værktøj. De fire sider har Google-trafik og ingen affiliatebokse.
 Placeringerne godkendes via `ADSENSE_PAGES` i `src/lib/ads.ts`. Kun det danske
-site bruger annonceenheden.
+site bruger annonceenheden. Derfor omtaler kun det danske cookiebanner
+Googles annoncecookies.
 
 Scriptet indlæses først efter accept i det danske cookiebanner. Banneret og
 annonceenheden følger samtykkeændringer på tværs af åbne faner. Banneret

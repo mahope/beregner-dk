@@ -143,9 +143,16 @@ test.each([
   expectNoAds();
 });
 
-test.each(["se", "no"] as const)("locale %s har ingen annoncer med samtykke", async (locale) => {
-  storeConsent(true);
+test.each([
+  ["se", "Webbplatsen använder inga kakor.", "Acceptera"],
+  ["no", "Nettstedet bruker ingen informasjonskapsler.", "Godta"],
+] as const)("locale %s beskriver det cookiefrie site og viser ingen annoncer efter accept", async (locale, body, accept) => {
   await renderPage(TidsberegnerPage, locale);
+  expect(screen.getByText(body, { exact: false })).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole("button", { name: accept }));
+
+  expect(screen.queryByRole("button", { name: accept })).not.toBeInTheDocument();
   expectNoAds();
 });
 
