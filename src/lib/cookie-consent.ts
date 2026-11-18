@@ -1,5 +1,6 @@
 export const CONSENT_STORAGE_KEY = "mb_cookie_consent_v2";
 export const CONSENT_CHANGED_EVENT = "mb-consent-changed";
+export const CONSENT_SETTINGS_EVENT = "mb-consent-settings";
 export const CONSENT_VERSION = 2;
 
 export function readCookieConsent() {

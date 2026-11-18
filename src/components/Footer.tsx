@@ -3,6 +3,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getTranslations } from "@/lib/i18n";
 import { getFooterCategories, getFooterBlogLinks } from "@/lib/footer-data";
 import { getAllDomainConfigs } from "@/lib/domain-config";
+import { CookieSettingsButton } from "./CookieConsent";
 import CountryFlag from "./CountryFlag";
 import { CalcIcon, CategoryIcon } from "@/components/ui/icons";
 import { Calculator, CalendarDays, ShieldCheck } from "lucide-react";
@@ -91,6 +92,9 @@ export default async function Footer() {
                 >
                   {t.footer.cookieLink}
                 </Link>
+              </li>
+              <li>
+                <CookieSettingsButton label={t.footer.cookieSettings} />
               </li>
             </ul>
           </div>

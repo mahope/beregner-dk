@@ -10,7 +10,10 @@ Googles annoncecookies.
 
 Scriptet indlæses først efter accept i det danske cookiebanner. Banneret og
 annonceenheden følger samtykkeændringer på tværs af åbne faner. Banneret
-gemmer valget i `mb_cookie_consent_v2`. Tidligere valg på v1-nøglen udløser
+gemmer valget i `mb_cookie_consent_v2`. Cookieindstillinger i footeren åbner
+banneret igen. Afvis gemmer afslaget og fjerner annonceenheden og dens script.
+Hvis fanen allerede har indsat Google-scriptet, genindlæses siden for at stoppe
+eventuel kørende Google-kode, også ved tilbagetræk i en anden fane. Tidligere valg på v1-nøglen udløser
 et nyt spørgsmål. Annonceenheden beder om ikke-personaliserede annoncer.
 Google kan levere et begrænset udvalg afhængigt af trafikken og kontoens
 indstillinger. [Googles krav til samtykkeplatforme](https://support.google.com/adsense/answer/13554116).
