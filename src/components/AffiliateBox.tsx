@@ -3,6 +3,8 @@
 import { trackAffiliateClick } from "@/lib/analytics";
 import { adtractionLink } from "@/lib/adtraction";
 import { useLocale } from "@/components/LocaleProvider";
+import { KreditEksempel } from "@/components/KreditEksempel";
+import { PANTSAT, type Laangiver } from "@/lib/kredit-eksempler";
 import type { LucideIcon } from "lucide-react";
 import { Briefcase, Car, Landmark, ScrollText, ShieldCheck } from "lucide-react";
 
@@ -13,6 +15,8 @@ interface AffiliateLink {
   cta: string;
   logo?: string;
   highlight?: boolean;
+  /** Kreditgiver: viser dens eget repræsentative eksempel, hvis den har et. */
+  laangiver?: Laangiver;
 }
 
 interface AffiliateBoxProps {
@@ -26,26 +30,12 @@ interface AffiliateBoxProps {
 }
 
 /**
- * Lovpligtig advarsel ved markedsføring af forbrugslån (Markedsføringsloven og
- * Forbrugerkreditloven): "Det koster penge at låne penge" og et ÅOP-eksempel.
- * Eksemplet er en illustration (annuitetslån, ingen gebyrer), ikke en bestemt
- * långivers vilkår. Tallene regnes ud, så teksten og regnestykket ikke kan skilles.
+ * Lovpligtig advarsel ved markedsføring af forbrugskredit (markedsføringsloven
+ * § 18, stk. 1, fra 20. november 2026) i lovens ordlyd. Tal (rente, ÅOP, beløb)
+ * må kun stå i boksen som långiverens eget repræsentative eksempel fra
+ * `src/lib/kredit-eksempler.ts`, via `laangiver` på linket.
  */
-const EKSEMPEL = { hovedstol: 10000, maaneder: 12, rente: 0.2 };
-
-function kreditEksempel({ hovedstol, maaneder, rente }: typeof EKSEMPEL = EKSEMPEL) {
-  const r = rente / 12;
-  const ydelse = (hovedstol * r) / (1 - Math.pow(1 + r, -maaneder));
-  return {
-    renteomkostning: Math.round(ydelse * maaneder - hovedstol),
-    aop: (Math.pow(1 + r, 12) - 1) * 100,
-  };
-}
-
-const eksempel = kreditEksempel();
-const kr = (n: number) => n.toLocaleString("da-DK", { maximumFractionDigits: 0 });
-
-export const KREDIT_ADVARSEL = `Det koster penge at låne penge. Eksempel: Et lån på ${kr(EKSEMPEL.hovedstol)} kr. over ${EKSEMPEL.maaneder} måneder med ${EKSEMPEL.rente * 100} % i årlig rente og uden gebyrer koster ca. ${kr(eksempel.renteomkostning)} kr. i renter og har en ÅOP på ca. ${eksempel.aop.toLocaleString("da-DK", { maximumFractionDigits: 1 })} %. Eksemplet er en illustration. Långiverens egne vilkår gælder.`;
+export const KREDIT_ADVARSEL = "Advarsel! Det koster penge at låne penge.";
 
 /**
  * AffiliateBox - Viser affiliate links med tydelig disclosure
@@ -81,35 +71,41 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = fals
       {/* Affiliate links */}
       <div className="divide-y divide-gray-100 dark:divide-gray-700">
         {links.map((link, index) => (
-          <a
-            key={index}
-            href={link.url}
-            target="_blank"
-            rel="sponsored nofollow noopener noreferrer"
-            onClick={() => trackAffiliateClick(title, link.url)}
-            className={`block p-4 transition-colors ${
-              link.highlight 
-                ? "bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 hover:from-green-100 hover:to-blue-100 dark:hover:from-green-900/30 dark:hover:to-blue-900/30" 
-                : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">{link.name}</span>
-                  {link.highlight && (
-                    <span className="text-xs bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-                      Populær
-                    </span>
-                  )}
+          <div key={index}>
+            <a
+              href={link.url}
+              target="_blank"
+              rel="sponsored nofollow noopener noreferrer"
+              onClick={() => trackAffiliateClick(title, link.url)}
+              className={`block p-4 transition-colors ${
+                link.highlight 
+                  ? "bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 hover:from-green-100 hover:to-blue-100 dark:hover:from-green-900/30 dark:hover:to-blue-900/30" 
+                  : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">{link.name}</span>
+                    {link.highlight && (
+                      <span className="text-xs bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
+                        Populær
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{link.description}</p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{link.description}</p>
+                <span className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+                  {link.cta} →
+                </span>
               </div>
-              <span className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
-                {link.cta} →
-              </span>
-            </div>
-          </a>
+            </a>
+            {link.laangiver?.eksempel && (
+              <div className="bg-white dark:bg-gray-800 px-4 pb-4 text-xs text-gray-600 dark:text-gray-400 [&_a]:underline">
+                <KreditEksempel laangiver={link.laangiver} />
+              </div>
+            )}
+          </div>
         ))}
       </div>
 
@@ -211,14 +207,15 @@ export const testamenteAffiliates: AffiliateLink[] = [
 
 // Convenience komponenter
 
-const PANTSAT = "78126"; // Pantsat.dk
+const PANTSAT_BANNER = "78126"; // Pantsat.dk
 
 export const pantelaanAffiliates: AffiliateLink[] = [
   {
-    name: "Pantsat.dk",
+    name: PANTSAT.navn,
     description: "Pantelån, hvor du stiller en værdigenstand som sikkerhed for lånet.",
-    url: partnerAdsLink(PANTSAT),
+    url: partnerAdsLink(PANTSAT_BANNER),
     cta: "Se pantelån",
+    laangiver: PANTSAT,
   },
 ];
 

@@ -56,11 +56,14 @@ describe("affiliate-links", () => {
     expect(pantelaanAffiliates[0].url).toContain("bannerid=78126");
   });
 
-  test("kreditadvarslen indeholder lovpligtig tekst og ÅOP-eksempel", () => {
-    expect(KREDIT_ADVARSEL).toContain("Det koster penge at låne penge");
-    expect(KREDIT_ADVARSEL).toContain("ÅOP");
-    expect(KREDIT_ADVARSEL).toContain("ca. 1.116 kr. i renter");
-    expect(KREDIT_ADVARSEL).toContain("ÅOP på ca. 21,9 %");
+  test("kreditadvarslen bruger lovens ordlyd", () => {
+    expect(KREDIT_ADVARSEL).toBe("Advarsel! Det koster penge at låne penge.");
+  });
+
+  // Tal i en kreditboks skal være långiverens eget eksempel (markedsføringsloven § 18).
+  test("pantelån viser ingen tal, når Pantsat ikke har et offentliggjort eksempel", () => {
+    expect(pantelaanAffiliates[0].laangiver?.eksempel).toBeNull();
+    expect(`${pantelaanAffiliates[0].name} ${pantelaanAffiliates[0].description}`).not.toMatch(/\d/);
   });
 
   test("ingen komponent eller side lover hurtighed, nemhed eller bedste rente ved lån", () => {

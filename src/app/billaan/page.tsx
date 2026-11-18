@@ -11,6 +11,8 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { KreditEksempel } from "@/components/KreditEksempel";
+import { BILLAAN_LAANGIVERE } from "@/lib/kredit-eksempler";
 import { CheckCircle, XCircle } from "lucide-react";
 
 export async function generateMetadata() {
@@ -108,43 +110,21 @@ export default async function BillaanPage() {
           <li><strong>Bankens politik:</strong> Forskellige banker har forskellige satser</li>
         </ul>
 
-        <h2>Typiske billån satser (2026)</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Bank</th>
-              <th>Rente fra</th>
-              <th>ÅOP fra</th>
-              <th>Udbetaling</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Nordea</td>
-              <td>5,95 %</td>
-              <td>6,5 %</td>
-              <td>10 %</td>
-            </tr>
-            <tr>
-              <td>Bank Norwegian</td>
-              <td>5,49 %</td>
-              <td>6,0 %</td>
-              <td>0 %</td>
-            </tr>
-            <tr>
-              <td>Basisbank</td>
-              <td>6,25 %</td>
-              <td>7,0 %</td>
-              <td>10 %</td>
-            </tr>
-            <tr>
-              <td>Santander</td>
-              <td>6,50 %</td>
-              <td>7,2 %</td>
-              <td>10 %</td>
-            </tr>
-          </tbody>
-        </table>
+        <h2>Eksempler fra bankerne</h2>
+        <p>
+          Eksemplerne er bankernes egne og er ikke tilpasset din situation. Din rente afhænger af
+          bankens kreditvurdering. Sammenlign altid ÅOP for samme beløb og løbetid.
+        </p>
+        {BILLAAN_LAANGIVERE.map((laangiver) => (
+          <div key={laangiver.navn}>
+            <h3>
+              <a href={laangiver.url} target="_blank" rel="nofollow noopener noreferrer">
+                {laangiver.navn}
+              </a>
+            </h3>
+            <KreditEksempel laangiver={laangiver} />
+          </div>
+        ))}
 
         <h2>Sådan får du det bedste tilbud</h2>
         <ol>
