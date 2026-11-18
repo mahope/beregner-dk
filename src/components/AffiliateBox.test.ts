@@ -78,6 +78,19 @@ describe("affiliate-links", () => {
     }
   });
 
+  test("forsikrings- og a-kasse-tekster lover hverken tid eller pris-rangering", () => {
+    const forbudt = /på 2 minutter|på få minutter|hurtig tilmelding|danmarks billigste|billigste (indbo|hus|bil|forsikring|a-kasse)/i;
+    const samlFiler = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const sti = join(dir, e.name);
+        if (e.isDirectory()) return samlFiler(sti);
+        return /\.tsx?$/.test(e.name) && !e.name.includes(".test.") ? [sti] : [];
+      });
+    for (const f of samlFiler(join(__dirname, ".."))) {
+      expect(readFileSync(f, "utf-8"), f).not.toMatch(forbudt);
+    }
+  });
+
   test("affiliate-links markeres sponsored nofollow", () => {
     expect(readFileSync(join(__dirname, "AffiliateBox.tsx"), "utf-8")).toContain('rel="sponsored nofollow noopener noreferrer"');
   });

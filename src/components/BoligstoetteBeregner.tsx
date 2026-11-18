@@ -840,7 +840,7 @@ export default function BoligstoetteBeregner() {
 
         <AffiliateBox
           title="Forsikring til din bolig"
-          subtitle="Sammenlign og find den billigste indbo- og husforsikring"
+          subtitle="Sammenlign tilbud på indbo- og husforsikring"
           links={[
             {
               name: "Findforsikring.dk",

@@ -170,7 +170,7 @@ export const forsikringAffiliates: AffiliateLink[] = [
 export const bilforsikringAffiliates: AffiliateLink[] = [
   {
     name: "Cover Bilforsikring",
-    description: "Skift bilforsikring online på 2 minutter (i samarbejde med Aros Forsikring)",
+    description: "Skift bilforsikring online (i samarbejde med Aros Forsikring)",
     url: partnerAdsLink(COVER_BILFORSIKRING),
     cta: "Se pris",
     highlight: true,
@@ -196,7 +196,7 @@ export const selvstaendigAffiliates: AffiliateLink[] = [
 export const testamenteAffiliates: AffiliateLink[] = [
   {
     name: "Jura-Docs",
-    description: "Testamente, ægtepagt og fremtidsfuldmagt online — leveret på mail på få minutter",
+    description: "Testamente, ægtepagt og fremtidsfuldmagt online — leveres på mail",
     url: partnerAdsLink(JURA_DOCS),
     cta: "Se dokumenter",
     highlight: true,
