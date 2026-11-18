@@ -45,7 +45,7 @@ describe("buildPageMetadata", () => {
       locale: "da" as const,
       title: "Procentberegner: 10 % af 1.600 kr. = 160 kr.",
       description:
-        "Hvor mange procent er x af y? Se også rabatten i procent: 9.000 kr. → 7.875 kr. = 12,5 %. Beregn stigning og fald. Gratis, uden login.",
+        "Hvor mange procent er x af y? Se også 10 % af et tal og rabatten i procent: 9.000 kr. → 7.875 kr. = 12,5 %. Beregn stigning og fald. Gratis, uden login.",
     },
     {
       locale: "se" as const,

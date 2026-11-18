@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { getPageData } from "./page-data";
+import { simulerOpsparing } from "./opsparing";
 
 /**
  * GSC 18/8 til 16/11-2026 (minberegner.dk, 90 dage): de her sider har mange
@@ -8,7 +9,7 @@ import { getPageData } from "./page-data";
  * og lover et konkret svar. Testen låser længden (så Google ikke afkorter) og at
  * hovedsøgningen stadig står i teksten.
  *
- * `expectTitle` er sat, hvor titlen er ændret; ellers er det kun beskrivelsen.
+ * `titel` er sat, hvor titlen er ændret; ellers er det kun beskrivelsen.
  */
 const SIDER: {
   slug: string;
@@ -44,8 +45,8 @@ const SIDER: {
   },
   {
     slug: "opsparing",
-    titel: ["Opsparingsberegner", "830.000 kr."],
-    beskrivelse: ["Renters rente beregner", "830.000 kr."],
+    titel: ["Opsparingsberegner", "837.000 kr."],
+    beskrivelse: ["Renters rente beregner", "837.000 kr."],
   },
 ];
 
@@ -55,7 +56,7 @@ describe("CTR-titler nov. 2026 (da)", () => {
     expect(data, `getPageData("${slug}", "da")`).toBeDefined();
 
     expect(data!.metaTitle.length).toBeLessThanOrEqual(60);
-    expect(data!.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data!.metaDescription.length).toBeLessThanOrEqual(155);
     expect(data!.ogTitle.length).toBeLessThanOrEqual(60);
 
     // Ingen tankestreger, og ingen uløste pladsholdere i det Google ser.
@@ -63,6 +64,7 @@ describe("CTR-titler nov. 2026 (da)", () => {
       expect(streng).not.toMatch(/\{[A-Z_]+\}/);
     }
     expect(data!.metaTitle).not.toContain("—");
+    expect(data!.metaDescription).not.toContain("—");
 
     for (const ord of side.titel ?? []) {
       expect(data!.metaTitle).toContain(ord);
@@ -73,5 +75,12 @@ describe("CTR-titler nov. 2026 (da)", () => {
     for (const ord of side.beskrivelse) {
       expect(data!.metaDescription).toContain(ord);
     }
+  });
+});
+
+describe("opsparing-titlens tal kan regnes efter", () => {
+  test("1.000 kr./md. i 30 år, 5 %, årlig tilskrivning rundes til 837.000", () => {
+    const slut = simulerOpsparing(0, 1000, 5, 30, "aarlig").slutSaldo;
+    expect(Math.round(slut / 1000) * 1000).toBe(837000);
   });
 });

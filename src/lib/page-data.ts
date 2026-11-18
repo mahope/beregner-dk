@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { simulerOpsparing } from "./opsparing";
 import { BARSEL_2026, BOLIGSTOETTE_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
 import { BOLIGSIKRING_2026 } from "./boligsikring";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
@@ -354,6 +355,10 @@ import {
  * modullets udregning for serveringen, så en sætning aldrig lover et andet tal
  * end tabellen viser (punkt 11).
  */
+/** Eksempel i opsparing-titlen: 1.000 kr./md. i 30 år, 5 %, årlig tilskrivning (beregnerens standard). */
+const OPSPARING_TITEL_EKSEMPEL = Math.round(simulerOpsparing(0, 1000, 5, 30, "aarlig").slutSaldo / 1000) * 1000;
+const OPSPARING_TITEL_TEKST = formatBelob(OPSPARING_TITEL_EKSEMPEL, "da");
+
 const ALK = drikMedNavn("Øl, almindelig")!;
 const ALK_LET = drikMedNavn("Øl, let")!;
 const ALK_STAERK = drikMedNavn("Øl, stærk")!;
@@ -2772,11 +2777,11 @@ faqItems: kalorierFaqItems("da"),
         `Hvad er 10 % af ${PROCENT_DA.tyveFaaHundrede} kr.? Det er ${PROCENT_DA.tyveFaaHundredeSvar} kr. Beregn desuden rabat i procent, procentvis stigning og fald mellem to tal.`,
       metaTitle: `Procentberegner: 10 % af ${PROCENT_DA.tyveFaaHundrede} kr. = ${PROCENT_DA.tyveFaaHundredeSvar} kr.`,
       metaDescription:
-        `Hvor mange procent er x af y? Se også rabatten i procent: ${RABAT_DA.normalPris} kr. → ${RABAT_DA.nedsatPris} kr. = ${RABAT_DA.rabat} %. Beregn stigning og fald. Gratis, uden login.`,
+        `Hvor mange procent er x af y? Se også 10 % af et tal og rabatten i procent: ${RABAT_DA.normalPris} kr. → ${RABAT_DA.nedsatPris} kr. = ${RABAT_DA.rabat} %. Beregn stigning og fald. Gratis, uden login.`,
       keywords: ["procentberegner", "beregn procent", "procent af", "procentvis stigning", "procentvis ændring", "procentregning"],
       ogTitle: `Procentberegner: 10 % af ${PROCENT_DA.tyveFaaHundrede} kr. = ${PROCENT_DA.tyveFaaHundredeSvar} kr.`,
       ogDescription:
-        `Hvor mange procent er x af y? Se også rabatten i procent: ${RABAT_DA.normalPris} kr. → ${RABAT_DA.nedsatPris} kr. = ${RABAT_DA.rabat} %. Beregn stigning og fald. Gratis, uden login.`,
+        `Hvor mange procent er x af y? Se også 10 % af et tal og rabatten i procent: ${RABAT_DA.normalPris} kr. → ${RABAT_DA.nedsatPris} kr. = ${RABAT_DA.rabat} %. Beregn stigning og fald. Gratis, uden login.`,
       category: "Matematik",
       breadcrumbCategory: "Matematik",
       breadcrumbCategoryHref: "/kategori/matematik",
@@ -2834,7 +2839,7 @@ faqItems: kalorierFaqItems("da"),
       title: "Aldersberegner",
       description: "Hvor gammel er du præcist? Født 15. marts 1990 er du {ALDER} pr. {DATO}. Indtast din fødselsdato, så tæller vi hele år, måneder og dage.",
       metaTitle: "Aldersberegner: født 15. marts 1990 = {AAR} år",
-      metaDescription: "Hvor gammel er jeg? Født 15. marts 1990 = {ALDER} pr. {DATO}. Skriv din fødselsdato og se alder i år, måneder, uger og dage.",
+      metaDescription: "Hvor gammel er jeg? Født 15. marts 1990 = {ALDER} pr. {DATO}. Se alder i år, måneder, uger og dage.",
       keywords: ["aldersberegner", "beregn alder", "hvor gammel er jeg", "præcis alder", "alder i dage", "hvor mange dage har jeg levet", "hvor mange dage har jeg været i live", "hvor gammel er jeg i dage", "stjernetegn"],
       ogTitle: "Aldersberegner: født 15. marts 1990 = {AAR} år",
       ogDescription: "Fødselsdato til i dag: alder i år, måneder, uger og dage. Eksempel: født 15. marts 1990 = {ALDER}.",
@@ -3237,10 +3242,10 @@ faqItems: kalorierFaqItems("da"),
       slug: "opsparing",
       title: "Opsparingsberegner",
       description: "Se hvad din opsparing vokser til med renters rente.",
-      metaTitle: "Opsparingsberegner: 1.000 kr./md. i 30 år ≈ 830.000 kr.",
-      metaDescription: "Renters rente beregner: se hvad din opsparing vokser til. Eksempel: 1.000 kr./md. i 30 år med 5 % rente giver ca. 830.000 kr. Gratis.",
+      metaTitle: `Opsparingsberegner: 1.000 kr./md. i 30 år ≈ ${OPSPARING_TITEL_TEKST} kr.`,
+      metaDescription: `Renters rente beregner: se hvad din opsparing vokser til. Eksempel: 1.000 kr./md. i 30 år med 5 % rente giver ca. ${OPSPARING_TITEL_TEKST} kr. Gratis.`,
       keywords: ["opsparingsberegner", "renters rente", "beregn opsparing", "compound interest", "investering beregner"],
-      ogTitle: "Opsparingsberegner: 1.000 kr./md. i 30 år ≈ 830.000 kr.",
+      ogTitle: `Opsparingsberegner: 1.000 kr./md. i 30 år ≈ ${OPSPARING_TITEL_TEKST} kr.`,
       ogDescription: "Beregn hvad din opsparing vokser til med renters rente.",
       category: "Økonomi",
       breadcrumbCategory: "Økonomi",
