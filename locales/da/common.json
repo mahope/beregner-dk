@@ -53,6 +53,7 @@
     "privacyPolicyLink": "privatlivspolitikken",
     "cookieAccept": "Accepter",
     "cookieDecline": "Afvis",
+    "cookieSaveError": "Dit valg kunne ikke gemmes. Prøv igen.",
     "newsletterHeading": "Få besked når satser ændres",
     "newsletterBody": "Modtag opdateringer om nye 2026-satser og beregnere direkte i din indbakke. Gratis og ingen spam.",
     "newsletterPlaceholder": "din@email.dk",

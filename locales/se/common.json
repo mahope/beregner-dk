@@ -53,6 +53,7 @@
     "privacyPolicyLink": "integritetspolicyn",
     "cookieAccept": "Acceptera",
     "cookieDecline": "Avvisa",
+    "cookieSaveError": "Ditt val kunde inte sparas. Försök igen.",
     "newsletterHeading": "Få besked när satser ändras",
     "newsletterBody": "Få uppdateringar om nya 2026-satser och kalkylatorer direkt i din inkorg. Gratis och ingen spam.",
     "newsletterPlaceholder": "din@email.se",

@@ -30,6 +30,7 @@ export default function CookieConsent() {
   const { locale } = useLocale();
   const [visible, setVisible] = useState(false);
   const [settingsTrigger, setSettingsTrigger] = useState<HTMLButtonElement | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
   const declineRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function CookieConsent() {
     syncVisibility();
     const unsubscribe = subscribeToCookieConsent(syncVisibility);
     function openSettings(event: Event) {
+      setSaveFailed(false);
       setSettingsTrigger((event as CustomEvent<HTMLButtonElement>).detail);
     }
     window.addEventListener(CONSENT_SETTINGS_EVENT, openSettings);
@@ -58,7 +60,11 @@ export default function CookieConsent() {
   }, [settingsTrigger]);
 
   const choose = (accepted: boolean) => {
-    saveCookieConsent(accepted);
+    if (!saveCookieConsent(accepted)) {
+      setSaveFailed(true);
+      return;
+    }
+    setSaveFailed(false);
     setVisible(false);
     settingsTrigger?.focus();
     setSettingsTrigger(null);
@@ -84,6 +90,7 @@ export default function CookieConsent() {
                 {" "}
                 <Link className="text-blue-600 dark:text-blue-400 hover:underline" href="/privatlivspolitik">{t(l, "ui.privacyPolicyLink")}</Link>.
               </p>
+              {saveFailed && <p role="alert">{t(l, "ui.cookieSaveError")}</p>}
             </div>
             <div role="group" aria-labelledby="cookie-titel" className="shrink-0 flex gap-2 mt-3 md:mt-0">
               <button type="button" ref={declineRef} onClick={() => choose(false)} className="px-3 py-2 border dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">{t(l, "ui.cookieDecline")}</button>

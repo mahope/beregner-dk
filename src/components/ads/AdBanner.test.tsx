@@ -204,6 +204,45 @@ test("afslag fra cookieindstillingerne fjerner annonce og annoncescript", async 
   expect(ads.reloadAfterAdConsentWithdrawal).toHaveBeenCalledOnce();
 });
 
+test("et afslag erstatter tidligere samtykke selv med fuld lagerkvote", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  try {
+    storeConsent(true);
+    await renderPage(TidsberegnerPage);
+    const available = localStorage.getItem(consentKey)?.length ?? 0;
+    const setItem = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (this: Storage, key, value) {
+      if (key === consentKey && value.length > available) {
+        throw new DOMException("Storage quota exceeded", "QuotaExceededError");
+      }
+      setItem.call(this, key, value);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Cookieindstillinger" }));
+    fireEvent.click(screen.getByRole("button", { name: "Afvis" }));
+
+    expect(JSON.parse(localStorage.getItem(consentKey) ?? "null")).toMatchObject({ accepted: false });
+    expectNoAds();
+    expect(ads.reloadAfterAdConsentWithdrawal).toHaveBeenCalledOnce();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("afslag efter en scriptfejl fjerner annoncen uden genindlæsning", async () => {
+  storeConsent(true);
+  await renderPage(TidsberegnerPage);
+  const script = getScript();
+  if (!script) throw new Error("Annoncescriptet mangler");
+  fireEvent.error(script);
+
+  fireEvent.click(screen.getByRole("button", { name: "Cookieindstillinger" }));
+  fireEvent.click(screen.getByRole("button", { name: "Afvis" }));
+
+  expectNoAds();
+  expect(ads.reloadAfterAdConsentWithdrawal).not.toHaveBeenCalled();
+});
+
 test("gemt samtykke bruger ikke-personaliserede annoncer og genbruger Google-scriptet", async () => {
   vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "true");
   storeConsent(true);
