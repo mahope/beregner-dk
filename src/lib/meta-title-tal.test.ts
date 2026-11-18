@@ -2,6 +2,7 @@ import { describe, test, expect } from "vitest";
 import { getPageData } from "./page-data";
 import { NUTIDSKRONER_TITEL_EKSEMPEL } from "./page-data";
 import { kvadratmeterEksempelLignelse } from "./kvadratmeter-eksempler";
+import { dageTilDecember } from "./dage-mellem-datoer";
 import { alderLevet } from "./alder-levet";
 import { iDagISidensTidszone } from "./lokal-dato";
 import { formatBelob, formatNumber } from "./format";
@@ -94,10 +95,11 @@ const REGNETE_EKSEMPLER: {
   { slug: "procent", resulter: { da: PROCENT_TITEL_DA, se: "10 % av ett tal" } },
   {
     slug: "dato",
-    // Fast eksempel, regnet efter i `title-eksempel.test.ts`: 15. marts til
-    // 25. september 2026 er 194 dage.
+    // da: titlens dagstal skifter hver dag, så porten regner dem med samme
+    // funktion som siden. se: fast eksempel, regnet efter i
+    // `title-eksempel.test.ts`: 15. marts til 25. september 2026 er 194 dage.
     resulter: {
-      da: "15. mar–25. sep = 194 dage",
+      da: `1. december: ${dageTilDecember("da", new Date()).kort} tilbage`,
       se: "15 mar–25 sep = 194 dagar",
     },
   },

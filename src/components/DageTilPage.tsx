@@ -174,11 +174,10 @@ export async function buildDageTilMetadata(
   // does not say — and lands under Google's ~160-character cut.
   return {
     title: { absolute: titleText },
-    description: `${headline}. ${target}. ${equivalent} ${
+    description:
       dageLocale === "da"
-        ? "Gratis nedtælling, der opdateres hver dag."
-        : "Gratis nedräkning som uppdateras varje dag."
-    }`,
+        ? `${headline}. ${target}. Tallet opdateres hver dag.`
+        : `${headline}. ${target}. ${equivalent} Gratis nedräkning som uppdateras varje dag.`,
     openGraph: {
       title: titleText,
       description: `${headline}. ${target} (${targetIso}).`,

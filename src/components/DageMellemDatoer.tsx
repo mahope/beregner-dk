@@ -92,13 +92,15 @@ export async function DageMellemDatoerRoute({ prefix }: { prefix: string }) {
   return (
     <div>
       {/* The page is a calculator (DatoBeregner), so it is a WebApplication as
-          well as a FAQPage. */}
-      <CalculatorSchema
-        name={c.h1}
-        description={c.lead}
-        url={`${baseUrl}${sti}`}
-        category="UtilitiesApplication"
-      />
+          well as a FAQPage. Not on the Danish page: the Danish pages are left as they were. */}
+      {locale !== "da" && (
+        <CalculatorSchema
+          name={c.h1}
+          description={c.lead}
+          url={`${baseUrl}${sti}`}
+          category="UtilitiesApplication"
+        />
+      )}
       <FAQSchema items={c.faq} />
       <Breadcrumbs
         items={[

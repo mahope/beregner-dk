@@ -1,6 +1,8 @@
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getHomeCalculatorCount } from "@/lib/home-data";
+import type { Locale } from "@/lib/i18n";
+import { localizedPath } from "@/lib/locale-slugs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -34,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function DaContent() {
+function DaContent({ locale }: { locale: Locale }) {
   return (
     <>
       <h1 className="text-3xl font-bold mb-6">Om MinBeregner.dk</h1>
@@ -80,12 +82,12 @@ function DaContent() {
 
         <h3>Bolig og lån</h3>
         <ul>
-          <li><Link href="/boliglaan">Boliglån</Link> - beregn boliglånsydelse</li>
-          <li><Link href="/laaneberegner">Låneberegner</Link> - generel låneberegner</li>
-          <li><Link href="/billaan">Billån</Link> - beregn billånsydelse</li>
-          <li><Link href="/forbrugslaan">Forbrugslån</Link> - beregn forbrugslånsydelse</li>
-          <li><Link href="/renteberegner">Renteberegner</Link> - beregn renter og afdrag</li>
-          <li><Link href="/opsparing">Opsparingsberegner</Link> - se renters rente-effekt</li>
+          <li><Link href={localizedPath("/boliglaan", locale)}>Boliglån</Link> - beregn boliglånsydelse</li>
+          <li><Link href={localizedPath("/laaneberegner", locale)}>Låneberegner</Link> - generel låneberegner</li>
+          <li><Link href={localizedPath("/billaan", locale)}>Billån</Link> - beregn billånsydelse</li>
+          <li><Link href={localizedPath("/forbrugslaan", locale)}>Forbrugslån</Link> - beregn forbrugslånsydelse</li>
+          <li><Link href={localizedPath("/renteberegner", locale)}>Renteberegner</Link> - beregn renter og afdrag</li>
+          <li><Link href={localizedPath("/opsparing", locale)}>Opsparingsberegner</Link> - se renters rente-effekt</li>
           <li><Link href="/ejendomsvaerdiskat">Ejendomsværdiskat</Link> - beregn boligskat 2026</li>
           <li><Link href="/boligstoette">Boligstøtte</Link> - se standardinterval og formuegrænser</li>
           <li><Link href="/husleje">Huslejebudget</Link> - hvad har du råd til?</li>
@@ -99,15 +101,15 @@ function DaContent() {
 
         <h3>Hverdag og praktisk</h3>
         <ul>
-          <li><Link href="/elberegner">Elberegner</Link> - se hvad dine apparater koster</li>
-          <li><Link href="/braendstof">Brændstof</Link> - beregn transportomkostninger</li>
+          <li><Link href={localizedPath("/elberegner", locale)}>Elberegner</Link> - se hvad dine apparater koster</li>
+          <li><Link href={localizedPath("/braendstof", locale)}>Brændstof</Link> - beregn transportomkostninger</li>
           <li><Link href="/bil">Bil værdtab</Link> - beregn bilens samlede omkostninger</li>
           <li><Link href="/timepris">Timeprisberegner</Link> - find din freelance-timepris</li>
           <li><Link href="/kvadratmeter">Kvadratmeter</Link> - beregn arealer</li>
           <li><Link href="/dato">Datoberegner</Link> - beregn dage mellem datoer</li>
           <li><Link href="/alder">Aldersberegner</Link> - beregn din præcise alder</li>
-          <li><Link href="/tidsberegner">Tidsberegner</Link> - beregn tid mellem tidspunkter</li>
-          <li><Link href="/tidszone">Tidszoneberegner</Link> - se klokken i andre lande</li>
+          <li><Link href={localizedPath("/tidsberegner", locale)}>Tidsberegner</Link> - beregn tid mellem tidspunkter</li>
+          <li><Link href={localizedPath("/tidszone", locale)}>Tidszoneberegner</Link> - se klokken i andre lande</li>
         </ul>
 
         <h2>Præcision og ansvarsfraskrivelse</h2>
@@ -280,7 +282,7 @@ export default async function OmPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <Breadcrumbs items={[{ name: breadcrumbName, href: "/om" }]} />
-      {locale === "se" ? <SeContent /> : <DaContent />}
+      {locale === "se" ? <SeContent /> : <DaContent locale={locale} />}
     </div>
   );
 }

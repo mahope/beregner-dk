@@ -533,7 +533,7 @@ describe("dage-til meta descriptions", () => {
     )!;
     const description = String((await metadataFor("da", "grundlovsdag")).description);
     expect(description).toBe(
-      "Der er 251 dage til grundlovsdag. 5. juni 2027 er en lørdag. Det svarer til 35 uger og 6 dage. Gratis nedtælling, der opdateres hver dag."
+      "Der er 251 dage til grundlovsdag. 5. juni 2027 er en lørdag. Tallet opdateres hver dag."
     );
   });
 
@@ -545,7 +545,7 @@ describe("dage-til meta descriptions", () => {
     const juleaften = await metadataFor("da", "24-december", new Date("2026-12-24T09:00:00.000Z"));
     const description = String(juleaften.description);
     expect(description).toBe(
-      "Det er juleaften — 0 dage. 24. december 2026 er en torsdag. Der er 0 dage tilbage. Gratis nedtælling, der opdateres hver dag."
+      "Det er juleaften — 0 dage. 24. december 2026 er en torsdag. Tallet opdateres hver dag."
     );
     expect(description.length).toBeLessThanOrEqual(160);
   });

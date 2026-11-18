@@ -8,6 +8,7 @@ import { TIDSZONER } from "./tidszone-reference";
 import { forkortBrok } from "./brok";
 import { alderLevet, formatDageLived } from "./alder-levet";
 import { formatAlder } from "./alder-eksempler";
+import { dageTilDecember } from "./dage-mellem-datoer";
 import { formatBelob, formatNumber, getIntlLocale } from "./format";
 import { iDagISidensTidszone } from "./lokal-dato";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
@@ -563,7 +564,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Kvadratmeterberegner: 5 x 4 m = 20 m², med pris pr. m²",
+      title: "Kvadratmeterberegner: 5 x 4 m = 20 m²",
       area: "20 m²",
       heading: "Et rum på 5 x 4 m er 20 m²",
       price: "3.000 kr.",
@@ -805,9 +806,9 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      titel: "Datoberegner: dage mellem datoer, 15. mar–25. sep = 194 dage",
+      titel: "Beregn dage til 1. december: {DAGE_TIL_DEC} tilbage",
       heading: "Beregn antal dage mellem to datoer",
-      intent: "dage mellem to datoer",
+      intent: "antal dage mellem to datoer",
       answer: "Vælg en startdato og en slutdato",
       months: "ca. måneder",
       countdown: "Hvor mange dage er der til en dato?",
@@ -825,7 +826,10 @@ describe("getPageData", () => {
     "has answer-first date metadata for $locale",
     ({ locale, titel, heading, intent, answer, months, countdown }) => {
       const data = getPageData("dato", locale)!;
-      const title = titel;
+      // Titlens dagtal regnes hver dag, så testen regner det samme tal i stedet
+      // for at skrive «58» — ellers ville porten blive rød hver 1. december.
+      const { kort } = dageTilDecember(locale, new Date());
+      const title = titel.replaceAll("{DAGE_TIL_DEC}", kort);
 
       expect(data.title).toBe(heading);
       expect(data.metaTitle).toBe(title);
@@ -833,9 +837,12 @@ describe("getPageData", () => {
       expect(data.description).toContain(answer);
       expect(data.description).toContain(months);
       expect(data.metaDescription).toContain(intent);
+      // Den svenske beskrivelse er omskrevet til «dagar mellan datum» og nævner ikke længere måneder.
+      if (locale === "da") expect(data.metaDescription).toContain(months);
       expect(data.metaDescription.length).toBeLessThanOrEqual(160);
       expect(data.ogTitle).toBe(title);
       expect(data.ogDescription).toContain(intent);
+      if (locale === "da") expect(data.ogDescription).toContain(months);
       expect(data.schemaDescription).toContain(intent);
       expect(data.schemaDescription).toContain(months);
 
@@ -847,10 +854,10 @@ describe("getPageData", () => {
       // om noget andet. Beskrivelsen SKAL desuden begynde med spørgsmålet
       // og ikke gentage titlen: de to var ens, hvilket koster halve
       // snippet-pladsen på det samme "se mere"-link.
-      // 8/11: titlen er målrettet «dage mellem datoer» (se `title-eksempel.test.ts`),
+      // 8/11: den svenske titel er målrettet «dagar mellan datum» (se `title-eksempel.test.ts`),
       // men tællesøgningerne lever videre i beskrivelsen, som stadig starter
       // med spørgsmålet.
-      expect(data.metaTitle).toMatch(/dage mellem datoer|dagar mellan datum/);
+      expect(data.metaTitle).toMatch(/dage til 1\. december|dagar mellan datum/);
       expect(data.metaDescription.startsWith(countdown)).toBe(true);
       expect(data.metaDescription).not.toBe(data.metaTitle);
     }
