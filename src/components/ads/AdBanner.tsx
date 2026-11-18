@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { useLocaleOptional } from "@/components/LocaleProvider";
-import { ADSENSE_PAGES } from "@/lib/ads";
+import { ADSENSE_PAGES, isAdSenseEnabled, reloadAfterAdConsentWithdrawal } from "@/lib/ads";
 import { hasAdConsent, subscribeToCookieConsent } from "@/lib/cookie-consent";
 
 const AD_CLIENT = "ca-pub-1902871361369866";
@@ -20,6 +20,25 @@ declare global {
 }
 
 let scriptLoaded = false;
+let stopWatchingConsent: (() => void) | undefined;
+const pendingScripts = new Set<symbol>();
+
+function stopConsentWatcher() {
+  stopWatchingConsent?.();
+  stopWatchingConsent = undefined;
+}
+
+function watchConsentAfterScriptInsertion() {
+  stopWatchingConsent ??= subscribeToCookieConsent(() => {
+    if (hasAdConsent()) return;
+
+    stopConsentWatcher();
+    scriptLoaded = false;
+    pendingScripts.clear();
+    // Removing the script element cannot stop Google code that has already executed.
+    reloadAfterAdConsentWithdrawal();
+  });
+}
 
 function nonPersonalizedQueue() {
   const queue: AdQueue = window.adsbygoogle ?? ([] as Record<string, never>[]);
@@ -58,14 +77,23 @@ function AdUnit({ slot }: { slot: string }) {
     script.src = SCRIPT_URL;
     script.async = true;
     script.crossOrigin = "anonymous";
+    const pendingScript = Symbol();
+    pendingScripts.add(pendingScript);
     script.onload = () => {
+      if (!pendingScripts.delete(pendingScript)) return;
       scriptLoaded = true;
-      requestAd();
+      if (script.isConnected) requestAd();
     };
+    script.onerror = () => {
+      pendingScripts.delete(pendingScript);
+      script.remove();
+      if (!scriptLoaded && pendingScripts.size === 0) stopConsentWatcher();
+    };
+    watchConsentAfterScriptInsertion();
     document.head.append(script);
 
     return () => {
-      script.onload = null;
+      // Removal may leave a pending script running. Keep its load and error handlers.
       script.remove();
     };
   }, [accepted]);
@@ -88,9 +116,8 @@ function AdUnit({ slot }: { slot: string }) {
 
 export function ResultAd({ page }: { page: string }) {
   const locale = useLocaleOptional()?.locale;
-  const enabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED;
   const slot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT;
   if (locale !== "da" || !ADSENSE_PAGES.has(page)) return null;
-  if ((enabled !== "1" && enabled !== "true") || !slot || !/^\d+$/.test(slot)) return null;
+  if (!isAdSenseEnabled() || !slot || !/^\d+$/.test(slot)) return null;
   return <AdUnit key={slot} slot={slot} />;
 }

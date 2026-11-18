@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isAdSenseEnabled } from "@/lib/ads";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { CONSENT_STORAGE_KEY } from "@/lib/cookie-consent";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
@@ -11,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const desc =
     locale === "se"
       ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible och Umami (cookiefritt).`
-      : locale === "da"
+      : locale === "da" && isAdSenseEnabled()
         ? `Læs om cookies og localStorage på ${dc.siteName}. Google AdSense bruges på udvalgte beregnersider efter samtykke.`
         : `Læs om vores brug af cookies og localStorage på ${dc.siteName}.`;
   const canonicalUrl = `${dc.baseUrl}/cookiepolitik`;
@@ -115,8 +116,8 @@ function DaContent({ showAdPolicy }: { showAdPolicy: boolean }) {
       <ul>
         <li>Blokere eller slette cookies via dine browserindstillinger</li>
         <li>
-          Trække dit samtykke tilbage ved at rydde sidens gemte data i
-          browseren, genindlæse siden og vælge Afvis i cookiebanneret.
+          Ændre dit valg under <strong>Cookieindstillinger</strong> i footeren.
+          Vælg Afvis for at trække dit samtykke tilbage.
         </li>
       </ul>
 
@@ -202,7 +203,7 @@ function SeContent() {
       </p>
       <ul>
         <li>Blockera eller radera cookies via dina webbläsarinställningar</li>
-        <li>Rensa localStorage via webbläsarens utvecklarverktyg</li>
+        <li>Ändra ditt val under <strong>Cookieinställningar</strong> i sidfoten</li>
       </ul>
 
       <h2>5. Kontakt</h2>
@@ -228,7 +229,7 @@ export default async function CookiePolitikPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <Breadcrumbs items={[{ name: breadcrumbName, href: "/cookiepolitik" }]} />
-      {locale === "se" ? <SeContent /> : <DaContent showAdPolicy={locale === "da"} />}
+      {locale === "se" ? <SeContent /> : <DaContent showAdPolicy={locale === "da" && isAdSenseEnabled()} />}
     </div>
   );
 }

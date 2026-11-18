@@ -1,5 +1,6 @@
 export const CONSENT_STORAGE_KEY = "mb_cookie_consent_v2";
 export const CONSENT_CHANGED_EVENT = "mb-consent-changed";
+export const CONSENT_SETTINGS_EVENT = "mb-consent-settings";
 export const CONSENT_VERSION = 2;
 
 export function readCookieConsent() {
@@ -17,15 +18,24 @@ export function hasAdConsent() {
 }
 
 export function saveCookieConsent(accepted: boolean) {
+  const choice = { accepted, version: CONSENT_VERSION };
   try {
-    localStorage.setItem(
-      CONSENT_STORAGE_KEY,
-      JSON.stringify({ date: Date.now(), accepted, version: CONSENT_VERSION }),
-    );
+    localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify({ date: Date.now(), ...choice }));
   } catch {
-    return;
+    if (accepted) return false;
+    try {
+      // A refusal can exceed a full quota by one byte. Leave out the optional timestamp.
+      localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(choice));
+    } catch {
+      try {
+        localStorage.removeItem(CONSENT_STORAGE_KEY);
+      } catch {
+        return false;
+      }
+    }
   }
   window.dispatchEvent(new Event(CONSENT_CHANGED_EVENT));
+  return true;
 }
 
 export function subscribeToCookieConsent(onChange: () => void) {

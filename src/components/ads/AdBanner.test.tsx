@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import Home from "@/app/page";
 import BMIPage from "@/app/bmi/page";
@@ -6,6 +6,7 @@ import TidsberegnerPage from "@/app/tidsberegner/page";
 import CookieConsent from "@/components/CookieConsent";
 import Footer from "@/components/Footer";
 import { LocaleProvider } from "@/components/LocaleProvider";
+import * as ads from "@/lib/ads";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import type { Locale } from "@/lib/i18n";
@@ -51,6 +52,7 @@ function expectNoAds() {
 }
 
 beforeEach(() => {
+  vi.spyOn(ads, "reloadAfterAdConsentWithdrawal").mockImplementation(() => {});
   vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "1");
   vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_RESULT", "1234567890");
   localStorage.clear();
@@ -58,6 +60,9 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  localStorage.removeItem(consentKey);
+  fireEvent(window, new StorageEvent("storage", { key: consentKey }));
+  vi.restoreAllMocks();
   vi.unstubAllEnvs();
 });
 
@@ -156,6 +161,88 @@ test.each([
   expectNoAds();
 });
 
+test.each([
+  ["da", "Cookieindstillinger", "Accepter", "Afvis"],
+  ["se", "Cookieinställningar", "Acceptera", "Avvisa"],
+] as const)("locale %s kan ændre det gemte valg fra footeren med flaget fra", async (locale, settings, accept, decline) => {
+  vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "0");
+  await renderPage(TidsberegnerPage, locale);
+  expectNoAds();
+
+  fireEvent.click(screen.getByRole("button", { name: accept }));
+  expect(JSON.parse(localStorage.getItem(consentKey) ?? "null")).toMatchObject({ accepted: true, version: 2 });
+  expectNoAds();
+
+  const trigger = within(screen.getByRole("contentinfo")).getByRole("button", { name: settings });
+  expect(trigger.closest("footer")).not.toBeNull();
+  fireEvent.click(trigger);
+  expect(screen.getByRole("button", { name: decline })).toHaveFocus();
+  fireEvent.click(screen.getByRole("button", { name: decline }));
+  expect(JSON.parse(localStorage.getItem(consentKey) ?? "null")).toMatchObject({ accepted: false, version: 2 });
+  expect(trigger).toHaveFocus();
+  expectNoAds();
+
+  cleanup();
+  await renderPage(TidsberegnerPage, locale);
+  expect(screen.queryByRole("button", { name: accept })).not.toBeInTheDocument();
+  fireEvent.click(within(screen.getByRole("contentinfo")).getByRole("button", { name: settings }));
+  fireEvent.click(screen.getByRole("button", { name: accept }));
+  expect(JSON.parse(localStorage.getItem(consentKey) ?? "null")).toMatchObject({ accepted: true, version: 2 });
+  expectNoAds();
+  expect(ads.reloadAfterAdConsentWithdrawal).not.toHaveBeenCalled();
+});
+
+test("afslag fra cookieindstillingerne fjerner annonce og annoncescript", async () => {
+  storeConsent(true);
+  await renderPage(TidsberegnerPage);
+  expect(getScript()).not.toBeNull();
+
+  fireEvent.click(screen.getByRole("button", { name: "Cookieindstillinger" }));
+  fireEvent.click(screen.getByRole("button", { name: "Afvis" }));
+
+  expectNoAds();
+  expect(ads.reloadAfterAdConsentWithdrawal).toHaveBeenCalledOnce();
+});
+
+test("et afslag erstatter tidligere samtykke selv med fuld lagerkvote", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  try {
+    storeConsent(true);
+    await renderPage(TidsberegnerPage);
+    const available = localStorage.getItem(consentKey)?.length ?? 0;
+    const setItem = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (this: Storage, key, value) {
+      if (key === consentKey && value.length > available) {
+        throw new DOMException("Storage quota exceeded", "QuotaExceededError");
+      }
+      setItem.call(this, key, value);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Cookieindstillinger" }));
+    fireEvent.click(screen.getByRole("button", { name: "Afvis" }));
+
+    expect(JSON.parse(localStorage.getItem(consentKey) ?? "null")).toMatchObject({ accepted: false });
+    expectNoAds();
+    expect(ads.reloadAfterAdConsentWithdrawal).toHaveBeenCalledOnce();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("afslag efter en scriptfejl fjerner annoncen uden genindlæsning", async () => {
+  storeConsent(true);
+  await renderPage(TidsberegnerPage);
+  const script = getScript();
+  if (!script) throw new Error("Annoncescriptet mangler");
+  fireEvent.error(script);
+
+  fireEvent.click(screen.getByRole("button", { name: "Cookieindstillinger" }));
+  fireEvent.click(screen.getByRole("button", { name: "Afvis" }));
+
+  expectNoAds();
+  expect(ads.reloadAfterAdConsentWithdrawal).not.toHaveBeenCalled();
+});
+
 test("gemt samtykke bruger ikke-personaliserede annoncer og genbruger Google-scriptet", async () => {
   vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "true");
   storeConsent(true);
@@ -180,4 +267,12 @@ test("gemt samtykke bruger ikke-personaliserede annoncer og genbruger Google-scr
   expect(getScript()).toBeNull();
   expect(push).toHaveBeenCalledTimes(2);
   expect(push.mock.results.map(({ value }) => value)).toEqual([1, 1]);
+
+  cleanup();
+  await renderPage(BMIPage);
+  storeConsent(false);
+  fireEvent(window, new StorageEvent("storage", { key: consentKey }));
+
+  expect(ads.reloadAfterAdConsentWithdrawal).toHaveBeenCalledOnce();
+  expectNoAds();
 });

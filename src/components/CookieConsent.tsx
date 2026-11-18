@@ -1,19 +1,37 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
 
 import {
+  CONSENT_SETTINGS_EVENT,
   CONSENT_VERSION,
   readCookieConsent,
   saveCookieConsent,
   subscribeToCookieConsent,
 } from "@/lib/cookie-consent";
 
+export function CookieSettingsButton({ label }: { label: string }) {
+  return (
+    <button
+      type="button"
+      className="text-left underline underline-offset-2 hover:text-white transition-colors"
+      onClick={(event) => window.dispatchEvent(
+        new CustomEvent(CONSENT_SETTINGS_EVENT, { detail: event.currentTarget }),
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
 export default function CookieConsent() {
   const { locale } = useLocale();
   const [visible, setVisible] = useState(false);
+  const [settingsTrigger, setSettingsTrigger] = useState<HTMLButtonElement | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const declineRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function syncVisibility() {
@@ -25,15 +43,34 @@ export default function CookieConsent() {
     }
 
     syncVisibility();
-    return subscribeToCookieConsent(syncVisibility);
+    const unsubscribe = subscribeToCookieConsent(syncVisibility);
+    function openSettings(event: Event) {
+      setSaveFailed(false);
+      setSettingsTrigger((event as CustomEvent<HTMLButtonElement>).detail);
+    }
+    window.addEventListener(CONSENT_SETTINGS_EVENT, openSettings);
+    return () => {
+      unsubscribe();
+      window.removeEventListener(CONSENT_SETTINGS_EVENT, openSettings);
+    };
   }, [locale]);
 
+  useEffect(() => {
+    if (settingsTrigger) declineRef.current?.focus();
+  }, [settingsTrigger]);
+
   const choose = (accepted: boolean) => {
-    saveCookieConsent(accepted);
+    if (!saveCookieConsent(accepted)) {
+      setSaveFailed(true);
+      return;
+    }
+    setSaveFailed(false);
     setVisible(false);
+    settingsTrigger?.focus();
+    setSettingsTrigger(null);
   };
 
-  if (!visible) return null;
+  if (!visible && !settingsTrigger) return null;
 
   const l = locale as "da" | "no" | "se";
 
@@ -53,9 +90,10 @@ export default function CookieConsent() {
                 {" "}
                 <Link className="text-blue-600 dark:text-blue-400 hover:underline" href="/privatlivspolitik">{t(l, "ui.privacyPolicyLink")}</Link>.
               </p>
+              {saveFailed && <p role="alert">{t(l, "ui.cookieSaveError")}</p>}
             </div>
             <div role="group" aria-labelledby="cookie-titel" className="shrink-0 flex gap-2 mt-3 md:mt-0">
-              <button type="button" onClick={() => choose(false)} className="px-3 py-2 border dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">{t(l, "ui.cookieDecline")}</button>
+              <button type="button" ref={declineRef} onClick={() => choose(false)} className="px-3 py-2 border dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">{t(l, "ui.cookieDecline")}</button>
               <button type="button" onClick={() => choose(true)} className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">{t(l, "ui.cookieAccept")}</button>
             </div>
           </div>
