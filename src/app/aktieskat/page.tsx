@@ -99,7 +99,7 @@ export default async function AktieskatPage() {
         <RelatedCalculators current="/aktieskat" />
       </div>
 
-      <Sidebar currentHref="/aktieskat" adSlotId="aktieskat-sidebar" />
+      <Sidebar currentHref="/aktieskat" />
     </div>
   );
 }

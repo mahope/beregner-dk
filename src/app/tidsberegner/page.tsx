@@ -1,3 +1,4 @@
+import { ResultAd } from "@/components/ads/AdBanner";
 import TidsBeregner from "@/components/TidsBeregner";
 import PlusTidBeregner from "@/components/PlusTidBeregner";
 import MinutterTilTimerBeregner from "@/components/MinutterTilTimerBeregner";
@@ -1089,6 +1090,8 @@ export default async function TidsberegnerPage() {
         </ul>
       </div>
       )}
+
+      <ResultAd page="/tidsberegner" />
 
       {/* Search Console: /tidsberegner er sidens tredjestørste side (79.641
           visninger, pos. 6,7) og dens egne søgninger er «hvor lang tid er der

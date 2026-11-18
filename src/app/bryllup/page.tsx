@@ -86,7 +86,7 @@ export default async function BryllupPage() {
         <RelatedCalculators current="/bryllup" />
       </div>
 
-      <Sidebar currentHref="/bryllup" adSlotId="bryllup-sidebar" />
+      <Sidebar currentHref="/bryllup" />
     </div>
   );
 }

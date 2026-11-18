@@ -142,7 +142,7 @@ export default async function ArealPage() {
 
         <RelatedCalculators current="/areal" />
       </div>
-      <Sidebar currentHref="/areal" adSlotId="areal-sidebar" />
+      <Sidebar currentHref="/areal" />
     </div>
   );
 }

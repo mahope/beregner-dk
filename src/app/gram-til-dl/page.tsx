@@ -145,7 +145,7 @@ export default async function GramTilDlPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/gram-til-dl" adSlotId="gram-til-dl-sidebar" />
+      <Sidebar currentHref="/gram-til-dl" />
     </div>
   );
 }

@@ -99,7 +99,7 @@ export default async function LonEfterSkattPage() {
 
         <RelatedCalculators current="/lon-efter-skatt" />
       </div>
-      <Sidebar currentHref="/lon-efter-skatt" adSlotId="lon-efter-skatt-sidebar" />
+      <Sidebar currentHref="/lon-efter-skatt" />
     </div>
   );
 }

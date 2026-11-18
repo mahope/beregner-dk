@@ -651,12 +651,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 
 ## G. Monetisering & Vaekst (7 opgaver)
 
-### G1. AdSense aktivering og optimering
-- [x] Naar AdSense er godkendt: aktiver script i layout.tsx (nu kommenteret ud)
-- Placer annoncer strategisk: sidebar, mellem FAQ og beregner, footer
-- Test ad performance med Plausible events (ad_clicked, ad_impression)
-- Implementer ad-free oplevelse paa foerste visit (vis ads foerst ved genbrug)
-- Respekter max 3 ads per side for UX
+### G1. AdSense
+- Se [annonceopsætningen](docs/annoncer.md) for placering, aktivering og samtykke.
 
 ### G3. Email-capture og nyhedsbrev
 - [x] Implementer email-signup paa forsiden og beregner-sider

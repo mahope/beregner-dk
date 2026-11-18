@@ -127,7 +127,7 @@ export default async function LaaneberegnerPage() {
       {/* Related Calculators */}
       <RelatedCalculators current="/laaneberegner" />
       </div>
-      <Sidebar currentHref="/laaneberegner" adSlotId="laaneberegner-sidebar" />
+      <Sidebar currentHref="/laaneberegner" />
     </div>
   );
 }

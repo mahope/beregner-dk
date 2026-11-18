@@ -90,7 +90,7 @@ export default async function RygestopPage() {
 
         <RelatedCalculators current="/rygestop" />
       </div>
-      <Sidebar currentHref="/rygestop" adSlotId="rygestop-sidebar" />
+      <Sidebar currentHref="/rygestop" />
     </div>
   );
 }

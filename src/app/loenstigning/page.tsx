@@ -90,7 +90,7 @@ export default async function LoenstigningPage() {
 
         <RelatedCalculators current="/loenstigning" />
       </div>
-      <Sidebar currentHref="/loenstigning" adSlotId="loenstigning-sidebar" />
+      <Sidebar currentHref="/loenstigning" />
     </div>
   );
 }

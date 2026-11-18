@@ -88,7 +88,7 @@ export default async function UgenummerPage() {
 
         <RelatedCalculators current="/ugenummer" />
       </div>
-      <Sidebar currentHref="/ugenummer" adSlotId="ugenummer-sidebar" />
+      <Sidebar currentHref="/ugenummer" />
     </div>
   );
 }

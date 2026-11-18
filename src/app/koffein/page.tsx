@@ -126,7 +126,7 @@ export default async function KoffeinPage() {
 
         <RelatedCalculators current="/koffein" />
       </div>
-      <Sidebar currentHref="/koffein" adSlotId="koffein-sidebar" />
+      <Sidebar currentHref="/koffein" />
     </div>
   );
 }

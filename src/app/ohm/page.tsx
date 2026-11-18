@@ -87,7 +87,7 @@ export default async function OhmPage() {
 
         <RelatedCalculators current="/ohm" />
       </div>
-      <Sidebar currentHref="/ohm" adSlotId="ohm-sidebar" />
+      <Sidebar currentHref="/ohm" />
     </div>
   );
 }

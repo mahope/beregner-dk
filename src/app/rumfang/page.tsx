@@ -131,7 +131,7 @@ export default async function RumfangPage() {
 
         <RelatedCalculators current="/rumfang" />
       </div>
-      <Sidebar currentHref="/rumfang" adSlotId="rumfang-sidebar" />
+      <Sidebar currentHref="/rumfang" />
     </div>
   );
 }

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
-import { InlineAd } from "@/components/ads/AdBanner";
 import { formatNumber } from "@/lib/format";
 import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
@@ -116,9 +115,6 @@ export default function PensionGuidePage() {
           selv på et tidspunkt. I denne guide giver vi dig konkrete tal, tommelfingerregler og 
           en forståelse af det danske pensionssystem, så du kan planlægge din økonomiske fremtid.
         </p>
-
-        {/* Inline Ad - After introduction */}
-        <InlineAd slotId="pension-after-intro" />
 
         <h2>Den korte version: Hvor meget skal du spare?</h2>
         <p>
@@ -487,9 +483,6 @@ export default function PensionGuidePage() {
         </div>
 
         <h2>Ofte stillede spørgsmål</h2>
-        
-        {/* Inline Ad - Before FAQ */}
-        <InlineAd slotId="pension-before-faq" />
         
         {faqItems.map((item, index) => (
           <div key={index} className="mb-4">

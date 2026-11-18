@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ResultAd } from "@/components/ads/AdBanner";
 import { RuteAfstand } from "@/components/RuteAfstand";
 import { aarstal } from "@/lib/dato-eksempler";
 import { formatNumber } from "@/lib/format";
@@ -21,22 +22,25 @@ export default function AfstandsBeregner() {
   const [kmEnVej, setKmEnVej] = useState<number | null>(null);
 
   return (
-    <div>
-      <RuteAfstand onAfstand={setKmEnVej} fraLabel="Fra-adresse" tilLabel="Til-adresse" />
-      {kmEnVej !== null && (
-        <div className="rounded-xl bg-blue-50 p-4 text-sm dark:bg-blue-950 dark:text-blue-100">
-          <p>
-            <strong>Tur/retur:</strong> {km(kmEnVej * 2)} km. Hvis du kører tur/retur hver
-            arbejdsdag, bliver det {km(kmEnVej * 2 * ARBEJDSDAGE_2026)} km om året — 2026 har{" "}
-            {ARBEJDSDAGE_2026} arbejdsdage.
-          </p>
-          <p className="mt-2">
-            <Link href="/befordringsfradrag" className="font-medium underline">
-              Læg afstanden ind i dit kørselsfradrag
-            </Link>
-          </p>
-        </div>
-      )}
-    </div>
+    <>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
+        <RuteAfstand onAfstand={setKmEnVej} fraLabel="Fra-adresse" tilLabel="Til-adresse" />
+        {kmEnVej !== null && (
+          <div className="rounded-xl bg-blue-50 p-4 text-sm dark:bg-blue-950 dark:text-blue-100">
+            <p>
+              <strong>Tur/retur:</strong> {km(kmEnVej * 2)} km. Hvis du kører tur/retur hver
+              arbejdsdag, bliver det {km(kmEnVej * 2 * ARBEJDSDAGE_2026)} km om året — 2026 har{" "}
+              {ARBEJDSDAGE_2026} arbejdsdage.
+            </p>
+            <p className="mt-2">
+              <Link href="/befordringsfradrag" className="font-medium underline">
+                Læg afstanden ind i dit kørselsfradrag
+              </Link>
+            </p>
+          </div>
+        )}
+      </div>
+      {kmEnVej !== null && <ResultAd page="/afstand-mellem-adresser" />}
+    </>
   );
 }
