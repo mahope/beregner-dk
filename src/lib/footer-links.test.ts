@@ -41,8 +41,8 @@ describe("footer links", () => {
     }
   });
 
-  test("footer credits Mahoje with a followed, noopener link", () => {
-    expect(footerSource).toMatch(/href="https:\/\/mahoje\.dk"\s+rel="noopener"/);
-    expect(footerSource).not.toContain("nofollow");
+  test("footer does not display an agency credit", () => {
+    expect(footerSource).not.toContain("Lavet af");
+    expect(footerSource).not.toContain('href="https://mahoje.dk"');
   });
 });
