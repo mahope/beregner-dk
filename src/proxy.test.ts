@@ -226,7 +226,6 @@ describe("proxy IndexNow key file", () => {
       "/abc12345",
       "/abc_12345.txt",
       "/robots.txt",
-      "/ads.txt",
     ]) {
       const response = proxy(makeRequest("minberegner.dk", path));
       expect(response.headers.get("x-middleware-rewrite"), path).toBeNull();
@@ -245,7 +244,6 @@ describe("proxy IndexNow key file", () => {
       .filter((name) => getIndexNowKeyFromPathname(`/${name}`) !== null);
 
     expect(keyShaped).toEqual([]);
-    expect(readdirSync(publicDir)).toContain("ads.txt");
   });
 
   /**

@@ -37,10 +37,6 @@ import {
   formatTargetDate,
 } from "@/lib/dage-til";
 
-vi.mock("@/components/ads/AdBanner", () => ({
-  ResultAd: () => <p>Annonce</p>,
-}));
-
 vi.mock("@/components/TidsBeregner", () => ({
   default: () => <div>Tidsværktøj</div>,
 }));
@@ -63,17 +59,6 @@ describe("tidsberegner page", () => {
   beforeEach(() => {
     vi.mocked(getLocale).mockResolvedValue("da");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
-  });
-
-  test("viser annoncen efter alle værktøjer", async () => {
-    const html = renderToStaticMarkup(await TidsberegnerPage());
-    const annonce = html.indexOf("<p>Annonce</p>");
-
-    expect(annonce).toBeGreaterThan(-1);
-    for (const værktøj of ["Tidsværktøj", "Plus-tidsværktøj", "Minutter-til-timer-værktøj"]) {
-      expect(html.indexOf(værktøj)).toBeGreaterThan(-1);
-      expect(html.indexOf(værktøj)).toBeLessThan(annonce);
-    }
   });
 
   test.each([

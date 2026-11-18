@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { isAdSenseEnabled } from "@/lib/ads";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { CONSENT_STORAGE_KEY } from "@/lib/cookie-consent";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
@@ -12,9 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const desc =
     locale === "se"
       ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible och Umami (cookiefritt).`
-      : locale === "da" && isAdSenseEnabled()
-        ? `Læs om cookies og localStorage på ${dc.siteName}. Google AdSense bruges på udvalgte beregnersider efter samtykke.`
-        : `Læs om vores brug af cookies og localStorage på ${dc.siteName}.`;
+      : `Læs om vores brug af cookies og localStorage på ${dc.siteName}.`;
   const canonicalUrl = `${dc.baseUrl}/cookiepolitik`;
   return {
     title,
@@ -35,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function DaContent({ showAdPolicy }: { showAdPolicy: boolean }) {
+function DaContent() {
   return (
     <div className="prose dark:prose-invert max-w-3xl">
       <h1>Cookiepolitik</h1>
@@ -45,7 +42,7 @@ function DaContent({ showAdPolicy }: { showAdPolicy: boolean }) {
         bestræber os på at indsamle så lidt data som muligt.
       </p>
       <p>
-        <strong>Sidst opdateret:</strong> 17. november 2026
+        <strong>Sidst opdateret:</strong> 18. november 2026
       </p>
 
       <h2>1. Nødvendige cookies og localStorage</h2>
@@ -84,21 +81,7 @@ function DaContent({ showAdPolicy }: { showAdPolicy: boolean }) {
         forbedre siden.
       </p>
 
-      {showAdPolicy && (
-        <>
-          <h2>3. Annoncecookies (Google AdSense)</h2>
-          <p>
-            Når annoncer er slået til på MinBeregner.dk, kan Google AdSense vise
-            én annonce under resultatet på udvalgte beregnersider. Vi indlæser
-            først Google AdSense, når du har accepteret annoncecookies i
-            cookiebanneret. Vi beder kun Google om ikke-personaliserede annoncer.
-            Google kan bruge cookies til blandt andet at begrænse, hvor ofte du
-            ser en annonce, og til at måle annoncer.
-          </p>
-        </>
-      )}
-
-      <h2>{showAdPolicy ? 4 : 3}. Beregninger og brugerdata</h2>
+      <h2>3. Beregninger og brugerdata</h2>
       <p>
         Når du ikke bruger &quot;Del beregning&quot;, sker alle beregninger på
         MinBeregner.dk lokalt i din browser, og de tal, du indtaster, sendes ikke i
@@ -109,25 +92,24 @@ function DaContent({ showAdPolicy }: { showAdPolicy: boolean }) {
         Vælg derfor kun at dele links med data, du har tilladelse til at videregive.
       </p>
 
-      <h2>{showAdPolicy ? 5 : 4}. Sådan styrer du cookies</h2>
+      <h2>4. Sådan styrer du cookies</h2>
       <p>
         Du kan til enhver tid:
       </p>
       <ul>
         <li>Blokere eller slette cookies via dine browserindstillinger</li>
         <li>
-          Ændre dit valg under <strong>Cookieindstillinger</strong> i footeren.
-          Vælg Afvis for at trække dit samtykke tilbage.
+          Ændre dit gemte cookievalg under <strong>Cookieindstillinger</strong> i sidefoden.
         </li>
       </ul>
 
-      <h2>{showAdPolicy ? 6 : 5}. Kontakt</h2>
+      <h2>5. Kontakt</h2>
       <p>
         Har du spørgsmål til vores cookiepolitik, er du velkommen til at
         kontakte os via siden <a href="/om">Om MinBeregner.dk</a>.
       </p>
 
-      <h2>{showAdPolicy ? 7 : 6}. Opdateringer</h2>
+      <h2>6. Opdateringer</h2>
       <p>
         Denne cookiepolitik kan blive opdateret ved ændringer i vores brug af
         cookies eller teknologier. Den seneste version vil altid være
@@ -147,7 +129,7 @@ function SeContent() {
         strävar efter att samla in så lite data som möjligt.
       </p>
       <p>
-        <strong>Senast uppdaterad:</strong> 24 september 2026
+        <strong>Senast uppdaterad:</strong> 18 november 2026
       </p>
 
       <h2>1. Nödvändiga cookies och localStorage</h2>
@@ -192,7 +174,7 @@ function SeContent() {
         webbläsare, och siffrorna du anger skickas inte i beräkningsprocessen. Delelänkar
         är ett undantag. Beroende på kalkylator använder de antingen URL:ens fragment,
         som webbläsaren inte skickar med sidans förfrågan, eller en query-parameter, som
-        kan skickas när länken öppnas. Länken kan alsoå innehålla uppgifter som alla som
+        kan skickas när länken öppnas. Länken kan också innehålla uppgifter som alla som
         får den kan avkoda. Dela därför bara länkar med data som du har tillåtit att
         vidarebefordra.
       </p>
@@ -229,7 +211,7 @@ export default async function CookiePolitikPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <Breadcrumbs items={[{ name: breadcrumbName, href: "/cookiepolitik" }]} />
-      {locale === "se" ? <SeContent /> : <DaContent showAdPolicy={locale === "da" && isAdSenseEnabled()} />}
+      {locale === "se" ? <SeContent /> : <DaContent />}
     </div>
   );
 }

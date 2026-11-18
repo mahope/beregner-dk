@@ -6,12 +6,6 @@ Samlet under nightly review (6 iterationer). Prioritér og vælg.
 
 ## Kræver beslutning
 
-### [M] GDPR-compliant ad loading
-- Problem: AdSense loades ubetinget. Cookie-banneret gemmer `accepted: true/false`, men intet checker værdien.
-- Forslag: Client component der checker localStorage consent før AdSense loades.
-- Rører: `src/app/layout.tsx`, ny `src/components/AdSenseLoader.tsx`
-- Hvorfor: kræver compliance-beslutning + prod-test
-
 ### [M] Client-side QR-kode generering
 - Problem: QR-koder via ekstern API (api.qrserver.com) sender brugerdata til tredjepart.
 - Forslag: `qrcode` npm-pakke til client-side generering.

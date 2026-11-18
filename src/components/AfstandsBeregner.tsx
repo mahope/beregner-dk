@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ResultAd } from "@/components/ads/AdBanner";
 import { RuteAfstand } from "@/components/RuteAfstand";
 import { aarstal } from "@/lib/dato-eksempler";
 import { formatNumber } from "@/lib/format";
@@ -40,7 +39,6 @@ export default function AfstandsBeregner() {
           </div>
         )}
       </div>
-      {kmEnVej !== null && <ResultAd page="/afstand-mellem-adresser" />}
     </>
   );
 }

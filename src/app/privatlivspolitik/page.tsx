@@ -1,4 +1,3 @@
-import { isAdSenseEnabled } from "@/lib/ads";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import type { Metadata } from "next";
@@ -147,36 +146,10 @@ function DaContent() {
           og antal beregninger. Vi kan ikke identificere individuelle brugere.
         </p>
 
-        {isAdSenseEnabled() && (
-          <>
-            <h2>Google AdSense</h2>
-            <p>
-              MinBeregner.dk kan vise en annonce fra Google AdSense på udvalgte
-              beregnersider. Efter dit samtykke indlæser din browser Googles
-              annoncescript, og vi anmoder om ikke-personaliserede annoncer.
-              Google modtager blandt andet din IP-adresse og den side, du besøger.
-              Google kan bruge cookies til at begrænse, hvor ofte du ser en annonce,
-              måle annoncevisninger og bekæmpe misbrug.
-              Se <a href="https://policies.google.com/technologies/partner-sites?hl=da">hvordan Google bruger oplysninger fra partnersider</a>.
-            </p>
-            <p>
-              Du kan til enhver tid trække samtykket tilbage. Vælg
-              {" "}<strong>Cookieindstillinger</strong> i footeren og derefter Afvis.
-              Siden kan genindlæses for at stoppe det annoncescript, der allerede
-              er startet. Du kan slette tidligere gemte cookies i din browser.
-            </p>
-            <p>
-              Du kan kontakte os på adressen nedenfor om dine rettigheder,
-              fx indsigt, rettelse eller sletning af personoplysninger.
-            </p>
-          </>
-        )}
-
-        <h2>Annonce- og affiliate-links</h2>
+        <h2>Affiliate-links</h2>
         <p>
           Visse beregnere indeholder affiliate-links til finansielle partnere
-          (fx banker, låneudbydere). Disse er altid tydeligt markeret med
-          &quot;Annonce&quot; i henhold til dansk markedsføringslov.
+          (fx banker og låneudbydere).
         </p>
         <p>
           Når du klikker på et affiliate-link, sendes du til partnerens
@@ -312,34 +285,10 @@ function SeContent() {
           och antal beräkningar. Vi kan inte identifiera enskilda användare.
         </p>
 
-        {isAdSenseEnabled() && (
-          <>
-            <h2>Google AdSense</h2>
-            <p>
-              Vår danska webbplats MinBeregner.dk kan visa annonser från Google
-              AdSense på utvalda sidor efter samtycke. Beräknare.se laddar aldrig
-              Googles annonsskript. På den danska webbplatsen begär vi
-              icke-personanpassade annonser. Google tar då bland annat emot
-              besökarens IP-adress och uppgift om vilken sida som besöks. Google
-              kan använda kakor för att begränsa antalet annonsvisningar, mäta
-              annonser och motverka missbruk.
-              Se <a href="https://policies.google.com/technologies/partner-sites?hl=sv">hur Google använder uppgifter från partnersidor</a>.
-            </p>
-            <p>
-              På den danska webbplatsen kan du när som helst återkalla ditt samtycke.
-              Välj Cookieindstillinger i sidfoten och sedan Afvis. Här på Beräknare.se
-              kan du ändra ditt lokala val under <strong>Cookieinställningar</strong>.
-              Du kan kontakta oss på adressen nedan om dina rättigheter, till
-              exempel tillgång till, rättelse eller radering av personuppgifter.
-            </p>
-          </>
-        )}
-
-        <h2>Annons- och affiliatelänkar</h2>
+        <h2>Affiliatelänkar</h2>
         <p>
           Vissa beräkningsverktyg innehåller affiliatelänkar till finansiella partners
-          (t.ex. banker, långivare). Dessa är alltid tydligt markerade med
-          &quot;Annons&quot; i enlighet med svensk marknadsföringslag.
+          (t.ex. banker och långivare).
         </p>
         <p>
           När du klickar på en affiliatelänk skickas du till partnerns

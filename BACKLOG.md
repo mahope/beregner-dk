@@ -1,7 +1,7 @@
 # MinBeregner.dk — Backlog
 
 > **Produkt:** Gratis online beregnere til danskere
-> **Revenue model:** Ads (AdSense), Affiliate (finans, forsikring)
+> **Revenue model:** Affiliate (finans, forsikring)
 > **Target:** Danskere der soeger paa "beregn X", "X beregner"
 > **Maal:** 50.000 maanedlige besoegende inden Q4 2026
 > **Tech stack:** Next.js 15, TypeScript, Tailwind CSS v4, Dokploy
@@ -41,7 +41,6 @@
 - [x] Plausible analytics integreret
 - [x] Event tracking (beregning_udfoert, resultat_kopieret)
 - [x] Affiliate boxes (boliglaan, forsikring, opsparing)
-- [x] AdSense placeholder-ads klar
 - [x] JSON-LD schema paa alle beregnere
 - [x] FAQ schema paa populaere sider
 - [x] Deploy til Dokploy med HTTPS
@@ -145,7 +144,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Mange beregnere har ikke faaet dark mode styling (kun BMI, Loen, Moms, Procent er testet)
 - Fix kontrast-problemer paa sekundaer tekst, borders og baggrunde
 - Sorg for at alle grafer/charts ogsaa virker i dark mode
-- Test alle affiliate boxes og ad-bannere i dark mode
+- Test alle affiliate boxes i dark mode
 - Verificer at print stadig virker korrekt fra dark mode
 
 ### A12. Kategorisider
@@ -262,7 +261,6 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - [x] Opdater privatlivspolitikken — den siger "ingen cookies" og "ingen analytics" men sitet bruger Plausible analytics og cookie consent
 - Tilfoej sektion om Plausible analytics (privacy-fokuseret, ingen persondata)
 - Opdater cookie-sektionen til at afspejle faktisk brug
-- Tilfoej info om AdSense cookies (naar det aktiveres)
 - Tilfoej info om localStorage-brug (theme, cookie consent)
 
 ### B10. Struktureret indhold med tabeller
@@ -627,7 +625,6 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ### F6. Cookiepolitik og GDPR compliance
 - [x] Opdater cookiepolitik-siden med faktisk brug
 - Cookie consent gemmer i localStorage — er det tilstraekkeligt eller skal det vaere en cookie?
-- Tilfoej granuleret samtykke (nødvendige, analytics, marketing) naar AdSense aktiveres
 - Sorg for at Plausible foerst loades efter samtykke (eller dokumenter at det er cookiefrit)
 - Test at cookie consent virker korrekt paa alle sider
 
@@ -650,9 +647,6 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ---
 
 ## G. Monetisering & Vaekst (7 opgaver)
-
-### G1. AdSense
-- Se [annonceopsætningen](docs/annoncer.md) for placering, aktivering og samtykke.
 
 ### G3. Email-capture og nyhedsbrev
 - [x] Implementer email-signup paa forsiden og beregner-sider

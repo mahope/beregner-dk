@@ -23,7 +23,7 @@ beregner-dk is a Danish calculator website (MinBeregner.dk) — a large collecti
 - `src/app/` — App Router. One folder per calculator (e.g. `brutto-netto`, `boliglaan`, `bmi`, `valuta`), plus `blog/`, `kategori/`, `embed/`, and root metadata files (`sitemap.ts`, `robots.ts`, `manifest.ts`, `layout.tsx`).
 - `src/app/api/v1/` — public JSON API endpoints (`moms`, `bmi`, `loen`) with an index `route.ts` documenting them.
 - `src/app/api/health/` — health route used for deploy verification.
-- `src/components/` — one `*Beregner.tsx` component per calculator, plus shared UI (`Header`, `Footer`, `Sidebar`, `SearchBar`), `ads/`, and `ui/`.
+- `src/components/` — one `*Beregner.tsx` component per calculator, plus shared UI (`Header`, `Footer`, `Sidebar`, `SearchBar`), and `ui/`.
 - `src/lib/` — pure logic and data: calculations, formatting, i18n (`i18n.ts`, `get-locale.ts`), `domain-config.ts`, `categories.ts`, `calculator-list.ts`, `kommuner.ts`. Co-located `*.test.ts` files hold the unit tests.
 - `src/proxy.ts` — request proxy (locale/domain handling; Next 16's rename of middleware).
 - `locales/` — translation files. `public/` — static assets.

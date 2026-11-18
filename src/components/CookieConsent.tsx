@@ -6,7 +6,6 @@ import { t } from "@/lib/i18n";
 
 import {
   CONSENT_SETTINGS_EVENT,
-  CONSENT_VERSION,
   readCookieConsent,
   saveCookieConsent,
   subscribeToCookieConsent,
@@ -36,10 +35,7 @@ export default function CookieConsent() {
   useEffect(() => {
     function syncVisibility() {
       const consent = readCookieConsent();
-      setVisible(
-        consent?.accepted !== false &&
-        (consent?.accepted !== true || (locale === "da" && consent.version !== CONSENT_VERSION)),
-      );
+      setVisible(typeof consent?.accepted !== "boolean");
     }
 
     syncVisibility();
@@ -53,7 +49,7 @@ export default function CookieConsent() {
       unsubscribe();
       window.removeEventListener(CONSENT_SETTINGS_EVENT, openSettings);
     };
-  }, [locale]);
+  }, []);
 
   useEffect(() => {
     if (settingsTrigger) declineRef.current?.focus();
