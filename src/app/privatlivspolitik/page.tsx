@@ -1,3 +1,4 @@
+import { isAdSenseEnabled } from "@/lib/ads";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import type { Metadata } from "next";
@@ -109,8 +110,8 @@ function DaContent() {
 
         <h2>Cookies og lokal lagring</h2>
         <p>
-          MinBeregner.dk bruger <strong>ingen tracking-cookies</strong>. Vi
-          bruger dog browserens <strong>localStorage</strong> til to formål:
+          Vores trafikmåling bruger ingen cookies. Vi bruger browserens
+          <strong> localStorage</strong> til følgende indstillinger:
         </p>
         <ul>
           <li>
@@ -118,8 +119,8 @@ function DaContent() {
             mørk eller system-tema, så indstillingen huskes ved næste besøg.
           </li>
           <li>
-            <strong>Cookie-samtykke:</strong> Gemmer at du har set og accepteret
-            vores cookie-banner, så den ikke vises igen.
+            <strong>Cookievalg:</strong> Gemmer, om og hvornår du valgte Accepter
+            eller Afvis. Du kan ændre valget under <strong>Cookieindstillinger</strong> i footeren.
           </li>
         </ul>
         <p>
@@ -145,6 +146,31 @@ function DaContent() {
           Vi måler aggregerede tal som sidevisninger, mest besøgte beregnere,
           og antal beregninger. Vi kan ikke identificere individuelle brugere.
         </p>
+
+        {isAdSenseEnabled() && (
+          <>
+            <h2>Google AdSense</h2>
+            <p>
+              MinBeregner.dk kan vise en annonce fra Google AdSense på udvalgte
+              beregnersider. Efter dit samtykke indlæser din browser Googles
+              annoncescript, og vi anmoder om ikke-personaliserede annoncer.
+              Google modtager blandt andet din IP-adresse og den side, du besøger.
+              Google kan bruge cookies til at begrænse, hvor ofte du ser en annonce,
+              måle annoncevisninger og bekæmpe misbrug.
+              Se <a href="https://policies.google.com/technologies/partner-sites?hl=da">hvordan Google bruger oplysninger fra partnersider</a>.
+            </p>
+            <p>
+              Du kan til enhver tid trække samtykket tilbage. Vælg
+              {" "}<strong>Cookieindstillinger</strong> i footeren og derefter Afvis.
+              Siden kan genindlæses for at stoppe det annoncescript, der allerede
+              er startet. Du kan slette tidligere gemte cookies i din browser.
+            </p>
+            <p>
+              Du kan kontakte os på adressen nedenfor om dine rettigheder,
+              fx indsigt, rettelse eller sletning af personoplysninger.
+            </p>
+          </>
+        )}
 
         <h2>Annonce- og affiliate-links</h2>
         <p>
@@ -198,13 +224,13 @@ function DaContent() {
           <p className="font-medium text-green-800 dark:text-green-300">Vores løfte</p>
           <p className="text-green-700 dark:text-green-400">
             Vi tror på privatliv by design. Alle beregninger sker i din browser.
-            Vi bruger privacy-fokuseret analytics uden cookies. Vi sælger ikke
-            data og tracker ikke individuelle brugere.
+            Vi bruger privacy-fokuseret analytics uden cookies. Vores trafikmåling
+            følger ikke individuelle brugere.
           </p>
         </div>
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-          Sidst opdateret: 25. september 2026
+          Sidst opdateret: 18. november 2026
         </p>
       </div>
     </>
@@ -249,8 +275,8 @@ function SeContent() {
 
         <h2>Cookies och lokal lagring</h2>
         <p>
-          Beräknare.se använder <strong>inga spårningscookies</strong>. Vi
-          använder dock webbläsarens <strong>localStorage</strong> för två ändamål:
+          Vår trafikanalys använder inga kakor. Vi använder webbläsarens
+          <strong> localStorage</strong> för följande inställningar:
         </p>
         <ul>
           <li>
@@ -258,8 +284,8 @@ function SeContent() {
             mörkt eller systemtema, så att inställningen behålls vid nästa besök.
           </li>
           <li>
-            <strong>Cookie-samtycke:</strong> Sparar att du har sett och godkänt
-            vår cookie-banner, så att den inte visas igen.
+            <strong>Cookieval:</strong> Sparar om och när du valde Acceptera
+            eller Avvisa. Du kan ändra valet under <strong>Cookieinställningar</strong> i sidfoten.
           </li>
         </ul>
         <p>
@@ -285,6 +311,29 @@ function SeContent() {
           Vi mäter aggregerade tal som sidvisningar, mest besökta beräkningsverktyg
           och antal beräkningar. Vi kan inte identifiera enskilda användare.
         </p>
+
+        {isAdSenseEnabled() && (
+          <>
+            <h2>Google AdSense</h2>
+            <p>
+              Vår danska webbplats MinBeregner.dk kan visa annonser från Google
+              AdSense på utvalda sidor efter samtycke. Beräknare.se laddar aldrig
+              Googles annonsskript. På den danska webbplatsen begär vi
+              icke-personanpassade annonser. Google tar då bland annat emot
+              besökarens IP-adress och uppgift om vilken sida som besöks. Google
+              kan använda kakor för att begränsa antalet annonsvisningar, mäta
+              annonser och motverka missbruk.
+              Se <a href="https://policies.google.com/technologies/partner-sites?hl=sv">hur Google använder uppgifter från partnersidor</a>.
+            </p>
+            <p>
+              På den danska webbplatsen kan du när som helst återkalla ditt samtycke.
+              Välj Cookieindstillinger i sidfoten och sedan Afvis. Här på Beräknare.se
+              kan du ändra ditt lokala val under <strong>Cookieinställningar</strong>.
+              Du kan kontakta oss på adressen nedan om dina rättigheter, till
+              exempel tillgång till, rättelse eller radering av personuppgifter.
+            </p>
+          </>
+        )}
 
         <h2>Annons- och affiliatelänkar</h2>
         <p>
@@ -336,13 +385,13 @@ function SeContent() {
           <p className="font-medium text-green-800 dark:text-green-300">Vårt löfte</p>
           <p className="text-green-700 dark:text-green-400">
             Vi tror på integritet by design. Alla beräkningar sker i din webbläsare.
-            Vi använder integritetsanpassad analys utan cookies. Vi säljer inte
-            data och spårar inte enskilda användare.
+            Vi använder integritetsanpassad analys utan cookies. Vår trafikanalys
+            spårar inte enskilda användare.
           </p>
         </div>
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-          Senast uppdaterad: 24 september 2026
+          Senast uppdaterad: 18 november 2026
         </p>
       </div>
     </>
