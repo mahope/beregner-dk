@@ -12,7 +12,9 @@ export function KreditEksempel({ laangiver }: { laangiver: Laangiver }) {
     <p>
       <strong>Repræsentativt eksempel ({e.produkt}):</strong> Samlet kreditbeløb {e.samletKreditbeloeb}, løbetid{" "}
       {e.loebetid}, {e.rente}, ÅOP {e.aop}, månedlig ydelse {e.maanedligYdelse}, samlede kreditomkostninger{" "}
-      {e.samledeKreditomkostninger} og samlet tilbagebetaling {e.samletTilbagebetaling}.
+      {e.samledeKreditomkostninger} og samlet tilbagebetaling {e.samletTilbagebetaling}
+      {/* Amounts end in "kr.", which already closes the sentence. */}
+      {e.samletTilbagebetaling.endsWith(".") ? "" : "."}
       {e.note && ` ${e.note}`} Eksemplet er hentet fra{" "}
       <a href={e.kilde} target="_blank" rel="nofollow noopener noreferrer">
         {laangiver.navn}

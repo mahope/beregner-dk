@@ -94,6 +94,12 @@ const REVIEWED = [
       "Som ForbrugslaanBeregner: dansk annoncekopi, der kun når AffiliateBox, som returnerer null for ikke-da.",
   },
   {
+    file: "src/components/KreditEksempel.tsx",
+    verdict: "DØD",
+    reason:
+      "Dansk lovpligtigt kreditgiver-eksempel. Monteres kun i AffiliateBox (returnerer null for ikke-da) og i `locale === \"da\"`-grenen af src/app/billaan/page.tsx.",
+  },
+  {
     file: "src/components/TidszoneBeregner.tsx",
     verdict: "DØD",
     reason:
