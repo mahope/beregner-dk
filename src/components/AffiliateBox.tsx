@@ -1,6 +1,7 @@
 "use client";
 
 import { trackAffiliateClick } from "@/lib/analytics";
+import { adtractionLink } from "@/lib/adtraction";
 import { useLocale } from "@/components/LocaleProvider";
 import type { LucideIcon } from "lucide-react";
 import { Briefcase, Car, Landmark, ScrollText, ShieldCheck } from "lucide-react";
@@ -160,7 +161,7 @@ export const forsikringAffiliates: AffiliateLink[] = [
   {
     name: "Findforsikring.dk",
     description: "Få 3 gratis tilbud på dine forsikringer og se, hvor meget du kan spare",
-    url: partnerAdsLink(FINDFORSIKRING),
+    url: adtractionLink("1873805482", "https://www.findforsikring.dk/"),
     cta: "Få tilbud",
     highlight: true,
   },
