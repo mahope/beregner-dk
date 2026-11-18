@@ -8,8 +8,8 @@ import { TIDSZONER } from "./tidszone-reference";
 import { forkortBrok } from "./brok";
 import { alderLevet, formatDageLived } from "./alder-levet";
 import { formatAlder } from "./alder-eksempler";
-import { formatBelob, formatNumber, getIntlLocale } from "./format";
 import { dageTilDecember } from "./dage-mellem-datoer";
+import { formatBelob, formatNumber, getIntlLocale } from "./format";
 import { iDagISidensTidszone } from "./lokal-dato";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import {
@@ -815,9 +815,9 @@ describe("getPageData", () => {
     },
     {
       locale: "se" as const,
-      titel: "Beräkna dagar till 1 december: {DAGE_TIL_DEC} kvar",
+      titel: "Beräkna dagar mellan datum: 15 mar–25 sep = 194 dagar",
       heading: "Beräkna antal dagar mellan två datum",
-      intent: "antal dagar mellan två datum",
+      intent: "dagar mellan två datum",
       answer: "Välj ett startdatum och ett slutdatum",
       months: "ungefärligt antal månader",
       countdown: "Hur många dagar är det kvar till ett datum?",
@@ -837,11 +837,12 @@ describe("getPageData", () => {
       expect(data.description).toContain(answer);
       expect(data.description).toContain(months);
       expect(data.metaDescription).toContain(intent);
-      expect(data.metaDescription).toContain(months);
+      // Den svenske beskrivelse er omskrevet til «dagar mellan datum» og nævner ikke længere måneder.
+      if (locale === "da") expect(data.metaDescription).toContain(months);
       expect(data.metaDescription.length).toBeLessThanOrEqual(160);
       expect(data.ogTitle).toBe(title);
       expect(data.ogDescription).toContain(intent);
-      expect(data.ogDescription).toContain(months);
+      if (locale === "da") expect(data.ogDescription).toContain(months);
       expect(data.schemaDescription).toContain(intent);
       expect(data.schemaDescription).toContain(months);
 
@@ -853,7 +854,10 @@ describe("getPageData", () => {
       // om noget andet. Beskrivelsen SKAL desuden begynde med spørgsmålet
       // og ikke gentage titlen: de to var ens, hvilket koster halve
       // snippet-pladsen på det samme "se mere"-link.
-      expect(data.metaTitle).toMatch(/dage til 1\. december|dagar till 1 december/);
+      // 8/11: den svenske titel er målrettet «dagar mellan datum» (se `title-eksempel.test.ts`),
+      // men tællesøgningerne lever videre i beskrivelsen, som stadig starter
+      // med spørgsmålet.
+      expect(data.metaTitle).toMatch(/dage til 1\. december|dagar mellan datum/);
       expect(data.metaDescription.startsWith(countdown)).toBe(true);
       expect(data.metaDescription).not.toBe(data.metaTitle);
     }
@@ -869,7 +873,7 @@ describe("getPageData", () => {
     },
     {
       locale: "se" as const,
-      title: "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min",
+      title: "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min, dra av rast",
       intent: "mellan två klockslag",
       example: "08:30 till 16:45 är 8 timmar och 15 minuter",
       schema: "Gratis tidskalkylator. Beräkna tidsintervall mellan två klockslag och se resultatet i timmar, minuter och decimaltimmar.",

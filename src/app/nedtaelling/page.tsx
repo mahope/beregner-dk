@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
@@ -268,7 +269,7 @@ export default async function NedtaellingPage() {
               <strong>Cellen ska formateras som Tal</strong>, annars visar Excel ett datumformat,
               eftersom det är ett tal från en datumformel. Ska du räkna dagar mellan två
               valfria datum, arbetsdagar eller datum plus veckor:{" "}
-              <Link href="/dato">datokalkylatorn</Link>.
+              <Link href={localizedPath("/dato", locale)}>datokalkylatorn</Link>.
             </p>
           </div>
         )}
@@ -328,12 +329,12 @@ export default async function NedtaellingPage() {
                 <>
                   Ska du räkna dagar mellan två valfria datum, arbetsdagar eller datum plus veckor
                   kan du använda{" "}
-                  <Link href="/dato">datokalkylatorn</Link>.
+                  <Link href={localizedPath("/dato", locale)}>datokalkylatorn</Link>.
                 </>
               ) : (
                 <>
                   Skal du tælle dage mellem to valgfrie datoer, arbejdsdage eller datoer plus uger,
-                  kan du bruge <Link href="/dato">datoberegneren</Link>.
+                  kan du bruge <Link href={localizedPath("/dato", locale)}>datoberegneren</Link>.
                 </>
               )}
             </p>

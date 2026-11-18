@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
@@ -122,7 +123,7 @@ export default async function ArealPage() {
           <h2>{se ? "Area och volym är inte samma sak" : "Areal og rumfang er ikke det samme"}</h2>
           <p>
             {se ? "Area är ytans storlek i m² — golvet, väggen, tomten. Det är vad den här sidan räknar. Volym är utrymmet innanför kroppen i m³ — det räknar " : "Areal er fladens størrelse i m² — gulvet, væggen, grundstykket. Det er det, denne side regner. Rumfang er pladsen inde i kroppen i m³ — det regner "}
-            <Link href="/rumfang">{se ? "volymberäknaren" : "rumfangsberegneren"}</Link>
+            <Link href={localizedPath("/rumfang", locale)}>{se ? "volymberäknaren" : "rumfangsberegneren"}</Link>
             {se
               ? ". En låda på 2 × 1 × 0,5 m har 2 m² golv men bara 1 m³ volym."
               : ". Den samme kasse på 2 × 1 × 0,5 m har 2 m² gulv, men kun 1 m³ rumfang."}

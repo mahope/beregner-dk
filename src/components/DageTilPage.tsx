@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -96,7 +97,7 @@ function getAnswerText(
     return {
       headline: `${copy[locale].today} ${dageTilArm(event, locale).copy.short} — 0 ${u.days}`,
       equivalent: locale === "da" ? "Der er 0 dage tilbage." : "Det finns 0 dagar kvar.",
-      target: `${target} ${formatTargetYear(answer.targetDate)} er en ${weekday}`,
+      target: `${target} ${formatTargetYear(answer.targetDate)} ${locale === "da" ? "er" : "är"} en ${weekday}`,
       targetIso: answer.targetDate.toISOString().slice(0, 10),
     };
   }
@@ -107,12 +108,14 @@ function getAnswerText(
     equivalent:
       answer.daysLeft === 0
         ? `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)}.`
-        : `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)} og ${count(
+        : `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)} ${
+            locale === "da" ? "og" : "och"
+          } ${count(
             answer.daysLeft,
             u.day,
             u.days
           )}.`,
-    target: `${target} ${formatTargetYear(answer.targetDate)} er en ${weekday}`,
+    target: `${target} ${formatTargetYear(answer.targetDate)} ${locale === "da" ? "er" : "är"} en ${weekday}`,
     targetIso: answer.targetDate.toISOString().slice(0, 10),
   };
 }
@@ -135,7 +138,7 @@ export async function buildDageTilMetadata(
   if (!event) {
     return { robots: { index: false, follow: false } };
   }
-  const { headline, target, targetIso } = getAnswerText(event, dageLocale, today);
+  const { headline, equivalent, target, targetIso } = getAnswerText(event, dageLocale, today);
   const canonical = `${baseUrl}${prefix}${slug}`;
   const u = units[dageLocale];
   const days = getDageTilAnswer(event, dageLocale, today).days;
@@ -171,11 +174,10 @@ export async function buildDageTilMetadata(
   // does not say — and lands under Google's ~160-character cut.
   return {
     title: { absolute: titleText },
-    description: `${headline}. ${target}. ${
+    description:
       dageLocale === "da"
-        ? "Tallet opdateres hver dag."
-        : "Talet uppdateras varje dag."
-    }`,
+        ? `${headline}. ${target}. Tallet opdateres hver dag.`
+        : `${headline}. ${target}. ${equivalent} Gratis nedräkning som uppdateras varje dag.`,
     openGraph: {
       title: titleText,
       description: `${headline}. ${target} (${targetIso}).`,
@@ -325,13 +327,13 @@ export async function DageTilRoute({
         </ul>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/dato"
+            href={localizedPath("/dato", locale)}
             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
           >
             {dageLocale === "da" ? "Datoberegner" : "Datumräknare"}
           </Link>
           <Link
-            href="/nedtaelling"
+            href={localizedPath("/nedtaelling", locale)}
             className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium"
           >
             {dageLocale === "da" ? "Nedtæller" : "Nedräknare"}

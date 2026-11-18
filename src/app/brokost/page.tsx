@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
@@ -234,8 +235,8 @@ export default async function BrokostPage() {
             Broen er sjældent den største post. Vil du se hele regningen for bilen, regner{" "}
             <Link href="/bil">bilomkostningsberegneren</Link> den sammen med benzin, forsikring,
             service og værditab. Skal du kende forbruget på turen, står det i{" "}
-            <Link href="/braendstof">brændstofberegneren</Link>, og er du på vej til udlandet, er{" "}
-            <Link href="/rejsebudget">rejsebudgetten</Link> det samme tal fordelt på hele rejsen.
+            <Link href={localizedPath("/braendstof", locale)}>brændstofberegneren</Link>, og er du på vej til udlandet, er{" "}
+            <Link href={localizedPath("/rejsebudget", locale)}>rejsebudgetten</Link> det samme tal fordelt på hele rejsen.
           </p>
         </div>
 

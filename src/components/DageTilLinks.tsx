@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Link from "next/link";
 import { formatNumber } from "@/lib/format";
 import {
@@ -98,7 +99,7 @@ export default function DageTilLinks({
       {vaerktoej === "datoberegner" ? (
         <p>
           {listIntroLink[locale].foer}
-          <Link href="/dato">{listIntroLink[locale].ord}</Link>
+          <Link href={localizedPath("/dato", locale)}>{listIntroLink[locale].ord}</Link>
           {listIntroLink[locale].efter}
         </p>
       ) : (
@@ -162,7 +163,7 @@ export default function DageTilLinks({
         {locale === "se" ? (
           <>
             Vill du bara räkna ner till ett datum och se det som veckor och dagar kan du
-            använda <Link href="/nedtaelling">nedräkningen</Link>.
+            använda <Link href="/nedrakning">nedräkningen</Link>.
           </>
         ) : (
           <>

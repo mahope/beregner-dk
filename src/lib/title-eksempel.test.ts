@@ -32,6 +32,7 @@ import { describe, expect, test } from "vitest";
 import { rabatProcent, procentAf, RABAT_EKSEMPEL, PROCENT_10_AF_FAQ } from "@/lib/procent";
 import { beregnBmr, beregnTdee } from "@/lib/makroer";
 import { dageTilDecember } from "@/lib/dage-mellem-datoer";
+import { daysBetween } from "@/lib/dage-til";
 import { beregnMoms } from "@/lib/moms";
 import { getPageData } from "@/lib/page-data";
 import { formatBelob } from "./format";
@@ -121,8 +122,10 @@ describe("tallene i titlerne er rigtige", () => {
     for (const streng of [page.metaDescription, page.ogDescription, page.schemaDescription]) {
       expect(streng).toMatch(/datoer/i);
     }
-    // Svensk titel er frosset til 13/10 (opgave 187), så den skal ikke røres.
+    // Den svenske titel er aldrig blevet lovet datoer, og 8/11 fik den i stedet
+    // løftet om at dra av rast, som værktøjet faktisk kan.
     expect(getPageData("tidsberegner", "se")!.metaTitle).not.toMatch(/datoer/i);
+    expect(getPageData("tidsberegner", "se")!.metaTitle).toContain("dra av rast");
   });
 
   test("moms: 1.000 kr. ekskl. moms er 1.250 kr. inkl. 25 %", () => {
@@ -172,6 +175,31 @@ describe("tallene i titlerne er rigtige", () => {
     expect(titel).toContain(`${dage} dage`);
     // Ikke længere et interval: pilen var den del, der læst som «365 dage kvar».
     expect(titel).not.toMatch(/→/);
+  });
+
+  // Titlen på /dato på beraknare.se (GSC til 6/11: 156.216 visninger, CTR 0,5 %)
+  // var en nedtælling til 1 december, der skiftede hver dag. 8/11 er den svenske
+  // titel målrettet det værktøjet løser: dagar mellan datum. Eksemplet er fast
+  // og regnes her uafhængigt af siden: 15. marts til 25. september 2026 er 194
+  // dage, samme tal som sidens egen FAQ om Excel.
+  test("dato: den svenske titel regner dagene mellem to faste datoer", () => {
+    const dage = Math.round(
+      (Date.UTC(2026, 8, 25) - Date.UTC(2026, 2, 15)) / 86_400_000,
+    );
+    expect(dage).toBe(194);
+    expect(daysBetween(new Date("2026-03-15T12:00:00Z"), new Date("2026-09-25T12:00:00Z"))).toBe(194);
+    const se = getPageData("dato", "se")!.metaTitle;
+    expect(se).toMatch(/^Beräkna dagar mellan datum/);
+    expect(se).toContain("15 mar–25 sep = 194 dagar");
+    // Titlen følger ikke længere dagens dato.
+    expect(se).not.toMatch(/1 december/);
+  });
+
+  test("dato: den svenske beskrivelse dækker de tre opgaver søgningerne spørger om", () => {
+    const se = getPageData("dato", "se")!.metaDescription;
+    expect(se).toMatch(/dagar mellan två datum/);
+    expect(se).toMatch(/dagar är det kvar till ett datum/i);
+    expect(se).toMatch(/lägg till/);
   });
 
   test("bmi: 75 kg og 1,75 m er BMI 24,5", () => {

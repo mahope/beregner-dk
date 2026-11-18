@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -79,7 +80,7 @@ export default async function IdealvaegtPage() {
               interval, værktøjet viser under de to formler — og det er samme tabel,
               <Link href="/bmi">BMI-beregneren</Link> bruger, så de to sider ikke kan sige hver sit om, hvad
               normalvægt er. Vil du se, hvor din nuværende vægt ligger i forhold til din højde, er{" "}
-              <Link href="/kropsfedt">kropsfedtprocenten</Link> det mere nuancerede mål.
+              <Link href={localizedPath("/kropsfedt", locale)}>kropsfedtprocenten</Link> det mere nuancerede mål.
             </p>
           </div>
         ) : (
@@ -118,7 +119,7 @@ export default async function IdealvaegtPage() {
               <Link href="/bmi">BMI-kalkylatorn</Link> använder, så de två sidorna inte kan säga var sin
               uppfattning om vad normalvikt är. Vill du se var din nuvarande vikt ligger i
               förhållande till din längd, är{" "}
-              <Link href="/kropsfedt">kroppsfettprocenten</Link> det mer nyanserade måttet.
+              <Link href={localizedPath("/kropsfedt", locale)}>kroppsfettprocenten</Link> det mer nyanserade måttet.
             </p>
           </div>
         )}

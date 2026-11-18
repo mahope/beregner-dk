@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -236,7 +237,7 @@ export default async function BetonPage() {
             langsomt at varme op. Pladetykkelsen skal dække slangerne, armeringsnettet og laget
             under — derfor er en plade med gulvvarme sjældent tyndere end 7–8 cm. Skal du også regne
             på, hvad huset koster at varme, kan du bruge{" "}
-            <Link href="/elberegner" className="underline font-medium">
+            <Link href={localizedPath("/elberegner", locale)} className="underline font-medium">
               elberegneren
             </Link>{" "}
             bagefter.

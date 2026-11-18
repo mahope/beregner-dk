@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -240,7 +241,7 @@ export async function DageTilbageIAaretRoute({ prefix }: { prefix: string }) {
 
       <div className="flex flex-wrap gap-3 mb-8">
         <Link
-          href="/dato"
+          href={localizedPath("/dato", locale)}
           className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
         >
           {c.linkDato}

@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -82,7 +83,7 @@ export default async function RenteprognosePage() {
                 <p>
                   Det er den forskel på en renteprognose og en renteberegning, der
                   er værd at kende. En{" "}
-                  <Link href="/renteberegner" className="underline">renteberegner</Link>{" "}
+                  <Link href={localizedPath("/renteberegner", locale)} className="underline">renteberegner</Link>{" "}
                   forteller dig, hvad ét lån koster ved én rente. En
                   renteprognose forteller dig, hvad det{" "}
                   <em>kommer til at</em> koste, når rentesættet flytter sig.

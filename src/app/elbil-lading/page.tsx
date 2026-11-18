@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -117,7 +118,7 @@ export default async function ElbilLadingPage() {
                     elbil vs. bensin-sidan
                   </Link>
                   , eller beräkna vad dina apparater kostar i el på{" "}
-                  <Link href="/elberegner" className="underline font-medium">
+                  <Link href={localizedPath("/elberegner", locale)} className="underline font-medium">
                     elkalkylatorn
                   </Link>
                   .
@@ -178,7 +179,7 @@ export default async function ElbilLadingPage() {
                     elbil vs. benzinbil-siden
                   </Link>
                   , eller beregn hvad dine apparater koster i strøm på{" "}
-                  <Link href="/elberegner" className="underline font-medium">
+                  <Link href={localizedPath("/elberegner", locale)} className="underline font-medium">
                     elberegneren
                   </Link>
                   .

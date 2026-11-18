@@ -107,7 +107,7 @@ describe("internal IndexNow trigger", () => {
     { url: "https://minberegner.dk/procent?view=full" },
     { url: "https://minberegner.dk/procent?", deleted: true },
     { url: "https://minberegner.dk/procent#answer", deleted: true },
-    { url: "https://beraknare.se/tidskalkylator" },
+    { url: "https://beraknare.se/tidsberegner" },
     { url: "https://beraknare.se/su" },
     { url: "https://minberegner.dk/procent/" },
   ])("rejects a non-canonical request body: %s", async (body) => {

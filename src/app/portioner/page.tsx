@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -128,7 +129,7 @@ export default async function PortionerPage() {
               Tallene er de anbefalede mængder pr. voksen fra kildens tabel og er et udgangspunkt —
               ikke et facit. Kender du dine gæsters appetit, så justér efter den. Skal regningen
               deles bagefter, kan du bruge{" "}
-              <Link href="/del-regning" className="underline font-medium">
+              <Link href={localizedPath("/del-regning", locale)} className="underline font-medium">
                 del regningen
               </Link>
               .

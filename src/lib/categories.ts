@@ -1,4 +1,5 @@
 import { getCalculatorsByLocale } from "./calculator-list";
+import { localizedPath } from "./locale-slugs";
 import type { Locale } from "./i18n";
 import { BARSEL_2026, SU_2026 } from "./satser-2026";
 
@@ -351,10 +352,10 @@ export function getBeregnereByCategoryName(
   // drop calculators that are not available in this locale (e.g. daOnly ones).
   const byHref = new Map(getCalculatorsByLocale(locale).map((c) => [c.href, c]));
   return inCategory
-    .filter((b) => byHref.has(b.href))
+    .filter((b) => byHref.has(localizedPath(b.href, locale)))
     .map((b) => {
-      const c = byHref.get(b.href)!;
-      return { ...b, title: c.title, description: c.description };
+      const c = byHref.get(localizedPath(b.href, locale))!;
+      return { ...b, href: c.href, title: c.title, description: c.description };
     });
 }
 

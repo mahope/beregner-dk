@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { ResultAd } from "@/components/ads/AdBanner";
 import dynamic from "next/dynamic";
 const DatoBeregner = dynamic(() => import("@/components/DatoBeregner"));
@@ -844,12 +845,12 @@ export default async function DatoPage() {
           {locale === "se" ? (
             <>
               Vill du bara räkna ner till ett datum och se det som veckor och dagar kan du
-              använda <Link href="/nedtaelling">nedräkningen</Link>.
+              använda <Link href="/nedrakning">nedräkningen</Link>.
             </>
           ) : (
             <>
               Vil du bare tælle ned til én dato og se det som uger og dage, kan du bruge{" "}
-              <Link href="/nedtaelling">nedtællingen</Link>.
+              <Link href={localizedPath("/nedtaelling", locale)}>nedtællingen</Link>.
             </>
           )}
         </p>

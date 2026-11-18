@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import ProcentBeregner from "@/components/ProcentBeregner";
@@ -405,7 +406,7 @@ export default async function ProcentPage() {
         </p>
         <p>
           En lønprocent kan du se i kroner her:{" "}
-          <Link href="/loenstigning" className="text-blue-700 underline">
+          <Link href={localizedPath("/loenstigning", locale)} className="text-blue-700 underline">
             lønstigning i procent
           </Link>
           .
@@ -609,7 +610,7 @@ export default async function ProcentPage() {
           Skriver du <code>=A1/B1</code> får du andelen (
           {num(EXCEL_ANDEL.del / EXCEL_ANDEL.heltal, 2)}), og så skal cellen
           formateres som procent. En løn, der stiger i procent, regner du med{" "}
-          <Link href="/loenstigning" className="text-blue-700 underline">
+          <Link href={localizedPath("/loenstigning", locale)} className="text-blue-700 underline">
             lønstigning i procent
           </Link>
           .
@@ -891,7 +892,7 @@ export default async function ProcentPage() {
           {num(EXCEL_ANDEL.del / EXCEL_ANDEL.heltal, 2)}) och måste
           då formatera cellen som procent. Vill du se kronor och procent
           samtidigt på en löneforhåndring är det{" "}
-          <Link href="/loenstigning" className="text-blue-700 underline">
+          <Link href={localizedPath("/loenstigning", locale)} className="text-blue-700 underline">
             löneökning i procent
           </Link>{" "}
           du söker efter.
@@ -1077,7 +1078,7 @@ export default async function ProcentPage() {
         </p>
         <p>
           En lönprocent kan du se som kronor här:{" "}
-          <Link href="/loenstigning" className="text-blue-700 underline">
+          <Link href={localizedPath("/loenstigning", locale)} className="text-blue-700 underline">
             löneökning i procent
           </Link>
           .
