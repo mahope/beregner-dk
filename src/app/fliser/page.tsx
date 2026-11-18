@@ -171,7 +171,7 @@ export default async function FliserPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/fliser" adSlotId="fliser-sidebar" />
+      <Sidebar currentHref="/fliser" />
     </div>
   );
 }

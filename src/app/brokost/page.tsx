@@ -246,7 +246,7 @@ export default async function BrokostPage() {
 
         <RelatedCalculators current="/brokost" />
       </div>
-      <Sidebar currentHref="/brokost" adSlotId="brokost-sidebar" />
+      <Sidebar currentHref="/brokost" />
     </div>
   );
 }

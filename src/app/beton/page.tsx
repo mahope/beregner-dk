@@ -289,7 +289,7 @@ export default async function BetonPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/beton" adSlotId="beton-sidebar" />
+      <Sidebar currentHref="/beton" />
     </div>
   );
 }

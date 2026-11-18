@@ -96,7 +96,7 @@ export default async function AlkoholenhederPage() {
 
         <RelatedCalculators current="/alkoholenheder" />
       </div>
-      <Sidebar currentHref="/alkoholenheder" adSlotId="alkoholenheder-sidebar" />
+      <Sidebar currentHref="/alkoholenheder" />
     </div>
   );
 }

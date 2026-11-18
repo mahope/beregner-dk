@@ -91,7 +91,7 @@ export default async function TopskatPage() {
         <RelatedCalculators current="/topskat" />
       </div>
 
-      <Sidebar currentHref="/topskat" adSlotId="topskat-sidebar" />
+      <Sidebar currentHref="/topskat" />
     </div>
   );
 }

@@ -84,7 +84,7 @@ export default async function DelRegningPage() {
 
         <RelatedCalculators current="/del-regning" />
       </div>
-      <Sidebar currentHref="/del-regning" adSlotId="del-regning-sidebar" />
+      <Sidebar currentHref="/del-regning" />
     </div>
   );
 }

@@ -90,7 +90,7 @@ export default async function SolcellerPage() {
         <RelatedCalculators current="/solceller" />
       </div>
 
-      <Sidebar currentHref="/solceller" adSlotId="solceller-sidebar" />
+      <Sidebar currentHref="/solceller" />
     </div>
   );
 }

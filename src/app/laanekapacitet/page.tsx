@@ -199,7 +199,7 @@ export default async function LaanekapacitetPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/laanekapacitet" adSlotId="laanekapacitet-sidebar" />
+      <Sidebar currentHref="/laanekapacitet" />
     </div>
   );
 }

@@ -169,7 +169,7 @@ export default async function TvStorrelsePage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/tv-storrelse" adSlotId="tv-storrelse-sidebar" />
+      <Sidebar currentHref="/tv-storrelse" />
     </div>
   );
 }

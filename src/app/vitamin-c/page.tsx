@@ -340,7 +340,7 @@ export default async function VitaminCPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/vitamin-c" adSlotId="vitamin-c-sidebar" />
+      <Sidebar currentHref="/vitamin-c" />
     </div>
   );
 }

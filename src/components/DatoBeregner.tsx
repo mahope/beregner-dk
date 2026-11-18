@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, type ReactNode } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -166,7 +166,7 @@ const labels = {
   },
 } as const;
 
-export default function DatoBeregner() {
+export default function DatoBeregner({ resultAd }: { resultAd?: ReactNode }) {
   const { locale } = useLocale();
   const intlLocale = getIntlLocale(locale);
   const l = labels[locale as keyof typeof labels] || labels.da;
@@ -715,6 +715,7 @@ export default function DatoBeregner() {
           resultSummary={resultatTekst || undefined}
         />
       </div>
+      {resultat && resultAd}
     </div>
   );
 }

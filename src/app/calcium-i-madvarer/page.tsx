@@ -283,7 +283,7 @@ export default async function CalciumIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/calcium-i-madvarer" adSlotId="calcium-i-madvarer-sidebar" />
+      <Sidebar currentHref="/calcium-i-madvarer" />
     </div>
   );
 }

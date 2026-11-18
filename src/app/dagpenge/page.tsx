@@ -165,7 +165,7 @@ export default async function DagpengePage() {
         <RelatedCalculators current="/dagpenge" />
       </section>
       </div>
-      <Sidebar currentHref="/dagpenge" adSlotId="dagpenge-sidebar" />
+      <Sidebar currentHref="/dagpenge" />
     </div>
   );
 }

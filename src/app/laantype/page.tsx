@@ -158,7 +158,7 @@ export default async function LaantypePage() {
 
         <RelatedCalculators current="/laantype" />
       </div>
-      <Sidebar currentHref="/laantype" adSlotId="laantype-sidebar" />
+      <Sidebar currentHref="/laantype" />
     </div>
   );
 }

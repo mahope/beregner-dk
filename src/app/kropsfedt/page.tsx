@@ -99,7 +99,7 @@ export default async function KropsfedtPage() {
 
         <RelatedCalculators current="/kropsfedt" />
       </div>
-      <Sidebar currentHref="/kropsfedt" adSlotId="kropsfedt-sidebar" />
+      <Sidebar currentHref="/kropsfedt" />
     </div>
   );
 }

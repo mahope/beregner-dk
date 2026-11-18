@@ -278,7 +278,7 @@ export default async function FartPage() {
 
         <RelatedCalculators current="/fart" />
       </div>
-      <Sidebar currentHref="/fart" adSlotId="fart-sidebar" />
+      <Sidebar currentHref="/fart" />
     </div>
   );
 }

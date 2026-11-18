@@ -267,7 +267,7 @@ export default async function BoliglaanPage() {
 
       <RelatedCalculators current="/boliglaan" />
       </div>
-      <Sidebar currentHref="/boliglaan" adSlotId="boliglaan-sidebar" />
+      <Sidebar currentHref="/boliglaan" />
     </div>
   );
 }

@@ -201,7 +201,7 @@ export default async function ElbilLadingPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/elbil-lading" adSlotId="elbil-lading-sidebar" />
+      <Sidebar currentHref="/elbil-lading" />
     </div>
   );
 }

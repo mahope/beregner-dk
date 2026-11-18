@@ -75,7 +75,7 @@ export default async function RabatPage() {
 
         <RelatedCalculators current="/rabat" />
       </div>
-      <Sidebar currentHref="/rabat" adSlotId="rabat-sidebar" />
+      <Sidebar currentHref="/rabat" />
     </div>
   );
 }

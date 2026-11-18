@@ -109,7 +109,7 @@ export default async function BudgetPage() {
 
         <RelatedCalculators current="/budget" />
       </div>
-      <Sidebar currentHref="/budget" adSlotId="budget-sidebar" />
+      <Sidebar currentHref="/budget" />
     </div>
   );
 }

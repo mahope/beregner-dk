@@ -153,7 +153,7 @@ export default async function UgedagPage() {
 
         <RelatedCalculators current="/ugedag" />
       </div>
-      <Sidebar currentHref="/ugedag" adSlotId="ugedag-sidebar" />
+      <Sidebar currentHref="/ugedag" />
     </div>
   );
 }

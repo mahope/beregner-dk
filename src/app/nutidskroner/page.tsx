@@ -133,7 +133,7 @@ export default async function NutidskronerPage() {
 
         <RelatedCalculators current="/nutidskroner" />
       </div>
-      <Sidebar currentHref="/nutidskroner" adSlotId="nutidskroner-sidebar" />
+      <Sidebar currentHref="/nutidskroner" />
     </div>
   );
 }

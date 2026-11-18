@@ -1158,7 +1158,7 @@ export default async function ProcentPage() {
 
       <RelatedCalculators current="/procent" />
       </div>
-      <Sidebar currentHref="/procent" adSlotId="procent-sidebar" />
+      <Sidebar currentHref="/procent" />
     </div>
   );
 }

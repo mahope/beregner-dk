@@ -3,7 +3,6 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getTranslations } from "@/lib/i18n";
 import { getFooterCategories, getFooterBlogLinks } from "@/lib/footer-data";
 import { getAllDomainConfigs } from "@/lib/domain-config";
-import { FooterAd } from "./ads/AdBanner";
 import CountryFlag from "./CountryFlag";
 import { CalcIcon, CategoryIcon } from "@/components/ui/icons";
 import { Calculator, CalendarDays, ShieldCheck } from "lucide-react";
@@ -155,19 +154,7 @@ export default async function Footer() {
 
         <div className="text-center text-sm">
           <p>{t.footer.copyright.replace("{year}", String(year))}</p>
-          <p className="mt-2 text-xs text-gray-500">
-            Lavet af{" "}
-            <a
-              href="https://mahoje.dk"
-              rel="noopener"
-              className="hover:text-white transition-colors"
-            >
-              Mahoje
-            </a>
-          </p>
         </div>
-
-        <FooterAd />
       </div>
     </footer>
   );

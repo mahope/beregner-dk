@@ -99,7 +99,7 @@ export default async function VeckodagPage() {
 
         <RelatedCalculators current="/veckodag" />
       </div>
-      <Sidebar currentHref="/veckodag" adSlotId="veckodag-sidebar" />
+      <Sidebar currentHref="/veckodag" />
     </div>
   );
 }

@@ -85,7 +85,7 @@ export default async function EnhederPage() {
 
         <RelatedCalculators current="/enheder" />
       </div>
-      <Sidebar currentHref="/enheder" adSlotId="enheder-sidebar" />
+      <Sidebar currentHref="/enheder" />
     </div>
   );
 }

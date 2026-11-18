@@ -220,7 +220,7 @@ export default async function PacePage() {
 
         <RelatedCalculators current="/pace" />
       </div>
-      <Sidebar currentHref="/pace" adSlotId="pace-sidebar" />
+      <Sidebar currentHref="/pace" />
     </div>
   );
 }
