@@ -416,9 +416,9 @@ export const dageMellemCopy: Record<DageMellemLocale, DageMellemCopy> = {
   },
   se: {
     h1: "Beräkna dagar mellan två datum",
-    title: "Dagar mellan datum: räkna ut antal dagar mellan två datum",
+    title: "Dagar mellan datum: räkna dagar, veckor och arbetsdagar",
     description:
-      "Räkna ut antal dagar mellan två datum. Få dagar, hela veckor, arbetsdagar, helgdagar och helgvagar – och se hela uträkningen.",
+      "Räkna dagar mellan två datum. Få dagar, hela veckor, arbetsdagar och helgdagar, och se hela uträkningen. Gratis, utan inloggning.",
     lead:
       "Välj två datum, så får du antalet dagar mellan dem — och de övriga talen står bredvid: hela veckor, ca. månader, arbetsdagar, lördagar/söndagar och helgdagar.",
     faq: [

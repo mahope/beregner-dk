@@ -243,7 +243,7 @@ export const dageIAaretCopy: Record<DageIAaretLocale, DageIAaretCopy> = {
     h1: "Hur många dagar är det på ett år?",
     title: "Hur många dagar är det på ett år? Dagar i alla 12 månader",
     description:
-      "Hur många dagar är det i varje månad? Se alla 12 månader med dagar, vardagar och helvdagar – och hur många dagar som är kvar av året.",
+      "Ett år har 365 dagar, 366 i skottår. Se dagar, vardagar och helgdagar i alla 12 månader och hur många dagar som är kvar av året.",
     lead:
       "Ett kalenderår har 365 dagar, men de tolv månaderna är inte lika långa. Här är alla 12 med dagar, vardagar och helvdagar, och hur många dagar som är kvar av året.",
     linkDato: "Datumräknare med alla fyra verktyg",

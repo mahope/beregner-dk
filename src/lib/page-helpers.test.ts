@@ -49,9 +49,9 @@ describe("buildPageMetadata", () => {
     },
     {
       locale: "se" as const,
-      title: "Procenträknare: 10 % av ett tal, rabatt och ökning/minskning",
+      title: "Procenträknare: räkna ut 10 % av ett tal, rabatt, ökning",
       description:
-        "Beräkna procent av ett tal, rabattprocent och procentuell ändring mellan två tal. T. ex. rabatten på 1125 kr ned från 9000 kr.",
+        "Räkna procent av ett tal, rabattprocent och procentuell ändring mellan två tal. T. ex. rabatten på 1125 kr ned från 9000 kr. Gratis.",
     },
   ])("builds answer-first percentage metadata for $locale", ({ locale, title, description }) => {
     const metadata = buildPageMetadata("procent", getDomainConfigByLocale(locale));

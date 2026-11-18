@@ -381,7 +381,7 @@ export const ugerCopy: Record<UgerLocale, UgerCopy> = {
     h1: "Hur många veckor är det på ett år?",
     title: "Hur många veckor är det på ett år? Se veckorna i varje månad",
     description:
-      "Ett år har 52 veckor och en dag. Se hur många veckor året, varje månad och ett halvår har — och hur många veckor som är kvar.",
+      "Ett år har 52 veckor och en dag. Se hur många veckor året, varje månad och ett halvår har, och hur många veckor som är kvar av året.",
     lead:
       "Ett kalenderår har 365 dagar, och en vecka har sju. Här ser du hur många veckor året, varje månad och ett halvår har — och hur många veckor som är kvar av året.",
     tabelOverskrift: "Så många veckor är det i varje period",
