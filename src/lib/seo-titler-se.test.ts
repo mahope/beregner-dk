@@ -15,7 +15,6 @@ const SIDER: { slug: string; ord: string }[] = [
   { slug: "procent", ord: "Procenträknare" },
   { slug: "kvadratmeter", ord: "Kvadratmeterkalkylator" },
   { slug: "valuta", ord: "Valutakalkylator" },
-  { slug: "elberegner", ord: "Beräkna elkostnad" },
   { slug: "leasing", ord: "Företagsleasing bil" },
   { slug: "boliglaan", ord: "Bolånekalkylator" },
   { slug: "bil", ord: "Bilkostnadskalkylator" },

@@ -1212,13 +1212,13 @@ describe("svenska svar på frågeformulerade sökningar", () => {
     expect(text).not.toMatch(/\d\.\d{3} kr/);
   });
 
-  test("/leasing skriver fåretagsleasing med å overalt det står", () => {
+  test("/leasing har aldrig ä-stavningen og nævner ordet i titel og keywords", () => {
     const data = getPageData("leasing", "se")!;
     const felter = [data.title, data.metaTitle, data.metaDescription, data.ogTitle, ...data.keywords];
-    // Ordet skal findes i keywords og i titlen — det er de to, GSC kan matche
-    // på — men kravet er ikke "overalt", kun "aldrig med ä".
-    const medOrdet = felter.filter((t) => /f[åä]retagsleasing/i.test(t));
-    expect(medOrdet.length).toBeGreaterThanOrEqual(1);
+    // Titlen (metaTitle + ogTitle) staver ordet korrekt som "företagsleasing";
+    // keywordet bruger stadig den ældre å-stavning. Begge skal findes, aldrig ä.
+    const medOrdet = felter.filter((t) => /f[öå]retagsleasing/i.test(t));
+    expect(medOrdet.length).toBeGreaterThanOrEqual(2);
     for (const tekst of felter) {
       expect(tekst, `"${tekst}"`).not.toMatch(/färetagsleasing/i);
     }
