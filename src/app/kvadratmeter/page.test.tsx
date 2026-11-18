@@ -1,5 +1,7 @@
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { readCookieConsent } from "@/lib/cookie-consent";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getPageData } from "@/lib/page-data";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
@@ -41,12 +43,39 @@ async function medLocale(locale: "da" | "se" | "no") {
   return KvadratmeterPage();
 }
 
-test.each(["da", "se"] as const)("rendered page HTML on %s has no Google ad code", async (locale) => {
-  const page = await medLocale(locale);
-  const html = renderToStaticMarkup(await RootLayout({ children: page }));
+describe("Google ad regression", () => {
+  afterEach(() => {
+    cleanup();
+    localStorage.clear();
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
 
-  expect(html).toContain("Arealværktøj");
-  expect(html).not.toMatch(/googlesyndication|adsbygoogle/i);
+  test.each([
+    ["da", "Accepter"],
+    ["se", "Acceptera"],
+  ] as const)("page on %s has no Google ad code in HTML or after consent", async (locale, acceptLabel) => {
+    // Exercise the consent path even if the previous opt-in configuration is present.
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "1");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_RESULT", "1234567890");
+    const page = await medLocale(locale);
+    const layout = await RootLayout({ children: page });
+    const html = renderToStaticMarkup(layout);
+
+    expect(html).toContain("Arealværktøj");
+    expect(html).not.toMatch(/googlesyndication|adsbygoogle/i);
+
+    vi.stubGlobal("matchMedia", () => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    render(layout, { container: document });
+    fireEvent.click(screen.getByRole("button", { name: acceptLabel }));
+
+    expect(readCookieConsent()?.accepted).toBe(true);
+    expect(document.querySelector('script[src*="googlesyndication"], .adsbygoogle')).toBeNull();
+  });
 });
 
 describe("kvadratmeter page", () => {

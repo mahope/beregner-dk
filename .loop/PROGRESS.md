@@ -36,7 +36,6 @@
 12. `footer-data.test.ts` — 6 tests
 
 ## DEFERRED (kræver menneske)
-- **GDPR/AdSense**: AdSense indlæses ubetinget uanset cookie-consent
 - **QR-kode privacy**: ShareCalculation sender data til api.qrserver.com
 - **API/UI skat-inkonsistens**: /api/v1/loen mangler top-topskat
 - **NO locale fallback**: Info-sider viser DA for NO-locale
