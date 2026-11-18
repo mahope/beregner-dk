@@ -25,7 +25,7 @@ describe("kredit-eksempler", () => {
       for (const felt of [
         e.samletKreditbeloeb,
         e.loebetid,
-        e.rente,
+        e.debitorrente,
         e.aop,
         e.maanedligYdelse,
         e.samledeKreditomkostninger,
@@ -34,6 +34,7 @@ describe("kredit-eksempler", () => {
         expect(felt.trim()).not.toBe("");
       }
       expect(e.kilde).toMatch(/^https:\/\//);
+      if (e.debitorrenteKilde) expect(e.debitorrenteKilde.url).toMatch(/^https:\/\//);
     },
   );
 

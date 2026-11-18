@@ -11,7 +11,18 @@ export function KreditEksempel({ laangiver }: { laangiver: Laangiver }) {
   return (
     <p>
       <strong>Repræsentativt eksempel ({e.produkt}):</strong> Samlet kreditbeløb {e.samletKreditbeloeb}, løbetid{" "}
-      {e.loebetid}, {e.rente}, ÅOP {e.aop}, månedlig ydelse {e.maanedligYdelse}, samlede kreditomkostninger{" "}
+      {e.loebetid}, {e.paalydendeRente && `pålydende rente ${e.paalydendeRente}, `}debitorrente {e.debitorrente}
+      {e.debitorrenteKilde && (
+        <>
+          {" "}
+          (ifølge{" "}
+          <a href={e.debitorrenteKilde.url} target="_blank" rel="nofollow noopener noreferrer">
+            {e.debitorrenteKilde.navn}
+          </a>
+          )
+        </>
+      )}
+      , ÅOP {e.aop}, månedlig ydelse {e.maanedligYdelse}, samlede kreditomkostninger{" "}
       {e.samledeKreditomkostninger} og samlet tilbagebetaling {e.samletTilbagebetaling}
       {/* Amounts end in "kr.", which already closes the sentence. */}
       {e.samletTilbagebetaling.endsWith(".") ? "" : "."}

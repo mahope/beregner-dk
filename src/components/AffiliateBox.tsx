@@ -78,8 +78,8 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = fals
               rel="sponsored nofollow noopener noreferrer"
               onClick={() => trackAffiliateClick(title, link.url)}
               className={`block p-4 transition-colors ${
-                link.highlight 
-                  ? "bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 hover:from-green-100 hover:to-blue-100 dark:hover:from-green-900/30 dark:hover:to-blue-900/30" 
+                link.highlight
+                  ? "bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 hover:from-green-100 hover:to-blue-100 dark:hover:from-green-900/30 dark:hover:to-blue-900/30"
                   : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
               }`}
             >
@@ -93,7 +93,10 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = fals
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{link.description}</p>
+                  {/* A lender without a published example gets only its name and link. */}
+                  {!(link.laangiver && !link.laangiver.eksempel) && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{link.description}</p>
+                  )}
                 </div>
                 <span className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
                   {link.cta} →

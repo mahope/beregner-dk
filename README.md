@@ -22,7 +22,11 @@ kun vises som långiverens eget offentliggjorte repræsentative eksempel
 [`src/lib/kredit-eksempler.ts`](src/lib/kredit-eksempler.ts) med kilde-URL og
 `hentet`-dato og vises med "Eksemplet er hentet fra [långiver] den [dato]".
 Har en långiver intet offentliggjort eksempel, står `eksempel: null`, og siden
-viser kun navn og link.
+viser kun navn og link (ingen beskrivelse).
+
+Eksemplet skal have debitorrenten (`debitorrente`). Viser långiverens
+eksempelside kun den pålydende rente, hentes debitorrenten for samme produkt
+fra långiverens eget prisskilt og vises med link via `debitorrenteKilde`.
 
 `kredit-eksempler.test.ts` fejler, når et eksempel er mere end 90 dage
 gammelt. Hent da tallene igen fra kildesiden og opdatér `hentet`, eller sæt

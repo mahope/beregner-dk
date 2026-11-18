@@ -17,8 +17,15 @@ export interface KreditEksempel {
   produkt: string;
   samletKreditbeloeb: string;
   loebetid: string;
-  /** Rate label and value as published, e.g. "variabel debitorrente 9,37 % til 20,73 %". */
-  rente: string;
+  /** Debitorrente as published, e.g. "9,37 % til 20,73 % (variabel)". Required by law. */
+  debitorrente: string;
+  /**
+   * Page the debitorrente was copied from, when the lender's example page only
+   * states the pålydende rente and the lender publishes the debitorrente elsewhere.
+   */
+  debitorrenteKilde?: { navn: string; url: string };
+  /** Pålydende rente, when the lender's example states it besides the debitorrente. */
+  paalydendeRente?: string;
   aop: string;
   maanedligYdelse: string;
   samledeKreditomkostninger: string;
@@ -57,7 +64,14 @@ export const BILLAAN_LAANGIVERE: Laangiver[] = [
       produkt: "Lån til elbil",
       samletKreditbeloeb: "300.000 kr.",
       loebetid: "10 år",
-      rente: "variabel rente 2,75 % til 6,55 %",
+      // The billån page states only the pålydende rente. The debitorrente for
+      // the same product and rate span is in Nordea's prisskilt (pr. 10.11.2026).
+      paalydendeRente: "2,75 % til 6,55 % (variabel)",
+      debitorrente: "2,78 % til 6,71 %",
+      debitorrenteKilde: {
+        navn: "Nordeas prisskilt pr. 10. november 2026",
+        url: "https://www.nordea.dk/Images/144-528916/Prisskilt%2011.03.2026%20-%20Nordea.dk.pdf",
+      },
       aop: "3,1 % til 7,0 %",
       maanedligYdelse: "2.901 kr. til 3.456 kr.",
       samledeKreditomkostninger: "43.976 kr. til 110.534 kr.",
@@ -75,7 +89,7 @@ export const BILLAAN_LAANGIVERE: Laangiver[] = [
       produkt: "Billån uden sikkerhed",
       samletKreditbeloeb: "85.000 kr.",
       loebetid: "7 år",
-      rente: "variabel debitorrente 9,37 % til 20,73 %",
+      debitorrente: "9,37 % til 20,73 % (variabel)",
       aop: "9,37 % til 20,73 %",
       maanedligYdelse: "1.367 kr. til 1.836 kr.",
       samledeKreditomkostninger: "29.840 kr. til 69.239 kr.",
