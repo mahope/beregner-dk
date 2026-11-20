@@ -13,6 +13,7 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import BeregnerAssistent from "@/components/BeregnerAssistent";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { calculationStatePrivacyScript } from "@/lib/calculation-state-privacy";
+import { ADSENSE_SCRIPT_URL, hasAdSenseVerificationScript } from "@/lib/ads";
 import { getSiteTranslations } from "@/lib/i18n";
 import { OG_IMAGE, OG_IMAGE_URL } from "@/lib/page-helpers";
 
@@ -116,6 +117,11 @@ export default async function RootLayout({
             data-exclude-hash="true"
             strategy="afterInteractive"
           />
+        )}
+
+        {/* AdSense site verification for beraknare.se; ad units stay behind the flag. */}
+        {hasAdSenseVerificationScript(domainConfig.locale) && (
+          <script async src={ADSENSE_SCRIPT_URL} crossOrigin="anonymous" />
         )}
 
         <OrganizationSchema

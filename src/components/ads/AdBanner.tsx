@@ -2,11 +2,14 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { useLocaleOptional } from "@/components/LocaleProvider";
-import { ADSENSE_PAGES, isAdSenseEnabled, reloadAfterAdConsentWithdrawal } from "@/lib/ads";
+import {
+  ADSENSE_CLIENT as AD_CLIENT,
+  ADSENSE_PAGES,
+  ADSENSE_SCRIPT_URL as SCRIPT_URL,
+  isAdSenseEnabled,
+  reloadAfterAdConsentWithdrawal,
+} from "@/lib/ads";
 import { hasAdConsent, subscribeToCookieConsent } from "@/lib/cookie-consent";
-
-const AD_CLIENT = "ca-pub-1902871361369866";
-const SCRIPT_URL = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CLIENT}`;
 
 type AdQueue = {
   requestNonPersonalizedAds?: 1;

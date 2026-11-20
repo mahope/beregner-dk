@@ -33,3 +33,23 @@ indstillinger. [Googles krav til samtykkeplatforme](https://support.google.com/a
 3. Sæt `NEXT_PUBLIC_ADSENSE_ENABLED=0` ved næste build for at slå alle
    AdSense-enheder og scriptet fra. Uden et gyldigt slot-id forbliver
    annoncerne også slået fra.
+
+## Verifikation af beraknare.se
+
+`src/app/layout.tsx` lægger publisherscriptet (`adsbygoogle.js?client=ca-pub-1902871361369866`)
+i `<head>` på alle sider på beraknare.se, også når `NEXT_PUBLIC_ADSENSE_ENABLED=0`.
+Det er kun verifikation: annonceenheder (`ins.adsbygoogle`) kommer stadig kun fra
+`AdBanner.tsx` og kræver flag, slot og samtykke. Scriptet indlæses uden samtykke,
+fordi AdSense skal kunne finde det. Fjern `hasAdSenseVerificationScript` i
+`src/lib/ads.ts`, hvis sitet ikke skal bære scriptet efter godkendelse.
+`public/ads.txt` indeholder publisher-linjen og serveres på alle domæner.
+
+## Samtykkeløsning (CMP)
+
+Begge sites bruger en hjemmebygget banner (`src/components/CookieConsent.tsx`,
+`src/lib/cookie-consent.ts`, nøgle `mb_cookie_consent_v2` i localStorage), ikke
+en Google-certificeret CMP. Googles krav:
+https://support.google.com/adsense/answer/13554116. Overgang til Googles egen
+«Privatliv og meddelelser»: opret en EU-samtykkemeddelelse for begge sites i
+AdSense, fjern den egne banner og samtykke-gating af annoncescriptet, og lad
+Google styre samtykket. Analytics (Plausible, Umami) skal afklares separat.

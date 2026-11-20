@@ -10,8 +10,8 @@ function filesIn(directory: string): string[] {
   });
 }
 
-test("AdSense-kode findes kun i annoncekomponenten og ads.txt", () => {
-  const allowed = new Set(["src/components/ads/AdBanner.tsx", "public/ads.txt"]);
+test("AdSense-kode findes kun i ads.ts, annoncekomponenten og ads.txt", () => {
+  const allowed = new Set(["src/lib/ads.ts", "src/components/ads/AdBanner.tsx", "public/ads.txt"]);
   const pattern = /adsbygoogle|ca-pub-|pagead2\.googlesyndication\.com/i;
   const unexpected = ["src", "public"].flatMap(filesIn).filter((path) =>
     !allowed.has(path) && !/\.test\.[jt]sx?$/.test(path) && pattern.test(readFileSync(path, "utf8")),
