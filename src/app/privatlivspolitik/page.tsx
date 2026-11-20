@@ -312,18 +312,24 @@ function SeContent() {
           och antal beräkningar. Vi kan inte identifiera enskilda användare.
         </p>
 
+        <h2>Google AdSense</h2>
+        <p>
+          Beräknare.se laddar ett skript från Google AdSense på alla
+          sidor, så att Google kan verifiera webbplatsen för AdSense. Skriptet
+          laddas utan föregående samtycke, och Google tar då emot din
+          IP-adress och uppgift om vilken sida du besöker. Vi visar för
+          närvarande inga annonser på Beräknare.se.
+          Se <a href="https://policies.google.com/technologies/partner-sites?hl=sv">hur Google använder uppgifter från partnersidor</a>.
+        </p>
         {isAdSenseEnabled() && (
           <>
-            <h2>Google AdSense</h2>
             <p>
               Vår danska webbplats MinBeregner.dk kan visa annonser från Google
-              AdSense på utvalda sidor efter samtycke. Beräknare.se laddar aldrig
-              Googles annonsskript. På den danska webbplatsen begär vi
-              icke-personanpassade annonser. Google tar då bland annat emot
-              besökarens IP-adress och uppgift om vilken sida som besöks. Google
-              kan använda kakor för att begränsa antalet annonsvisningar, mäta
-              annonser och motverka missbruk.
-              Se <a href="https://policies.google.com/technologies/partner-sites?hl=sv">hur Google använder uppgifter från partnersidor</a>.
+              AdSense på utvalda sidor efter samtycke. På den danska webbplatsen
+              begär vi icke-personanpassade annonser. Google tar då bland annat
+              emot besökarens IP-adress och uppgift om vilken sida som besöks.
+              Google kan använda kakor för att begränsa antalet annonsvisningar,
+              mäta annonser och motverka missbruk.
             </p>
             <p>
               På den danska webbplatsen kan du när som helst återkalla ditt samtycke.

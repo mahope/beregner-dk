@@ -8,7 +8,7 @@ Placeringerne godkendes via `ADSENSE_PAGES` i `src/lib/ads.ts`. Kun det danske
 site bruger annonceenheden. Derfor omtaler kun det danske cookiebanner
 Googles annoncecookies.
 
-Scriptet indlæses først efter accept i det danske cookiebanner. Banneret og
+På det danske site indlæses annoncescriptet først efter accept i det danske cookiebanner. Banneret og
 annonceenheden følger samtykkeændringer på tværs af åbne faner. Banneret
 gemmer valget i `mb_cookie_consent_v2`. Cookieindstillinger i footeren åbner
 banneret igen. Afvis gemmer afslaget og fjerner annonceenheden og dens script.
@@ -31,7 +31,8 @@ indstillinger. [Googles krav til samtykkeplatforme](https://support.google.com/a
    Dockerfile tager begge værdier som build-args. Next.js indlejrer dem ved
    build, så en ændring af runtime-miljøet alene ændrer ikke annoncerne.
 3. Sæt `NEXT_PUBLIC_ADSENSE_ENABLED=0` ved næste build for at slå alle
-   AdSense-enheder og scriptet fra. Uden et gyldigt slot-id forbliver
+   AdSense-enheder og det danske annoncescript fra. Verifikationsscriptet på
+   beraknare.se påvirkes ikke af flaget. Uden et gyldigt slot-id forbliver
    annoncerne også slået fra.
 
 ## Verifikation af beraknare.se
@@ -40,7 +41,10 @@ indstillinger. [Googles krav til samtykkeplatforme](https://support.google.com/a
 i `<head>` på alle sider på beraknare.se, også når `NEXT_PUBLIC_ADSENSE_ENABLED=0`.
 Det er kun verifikation: annonceenheder (`ins.adsbygoogle`) kommer stadig kun fra
 `AdBanner.tsx` og kræver flag, slot og samtykke. Scriptet indlæses uden samtykke,
-fordi AdSense skal kunne finde det. Fjern `hasAdSenseVerificationScript` i
+fordi AdSense skal kunne finde det. Auto ads (inkl. ankerannoncer og
+vignetter) skal være slået fra for beraknare.se i AdSense, og også som
+kontostandard for nye sites: ellers kan Google placere annoncer, der omgår både
+flaget og samtykket. Fjern `hasAdSenseVerificationScript` i
 `src/lib/ads.ts`, hvis sitet ikke skal bære scriptet efter godkendelse.
 `public/ads.txt` indeholder publisher-linjen og serveres på alle domæner.
 

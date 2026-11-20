@@ -3,9 +3,9 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { useLocaleOptional } from "@/components/LocaleProvider";
 import {
-  ADSENSE_CLIENT as AD_CLIENT,
+  ADSENSE_CLIENT,
   ADSENSE_PAGES,
-  ADSENSE_SCRIPT_URL as SCRIPT_URL,
+  ADSENSE_SCRIPT_URL,
   isAdSenseEnabled,
   reloadAfterAdConsentWithdrawal,
 } from "@/lib/ads";
@@ -77,7 +77,7 @@ function AdUnit({ slot }: { slot: string }) {
 
     nonPersonalizedQueue();
     const script = document.createElement("script");
-    script.src = SCRIPT_URL;
+    script.src = ADSENSE_SCRIPT_URL;
     script.async = true;
     script.crossOrigin = "anonymous";
     const pendingScript = Symbol();
@@ -110,7 +110,7 @@ function AdUnit({ slot }: { slot: string }) {
         ref={adRef}
         className="adsbygoogle"
         style={{ display: "block", marginInline: "auto", width: 250, height: 250 }}
-        data-ad-client={AD_CLIENT}
+        data-ad-client={ADSENSE_CLIENT}
         data-ad-slot={slot}
       />
     </div>

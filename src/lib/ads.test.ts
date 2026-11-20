@@ -22,3 +22,12 @@ test("ads.txt har publisher-linjen og serveres uændret på begge domæner", () 
     expect(getRouteDecision(getDomainConfigForHost(host), "/ads.txt")).toEqual({ type: "allow" });
   }
 });
+
+test("layoutet renderer verifikationsscriptet i head bag hasAdSenseVerificationScript, uden flag", () => {
+  const layout = readFileSync("src/app/layout.tsx", "utf8");
+  const head = layout.slice(layout.indexOf("<head"), layout.indexOf("</head>"));
+  expect(head).toMatch(
+    /hasAdSenseVerificationScript\(domainConfig\.locale\) && \(\s*<script async src=\{ADSENSE_SCRIPT_URL\} crossOrigin="anonymous" \/>/,
+  );
+  expect(head).not.toContain("isAdSenseEnabled");
+});
