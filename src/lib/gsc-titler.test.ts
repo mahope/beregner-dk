@@ -38,9 +38,9 @@ describe("titler målrettet GSC-søgninger (da)", () => {
     expect(d.metaTitle.length).toBeLessThanOrEqual(60);
   });
 
-  test("/boligstoette: titlen matcher 'boligstøtte beregner uden login'", () => {
+  test("/boligstoette: titlen matcher 'beregn boligstøtte uden login'", () => {
     const d = getPageData("boligstoette", "da")!;
-    expect(d.metaTitle.toLowerCase()).toContain("boligstøtte beregner uden login");
+    expect(d.metaTitle.toLowerCase()).toContain("beregn boligstøtte 2026 uden login");
     expect(d.metaTitle.length).toBeLessThanOrEqual(60);
     expect(d.ogTitle).toBe(d.metaTitle);
   });

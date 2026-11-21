@@ -31,7 +31,6 @@
 import { describe, expect, test } from "vitest";
 import { rabatProcent, procentAf, RABAT_EKSEMPEL, PROCENT_10_AF_FAQ } from "@/lib/procent";
 import { beregnBmr, beregnTdee } from "@/lib/makroer";
-import { dageTilDecember } from "@/lib/dage-mellem-datoer";
 import { daysBetween } from "@/lib/dage-til";
 import { beregnMoms } from "@/lib/moms";
 import { getPageData } from "@/lib/page-data";
