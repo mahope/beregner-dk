@@ -34,16 +34,20 @@ describe("renteberegner page", () => {
     {
       locale: "da" as const,
       heading: "Renteberegner",
+      tool: "Låneplanværktøj",
+      other: "Renteværktøj",
       answer: "1.887 kr. om måneden",
       interest: "Samlet rente: 13.227 kr.",
     },
     {
       locale: "se" as const,
       heading: "Räntekalkylator",
+      tool: "Renteværktøj",
+      other: "Låneplanværktøj",
       answer: "1 887 kr i månaden",
       interest: "Total ränta: 13 227 kr.",
     },
-  ])("viser det konkrete lån-svar og beregneren i $locale", async ({ locale, heading, answer, interest }) => {
+  ])("viser det konkrete lån-svar og beregneren i $locale", async ({ locale, heading, tool, other, answer, interest }) => {
     vi.mocked(getLocale).mockResolvedValue(locale);
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
 
@@ -52,7 +56,9 @@ describe("renteberegner page", () => {
     expect(html).toContain(`<h1 class="text-3xl font-bold mb-2">${heading}</h1>`);
     expect(html).toContain(answer);
     expect(html).toContain(interest);
-    expect(html).toContain("Renteværktøj");
+    // Ét sæt inputfelter pr. side: dansk har låneplanberegneren, svensk den gamle.
+    expect(html).toContain(tool);
+    expect(html).not.toContain(other);
   });
 
   test("henviser dansk skatteafsnit til den kildeførte rentefradragsberegner", async () => {

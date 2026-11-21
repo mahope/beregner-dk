@@ -284,3 +284,29 @@ export function restgaeldPrAar(plan: Laaneplan, hovedstol: number): { aar: numbe
   }
   return punkter;
 }
+
+/**
+ * Gamle del-links fra den tidligere renteberegner bar `?s=<base64>` med
+ * `{ hovedstol, rente, loebetid, type }`. Tallene sendes gennem `fraQuery`, så
+ * de får samme validering som et nyt link; gebyrer er 0, for dem kendte det
+ * gamle værktøj ikke.
+ */
+export function fraGammeltDelLink(inputs: Record<string, unknown>, standard: LaaneState): LaaneState {
+  const p = new URLSearchParams();
+  const saet = (noegle: string, v: unknown) => {
+    if (typeof v === "number" || typeof v === "string") p.set(noegle, String(v));
+  };
+  saet(URL_NOEGLER.hovedstol, inputs.hovedstol);
+  saet(URL_NOEGLER.aarsrente, inputs.rente);
+  saet(URL_NOEGLER.loebetidAar, inputs.loebetid);
+  saet(URL_NOEGLER.type, inputs.type);
+  return fraQuery(p.toString(), standard);
+}
+
+/** Kort beløb til en akse: 1.000.000 giver "1 mio.", 2.500.000 "2,5 mio." og 500.000 "500 t.". */
+export function kortBeloeb(n: number): string {
+  const dk = (v: number) => new Intl.NumberFormat("da-DK", { maximumFractionDigits: 1 }).format(v);
+  if (n >= 1_000_000) return `${dk(n / 1_000_000)} mio.`;
+  if (n >= 10_000) return `${dk(Math.round(n / 1000))} t.`;
+  return new Intl.NumberFormat("da-DK", { maximumFractionDigits: 0 }).format(n);
+}

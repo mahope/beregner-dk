@@ -2,16 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { InputField } from "@/components/InputField";
+import LaanebeloebTabel from "@/components/LaanebeloebTabel";
 import { useLocale } from "@/components/LocaleProvider";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { trackCalculation } from "@/lib/analytics";
+import { getStateFromUrl } from "@/lib/calculation-state";
 import { formatNumber } from "@/lib/format";
 import {
   type Laanetype,
   type LaaneState,
   aarsOversigt,
   beregnLaaneplan,
+  fraGammeltDelLink,
   fraQuery,
+  kortBeloeb,
   harDelLink,
   DEL_NOEGLER,
   FORBRUGSLAAN_EKSEMPEL,
@@ -42,7 +46,7 @@ function Graf({ hovedstol, annuitet, serielaan }: {
 }) {
   const B = 600;
   const H = 240;
-  const m = { l: 56, r: 12, t: 12, b: 28 };
+  const m = { l: 60, r: 14, t: 14, b: 28 };
   const a = restgaeldPrAar(annuitet, hovedstol);
   const s = restgaeldPrAar(serielaan, hovedstol);
   const maxAar = a[a.length - 1].aar;
@@ -63,13 +67,13 @@ function Graf({ hovedstol, annuitet, serielaan }: {
         {[0, 0.5, 1].map((f) => (
           <g key={f}>
             <line x1={m.l} x2={B - m.r} y1={y(hovedstol * f)} y2={y(hovedstol * f)} className="stroke-gray-200 dark:stroke-gray-700" strokeWidth={1} />
-            <text x={m.l - 6} y={y(hovedstol * f) + 4} textAnchor="end" className="fill-gray-500 dark:fill-gray-400" fontSize={11}>
-              {formatNumber(hovedstol * f, "da", { maximumFractionDigits: 0 })}
+            <text x={m.l - 6} y={y(hovedstol * f) + 4} textAnchor="end" className="fill-gray-500 dark:fill-gray-400" fontSize={12}>
+              {kortBeloeb(hovedstol * f)}
             </text>
           </g>
         ))}
         {aarTicks.map((t) => (
-          <text key={t} x={x(t)} y={H - 8} textAnchor="middle" className="fill-gray-500 dark:fill-gray-400" fontSize={11}>
+          <text key={t} x={x(t)} y={H - 8} textAnchor="middle" className="fill-gray-500 dark:fill-gray-400" fontSize={12}>
             {t} år
           </text>
         ))}
@@ -88,7 +92,7 @@ function RenteAfdragGraf({ plan }: { plan: ReturnType<typeof beregnLaaneplan> })
   const aar = aarsOversigt(plan);
   const B = 600;
   const H = 220;
-  const m = { l: 56, r: 12, t: 12, b: 28 };
+  const m = { l: 60, r: 14, t: 14, b: 28 };
   const maks = Math.max(...aar.map((r) => r.rente + r.afdrag));
   const bw = (B - m.l - m.r) / aar.length;
   const h = (v: number) => (v / maks) * (H - m.t - m.b);
@@ -101,10 +105,10 @@ function RenteAfdragGraf({ plan }: { plan: ReturnType<typeof beregnLaaneplan> })
           Hver søjle viser, hvor meget af årets betalinger der går til rente og til afdrag på lånet.
         </desc>
         <line x1={m.l} x2={B - m.r} y1={bund} y2={bund} className="stroke-gray-300 dark:stroke-gray-600" />
-        <text x={m.l - 6} y={m.t + 8} textAnchor="end" className="fill-gray-500 dark:fill-gray-400" fontSize={11}>
-          {formatNumber(maks, "da", { maximumFractionDigits: 0 })}
+        <text x={m.l - 6} y={m.t + 8} textAnchor="end" className="fill-gray-500 dark:fill-gray-400" fontSize={12}>
+          {kortBeloeb(maks)}
         </text>
-        <text x={m.l - 6} y={bund + 4} textAnchor="end" className="fill-gray-500 dark:fill-gray-400" fontSize={11}>0</text>
+        <text x={m.l - 6} y={bund + 4} textAnchor="end" className="fill-gray-500 dark:fill-gray-400" fontSize={12}>0</text>
         {aar.map((r, i) => {
           const bx = m.l + i * bw + bw * 0.1;
           const w = bw * 0.8;
@@ -113,7 +117,7 @@ function RenteAfdragGraf({ plan }: { plan: ReturnType<typeof beregnLaaneplan> })
               <rect x={bx} y={bund - h(r.afdrag)} width={w} height={h(r.afdrag)} className="fill-blue-600 dark:fill-blue-400" />
               <rect x={bx} y={bund - h(r.afdrag) - h(r.rente)} width={w} height={h(r.rente)} className="fill-amber-500 dark:fill-amber-400" />
               {(aar.length <= 12 || r.aar % Math.ceil(aar.length / 8) === 0) && (
-                <text x={bx + w / 2} y={H - 8} textAnchor="middle" className="fill-gray-500 dark:fill-gray-400" fontSize={11}>{r.aar}</text>
+                <text x={bx + w / 2} y={H - 8} textAnchor="middle" className="fill-gray-500 dark:fill-gray-400" fontSize={12}>{r.aar}</text>
               )}
             </g>
           );
@@ -128,19 +132,43 @@ function RenteAfdragGraf({ plan }: { plan: ReturnType<typeof beregnLaaneplan> })
   );
 }
 
-export default function LaaneplanBeregner({ variant, overskriftsniveau = 2 }: { variant: LaaneplanVariant; overskriftsniveau?: 2 | 3 }) {
+export default function LaaneplanBeregner({
+  variant,
+  overskriftsniveau = 2,
+  foldGebyrer = false,
+  medBeloebTabel = false,
+}: {
+  variant: LaaneplanVariant;
+  overskriftsniveau?: 2 | 3;
+  /** Gebyrfelterne ligger under "Gebyrer og ÅOP", så det simple brug forbliver simpelt. */
+  foldGebyrer?: boolean;
+  /** Tabellen "Hvor meget koster det at låne?" under resultatet, styret af de samme felter. */
+  medBeloebTabel?: boolean;
+}) {
   const H = `h${overskriftsniveau}` as "h2" | "h3";
   const { locale } = useLocale();
   const standard = STANDARD_STATE[variant];
   const [state, setState] = useState<LaaneState>(standard);
   const [kopieret, setKopieret] = useState(false);
+  const [gebyrerAaben, setGebyrerAaben] = useState(false);
   const aendretAfBruger = useRef(false);
   const tracked = useRef(false);
 
   // Læs del-link ved mount (kun hvis adressen har beregnerens egne nøgler).
   useEffect(() => {
     const soeg = window.location.search;
-    if (harDelLink(soeg)) setState(fraQuery(soeg, standard));
+    let fra: LaaneState | null = null;
+    if (harDelLink(soeg)) {
+      fra = fraQuery(soeg, standard);
+    } else {
+      // Gamle del-links fra den tidligere renteberegner: ?s=<base64> med type "rente".
+      const gammel = getStateFromUrl();
+      if (gammel?.type === "rente") fra = fraGammeltDelLink(gammel.inputs, standard);
+    }
+    if (fra) {
+      setState(fra);
+      if (fra.stiftelsesgebyr > 0 || fra.maanedsgebyr > 0) setGebyrerAaben(true);
+    }
   }, [standard]);
 
   // Skriv kun tilbage, når brugeren har ændret noget, og bevar andre parametre og hash.
@@ -205,8 +233,27 @@ export default function LaaneplanBeregner({ variant, overskriftsniveau = 2 }: { 
             helpText="Den nominelle rente uden gebyrer. ÅOP regnes ud nedenfor."
           />
           <InputField value={state.loebetidAar} onChange={(v) => set("loebetidAar", v)} label="Løbetid" min={0.1} max={50} step={0.5} unit="år" />
-          <InputField value={state.stiftelsesgebyr} onChange={(v) => set("stiftelsesgebyr", v)} label="Stiftelsesgebyr (engang)" min={0} max={100000} step={500} unit="kr." />
-          <InputField value={state.maanedsgebyr} onChange={(v) => set("maanedsgebyr", v)} label="Gebyr pr. måned" min={0} max={100000} step={5} unit="kr." />
+          {foldGebyrer ? (
+            <details
+              open={gebyrerAaben}
+              onToggle={(e) => setGebyrerAaben(e.currentTarget.open)}
+              className="rounded-lg border border-gray-200 dark:border-gray-700"
+            >
+              <summary className="min-h-11 cursor-pointer px-3 py-2.5 text-sm font-medium text-blue-700 dark:text-blue-300">
+                Gebyrer og ÅOP
+              </summary>
+              <div className="space-y-4 px-3 pb-4 pt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Tilføj gebyrer for at se lånets ÅOP.</p>
+                <InputField value={state.stiftelsesgebyr} onChange={(v) => set("stiftelsesgebyr", v)} label="Stiftelsesgebyr (engang)" min={0} max={100000} step={500} unit="kr." />
+                <InputField value={state.maanedsgebyr} onChange={(v) => set("maanedsgebyr", v)} label="Gebyr pr. måned" min={0} max={100000} step={5} unit="kr." />
+              </div>
+            </details>
+          ) : (
+            <>
+              <InputField value={state.stiftelsesgebyr} onChange={(v) => set("stiftelsesgebyr", v)} label="Stiftelsesgebyr (engang)" min={0} max={100000} step={500} unit="kr." />
+              <InputField value={state.maanedsgebyr} onChange={(v) => set("maanedsgebyr", v)} label="Gebyr pr. måned" min={0} max={100000} step={5} unit="kr." />
+            </>
+          )}
           <fieldset>
             <legend className="block text-sm font-medium mb-2 dark:text-gray-200">Lånetype</legend>
             <div className="grid grid-cols-2 gap-2">
@@ -330,6 +377,8 @@ export default function LaaneplanBeregner({ variant, overskriftsniveau = 2 }: { 
               <Graf hovedstol={state.hovedstol} annuitet={sam.annuitet} serielaan={sam.serielaan} />
             </div>
           </section>
+
+          {medBeloebTabel && <LaanebeloebTabel aarligRente={state.aarsrente} loebetid={state.loebetidAar} type={state.type} />}
 
           <section aria-labelledby="amortisering-overskrift">
             <H id="amortisering-overskrift" className="text-xl font-semibold mb-3 dark:text-white">Amortiseringsplan ({TYPE_NAVN[state.type].toLowerCase()})</H>

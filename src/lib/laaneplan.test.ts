@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
+  fraGammeltDelLink,
+  kortBeloeb,
   type LaaneState,
   aarsOversigt,
   fraQuery,
@@ -224,5 +226,25 @@ describe("restgæld pr. år", () => {
   test("løbetid på ikke hele år får et slutpunkt", () => {
     const p = beregnLaaneplan({ hovedstol: 60_000, aarsrente: 6, loebetidAar: 2.5, type: "annuitet" });
     expect(restgaeldPrAar(p, 60_000).at(-1)).toEqual({ aar: 2.5, restgaeld: 0 });
+  });
+});
+
+describe("gammelt del-link og aksetekst", () => {
+  const standard = { hovedstol: 1_000_000, aarsrente: 5, loebetidAar: 30, stiftelsesgebyr: 0, maanedsgebyr: 0, type: "annuitet" as const };
+
+  test("mapper gamle felter til nye og beholder standard for ugyldige", () => {
+    expect(fraGammeltDelLink({ hovedstol: 200000, rente: 4, loebetid: 20, type: "serielaan" }, standard)).toEqual({
+      ...standard, hovedstol: 200000, aarsrente: 4, loebetidAar: 20, type: "serielaan",
+    });
+    expect(fraGammeltDelLink({ hovedstol: -5, rente: "x", type: "andet" }, standard)).toEqual(standard);
+  });
+
+  test("kortBeloeb forkorter aksens tal", () => {
+    expect(kortBeloeb(1_000_000)).toBe("1 mio.");
+    expect(kortBeloeb(2_500_000)).toBe("2,5 mio.");
+    expect(kortBeloeb(500_000)).toBe("500 t.");
+    expect(kortBeloeb(50_000)).toBe("50 t.");
+    expect(kortBeloeb(0)).toBe("0");
+    expect(kortBeloeb(5_000)).toBe("5.000");
   });
 });

@@ -13,10 +13,10 @@ vi.mock("@/lib/analytics", () => ({
 
 const rene = (t: string | null) => (t ?? "").replace(/ /g, " ");
 
-function renderDa(variant: "annuitet" | "forbrugslaan") {
+function renderDa(variant: "annuitet" | "forbrugslaan", props: { foldGebyrer?: boolean; medBeloebTabel?: boolean } = {}) {
   return render(
     <LocaleProvider locale="da" domainConfig={getDomainConfig("localhost")}>
-      <LaaneplanBeregner variant={variant} />
+      <LaaneplanBeregner variant={variant} {...props} />
     </LocaleProvider>,
   );
 }
@@ -72,6 +72,48 @@ describe("LaaneplanBeregner", () => {
       .find((dt) => dt.textContent === "ÅOP")
       ?.nextElementSibling?.textContent;
     expect(Number((aop ?? "").replace(/[^\d,]/g, "").replace(",", "."))).toBeGreaterThan(5.12);
+  });
+
+  test("foldet gebyr: felterne ligger under 'Gebyrer og ÅOP' og er lukket som standard", () => {
+    renderDa("annuitet", { foldGebyrer: true });
+    const details = screen.getByText("Gebyrer og ÅOP").closest("details") as HTMLDetailsElement;
+    expect(details.open).toBe(false);
+    expect(details.contains(screen.getByLabelText(/Stiftelsesgebyr/))).toBe(true);
+    // Der er stadig kun ét lånebeløb-felt på siden.
+    expect(screen.getAllByLabelText(/Lånebeløb/)).toHaveLength(1);
+  });
+
+  test("foldet gebyr åbnes af et del-link med gebyr", () => {
+    window.history.replaceState(null, "", "/renteberegner?beloeb=500000&rente=4&aar=20&stiftelse=5000");
+    renderDa("annuitet", { foldGebyrer: true });
+    expect((screen.getByText("Gebyrer og ÅOP").closest("details") as HTMLDetailsElement).open).toBe(true);
+    expect((screen.getByLabelText(/Stiftelsesgebyr/) as HTMLInputElement).value).toBe("5000");
+  });
+
+  test("gammelt del-link (?s=…) fra den tidligere renteberegner genskaber tallene", () => {
+    const gammel = {
+      v: "1",
+      t: "rente",
+      i: { hovedstol: 750000, rente: 3.5, loebetid: 25, type: "serielaan" },
+      ts: 1,
+    };
+    const kodet = btoa(JSON.stringify(gammel)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    window.history.replaceState(null, "", `/renteberegner?s=${kodet}`);
+    renderDa("annuitet", { foldGebyrer: true });
+    expect((screen.getByLabelText(/Lånebeløb/) as HTMLInputElement).value).toBe("750000");
+    expect((screen.getByLabelText(/^Rente \(debitorrente/) as HTMLInputElement).value).toBe("3.5");
+    expect((screen.getByLabelText(/Løbetid/) as HTMLInputElement).value).toBe("25");
+    expect(screen.getByRole("button", { name: "Serielån" }).getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("beløbstabellen følger rente og løbetid fra de samme felter", () => {
+    renderDa("annuitet", { medBeloebTabel: true });
+    expect(screen.getByRole("heading", { name: "Hvor meget koster det at låne?" })).toBeTruthy();
+    const ydelse = () => document.querySelector("table tbody tr:nth-child(1) td")?.textContent;
+    const foer = ydelse();
+    fireEvent.change(screen.getByLabelText(/Løbetid/), { target: { value: "10" } });
+    expect(ydelse()).not.toBe(foer);
+    expect(screen.getAllByLabelText(/Lånebeløb/)).toHaveLength(1);
   });
 
   test("viser ingenting på de svenske og norske domæner", () => {
