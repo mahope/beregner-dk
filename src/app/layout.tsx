@@ -59,19 +59,16 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t.site.description,
       images: OG_IMAGE,
     },
+    // No `index`/`follow` and no canonical here: this metadata is inherited by
+    // the 404 page, where Next adds its own `noindex`. Indexable is the default
+    // for every real page, and each of those declares its own canonical
+    // (see not-found-metadata.test.ts).
     robots: {
-      index: true,
-      follow: true,
       googleBot: {
-        index: true,
-        follow: true,
         "max-video-preview": -1,
         "max-image-preview": "large",
         "max-snippet": -1,
       },
-    },
-    alternates: {
-      canonical: baseUrl,
     },
   };
 }

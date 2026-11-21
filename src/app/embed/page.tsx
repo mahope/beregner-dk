@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   title: "Embed Beregnere - Gratis Widgets",
   description:
     "Integrer gratis beregner-widgets på din hjemmeside. Momsberegner, BMI for voksne og mere. Kopier koden og indsæt.",
+  // Resolved against the per-domain metadataBase from the root layout.
+  alternates: { canonical: "/embed" },
 };
 
 const widgets = [
