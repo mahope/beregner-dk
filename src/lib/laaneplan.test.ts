@@ -242,6 +242,8 @@ describe("gammelt del-link og aksetekst", () => {
   test("kortBeloeb forkorter aksens tal", () => {
     expect(kortBeloeb(1_000_000)).toBe("1 mio.");
     expect(kortBeloeb(2_500_000)).toBe("2,5 mio.");
+    expect(kortBeloeb(999_600)).toBe("1 mio.");
+    expect(kortBeloeb(999_400)).toBe("999 t.");
     expect(kortBeloeb(500_000)).toBe("500 t.");
     expect(kortBeloeb(50_000)).toBe("50 t.");
     expect(kortBeloeb(0)).toBe("0");

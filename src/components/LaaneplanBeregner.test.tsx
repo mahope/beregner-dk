@@ -124,4 +124,18 @@ describe("LaaneplanBeregner", () => {
     );
     expect(container.textContent).toBe("");
   });
+
+  test("trackingNavn styrer navnet i calculation_done og scroll-depth", async () => {
+    const analytics = await import("@/lib/analytics");
+    vi.useFakeTimers();
+    render(
+      <LocaleProvider locale="da" domainConfig={getDomainConfig("localhost")}>
+        <LaaneplanBeregner variant="annuitet" trackingNavn="renteberegner" />
+      </LocaleProvider>,
+    );
+    vi.advanceTimersByTime(2100);
+    vi.useRealTimers();
+    expect(analytics.trackCalculation).toHaveBeenCalledWith("renteberegner");
+    expect(analytics.initScrollDepthTracking).toHaveBeenCalledWith("renteberegner");
+  });
 });

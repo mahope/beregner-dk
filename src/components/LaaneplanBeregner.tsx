@@ -5,7 +5,7 @@ import { InputField } from "@/components/InputField";
 import LaanebeloebTabel from "@/components/LaanebeloebTabel";
 import { useLocale } from "@/components/LocaleProvider";
 import { CopyResultButton, ResetButton } from "@/components/ui";
-import { trackCalculation } from "@/lib/analytics";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { getStateFromUrl } from "@/lib/calculation-state";
 import { formatNumber } from "@/lib/format";
 import {
@@ -137,6 +137,7 @@ export default function LaaneplanBeregner({
   overskriftsniveau = 2,
   foldGebyrer = false,
   medBeloebTabel = false,
+  trackingNavn,
 }: {
   variant: LaaneplanVariant;
   overskriftsniveau?: 2 | 3;
@@ -144,6 +145,8 @@ export default function LaaneplanBeregner({
   foldGebyrer?: boolean;
   /** Tabellen "Hvor meget koster det at låne?" under resultatet, styret af de samme felter. */
   medBeloebTabel?: boolean;
+  /** Navn i analytics. Standard er "laaneplan" (annuitet) eller "forbrugslaan"; /renteberegner bruger "renteberegner". */
+  trackingNavn?: string;
 }) {
   const H = `h${overskriftsniveau}` as "h2" | "h3";
   const { locale } = useLocale();
@@ -180,19 +183,30 @@ export default function LaaneplanBeregner({
     window.history.replaceState(null, "", url);
   }, [state]);
 
+  const sporNavn = trackingNavn ?? (variant === "annuitet" ? "laaneplan" : "forbrugslaan");
+
   useEffect(() => {
     if (tracked.current) return;
     const t = setTimeout(() => {
-      trackCalculation(variant === "annuitet" ? "laaneplan" : "forbrugslaan");
+      trackCalculation(sporNavn);
       tracked.current = true;
     }, 2000);
     return () => clearTimeout(t);
-  }, [variant]);
+  }, [sporNavn]);
+
+  useEffect(() => initScrollDepthTracking(sporNavn), [sporNavn]);
 
   const set = useCallback(<K extends keyof LaaneState>(k: K, v: LaaneState[K]) => {
     aendretAfBruger.current = true;
     setState((s) => ({ ...s, [k]: v }));
   }, []);
+
+  const gebyrFelter = (
+    <>
+      <InputField value={state.stiftelsesgebyr} onChange={(v) => set("stiftelsesgebyr", v)} label="Stiftelsesgebyr (engang)" min={0} max={100000} step={500} unit="kr." />
+      <InputField value={state.maanedsgebyr} onChange={(v) => set("maanedsgebyr", v)} label="Gebyr pr. måned" min={0} max={100000} step={5} unit="kr." />
+    </>
+  );
 
   const fejl = validerInput(state);
   const sam = useMemo(() => (fejl ? null : sammenlign(state)), [fejl, state]);
@@ -244,15 +258,11 @@ export default function LaaneplanBeregner({
               </summary>
               <div className="space-y-4 px-3 pb-4 pt-1">
                 <p className="text-sm text-gray-600 dark:text-gray-400">Tilføj gebyrer for at se lånets ÅOP.</p>
-                <InputField value={state.stiftelsesgebyr} onChange={(v) => set("stiftelsesgebyr", v)} label="Stiftelsesgebyr (engang)" min={0} max={100000} step={500} unit="kr." />
-                <InputField value={state.maanedsgebyr} onChange={(v) => set("maanedsgebyr", v)} label="Gebyr pr. måned" min={0} max={100000} step={5} unit="kr." />
+                {gebyrFelter}
               </div>
             </details>
           ) : (
-            <>
-              <InputField value={state.stiftelsesgebyr} onChange={(v) => set("stiftelsesgebyr", v)} label="Stiftelsesgebyr (engang)" min={0} max={100000} step={500} unit="kr." />
-              <InputField value={state.maanedsgebyr} onChange={(v) => set("maanedsgebyr", v)} label="Gebyr pr. måned" min={0} max={100000} step={5} unit="kr." />
-            </>
+            gebyrFelter
           )}
           <fieldset>
             <legend className="block text-sm font-medium mb-2 dark:text-gray-200">Lånetype</legend>

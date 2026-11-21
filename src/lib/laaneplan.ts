@@ -306,7 +306,7 @@ export function fraGammeltDelLink(inputs: Record<string, unknown>, standard: Laa
 /** Kort beløb til en akse: 1.000.000 giver "1 mio.", 2.500.000 "2,5 mio." og 500.000 "500 t.". */
 export function kortBeloeb(n: number): string {
   const dk = (v: number) => new Intl.NumberFormat("da-DK", { maximumFractionDigits: 1 }).format(v);
-  if (n >= 1_000_000) return `${dk(n / 1_000_000)} mio.`;
+  if (n >= 999_500) return `${dk(n / 1_000_000)} mio.`;
   if (n >= 10_000) return `${dk(Math.round(n / 1000))} t.`;
   return new Intl.NumberFormat("da-DK", { maximumFractionDigits: 0 }).format(n);
 }

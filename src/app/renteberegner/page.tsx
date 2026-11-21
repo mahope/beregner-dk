@@ -174,7 +174,7 @@ export default async function RenteberegnerPage() {
 
       {locale === "da" ? (
         <>
-          <LaaneplanBeregner variant="annuitet" foldGebyrer medBeloebTabel />
+          <LaaneplanBeregner variant="annuitet" foldGebyrer medBeloebTabel trackingNavn="renteberegner" />
           <p className="mt-6 text-gray-600 dark:text-gray-400">
             Tilføj stiftelsesgebyr og månedsgebyr under &ldquo;Gebyrer og ÅOP&rdquo;, og se ÅOP, restgæld år for år og annuitetslån og serielån side om side. Beregningen kan deles som link. Skal du låne til forbrug, så brug <Link href="/forbrugslaan">forbrugslånsberegneren</Link>, og læs om <Link href="/laantype">forskellen på annuitetslån, serielån og stående lån</Link>.
           </p>
@@ -202,8 +202,8 @@ export default async function RenteberegnerPage() {
             <strong>Indtast lånebeløbet</strong> - hvor meget vil du låne?
           </li>
           <li>
-            <strong>Angiv renten</strong> - den årlige rentesats (ÅOP eller
-            debitorrente)
+            <strong>Angiv renten</strong> - den årlige debitorrente (uden
+            gebyrer, ÅOP regnes ud for dig)
           </li>
           <li>
             <strong>Vælg løbetid</strong> - hvor mange år skal lånet løbe?
