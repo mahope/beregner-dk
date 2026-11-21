@@ -35,11 +35,23 @@ describe("root layout metadata (inherited by the 404 page)", () => {
 });
 
 describe("ordinary pages keep their own canonical and stay indexable", () => {
-  test.each(["brutto-netto", "bmi", "boliglaan"])("%s", (slug) => {
+  test.each(["brutto-netto", "bmi", "boliglaan"])("%s", async (slug) => {
     const da = getDomainConfigByLocale("da");
-    const meta = buildPageMetadata(slug, da);
-    expect(meta.alternates?.canonical).toBe(`${da.baseUrl}/${slug}`);
-    const robots = meta.robots as { index?: boolean } | undefined;
+    const page = buildPageMetadata(slug, da);
+    expect(page.alternates?.canonical).toBe(`${da.baseUrl}/${slug}`);
+    // Merge the way Next does: page fields override layout fields, robots is
+    // replaced wholesale by the page when it declares one.
+    const layout = await generateMetadata();
+    const robots = (page.robots ?? layout.robots) as
+      | { index?: boolean; follow?: boolean }
+      | undefined;
     expect(robots?.index).not.toBe(false);
+    expect(robots?.follow).not.toBe(false);
+    expect(page.alternates?.canonical).not.toBe(da.baseUrl);
+  });
+
+  test("embed declares its own canonical", async () => {
+    const { metadata } = await import("./embed/page");
+    expect(metadata.alternates?.canonical).toBe("/embed");
   });
 });
