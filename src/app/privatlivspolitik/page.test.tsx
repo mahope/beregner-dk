@@ -16,11 +16,8 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-test.each([
-  ["da", "Cookieindstillinger"],
-  ["se", "Cookieinställningar"],
-] as const)("privatlivspolitikken på %s viser kun AdSense-afsnittet med flaget til", async (locale, settings) => {
-  vi.mocked(getLocale).mockResolvedValue(locale);
+test("den danske privatlivspolitik omtaler kun AdSense med flaget til", async () => {
+  vi.mocked(getLocale).mockResolvedValue("da");
   vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "0");
   render(await PrivacyPolicy());
   expect(screen.queryByRole("heading", { name: "Google AdSense" })).not.toBeInTheDocument();
@@ -29,7 +26,23 @@ test.each([
   vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "1");
   render(await PrivacyPolicy());
   expect(screen.getByRole("heading", { name: "Google AdSense" })).toBeInTheDocument();
-  expect(screen.getAllByText(settings, { selector: "strong" })[0]).toBeInTheDocument();
+  expect(screen.getAllByText("Cookieindstillinger", { selector: "strong" })[0]).toBeInTheDocument();
+});
+
+// beraknare.se loads the AdSense verification script on every page regardless of
+// the flag, so the policy must always disclose it; only the ad-display text is gated.
+test("den svenske privatlivspolitik oplyser altid om verifikationsscriptet og gater annoncetekst", async () => {
+  vi.mocked(getLocale).mockResolvedValue("se");
+  vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "0");
+  render(await PrivacyPolicy());
+  expect(screen.getByRole("heading", { name: "Google AdSense" })).toBeInTheDocument();
+  expect(screen.queryByText(/Vår danska webbplats MinBeregner\.dk/)).not.toBeInTheDocument();
+
+  cleanup();
+  vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "1");
+  render(await PrivacyPolicy());
+  expect(screen.getByText(/Vår danska webbplats MinBeregner\.dk/)).toBeInTheDocument();
+  expect(screen.getAllByText("Cookieinställningar", { selector: "strong" })[0]).toBeInTheDocument();
 });
 
 test("den danske cookiepolitik omtaler kun AdSense med flaget til", async () => {
