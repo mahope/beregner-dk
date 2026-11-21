@@ -123,9 +123,14 @@ export function beregnBarselsdagpenge(
     employment === "unemployed"
       ? estimerNettoMaaned({ loen: 0, ydelse: monthlyIncome }).netto
       : estimerNettoMaaned({ loen: monthlyIncome, ydelse: 0 }).netto;
+  // The employer's refund is capped at the salary paid (barselsloven § 39), so the
+  // employee gets the benefit when it exceeds the partial salary: max of the two.
   const employerNet =
     employerWeeks > 0
-      ? estimerNettoMaaned({ loen: (monthlyIncome * employerPercent) / 100, ydelse: 0 }).netto
+      ? Math.max(
+          estimerNettoMaaned({ loen: (monthlyIncome * employerPercent) / 100, ydelse: 0 }).netto,
+          benefitNet
+        )
       : 0;
 
   const totalNet =
@@ -148,8 +153,14 @@ export function beregnBarselsdagpenge(
     employerWeeks,
     benefitWeeks,
     employerMonthlyAfterTax: employerNet,
-    coveragePercent: Math.min(100, (weeklyRate / usualWeekly) * 100),
-    monthlyLoss: Math.max(0, usualNet - benefitNet),
+    coveragePercent: Math.min(
+      100,
+      ((weeklyRate * benefitWeeks +
+        Math.max((usualWeekly * employerPercent) / 100, weeklyRate) * employerWeeks) /
+        (usualWeekly * weeks)) *
+        100
+    ),
+    monthlyLoss: Math.max(0, usualNet - averageMonthlyAfterTax),
     isHourlyRateCapped,
     isWeeklyRateCapped,
   };

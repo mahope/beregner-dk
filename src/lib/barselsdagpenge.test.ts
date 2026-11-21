@@ -178,14 +178,33 @@ describe("beregnBarselsdagpenge: løn under barsel", () => {
     const fuld = beregnBarselsdagpenge({
       monthlyIncome: 30000, weeklyHours: 37, weeks: 10, employerWeeks: 10,
     })!;
-    const halv = beregnBarselsdagpenge({
-      monthlyIncome: 30000, weeklyHours: 37, weeks: 10, employerWeeks: 10, employerPercent: 50,
+    const delvis = beregnBarselsdagpenge({
+      monthlyIncome: 30000, weeklyHours: 37, weeks: 10, employerWeeks: 10, employerPercent: 80,
     })!;
-    expect(halv.employerMonthlyAfterTax).toBeLessThan(fuld.employerMonthlyAfterTax);
-    expect(halv.employerMonthlyAfterTax).toBeCloseTo(
-      estimerNettoMaaned({ loen: 15000, ydelse: 0 }).netto,
+    expect(delvis.employerMonthlyAfterTax).toBeLessThan(fuld.employerMonthlyAfterTax);
+    expect(delvis.employerMonthlyAfterTax).toBeCloseTo(
+      estimerNettoMaaned({ loen: 24000, ydelse: 0 }).netto,
       6,
     );
+  });
+
+  test("delvis løn under dagpengene giver aldrig mindre end dagpengene (§ 39)", () => {
+    const r = beregnBarselsdagpenge({
+      monthlyIncome: 30000, weeklyHours: 37, weeks: 10, employerWeeks: 10, employerPercent: 50,
+    })!;
+    expect(r.employerMonthlyAfterTax).toBeCloseTo(r.monthlyAfterTax, 6);
+    expect(r.monthlyLoss).toBeCloseTo(
+      Math.max(0, estimerNettoMaaned({ loen: 30000, ydelse: 0 }).netto - r.monthlyAfterTax),
+      6,
+    );
+  });
+
+  test("fuld løn i alle uger giver ingen indkomstnedgang og fuld dækning", () => {
+    const r = beregnBarselsdagpenge({
+      monthlyIncome: 30000, weeklyHours: 37, weeks: 12, employerWeeks: 12,
+    })!;
+    expect(r.monthlyLoss).toBeCloseTo(0, 6);
+    expect(r.coveragePercent).toBe(100);
   });
 });
 

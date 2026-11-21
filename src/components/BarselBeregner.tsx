@@ -20,6 +20,8 @@ import { getCurrencySuffix } from "@/lib/format";
 import { AffiliateBox } from "./AffiliateBox";
 import { adtractionLink } from "@/lib/adtraction";
 
+const DEFAULT_EMPLOYER_WEEKS = '14';
+
 export default function BarselBeregner() {
   const { locale } = useLocale();
 
@@ -28,12 +30,10 @@ export default function BarselBeregner() {
       monthlyGross: "Månedlig bruttoløn (kr.)",
       placeholder: "F.eks. 35000",
       employmentType: "Beregningsgrundlag",
-      employeeOnlyNote: "Beregningen gælder lønmodtagere. Selvstændige og ledige skal bruge Min barsel.",
       fulltime: `Lønmodtager, fuldtid (${BARSEL_2026.fullTimeHours} timer)`,
       parttime: "Lønmodtager, deltid",
       selfemployed: "Selvstændig",
       unemployed: "Ledig (a-kasse)",
-      otherRules: "Selvstændige og ledige har andre regler. Brug Min barsel til den officielle ansøgning og beregning.",
       monthlyProfit: "Månedligt overskud før skat (kr.)",
       monthlyBenefit: "Dine månedlige a-dagpenge (kr.)",
       profitHint: `Satsen beregnes af virksomhedens overskud. Fuld sats kræver et årligt overskud på ca. ${BARSEL_2026.selfEmployedProfitForMaxRate.toLocaleString("da-DK")} kr. Kilde:`,
@@ -99,12 +99,10 @@ export default function BarselBeregner() {
       monthlyGross: "Månatlig bruttolön (kr)",
       placeholder: "T.ex. 35000",
       employmentType: "Beräkningsunderlag",
-      employeeOnlyNote: "Beräkningen gäller löntagare. Egenföretagare och arbetslösa ska använda Min barsel.",
       fulltime: `Heltid (${BARSEL_2026.fullTimeHours} timmar)`,
       parttime: "Deltid",
       selfemployed: "Egenföretagare – se Min barsel",
       unemployed: "Arbetslös – se Min barsel",
-      otherRules: "Egenföretagare och arbetslösa har andra regler. Använd Min barsel för den officiella ansökan och beräkningen.",
       weeklyHours: "Veckoarbetstimmar",
       hoursUnit: "timmar",
       youAre: "Du är",
@@ -141,12 +139,10 @@ export default function BarselBeregner() {
       monthlyGross: "Månedlig bruttolønn (kr)",
       placeholder: "F.eks. 35000",
       employmentType: "Beregningsgrunnlag",
-      employeeOnlyNote: "Beregningen gjelder lønnsøkere. Selvstendige og arbeidsledige skal bruke Min barsel.",
       fulltime: `Fulltid (${BARSEL_2026.fullTimeHours} timer)`,
       parttime: "Deltid",
       selfemployed: "Selvstendig – se Min barsel",
       unemployed: "Arbeidsledig – se Min barsel",
-      otherRules: "Selvstendige og arbeidsledige har andre regler. Bruk Min barsel til den offisielle søknaden og beregningen.",
       weeklyHours: "Ukentlige arbeidstimer",
       hoursUnit: "timer",
       youAre: "Du er",
@@ -191,7 +187,7 @@ export default function BarselBeregner() {
     `${fordelBarselsUger('mor').total}`
   );
   const [employerPays, setEmployerPays] = useState<boolean>(false);
-  const [employerWeeks, setEmployerWeeks] = useState<string>('14');
+  const [employerWeeks, setEmployerWeeks] = useState<string>(DEFAULT_EMPLOYER_WEEKS);
   const [employerPercent, setEmployerPercent] = useState<string>('100');
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -262,7 +258,7 @@ export default function BarselBeregner() {
     setTransfer('0');
     setWeeksPlanned(`${fordelBarselsUger('mor').total}`);
     setEmployerPays(false);
-    setEmployerWeeks('14');
+    setEmployerWeeks(DEFAULT_EMPLOYER_WEEKS);
     setEmployerPercent('100');
   }, []);
 
