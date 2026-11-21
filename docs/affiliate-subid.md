@@ -35,6 +35,8 @@ Før dette brugte alle Partner-ads-links `uid=minberegner`. Det erstattes af det
 
 ### Adtraction (API, token under Account > Settings)
 
+Endpoint-stierne og felterne nedenfor er læst i dokumentationen (https://api.adtraction.com/), men ikke kaldt. Betragt dem som ubekræftede, til et første kald har vist de rigtige felt- og stinavne.
+
 Basis: `https://api.adtraction.net/v2/` (dokumentation: https://api.adtraction.com/). Header `X-Token: <token>` (eller `?token=`).
 
 - `POST /partner/statistics/epi/`: aggregeret pr. EPI. Krævede felter: `fromDate`, `toDate` (ISO 8601), `currency`, `market` (`DK`), `transactionStatus` (1 godkendt, 2 afventer, 3 begge). Valgfri: `programId`, `channelId`, `groupbyEpi` (standard `true`). Svaret indeholder pr. gruppe `clicks`, `clicksUnique`, `leads`, `sales`, `commission`, `orderValue`, `epc`, `aov`, `leadRatio`, `conversionRatio`. EPI-værdien pr. gruppe returneres sammen med tallene; kontrollér feltnavnet ved første kald, for dokumentationens svareksempel viser det ikke.

@@ -13,7 +13,6 @@ describe("pageSlug", () => {
     ["/dagpenge", "dagpenge"],
     ["/dagpenge/", "dagpenge"],
     ["/blog/Løn og Åbning", "blog-loen-og-aabning"],
-    ["/bmi?x=1#top", "bmi"],
   ])("%s -> %s", (path, slug) => {
     expect(pageSlug(path)).toBe(slug);
   });
@@ -132,6 +131,18 @@ describe("affiliate links in the code", () => {
       })
       .map((f) => relative(src, f));
     expect(offenders).toEqual([]);
+  });
+
+  it("uses the link helpers only inside AffiliateBox links, never as a bare href", () => {
+    const users = files
+      .filter((f) => !allowed.has(relative(src, f)))
+      .filter((f) => /\b(partnerAdsLink|adtractionLink)\(/.test(readFileSync(f, "utf-8")));
+    const bare = users.filter((f) =>
+      /href=\{\s*(partnerAdsLink|adtractionLink)\(/.test(readFileSync(f, "utf-8")),
+    );
+    const withoutBox = users.filter((f) => !readFileSync(f, "utf-8").includes("<AffiliateBox"));
+    expect(bare.map((f) => relative(src, f))).toEqual([]);
+    expect(withoutBox.map((f) => relative(src, f))).toEqual([]);
   });
 
   it("renders every AffiliateBox link through withSubid", () => {

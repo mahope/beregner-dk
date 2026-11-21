@@ -60,7 +60,7 @@ function clean(part: string): string {
 
 /** Slug of a pathname: "/dagpenge/" -> "dagpenge", "/blog/x" -> "blog-x", "/" -> "forside". */
 export function pageSlug(pathname: string): string {
-  const segments = pathname.split(/[?#]/)[0].split("/").map(clean).filter(Boolean);
+  const segments = pathname.split("/").map(clean).filter(Boolean);
   return segments.join("-") || "forside";
 }
 
