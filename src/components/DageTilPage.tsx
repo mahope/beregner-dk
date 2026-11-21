@@ -161,7 +161,18 @@ export async function buildDageTilMetadata(
   // title; these nine are the exception because their question alone is the
   // whole lift. C81 locked this for the 160 `page-data` titles, and this is
   // the same rule applied to the nine the gate could not see.
-  const titleText = `${dageTilArm(event, dageLocale).copy.question} ${count(days, u.day, u.days)}`;
+  // 1. advent is the exception on .dk: GSC 22/10-19/11-2026 shows ~25.000
+  // impressions on "1 advent 2026", "første advent 2026" and "1. søndag i
+  // advent 2026" (pos. 7-11, almost no clicks). Those searchers want the date,
+  // so the title carries the year, the weekday and the date, which also
+  // matches the wording the searches use.
+  const { targetDate } = getDageTilAnswer(event, dageLocale, today);
+  const titleText =
+    dageLocale === "da" && event.id === "advent"
+      ? `1. advent ${formatTargetYear(targetDate)}: ${copy.da.weekday(
+          targetDate.getUTCDay()
+        )} ${formatTargetDate(targetDate, "da")} (${count(days, u.day, u.days)})`
+      : `${dageTilArm(event, dageLocale).copy.question} ${count(days, u.day, u.days)}`;
 
   // The description used to open with the event's own question — the exact
   // words the title already carries — so the first ~38 characters of the

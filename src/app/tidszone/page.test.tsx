@@ -65,7 +65,35 @@ describe("tidszone page", () => {
     expect(html).toContain("Tidszoneværktøj");
   });
 
-  test.each(["da", "se"] as const)(
+  // GSC 22/10-19/11-2026: "hvilken tidszone er danmark" 542 visninger pos. 8,4,
+  // "tidszoner" 1.707 pos. 9. Svaret skal stå i den renderede HTML, øverst.
+  test("da svarer direkte på 'hvilken tidszone er Danmark i' øverst på siden", async () => {
+    const html = renderToStaticMarkup(await TidszonePage());
+    expect(html).toContain(">Hvilken tidszone er Danmark i?<");
+    expect(html).toContain("Danmark ligger i tidszonen <strong>CET (UTC+1)</strong>");
+    expect(html).toContain("<strong>CEST (UTC+2)</strong>");
+    // Svaret kommer før klokken-12-tabellen.
+    expect(html.indexOf("Hvilken tidszone er Danmark i?")).toBeLessThan(
+      html.indexOf("Når det er 12 i Danmark, er det 06 i New York")
+    );
+    expect(html.indexOf("Hvilken tidszone er Danmark i?")).toBeLessThan(html.indexOf("Tidszoneværktøj"));
+  });
+
+  test("se får ikke det danske svarblok", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await TidszonePage());
+    expect(html).not.toContain("Hvilken tidszone er Danmark i?");
+  });
+
+  test("da metadata nævner CET og CEST", () => {
+    const d = getPageData("tidszone", "da")!;
+    expect(d.metaTitle).toMatch(/CET \(UTC\+1\)/);
+    expect(d.metaTitle).toMatch(/CEST \(UTC\+2\)/);
+    expect(d.metaDescription).toMatch(/New York/);
+  });
+
+  test.each(["se"] as const)(
     "metadata i %s svarer direkte paa tidsspoergsmaalet",
     (locale) => {
       const pageData = getPageData("tidszone", locale);

@@ -57,3 +57,16 @@ beløbet efter skat.
 - Annoncer: kun godkendte programmer, mærket "Annonce". A-kasse-boksen bruger ASE
   (Adtraction, `src/lib/adtraction.ts`). Det Faglige Hus er ikke godkendt til denne side.
 - Skærmbilleder (desktop, mobil, mørk): [docs/screenshots/barselsdagpenge/](docs/screenshots/barselsdagpenge/).
+
+## Titler og direkte svar (GSC-løft, 21/11-2026)
+
+Sider med høj placering og lav CTR har fået en titel, der matcher søgningen, og et
+direkte svar øverst (kun minberegner.dk; beraknare.se er urørt):
+
+- `/tidszone`: titel og svarblok "Hvilken tidszone er Danmark i?" (CET/CEST).
+- `/dato`: titel dækker "dage mellem to datoer"; sæsonlinket til 1. december står i brødteksten.
+- `/ugenummer`: titel "Hvilken uge er vi i?" og dagens ugenummer øverst (regnet pr. kald).
+- `/boligstoette` ("uden login") og `/promille` ("promille beregner"): kun titel/beskrivelse.
+- `/dage-til/1-advent`: titel med år, ugedag og dato (`buildDageTilMetadata`).
+
+Tests: `src/lib/gsc-titler.test.ts`, `src/app/ugenummer/page.test.tsx`, `src/app/tidszone/page.test.tsx`.

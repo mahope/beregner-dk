@@ -168,13 +168,17 @@ describe("tallene i titlerne er rigtige", () => {
   // «1. jan. 2026→2027 = 365» — et interval på en nedtællingsside, håndskrevet
   // som bogstaver. Nu regner den nedtællingen til næste 1. december, så porten
   // dømmer *dagens* tal og ikke et gammelt.
-  test("dato: titlen regner dagene til 1. december", () => {
-    const { dage, decemberTekst } = dageTilDecember("da", new Date());
+  // GSC 22/10-19/11-2026: /dato rangerer pos. 2-3 på "dage mellem datoer",
+  // "antal dage mellem to datoer" og "datoberegner", men titlen var en
+  // nedtælling til 1. december. Den følger nu søgeintentionen med et fast
+  // regnestykke (15. marts til 25. september 2026 = 194 dage); sæsontilbuddet
+  // lever i brødteksten.
+  test("dato: den danske titel dækker 'dage mellem to datoer' med et fast regnestykke", () => {
     const titel = getPageData("dato", "da")!.metaTitle;
-    expect(titel).toContain(decemberTekst);
-    expect(titel).toContain(`${dage} dage`);
-    // Ikke længere et interval: pilen var den del, der læst som «365 dage kvar».
-    expect(titel).not.toMatch(/→/);
+    expect(titel).toContain("dage mellem to datoer");
+    expect(titel).toContain("15. mar–25. sep = 194 dage");
+    expect(titel).not.toMatch(/1\. december/);
+    expect(titel.length).toBeLessThanOrEqual(60);
   });
 
   // Titlen på /dato på beraknare.se (GSC til 6/11: 156.216 visninger, CTR 0,5 %)

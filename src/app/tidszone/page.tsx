@@ -145,6 +145,19 @@ export default async function TidszonePage() {
         </p>
       </div>
 
+      {/* Svar-først på den mest søgte forespørgsel: "hvilken tidszone er danmark (i)" */}
+      {locale === "da" && (
+        <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+          <h2 className="text-xl font-bold mb-2">Hvilken tidszone er Danmark i?</h2>
+          <p>
+            Danmark ligger i tidszonen <strong>CET (UTC+1)</strong>, mellemeuropæisk tid. Om
+            sommeren er der sommertid, <strong>CEST (UTC+2)</strong>, fra sidste søndag i marts
+            til sidste søndag i oktober. Det gælder hele Danmark; Grønland og Færøerne har deres
+            egne tidszoner.
+          </p>
+        </div>
+      )}
+
       {/* Svar-foerst: besvarer "hvad er klokken i X naar den er 12 i Danmark" */}
       {locale === "da" && (
         <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
