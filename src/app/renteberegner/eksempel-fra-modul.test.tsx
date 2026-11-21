@@ -60,6 +60,7 @@ vi.mock("@/lib/rente-eksempler", () => ({
 vi.mock("@/components/RenteBeregner", () => ({
   default: () => <div>Renteværktøj</div>,
 }));
+vi.mock("@/components/LaaneplanBeregner", () => ({ default: () => null }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));

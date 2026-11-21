@@ -1,7 +1,13 @@
+import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import ForbrugslaanBeregner from "@/components/ForbrugslaanBeregner";
+import LaaneplanBeregner from "@/components/LaaneplanBeregner";
+import { AffiliateBox, PantelaanAffiliate } from "@/components/AffiliateBox";
+import { FORBRUGSLAAN_EKSEMPEL } from "@/lib/page-data";
+import { beregnLaaneplan } from "@/lib/laaneplan";
+import { formatNumber } from "@/lib/format";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -39,8 +45,62 @@ export default async function ForbrugslaanPage() {
 
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
-        <ForbrugslaanBeregner />
+        {locale === "da" ? (
+          <>
+            <LaaneplanBeregner variant="forbrugslaan" />
+            <AffiliateBox
+              title="Forsikring"
+              subtitle="Sammenlign forsikringer"
+              links={[
+                { name: "Findforsikring.dk", description: "Sammenlign forsikringer fra flere selskaber.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true },
+              ]}
+              className="mt-8"
+            />
+            <PantelaanAffiliate className="mt-6" />
+          </>
+        ) : (
+          <ForbrugslaanBeregner />
+        )}
       </div>
+
+      {locale === "da" && (() => {
+        const kr0 = (n: number) => formatNumber(n, "da", { maximumFractionDigits: 0 });
+        const kr2 = (n: number) => formatNumber(n, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const med = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, type: "annuitet" });
+        const uden = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, stiftelsesgebyr: 0, type: "annuitet" });
+        const serie = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, type: "serielaan" });
+        const e = FORBRUGSLAAN_EKSEMPEL;
+        return (
+          <div className="prose dark:prose-invert max-w-none mb-8">
+            <h2>Sådan regner beregneren et forbrugslån</h2>
+            <p>
+              Et forbrugslån er normalt et <strong>annuitetslån</strong>: du betaler den samme ydelse hver måned i hele løbetiden. I starten er størstedelen af ydelsen rente, og afdraget vokser, i takt med at restgælden falder. Beregneren tager lånebeløb, rente, løbetid og gebyrer og viser ydelse pr. måned, samlede renter, samlet tilbagebetaling, ÅOP og en amortiseringsplan måned for måned.
+            </p>
+
+            <h2>Eksempel på et forbrugslån</h2>
+            <p>
+              Et lån på <strong>{kr0(e.hovedstol)} kr.</strong> over <strong>{e.loebetidAar} år</strong> med en rente på <strong>{e.aarsrente} %</strong> og et stiftelsesgebyr på {kr0(e.stiftelsesgebyr)} kr. giver en ydelse på <strong>{kr2(med.foersteYdelse)} kr. om måneden</strong>. I alt betaler du {kr0(med.samletTilbagebetaling)} kr. tilbage, hvoraf {kr0(med.samletRente)} kr. er renter og {kr0(med.samletGebyr)} kr. er gebyr. ÅOP er {kr2(med.aop)} %. Det er et regneeksempel, ikke et tilbud: din rente afhænger af långiveren og af din økonomi. Det koster penge at låne penge.
+            </p>
+
+            <h2>Debitorrente og ÅOP</h2>
+            <p>
+              <strong>Debitorrenten</strong> er den rente, du betaler på det, du skylder. <strong>ÅOP</strong> (årlige omkostninger i procent) lægger gebyrer til og regner det hele om til én årlig rente, så to lån kan sammenlignes ens. I eksemplet er ÅOP {kr2(uden.aop)} % uden gebyrer, fordi renten tilskrives hver måned, og {kr2(med.aop)} % med stiftelsesgebyret. Jo kortere løbetid, jo tungere vejer et engangsgebyr i ÅOP.
+            </p>
+
+            <h2>Annuitetslån eller serielån?</h2>
+            <p>
+              Med et serielån er afdraget fast, så ydelsen falder: i eksemplet starter den på {kr2(serie.foersteYdelse)} kr. og ender på {kr2(serie.sidsteYdelse)} kr., og renterne er {kr0(serie.samletRente)} kr. mod {kr0(med.samletRente)} kr. for annuitetslånet. Serielånet er billigere i renter, men dyrere i de første måneder. Se hele sammenligningen i beregneren ovenfor, eller læs mere om{" "}
+              <Link href="/laantype">annuitetslån, serielån og stående lån</Link>, og brug{" "}
+              <Link href="/renteberegner">renteberegneren</Link> til andre lån.
+            </p>
+
+            <h2>Regler for forbrugslån</h2>
+            <p>
+              Forbrugslån er reguleret af forbrugerkreditloven. Långiveren skal oplyse ÅOP og de samlede omkostninger, før du underskriver, og der gælder et loft over ÅOP. Du har som udgangspunkt fortrydelsesret i 14 dage og ret til at indfri lånet før tid. Tjek altid de aktuelle regler hos Forbrugerombudsmanden og læs låneaftalen igennem, før du siger ja.
+            </p>
+          </div>
+        );
+      })()}
 
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
