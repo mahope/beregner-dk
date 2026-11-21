@@ -227,16 +227,16 @@ export default function Boligsalg2026GuidePage() {
           energieffektiv) til G (dårlig). Prisen er reguleret af Energistyrelsen:
         </p>
         <ul>
-          <li>Under 100 m²: maks. 6.931 kr (2026-estimat: ca. 7.200 kr)</li>
-          <li>100-199 m²: maks. 7.626 kr (2026-estimat: ca. 7.900 kr)</li>
-          <li>200-299 m²: maks. 8.319 kr (2026-estimat: ca. 8.600 kr)</li>
+          <li>Under 100 m²: maks. 6.931 kr</li>
+          <li>100-199 m²: maks. 7.626 kr</li>
+          <li>200-299 m²: maks. 8.319 kr</li>
           <li>Over 299 m²: fri prisdannelse</li>
         </ul>
         <p>
           Mærket er gyldigt i 10 år. Har du allerede et energimærke (fra september
           2006 eller senere), kan du få en rabat på ca. 1.377 kr på det nye mærke.
           <br />
-          <em>Kilde: Boligejer.dk (Erhvervsstyrelsen), opdateret august 2025.</em>
+          <em>Kilde: Boligejer.dk (Erhvervsstyrelsen), priser opdateret august 2025. Priserne er ikke genbekræftet for 2026, så tjek den aktuelle pris hos energimærkefirmaet.</em>
         </p>
 
         <h3>Tilstandsrapport</h3>
@@ -469,6 +469,10 @@ export default function Boligsalg2026GuidePage() {
           <Link href="/ejendomsvaerdiskat" className="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <span className="font-medium text-gray-900 dark:text-white">Ejendomsværdiskat →</span>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn ejendomsværdiskat og grundskyld 2026</p>
+          </Link>
+          <Link href="/boligstoette" className="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <span className="font-medium text-gray-900 dark:text-white">Boligstøtteberegner →</span>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Skal du leje efter salget? Se, om du kan få boligstøtte</p>
           </Link>
           <Link href="/andelsbolig" className="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <span className="font-medium text-gray-900 dark:text-white">Andelsboligberegner →</span>

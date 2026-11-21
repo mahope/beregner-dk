@@ -1,6 +1,7 @@
 import BoligstoetteBeregner from "@/components/BoligstoetteBeregner";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
+import Link from "next/link";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -277,6 +278,29 @@ export default async function BoligstoettePage() {
       </section>
 
       <RelateredeArtikler current="/boligstoette" locale={locale} />
+
+      {locale === "da" && (
+        <section className="mt-8">
+          <h2 className="text-xl font-bold mb-3">Flytter du eller sælger du bolig?</h2>
+          <ul className="list-disc pl-6 space-y-1">
+            <li>
+              <Link href="/blog/boligsalg-2026-guide-til-omkostninger-og-provenu" className="text-blue-600 hover:underline">
+                Boligsalg: omkostninger og provenu
+              </Link>
+            </li>
+            <li>
+              <Link href="/blog/koeb-af-bolig-2026-omkostninger" className="text-blue-600 hover:underline">
+                Køb af bolig: omkostninger
+              </Link>
+            </li>
+            <li>
+              <Link href="/boligsikring" className="text-blue-600 hover:underline">
+                Boligsikring
+              </Link>
+            </li>
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

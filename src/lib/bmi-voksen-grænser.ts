@@ -27,7 +27,7 @@ export const BMI_KILDE = {
   opdateret: "2025-12-08",
   url: "https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight",
   /** Tilstand, så indlægget kan sige hvor kilden er fra, uden at lyde som et juridisk dokument. */
-  hentet: "1. oktober 2026",
+  hentet: "21. november 2026",
 } as const;
 
 export interface BmiBaand {
