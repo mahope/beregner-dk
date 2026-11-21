@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
+import { TRACKING_URLS } from "@/lib/adtraction";
 import {
   bilforsikringAffiliates,
   boligforsikringAffiliates,
@@ -75,6 +76,32 @@ describe("affiliate-links", () => {
     expect(filer.length).toBeGreaterThan(100);
     for (const f of filer) {
       expect(readFileSync(f, "utf-8"), f).not.toMatch(forbudt);
+    }
+  });
+
+  test("ingen affiliate-boks peger på et program, Mahope ikke er godkendt til", () => {
+    // Kun Adtraction-programmer Mahope er godkendt i (Ase, CA, Krifa, Bornfiber,
+    // Hiper, Oslo Skin Lab) og Partner-ads. Listen er kendt ikke-godkendte.
+    const ikkeGodkendt =
+      /detfagligehus|faglige hus|lederne\.dk|qred\.|name: "Qred"|facitbank|facit bank"|capitalbox|banknorwegian|name: "Bank Norwegian"|unilaan|name: "Unil[åa]n"|svea|name: "3 |3\.dk|tjenestetorvet/i;
+    const samlFiler = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const sti = join(dir, e.name);
+        if (e.isDirectory()) return samlFiler(sti);
+        return /\.tsx?$/.test(e.name) && !e.name.includes(".test.") ? [sti] : [];
+      });
+    for (const f of samlFiler(join(__dirname, ".."))) {
+      expect(readFileSync(f, "utf-8"), f).not.toMatch(ikkeGodkendt);
+    }
+    expect(Object.keys(TRACKING_URLS)).not.toContain("1873805030"); // Det Faglige Hus
+  });
+
+  test("a-kasse-boksene fører Ase A-kasse og nævner ikke Det Faglige Hus", () => {
+    for (const navn of ["Dagpenge", "Sygedagpenge", "Efterloens"]) {
+      const kilde = readFileSync(join(__dirname, `${navn}Beregner.tsx`), "utf-8");
+      expect(kilde, navn).toContain('name: "Ase A-kasse"');
+      expect(kilde, navn).toContain('adtractionLink("1666137874"');
+      expect(kilde, navn).not.toMatch(/Det Faglige Hus/);
     }
   });
 
