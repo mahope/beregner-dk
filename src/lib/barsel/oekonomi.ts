@@ -72,7 +72,9 @@ export function normalUgeindkomst(f: Foraelder): { loen: number; ydelse: number 
  * Wage earners: hours × min(hourly pay after AM-bidrag, max hourly rate),
  * capped at the weekly maximum (barselsloven § 33 and § 35).
  */
-export function ugesats(f: Foraelder): number {
+export function ugesats(
+  f: Pick<Foraelder, "beskaeftigelse" | "maanedsloen" | "ugentligeTimer" | "ydelseMaaned">,
+): number {
   switch (f.beskaeftigelse) {
     case "loenmodtager": {
       const timer = Math.max(1, f.ugentligeTimer);
