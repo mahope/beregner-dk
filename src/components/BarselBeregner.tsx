@@ -17,7 +17,7 @@ import { BARSEL_2026 } from '@/lib/satser-2026';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
-import { AffiliateBox } from "./AffiliateBox";
+import { AffiliateBox, partnerAdsLink } from "./AffiliateBox";
 import { adtractionLink } from "@/lib/adtraction";
 
 const DEFAULT_EMPLOYER_WEEKS = '14';
@@ -654,6 +654,7 @@ export default function BarselBeregner() {
       </div>
 
       <AffiliateBox
+        placement="akasse"
         title="Skal du være medlem af en a-kasse?"
         subtitle="Som ledig kræver barselsdagpenge, at du er medlem af en a-kasse"
         links={[{ name: "ASE", description: "A-kasse for alle, uanset job, med online tilmelding.", url: adtractionLink("1666137874", "https://www.ase.dk"), cta: "Se priser", highlight: true }]}
@@ -661,16 +662,18 @@ export default function BarselBeregner() {
       />
 
       <AffiliateBox
+        placement="babyudstyr"
         title="Forbered babyen"
         subtitle="Alt til den lille — barnevogn, autostol, tøj og udstyr"
-        links={[{ name: "Babysam", description: "Danmarks store babyudstyrsbutik — barnevogne, autostole, tøj og legetøj.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=66806&uid=minberegner", cta: "Se udstyr hos Babysam", highlight: true }]}
+        links={[{ name: "Babysam", description: "Danmarks store babyudstyrsbutik — barnevogne, autostole, tøj og legetøj.", url: partnerAdsLink("66806"), cta: "Se udstyr hos Babysam", highlight: true }]}
         className="mt-6"
       />
 
       <AffiliateBox
+        placement="familieforsikring"
         title="Forsikring til den nye familie"
         subtitle="Sammenlign børne-, familie- og ulykkesforsikring"
-        links={[{ name: "Findforsikring.dk", description: "Danmarks største forsikringsportal — sammenlign børne-, familie- og ulykkesforsikring og sikr den nye familie bedst muligt.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true }]}
+        links={[{ name: "Findforsikring.dk", description: "Danmarks største forsikringsportal — sammenlign børne-, familie- og ulykkesforsikring og sikr den nye familie bedst muligt.", url: partnerAdsLink("60068"), cta: "Sammenlign forsikringer", highlight: true }]}
         className="mt-6"
       />
     </div>

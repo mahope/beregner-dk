@@ -2,6 +2,8 @@
 
 import { trackAffiliateClick } from "@/lib/analytics";
 import { adtractionLink } from "@/lib/adtraction";
+import { withSubid } from "@/lib/affiliate";
+import { usePathname } from "next/navigation";
 import { useLocale } from "@/components/LocaleProvider";
 import type { LucideIcon } from "lucide-react";
 import { Briefcase, Car, Landmark, ScrollText, ShieldCheck } from "lucide-react";
@@ -20,6 +22,8 @@ interface AffiliateBoxProps {
   subtitle?: string;
   icon?: LucideIcon;
   links: AffiliateLink[];
+  /** Box id in the sub-id (e.g. "forsikring"), so statistics show which box works. */
+  placement: string;
   /** Sæt på bokse med kreditprodukter: viser den lovpligtige advarsel. */
   credit?: boolean;
   className?: string;
@@ -52,8 +56,9 @@ export const KREDIT_ADVARSEL = `Det koster penge at låne penge. Eksempel: Et l�
  * 
  * Kræver "Annonce" label per dansk markedsføringslov.
  */
-export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = false, className = "" }: AffiliateBoxProps) {
+export function AffiliateBox({ title, subtitle, icon: Icon, links, placement, credit = false, className = "" }: AffiliateBoxProps) {
   const { locale } = useLocale();
+  const pathname = usePathname() ?? "/";
   // Every affiliate partner is Danish (.dk links, "Annonce" disclosure per
   // dansk markedsføringslov), so only show these on the Danish site.
   if (locale !== "da") return null;
@@ -80,13 +85,15 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = fals
 
       {/* Affiliate links */}
       <div className="divide-y divide-gray-100 dark:divide-gray-700">
-        {links.map((link, index) => (
+        {links.map((link, index) => {
+          const href = withSubid(link.url, pathname, placement);
+          return (
           <a
             key={index}
-            href={link.url}
+            href={href}
             target="_blank"
             rel="sponsored nofollow noopener noreferrer"
-            onClick={() => trackAffiliateClick(title, link.url)}
+            onClick={() => trackAffiliateClick(title, href)}
             className={`block p-4 transition-colors ${
               link.highlight 
                 ? "bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 hover:from-green-100 hover:to-blue-100 dark:hover:from-green-900/30 dark:hover:to-blue-900/30" 
@@ -110,7 +117,8 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = fals
               </span>
             </div>
           </a>
-        ))}
+          );
+        })}
       </div>
 
       {credit && (
@@ -130,14 +138,14 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, credit = fals
 // Pre-konfigurerede affiliate data
 //
 // Kun programmer Mahope er godkendt til hos Partner-ads (partnerid 42553).
-// uid=minberegner gør klik og salg synlige pr. site i Partner-ads' statistik.
+// Sub-id (uid) pr. side og boks tilføjes af AffiliateBox via withSubid().
 // Tilføj ALDRIG links med en hjemmelavet ?ref= — de giver ingen kommission.
 
 const PARTNER_ADS_ID = "42553";
 
 /** Partner-ads tracking-link, evt. som deeplink til en underside hos annoncøren. */
 export function partnerAdsLink(bannerId: string, deeplink?: string): string {
-  const base = `https://www.partner-ads.com/dk/klikbanner.php?partnerid=${PARTNER_ADS_ID}&bannerid=${bannerId}&uid=minberegner`;
+  const base = `https://www.partner-ads.com/dk/klikbanner.php?partnerid=${PARTNER_ADS_ID}&bannerid=${bannerId}`;
   return deeplink ? `${base}&htmlurl=${encodeURIComponent(deeplink)}` : base;
 }
 
@@ -228,6 +236,7 @@ export function PantelaanAffiliate({ className = "" }: { className?: string }) {
       title="Lån med pant"
       subtitle="Én af flere måder at låne på"
       links={pantelaanAffiliates}
+      placement="pantelaan"
       credit
       className={className}
     />
@@ -241,6 +250,7 @@ export function BoliglaanAffiliate({ className = "" }: { className?: string }) {
       icon={Landmark}
       subtitle="Husk forsikringen, når du overtager boligen"
       links={boligforsikringAffiliates}
+      placement="boligforsikring"
       className={className}
     />
   );
@@ -253,6 +263,7 @@ export function ForsikringAffiliate({ className = "" }: { className?: string }) 
       icon={ShieldCheck}
       subtitle="Spar penge på dine forsikringer"
       links={forsikringAffiliates}
+      placement="forsikring"
       className={className}
     />
   );
@@ -265,6 +276,7 @@ export function BilforsikringAffiliate({ className = "" }: { className?: string 
       icon={Car}
       subtitle="Bilforsikringen er ofte en af bilens største faste udgifter"
       links={bilforsikringAffiliates}
+      placement="bilforsikring"
       className={className}
     />
   );
@@ -277,6 +289,7 @@ export function SelvstaendigAffiliate({ className = "" }: { className?: string }
       icon={Briefcase}
       subtitle="Hold styr på moms og fakturaer"
       links={selvstaendigAffiliates}
+      placement="selvstaendig"
       className={className}
     />
   );
@@ -289,6 +302,7 @@ export function TestamenteAffiliate({ className = "" }: { className?: string }) 
       icon={ScrollText}
       subtitle="Et testamente kan ændre fordelingen og dermed afgiften"
       links={testamenteAffiliates}
+      placement="testamente"
       className={className}
     />
   );

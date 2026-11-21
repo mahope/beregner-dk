@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
-import { AffiliateBox, PantelaanAffiliate } from "./AffiliateBox";
+import { AffiliateBox, PantelaanAffiliate, partnerAdsLink } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
 import { CopyResultButton, ResetButton } from "@/components/ui";
@@ -364,10 +364,11 @@ export default function BillaanBeregner() {
       </div>
 
       <AffiliateBox
+        placement="bilforsikring"
         title="Bilforsikring"
         subtitle="Se din pris på bilforsikring"
         links={[
-          { name: "Cover Forsikring", description: "Se din pris på bilforsikring hos Cover Forsikring.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=110013&uid=minberegner", cta: "Beregn din bilforsikring", highlight: true },
+          { name: "Cover Forsikring", description: "Se din pris på bilforsikring hos Cover Forsikring.", url: partnerAdsLink("110013"), cta: "Beregn din bilforsikring", highlight: true },
         ]}
         className="mt-6"
       />
