@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
-import { AffiliateBox, PantelaanAffiliate } from "./AffiliateBox";
+import { AffiliateBox, PantelaanAffiliate, partnerAdsLink } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
 import { CopyResultButton, ResetButton } from "@/components/ui";
@@ -354,10 +354,11 @@ export default function ForbrugslaanBeregner() {
       </div>
 
       <AffiliateBox
+        placement="forsikring"
         title="Forsikring"
         subtitle="Sammenlign forsikringer"
         links={[
-          { name: "Findforsikring.dk", description: "Sammenlign forsikringer fra flere selskaber.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true },
+          { name: "Findforsikring.dk", description: "Sammenlign forsikringer fra flere selskaber.", url: partnerAdsLink("60068"), cta: "Sammenlign forsikringer", highlight: true },
         ]}
         className="mt-6"
       />

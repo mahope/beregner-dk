@@ -401,6 +401,7 @@ export default function EfterloensBeregner() {
         </div>
       </div>
       <AffiliateBox
+        placement="akasse"
         title="Find den rette a-kasse"
         subtitle="Sammenlign a-kasser og sikre din indkomst ved ledighed"
         links={[

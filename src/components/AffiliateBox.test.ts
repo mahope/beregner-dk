@@ -20,9 +20,9 @@ const partnerAdsPresets = [
 ];
 
 describe("affiliate-links", () => {
-  test("partnerAdsLink bygger et sporbart link med site-uid", () => {
+  test("partnerAdsLink bygger et sporbart link (uid tilføjes af withSubid)", () => {
     expect(partnerAdsLink("60068")).toBe(
-      "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner",
+      "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068",
     );
   });
 
@@ -33,7 +33,7 @@ describe("affiliate-links", () => {
   });
 
   test.each(partnerAdsPresets.map((p) => [p.name, p.url]))("%s går gennem Partner-ads med vores id", (_navn, url) => {
-    expect(url).toMatch(/^https:\/\/www\.partner-ads\.com\/dk\/klikbanner\.php\?partnerid=42553&bannerid=\d+&uid=minberegner/);
+    expect(url).toMatch(/^https:\/\/www\.partner-ads\.com\/dk\/klikbanner\.php\?partnerid=42553&bannerid=\d+/);
   });
 
   test("Findforsikring.dk i boligbudgettet går gennem Adtraction", () => {

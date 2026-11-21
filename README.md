@@ -23,6 +23,13 @@ ligger under "Gebyrer og ÅOP" (åbnes af et del-link med gebyr), og
 felter. Grafernes akser bruger `kortBeloeb` ("1 mio.", "500 t."), så øverste
 tick ikke skæres af, også på mobil.
 
+## Affiliate-links og sub-id
+
+Alle affiliate-links går gennem `withSubid` (`src/lib/affiliate.ts`) via `AffiliateBox`, som
+tilføjer et sub-id `mb.<side>.<placering>` (Adtraction `epi`, Partner-ads `uid`).
+Hver `AffiliateBox` kræver et `placement`-prop. Format, kilder og hentning af
+statistik pr. sub-id står i [docs/affiliate-subid.md](docs/affiliate-subid.md).
+
 ## AdSense
 
 Annoncer er slået fra som standard. Ved build tænder

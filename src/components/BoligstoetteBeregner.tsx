@@ -24,7 +24,7 @@ import { CALCULATION_STATE_HISTORY_KEY } from "@/lib/calculation-state-privacy";
 import { formatNumber } from "@/lib/format";
 import { BOLIGSTOETTE_2026 } from "@/lib/satser-2026";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AffiliateBox } from "./AffiliateBox";
+import { AffiliateBox, partnerAdsLink } from "./AffiliateBox";
 
 function numberOrZero(value: string): number {
   return parseBoligstoetteNumber(value) ?? 0;
@@ -839,13 +839,14 @@ export default function BoligstoetteBeregner() {
         </div>
 
         <AffiliateBox
+          placement="boligforsikring"
           title="Forsikring til din bolig"
           subtitle="Sammenlign tilbud på indbo- og husforsikring"
           links={[
             {
               name: "Findforsikring.dk",
               description: "Danmarks største forsikringsportal — sammenlign indbo-, hus- og familieforsikring og spar penge på din police.",
-              url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner",
+              url: partnerAdsLink("60068"),
               cta: "Sammenlign forsikringer",
               highlight: true,
             },

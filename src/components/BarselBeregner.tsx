@@ -16,7 +16,7 @@ import { BARSEL_2026 } from '@/lib/satser-2026';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
-import { AffiliateBox } from "./AffiliateBox";
+import { AffiliateBox, partnerAdsLink } from "./AffiliateBox";
 
 export default function BarselBeregner() {
   const { locale } = useLocale();
@@ -468,16 +468,18 @@ export default function BarselBeregner() {
         </div>
       </div>
       <AffiliateBox
+        placement="babyudstyr"
         title="Forbered babyen"
         subtitle="Alt til den lille — barnevogn, autostol, tøj og udstyr"
-        links={[{ name: "Babysam", description: "Danmarks store babyudstyrsbutik — barnevogne, autostole, tøj og legetøj.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=66806&uid=minberegner", cta: "Se udstyr hos Babysam", highlight: true }]}
+        links={[{ name: "Babysam", description: "Danmarks store babyudstyrsbutik — barnevogne, autostole, tøj og legetøj.", url: partnerAdsLink("66806"), cta: "Se udstyr hos Babysam", highlight: true }]}
         className="mt-6"
       />
 
       <AffiliateBox
+        placement="familieforsikring"
         title="Forsikring til den nye familie"
         subtitle="Sammenlign børne-, familie- og ulykkesforsikring"
-        links={[{ name: "Findforsikring.dk", description: "Danmarks største forsikringsportal — sammenlign børne-, familie- og ulykkesforsikring og sikr den nye familie bedst muligt.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true }]}
+        links={[{ name: "Findforsikring.dk", description: "Danmarks største forsikringsportal — sammenlign børne-, familie- og ulykkesforsikring og sikr den nye familie bedst muligt.", url: partnerAdsLink("60068"), cta: "Sammenlign forsikringer", highlight: true }]}
         className="mt-6"
       />
     </div>
