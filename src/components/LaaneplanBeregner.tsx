@@ -46,7 +46,7 @@ function Graf({ hovedstol, annuitet, serielaan }: {
 }) {
   const B = 600;
   const H = 240;
-  const m = { l: 60, r: 14, t: 14, b: 28 };
+  const m = { l: 60, r: 28, t: 14, b: 28 };
   const a = restgaeldPrAar(annuitet, hovedstol);
   const s = restgaeldPrAar(serielaan, hovedstol);
   const maxAar = a[a.length - 1].aar;
