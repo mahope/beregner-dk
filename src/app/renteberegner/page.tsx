@@ -3,6 +3,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
+import LaaneplanBeregner from "@/components/LaaneplanBeregner";
 import RenteBeregner from "@/components/RenteBeregner";
 import {
   CalculatorSchema,
@@ -172,6 +173,18 @@ export default async function RenteberegnerPage() {
       </p>
 
       <RenteBeregner />
+
+      {locale === "da" && (
+      <section className="mt-12" aria-labelledby="laaneplan-overskrift">
+        <h2 id="laaneplan-overskrift" className="text-2xl font-bold mb-2">
+          Annuitetslån beregner med gebyrer, ÅOP og amortiseringsplan
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          Tilføj stiftelsesgebyr og månedsgebyr og se ÅOP, restgæld år for år og annuitetslån og serielån side om side. Beregningen kan deles som link. Skal du låne til forbrug, så brug <Link href="/forbrugslaan">forbrugslånsberegneren</Link>, og læs om <Link href="/laantype">forskellen på annuitetslån, serielån og stående lån</Link>.
+        </p>
+        <LaaneplanBeregner variant="annuitet" />
+      </section>
+      )}
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">

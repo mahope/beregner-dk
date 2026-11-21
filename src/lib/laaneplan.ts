@@ -183,6 +183,86 @@ export function sammenlign(input: Omit<LaaneInput, "type">): Sammenligning {
   };
 }
 
+/** Det, der gemmes i et del-link. */
+export interface LaaneState {
+  hovedstol: number;
+  aarsrente: number;
+  loebetidAar: number;
+  stiftelsesgebyr: number;
+  maanedsgebyr: number;
+  type: Laanetype;
+}
+
+const URL_NOEGLER = {
+  hovedstol: "beloeb",
+  aarsrente: "rente",
+  loebetidAar: "aar",
+  stiftelsesgebyr: "stiftelse",
+  maanedsgebyr: "gebyr",
+  type: "type",
+} as const;
+
+/** Del-link som læsbare parametre: `?beloeb=500000&rente=5&aar=30&type=annuitet`. */
+export function tilQuery(s: LaaneState): string {
+  const p = new URLSearchParams();
+  p.set(URL_NOEGLER.hovedstol, String(s.hovedstol));
+  p.set(URL_NOEGLER.aarsrente, String(s.aarsrente));
+  p.set(URL_NOEGLER.loebetidAar, String(s.loebetidAar));
+  if (s.stiftelsesgebyr) p.set(URL_NOEGLER.stiftelsesgebyr, String(s.stiftelsesgebyr));
+  if (s.maanedsgebyr) p.set(URL_NOEGLER.maanedsgebyr, String(s.maanedsgebyr));
+  p.set(URL_NOEGLER.type, s.type);
+  return p.toString();
+}
+
+/**
+ * Læser et del-link. Hver parameter der mangler eller er ugyldig, falder
+ * tilbage til `standard`, så et ødelagt link aldrig giver `NaN` i værktøjet.
+ */
+export function fraQuery(query: string, standard: LaaneState): LaaneState {
+  const p = new URLSearchParams(query);
+  const tal = (noegle: string, min: number, max: number, fallback: number) => {
+    const raa = p.get(noegle);
+    if (raa === null || raa.trim() === "") return fallback;
+    const v = Number(raa);
+    return Number.isFinite(v) && v >= min && v <= max ? v : fallback;
+  };
+  const type = p.get(URL_NOEGLER.type);
+  return {
+    hovedstol: tal(URL_NOEGLER.hovedstol, MIN_HOVEDSTOL, MAX_HOVEDSTOL, standard.hovedstol),
+    aarsrente: tal(URL_NOEGLER.aarsrente, 0, MAX_AARSRENTE, standard.aarsrente),
+    loebetidAar: tal(URL_NOEGLER.loebetidAar, 1 / 12, MAX_LOEBETID_AAR, standard.loebetidAar),
+    stiftelsesgebyr: tal(URL_NOEGLER.stiftelsesgebyr, 0, MAX_GEBYR, 0),
+    maanedsgebyr: tal(URL_NOEGLER.maanedsgebyr, 0, MAX_GEBYR, 0),
+    type: type === "annuitet" || type === "serielaan" ? type : standard.type,
+  };
+}
+
+export interface Aarsraekke {
+  aar: number;
+  ydelse: number;
+  rente: number;
+  afdrag: number;
+  restgaeld: number;
+}
+
+/** Samler en plan i hele år til tabel og søjlediagram. */
+export function aarsOversigt(plan: Laaneplan): Aarsraekke[] {
+  const ud: Aarsraekke[] = [];
+  for (const x of plan.raekker) {
+    const aar = Math.ceil(x.maaned / 12);
+    let post = ud[aar - 1];
+    if (!post) {
+      post = { aar, ydelse: 0, rente: 0, afdrag: 0, restgaeld: 0 };
+      ud.push(post);
+    }
+    post.ydelse += x.ydelse;
+    post.rente += x.rente;
+    post.afdrag += x.afdrag;
+    post.restgaeld = x.restgaeld;
+  }
+  return ud;
+}
+
 /** Restgælden efter hvert år (og ved start), til grafen. */
 export function restgaeldPrAar(plan: Laaneplan, hovedstol: number): { aar: number; restgaeld: number }[] {
   const punkter = [{ aar: 0, restgaeld: hovedstol }];

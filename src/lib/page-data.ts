@@ -536,6 +536,7 @@ import {
 import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
 import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
+import { beregnLaaneplan, sammenlign as sammenlignLaan } from "./laaneplan";
 import { EKSEMPEL_BARN } from "./arveafgift";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { dageTilDecember } from "./dage-mellem-datoer";
@@ -1148,6 +1149,15 @@ const seKrPrKm = (value: number) => value.toFixed(2).replace(".", ",") + " kr/km
 // præcis `faqItems`, så de var tal i Googles svar og ikke kun brødtekst.
 const renteHoved = hovedEksempel();
 const renteFormel = annuitetsEksempel();
+
+// ─── /forbrugslaan og /renteberegner: eksempeltallene i FAQ og metadata regnes af
+// `laaneplan`, de samme funktioner som værktøjet bruger, så tekst og værktøj ikke kan sige hver sit.
+export const FORBRUGSLAAN_EKSEMPEL = { hovedstol: 100_000, aarsrente: 9, loebetidAar: 5, stiftelsesgebyr: 1_500 };
+const forbrugEks = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, type: "annuitet" });
+const forbrugEksSerie = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, type: "serielaan" });
+const forbrugEksUdenGebyr = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, stiftelsesgebyr: 0, type: "annuitet" });
+const renteSammenligning = sammenlignLaan({ hovedstol: renteHoved.hovedstol, aarsrente: renteHoved.aarsrente, loebetidAar: renteHoved.loebetid });
+const daKomma2 = (n: number) => formatNumber(n, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 // ─── /rumfang — de samme tal i titel, metadata, FAQ og løsning, regnet fra
 // `rumfang.ts`. Skriver brødteksten dem i hånden, kan de tre steder komme til at
@@ -3227,7 +3237,8 @@ faqItems: kalorierFaqItems("da"),
       faqItems: [
       { question: "Annuitetslån vs serielån?", answer: "Annuitetslån: fast ydelse. Serielån: fast afdrag, faldende ydelse." },
       { question: `Hvad er ydelsen på ${formatBelob(renteHoved.hovedstol, "da")} kr. med ${renteHoved.aarsrente} % rente i ${renteHoved.loebetid} år?`, answer: `Ca. ${formatBelob(renteHoved.maanedligBetalning, "da")} kr. om måneden i et annuitetslån, i alt ${formatBelob(renteHoved.samletRante, "da")} kr. i rente over de ${Math.round(renteHoved.antalMaaneder)} terminer.` },
-      { question: "ÅOP?", answer: "Årlige Omkostninger i Procent inkl. alle gebyrer." },
+      { question: "Hvad er ÅOP, og hvordan adskiller den sig fra renten?", answer: "ÅOP (årlige omkostninger i procent) er renten og alle gebyrer regnet om til én årlig rente. Debitorrenten er kun renten på restgælden. Har lånet gebyrer, er ÅOP højere end debitorrenten, og det er ÅOP, du skal sammenligne lån på. Under beregneren kan du taste stiftelsesgebyr og månedsgebyr og se ÅOP." },
+      { question: "Hvad er en amortiseringsplan?", answer: `En amortiseringsplan viser for hver måned, hvor meget af ydelsen der er rente, hvor meget der er afdrag, og hvad restgælden er bagefter. På et annuitetslån er ydelsen den samme hver måned, men afdraget stiger, fordi renten falder med restgælden. På ${formatBelob(renteHoved.hovedstol, "da")} kr. i ${renteHoved.loebetid} år til ${renteHoved.aarsrente} % er renterne ${formatBelob(renteSammenligning.annuitet.samletRente, "da")} kr. på annuitetslånet og ${formatBelob(renteSammenligning.serielaan.samletRente, "da")} kr. på serielånet.` },
       { question: "Fradrag?", answer: "Se vores rentefradragsberegner for den aktuelle fradragsværdi." },
       { question: "Hvilken formel beregner et annuitetslån, og hvordan gør man det i Excel?", answer: `Ydelsen er P × r ÷ (1 − (1 + r)^-n), hvor r er den månedlige rente og n antal måneder. Et lån på ${formatBelob(renteFormel.hovedstol, "da")} kr. til ${renteFormel.aarsrente} % i ${renteFormel.loebetid} år giver ${formatBelob(renteFormel.maanedligBetalning, "da", 2)} kr. pr. måned. I Excel er det =YDELSE(${formatBelob(renteFormel.aarsrente / 100, "da", 2)}/12;${Math.round(renteFormel.antalMaaneder)};-${renteFormel.hovedstol}) — lånebeløbet skal ind som et negativt tal.` },
       { question: "Hvad er forskellen på nominel og effektiv rente?", answer: "Den nominelle rente er den, banken oplyser, fx 4 % om året. Den effektive rente regner også med månedlig tilskrivning, så 4 % nominelt er 4,07 % effektivt. Omvendt er 1 % pr. måned 12,68 % om året. Sammenlign altid lån på den effektive rente." },
@@ -3321,22 +3332,26 @@ faqItems: kalorierFaqItems("da"),
     "forbrugslaan": {
       slug: "forbrugslaan",
       title: "Forbrugslån Beregner",
-      description: "Beregn månedlig ydelse på forbrugslån.",
-      metaTitle: "Forbrugslån Beregner: beregn månedsydelse",
-      metaDescription: "Beregn månedlig ydelse på forbrugslån. Gratis beregner.",
-      keywords: ["forbrugslaan", "forbrugslån beregner", "beregner", "gratis", "2026"],
-      ogTitle: "Forbrugslån Beregner: beregn månedsydelse",
-      ogDescription: "Beregn månedlig ydelse på forbrugslån.",
+      description: "Beregn ydelse, samlede renter og ÅOP på et forbrugslån med gebyrer, og se amortiseringsplanen.",
+      metaTitle: "Forbrugslån beregner: månedsydelse, ÅOP og afdragsplan",
+      metaDescription: `Beregn forbrugslån med gebyrer: månedlig ydelse, samlede renter og ÅOP. Eksempel: ${formatBelob(FORBRUGSLAAN_EKSEMPEL.hovedstol, "da")} kr. i ${FORBRUGSLAAN_EKSEMPEL.loebetidAar} år til ${FORBRUGSLAAN_EKSEMPEL.aarsrente} % giver ${formatBelob(forbrugEks.foersteYdelse, "da")} kr. om måneden.`,
+      keywords: ["forbrugslån beregner", "beregn forbrugslån", "låneberegner forbrugslån", "forbrugslån ÅOP", "forbrugslån ydelse", "afdragsplan"],
+      ogTitle: "Forbrugslån beregner: månedsydelse, ÅOP og afdragsplan",
+      ogDescription: "Beregn månedlig ydelse, samlede renter og ÅOP på et forbrugslån, inklusive gebyrer.",
       category: "Økonomi",
       breadcrumbCategory: "Økonomi",
       breadcrumbCategoryHref: "/kategori/oekonomi",
-      schemaName: "Forbrugslån Beregner",
-      schemaDescription: "Gratis forbrugslån beregner. Beregn månedlig ydelse på forbrugslån.",
+      schemaName: "Forbrugslån beregner",
+      schemaDescription: "Beregn månedlig ydelse, samlede renter og ÅOP på et forbrugslån med gebyrer, og se amortiseringsplanen.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvordan bruger jeg denne beregner?", answer: "Indtast dine data og se resultatet med det samme. Forbrugslån Beregner er gratis og nem at bruge." },
-      { question: "Er resultaterne præcise?", answer: "Beregneren giver et godt estimat. Individuelle forhold kan påvirke det endelige resultat." },
-      { question: "Kan jeg bruge beregneren på mobil?", answer: "Ja, beregneren er fuldt responsiv og fungerer på alle enheder." },
+      { question: "Hvordan beregner man et forbrugslån?", answer: `Et forbrugslån er normalt et annuitetslån: du betaler den samme ydelse hver måned, og i starten går det meste til renter. Ydelsen er hovedstol × r ÷ (1 − (1 + r)^−n), hvor r er månedsrenten og n antal måneder. Et lån på ${formatBelob(FORBRUGSLAAN_EKSEMPEL.hovedstol, "da")} kr. til ${FORBRUGSLAAN_EKSEMPEL.aarsrente} % i ${FORBRUGSLAAN_EKSEMPEL.loebetidAar} år giver ${daKomma2(forbrugEks.foersteYdelse)} kr. om måneden og ${formatBelob(forbrugEks.samletRente, "da")} kr. i renter.` },
+      { question: "Hvad er forskellen på debitorrente og ÅOP?", answer: `Debitorrenten er den rente, du betaler på restgælden. ÅOP (årlige omkostninger i procent) tæller også gebyrer med og gør det til én årlig rente, så lån kan sammenlignes. I eksemplet med ${formatBelob(FORBRUGSLAAN_EKSEMPEL.hovedstol, "da")} kr. og ${FORBRUGSLAAN_EKSEMPEL.aarsrente} % i rente er ÅOP ${daKomma2(forbrugEksUdenGebyr.aop)} % uden gebyrer og ${daKomma2(forbrugEks.aop)} % med et stiftelsesgebyr på ${formatBelob(FORBRUGSLAAN_EKSEMPEL.stiftelsesgebyr, "da")} kr.` },
+      { question: "Hvad koster et forbrugslån i alt?", answer: `Du betaler hovedstolen tilbage plus renter og gebyrer. I eksemplet er det ${formatBelob(forbrugEks.samletTilbagebetaling, "da")} kr. for at låne ${formatBelob(FORBRUGSLAAN_EKSEMPEL.hovedstol, "da")} kr. Det er et regneeksempel og ikke et tilbud: din rente afhænger af långiveren og af din økonomi. Det koster penge at låne penge.` },
+      { question: "Hvad er forskellen på annuitetslån og serielån?", answer: `Et annuitetslån har en fast ydelse, et serielån har et fast afdrag, så ydelsen falder over tid. På eksemplet er serielånets første ydelse ${daKomma2(forbrugEksSerie.foersteYdelse)} kr. og den sidste ${daKomma2(forbrugEksSerie.sidsteYdelse)} kr., og renterne er ${formatBelob(forbrugEksSerie.samletRente, "da")} kr. mod ${formatBelob(forbrugEks.samletRente, "da")} kr. for annuitetslånet. Forbrugslån udbydes langt oftest som annuitetslån.` },
+      { question: "Hvordan kan jeg sænke prisen på et forbrugslån?", answer: "Vælg den korteste løbetid, du har råd til, for så betaler du rente i færre måneder. Sammenlign ÅOP og ikke kun renten, og se på gebyrer for oprettelse, administration og ekstra afdrag. Spørg om du kan indfri lånet før tid uden ekstra omkostning." },
+      { question: "Er der et loft over renten på forbrugslån?", answer: "Ja. Forbrugerkreditloven sætter et loft over de årlige omkostninger i procent (ÅOP) på forbrugslån. Loftets størrelse følger loven og kan ændres, så tjek den gældende grænse hos Forbrugerombudsmanden eller i loven, før du underskriver." },
+      { question: "Er resultaterne præcise?", answer: "Tallene er regnet med månedlige ydelser og de gebyrer, du selv indtaster. Din långivers tilbud kan afvige på grund af terminsdatoer, afrunding og andre gebyrer, så brug beregneren til at sammenligne og læs altid tilbuddets ÅOP." },
       ],
     },
     "gaeldsfri": {

@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest";
 import {
+  type LaaneState,
+  aarsOversigt,
+  fraQuery,
+  tilQuery,
   aopFraBetalinger,
   beregnLaaneplan,
   restgaeldPrAar,
@@ -158,6 +162,42 @@ describe("sammenligning", () => {
     const s = sammenlign({ hovedstol: 120_000, aarsrente: 0, loebetidAar: 10 });
     expect(s.krydsMaaned).toBeNull();
     expect(s.renteForskel).toBe(0);
+  });
+});
+
+describe("del-link", () => {
+  const STANDARD: LaaneState = {
+    hovedstol: 1_000_000,
+    aarsrente: 5,
+    loebetidAar: 30,
+    stiftelsesgebyr: 0,
+    maanedsgebyr: 0,
+    type: "annuitet",
+  };
+
+  test("rundtur: det der skrives, læses tilbage", () => {
+    const s: LaaneState = { hovedstol: 75_000, aarsrente: 8.5, loebetidAar: 2.5, stiftelsesgebyr: 1_500, maanedsgebyr: 25, type: "serielaan" };
+    expect(fraQuery(tilQuery(s), STANDARD)).toEqual(s);
+  });
+
+  test("tilQuery giver læsbare parametre", () => {
+    expect(tilQuery(STANDARD)).toBe("beloeb=1000000&rente=5&aar=30&type=annuitet");
+  });
+
+  test("ugyldige og manglende parametre falder tilbage til standard", () => {
+    expect(fraQuery("", STANDARD)).toEqual(STANDARD);
+    expect(fraQuery("beloeb=abc&rente=-3&aar=9999&type=hack&stiftelse=1e99", STANDARD)).toEqual(STANDARD);
+  });
+});
+
+describe("årsoversigt", () => {
+  test("summerer ydelse, renter og afdrag pr. år og slutter på 0", () => {
+    const p = beregnLaaneplan({ hovedstol: 60_000, aarsrente: 6, loebetidAar: 2.5, type: "annuitet" });
+    const o = aarsOversigt(p);
+    expect(o.map((x) => x.aar)).toEqual([1, 2, 3]);
+    expect(o.reduce((s, x) => s + x.rente, 0)).toBeCloseTo(p.samletRente, 6);
+    expect(o.reduce((s, x) => s + x.afdrag, 0)).toBeCloseTo(60_000, 6);
+    expect(o.at(-1)?.restgaeld).toBe(0);
   });
 });
 

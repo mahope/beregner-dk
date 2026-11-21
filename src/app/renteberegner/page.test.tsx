@@ -10,6 +10,7 @@ import RenteberegnerPage from "./page";
 vi.mock("@/components/RenteBeregner", () => ({
   default: () => <div>Renteværktøj</div>,
 }));
+vi.mock("@/components/LaaneplanBeregner", () => ({ default: () => <div>Låneplanværktøj</div> }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));
