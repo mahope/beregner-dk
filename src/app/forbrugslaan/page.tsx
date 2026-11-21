@@ -4,7 +4,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import ForbrugslaanBeregner from "@/components/ForbrugslaanBeregner";
 import LaaneplanBeregner from "@/components/LaaneplanBeregner";
-import { PantelaanAffiliate } from "@/components/AffiliateBox";
+import { AffiliateBox, PantelaanAffiliate } from "@/components/AffiliateBox";
 import { FORBRUGSLAAN_EKSEMPEL } from "@/lib/page-data";
 import { beregnLaaneplan } from "@/lib/laaneplan";
 import { formatNumber } from "@/lib/format";
@@ -48,7 +48,15 @@ export default async function ForbrugslaanPage() {
         {locale === "da" ? (
           <>
             <LaaneplanBeregner variant="forbrugslaan" />
-            <PantelaanAffiliate className="mt-8" />
+            <AffiliateBox
+              title="Forsikring"
+              subtitle="Sammenlign forsikringer"
+              links={[
+                { name: "Findforsikring.dk", description: "Sammenlign forsikringer fra flere selskaber.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true },
+              ]}
+              className="mt-8"
+            />
+            <PantelaanAffiliate className="mt-6" />
           </>
         ) : (
           <ForbrugslaanBeregner />

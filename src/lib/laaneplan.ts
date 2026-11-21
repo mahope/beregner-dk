@@ -202,6 +202,17 @@ const URL_NOEGLER = {
   type: "type",
 } as const;
 
+export const FORBRUGSLAAN_EKSEMPEL = { hovedstol: 100_000, aarsrente: 9, loebetidAar: 5, stiftelsesgebyr: 1_500 };
+
+/** Nøglerne, der hører til beregnerens del-link. */
+export const DEL_NOEGLER: string[] = Object.values(URL_NOEGLER);
+
+/** Sandt, hvis adressen indeholder mindst én af del-linkets nøgler (ikke fx `gclid` eller `utm_*`). */
+export function harDelLink(query: string): boolean {
+  const p = new URLSearchParams(query);
+  return DEL_NOEGLER.some((k) => p.has(k));
+}
+
 /** Del-link som læsbare parametre: `?beloeb=500000&rente=5&aar=30&type=annuitet`. */
 export function tilQuery(s: LaaneState): string {
   const p = new URLSearchParams();

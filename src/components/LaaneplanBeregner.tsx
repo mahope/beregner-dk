@@ -12,6 +12,9 @@ import {
   aarsOversigt,
   beregnLaaneplan,
   fraQuery,
+  harDelLink,
+  DEL_NOEGLER,
+  FORBRUGSLAAN_EKSEMPEL,
   restgaeldPrAar,
   sammenlign,
   tilQuery,
@@ -23,7 +26,7 @@ export type LaaneplanVariant = "annuitet" | "forbrugslaan";
 /** Startværdier pr. side: et boliglignende annuitetslån og et typisk forbrugslån. */
 export const STANDARD_STATE: Record<LaaneplanVariant, LaaneState> = {
   annuitet: { hovedstol: 1_000_000, aarsrente: 5, loebetidAar: 30, stiftelsesgebyr: 0, maanedsgebyr: 0, type: "annuitet" },
-  forbrugslaan: { hovedstol: 100_000, aarsrente: 9, loebetidAar: 5, stiftelsesgebyr: 1_500, maanedsgebyr: 0, type: "annuitet" },
+  forbrugslaan: { ...FORBRUGSLAAN_EKSEMPEL, maanedsgebyr: 0, type: "annuitet" },
 };
 
 const kr = (n: number) => `${formatNumber(n, "da", { maximumFractionDigits: 0 })} kr.`;
@@ -125,39 +128,45 @@ function RenteAfdragGraf({ plan }: { plan: ReturnType<typeof beregnLaaneplan> })
   );
 }
 
-export default function LaaneplanBeregner({ variant }: { variant: LaaneplanVariant }) {
+export default function LaaneplanBeregner({ variant, overskriftsniveau = 2 }: { variant: LaaneplanVariant; overskriftsniveau?: 2 | 3 }) {
+  const H = `h${overskriftsniveau}` as "h2" | "h3";
   const { locale } = useLocale();
   const standard = STANDARD_STATE[variant];
   const [state, setState] = useState<LaaneState>(standard);
   const [kopieret, setKopieret] = useState(false);
-  const indlaest = useRef(false);
+  const aendretAfBruger = useRef(false);
   const tracked = useRef(false);
 
-  // Læs del-link ved mount; skriv derefter hver ændring tilbage i adressen.
+  // Læs del-link ved mount (kun hvis adressen har beregnerens egne nøgler).
   useEffect(() => {
-    const fraUrl = window.location.search ? fraQuery(window.location.search, standard) : null;
-    if (fraUrl) setState(fraUrl);
-    indlaest.current = true;
+    const soeg = window.location.search;
+    if (harDelLink(soeg)) setState(fraQuery(soeg, standard));
   }, [standard]);
 
+  // Skriv kun tilbage, når brugeren har ændret noget, og bevar andre parametre og hash.
   useEffect(() => {
-    if (!indlaest.current) return;
-    const url = `${window.location.pathname}?${tilQuery(state)}`;
+    if (!aendretAfBruger.current) return;
+    const url = new URL(window.location.href);
+    for (const k of DEL_NOEGLER) url.searchParams.delete(k);
+    new URLSearchParams(tilQuery(state)).forEach((v, k) => url.searchParams.set(k, v));
     window.history.replaceState(null, "", url);
   }, [state]);
 
   useEffect(() => {
     if (tracked.current) return;
     const t = setTimeout(() => {
-      trackCalculation(variant === "annuitet" ? "renteberegner" : "forbrugslaan");
+      trackCalculation(variant === "annuitet" ? "laaneplan" : "forbrugslaan");
       tracked.current = true;
     }, 2000);
     return () => clearTimeout(t);
   }, [variant]);
 
-  const set = useCallback(<K extends keyof LaaneState>(k: K, v: LaaneState[K]) => setState((s) => ({ ...s, [k]: v })), []);
+  const set = useCallback(<K extends keyof LaaneState>(k: K, v: LaaneState[K]) => {
+    aendretAfBruger.current = true;
+    setState((s) => ({ ...s, [k]: v }));
+  }, []);
 
-  const fejl = validerInput({ ...state, type: state.type });
+  const fejl = validerInput(state);
   const sam = useMemo(() => (fejl ? null : sammenlign(state)), [fejl, state]);
   const valgt = sam ? sam[state.type] : null;
   const aarOversigt = useMemo(() => (valgt ? aarsOversigt(valgt) : []), [valgt]);
@@ -275,7 +284,10 @@ export default function LaaneplanBeregner({ variant }: { variant: LaaneplanVaria
                 >
                   {kopieret ? "Link kopieret!" : "Kopiér link til beregningen"}
                 </button>
-                <ResetButton onReset={() => setState(standard)} />
+                <ResetButton onReset={() => {
+                    aendretAfBruger.current = true;
+                    setState(standard);
+                  }} />
               </div>
             </>
           )}
@@ -285,7 +297,7 @@ export default function LaaneplanBeregner({ variant }: { variant: LaaneplanVaria
       {sam && valgt && (
         <>
           <section aria-labelledby="sammenligning-overskrift">
-            <h2 id="sammenligning-overskrift" className="text-xl font-semibold mb-3 dark:text-white">Annuitetslån eller serielån på de samme tal</h2>
+            <H id="sammenligning-overskrift" className="text-xl font-semibold mb-3 dark:text-white">Annuitetslån eller serielån på de samme tal</H>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <caption className="sr-only">Annuitetslån og serielån side om side</caption>
@@ -310,7 +322,9 @@ export default function LaaneplanBeregner({ variant }: { variant: LaaneplanVaria
                 ? `Serielånet koster ${kr(sam.renteForskel)} mindre i renter, men ydelsen er ${kr(sam.foersteYdelseForskel)} højere i første måned${
                     sam.krydsMaaned ? ` og først lavere end annuitetslånets fra måned ${sam.krydsMaaned}` : ""
                   }.`
-                : "Uden rente er de to lånetyper lige dyre."}
+                : state.aarsrente === 0
+                  ? "Uden rente er de to lånetyper lige dyre."
+                  : "På de her tal er renteforskellen under 1 krone."}
             </p>
             <div className="mt-6">
               <Graf hovedstol={state.hovedstol} annuitet={sam.annuitet} serielaan={sam.serielaan} />
@@ -318,7 +332,7 @@ export default function LaaneplanBeregner({ variant }: { variant: LaaneplanVaria
           </section>
 
           <section aria-labelledby="amortisering-overskrift">
-            <h2 id="amortisering-overskrift" className="text-xl font-semibold mb-3 dark:text-white">Amortiseringsplan ({TYPE_NAVN[state.type].toLowerCase()})</h2>
+            <H id="amortisering-overskrift" className="text-xl font-semibold mb-3 dark:text-white">Amortiseringsplan ({TYPE_NAVN[state.type].toLowerCase()})</H>
             <RenteAfdragGraf plan={valgt} />
             <div className="overflow-x-auto mt-6">
               <table className="w-full text-sm">

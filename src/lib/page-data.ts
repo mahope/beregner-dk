@@ -536,7 +536,7 @@ import {
 import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
 import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
-import { beregnLaaneplan, sammenlign as sammenlignLaan } from "./laaneplan";
+import { beregnLaaneplan, FORBRUGSLAAN_EKSEMPEL, sammenlign as sammenlignLaan } from "./laaneplan";
 import { EKSEMPEL_BARN } from "./arveafgift";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { dageTilDecember } from "./dage-mellem-datoer";
@@ -1152,7 +1152,7 @@ const renteFormel = annuitetsEksempel();
 
 // ─── /forbrugslaan og /renteberegner: eksempeltallene i FAQ og metadata regnes af
 // `laaneplan`, de samme funktioner som værktøjet bruger, så tekst og værktøj ikke kan sige hver sit.
-export const FORBRUGSLAAN_EKSEMPEL = { hovedstol: 100_000, aarsrente: 9, loebetidAar: 5, stiftelsesgebyr: 1_500 };
+export { FORBRUGSLAAN_EKSEMPEL };
 const forbrugEks = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, type: "annuitet" });
 const forbrugEksSerie = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, type: "serielaan" });
 const forbrugEksUdenGebyr = beregnLaaneplan({ ...FORBRUGSLAAN_EKSEMPEL, stiftelsesgebyr: 0, type: "annuitet" });

@@ -182,7 +182,7 @@ export default async function RenteberegnerPage() {
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           Tilføj stiftelsesgebyr og månedsgebyr og se ÅOP, restgæld år for år og annuitetslån og serielån side om side. Beregningen kan deles som link. Skal du låne til forbrug, så brug <Link href="/forbrugslaan">forbrugslånsberegneren</Link>, og læs om <Link href="/laantype">forskellen på annuitetslån, serielån og stående lån</Link>.
         </p>
-        <LaaneplanBeregner variant="annuitet" />
+        <LaaneplanBeregner variant="annuitet" overskriftsniveau={3} />
       </section>
       )}
 

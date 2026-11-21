@@ -3,6 +3,7 @@ import {
   type LaaneState,
   aarsOversigt,
   fraQuery,
+  harDelLink,
   tilQuery,
   aopFraBetalinger,
   beregnLaaneplan,
@@ -90,6 +91,16 @@ describe("ÅOP", () => {
     expect(med.samletGebyr).toBe(2_000 + 30 * 60);
     expect(med.udbetalt).toBe(98_000);
     expect(med.samletTilbagebetaling).toBeCloseTo(100_000 + med.samletRente + 3_800, 6);
+  });
+
+  test("100.000 kr. til 9 % over 5 år med 1.500 kr. i stiftelsesgebyr: ÅOP 10,09 %", () => {
+    const p = beregnLaaneplan({ hovedstol: 100_000, aarsrente: 9, loebetidAar: 5, stiftelsesgebyr: 1_500, type: "annuitet" });
+    expect(p.aop).toBeCloseTo(10.09, 2);
+  });
+
+  test("harDelLink ignorerer sporingsparametre", () => {
+    expect(harDelLink("?gclid=abc&utm_source=x")).toBe(false);
+    expect(harDelLink("?utm_source=x&beloeb=5000")).toBe(true);
   });
 
   test("ÅOP-løsningen går i nul: nutidsværdien af betalingerne er det udbetalte", () => {
