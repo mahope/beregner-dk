@@ -1,125 +1,52 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import Elberegner from "@/components/Elberegner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { getElprisData } from "@/lib/energi/server";
+import { dkNu } from "@/lib/energi/elpriser";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata() {
+  return generatePageMetadata("elberegner");
+}
 
-export const metadata: Metadata = {
-  title: "Elberegner - Beregn dit elforbrug og strømudgifter",
-  description:
-    "Gratis elberegner. Beregn dit elforbrug og se hvad dine apparater koster i strøm per dag, måned og år. Inkluderer watt-værdier for typiske apparater.",
-  keywords: [
-    "elberegner",
-    "elforbrug",
-    "beregn strøm",
-    "strømforbrug",
-    "kwh beregner",
-    "elpris beregner",
-    "hvad koster strøm",
-    "elforbrug apparat",
-    "watt til kr",
-    "energiberegner",
-  ],
-  openGraph: {
-    title: "Elberegner - Beregn dit elforbrug",
-    description:
-      "Se hvad dine apparater koster i strøm. Gratis elberegner med danske elpriser.",
-    url: `${baseUrl}/elberegner`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/elberegner`,
-  },
-};
+export default async function ElberegnerPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("elberegner", locale) || getPageData("elberegner", "da")!;
+  // Live Danish spot prices are only relevant on the Danish site.
+  const elprisData = locale === "da" ? await getElprisData() : null;
 
-const faqItems = [
-  {
-    question: "Hvordan beregner jeg mit elforbrug?",
-    answer:
-      "Dit elforbrug beregnes ved at gange apparatets watt med antal timer det bruges, og dividere med 1000 for at få kWh. For eksempel bruger en 100W lampe tændt i 10 timer: 100W × 10t / 1000 = 1 kWh.",
-  },
-  {
-    question: "Hvor finder jeg watt-tallet på mine apparater?",
-    answer:
-      "Watt-tallet findes typisk på mærkepladen bag på eller under apparatet, i brugsanvisningen under tekniske specifikationer, eller ved at søge efter modelnummeret online.",
-  },
-  {
-    question: "Hvad koster 1 kWh i Danmark?",
-    answer:
-      "I 2026 ligger den gennemsnitlige elpris typisk mellem 2-3 kr/kWh inkl. alle afgifter (spotpris, nettarif, elafgift, moms). Tjek din seneste elregning for din præcise pris.",
-  },
-  {
-    question: "Hvilke apparater bruger mest strøm?",
-    answer:
-      "De største strømslugere er typisk varmelegemer som tørretumblere (3000W), ovne (2500W), og elkedler (2000W). Men apparater der kører konstant som køleskabe og frysere bidrager også væsentligt til den årlige regning.",
-  },
-  {
-    question: "Hvordan kan jeg spare på strømmen?",
-    answer:
-      "Du kan spare strøm ved at slukke for standby, vælge A+++-mærkede apparater, bruge LED-pærer, vaske ved 30°, og kun køre vaskemaskine og opvaskemaskine når de er fulde.",
-  },
-  {
-    question: "Hvad bruger en computer i strøm?",
-    answer:
-      "En almindelig bærbar computer bruger ca. 50-100W, en stationær computer 150-300W, og en gaming PC kan bruge 400-700W under belastning. Standby-forbrug er typisk 1-5W.",
-  },
-  {
-    question: "Hvad er forskellen på watt og kWh?",
-    answer:
-      "Watt (W) er en måleenhed for effekt - hvor meget energi et apparat bruger i øjeblikket. kWh (kilowatt-timer) er energi over tid - det du betaler for. 1 kWh = 1000W brugt i 1 time.",
-  },
-  {
-    question: "Hvor meget strøm bruger et køleskab?",
-    answer:
-      "Et moderne A+++-køleskab bruger ca. 30-50W og kører ca. 8-10 timer aktivt per dag. Det giver et årligt forbrug på ca. 100-150 kWh, svarende til 250-375 kr ved 2,5 kr/kWh.",
-  },
-];
-
-export default function ElberegnerPage() {
   return (
     <div>
       <CalculatorSchema
-        name="Elberegner - Beregn elforbrug"
-        description="Gratis elberegner. Beregn dit elforbrug og se hvad dine apparater koster i strøm."
-        url={`${baseUrl}/elberegner`}
-        category="UtilitiesApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/elberegner`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Elberegner", url: `${baseUrl}/elberegner` },
-        ]}
-      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/elberegner" }]} />
 
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Elberegner</span>
-      </nav>
-
-      <h1 className="text-3xl font-bold mb-2">Elberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn dit elforbrug og se hvad dine elektriske apparater koster i strøm
-        per dag, måned og år. Tilføj dine apparater og få overblik over din
-        elregning.
+        {pageData.description}
       </p>
 
-      <Elberegner />
+      <Elberegner elprisData={elprisData} nu={dkNu()} />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du elberegneren</h2>
         <p>
-          Med vores elberegner kan du nemt beregne, hvad dine elektriske
-          apparater koster i strøm. Sådan gør du:
+          Med vores <strong>elberegner</strong> kan du nemt beregne, hvad dine elektriske
+          apparater <strong>koster i strøm</strong>. Sådan gør du:
         </p>
         <ol>
           <li>
@@ -169,7 +96,7 @@ export default function ElberegnerPage() {
               <tr>
                 <td>Tørretumbler</td>
                 <td>3000W</td>
-                <td>~1095 kr (1t/dag)</td>
+                <td>~10.950 kr (4t/dag)</td>
               </tr>
               <tr>
                 <td>Gaming PC</td>
@@ -200,8 +127,8 @@ export default function ElberegnerPage() {
             stadig strøm (typisk 5-15W)
           </li>
           <li>
-            <strong>Vælg energieffektive apparater</strong> - kig efter A+++
-            mærkning
+            <strong>Vælg energieffektive apparater</strong> - kig efter en god
+            energiklasse på EU&apos;s A-G-mærkning
           </li>
           <li>
             <strong>LED-pærer</strong> - bruger op til 80% mindre strøm end
@@ -223,8 +150,8 @@ export default function ElberegnerPage() {
 
         <h2>Om elpriser i Danmark</h2>
         <p>
-          Elpriser i Danmark varierer afhængigt af tidspunkt, årstid og din
-          elaftale. Den samlede pris du betaler inkluderer:
+          <strong>Elpriser i Danmark</strong> varierer afhængigt af tidspunkt, årstid og din
+          elaftale. Den <strong>samlede pris</strong> du betaler inkluderer:
         </p>
         <ul>
           <li>
@@ -245,7 +172,7 @@ export default function ElberegnerPage() {
           </li>
         </ul>
 
-        <div className="bg-green-50 border-l-4 border-green-400 p-4 my-6 not-prose">
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800">Tip til lavere elregning</p>
           <p className="text-green-700">
             Overvej en variabel elaftale og brug strøm når spotprisen er lav.
@@ -254,8 +181,157 @@ export default function ElberegnerPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Så här använder du elberäknaren</h2>
+        <p>
+          Med vår <strong>elberäknare</strong> kan du enkelt räkna ut vad dina elektriska
+          apparater <strong>kostar i el</strong>. Så här gör du:
+        </p>
+        <ol>
+          <li>
+            <strong>Välj en apparat</strong> från listan, eller skriv namnet
+            själv
+          </li>
+          <li>
+            <strong>Ange watt</strong> - du hittar det på apparatens
+            märkskylt
+          </li>
+          <li>
+            <strong>Ange timmar per dag</strong> - hur länge använder du
+            apparaten?
+          </li>
+          <li>
+            <strong>Lägg till fler apparater</strong> för att se din totala
+            förbrukning
+          </li>
+        </ol>
+
+        <h2>Vanliga apparaters elförbrukning</h2>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Apparat</th>
+                <th>Typisk watt</th>
+                <th>Årlig kostnad*</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Kylskåp</td>
+                <td>40W (går 24/7)</td>
+                <td>~875 kr</td>
+              </tr>
+              <tr>
+                <td>Dator</td>
+                <td>150W</td>
+                <td>~550 kr (4h/dag)</td>
+              </tr>
+              <tr>
+                <td>TV</td>
+                <td>100W</td>
+                <td>~365 kr (4h/dag)</td>
+              </tr>
+              <tr>
+                <td>Torktumlare</td>
+                <td>3000W</td>
+                <td>~10 950 kr (4h/dag)</td>
+              </tr>
+              <tr>
+                <td>Gaming-dator</td>
+                <td>500W</td>
+                <td>~1825 kr (4h/dag)</td>
+              </tr>
+              <tr>
+                <td>LED-lampa</td>
+                <td>10W</td>
+                <td>~45 kr (5h/dag)</td>
+              </tr>
+              <tr>
+                <td>Glödlampa</td>
+                <td>60W</td>
+                <td>~275 kr (5h/dag)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="text-sm text-gray-500">
+          *Beräknat med ett elpris på 2,5 kr/kWh
+        </p>
+
+        <h2>Tips för att spara på elen</h2>
+        <ul>
+          <li>
+            <strong>Stäng av standby</strong> - apparater i standby-läge drar
+            fortfarande el (typiskt 5-15W)
+          </li>
+          <li>
+            <strong>Välj energieffektiva apparater</strong> - titta efter en bra
+            energiklass på EU:s A-G-märkning
+          </li>
+          <li>
+            <strong>LED-lampor</strong> - drar upp till 80% mindre el än
+            glödlampor
+          </li>
+          <li>
+            <strong>Tvätta på 30°</strong> - de flesta tvättar blir rena vid
+            lägre temperaturer
+          </li>
+          <li>
+            <strong>Fyll maskinen</strong> - kör disk- och tvättmaskin
+            bara när de är fulla
+          </li>
+          <li>
+            <strong>Använd timer</strong> - kör apparater när elen är billigast
+            (ofta på natten)
+          </li>
+        </ul>
+
+        <h2>Om elpriser i Sverige</h2>
+        <p>
+          <strong>Elpriser i Sverige</strong> varierar beroende på tidpunkt, årstid, elområde och ditt
+          elavtal. Det <strong>totala priset</strong> du betalar består av:
+        </p>
+        <ul>
+          <li>
+            <strong>Elpris (spotpris)</strong> - varierar timme för timme på
+            Nord Pool utifrån utbud och efterfrågan
+          </li>
+          <li>
+            <strong>Elnätsavgift</strong> - betalning till nätbolaget för
+            transport av elen
+          </li>
+          <li>
+            <strong>Energiskatt på el</strong> - statlig skatt på elektricitet
+          </li>
+          <li>
+            <strong>Moms</strong> - 25% på hela summan
+          </li>
+          <li>
+            <strong>Elhandlarens påslag</strong> - varierar mellan bolag
+          </li>
+        </ul>
+        <p>
+          Sverige är indelat i fyra <strong>elområden</strong>, SE1–SE4, där priset ofta är lägre i
+          norr (SE1–SE2) och högre i söder (SE3–SE4). Inklusive alla avgifter och moms landar priset
+          ofta på ca <strong>1,5–3 kr/kWh</strong>.
+        </p>
+
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800">Tips för lägre elräkning</p>
+          <p className="text-green-700">
+            Överväg ett rörligt elavtal och använd el när spotpriset är lågt.
+            Appar som Tibber och Greppa visar priser i realtid och kan hjälpa
+            dig att spara.
+          </p>
+        </div>
+      </div>
+      )}
+
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/elberegner" />
     </div>

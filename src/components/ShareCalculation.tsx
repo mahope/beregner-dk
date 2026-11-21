@@ -1,0 +1,393 @@
+'use client';
+
+/**
+ * Share Calculation Component
+ * 
+ * UI for sharing calculation results via URL or shortlink.
+ * 
+ * @package Beregner.dk
+ * @since 1.1.0
+ */
+
+import { useLocale } from '@/components/LocaleProvider';
+import { trackResultCopied, trackShare } from '@/lib/analytics';
+import {
+  ShareableLink,
+  copyToClipboard,
+} from '@/lib/calculation-state';
+import type { Locale } from '@/lib/i18n';
+import { Check, Copy, Facebook, Link2, Mail, QrCode, Share2, Twitter, X } from 'lucide-react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+
+const shareLabels = {
+  da: {
+    shareButton: "Del beregning",
+    title: "Del din beregning",
+    subtitle: "Andre kan se og genbruge dine indtastninger",
+    close: "Luk dialog",
+    linkLabel: "Link til beregning",
+    copied: "Kopieret!",
+    copyError: "Linket kunne ikke kopieres. Marker og kopier det manuelt.",
+    copyLink: "Kopier link",
+    socialLabel: "Del på sociale medier",
+    twitter: "Del på Twitter",
+    facebook: "Del på Facebook",
+    email: "Del via email",
+    showQr: "Vis QR-kode",
+    hideQr: "Skjul QR-kode",
+    scanQr: "Scan for at åbne beregningen",
+    result: "Resultat",
+    closeButton: "Luk",
+    shareText: "Se min beregning på",
+  },
+  no: {
+    shareButton: "Del beregning",
+    title: "Del din beregning",
+    subtitle: "Andre kan se og gjenbruke dine innstillinger",
+    close: "Lukk dialog",
+    linkLabel: "Lenke til beregning",
+    copied: "Kopiert!",
+    copyError: "Lenken kunne ikke kopieres. Marker og kopier den manuelt.",
+    copyLink: "Kopier lenke",
+    socialLabel: "Del på sosiale medier",
+    twitter: "Del på Twitter",
+    facebook: "Del på Facebook",
+    email: "Del via e-post",
+    showQr: "Vis QR-kode",
+    hideQr: "Skjul QR-kode",
+    scanQr: "Skann for å åpne beregningen",
+    result: "Resultat",
+    closeButton: "Lukk",
+    shareText: "Se min beregning på",
+  },
+  se: {
+    shareButton: "Dela beräkning",
+    title: "Dela din beräkning",
+    subtitle: "Andra kan se och återanvända dina inmatningar",
+    close: "Stäng dialog",
+    linkLabel: "Länk till beräkning",
+    copied: "Kopierat!",
+    copyError: "Länken kunde inte kopieras. Markera och kopiera den manuellt.",
+    copyLink: "Kopiera länk",
+    socialLabel: "Dela på sociala medier",
+    twitter: "Dela på Twitter",
+    facebook: "Dela på Facebook",
+    email: "Dela via e-post",
+    showQr: "Visa QR-kod",
+    hideQr: "Dölj QR-kod",
+    scanQr: "Skanna för att öppna beräkningen",
+    result: "Resultat",
+    closeButton: "Stäng",
+    shareText: "Se min beräkning på",
+  },
+} as const;
+
+interface ShareCalculationProps {
+  getShareableLink: () => ShareableLink;
+  calculatorName: string;
+  resultSummary?: string;
+  privacyWarning?: string;
+  allowExternalSharing?: boolean;
+}
+
+export function ShareCalculation({
+  getShareableLink,
+  calculatorName,
+  resultSummary,
+  privacyWarning,
+  allowExternalSharing = true,
+}: ShareCalculationProps) {
+  const { locale } = useLocale();
+  const l = shareLabels[locale as Locale] || shareLabels.da;
+  const [isOpen, setIsOpen] = useState(false);
+  const [shareableLink, setShareableLink] = useState<ShareableLink | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
+  const [hasCopyError, setHasCopyError] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+  const modalTitleId = useId();
+  const linkInputId = useId();
+  const privacyWarningId = useId();
+
+  const handleOpen = useCallback(() => {
+    previousActiveElement.current = document.activeElement as HTMLElement;
+    const link = getShareableLink();
+    setShareableLink(link);
+    setIsOpen(true);
+    setIsCopied(false);
+    setHasCopyError(false);
+    trackShare(calculatorName, 'open');
+  }, [getShareableLink, calculatorName]);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    // Restore focus to the button that opened the modal
+    previousActiveElement.current?.focus();
+  }, []);
+
+  // Handle Escape key and focus trapping
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+        return;
+      }
+
+      // Focus trapping
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Focus the close button when modal opens
+    const focusTimer = window.setTimeout(() => closeButtonRef.current?.focus(), 0);
+
+    // Prevent scrolling when modal is open
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen, handleClose]);
+
+  const handleCopy = async () => {
+    if (!shareableLink) return;
+
+    const url = shareableLink.fullUrl;
+    const success = await copyToClipboard(url);
+
+    setIsCopied(success);
+    setHasCopyError(!success);
+    if (success) {
+      trackResultCopied(calculatorName);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
+  const shareUrl = shareableLink?.fullUrl || '';
+  const shareText = resultSummary
+    ? `${calculatorName}: ${resultSummary}`
+    : `${l.shareText} ${calculatorName}`;
+
+  const socialLinks = {
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    email: `mailto:?subject=${encodeURIComponent(`${calculatorName} beregning`)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`,
+  };
+
+  return (
+    <>
+      <button type="button"
+        onClick={handleOpen}
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+        aria-label={l.shareButton}
+      >
+        <Share2 className="w-4 h-4" />
+        <span>{l.shareButton}</span>
+      </button>
+
+      {/* Modal */}
+      {isOpen && (
+        <div 
+           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={modalTitleId}
+          onClick={(e) => e.target === e.currentTarget && handleClose()}
+        >
+          <div 
+            ref={modalRef}
+             className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain"
+          >
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-start justify-between">
+              <div>
+                <h2 id={modalTitleId} className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  {l.title}
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {l.subtitle}
+                </p>
+                {privacyWarning && (
+                  <p
+                    id={privacyWarningId}
+                    className="text-sm text-amber-800 dark:text-amber-300 mt-2"
+                  >
+                    {privacyWarning}
+                  </p>
+                )}
+              </div>
+              <button type="button"
+                ref={closeButtonRef}
+                onClick={handleClose}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label={l.close}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* URL Copy Section */}
+              <div>
+                <label
+                  htmlFor={linkInputId}
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  {l.linkLabel}
+                </label>
+                <div className="flex gap-2">
+                  <div className="flex-1 relative">
+                    <input
+                      id={linkInputId}
+                      type="text"
+                      value={shareUrl}
+                       readOnly
+                       aria-describedby={privacyWarning ? privacyWarningId : undefined}
+                      className="w-full px-3 py-2 pr-10 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 truncate"
+                    />
+                    <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
+                  </div>
+                  <button type="button"
+                    onClick={handleCopy}
+                    aria-label={isCopied ? l.copied : l.copyLink}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                      isCopied
+                        ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {isCopied ? (
+                      <Check className="w-4 h-4" aria-hidden="true" />
+                    ) : (
+                      <Copy className="w-4 h-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+                {hasCopyError && (
+                  <p role="alert" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {l.copyError}
+                  </p>
+                )}
+
+              </div>
+
+              {allowExternalSharing && (
+                <>
+              {/* Social Share */}
+              <div>
+                <label id="share-social-gruppe" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {l.socialLabel}
+                </label>
+                <div role="group" aria-labelledby="share-social-gruppe" className="flex gap-3">
+                  <a
+                    href={socialLinks.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackShare(calculatorName, 'twitter')}
+                    className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1DA1F2] text-white hover:opacity-90 transition-opacity"
+                    aria-label={l.twitter}
+                  >
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                  <a
+                    href={socialLinks.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackShare(calculatorName, 'facebook')}
+                    className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1877F2] text-white hover:opacity-90 transition-opacity"
+                    aria-label={l.facebook}
+                  >
+                    <Facebook className="w-5 h-5" />
+                  </a>
+                  <a
+                    href={socialLinks.email}
+                    onClick={() => trackShare(calculatorName, 'email')}
+                    className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-600 text-white hover:opacity-90 transition-opacity"
+                    aria-label={l.email}
+                  >
+                    <Mail className="w-5 h-5" />
+                  </a>
+                  <button type="button"
+                    onClick={() => setShowQr(!showQr)}
+                    className={`flex items-center justify-center w-12 h-12 rounded-full transition-colors ${
+                      showQr
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                    aria-label={showQr ? l.hideQr : l.showQr}
+                    aria-pressed={showQr}
+                  >
+                    <QrCode className="w-5 h-5" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+
+              {/* QR Code */}
+              {showQr && (
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="inline-block p-4 bg-white rounded-lg">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareUrl)}`}
+                      alt="QR kode til beregning"
+                      className="w-32 h-32"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    {l.scanQr}
+                  </p>
+                </div>
+              )}
+                </>
+              )}
+
+              {/* Result preview */}
+              {resultSummary && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                    {l.result}: {resultSummary}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700">
+              <button type="button"
+                onClick={handleClose}
+                className="w-full py-2 text-gray-600 dark:text-gray-400 font-medium hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              >
+                {l.closeButton}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default ShareCalculation;

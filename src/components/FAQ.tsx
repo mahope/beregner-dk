@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { renderInlineMarkdown } from "@/components/inline-markdown";
+import { useLocale } from "@/components/LocaleProvider";
+import { t } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n";
 
 interface FAQItem {
   question: string;
@@ -12,21 +16,23 @@ interface FAQProps {
   title?: string;
 }
 
-export default function FAQ({ items, title = "Ofte stillede spørgsmål" }: FAQProps) {
+export function FAQ({ items, title }: FAQProps) {
+  const { locale } = useLocale();
+  const faqTitle = title || t(locale as Locale, "ui.faq");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-bold mb-6">{title}</h2>
+      <h2 className="text-2xl font-bold mb-6 dark:text-white">{faqTitle}</h2>
       <div className="space-y-3">
         {items.map((item, index) => (
           <div
             key={index}
-            className="border rounded-lg overflow-hidden bg-white"
+            className="border dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800"
           >
-            <button
+            <button type="button"
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+              className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:text-white"
               aria-expanded={openIndex === index}
             >
               <span className="font-medium pr-4">{item.question}</span>
@@ -39,8 +45,8 @@ export default function FAQ({ items, title = "Ofte stillede spørgsmål" }: FAQP
               </span>
             </button>
             {openIndex === index && (
-              <div className="px-6 pb-4 text-gray-600">
-                <p>{item.answer}</p>
+              <div className="px-6 pb-4 text-gray-600 dark:text-gray-300">
+                <p>{renderInlineMarkdown(item.answer)}</p>
               </div>
             )}
           </div>
@@ -52,3 +58,4 @@ export default function FAQ({ items, title = "Ofte stillede spørgsmål" }: FAQP
 
 // Export for use in data files
 export type { FAQItem };
+export default FAQ;

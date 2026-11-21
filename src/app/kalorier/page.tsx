@@ -1,122 +1,154 @@
-import type { Metadata } from "next";
+import { localizedPath } from "@/lib/locale-slugs";
 import KalorieBeregner from "@/components/KalorieBeregner";
+import Link from "next/link";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { PROTEIN_G_PER_KG, kaloriePrAlderRaekker, kaloriePrDagRaekker, type KalorieMaal } from "@/lib/makroer";
+import { formatNumber } from "@/lib/format";
+import KalorieTabel from "@/components/KalorieTabel";
+import { MADVARER, kalorieIgram, madvareMedNavn } from "@/lib/kalorier-madvarer";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata() {
+  return generatePageMetadata("kalorier");
+}
 
-export const metadata: Metadata = {
-  title: "Kalorieberegner - Beregn dit daglige kaloriebehov gratis",
-  description:
-    "Gratis kalorieberegner. Beregn dit daglige kaloriebehov (TDEE og BMR) baseret på alder, køn, vægt og aktivitetsniveau. Få makrofordeling for vægttab eller muskelopbygning.",
-  keywords: [
-    "kalorieberegner",
-    "dagligt kaloriebehov",
-    "TDEE beregner",
-    "BMR beregner",
-    "vægttab kalorier",
-    "makroer beregner",
-    "protein beregner",
-    "kalorieunderskud",
-  ],
-  openGraph: {
-    title: "Kalorieberegner - Beregn dit kaloriebehov",
-    description:
-      "Beregn dit daglige kaloriebehov og få makrofordeling. Gratis kalorieberegner.",
-    url: `${baseUrl}/kalorier`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/kalorier`,
-  },
-};
+export default async function KalorierPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("kalorier", locale) || getPageData("kalorier", "da")!;
+  const dec = (value: number) => formatNumber(value, locale, { maximumFractionDigits: 1 });
+  const proteinRange = (maal: KalorieMaal) => {
+    const { min, max } = PROTEIN_G_PER_KG[maal];
+    return `${dec(min)}-${dec(max)}`;
+  };
+  /**
+   * Kalorierne i brødteksten læses fra tabellen, ikke skrevet ind i sætningen.
+   * Et navn, der ikke findes, kaster — så en ny madvare kan ikke få en brødtekst
+   * med et tal, tabellen ikke har.
+   */
+  const kcalIMadvare = (navn: string, gram: number) => {
+    const madvare = madvareMedNavn(navn);
+    if (!madvare) throw new Error(`Unknown food in the calorie prose: ${navn}`);
+    return formatNumber(kalorieIgram(madvare, gram), locale, { maximumFractionDigits: 0 });
+  };
 
-const faqItems = [
-  {
-    question: "Hvad er forskellen på BMR og TDEE?",
-    answer:
-      "BMR (Basal Metabolic Rate) er de kalorier din krop brænder i hvile - bare for at holde dig i live. TDEE (Total Daily Energy Expenditure) er dit totale daglige forbrug inkl. al aktivitet. TDEE = BMR × aktivitetsfaktor.",
-  },
-  {
-    question: "Hvor mange kalorier skal jeg spise for at tabe mig?",
-    answer:
-      "For at tabe ca. 0,5 kg om ugen, spis 500 kalorier under din TDEE. For 1 kg/uge, spis 1000 under (ikke anbefalet i længere perioder). Start med 500 kcal underskud for bæredygtigt vægttab.",
-  },
-  {
-    question: "Hvor meget protein har jeg brug for?",
-    answer:
-      "Det afhænger af dit mål: Vedligehold: 0,8-1,2g per kg kropsvægt. Vægttab: 1,2-1,6g per kg (bevarer muskler). Muskelopbygning: 1,6-2,2g per kg. Protein mætter godt og bevarer muskelmasse.",
-  },
-  {
-    question: "Er denne beregner præcis?",
-    answer:
-      "Beregneren bruger Mifflin-St Jeor formlen, som er den mest præcise formel for de fleste mennesker. Dog kan individuelle variationer være på 10-15%. Brug resultatet som udgangspunkt og justér baseret på dine resultater.",
-  },
-  {
-    question: "Hvorfor taber jeg ikke vægt selvom jeg spiser under min TDEE?",
-    answer:
-      "Mulige årsager: 1) Du spiser mere end du tror (prøv at veje maden). 2) Din TDEE er lavere end beregnet. 3) Du har ikke givet det tid nok - vægten svinger naturligt. Prøv at reducere yderligere 200 kcal.",
-  },
-  {
-    question: "Skal jeg spise mine trænede kalorier tilbage?",
-    answer:
-      "Det afhænger af dit mål. Ved vægttab: Spis ikke alle tilbage, men tilføj evt. 50% ved hård træning. Ved vedligehold/muskelopbygning: Ja, spis ekstra for at dække træningen. Din aktivitetsfaktor dækker allerede let-moderat træning.",
-  },
-  {
-    question: "Hvor hurtigt kan jeg tabe mig sikkert?",
-    answer:
-      "En sikker og bæredygtig vægttabsrate er 0,5-1 kg per uge. Hurtigere vægttab kan føre til muskeltab, næringsmangel og metabolisk tilpasning. Tålmodighed giver bedre resultater på lang sigt.",
-  },
-  {
-    question: "Hvad er en god makrofordeling?",
-    answer:
-      "En typisk fordeling er: Protein 25-30%, Fedt 25-30%, Kulhydrater 40-50%. Ved vægttab øges protein ofte til 30-35%. Fedt bør aldrig være under 20% af kalorierne pga. hormonbalance.",
-  },
-];
-
-export default function KalorierPage() {
   return (
     <div>
       <CalculatorSchema
-        name="Kalorieberegner"
-        description="Gratis kalorieberegner. Beregn dit daglige kaloriebehov og få makrofordeling."
-        url={`${baseUrl}/kalorier`}
-        category="HealthApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/kalorier`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Kalorieberegner", url: `${baseUrl}/kalorier` },
-        ]}
-      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/kalorier" }]} />
 
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Kalorieberegner</span>
-      </nav>
-
-      <h1 className="text-3xl font-bold mb-2">Kalorieberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn dit daglige kaloriebehov baseret på din krop og aktivitetsniveau.
-        Få personlige anbefalinger til vægttab, vedligehold eller
-        muskelopbygning.
+        {pageData.description}
       </p>
 
       <KalorieBeregner />
 
+      {locale === "da" && (
+      <>
+        <KalorieTabel locale={locale} />
+
+        <div className="mt-12 prose max-w-none">
+          <h2>Kalorier i madvarer</h2>
+          <p>
+            Det mest søgte spørgsmål på denne side er ikke «hvad er mit
+            kaloriebehov», men «kalorier i æg», «kalorier i en banan» og «kalorier
+            i kartofler». Derfor står der en tabel med{" "}
+            <strong>{MADVARER.length} madvarer</strong> ovenfor: hver med
+            kalorier, protein, fedt og kulhydrat pr. 100 g. Skriv i gram-feltet,
+            så regner den den portione, du spiser — <strong>et æg på 60 gram er{" "}
+            {kcalIMadvare("Æg, helt, råt", 60)} kcal</strong>, en banan på 118
+            gram er {kcalIMadvare("Banan", 118)} kcal.
+          </p>
+          <p>
+            Tabellen slår én vare ad gangen op. Skal du vide hvad en{" "}
+            <strong>hel ret</strong> giver, lægger du ingredienserne sammen i{" "}
+            <Link href="/kalorier-i-opskrift" className="underline font-medium">
+              beregneren for kalorier i opskrifter
+            </Link>{" "}
+            — den dividerer desuden summen med antallet af portioner, så du får
+            kcal pr. portion frem for kcal i hele gryden.
+          </p>
+          <p>
+            Tallene er hentet fra{" "}
+            <a href="https://fdc.nal.usda.gov" rel="nofollow">
+              USDA FoodData Central
+            </a>{" "}
+            og hver madvar bærer sit nummer i den database, så tallet kan
+            slås op og efterprøves. Tilberedningsformen står i navnet:
+            kartofler er 87 kcal kogt og 77 kcal rå, og smør er 717 kcal mod
+            89 kcal i letmælk. Matcher tallet ikke din egen vare, regner
+            værktøjet ovenfor dit daglige behov, og{" "}
+            <a href="/proteinbehov">/proteinbehov</a> deler det op i protein,
+            fedt og kulhydrat.
+          </p>
+        </div>
+      </>
+      )}
+
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
+        <h2>Hvor mange kalorier pr dag?</h2>
+        <p>
+          Det er det tal de fleste søger på, og det afhænger af{" "}
+          <strong>vægt, højde, alder, køn og hvor aktiv du er</strong> — altså
+          af alle fem felter i værktøjet ovenfor. Herunder er tallene for en
+          mand og en kvinde på <strong>180 cm og 30 år</strong> med{" "}
+          <strong>moderat aktivitet</strong> (træner 1-3 gange om ugen), som er
+          den aktivitet de fleste ligger på.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Vægt</th>
+              <th>Mand, kalorier pr dag</th>
+              <th>Kvinde, kalorier pr dag</th>
+              <th>Mand, vægttab</th>
+              <th>Kvinde, vægttab</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kaloriePrDagRaekker().map((raekke) => (
+              <tr key={raekke.vaegtKg}>
+                <td>{dec(raekke.vaegtKg)} kg</td>
+                <td>{dec(raekke.mand)} kcal</td>
+                <td>{dec(raekke.kvinde)} kcal</td>
+                <td>{dec(raekke.tabMand)} kcal</td>
+                <td>{dec(raekke.tabKvinde)} kcal</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Kolonnen <strong>vægttab</strong> er 500 kcal under dagens forbrug, så
+          tallet <strong>2.259 kcal</strong> for en mand på 80 kg er både det
+          værktøjet viser og det, <a href={localizedPath("/vaegttab", locale)}>/vaegttab</a> regner ud fra
+          0,5 kg tab pr. uge. Er du lille og inaktiv, kan 500 kcal ikke tages
+          uden at komme under dit basalstofskifte — så lægger værktøjet et
+          mindre underskud i stedet.
+        </p>
+        <p>
+          Er tallene højere eller lavere end du forventer, er det
+          aktivitetsniveauet der er forkert, ikke din vægt. Svarer du{" "}
+          <a href={localizedPath("/motion-kalorier", locale)}>stillesiddende</a> men træner tre gange om
+          ugen, er du ikke stillesiddende.
+        </p>
+
         <h2>Forstå dit kaloriebehov</h2>
         <p>
-          Dit kaloriebehov afhænger af flere faktorer: alder, køn, vægt, højde
+          Dit <strong>kaloriebehov</strong> afhænger af flere faktorer: alder, køn, vægt, højde
           og hvor aktiv du er. Denne beregner bruger{" "}
           <strong>Mifflin-St Jeor formlen</strong>, som er den mest præcise
           metode til at estimere dit basalstofskifte.
@@ -126,69 +158,147 @@ export default function KalorierPage() {
 
         <h3>BMR (Basal Metabolic Rate)</h3>
         <p>
-          Dit basalstofskifte er antallet af kalorier din krop brænder bare for
-          at holde dig i live - hjertet pumper, lungerne trækker vejret,
+          Dit <strong>basalstofskifte</strong> er antallet af kalorier din krop brænder bare for
+          at holde dig i live — hjertet pumper, lungerne trækker vejret,
           cellerne fornyer sig. Selv hvis du lå stille i sengen hele dagen,
           ville du brænde disse kalorier.
         </p>
 
         <h3>TDEE (Total Daily Energy Expenditure)</h3>
         <p>
-          TDEE er dit totale daglige kalorieforbrug - BMR plus alle de kalorier
+          <strong>TDEE</strong> er dit <strong>totale daglige kalorieforbrug</strong> — BMR plus alle de kalorier
           du brænder gennem aktivitet: gåture, træning, arbejde, selv at tænke
           bruger kalorier.
         </p>
 
         <h2>Vægttab og kalorieunderskud</h2>
         <p>
-          For at tabe vægt skal du spise færre kalorier end du forbrænder. En
+          For at tabe vægt skal du spise <strong>færre kalorier end du forbrænder</strong>. En
           god tommelfingerregel:
         </p>
         <ul>
           <li>
-            <strong>500 kcal underskud/dag</strong> = ca. 0.5 kg tab/uge
+            <strong>500 kcal underskud/dag</strong> = ca. 0,5 kg tab/uge
           </li>
           <li>
             <strong>1000 kcal underskud/dag</strong> = ca. 1 kg tab/uge (ikke
             anbefalet længe)
           </li>
         </ul>
-
-        <h2>Makronæringsstoffer</h2>
-
-        <h3>Protein</h3>
         <p>
-          Protein er essentielt for muskler, hår, hud og hundredvis af
+          Beregneren <strong>regner aldrig et underskud, der fører dig under dit
+          basalstofskifte</strong> — kroppen skal bruge BMR bare for at leve. Er
+          du lille og inaktiv, kan 500 kcal underskud ikke lade sig gøre, og
+          værktøjet skriver da det underskud, der faktisk er muligt, i stedet for
+          500.
+        </p>
+
+         <h2>Makronæringsstoffer</h2>
+
+         <p>
+           Vil du vide, hvad du får i skeen: se{" "}
+           <Link href="/kalorier-i-opskrift" className="text-blue-700 underline dark:text-blue-300">
+             kalorier i opskrifter
+           </Link>{" "}
+           og{" "}
+           <Link href="/kalorier-i-alkohol" className="text-blue-700 underline dark:text-blue-300">
+             kalorier i alkohol
+           </Link>
+           . Derudover står der, hvor meget{" "}
+           <Link href="/protein-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             protein
+           </Link>
+           ,{" "}
+           <Link href="/sukker-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             sukker
+           </Link>
+           ,{" "}
+           <Link href="/kulhydrater-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             kulhydrat
+           </Link>
+           ,{" "}
+           <Link href="/fedt-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             fedt
+           </Link>
+           ,{" "}
+           <Link href="/fiber-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+             fiber
+           </Link>{" "}
+            og{" "}
+            <Link href="/salt-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              salt
+            </Link>{" "}
+            madvarerne har pr. 100 g. Derudover kan du se, hvor meget{" "}
+            <Link href="/jern-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              jern
+            </Link>
+            ,{" "}
+            <Link href="/calcium-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              calcium
+            </Link>
+            ,{" "}
+            <Link href="/magnesium-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              magnesium
+            </Link>
+            ,{" "}
+            <Link href="/zink-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              zink
+            </Link>
+            ,{" "}
+            <Link href="/kalium-i-madvarer" className="text-blue-700 underline dark:text-blue-300">
+              kalium
+            </Link>
+            ,{" "}
+            <Link href="/vitamin-d" className="text-blue-700 underline dark:text-blue-300">
+              D-vitamin
+            </Link>
+            ,{" "}
+            <Link href="/vitamin-c" className="text-blue-700 underline dark:text-blue-300">
+              C-vitamin
+            </Link>{" "}
+            og{" "}
+            <Link href="/vitamin-b12" className="text-blue-700 underline dark:text-blue-300">
+              B12-vitamin
+            </Link>{" "}
+            du får i dem.
+          </p>
+
+         <h3>Protein</h3>
+        <p>
+          <strong>Protein</strong> er essentielt for muskler, hår, hud og hundredvis af
           kropsprocesser.
         </p>
         <ul>
           <li>
-            <strong>Vedligehold:</strong> 0.8-1.2g per kg kropsvægt
+            <strong>Vedligehold:</strong> {proteinRange("vedligehold")} g per kg kropsvægt
           </li>
           <li>
-            <strong>Vægttab:</strong> 1.2-1.6g per kg (bevarer muskler)
+            <strong>Vægttab:</strong> {proteinRange("tab")} g per kg (bevarer muskler)
           </li>
           <li>
-            <strong>Muskelopbygning:</strong> 1.6-2.2g per kg
+            <strong>Muskelopbygning:</strong> {proteinRange("opbyg")} g per kg
+          </li>
+          <li>
+            Beregneren bruger midten af det valgte interval, så proteinmængden følger dit mål
           </li>
         </ul>
         <p>1g protein = 4 kalorier</p>
 
         <h3>Fedt</h3>
         <p>
-          Fedt er vigtigt for hormoner, vitaminoptagelse og cellestruktur.
-          Minimum 20-25% af kalorier bør komme fra fedt.
+          <strong>Fedt</strong> er vigtigt for hormoner, vitaminoptagelse og cellestruktur.
+          Minimum <strong>20-25 % af kalorier</strong> bør komme fra fedt.
         </p>
         <p>1g fedt = 9 kalorier</p>
 
         <h3>Kulhydrater</h3>
         <p>
-          Kulhydrater er kroppens foretrukne energikilde, især under træning.
+          <strong>Kulhydrater</strong> er kroppens <strong>foretrukne energikilde</strong>, især under træning.
           Mængden kan variere meget baseret på dine mål og præferencer.
         </p>
         <p>1g kulhydrat = 4 kalorier</p>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Vigtigt</p>
           <p className="text-yellow-700">
             Denne beregner giver et estimat baseret på gennemsnitsværdier.
@@ -198,8 +308,196 @@ export default function KalorierPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Hur många kalorier per dag?</h2>
+        <p>
+          Det är det talet de flesta söker på, och det beror på{" "}
+          <strong>vikt, längd, ålder, kön och hur aktiv du är</strong> — alltså
+          alla fem fälten i verktyget ovan. Här är talen för en man och en
+          kvinna på <strong>180 cm och 30 år</strong> med{" "}
+          <strong>måttlig aktivitet</strong> (tränar 1-3 gånger i veckan), vilket
+          är den aktivitet de flesta ligger på.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Vikt</th>
+              <th>Man, kcal per dag</th>
+              <th>Kvinna, kcal per dag</th>
+              <th>Man, viktnedgång</th>
+              <th>Kvinna, viktnedgång</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kaloriePrDagRaekker().map((raekke) => (
+              <tr key={raekke.vaegtKg}>
+                <td>{dec(raekke.vaegtKg)} kg</td>
+                <td>{dec(raekke.mand)} kcal</td>
+                <td>{dec(raekke.kvinde)} kcal</td>
+                <td>{dec(raekke.tabMand)} kcal</td>
+                <td>{dec(raekke.tabKvinde)} kcal</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Spalten <strong>viktnedgång</strong> ligger 500 kcal under dagsförbrukningen,
+          så talet <strong>2.259 kcal</strong> för en man på 80 kg är både det
+          verktyget visar och det som <a href={localizedPath("/vaegttab", locale)}>/vaegttab</a> räknar
+          fram till 0,5 kg viktnedgång per vecka. Är du liten och inaktiv går 500
+          kcal inte att dra av utan att komma under ditt basalomsättning — då
+          lägger verktyget in ett mindre underskott i stället.
+        </p>
+        <p>
+          Blir talen högre eller lägre än du väntat dig är det
+          aktivitetsnivån som är fel, inte din vikt. Svarar du{" "}
+          <a href={localizedPath("/motion-kalorier", locale)}>stillsittande</a> men tränar tre gånger i
+          veckan är du inte stillsittande.
+        </p>
+
+        <h2>Kaloribehov efter ålder</h2>
+        <p>
+          Åldern påverkar behovet, och det är den sista termen i formeln: varje år
+          du blir äldre räknar Mifflin-St Jeor av <strong>5 kcal</strong> från
+          ditt basalomsättning, för män och kvinnor lika. Det låter lite, men
+          tio år blir 50 kcal i BMR — och vid måttlig aktivitet{" "}
+          <strong>77 kcal i dagsförbrukningen</strong>. Här är samma person på
+          80 kg och 180 cm, bara äldre:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Ålder</th>
+              <th>Man, kcal per dag</th>
+              <th>Kvinna, kcal per dag</th>
+              <th>Kvinna, viktnedgång</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kaloriePrAlderRaekker().map((raekke) => (
+              <tr key={raekke.alder}>
+                <td>{raekke.alder} år</td>
+                <td>{dec(raekke.mand)} kcal</td>
+                <td>{dec(raekke.kvinde)} kcal</td>
+                <td>{dec(raekke.tabKvinde)} kcal</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Rad 30 år är den samma som 80 kg-raden i tabellen ovan — samma
+          person, olika ingång. Ligger du under 30 eller över 80 år skriver du
+          ditt eget ålderstal i verktyget; raderna är bara beräkningarna för de
+          ålderstal som faktiskt sätts i fråga.
+        </p>
+        <p>
+          <strong>Kaloribehovet för barn räknas inte ut med den här formeln.</strong>
+          Formeln är validerad för vuxna, och barn har ett helt annat behov per
+          kilo — där ska du använda en tabell för barn eller fråga en
+          barnläkare. Verktyget räknar alltså bara ut vuxnas behov.
+        </p>
+
+        <h2>Förstå ditt kaloriebehov</h2>
+        <p>
+          Ditt <strong>kaloriebehov</strong> beror på flera faktorer: ålder, kön, vikt, längd
+          och hur aktiv du är. Denna kalkylator använder{" "}
+          <strong>Mifflin-St Jeor-formeln</strong>, som är den mest exakta
+          metoden för att uppskatta din basalämnesomsättning.
+        </p>
+
+        <h2>BMR vs. TDEE</h2>
+
+        <h3>BMR (Basal Metabolic Rate)</h3>
+        <p>
+          Din <strong>basalämnesomsättning</strong> är antalet kalorier din kropp förbränner bara för
+          att hålla dig vid liv — hjärtat pumpar, lungorna andas,
+          cellerna förnyas. Även om du låg stilla i sängen hela dagen
+          skulle du förbränna dessa kalorier.
+        </p>
+
+        <h3>TDEE (Total Daily Energy Expenditure)</h3>
+        <p>
+          <strong>TDEE</strong> är din <strong>totala dagliga kaloriförbrukning</strong> — BMR plus alla kalorier
+          du förbränner genom aktivitet: promenader, träning, arbete, till och med att tänka
+          förbrukar kalorier.
+        </p>
+
+        <h2>Viktnedgång och kaloriunderskott</h2>
+        <p>
+          För att gå ner i vikt måste du äta <strong>färre kalorier än du förbränner</strong>. En
+          bra tumregel:
+        </p>
+        <ul>
+          <li>
+            <strong>500 kcal underskott/dag</strong> = ca 0,5 kg viktnedgång/vecka
+          </li>
+          <li>
+            <strong>1000 kcal underskott/dag</strong> = ca 1 kg viktnedgång/vecka (inte
+            rekommenderat under längre tid)
+          </li>
+        </ul>
+        <p>
+          Kalkylatorn räknar <strong>aldrig ett underskott som tar dig under din
+          basalämnesomsättning</strong> — kroppen behöver BMR bara för att leva. Är
+          du liten och inaktiv går 500 kcal underskott inte att genomföra, och
+          verktyget skriver då det underskott som faktiskt går, i stället för 500.
+        </p>
+
+        <h2>Makronäringsämnen</h2>
+
+        <h3>Protein</h3>
+        <p>
+          <strong>Protein</strong> är essentiellt för muskler, hår, hud och hundratals
+          kroppsprocesser.
+        </p>
+        <ul>
+          <li>
+            <strong>Underhåll:</strong> {proteinRange("vedligehold")} g per kg kroppsvikt
+          </li>
+          <li>
+            <strong>Viktnedgång:</strong> {proteinRange("tab")} g per kg (bevarar muskler)
+          </li>
+          <li>
+            <strong>Muskeluppbyggnad:</strong> {proteinRange("opbyg")} g per kg
+          </li>
+          <li>
+            Kalkylatorn använder mitten av det valda intervallet, så proteinmängden följer ditt mål
+          </li>
+        </ul>
+        <p>1 g protein = 4 kalorier</p>
+
+        <h3>Fett</h3>
+        <p>
+          <strong>Fett</strong> är viktigt för hormoner, vitaminupptag och cellstruktur.
+          Minst <strong>20-25 % av kalorierna</strong> bör komma från fett.
+        </p>
+        <p>1 g fett = 9 kalorier</p>
+
+        <h3>Kolhydrater</h3>
+        <p>
+          <strong>Kolhydrater</strong> är kroppens <strong>föredragna energikälla</strong>, särskilt under träning.
+          Mängden kan variera mycket beroende på dina mål och preferenser.
+        </p>
+        <p>1 g kolhydrat = 4 kalorier</p>
+
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
+          <p className="font-medium text-yellow-800">Viktigt</p>
+          <p className="text-yellow-700">
+            Denna kalkylator ger en uppskattning baserad på genomsnittsvärden.
+            Individuella variationer kan vara betydande. Vid större
+            viktförändringar eller hälsoproblem, rådgör alltid med en läkare eller
+            dietist.
+          </p>
+        </div>
+      </div>
+      )}
+
+      <FAQ items={pageData.faqItems} />
+
+      <RelateredeArtikler current="/kalorier" locale={locale} />
 
       <RelatedCalculators current="/kalorier" />
     </div>

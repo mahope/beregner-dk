@@ -1,133 +1,91 @@
-import type { Metadata } from "next";
+import Link from "next/link";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import HuslejeBudgetBeregner from "@/components/HuslejeBudgetBeregner";
+import HuslejePrKvm from "@/components/HuslejePrKvm";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+} from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import { ForsikringAffiliate } from "@/components/AffiliateBox";
+import { HUSLEJE_EKSEMPEL, HUSLEJE_EKSEMPEL_FORBRUG, HUSLEJE_EKSEMPEL_MED_FORBRUG, HUSLEJE_STANDARD } from "@/lib/husleje";
+import HuslejeNettoprisindeks from "@/components/HuslejeNettoprisindeks";
+import { formatCurrency } from "@/lib/format";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata() {
+  return generatePageMetadata("husleje");
+}
 
-export const metadata: Metadata = {
-  title: "Husleje Budget Beregner - Hvad har du råd til? | MinBeregner.dk",
-  description:
-    "Gratis husleje beregner. Find ud af hvor meget du kan bruge på husleje baseret på din indkomst og udgifter. Brug 30% reglen.",
-  keywords: [
-    "husleje beregner",
-    "hvad har jeg råd til i husleje",
-    "husleje budget",
-    "30% reglen husleje",
-    "bolig budget",
-    "lejlighed budget",
-    "hvad må husleje koste",
-  ],
-  openGraph: {
-    title: "Husleje Budget Beregner - Find din max husleje",
-    description: "Beregn hvor meget du kan bruge på husleje. Baseret på din indkomst og udgifter.",
-    url: `${baseUrl}/husleje`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/husleje`,
-  },
-};
+export default async function HuslejePage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("husleje", locale) || getPageData("husleje", "da")!;
 
-const faqItems = [
-  {
-    question: "Hvor meget af min løn bør gå til husleje?",
-    answer:
-      "Den klassiske tommelfingerregel er max 30% af din nettoindkomst. Nogle eksperter siger 33%. Husk at inkludere el, vand og varme i beregningen.",
-  },
-  {
-    question: "Hvad inkluderer huslejen typisk?",
-    answer:
-      "Basis husleje inkluderer ofte kun lejen. A conto varme og vand kan være inkluderet. El betaler du næsten altid selv. Internet og TV er sjældent inkluderet.",
-  },
-  {
-    question: "Hvor meget skal jeg have i depositum?",
-    answer:
-      "Typisk 1-3 måneders husleje i depositum + eventuelt forudbetalt husleje. Spar op til dette inden du begynder at lede efter bolig.",
-  },
-  {
-    question: "Skal jeg have opsparing ud over husleje?",
-    answer:
-      "Ja, eksperter anbefaler at have 3-6 måneders udgifter i en nødfond. Plus løbende opsparing på mindst 10% af din indkomst til fremtiden.",
-  },
-  {
-    question: "Er det bedre at leje eller købe?",
-    answer:
-      "Det afhænger af din situation. Leje giver fleksibilitet, køb opbygger formue. Som tommelfingerregel: Hvis du bliver 5+ år, kan køb ofte betale sig.",
-  },
-  {
-    question: "Hvad er typiske boligudgifter ud over husleje?",
-    answer:
-      "El (ca. 300-600 kr/md), internet (ca. 300 kr/md), indboforsikring (ca. 100-200 kr/md). Varme og vand er ofte a conto i huslejen.",
-  },
-];
+  // Eksemplet er det samme som værktøjets starttilstand, så tallet på siden er
+  // altid det, læseren ser da han/hun åbner beregneren.
+  const kr = (value: number) => formatCurrency(value, "da", { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
-const relatedCalculators = [
-  {
-    title: "Løn efter skat",
-    href: "/loen-efter-skat",
-    description: "Beregn din nettoløn",
-    icon: "💰",
-  },
-  {
-    title: "Boliglån",
-    href: "/boliglaan",
-    description: "Beregn dit boliglån",
-    icon: "🏠",
-  },
-  {
-    title: "Elberegner",
-    href: "/elberegner",
-    description: "Beregn dit elforbrug",
-    icon: "⚡",
-  },
-];
-
-export default function HuslejePage() {
   return (
     <div className="max-w-4xl mx-auto">
-      <FAQSchema items={faqItems} />
-      
+      <CalculatorSchema
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/husleje`}
+        category={pageData.schemaCategory}
+      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/husleje" }]} />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Husleje Budget Beregner
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600">
-          Find ud af hvor meget du kan bruge på husleje. Indtast din indkomst og udgifter, 
-          og få et realistisk bud på din max husleje baseret på 30% reglen.
+          {pageData.description}
         </p>
       </div>
 
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <HuslejeBudgetBeregner />
+        <ForsikringAffiliate className="mt-8" />
       </div>
 
+      {locale === "da" && <HuslejePrKvm />}
+
       {/* Informativ tekst - SEO */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Hvor meget bør du bruge på husleje?</h2>
         <p>
-          At finde den rigtige balance mellem husleje og andre udgifter er afgørende for 
-          en sund økonomi. Bruger du for meget på bolig, kan det gå ud over din livskvalitet 
-          og mulighed for opsparing.
+          At finde den <strong>rigtige balance mellem husleje og andre udgifter</strong> er afgørende for
+          en sund økonomi. Bruger du for meget på bolig, kan det gå ud over din <strong>livskvalitet</strong>
+          og mulighed for <strong>opsparing</strong>.
         </p>
-        
+
         <h3>30% reglen forklaret</h3>
         <p>
-          Den mest udbredte tommelfingerregel siger, at din husleje (inkl. forbrugsudgifter) 
-          ikke bør overstige 30% af din nettoindkomst. Nogle kilder siger 33%, men 30% 
-          giver mere buffer til uforudsete udgifter.
+          Den mest udbredte tommelfingerregel siger, at din husleje (inkl. forbrugsudgifter)
+          ikke bør overstige <strong>30 % af din nettoindkomst</strong>. Nogle kilder siger 33 %, men 30 %
+          giver mere <strong>buffer til uforudsete udgifter</strong>.
         </p>
         <p>
-          <strong>Eksempel:</strong> Med en nettoløn på 25.000 kr bør din husleje max være 
-          7.500 kr inkl. el, vand og varme.
+          <strong>Eksempel:</strong> Med en nettoløn på {kr(HUSLEJE_STANDARD.maanedligNettoLoen)} er
+          dit loft for boligudgifter {kr(HUSLEJE_EKSEMPEL.maxBoligudgifter)} — og det er både husleje,
+          el, vand og varme, der skal dele det. Har du {kr(HUSLEJE_EKSEMPEL_FORBRUG)} i el og varme
+          om måneden, er der {kr(HUSLEJE_EKSEMPEL_MED_FORBRUG.anbefaletHusleje)} til huslejen.
+          Beregneren ovenfor starter med præcis det samme eksempel, så du kan se reglen regne det ud.
         </p>
 
         <h3>Hvad inkluderer "husleje"?</h3>
         <p>
-          Når du beregner dit boligbudget, skal du huske alle boligrelaterede udgifter:
+          Når du beregner dit <strong>boligbudget</strong>, skal du huske alle <strong>boligrelaterede udgifter</strong>.
+          El, vand og varme har deres eget felt i beregneren, fordi de ofte ikke er en del af lejen:
         </p>
         <ul>
           <li>Grundleje/husleje</li>
@@ -137,23 +95,35 @@ export default function HuslejePage() {
           <li>Indboforsikring</li>
         </ul>
 
+        <h3>Sammenlign husleje pr. m²</h3>
+        <p>
+          Husleje pr. kvadratmeter gør det lettere at sammenligne boliger af forskellig størrelse.
+          Regn den ud ovenfor, og hent arealet fra BBR, hvis du ikke kender det.
+        </p>
+
         <h3>Tips til at finde billigere bolig</h3>
         <ul>
           <li>Overvej delelejlighed eller roommate</li>
           <li>Kig udenfor de dyreste områder</li>
           <li>Vær fleksibel med størrelse og stand</li>
           <li>Tjek almene boliger (boligforeninger)</li>
-          <li>Brug flere boligportaler og sociale medier</li>
-        </ul>
+<li>Brug flere boligportaler og sociale medier</li>
+    </ul>
+    <p>
+      Læs vores <Link href="/blog/maanedsbudget-2026-komplet-guide" className="text-blue-600 hover:underline">komplette guide til månedsbudget 2026</Link> for at se hvordan husleje passer ind i det samlede budget.
+    </p>
       </div>
+      )}
+
+      {locale === "da" && <HuslejeNettoprisindeks />}
 
       {/* FAQ */}
       <div className="mb-8">
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </div>
 
       {/* Related Calculators */}
-      <RelatedCalculators calculators={relatedCalculators} />
+      <RelatedCalculators current="/husleje" />
     </div>
   );
 }

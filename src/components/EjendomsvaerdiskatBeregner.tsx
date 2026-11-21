@@ -1,0 +1,348 @@
+"use client";
+
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Home, Percent, Calculator } from "lucide-react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton, ResetButton } from "@/components/ui";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency, getCurrencySuffix } from '@/lib/format';
+import {
+  beregnEjendomsvaerdiskat,
+  EJENDOMSVAERDISKAT,
+  GRUNDSKYLD_KOMMUNER,
+  grundskyldPromilleFor,
+} from '@/lib/ejendomsvaerdiskat';
+
+const sortedKommuner = Object.entries(GRUNDSKYLD_KOMMUNER).sort((a, b) =>
+  a[1].navn.localeCompare(b[1].navn, "da")
+);
+
+export default function EjendomsvaerdiskatBeregner() {
+  const { locale } = useLocale();
+  const [ejendomsvaerdi, setEjendomsvaerdi] = useState<number>(3000000);
+  const [grundvaerdi, setGrundvaerdi] = useState<number>(1000000);
+  const [valgtKommune, setValgtKommune] = useState<string>("koebenhavn");
+  const [customPromille, setCustomPromille] = useState<number>(6.0);
+  const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'ejendomsvaerdiskat') {
+      const inputs = urlState.inputs;
+      if (inputs.ejendomsvaerdi !== undefined) setEjendomsvaerdi(inputs.ejendomsvaerdi);
+      if (inputs.grundvaerdi !== undefined) setGrundvaerdi(inputs.grundvaerdi);
+      if (inputs.valgtKommune) setValgtKommune(inputs.valgtKommune);
+      if (inputs.customPromille !== undefined) setCustomPromille(inputs.customPromille);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("ejendomsvaerdiskat");
+    const timer = setTimeout(() => {
+      trackCalculation("ejendomsvaerdiskat");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'ejendomsvaerdiskat',
+      inputs: { ejendomsvaerdi, grundvaerdi, valgtKommune, customPromille },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [ejendomsvaerdi, grundvaerdi, valgtKommune, customPromille]);
+
+  const handleReset = useCallback(() => {
+    setEjendomsvaerdi(3000000);
+    setGrundvaerdi(1000000);
+    setValgtKommune("koebenhavn");
+    setCustomPromille(6.0);
+  }, []);
+
+  const grundskyldPromille = grundskyldPromilleFor(valgtKommune, customPromille);
+
+  const resultat = useMemo(
+    () =>
+      beregnEjendomsvaerdiskat({
+        ejendomsvaerdi,
+        grundvaerdi,
+        grundskyldPromille,
+      }),
+    [ejendomsvaerdi, grundvaerdi, grundskyldPromille],
+  );
+
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  return (
+    <div className="space-y-8">
+      {/* Input */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="ejendomsvaerdiskat-vaerdi" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              <Home className="inline w-4 h-4 mr-1" />
+              Ejendomsværdi (kr)
+            </label>
+            <div className="relative">
+              <input
+                id="ejendomsvaerdiskat-vaerdi"
+                type="number"
+                min="0"
+                max="50000000"
+                step="50000"
+                value={ejendomsvaerdi}
+                onChange={(e) =>
+                  setEjendomsvaerdi(parseFloat(e.target.value) || 0)
+                }
+                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}</span>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Vurdering fra Vurderingsstyrelsen ({formatKr(ejendomsvaerdi)})
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="ejendomsvaerdiskat-grundvaerdi" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              <Percent className="inline w-4 h-4 mr-1" />
+              Grundværdi (kr)
+            </label>
+            <div className="relative">
+              <input
+                id="ejendomsvaerdiskat-grundvaerdi"
+                type="number"
+                min="0"
+                max="20000000"
+                step="25000"
+                value={grundvaerdi}
+                onChange={(e) =>
+                  setGrundvaerdi(parseFloat(e.target.value) || 0)
+                }
+                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}</span>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Grundens vurdering ({formatKr(grundvaerdi)})
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="ejendomsvaerdiskat-kommune" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              <Calculator className="inline w-4 h-4 mr-1" />
+              Kommune
+            </label>
+            <select
+              id="ejendomsvaerdiskat-kommune"
+              value={valgtKommune}
+              onChange={(e) => setValgtKommune(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
+            >
+              {sortedKommuner.map(([key, data]) => (
+                <option key={key} value={key}>
+                  {data.navn} ({data.promille}‰)
+                </option>
+              ))}
+              <option value="custom">Anden kommune (indtast selv)</option>
+            </select>
+            {valgtKommune === "custom" && (
+              <div className="mt-2">
+                <label htmlFor="ejendomsvaerdiskat-promille" className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  Grundskyldspromille (‰)
+                </label>
+                <div className="relative">
+                  <input
+                    id="ejendomsvaerdiskat-promille"
+                    type="number"
+                    min="1"
+                    max="35"
+                    step="0.1"
+                    value={customPromille}
+                    onChange={(e) =>
+                      setCustomPromille(parseFloat(e.target.value) || 6)
+                    }
+                    className="w-full px-4 py-2 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">‰</span>
+                </div>
+              </div>
+            )}
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Grundskyldspromille: {grundskyldPromille}‰
+            </p>
+          </div>
+
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>Nyt system fra 2024:</strong> Ejendomsværdiskat beregnes
+              af 80% af vurderet ejendomsværdi (20% forsigtighedsfradrag).
+            </p>
+            <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+              5,1‰ op til {formatKr(EJENDOMSVAERDISKAT.progressionsgraense)} |
+              14‰ over (2026)
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
+      </div>
+
+      {/* Resultat */}
+      <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="text-center mb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+            Samlet årlig ejendomsskat
+          </p>
+          <p className="text-5xl font-bold text-blue-600 dark:text-blue-400">
+            {formatKr(resultat.samlet)}
+          </p>
+          <p className="text-xl text-gray-500 dark:text-gray-400 mt-2">
+            {formatKr(resultat.maanedligt)} / måned
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 bg-purple-50 dark:bg-purple-900/30 rounded-lg text-center">
+            <p className="text-sm text-purple-600 dark:text-purple-400">
+              <Home className="inline w-4 h-4 mr-1" />
+              Ejendomsværdiskat
+            </p>
+            <p className="font-bold text-2xl text-purple-700 dark:text-purple-300">
+              {formatKr(resultat.ejendomsvaerdiskat)}/år
+            </p>
+            <p className="text-xs text-purple-500 dark:text-purple-400 mt-1">
+              5,1‰ af {formatKr(resultat.beskatningsgrundlag)}
+              {resultat.beskatningsgrundlag >
+                EJENDOMSVAERDISKAT.progressionsgraense && " (+ 14‰ over grænse)"}
+            </p>
+          </div>
+          <div className="p-4 bg-orange-50 dark:bg-orange-900/30 rounded-lg text-center">
+            <p className="text-sm text-orange-600 dark:text-orange-400">
+              <Percent className="inline w-4 h-4 mr-1" />
+              Grundskyld
+            </p>
+            <p className="font-bold text-2xl text-orange-700 dark:text-orange-300">
+              {formatKr(resultat.grundskyld)}/år
+            </p>
+            <p className="text-xs text-orange-500 dark:text-orange-400 mt-1">
+              {grundskyldPromille}‰ af {formatKr(resultat.grundvaerdiBeskatning)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+          <p className="text-sm text-blue-700 dark:text-blue-300 text-center">
+            <strong>Bemærk:</strong> Disse tal er estimater baseret på 2026-satser
+            og det nye ejendomsskattesystem. Den faktiske skat afhænger af din
+            ejendomsskattebillet fra kommunen.
+          </p>
+        </div>
+      </div>
+
+      {/* Detaljeret breakdown */}
+      <details className="bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <summary className="p-4 cursor-pointer font-medium dark:text-gray-200">
+          Se detaljeret beregning
+        </summary>
+        <div className="p-4 pt-0 space-y-2 text-sm dark:text-gray-300">
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-600">
+            <span>Ejendomsværdi (vurdering)</span>
+            <span>{formatKr(ejendomsvaerdi)}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+            <span>− 20% forsigtighedsfradrag</span>
+            <span>
+              {formatKr(ejendomsvaerdi * EJENDOMSVAERDISKAT.forsigtighedsfradrag)}
+            </span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-600 font-medium">
+            <span>Beskatningsgrundlag (80%)</span>
+            <span>{formatKr(resultat.beskatningsgrundlag)}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-600 text-purple-700 dark:text-purple-400">
+            <span>Ejendomsværdiskat (5,1‰{resultat.beskatningsgrundlag > EJENDOMSVAERDISKAT.progressionsgraense ? " / 14‰" : ""})</span>
+            <span>{formatKr(resultat.ejendomsvaerdiskat)}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-600 mt-4">
+            <span>Grundværdi (vurdering)</span>
+            <span>{formatKr(grundvaerdi)}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+            <span>− 20% forsigtighedsfradrag</span>
+            <span>
+              {formatKr(grundvaerdi * EJENDOMSVAERDISKAT.forsigtighedsfradrag)}
+            </span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-600 text-orange-700 dark:text-orange-400">
+            <span>Grundskyld ({grundskyldPromille}‰)</span>
+            <span>{formatKr(resultat.grundskyld)}</span>
+          </div>
+          <div className="flex justify-between py-3 font-bold text-lg border-t-2 border-gray-300 dark:border-gray-600 mt-2 text-blue-700 dark:text-blue-400">
+            <span>Samlet ejendomsskat</span>
+            <span>{formatKr(resultat.samlet)}</span>
+          </div>
+        </div>
+      </details>
+
+      <div className="flex justify-center gap-3">
+        <CopyResultButton text={`${formatKr(resultat.samlet)}/år (${formatKr(resultat.maanedligt)}/md)`} />
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Ejendomsværdiskat-beregner"
+          resultSummary={`${formatKr(resultat.samlet)}/år (${formatKr(resultat.maanedligt)}/md)`}
+        />
+      </div>
+
+      {/* Info */}
+      <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+        <h2 className="font-medium mb-3 text-gray-800 dark:text-gray-200">
+          Om det nye ejendomsskattesystem (2024+)
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <div>
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">
+              Ejendomsværdiskat
+            </h3>
+            <ul className="mt-2 space-y-1">
+              <li>
+                - Beregnes af 80% af ejendomsværdien (forsigtighedsfradrag)
+              </li>
+              <li>- 5,1‰ op til progressionsgrænsen</li>
+              <li>
+                - 14‰ af beløb over {formatKr(EJENDOMSVAERDISKAT.progressionsgraense)}
+              </li>
+              <li>- Betales til staten</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">
+              Grundskyld
+            </h3>
+            <ul className="mt-2 space-y-1">
+              <li>- Beregnes af 80% af grundværdien</li>
+              <li>- Satsen (promille) varierer efter kommune</li>
+              <li>- Fra 3,1‰ (Frederiksberg) til 17,7‰ (Varde)</li>
+              <li>- Betales til din kommune</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

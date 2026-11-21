@@ -1,377 +1,269 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Gift, ShieldCheck } from "lucide-react";
 import { FAQSchema } from "@/components/StructuredData";
+import SearchBar from "@/components/SearchBar";
+import { CalcIcon, CategoryIcon, getCategoryColor } from "@/components/ui/icons";
+import { getTrendingHrefs } from "@/lib/trending";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getAllDomainConfigs } from "@/lib/domain-config";
+import { getDageTilKort, getHomePageData, getHomeCalculators } from "@/lib/home-data";
+import { getSearchContent } from "@/lib/search-content";
+import { HomeContent } from "@/components/HomeContent";
+import CountryFlag from "@/components/CountryFlag";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const domainConfig = await getCurrentDomainConfig();
+  const data = getHomePageData(domainConfig.locale);
+  const baseUrl = domainConfig.baseUrl;
+  const allDomains = getAllDomainConfigs();
 
-export const metadata: Metadata = {
-  title: "MinBeregner.dk - Gratis online beregnere til danskere",
-  description:
-    "Danmarks samling af gratis online beregnere. Lån, moms, valuta, løn, BMI, el og meget mere. 20+ beregnere - helt gratis og uden login.",
-  keywords: [
-    "beregner",
-    "online beregner",
-    "gratis beregner",
-    "dansk beregner",
-    "momsberegner",
-    "låneberegner",
-    "valutaberegner",
-    "lønberegner",
-    "bmi beregner",
-    "elberegner",
-    "timeprisberegner",
-  ],
-  openGraph: {
-    title: "MinBeregner.dk - Gratis online beregnere",
-    description:
-      "Danmarks samling af gratis beregnere til økonomi, sundhed og hverdag.",
-    url: baseUrl,
-    type: "website",
-  },
-  alternates: {
-    canonical: baseUrl,
-  },
-};
+  const languages: Record<string, string> = {};
+  for (const dc of allDomains) {
+    languages[dc.hreflangCode] = dc.baseUrl;
+  }
 
-const beregnere = [
-  {
-    title: "Løn efter skat",
-    description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension",
-    href: "/loen-efter-skat",
-    icon: "💰",
-    popular: true,
-    category: "Økonomi",
-  },
-  {
-    title: "BMI Beregner",
-    description: "Beregn dit Body Mass Index og se om din vægt er sund",
-    href: "/bmi",
-    icon: "⚖️",
-    popular: true,
-    category: "Sundhed",
-  },
-  {
-    title: "Låneberegner",
-    description: "Beregn ydelse, sammenlign lån og se afdragsplan",
-    href: "/laaneberegner",
-    icon: "🏦",
-    popular: true,
-    category: "Økonomi",
-  },
-  {
-    title: "Momsberegner",
-    description: "Tillæg eller fratræk 25% moms nemt og hurtigt",
-    href: "/moms",
-    icon: "🧾",
-    popular: true,
-    category: "Økonomi",
-  },
-  {
-    title: "Valutaberegner",
-    description: "Omregn mellem DKK, EUR, USD og andre valutaer",
-    href: "/valuta",
-    icon: "💱",
-    popular: true,
-    category: "Økonomi",
-  },
-  {
-    title: "Renteberegner",
-    description: "Beregn ydelse, rente og tilbagebetaling på lån",
-    href: "/renteberegner",
-    icon: "📊",
-    popular: false,
-    category: "Økonomi",
-  },
-  {
-    title: "Opsparingsberegner",
-    description: "Beregn renters rente og se din opsparing vokse",
-    href: "/opsparing",
-    icon: "📈",
-    popular: false,
-    category: "Økonomi",
-  },
-  {
-    title: "Procentberegner",
-    description: "Beregn procent af et tal, stigning, fald og mere",
-    href: "/procent",
-    icon: "➗",
-    popular: false,
-    category: "Matematik",
-  },
-  {
-    title: "Kvadratmeterberegner",
-    description: "Beregn areal af rum, haver og grunde",
-    href: "/kvadratmeter",
-    icon: "📐",
-    popular: false,
-    category: "Matematik",
-  },
-  {
-    title: "Aldersberegner",
-    description: "Beregn din præcise alder i år, måneder og dage",
-    href: "/alder",
-    icon: "🎂",
-    popular: false,
-    category: "Hverdag",
-  },
-  {
-    title: "Timeprisberegner",
-    description: "Find din timepris som freelancer eller selvstændig",
-    href: "/timepris",
-    icon: "⏱️",
-    popular: false,
-    category: "Erhverv",
-  },
-  {
-    title: "Brændstofberegner",
-    description: "Beregn pris for benzin, diesel eller el-bil",
-    href: "/braendstof",
-    icon: "⛽",
-    popular: false,
-    category: "Hverdag",
-  },
-  {
-    title: "Elberegner",
-    description: "Beregn dit elforbrug og se hvad dine apparater koster",
-    href: "/elberegner",
-    icon: "⚡",
-    popular: false,
-    category: "Hverdag",
-  },
-  {
-    title: "Feriepenge",
-    description: "Beregn hvor meget du har til gode i feriepenge",
-    href: "/feriepenge",
-    icon: "🏖️",
-    popular: false,
-    category: "Økonomi",
-  },
-  {
-    title: "Børnepenge",
-    description: "Se hvad du kan få i børne- og ungeydelse 2026",
-    href: "/boernepenge",
-    icon: "👶",
-    popular: false,
-    category: "Familie",
-  },
-  {
-    title: "SU Beregner",
-    description: "Beregn din SU og fribeløb baseret på din situation",
-    href: "/su",
-    icon: "🎓",
-    popular: false,
-    category: "Uddannelse",
-  },
-  {
-    title: "Dagpengeberegner",
-    description: "Beregn hvad du kan få i dagpenge ved ledighed",
-    href: "/dagpenge",
-    icon: "📋",
-    popular: false,
-    category: "Økonomi",
-  },
-  {
-    title: "Boligstøtte",
-    description: "Beregn din boligstøtte til husleje",
-    href: "/boligstoette",
-    icon: "🏘️",
-    popular: false,
-    category: "Bolig",
-  },
-  {
-    title: "Kalorieberegner",
-    description: "Beregn dit daglige kaloriebehov og makroer",
-    href: "/kalorier",
-    icon: "🍎",
-    popular: false,
-    category: "Sundhed",
-  },
-  {
-    title: "Datoberegner",
-    description: "Beregn dage mellem datoer, arbejdsdage og alder",
-    href: "/dato",
-    icon: "📅",
-    popular: false,
-    category: "Praktisk",
-  },
-  {
-    title: "Husleje Budget",
-    description: "Find ud af hvad du har råd til i husleje",
-    href: "/husleje",
-    icon: "🏠",
-    popular: false,
-    category: "Bolig",
-  },
-  {
-    title: "Tidszoneberegner",
-    description: "Se hvad klokken er i andre lande",
-    href: "/tidszone",
-    icon: "🌍",
-    popular: false,
-    category: "Hverdag",
-  },
-  {
-    title: "Tidsberegner",
-    description: "Beregn timer og minutter mellem tidspunkter",
-    href: "/tidsberegner",
-    icon: "⏱️",
-    popular: false,
-    category: "Praktisk",
-  },
-];
+  return {
+    title: data.meta.title,
+    description: data.meta.description,
+    keywords: data.meta.keywords,
+    openGraph: {
+      images: OG_IMAGE,
+      title: data.meta.ogTitle,
+      description: data.meta.ogDescription,
+      url: baseUrl,
+      type: "website",
+      siteName: domainConfig.siteName,
+      locale: domainConfig.ogLocale,
+    },
+    alternates: {
+      canonical: baseUrl,
+      languages,
+    },
+  };
+}
 
-const homeFaqItems = [
-  {
-    question: "Er beregnerne gratis at bruge?",
-    answer:
-      "Ja, alle beregnere på MinBeregner.dk er 100% gratis. Vi kræver ingen tilmelding eller betaling.",
-  },
-  {
-    question: "Gemmer I mine data?",
-    answer:
-      "Nej, alle beregninger sker lokalt i din browser. Vi gemmer ingen personlige data, og dine oplysninger forlader aldrig din computer.",
-  },
-  {
-    question: "Er beregningerne pålidelige?",
-    answer:
-      "Vores beregnere giver gode estimater baseret på officielle satser og formler. For præcise beløb anbefaler vi altid at tjekke de officielle kilder (SKAT, borger.dk, etc.).",
-  },
-  {
-    question: "Hvilke beregnere har I?",
-    answer:
-      "Vi har 20+ beregnere til økonomi (lån, moms, valuta, løn, feriepenge), sundhed (BMI, kalorier), matematik (procent, kvadratmeter) og hverdag (alder, el, brændstof). Vi tilføjer løbende nye beregnere.",
-  },
-];
+export default async function Home() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const data = getHomePageData(locale);
+  const beregnere = getHomeCalculators(locale);
+  const trendingHrefs = getTrendingHrefs(new Date(), locale);
 
-export default function Home() {
   const popularBeregnere = beregnere.filter((b) => b.popular);
   const oevrigeBeregnere = beregnere.filter((b) => !b.popular);
+  const dageTilKort = getDageTilKort(locale, new Date());
+
+  const grouped = new Map<string, typeof beregnere>();
+  for (const b of oevrigeBeregnere) {
+    const list = grouped.get(b.category) || [];
+    list.push(b);
+    grouped.set(b.category, list);
+  }
+
+  const searchData = [
+    ...beregnere.map(({ title, description, href, category }) => ({
+      title,
+      description,
+      href,
+      category,
+    })),
+    ...getSearchContent(locale),
+  ];
+
+  // Parse trust signals (format: "value|label")
+  const parseSignal = (s: string) => {
+    const [value, label] = s.split("|");
+    return { value, label };
+  };
+  const ts = {
+    calculators: parseSignal(data.trustSignals.calculators),
+    rates: parseSignal(data.trustSignals.rates),
+    price: parseSignal(data.trustSignals.price),
+    privacy: parseSignal(data.trustSignals.privacy),
+  };
 
   return (
     <div>
-      <FAQSchema items={homeFaqItems} />
+      <FAQSchema items={data.faqItems} />
 
       {/* Hero */}
-      <section className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          Gratis Online Beregnere
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Danmarks samling af nyttige beregnere til økonomi, sundhed og hverdag.
-          Helt gratis og uden login — dine data gemmes ikke.
-        </p>
-      </section>
-
-      {/* Popular calculators */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Populære beregnere</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {popularBeregnere.map((beregner) => (
-            <Link
-              key={beregner.href}
-              href={beregner.href}
-              className="group block p-6 bg-white rounded-xl shadow-sm border-2 border-transparent hover:border-blue-500 hover:shadow-lg transition-all"
-            >
-              <div className="flex items-start gap-4">
-                <span className="text-4xl">{beregner.icon}</span>
-                <div>
-                  <span className="text-xs text-blue-600 font-medium uppercase tracking-wide">
-                    {beregner.category}
-                  </span>
-                  <h3 className="text-xl font-semibold mt-1 group-hover:text-blue-600 transition-colors">
-                    {beregner.title}
-                  </h3>
-                  <p className="text-gray-600 mt-2">{beregner.description}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
+      <section className="-mx-4 px-4 pt-4 pb-8 mb-8 md:pb-12 md:mb-12 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+            {data.hero.title}
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+            {data.hero.subtitle}
+          </p>
+          <SearchBar beregnere={searchData} />
         </div>
       </section>
 
-      {/* Other calculators */}
-      <section className="mb-16">
-        <h2 className="text-2xl font-bold mb-6">Flere beregnere</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {oevrigeBeregnere.map((beregner) => (
-            <Link
-              key={beregner.href}
-              href={beregner.href}
-              className="group block p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start gap-4">
-                <span className="text-3xl">{beregner.icon}</span>
-                <div>
-                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+      {/* Popular calculators — the site's measured top pages, directly under
+          the hero. They used to sit below the trust bar with a compact strip
+          of the same links above it, which showed a Danish reader eight of the
+          fourteen twice and a Swedish reader the same six twice. One list, one
+          place, on the first screen. */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold mb-6 dark:text-white">{data.sections.popular}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-stagger">
+          {popularBeregnere.map((beregner) => {
+            const isTrending = trendingHrefs.includes(beregner.href);
+            return (
+              <Link
+                key={beregner.href}
+                href={beregner.href}
+                className="group relative block p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-lg transition-all"
+              >
+                {isTrending && (
+                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow">
+                    {data.sections.trending}
+                  </span>
+                )}
+                <div className="text-center">
+                  <CalcIcon
+                    href={beregner.href}
+                    className={`mx-auto block h-12 w-12 mb-3 ${getCategoryColor(beregner.category)}`}
+                  />
+                  <span className="inline-block text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mb-2">
                     {beregner.category}
                   </span>
-                  <h3 className="text-lg font-semibold mt-1 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors">
                     {beregner.title}
                   </h3>
-                  <p className="text-gray-600 text-sm mt-1">
+                  <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm">
                     {beregner.description}
                   </p>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
+      {/* Trust signals */}
+      <section className="flex flex-wrap justify-center gap-6 md:gap-10 mb-12 text-center">
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.calculators.value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.calculators.label}</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.rates.value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.rates.label}</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.price.value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.price.label}</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.privacy.value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.privacy.label}</div>
+        </div>
+      </section>
+
+      {/* Countdown pages — the site's second largest query cluster, which the
+          homepage did not link at all before this section existed. */}
+      {data.sections.dageTil && dageTilKort.length > 0 && (
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 dark:text-white">
+            {data.sections.dageTil}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dageTilKort.map((kort) => (
+              <Link
+                key={kort.href}
+                href={kort.href}
+                className="group block p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all"
+              >
+                <h3 className="text-xl font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors">
+                  {kort.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm">
+                  {kort.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Categorized sections */}
+      {data.categoryOrder.map(({ key }) => {
+        const items = grouped.get(key);
+        if (!items || items.length === 0) return null;
+        return (
+          <section key={key} className="mb-12">
+            <h2 className="text-xl font-bold mb-4 dark:text-white flex items-center gap-2">
+              <CategoryIcon name={key} className="h-6 w-6" />
+              {key}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {items.map((beregner) => {
+                const isTrending = trendingHrefs.includes(beregner.href);
+                return (
+                  <Link
+                    key={beregner.href}
+                    href={beregner.href}
+                    className="group relative flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md border border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all"
+                  >
+                    <CalcIcon
+                      href={beregner.href}
+                      className={`h-6 w-6 flex-shrink-0 ${getCategoryColor(beregner.category)}`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors truncate">
+                        {beregner.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm truncate">
+                        {beregner.description}
+                      </p>
+                    </div>
+                    {isTrending && (
+                      <span className="flex-shrink-0 bg-orange-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                        {data.sections.trending}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+
       {/* Features */}
-      <section className="bg-white rounded-2xl p-8 mb-16">
-        <h2 className="text-2xl font-bold mb-8 text-center">
-          Hvorfor bruge MinBeregner.dk?
+      <section className="bg-white dark:bg-gray-800 rounded-2xl p-8 mb-16">
+        <h2 className="text-2xl font-bold mb-8 text-center dark:text-white">
+          {data.sections.whyUse}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
-            <div className="text-4xl mb-4">🆓</div>
-            <h3 className="font-semibold text-lg mb-2">100% Gratis</h3>
-            <p className="text-gray-600">
-              Alle beregnere er gratis at bruge. Ingen skjulte gebyrer eller
-              premium-funktioner.
-            </p>
+            <Gift className="mx-auto h-10 w-10 mb-4 text-blue-600 dark:text-blue-400" strokeWidth={1.75} aria-hidden="true" />
+            <h3 className="font-semibold text-lg mb-2 dark:text-white">{data.sections.features.free.title}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{data.sections.features.free.description}</p>
           </div>
           <div className="text-center">
-            <div className="text-4xl mb-4">🔒</div>
-            <h3 className="font-semibold text-lg mb-2">Privat & Sikkert</h3>
-            <p className="text-gray-600">
-              Dine data gemmes ikke. Alle beregninger sker lokalt i din browser.
-            </p>
+            <ShieldCheck className="mx-auto h-10 w-10 mb-4 text-emerald-600 dark:text-emerald-400" strokeWidth={1.75} aria-hidden="true" />
+            <h3 className="font-semibold text-lg mb-2 dark:text-white">{data.sections.features.private.title}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{data.sections.features.private.description}</p>
           </div>
           <div className="text-center">
-            <div className="text-4xl mb-4">🇩🇰</div>
-            <h3 className="font-semibold text-lg mb-2">Danske Satser</h3>
-            <p className="text-gray-600">
-              Opdateret med de nyeste danske satser og regler for 2026.
-            </p>
+            <div className="text-4xl mb-4"><CountryFlag locale={domainConfig.locale} className="w-10 h-7 inline-block" /></div>
+            <h3 className="font-semibold text-lg mb-2 dark:text-white">{data.sections.features.local.title}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{data.sections.features.local.description}</p>
           </div>
         </div>
       </section>
 
-      {/* SEO content */}
-      <section className="prose max-w-none mb-16">
-        <h2>Om MinBeregner.dk</h2>
-        <p>
-          MinBeregner.dk er din go-to ressource for gratis online beregnere. Vi
-          har samlet de mest nyttige værktøjer til at hjælpe dig med at få
-          overblik over din økonomi, sundhed og hverdag.
-        </p>
-        <p>
-          Vores <Link href="/loen-efter-skat">lønberegner</Link> hjælper dig med
-          at se, hvad du får udbetalt efter skat, mens vores{" "}
-          <Link href="/bmi">BMI beregner</Link> giver dig indsigt i din sundhed.
-          Med <Link href="/elberegner">elberegneren</Link> kan du se, hvad dine
-          apparater koster i strøm.
-        </p>
-        <p>
-          For forældre har vi en <Link href="/boernepenge">børnepenge beregner</Link> med
-          2026-satser, og studerende kan bruge vores{" "}
-          <Link href="/su">SU beregner</Link> til at tjekke fribeløb og satser.
-        </p>
+      {/* SEO content - locale-specific */}
+      <HomeContent locale={locale} siteName={domainConfig.siteName} />
 
-        <h2>Ofte stillede spørgsmål</h2>
-        {homeFaqItems.map((item, index) => (
+      {/* FAQ */}
+      <section className="prose dark:prose-invert max-w-none mb-16">
+        <h2>{locale === "se" ? "Vanliga frågor" : "Ofte stillede spørgsmål"}</h2>
+        {data.faqItems.map((item, index) => (
           <div key={index}>
             <h3>{item.question}</h3>
             <p>{item.answer}</p>

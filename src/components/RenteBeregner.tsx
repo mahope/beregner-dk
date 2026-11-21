@@ -1,14 +1,144 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import LaanebeloebTabel from "@/components/LaanebeloebTabel";
+import { CopyResultButton, ResetButton } from "@/components/ui";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency, formatNumber, getCurrencySuffix } from '@/lib/format';
 
 type BeregningsType = "annuitet" | "serielaan";
 
+/** Alle dele af den delte sætning er allerede formaterede strenge. */
+type Sammenligning = {
+  belob: string;
+  rente: string;
+  aar: string;
+  laantype: string;
+  ydelser: string;
+  renteIalt: string;
+};
+
 export default function RenteBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      loanAmountLabel: "Lånebeløb (hovedstol)",
+      annualRateLabel: "Årlig rente (%)",
+      termLabel: "Løbetid (år)",
+      yearUnit: "år",
+      loanType: "Låntype",
+      annuitet: "Annuitetslån",
+      serielaan: "Serielån",
+      monthlyPayment: "Månedlig ydelse",
+      yearlyPayment: "Årlig ydelse",
+      firstMonthPayment: "Første måneds ydelse",
+      lastMonthPayment: "Sidste måneds ydelse",
+      loanAmount: "Lånebeløb",
+      totalInterest: "Samlet rente",
+      totalRepayment: "Samlet tilbagebetaling",
+      seeFirstYear: "Se første års beregning",
+      interestFirstYear: "Rente første år",
+      installmentFirstYear: "Afdrag første år",
+      totalPaymentFirstYear: "Samlet ydelse første år",
+      remainingDebtAfter1Year: "Restgæld efter 1 år",
+      aboutAnnuitet: "Om annuitetslån",
+      aboutSerielaan: "Om serielån",
+      annuitetDesc: "Ved annuitetslån er din månedlige ydelse fast gennem hele lånets løbetid. I starten betaler du mest i rente og mindst i afdrag. Over tid skifter forholdet, så du betaler mere i afdrag og mindre i rente.",
+      serielaanDesc: "Ved serielån er dit månedlige afdrag fast, men den samlede ydelse falder over tid, fordi renten beregnes af en stadig mindre restgæld. Du betaler mindre i samlet rente, men starter med højere ydelser.",
+      calcName: "Renteberegner",
+      lastMonthPaymentInline: "sidste måneds ydelse",
+      totalInterestInline: "samlet rente",
+      loanTypeInSentence: { annuitet: "annuitetslån", serielaan: "serielån" },
+      copySummary: (s: Sammenligning) =>
+        `${s.belob} til ${s.rente} % i ${s.aar} år (${s.laantype}). ${s.ydelser} og ${s.renteIalt}`,
+    },
+    se: {
+      loanAmountLabel: "Lånebelopp (huvudstol)",
+      annualRateLabel: "Årsränta (%)",
+      termLabel: "Löptid (år)",
+      yearUnit: "år",
+      loanType: "Lånetyp",
+      annuitet: "Annuitetslån",
+      serielaan: "Serielån",
+      monthlyPayment: "Månatlig betalning",
+      yearlyPayment: "Årlig betalning",
+      firstMonthPayment: "Första månadens betalning",
+      lastMonthPayment: "Sista månadens betalning",
+      loanAmount: "Lånebelopp",
+      totalInterest: "Total ränta",
+      totalRepayment: "Total återbetalning",
+      seeFirstYear: "Se första årets beräkning",
+      interestFirstYear: "Ränta första året",
+      installmentFirstYear: "Amortering första året",
+      totalPaymentFirstYear: "Total betalning första året",
+      remainingDebtAfter1Year: "Återstående skuld efter 1 år",
+      aboutAnnuitet: "Om annuitetslån",
+      aboutSerielaan: "Om serielån",
+      annuitetDesc: "Vid annuitetslån är din månatliga betalning fast under hela lånets löptid. I början betalar du mest i ränta och minst i amortering. Med tiden skiftar förhållandet, så att du betalar mer i amortering och mindre i ränta.",
+      serielaanDesc: "Vid serielån är din månatliga amortering fast, men den totala betalningen sjunker med tiden eftersom räntan beräknas på en allt mindre skuld. Du betalar mindre i total ränta, men börjar med högre betalningar.",
+      calcName: "Räntekalkylator",
+      lastMonthPaymentInline: "sista månadens betalning",
+      totalInterestInline: "total ränta",
+      loanTypeInSentence: { annuitet: "annuitetslån", serielaan: "serielån" },
+      copySummary: (s: Sammenligning) =>
+        `${s.belob} till ${s.rente} % i ${s.aar} år (${s.laantype}). ${s.ydelser} och ${s.renteIalt}`,
+    },
+  } as const;
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [hovedstol, setHovedstol] = useState<number>(1000000);
   const [rente, setRente] = useState<number>(5);
   const [loebetid, setLoebetid] = useState<number>(30);
   const [type, setType] = useState<BeregningsType>("annuitet");
+
+  const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'rente') {
+      const inputs = urlState.inputs;
+      if (inputs.hovedstol !== undefined) setHovedstol(inputs.hovedstol);
+      if (inputs.rente !== undefined) setRente(inputs.rente);
+      if (inputs.loebetid !== undefined) setLoebetid(inputs.loebetid);
+      if (inputs.type) setType(inputs.type);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("renteberegner");
+    const timer = setTimeout(() => {
+      trackCalculation("renteberegner");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setHovedstol(1000000);
+    setRente(5);
+    setLoebetid(30);
+    setType("annuitet");
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'rente',
+      inputs: { hovedstol, rente, loebetid, type },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [hovedstol, rente, loebetid, type]);
 
   const beregning = useMemo(() => {
     if (!hovedstol || !rente || !loebetid) {
@@ -89,13 +219,30 @@ export default function RenteBeregner() {
     }
   }, [hovedstol, rente, loebetid, type]);
 
-  const formatKr = (beloeb: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(beloeb);
-  };
+  const formatKr = (beloeb: number) => formatCurrency(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  // Ét sted bygger den delte tekst, så Kopier og Del ikke kan sige hver sit.
+  // Rentesatsen kom råt fra et talfelt, så 3,5 % blev "3.5%" i dansk tekst.
+  const deltTekst = (() => {
+    if (!beregning) return "";
+
+    const renteTekst = formatNumber(rente, locale, { maximumFractionDigits: 2 });
+    const loebetidTekst = formatNumber(loebetid, locale);
+    const laantype = beregning.type === "annuitet" ? l.loanTypeInSentence.annuitet : l.loanTypeInSentence.serielaan;
+    const ydelser = beregning.type === "annuitet"
+      ? `${l.monthlyPayment} ${formatKr(beregning.maanedligYdelse)}`
+      : `${l.firstMonthPayment} ${formatKr(beregning.foersteMaanedsYdelse)}, ` +
+        `${l.lastMonthPaymentInline} ${formatKr(beregning.sidsteMaanedsYdelse)}`;
+
+    return l.copySummary({
+      belob: formatKr(hovedstol),
+      rente: renteTekst,
+      aar: loebetidTekst,
+      laantype,
+      ydelser,
+      renteIalt: `${l.totalInterestInline} ${formatKr(beregning.samletRente)}`,
+    });
+  })();
 
   return (
     <div className="space-y-8">
@@ -103,76 +250,94 @@ export default function RenteBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Lånebeløb (hovedstol)
+            <label htmlFor="laaneBeloeb" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              {l.loanAmountLabel}
             </label>
-            <input
-              type="number"
-              min="0"
-              step="10000"
-              value={hovedstol}
-              onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                id="laaneBeloeb"
+                type="number"
+                min="0"
+                step="10000"
+                value={hovedstol}
+                onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">{getCurrencySuffix(locale)}</span>
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Årlig rente (%)
+            <label htmlFor="aarligRente" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              {l.annualRateLabel}
             </label>
-            <input
-              type="number"
-              min="0"
-              max="30"
-              step="0.1"
-              value={rente}
-              onChange={(e) => setRente(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                id="aarligRente"
+                type="number"
+                min="0"
+                max="30"
+                step="0.1"
+                value={rente}
+                onChange={(e) => setRente(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">%</span>
+            </div>
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Løbetid (år)
+            <label htmlFor="loebetid" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              {l.termLabel}
             </label>
-            <input
-              type="number"
-              min="1"
-              max="50"
-              value={loebetid}
-              onChange={(e) => setLoebetid(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                id="loebetid"
+                type="number"
+                min="1"
+                max="50"
+                value={loebetid}
+                onChange={(e) => setLoebetid(parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">{l.yearUnit}</span>
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Låntype</label>
-            <div className="flex gap-4">
+            <label id="rente-laantype-gruppe" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.loanType}</label>
+            <div role="group" aria-labelledby="rente-laantype-gruppe" className="flex gap-4">
               <button
+                type="button"
                 onClick={() => setType("annuitet")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   type === "annuitet"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                    : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200"
                 }`}
               >
-                Annuitetslån
+                {l.annuitet}
               </button>
               <button
+                type="button"
                 onClick={() => setType("serielaan")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   type === "serielaan"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                    : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200"
                 }`}
               >
-                Serielån
+                {l.serielaan}
               </button>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultater */}
@@ -181,34 +346,34 @@ export default function RenteBeregner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {beregning.type === "annuitet" ? (
               <>
-                <div className="p-6 bg-blue-100 rounded-xl text-center">
-                  <p className="text-sm text-gray-600 mb-1">Månedlig ydelse</p>
-                  <p className="text-3xl font-bold text-blue-700">
+                <div className="p-6 bg-blue-100 rounded-xl text-center dark:bg-blue-900/20">
+                  <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.monthlyPayment}</p>
+                  <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
                     {formatKr(beregning.maanedligYdelse)}
                   </p>
                 </div>
-                <div className="p-6 bg-blue-50 rounded-xl text-center">
-                  <p className="text-sm text-gray-600 mb-1">Årlig ydelse</p>
-                  <p className="text-3xl font-bold text-blue-600">
+                <div className="p-6 bg-blue-50 rounded-xl text-center dark:bg-blue-900/20">
+                  <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.yearlyPayment}</p>
+                  <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                     {formatKr(beregning.aarligYdelse)}
                   </p>
                 </div>
               </>
             ) : (
               <>
-                <div className="p-6 bg-blue-100 rounded-xl text-center">
-                  <p className="text-sm text-gray-600 mb-1">
-                    Første måneds ydelse
+                <div className="p-6 bg-blue-100 rounded-xl text-center dark:bg-blue-900/20">
+                  <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">
+                    {l.firstMonthPayment}
                   </p>
-                  <p className="text-3xl font-bold text-blue-700">
+                  <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
                     {formatKr(beregning.foersteMaanedsYdelse)}
                   </p>
                 </div>
-                <div className="p-6 bg-green-100 rounded-xl text-center">
-                  <p className="text-sm text-gray-600 mb-1">
-                    Sidste måneds ydelse
+                <div className="p-6 bg-green-100 rounded-xl text-center dark:bg-green-900/20">
+                  <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">
+                    {l.lastMonthPayment}
                   </p>
-                  <p className="text-3xl font-bold text-green-700">
+                  <p className="text-3xl font-bold text-green-700 dark:text-green-400">
                     {formatKr(beregning.sidsteMaanedsYdelse)}
                   </p>
                 </div>
@@ -217,70 +382,87 @@ export default function RenteBeregner() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-gray-100 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-1">Lånebeløb</p>
-              <p className="text-xl font-bold">{formatKr(hovedstol)}</p>
+            <div className="p-4 bg-gray-100 rounded-lg text-center dark:bg-gray-800">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.loanAmount}</p>
+              <p className="text-xl font-bold dark:text-white">{formatKr(hovedstol)}</p>
             </div>
-            <div className="p-4 bg-red-50 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-1">Samlet rente</p>
-              <p className="text-xl font-bold text-red-600">
+            <div className="p-4 bg-red-50 rounded-lg text-center dark:bg-red-900/20">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.totalInterest}</p>
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatKr(beregning.samletRente)}
               </p>
             </div>
-            <div className="p-4 bg-yellow-50 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-1">
-                Samlet tilbagebetaling
+            <div className="p-4 bg-yellow-50 rounded-lg text-center dark:bg-yellow-900/20">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">
+                {l.totalRepayment}
               </p>
-              <p className="text-xl font-bold text-yellow-700">
+              <p className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
                 {formatKr(beregning.samletBetaling)}
               </p>
             </div>
           </div>
 
           {/* Første år breakdown */}
-          <details className="bg-gray-50 rounded-lg">
-            <summary className="p-4 cursor-pointer font-medium">
-              Se første års beregning
+          <details className="bg-gray-50 rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">
+            <summary className="p-4 cursor-pointer font-medium dark:text-gray-200">
+              {l.seeFirstYear}
             </summary>
-            <div className="p-4 pt-0 space-y-2 text-sm">
+            <div className="p-4 pt-0 space-y-2 text-sm dark:text-gray-300">
               <div className="flex justify-between">
-                <span>Rente første år</span>
-                <span className="text-red-600">
+                <span>{l.interestFirstYear}</span>
+                <span className="text-red-600 dark:text-red-400">
                   {formatKr(beregning.foersteAarRente)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Afdrag første år</span>
-                <span className="text-green-600">
+                <span>{l.installmentFirstYear}</span>
+                <span className="text-green-600 dark:text-green-400">
                   {formatKr(beregning.foersteAarAfdrag)}
                 </span>
               </div>
-              <div className="flex justify-between font-medium border-t pt-2">
-                <span>Samlet ydelse første år</span>
+              <div className="flex justify-between font-medium border-t pt-2 dark:border-gray-700">
+                <span>{l.totalPaymentFirstYear}</span>
                 <span>
                   {formatKr(
                     beregning.foersteAarRente + beregning.foersteAarAfdrag
                   )}
                 </span>
               </div>
-              <div className="flex justify-between text-gray-600 border-t pt-2">
-                <span>Restgæld efter 1 år</span>
+              <div className="flex justify-between text-gray-600 border-t pt-2 dark:text-gray-400 dark:border-gray-700">
+                <span>{l.remainingDebtAfter1Year}</span>
                 <span>{formatKr(hovedstol - beregning.foersteAarAfdrag)}</span>
               </div>
             </div>
           </details>
 
+          {/* Share button */}
+          <div className="flex justify-center gap-3">
+            <CopyResultButton text={deltTekst} />
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName={l.calcName}
+              resultSummary={deltTekst}
+            />
+          </div>
+
           {/* Låntype forklaring */}
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium mb-2">
-              {type === "annuitet" ? "Om annuitetslån" : "Om serielån"}
-            </h3>
-            <p className="text-sm text-gray-600">
-              {type === "annuitet"
-                ? "Ved annuitetslån er din månedlige ydelse fast gennem hele lånets løbetid. I starten betaler du mest i rente og mindst i afdrag. Over tid skifter forholdet, så du betaler mere i afdrag og mindre i rente."
-                : "Ved serielån er dit månedlige afdrag fast, men den samlede ydelse falder over tid, fordi renten beregnes af en stadig mindre restgæld. Du betaler mindre i samlet rente, men starter med højere ydelser."}
+          <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+            <h2 className="font-medium mb-2 dark:text-white">
+              {type === "annuitet" ? l.aboutAnnuitet : l.aboutSerielaan}
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {type === "annuitet" ? l.annuitetDesc : l.serielaanDesc}
             </p>
           </div>
+
+          {/* Samme rente og løbetid, otte beløb. Autocomplete målt 4/10 under
+              «hvor meget koster det at låne» spørger om beløb, så beløbet skal
+              kunne læses uden at blive tastet ind. */}
+          <LaanebeloebTabel
+            aarligRente={rente}
+            loebetid={loebetid}
+            type={type}
+          />
         </>
       )}
     </div>

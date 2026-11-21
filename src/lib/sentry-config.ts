@@ -1,0 +1,182 @@
+/**
+ * Shared Sentry setup for minberegner.dk.
+ *
+ * The DSN is an ingest endpoint, not a credential, so it may live in the code —
+ * an env var can still point the same build at another project. Three rules
+ * live here and nowhere else, because breaking any of them either ships Danish
+ * users' data abroad or costs money:
+ *
+ *  - only production reports, so `next dev` never fills the project with noise,
+ *  - no personal data and no session replay, which needs consent we do not ask
+ *    for — see SENTRY_DATA_COLLECTION below,
+ *  - no source maps, because uploading them needs an auth token we do not have
+ *    (❓ open in IMPLEMENTATION_PLAN.md). That is a build-time setting, so it
+ *    lives in `next.config.ts` and not in these runtime options.
+ *
+ * Both the client and the server import this module, so the rules cannot drift
+ * apart between the two runtimes.
+ */
+export const FALLBACK_SENTRY_DSN =
+  "https://c7cdb0180c524aad8266807af5e5c533@fejlspor.mahoje.dk/22";
+
+export const SENTRY_TRACES_SAMPLE_RATE = 0.1;
+
+/** Session Replay records the user's screen. It needs consent we never ask for. */
+export const SENTRY_REPLAYS_SESSION_SAMPLE_RATE = 0;
+
+/**
+ * Sentry v11 dropped `sendDefaultPii` and, worse, collects *more* by default
+ * than v10 did with PII off: cookies, all HTTP request/response headers, HTTP
+ * bodies, URL query parameters, database values, queue arguments and the local
+ * variable values of every stack frame. On a Danish site with cookie consent,
+ * that is other users' data leaving the country over a page load.
+ *
+ * So every leaf is switched off explicitly rather than relying on a default,
+ * and `sentry-config.test.ts` fails if one is ever added back as `true`.
+ */
+export const SENTRY_DATA_COLLECTION = {
+  userInfo: false,
+  cookies: false,
+  httpHeaders: { request: false, response: false },
+  httpBodies: [],
+  urlQueryParams: false,
+  databaseQueryData: false,
+  queues: false,
+  stackFrameVariables: false,
+  graphQL: { document: false, variables: false },
+  genAI: { inputs: false, outputs: false },
+};
+
+type SentryEnv = Partial<
+  Pick<NodeJS.ProcessEnv, "NEXT_PUBLIC_SENTRY_DSN" | "NODE_ENV">
+>;
+
+export function sentryDsn(env: SentryEnv = process.env): string {
+  const configured = env.NEXT_PUBLIC_SENTRY_DSN?.trim();
+  return configured ? configured : FALLBACK_SENTRY_DSN;
+}
+
+export function sentryIsEnabled(
+  env: Pick<SentryEnv, "NODE_ENV"> = process.env,
+): boolean {
+  return env.NODE_ENV === "production";
+}
+
+/**
+ * `?s=` carries a calculator's entire state (see `calculation-state-privacy.ts`),
+ * and the scrub that moves it into session history runs in the browser. A crash
+ * in the first server render can therefore still put the user's numbers in a
+ * URL. Strip the value before the event leaves here.
+ *
+ * Sentry also reports the bare query string, which has no `?` — hence the `^`
+ * alternative — and the privacy script may leave the state in the fragment,
+ * hence `#`. All three are covered.
+ */
+const CALCULATION_STATE_KEY = "s";
+
+const CALCULATION_STATE_PARAM = /([?&#]|^)s=[^&#]*/g;
+
+export const SCRUBBED_VALUE = "[skjult]";
+
+export function scrubSentryUrl(url: string): string {
+  return url.replace(
+    CALCULATION_STATE_PARAM,
+    (_match, prefix: string) => `${prefix}s=${SCRUBBED_VALUE}`,
+  );
+}
+
+export interface SentryRequestLike {
+  url?: string;
+  /** Sentry types this as `string | QueryParams`, so every shape must survive. */
+  query_string?: string | Record<string, string> | [string, string][];
+}
+
+export interface SentryExceptionLike {
+  values?: Array<{ value?: string }>;
+}
+
+export interface SentryEventLike {
+  request?: SentryRequestLike;
+  exception?: SentryExceptionLike;
+}
+
+/**
+ * Next.js throws this when a request carries a malformed RSC router-state
+ * header. The page renders fine — it is client-side RSC noise, MINBEREGNER-1 in
+ * the Sentry project — so it must not cost us a real error's attention.
+ *
+ * Three keys, strongest first, because no single one is safe on its own:
+ *
+ *  1. Next's **error code**. `next/dist/server/app-render/
+ *     parse-and-validate-flight-router-state` throws
+ *     `Object.defineProperty(new Error(msg), "__NEXT_ERROR_CODE", { value:
+ *     "E10" })`. Measured 2/10: it is *not* part of the serialized event, and on
+ *     the client-`captureException` path `beforeSend` gets a hint holding only
+ *     `event_id` and `integrations` — no `originalException`, so the code is not
+ *     always reachable. Read when it is there; never relied on alone.
+ *  2. The **exact sentence**, the fallback for re-thrown or reconstructed errors.
+ *  3. The **subject phrase**, so a Next upgrade that only rewrites the wording
+ *     ("…header was sent but could not be parsed" → "…header kunne ikke læses")
+ *     still drops instead of flooding the project again.
+ *
+ * What made the old filter fragile was not the matching but the *test*: it
+ * hardcoded the same sentence, so it stayed green on a dead rule. Every key
+ * below is now asserted against Next's own installed message and code — see
+ * `__fixtures__/next-router-state-fejl.ts`.
+ */
+export const NEXT_ROUTER_STATE_ERROR_CODE = "E10";
+
+const NOISY_NEXT_ROUTER_STATE_ERRORS = new Set([
+  "The router state header was sent but could not be parsed.",
+]);
+
+/** The part of the sentence that names the failure, and not the phrasing. */
+const NEXT_ROUTER_STATE_PHRASE = /router state header/i;
+
+export interface SentryHintLike {
+  /** Sentry's own name for the thrown value; typed `unknown` in the SDK. */
+  originalException?: unknown;
+}
+
+function nextFejlkode(original: unknown): string | undefined {
+  if (typeof original !== "object" || original === null) return undefined;
+  const kode = (original as { __NEXT_ERROR_CODE?: unknown }).__NEXT_ERROR_CODE;
+  return typeof kode === "string" ? kode : undefined;
+}
+
+export function shouldDropSentryEvent(
+  event: SentryEventLike,
+  hint: SentryHintLike = {},
+): boolean {
+  if (nextFejlkode(hint.originalException) === NEXT_ROUTER_STATE_ERROR_CODE) return true;
+  return (
+    event.exception?.values?.some((exception) => {
+      const value = exception.value;
+      if (!value) return false;
+      return NOISY_NEXT_ROUTER_STATE_ERRORS.has(value) || NEXT_ROUTER_STATE_PHRASE.test(value);
+    }) ?? false
+  );
+}
+
+export function scrubSentryEvent<T extends SentryEventLike>(
+  event: T,
+  hint: SentryHintLike = {},
+): T | null {
+  if (shouldDropSentryEvent(event, hint)) return null;
+
+  const request = event.request;
+  if (!request) return event;
+  if (request.url) request.url = scrubSentryUrl(request.url);
+
+  const query = request.query_string;
+  if (typeof query === "string") {
+    request.query_string = scrubSentryUrl(query);
+  } else if (Array.isArray(query)) {
+    for (const pair of query) {
+      if (pair[0] === CALCULATION_STATE_KEY) pair[1] = SCRUBBED_VALUE;
+    }
+  } else if (query) {
+    if (CALCULATION_STATE_KEY in query) query[CALCULATION_STATE_KEY] = SCRUBBED_VALUE;
+  }
+  return event;
+}

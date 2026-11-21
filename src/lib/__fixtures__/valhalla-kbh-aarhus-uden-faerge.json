@@ -1,0 +1,54 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 55.675627,
+    "lon": 12.569577,
+    "side_of_street": "right",
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 56.15263,
+    "lon": 10.203206,
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": true,
+     "has_highway": true,
+     "has_ferry": false,
+     "min_lat": 55.298458,
+     "min_lon": 9.553529,
+     "max_lat": 56.152953,
+     "max_lon": 12.572118,
+     "time": 11795.076,
+     "length": 302.528,
+     "cost": 12464.629
+    },
+    "shape": "avceiBayc~VsAhDqUfa@eBzCmDdGsGbKo@`AgAdB"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": true,
+   "has_highway": true,
+   "has_ferry": false,
+   "min_lat": 55.298458,
+   "min_lon": 9.553529,
+   "max_lat": 56.152953,
+   "max_lon": 12.572118,
+   "time": 11795.076,
+   "length": 302.528,
+   "cost": 12464.629
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "en-US"
+ }
+}

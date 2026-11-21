@@ -1,125 +1,84 @@
-import type { Metadata } from "next";
-import BMIBeregner from "@/components/BMIBeregner";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+const BMIBeregner = dynamic(() => import("@/components/BMIBeregner"));
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata() {
+  return generatePageMetadata("bmi");
+}
 
-export const metadata: Metadata = {
-  title: "BMI Beregner - Beregn dit Body Mass Index gratis",
-  description:
-    "Gratis BMI beregner. Beregn dit Body Mass Index og se om din vægt er sund. Få din idealvægt og personlige anbefalinger baseret på din højde og vægt.",
-  keywords: [
-    "bmi beregner",
-    "bmi",
-    "body mass index",
-    "beregn bmi",
-    "idealvægt",
-    "vægtberegner",
-    "sundhed beregner",
-    "overvægt",
-    "undervægt",
-  ],
-  openGraph: {
-    title: "BMI Beregner - Beregn dit Body Mass Index",
-    description:
-      "Gratis BMI beregner. Se om din vægt er sund og få din idealvægt.",
-    url: `${baseUrl}/bmi`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/bmi`,
-  },
-};
+export default async function BMIPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("bmi", locale) || getPageData("bmi", "da")!;
 
-const faqItems = [
-  {
-    question: "Hvad er en normal BMI?",
-    answer:
-      "En normal BMI ligger mellem 18,5 og 24,9. Under 18,5 regnes som undervægt, 25-29,9 som overvægt, og over 30 som fedme. Husk at BMI ikke tager højde for muskelmasse.",
-  },
-  {
-    question: "Er BMI pålidelig for alle?",
-    answer:
-      "BMI er et godt screeningsværktøj, men har begrænsninger. Meget muskuløse personer kan have høj BMI uden at være overvægtige. Ældre og gravide bør også tage resultaterne med forbehold.",
-  },
-  {
-    question: "Hvordan beregnes BMI?",
-    answer:
-      "BMI beregnes ved at dividere din vægt i kg med din højde i meter i anden. Formlen er: BMI = vægt (kg) / højde² (m). En person på 75 kg og 175 cm har BMI = 75 / 1,75² = 24,5.",
-  },
-  {
-    question: "Hvad er min idealvægt?",
-    answer:
-      "Din idealvægt er det vægtinterval hvor din BMI ligger mellem 18,5 og 24,9. For en person på 175 cm er idealvægten cirka 57-76 kg. Brug beregneren ovenfor for at se dit interval.",
-  },
-  {
-    question: "Gælder BMI for børn?",
-    answer:
-      "Denne beregner er for voksne (18+). For børn og unge bruges alders- og kønsspecifikke BMI-percentiler, da kroppen ændrer sig under vækst. Tal med en læge om børns vægt.",
-  },
-  {
-    question: "Hvad kan jeg gøre for at forbedre min BMI?",
-    answer:
-      "Ved overvægt: Fokuser på varige livsstilsændringer som mere bevægelse og sundere kost. Ved undervægt: Spis hyppige, næringsrige måltider og overvej styrketræning. Konsulter altid en læge ved bekymringer.",
-  },
-];
-
-export default function BMIPage() {
   return (
-    <div>
+    <div className="flex flex-col lg:flex-row gap-8">
+      {/* Main Content - Left Column */}
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
-        name="BMI Beregner"
-        description="Gratis BMI beregner. Beregn dit Body Mass Index og se om din vægt er sund."
-        url={`${baseUrl}/bmi`}
-        category="HealthApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/bmi`}
+        category={pageData.schemaCategory}
+        siteName={domainConfig.siteName}
+        currency={domainConfig.currency}
       />
-      <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "BMI Beregner", url: `${baseUrl}/bmi` },
-        ]}
-      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/bmi" }]} />
 
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">BMI Beregner</span>
-      </nav>
-
-      <h1 className="text-3xl font-bold mb-2">BMI Beregner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn dit Body Mass Index (BMI) og se om din vægt er inden for det
-        sunde område. BMI er et nyttigt værktøj til at vurdere din vægt i
-        forhold til din højde.
+        {pageData.description}
       </p>
 
       <BMIBeregner />
 
+      {locale === "da" && (
+        <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-900/20">
+          <h2 className="text-lg font-semibold text-blue-950 dark:text-blue-100">BMI for børn?</h2>
+          <p className="mt-2 text-sm text-blue-900 dark:text-blue-100">
+            Dette værktøj er en BMI-beregner for voksne. Det bruger kun vægt og højde og
+            beregner ikke børns percentil. Til børn skal BMI vurderes med alders- og
+            kønsspecifikke percentiltabeller.
+          </p>
+          <Link
+            href="/blog/bmi-for-boern-saadan-tjekker-du"
+            className="mt-3 inline-block font-medium text-blue-700 underline hover:text-blue-900 dark:text-blue-200 dark:hover:text-white"
+          >
+            Læs BMI for børn og se percentiltabeller →
+          </Link>
+        </div>
+      )}
+
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
-        <h2>Hvad er BMI?</h2>
+        <h2>Hvad er BMI for voksne?</h2>
         <p>
           BMI står for <strong>Body Mass Index</strong> og er et tal, der bruges
           til at vurdere, om din vægt er passende i forhold til din højde. BMI
-          beregnes ved at dividere din vægt i kilogram med din højde i meter i
-          anden potens.
+          beregnes ved at dividere din <strong>vægt i kilogram</strong> med din <strong>højde i meter</strong> i
+          anden potens. Formlen justeres ikke for alder.
         </p>
         <p>
           <strong>Formlen er:</strong> BMI = vægt (kg) / højde² (m)
         </p>
 
-        <h2>BMI kategorier ifølge WHO</h2>
+        <h2>BMI-skala for voksne ifølge WHO</h2>
         <p>
-          Verdenssundhedsorganisationen (WHO) har defineret følgende BMI
-          kategorier for voksne:
+          Verdenssundhedsorganisationen (WHO) har defineret følgende BMI-skala
+          for voksne:
         </p>
         <ul>
           <li>
@@ -150,21 +109,22 @@ export default function BMIPage() {
             BMI uden at være overvægtige
           </li>
           <li>
-            <strong>Alder:</strong> Ældre voksne kan have lavere muskelmasse,
-            hvilket påvirker BMI
+            <strong>Alder:</strong> BMI-formlen justeres ikke for alder. Ældre voksne
+            kan have lavere muskelmasse, hvilket påvirker BMI
           </li>
           <li>
             <strong>Fedtfordeling:</strong> BMI fortæller ikke hvor fedtet
             sidder (mavefedme er mere risikabelt)
           </li>
           <li>
-            <strong>Køn:</strong> Kvinder har naturligt mere fedtvæv end mænd
+            <strong>Køn:</strong> Køn indgår ikke i BMI-formlen. Værktøjet viser WHR som
+            et råt forholdstal uden kønsjustering
           </li>
         </ul>
 
         <h2>Andre vigtige sundhedsmål</h2>
         <p>
-          Ud over BMI kan disse målinger give et bedre billede af din sundhed:
+          Ud over BMI kan disse målinger give et <strong>bedre billede af din sundhed</strong>:
         </p>
         <ul>
           <li>
@@ -172,8 +132,8 @@ export default function BMIPage() {
             kvinder
           </li>
           <li>
-            <strong>Talje-hofte-ratio:</strong> Under 0,9 for mænd, under 0,85
-            for kvinder
+            <strong>Talje-hofte-ratio:</strong> Værktøjet viser WHR som et råt forholdstal
+            uden kønsjustering. Værdien erstatter ikke en samlet vurdering fra en læge
           </li>
           <li>
             <strong>Fedtprocent:</strong> Måles med specialudstyr
@@ -183,7 +143,7 @@ export default function BMIPage() {
           </li>
         </ul>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Vigtigt</p>
           <p className="text-yellow-700">
             Denne beregner er kun til informationsformål og erstatter ikke
@@ -192,10 +152,108 @@ export default function BMIPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Vad är BMI för vuxna?</h2>
+        <p>
+          BMI står för <strong>Body Mass Index</strong> och är ett tal som används
+          för att bedöma om din vikt är rimlig i förhållande till din längd. BMI
+          beräknas genom att dividera din <strong>vikt i kilogram</strong> med din <strong>längd i meter</strong> i
+          kvadrat. Formeln justeras inte för ålder.
+        </p>
+        <p>
+          <strong>Formeln är:</strong> BMI = vikt (kg) / längd² (m)
+        </p>
+
+        <h2>BMI-skala för vuxna enligt WHO</h2>
+        <p>
+          Världshälsoorganisationen (WHO) har definierat följande BMI-skala
+          för vuxna:
+        </p>
+        <ul>
+          <li>
+            <strong>Under 18,5:</strong> Undervikt
+          </li>
+          <li>
+            <strong>18,5 - 24,9:</strong> Normalvikt
+          </li>
+          <li>
+            <strong>25,0 - 29,9:</strong> Övervikt
+          </li>
+          <li>
+            <strong>30,0 - 34,9:</strong> Fetma klass I
+          </li>
+          <li>
+            <strong>35,0 - 39,9:</strong> Fetma klass II
+          </li>
+          <li>
+            <strong>40+:</strong> Fetma klass III (svår fetma)
+          </li>
+        </ul>
+
+        <h2>Är BMI ett tillförlitligt mått?</h2>
+        <p>BMI är ett användbart screeningverktyg, men det har begränsningar:</p>
+        <ul>
+          <li>
+            <strong>Muskelmassa:</strong> Mycket muskulösa personer kan ha högt
+            BMI utan att vara överviktiga
+          </li>
+          <li>
+            <strong>Ålder:</strong> BMI-formeln justeras inte för ålder. Äldre vuxna
+            kan ha lägre muskelmassa, vilket påverkar BMI
+          </li>
+          <li>
+            <strong>Fettfördelning:</strong> BMI säger inte var fettet
+            sitter (bukfetma är farligare)
+          </li>
+          <li>
+            <strong>Kön:</strong> Kön ingår inte i BMI-formeln. Verktyget visar WHR som
+            ett rått förhållandetal utan könsjustering
+          </li>
+        </ul>
+
+        <h2>Andra viktiga hälsomått</h2>
+        <p>
+          Utöver BMI kan dessa mått ge en <strong>bättre bild av din hälsa</strong>:
+        </p>
+        <ul>
+          <li>
+            <strong>Midjemått:</strong> Under 94 cm för män, under 80 cm för
+            kvinnor
+          </li>
+          <li>
+            <strong>Midja-höft-kvot:</strong> Verktyget visar WHR som ett rått förhållandetal
+            utan könsjustering. Värdet ersätter inte en samlad bedömning från läkare
+          </li>
+          <li>
+            <strong>Fettprocent:</strong> Mäts med specialutrustning
+          </li>
+          <li>
+            <strong>Blodtryck och kolesterol:</strong> Viktiga för hjärthälsan
+          </li>
+        </ul>
+
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
+          <p className="font-medium text-yellow-800">Viktigt</p>
+          <p className="text-yellow-700">
+            Denna kalkylator är endast avsedd för informationsändamål och ersätter
+            inte professionell medicinsk rådgivning. Rådgör alltid med en läkare vid
+            oro för din vikt eller hälsa.
+          </p>
+        </div>
+      </div>
+      )}
+
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/bmi" />
+      <RelateredeArtikler current="/bmi" locale={locale} />
+      </div>
+
+      {/* Sidebar - Right Column (Desktop only) */}
+      <Sidebar currentHref="/bmi" />
     </div>
   );
 }

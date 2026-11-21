@@ -1,36 +1,55 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
+import {
+  GRUPPE_ETIKETTER,
+  POST_ETIKETTER,
+  formaterMarkedspris,
+  freelancerTimeprisFaqSvar,
+  markedspriser,
+} from "@/lib/timepris-markedspriser";
+import { Lightbulb } from "lucide-react";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Sådan finder du din timepris som freelancer | MinBeregner.dk",
-  description:
-    "Lær at beregne den rigtige timepris som freelancer. Trin-for-trin guide til at sætte en fair pris der dækker alle dine omkostninger.",
-  keywords: [
-    "freelancer timepris",
-    "beregn timepris",
-    "konsulent timepris",
-    "hvad skal jeg tage i timen",
-    "selvstændig timepris",
-    "timepris guide",
-  ],
-  openGraph: {
-    title: "Sådan finder du din timepris som freelancer",
-    description: "Trin-for-trin guide til at sætte den rigtige timepris som freelancer.",
-    url: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
-  },
-};
+  return {
+    title: { absolute: "Sådan finder du din timepris som freelancer" },
+    description:
+      "Lær at beregne den rigtige timepris som freelancer. Trin-for-trin guide til at sætte en fair pris der dækker alle dine omkostninger.",
+    keywords: [
+      "freelancer timepris",
+      "beregn timepris",
+      "konsulent timepris",
+      "hvad skal jeg tage i timen",
+      "selvstændig timepris",
+      "timepris guide",
+    ],
+    openGraph: {
+      images: OG_IMAGE,
+      title: "Sådan finder du din timepris som freelancer",
+      description: "Trin-for-trin guide til at sætte den rigtige timepris som freelancer.",
+      url: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
+      type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
+    },
+  };
+}
 
 const faqItems = [
   {
     question: "Hvad er en normal timepris for en freelancer?",
-    answer: "Det varierer meget efter branche: Webudviklere 600-1.200 kr, tekstforfattere 500-1.000 kr, konsulenter 800-1.500 kr. Erfaring og speciale påvirker prisen markant.",
+    answer: freelancerTimeprisFaqSvar(),
   },
   {
     question: "Skal jeg lægge moms på min timepris?",
@@ -45,6 +64,11 @@ const faqItems = [
 export default function TimeprisGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="saadan-finder-du-din-timepris-som-freelancer"
+        title="Sådan finder du din timepris som freelancer"
+        description="Lær at beregne den rigtige timepris som freelancer. Trin-for-trin guide til at sætte en fair pris der dækker alle dine omkostninger."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6">
@@ -78,8 +102,10 @@ export default function TimeprisGuidePage() {
           <strong>Det er en stor fejl.</strong> Som freelancer har du mange ekstra omkostninger:
         </p>
         <ul>
-          <li><strong>Ingen betalt ferie</strong> - 5-6 uger = 10-12% af din tid</li>
-          <li><strong>Ingen pension</strong> fra arbejdsgiver</li>
+          <li><strong>Ingen betalt ferie</strong> - 5-6 uger = 10-12% af din tid. Se vores{" "}
+            <Link href="/feriepenge" className="text-blue-600 hover:underline">feriepenge-beregner</Link> for sammenligning</li>
+          <li><strong>Ingen pension</strong> fra arbejdsgiver - brug vores{" "}
+            <Link href="/pension" className="text-blue-600 hover:underline">pensionsberegner</Link> til at planlægge</li>
           <li><strong>Ingen løn under sygdom</strong></li>
           <li><strong>Software og udstyr</strong> - du betaler selv</li>
           <li><strong>Forsikringer</strong> - ansvar, erhverv, sundhed</li>
@@ -102,7 +128,9 @@ export default function TimeprisGuidePage() {
         <h3>Trin 2: Beregn bruttoløn</h3>
         <p>
           Som selvstændig betaler du ca. 45% i skat (AM-bidrag + indkomstskat). 
-          Divider din ønskede nettoløn med 0,55:
+          Divider din ønskede nettoløn med 0,55. Du kan bruge vores{" "}
+          <Link href="/loen-efter-skat" className="text-blue-600 hover:underline">løn efter skat beregner</Link>{" "}
+          til at se sammenhængen mellem brutto og netto:
         </p>
         <div className="bg-gray-50 p-4 rounded-lg not-prose mb-4">
           <p className="font-mono">30.000 ÷ 0,55 = 54.545 kr bruttoløn</p>
@@ -140,60 +168,69 @@ export default function TimeprisGuidePage() {
         </div>
 
         <h3>Trin 5: Beregn timepris</h3>
-        <div className="bg-blue-50 p-4 rounded-lg not-prose my-6">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose my-6">
           <p className="font-mono text-lg">
             Timepris = Månedlig omsætning ÷ Fakturerbare timer<br/>
             = 56.945 ÷ 110 = <strong>518 kr/time</strong>
           </p>
         </div>
 
-        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-yellow-800">💡 Rund op!</p>
-          <p className="text-yellow-700 text-sm mt-1">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
+          <p className="font-medium text-yellow-800 flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-yellow-500 shrink-0" aria-hidden="true" />
+            Rund op!
+          </p>
+          <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
             I praksis ville du runde op til 550 eller 600 kr for at have buffer. 
-            Husk at dette er ekskl. moms - for virksomhedskunder tillægges 25%.
+            Husk at dette er ekskl. moms - for virksomhedskunder tillægges 25%. 
+            Brug vores <Link href="/moms" className="text-blue-600 hover:underline">momsberegner</Link>{" "}
+            til at beregne priser inkl. moms.
           </p>
         </div>
 
         <h2>Typiske timepriser i Danmark (2026)</h2>
+        <p>
+          Nedenfor er de niveauer, <Link href="/timepris" className="text-blue-600 hover:underline">timeprisberegnen</Link>{" "}
+          bruger. Det er de samme tal, du får dér, så du kan regne videre på dem.
+        </p>
         <div className="not-prose my-6">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b">
-                <th className="text-left py-2">Branche</th>
-                <th className="text-right py-2">Junior</th>
-                <th className="text-right py-2">Senior</th>
+                <th className="text-left py-2">Fag</th>
+                <th className="text-right py-2">Typisk timepris</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b">
-                <td className="py-2">Webudvikling</td>
-                <td className="text-right">500-700 kr</td>
-                <td className="text-right">800-1.400 kr</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Grafisk design</td>
-                <td className="text-right">400-600 kr</td>
-                <td className="text-right">700-1.000 kr</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Tekstforfatning</td>
-                <td className="text-right">500-700 kr</td>
-                <td className="text-right">800-1.200 kr</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Marketing</td>
-                <td className="text-right">500-800 kr</td>
-                <td className="text-right">900-1.500 kr</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Konsulentarbejde</td>
-                <td className="text-right">600-900 kr</td>
-                <td className="text-right">1.000-2.000 kr</td>
-              </tr>
+              {markedspriser("da").map((gruppe) => (
+                <Fragment key={gruppe.id}>
+                  <tr className="border-b">
+                    <th className="text-left py-2 font-medium" colSpan={2}>
+                      {GRUPPE_ETIKETTER[gruppe.id].da}
+                    </th>
+                  </tr>
+                  {gruppe.poster.map((post) => (
+                    <tr key={post.id} className="border-b">
+                      <td className="py-2 pl-4">{POST_ETIKETTER[post.id].da}</td>
+                      <td className="text-right py-2">{formaterMarkedspris(post, "da")}</td>
+                    </tr>
+                  ))}
+                </Fragment>
+              ))}
             </tbody>
           </table>
+          <p className="text-xs text-gray-500 mt-2">
+            Priserne er vejledende og ekskl. moms. Faktiske priser afhænger af erfaring, speciale og
+            geografi.
+          </p>
         </div>
+
+        <h2>Hvad hvis du mister opgaver?</h2>
+        <p>
+          Som selvstændig kan du have perioder uden indkomst. Det er vigtigt at have opsparing 
+          og evt. A-kasse. Tjek hvad du kan få i{" "}
+          <Link href="/dagpenge" className="text-blue-600 hover:underline">dagpenge</Link> hvis du står uden arbejde.
+        </p>
 
         <h2>Tips til at hæve din timepris</h2>
         <ol>
@@ -227,6 +264,12 @@ export default function TimeprisGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/timepris"
+        handling="Beregn din timepris"
+        beskrivelse="Sæt det beløb du vil have udbetalt ind, og se hvilken timepris der skal til for at få det — ferie, drift og skat regnet med."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

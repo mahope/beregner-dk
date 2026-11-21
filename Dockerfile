@@ -1,5 +1,8 @@
 FROM node:22-alpine AS base
 
+# Cache bust arg - change this to force full rebuild
+ARG CACHE_BUST=2026-02-13-v2
+
 # Install dependencies only when needed
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
@@ -14,6 +17,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+ARG NEXT_PUBLIC_ADSENSE_ENABLED=0
+ARG NEXT_PUBLIC_ADSENSE_SLOT_RESULT
+ENV NEXT_PUBLIC_ADSENSE_ENABLED=${NEXT_PUBLIC_ADSENSE_ENABLED}
+ENV NEXT_PUBLIC_ADSENSE_SLOT_RESULT=${NEXT_PUBLIC_ADSENSE_SLOT_RESULT}
 RUN npm run build
 
 # Production image, copy all the files and run next

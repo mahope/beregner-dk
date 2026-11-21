@@ -1,44 +1,265 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { InputField } from "./InputField";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton, ResetButton } from "@/components/ui";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+import { formatCurrency } from "@/lib/format";
+import {
+  GRUPPE_ETIKETTER,
+  POST_ETIKETTER,
+  formaterMarkedspris,
+  markedspriser,
+} from "@/lib/timepris-markedspriser";
 
 export default function TimeprisBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      findTimepris: "Find din timepris",
+      seIndtjening: "Se din indtjening",
+      vaelgVisning: "V\u00e6lg visning",
+      oensketNettoLoen: "\u00d8nsket nettol\u00f8n pr. m\u00e5ned",
+      oensketNettoLoenHelp: "Hvad vil du have udbetalt?",
+      arbejdstimerUge: "Arbejdstimer pr. uge",
+      ferieUger: "Ferie (uger pr. \u00e5r)",
+      sygdomsBuffer: "Buffer for sygdom/stille perioder (%)",
+      administrativTid: "Administrativ tid (%)",
+      administrativTidHelp: "Salg, mails, bogf\u00f8ring, etc.",
+      transportTid: "Transport/forberedelse (%)",
+      transportTidHelp: "Tid brugt p\u00e5 transport og forberedelse",
+      driftsomkostninger: "Driftsomkostninger pr. m\u00e5ned",
+      driftsomkostningerHelp: "Software, kontor, forsikring, etc.",
+      anbefaletTimepris: "Din anbefalede timepris",
+      exklMoms: "ekskl. moms ({amount} inkl. moms)",
+      timerMaaned: "Timer/m\u00e5ned",
+      timerAar: "Timer/\u00e5r",
+      aarligOmsaetning: "\u00c5rlig oms\u00e6tning",
+      bruttoLoenMaaned: "Bruttol\u00f8n/m\u00e5ned",
+      timeprisEkskl: "Timepris (ekskl. moms)",
+      fakturerbareTimerMaaned: "Fakturerbare timer/m\u00e5ned",
+      driftsomkostningerMaaned: "Driftsomkostninger/m\u00e5ned",
+      estimeretNettoLoen: "Estimeret nettol\u00f8n pr. m\u00e5ned",
+      efterSkat: "efter skat",
+      omsaetningFordeling: "Oms\u00e6tning fordeling",
+      netto: "Netto",
+      skat: "Skat",
+      drift: "Drift",
+      omsaetningMaaned: "Oms\u00e6tning/m\u00e5ned",
+      foerSkat: "F\u00f8r skat",
+      skatCa45: "Skat (ca. 45%)",
+      omsaetningAar: "Oms\u00e6tning/\u00e5r",
+      tipsTitle: "Tips til at s\u00e6tte din timepris",
+      tip1: "Unders\u00f8g markedspriser for din branche og kompetencer",
+      tip2: "Husk at inkludere buffer for sygdom og stille perioder",
+      tip3: "Som freelancer har du ikke betalt ferie, s\u00e5 indregn dette",
+      tip4: "Overvej dine driftsomkostninger: software, udstyr, forsikring",
+      tip5: "Start ikke for lavt - det er sv\u00e6rt at h\u00e6ve prisen bagefter",
+      typiskePriser: "Typiske timepriser i Danmark (2026)",
+      danskNote: "",
+      priserVejledende: "Priserne er vejledende og ekskl. moms. Faktiske priser afh\u00e6nger af erfaring, speciale og geografi.",
+      kopierAnbefalet: "Anbefalet timepris: {pris} ekskl. moms",
+      kopierNetto: "Nettol\u00f8n: {netto}/md ved {pris}/time",
+      calculatorName: "Timeprisberegner",
+    },
+    se: {
+      findTimepris: "Hitta ditt timpris",
+      seIndtjening: "Se din inkomst",
+      vaelgVisning: "V\u00e4lj vy",
+      oensketNettoLoen: "\u00d6nskad nettol\u00f6n per m\u00e5nad",
+      oensketNettoLoenHelp: "Vad vill du ha utbetalt?",
+      arbejdstimerUge: "Arbetstimmar per vecka",
+      ferieUger: "Semester (veckor per \u00e5r)",
+      sygdomsBuffer: "Buffert f\u00f6r sjukdom/stilla perioder (%)",
+      administrativTid: "Administrativ tid (%)",
+      administrativTidHelp: "F\u00f6rs\u00e4ljning, mejl, bokf\u00f6ring, etc.",
+      transportTid: "Transport/f\u00f6rberedelse (%)",
+      transportTidHelp: "Tid f\u00f6r transport och f\u00f6rberedelse",
+      driftsomkostninger: "Driftskostnader per m\u00e5nad",
+      driftsomkostningerHelp: "Programvara, kontor, f\u00f6rs\u00e4kring, etc.",
+      anbefaletTimepris: "Ditt rekommenderade timpris",
+      exklMoms: "exkl. moms ({amount} inkl. moms)",
+      timerMaaned: "Timmar/m\u00e5nad",
+      timerAar: "Timmar/\u00e5r",
+      aarligOmsaetning: "\u00c5rlig oms\u00e4ttning",
+      bruttoLoenMaaned: "Bruttol\u00f6n/m\u00e5nad",
+      timeprisEkskl: "Timpris (exkl. moms)",
+      fakturerbareTimerMaaned: "Fakturerbara timmar/m\u00e5nad",
+      driftsomkostningerMaaned: "Driftskostnader/m\u00e5nad",
+      estimeretNettoLoen: "Ber\u00e4knad nettol\u00f6n per m\u00e5nad",
+      efterSkat: "efter skatt",
+      omsaetningFordeling: "Oms\u00e4ttningsf\u00f6rdelning",
+      netto: "Netto",
+      skat: "Skatt",
+      drift: "Drift",
+      omsaetningMaaned: "Oms\u00e4ttning/m\u00e5nad",
+      foerSkat: "F\u00f6re skatt",
+      skatCa45: "Skatt (ca. 45%)",
+      omsaetningAar: "Oms\u00e4ttning/\u00e5r",
+      tipsTitle: "Tips f\u00f6r att s\u00e4tta ditt timpris",
+      tip1: "Unders\u00f6k marknadspriser f\u00f6r din bransch och kompetens",
+      tip2: "Kom ih\u00e5g att inkludera buffert f\u00f6r sjukdom och stilla perioder",
+      tip3: "Som frilansare har du ingen betald semester, s\u00e5 r\u00e4kna in det",
+      tip4: "T\u00e4nk p\u00e5 dina driftskostnader: programvara, utrustning, f\u00f6rs\u00e4kring",
+      tip5: "B\u00f6rja inte f\u00f6r l\u00e5gt \u2014 det \u00e4r sv\u00e5rt att h\u00f6ja priset efter\u00e5t",
+      typiskePriser: "Danska typiska timpriser (2026)",
+      danskNote:
+        "Niv\u00e5erna nedan \u00e4r danska. Vi saknar en k\u00e4lla f\u00f6r svensk marknadsniv\u00e5, s\u00e5 tabellen visar danska timpriser som j\u00e4mf\u00f6relse.",
+      priserVejledende: "Priserna \u00e4r v\u00e4gledande och exkl. moms. Faktiska priser beror p\u00e5 erfarenhet, specialisering och geografi.",
+      kopierAnbefalet: "Rekommenderad timpris: {pris} exkl. moms",
+      kopierNetto: "Nettol\u00f6n: {netto}/m\u00e5n vid {pris}/timme",
+      calculatorName: "Timpriskalkylator",
+    },
+    no: {
+      findTimepris: "Finn din timepris",
+      seIndtjening: "Se din inntekt",
+      vaelgVisning: "Velg visning",
+      oensketNettoLoen: "\u00d8nsket nettol\u00f8nn per m\u00e5ned",
+      oensketNettoLoenHelp: "Hva vil du ha utbetalt?",
+      arbejdstimerUge: "Arbeidstimer per uke",
+      ferieUger: "Ferie (uker per \u00e5r)",
+      sygdomsBuffer: "Buffer for sykdom/stille perioder (%)",
+      administrativTid: "Administrativ tid (%)",
+      administrativTidHelp: "Salg, e-post, regnskap, etc.",
+      transportTid: "Transport/forberedelse (%)",
+      transportTidHelp: "Tid brukt p\u00e5 transport og forberedelse",
+      driftsomkostninger: "Driftskostnader per m\u00e5ned",
+      driftsomkostningerHelp: "Programvare, kontor, forsikring, etc.",
+      anbefaletTimepris: "Din anbefalte timepris",
+      exklMoms: "ekskl. mva ({amount} inkl. mva)",
+      timerMaaned: "Timer/m\u00e5ned",
+      timerAar: "Timer/\u00e5r",
+      aarligOmsaetning: "\u00c5rlig omsetning",
+      bruttoLoenMaaned: "Bruttol\u00f8nn/m\u00e5ned",
+      timeprisEkskl: "Timepris (ekskl. mva)",
+      fakturerbareTimerMaaned: "Fakturerbare timer/m\u00e5ned",
+      driftsomkostningerMaaned: "Driftskostnader/m\u00e5ned",
+      estimeretNettoLoen: "Estimert nettol\u00f8nn per m\u00e5ned",
+      efterSkat: "etter skatt",
+      omsaetningFordeling: "Omsetningsfordeling",
+      netto: "Netto",
+      skat: "Skatt",
+      drift: "Drift",
+      omsaetningMaaned: "Omsetning/m\u00e5ned",
+      foerSkat: "F\u00f8r skatt",
+      skatCa45: "Skatt (ca. 45%)",
+      omsaetningAar: "Omsetning/\u00e5r",
+      tipsTitle: "Tips for \u00e5 sette timeprisen din",
+      tip1: "Unders\u00f8k markedspriser for din bransje og kompetanse",
+      tip2: "Husk \u00e5 inkludere buffer for sykdom og stille perioder",
+      tip3: "Som frilanser har du ikke betalt ferie, s\u00e5 regn med dette",
+      tip4: "Vurder dine driftskostnader: programvare, utstyr, forsikring",
+      tip5: "Start ikke for lavt \u2014 det er vanskelig \u00e5 \u00f8ke prisen etterp\u00e5",
+      typiskePriser: "Danske typiske timepriser (2026)",
+      danskNote:
+        "Niv\u00e5ene nedenfor er danske. Vi mangler en kilde til det norske niv\u00e5et, s\u00e5 tabellen viser danske timepriser som sammenligning.",
+      priserVejledende: "Prisene er veiledende og ekskl. mva. Faktiske priser avhenger av erfaring, spesialisering og geografi.",
+      kopierAnbefalet: "Anbefalt timepris: {pris} ekskl. mva",
+      kopierNetto: "Nettol\u00f8nn: {netto}/m\u00e5ned ved {pris}/time",
+      calculatorName: "Timepriskalkulator",
+    },
+  };
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [beregningsType, setBeregningsType] = useState<"fraLoen" | "fraTimepris">("fraLoen");
-  
-  // Fra ønsket løn
+
+  // Fra \u00f8nsket l\u00f8n
   const [oensketNettoLoen, setOensketNettoLoen] = useState<number>(35000);
   const [arbejdstimerUge, setArbejdstimerUge] = useState<number>(37);
   const [ferieUger, setFerieUger] = useState<number>(5);
   const [sygdomsBuffer, setSygdomsBuffer] = useState<number>(5);
   const [administrativTid, setAdministrativTid] = useState<number>(20);
+  const [transportTid, setTransportTid] = useState<number>(0);
   const [driftsomkostninger, setDriftsomkostninger] = useState<number>(3000);
-  
+
   // Fra timepris
   const [timepris, setTimepris] = useState<number>(600);
   const [fakturerbareTimer, setFakturerbareTimer] = useState<number>(120);
 
+  const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'timepris') {
+      const inputs = urlState.inputs;
+      if (inputs.beregningsType) setBeregningsType(inputs.beregningsType);
+      if (inputs.oensketNettoLoen !== undefined) setOensketNettoLoen(inputs.oensketNettoLoen);
+      if (inputs.arbejdstimerUge !== undefined) setArbejdstimerUge(inputs.arbejdstimerUge);
+      if (inputs.ferieUger !== undefined) setFerieUger(inputs.ferieUger);
+      if (inputs.sygdomsBuffer !== undefined) setSygdomsBuffer(inputs.sygdomsBuffer);
+      if (inputs.administrativTid !== undefined) setAdministrativTid(inputs.administrativTid);
+      if (inputs.transportTid !== undefined) setTransportTid(inputs.transportTid);
+      if (inputs.driftsomkostninger !== undefined) setDriftsomkostninger(inputs.driftsomkostninger);
+      if (inputs.timepris !== undefined) setTimepris(inputs.timepris);
+      if (inputs.fakturerbareTimer !== undefined) setFakturerbareTimer(inputs.fakturerbareTimer);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("timepris");
+    const timer = setTimeout(() => {
+      trackCalculation("timepris");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'timepris',
+      inputs: {
+        beregningsType, oensketNettoLoen, arbejdstimerUge, ferieUger,
+        sygdomsBuffer, administrativTid, transportTid, driftsomkostninger,
+        timepris, fakturerbareTimer,
+      },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [beregningsType, oensketNettoLoen, arbejdstimerUge, ferieUger,
+      sygdomsBuffer, administrativTid, transportTid, driftsomkostninger,
+      timepris, fakturerbareTimer]);
+
+  const handleReset = useCallback(() => {
+    setBeregningsType("fraLoen");
+    setOensketNettoLoen(35000);
+    setArbejdstimerUge(37);
+    setFerieUger(5);
+    setSygdomsBuffer(5);
+    setAdministrativTid(20);
+    setTransportTid(0);
+    setDriftsomkostninger(3000);
+    setTimepris(600);
+    setFakturerbareTimer(120);
+  }, []);
+
   const beregningFraLoen = useMemo(() => {
-    // Beregn skattetillæg (ca. 45% effektiv skat for selvstændige)
     const skatProcent = 0.45;
     const oensketBruttoLoen = oensketNettoLoen / (1 - skatProcent);
-    
-    // Årlige arbejdsuger
+
     const arbejdsugerAar = 52 - ferieUger;
     const effektiveUger = arbejdsugerAar * (1 - sygdomsBuffer / 100);
-    
-    // Fakturerbare timer
-    const timerUgeEfterAdmin = arbejdstimerUge * (1 - administrativTid / 100);
-    const fakturerbareTimerAar = effektiveUger * timerUgeEfterAdmin;
+
+    const spildtTidPct = administrativTid + transportTid;
+    const timerUgeEfterSpild = arbejdstimerUge * (1 - spildtTidPct / 100);
+    const fakturerbareTimerAar = effektiveUger * timerUgeEfterSpild;
     const fakturerbareTimerMaaned = fakturerbareTimerAar / 12;
-    
-    // Årlig omsætning nødvendig
+
     const aarligLoen = oensketBruttoLoen * 12;
     const aarligeDriftsomkostninger = driftsomkostninger * 12;
     const noedvendigOmsaetning = aarligLoen + aarligeDriftsomkostninger;
-    
-    // Timepris
-    const beregnetTimepris = noedvendigOmsaetning / fakturerbareTimerAar;
-    
+
+    const beregnetTimepris = fakturerbareTimerAar > 0 ? noedvendigOmsaetning / fakturerbareTimerAar : 0;
+    const timeprismMoms = beregnetTimepris * 1.25;
+
     return {
       oensketBruttoLoen,
       effektiveUger,
@@ -48,328 +269,311 @@ export default function TimeprisBeregner() {
       aarligeDriftsomkostninger,
       noedvendigOmsaetning,
       beregnetTimepris,
+      timeprismMoms,
     };
-  }, [oensketNettoLoen, arbejdstimerUge, ferieUger, sygdomsBuffer, administrativTid, driftsomkostninger]);
+  }, [oensketNettoLoen, arbejdstimerUge, ferieUger, sygdomsBuffer, administrativTid, transportTid, driftsomkostninger]);
 
   const beregningFraTimepris = useMemo(() => {
     const maanedligOmsaetning = timepris * fakturerbareTimer;
     const aarligOmsaetning = maanedligOmsaetning * 12;
-    
-    // Estimer skat (ca. 45%)
+
     const skatProcent = 0.45;
     const bruttoLoenMaaned = maanedligOmsaetning - driftsomkostninger;
-    const nettoLoenMaaned = bruttoLoenMaaned * (1 - skatProcent);
-    
+    const skatBeloeb = bruttoLoenMaaned * skatProcent;
+    const nettoLoenMaaned = bruttoLoenMaaned - skatBeloeb;
+
+    const total = maanedligOmsaetning;
+    const driftPct = total > 0 ? (driftsomkostninger / total) * 100 : 0;
+    const skatPct = total > 0 ? (skatBeloeb / total) * 100 : 0;
+    const nettoPct = total > 0 ? (Math.max(0, nettoLoenMaaned) / total) * 100 : 0;
+
     return {
       maanedligOmsaetning,
       aarligOmsaetning,
       bruttoLoenMaaned,
       nettoLoenMaaned,
-      skatBeloeb: bruttoLoenMaaned * skatProcent,
+      skatBeloeb,
+      driftPct, skatPct, nettoPct,
     };
   }, [timepris, fakturerbareTimer, driftsomkostninger]);
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
   return (
     <div className="space-y-8">
       {/* Valg af beregningstype */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <button
+      <div role="group" aria-label={l.vaelgVisning} className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+        <button type="button"
           onClick={() => setBeregningsType("fraLoen")}
-          className={`p-4 rounded-lg border-2 text-left transition-all ${
+          className={`flex-1 py-3 text-sm font-medium transition-colors ${
             beregningsType === "fraLoen"
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-200 hover:border-gray-300"
+              ? "bg-blue-600 text-white"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
-          <div className="font-medium">💰 Find din timepris</div>
-          <div className="text-sm text-gray-500">Ud fra ønsket løn</div>
+          {l.findTimepris}
         </button>
-        <button
+        <button type="button"
           onClick={() => setBeregningsType("fraTimepris")}
-          className={`p-4 rounded-lg border-2 text-left transition-all ${
+          className={`flex-1 py-3 text-sm font-medium transition-colors ${
             beregningsType === "fraTimepris"
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-200 hover:border-gray-300"
+              ? "bg-blue-600 text-white"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
-          <div className="font-medium">📊 Se din indtjening</div>
-          <div className="text-sm text-gray-500">Ud fra timepris</div>
+          {l.seIndtjening}
         </button>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {beregningsType === "fraLoen" ? (
         <>
-          {/* Input sektion - Fra løn */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Ønsket nettoløn pr. måned
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1000"
-                  value={oensketNettoLoen}
-                  onChange={(e) => setOensketNettoLoen(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
-                <p className="text-xs text-gray-500 mt-1">Hvad vil du have udbetalt?</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Arbejdstimer pr. uge
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="80"
-                  value={arbejdstimerUge}
-                  onChange={(e) => setArbejdstimerUge(parseFloat(e.target.value) || 37)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Ferie (uger pr. år)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="12"
-                  value={ferieUger}
-                  onChange={(e) => setFerieUger(parseFloat(e.target.value) || 5)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
-              </div>
+              <InputField
+                label={l.oensketNettoLoen}
+                value={oensketNettoLoen}
+                onChange={setOensketNettoLoen}
+                min={0}
+                step={1000}
+                unit="kr"
+                helpText={l.oensketNettoLoenHelp}
+              />
+              <InputField
+                label={l.arbejdstimerUge}
+                value={arbejdstimerUge}
+                onChange={setArbejdstimerUge}
+                min={1}
+                max={80}
+              />
+              <InputField
+                label={l.ferieUger}
+                value={ferieUger}
+                onChange={setFerieUger}
+                min={0}
+                max={12}
+              />
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Buffer for sygdom/stille perioder (%)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="30"
-                  value={sygdomsBuffer}
-                  onChange={(e) => setSygdomsBuffer(parseFloat(e.target.value) || 5)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Administrativ tid (%)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="50"
-                  value={administrativTid}
-                  onChange={(e) => setAdministrativTid(parseFloat(e.target.value) || 20)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
-                <p className="text-xs text-gray-500 mt-1">Salg, mails, bogføring, etc.</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Driftsomkostninger pr. måned
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="500"
-                  value={driftsomkostninger}
-                  onChange={(e) => setDriftsomkostninger(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
-                <p className="text-xs text-gray-500 mt-1">Software, kontor, forsikring, etc.</p>
-              </div>
+              <InputField
+                label={l.sygdomsBuffer}
+                value={sygdomsBuffer}
+                onChange={setSygdomsBuffer}
+                min={0}
+                max={30}
+              />
+              <InputField
+                label={l.administrativTid}
+                value={administrativTid}
+                onChange={setAdministrativTid}
+                min={0}
+                max={50}
+                helpText={l.administrativTidHelp}
+              />
+              <InputField
+                label={l.transportTid}
+                value={transportTid}
+                onChange={setTransportTid}
+                min={0}
+                max={30}
+                helpText={l.transportTidHelp}
+              />
+              <InputField
+                label={l.driftsomkostninger}
+                value={driftsomkostninger}
+                onChange={setDriftsomkostninger}
+                min={0}
+                step={500}
+                unit="kr"
+                helpText={l.driftsomkostningerHelp}
+              />
             </div>
           </div>
 
           {/* Resultat */}
           <div className="p-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl text-center text-white">
-            <p className="text-lg opacity-90 mb-2">Din anbefalede timepris</p>
+            <p className="text-lg opacity-90 mb-2">{l.anbefaletTimepris}</p>
             <p className="text-5xl md:text-6xl font-bold">
               {formatKr(beregningFraLoen.beregnetTimepris)}
             </p>
-            <p className="text-sm opacity-75 mt-2">ekskl. moms</p>
+            <p className="text-sm opacity-75 mt-2">
+              {l.exklMoms.replace("{amount}", formatKr(beregningFraLoen.timeprismMoms))}
+            </p>
           </div>
 
-          {/* Detaljer */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-xl font-bold text-gray-700 dark:text-white">
                 {beregningFraLoen.fakturerbareTimerMaaned.toFixed(0)}
               </p>
-              <p className="text-sm text-gray-500">Timer/måned</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.timerMaaned}</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-xl font-bold text-gray-700 dark:text-white">
                 {beregningFraLoen.fakturerbareTimerAar.toFixed(0)}
               </p>
-              <p className="text-sm text-gray-500">Timer/år</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.timerAar}</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-xl font-bold text-gray-700 dark:text-white">
                 {formatKr(beregningFraLoen.noedvendigOmsaetning)}
               </p>
-              <p className="text-sm text-gray-500">Årlig omsætning</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.aarligOmsaetning}</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-xl font-bold text-gray-700 dark:text-white">
                 {formatKr(beregningFraLoen.oensketBruttoLoen)}
               </p>
-              <p className="text-sm text-gray-500">Bruttoløn/måned</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.bruttoLoenMaaned}</p>
             </div>
+          </div>
+
+          <div className="flex justify-center">
+            <CopyResultButton text={l.kopierAnbefalet.replace("{pris}", formatKr(beregningFraLoen.beregnetTimepris))} />
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName={l.calculatorName}
+              resultSummary={l.kopierAnbefalet.replace("{pris}", formatKr(beregningFraLoen.beregnetTimepris))}
+            />
           </div>
         </>
       ) : (
         <>
-          {/* Input sektion - Fra timepris */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Timepris (ekskl. moms)</label>
-              <input
-                type="number"
-                min="0"
-                step="50"
-                value={timepris}
-                onChange={(e) => setTimepris(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg text-lg"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Fakturerbare timer/måned</label>
-              <input
-                type="number"
-                min="0"
-                max="200"
-                value={fakturerbareTimer}
-                onChange={(e) => setFakturerbareTimer(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg text-lg"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Driftsomkostninger/måned</label>
-              <input
-                type="number"
-                min="0"
-                step="500"
-                value={driftsomkostninger}
-                onChange={(e) => setDriftsomkostninger(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg text-lg"
-              />
-            </div>
+            <InputField
+              label={l.timeprisEkskl}
+              value={timepris}
+              onChange={setTimepris}
+              min={0}
+              step={50}
+              unit="kr"
+            />
+            <InputField
+              label={l.fakturerbareTimerMaaned}
+              value={fakturerbareTimer}
+              onChange={setFakturerbareTimer}
+              min={0}
+              max={200}
+            />
+            <InputField
+              label={l.driftsomkostningerMaaned}
+              value={driftsomkostninger}
+              onChange={setDriftsomkostninger}
+              min={0}
+              step={500}
+              unit="kr"
+            />
           </div>
 
           {/* Resultat */}
           <div className="p-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl text-center text-white">
-            <p className="text-lg opacity-90 mb-2">Estimeret nettoløn pr. måned</p>
+            <p className="text-lg opacity-90 mb-2">{l.estimeretNettoLoen}</p>
             <p className="text-5xl md:text-6xl font-bold">
               {formatKr(beregningFraTimepris.nettoLoenMaaned)}
             </p>
-            <p className="text-sm opacity-75 mt-2">efter skat</p>
+            <p className="text-sm opacity-75 mt-2">{l.efterSkat}</p>
           </div>
 
-          {/* Detaljer */}
+          {/* Visuel breakdown */}
+          <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg">
+            <h3 className="text-sm font-medium mb-3 dark:text-gray-200">{l.omsaetningFordeling}</h3>
+            <div className="flex h-8 rounded-full overflow-hidden mb-3">
+              <div className="bg-green-500" style={{ width: `${beregningFraTimepris.nettoPct}%` }} title={l.netto} />
+              <div className="bg-red-400" style={{ width: `${beregningFraTimepris.skatPct}%` }} title={l.skat} />
+              <div className="bg-gray-400" style={{ width: `${beregningFraTimepris.driftPct}%` }} title={l.drift} />
+            </div>
+            <div className="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+              <span className="flex items-center gap-1">
+                <span className="w-3 h-3 rounded-sm bg-green-500 inline-block" /> {l.netto} ({formatKr(beregningFraTimepris.nettoLoenMaaned)})
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-3 h-3 rounded-sm bg-red-400 inline-block" /> {l.skat} ({formatKr(beregningFraTimepris.skatBeloeb)})
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-3 h-3 rounded-sm bg-gray-400 inline-block" /> {l.drift} ({formatKr(driftsomkostninger)})
+              </span>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-xl font-bold text-gray-700 dark:text-white">
                 {formatKr(beregningFraTimepris.maanedligOmsaetning)}
               </p>
-              <p className="text-sm text-gray-500">Omsætning/måned</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.omsaetningMaaned}</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-xl font-bold text-gray-700 dark:text-white">
                 {formatKr(beregningFraTimepris.bruttoLoenMaaned)}
               </p>
-              <p className="text-sm text-gray-500">Før skat</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.foerSkat}</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-red-600">
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatKr(beregningFraTimepris.skatBeloeb)}
               </p>
-              <p className="text-sm text-gray-500">Skat (ca. 45%)</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.skatCa45}</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-xl font-bold text-gray-700 dark:text-white">
                 {formatKr(beregningFraTimepris.aarligOmsaetning)}
               </p>
-              <p className="text-sm text-gray-500">Omsætning/år</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.omsaetningAar}</p>
             </div>
+          </div>
+
+          <div className="flex justify-center">
+            <CopyResultButton text={l.kopierNetto.replace("{netto}", formatKr(beregningFraTimepris.nettoLoenMaaned)).replace("{pris}", formatKr(timepris))} />
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName={l.calculatorName}
+              resultSummary={l.kopierNetto.replace("{netto}", formatKr(beregningFraTimepris.nettoLoenMaaned)).replace("{pris}", formatKr(timepris))}
+            />
           </div>
         </>
       )}
 
-      {/* Vejledning */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-medium text-blue-800 mb-2">💡 Tips til at sætte din timepris</h3>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li>• Undersøg markedspriser for din branche og kompetencer</li>
-          <li>• Husk at inkludere buffer for sygdom og stille perioder</li>
-          <li>• Som freelancer har du ikke betalt ferie, så indregn dette</li>
-          <li>• Overvej dine driftsomkostninger: software, udstyr, forsikring</li>
-          <li>• Start ikke for lavt - det er svært at hæve prisen bagefter</li>
+      {/* Tips */}
+      <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <h2 className="font-medium text-blue-800 dark:text-blue-200 mb-2">{l.tipsTitle}</h2>
+        <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+          <li>{l.tip1}</li>
+          <li>{l.tip2}</li>
+          <li>{l.tip3}</li>
+          <li>{l.tip4}</li>
+          <li>{l.tip5}</li>
         </ul>
       </div>
 
       {/* Typiske timepriser */}
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b">
-          <h3 className="font-medium">Typiske timepriser i Danmark (2026)</h3>
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+          <h2 className="font-medium dark:text-white">{l.typiskePriser}</h2>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <h4 className="font-medium mb-2">IT & Udvikling</h4>
-              <ul className="space-y-1 text-gray-600">
-                <li>Junior udvikler: 500-700 kr</li>
-                <li>Senior udvikler: 800-1.200 kr</li>
-                <li>IT-konsulent: 900-1.500 kr</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">Kreativ & Marketing</h4>
-              <ul className="space-y-1 text-gray-600">
-                <li>Grafisk designer: 500-800 kr</li>
-                <li>Tekstforfatter: 600-1.000 kr</li>
-                <li>Marketing konsulent: 700-1.200 kr</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">Rådgivning</h4>
-              <ul className="space-y-1 text-gray-600">
-                <li>Konsulent: 800-1.500 kr</li>
-                <li>Advokat: 1.500-3.500 kr</li>
-                <li>Revisor: 900-1.800 kr</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">Håndværk & Service</h4>
-              <ul className="space-y-1 text-gray-600">
-                <li>Håndværker: 400-600 kr</li>
-                <li>Fotograf: 500-1.500 kr</li>
-                <li>Underviser: 500-1.000 kr</li>
-              </ul>
-            </div>
+            {markedspriser(locale).map((gruppe) => (
+              <div key={gruppe.id}>
+                <h3 className="font-medium mb-2 dark:text-gray-200">{GRUPPE_ETIKETTER[gruppe.id][locale]}</h3>
+                <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                  {gruppe.poster.map((post) => (
+                    <li key={post.id}>
+                      {POST_ETIKETTER[post.id][locale]}: {formaterMarkedspris(post, locale)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
+          {l.danskNote ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">{l.danskNote}</p>
+          ) : null}
           <p className="text-xs text-gray-400 mt-4">
-            Priserne er vejledende og ekskl. moms. Faktiske priser afhænger af erfaring, speciale og geografi.
+            {l.priserVejledende}
           </p>
         </div>
       </div>

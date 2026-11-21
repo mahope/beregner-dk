@@ -1,0 +1,10 @@
+{
+  "app": "beregner-dk",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "preview": {
+    "enabled": true,
+    "ttlDays": 7
+  }
+}

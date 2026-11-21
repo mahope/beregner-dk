@@ -1,0 +1,47 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --connect-timeout 2 http://127.0.0.1:59956/hook/stop?ptyId=38067aa8-238f-400d-a5fb-0c5fa820f2ff"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --connect-timeout 2 http://127.0.0.1:59956/hook/busy?ptyId=38067aa8-238f-400d-a5fb-0c5fa820f2ff"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --connect-timeout 2 -X POST -H \"Content-Type: application/json\" -d @- http://127.0.0.1:59956/hook/notification?ptyId=38067aa8-238f-400d-a5fb-0c5fa820f2ff"
+          }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --connect-timeout 2 -X POST -H \"Content-Type: application/json\" -d @- http://127.0.0.1:59956/hook/notification?ptyId=38067aa8-238f-400d-a5fb-0c5fa820f2ff"
+          }
+        ]
+      }
+    ]
+  },
+  "attribution": {
+    "commit": "\n\n"
+  }
+}

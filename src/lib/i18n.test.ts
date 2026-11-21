@@ -1,0 +1,146 @@
+import { describe, test, expect } from "vitest";
+import { getSiteTranslations, getTranslations, t } from "./i18n";
+import { getHomeCalculatorCount } from "./home-data";
+
+describe("getTranslations", () => {
+  test("returns DA translations by default", () => {
+    const trans = getTranslations();
+    expect(trans.site.name).toBe("MinBeregner.dk");
+  });
+
+  test("returns DA translations for da locale", () => {
+    const trans = getTranslations("da");
+    expect(trans.site.name).toBe("MinBeregner.dk");
+  });
+
+  test("returns SE translations for se locale", () => {
+    const trans = getTranslations("se");
+    expect(trans.site.name).toBe("Beräknare.se");
+  });
+
+  test("returns NO translations for no locale", () => {
+    const trans = getTranslations("no");
+    expect(trans.site.name).toBe("Beregner.no");
+  });
+
+  test("all locales have same top-level keys", () => {
+    const da = getTranslations("da");
+    const no = getTranslations("no");
+    const se = getTranslations("se");
+    const daKeys = Object.keys(da).sort();
+    const noKeys = Object.keys(no).sort();
+    const seKeys = Object.keys(se).sort();
+    expect(noKeys).toEqual(daKeys);
+    expect(seKeys).toEqual(daKeys);
+  });
+
+  test("all locales have same ui keys", () => {
+    const da = getTranslations("da");
+    const no = getTranslations("no");
+    const se = getTranslations("se");
+    const daKeys = Object.keys(da.ui).sort();
+    const noKeys = Object.keys(no.ui).sort();
+    const seKeys = Object.keys(se.ui).sort();
+    expect(noKeys).toEqual(daKeys);
+    expect(seKeys).toEqual(daKeys);
+  });
+
+  test("footer copy does not promise that no data is stored", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      const aboutSite = getTranslations(locale).footer.aboutSite;
+      expect(aboutSite, locale).not.toMatch(
+        /gemmer ingen data|lagrer ingen data|sparar ingen data/i,
+      );
+      expect(aboutSite, locale).toMatch(/database|databas/i);
+    }
+  });
+
+  test("all locales have localized search and OpenGraph copy", () => {
+    expect(t("da", "ui.searchPlaceholder")).toBe("Søg blandt alle beregnere...");
+    expect(t("no", "ui.searchPlaceholder")).toBe("Søk blant alle kalkulatorer...");
+    expect(t("se", "ui.searchPlaceholder")).toBe("Sök bland alla kalkylatorer...");
+    expect(t("da", "site.ogTagline")).toContain("danskere");
+    expect(t("no", "site.ogTagline")).toContain("nordmenn");
+    expect(t("se", "site.ogTagline")).toContain("svenskar");
+  });
+});
+
+describe("t", () => {
+  test("resolves nested path", () => {
+    expect(t("da", "site.name")).toBe("MinBeregner.dk");
+    expect(t("se", "site.name")).toBe("Beräknare.se");
+    expect(t("no", "site.name")).toBe("Beregner.no");
+  });
+
+  test("resolves deep path", () => {
+    expect(t("da", "nav.categories.economy")).toBe("Økonomi");
+    expect(t("se", "nav.categories.economy")).toBe("Ekonomi");
+  });
+
+  test("returns path string for missing key", () => {
+    expect(t("da", "does.not.exist")).toBe("does.not.exist");
+  });
+
+  test("returns path string for partial path hitting non-object", () => {
+    expect(t("da", "site.name.deeper")).toBe("site.name.deeper");
+  });
+
+  test("returns path for non-string leaf", () => {
+    expect(t("da", "nav.categories")).toBe("nav.categories");
+  });
+});
+
+describe("site description count", () => {
+  // `site.description` is the layout metadata description, the `description`
+  // in both JSON-LD blocks, the web manifest description and the homepage
+  // default — i.e. it ships on every page of every domain. It once read
+  // "33+ gratis beregnere" while the Danish catalog held 79, so these tests
+  // derive the number from the catalog instead of hardcoding it.
+  test("states the real Danish calculator count, not a stale one", () => {
+    const count = getHomeCalculatorCount("da");
+    expect(getSiteTranslations("da").site.description).toBe(
+      `${count}+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.`,
+    );
+  });
+
+  test("uses each locale's own count and its own wording", () => {
+    expect(getSiteTranslations("se").site.description).toBe(
+      `${getHomeCalculatorCount("se")}+ gratis kalkylatorer för ekonomi, bostad, skatt, hälsa och vardag.`,
+    );
+    expect(getSiteTranslations("no").site.description).toBe(
+      `${getHomeCalculatorCount("no")}+ gratis kalkulatorer for økonomi, bolig, skatt, helse og hverdag.`,
+    );
+  });
+
+  test("leaves no unresolved placeholder in any locale", () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      expect(getSiteTranslations(locale).site.description, locale).not.toContain(
+        "{count}",
+      );
+    }
+  });
+
+  test("never undercounts the catalog", () => {
+    // Guards the exact regression: a count below the real number is a false
+    // claim in indexed text. Overcounting is not tested — the "+" is honest.
+    for (const locale of ["da", "se", "no"] as const) {
+      const stated = Number(
+        getSiteTranslations(locale).site.description.match(/(\d+)\+/)?.[1],
+      );
+      expect(stated, locale).toBeGreaterThanOrEqual(
+        getHomeCalculatorCount(locale),
+      );
+    }
+  });
+
+  test("passes every other key through untouched", () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      expect(getSiteTranslations(locale).site.name).toBe(
+        getTranslations(locale).site.name,
+      );
+      expect(getSiteTranslations(locale).nav).toEqual(
+        getTranslations(locale).nav,
+      );
+    }
+  });
+});

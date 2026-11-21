@@ -1,88 +1,261 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { CircleCheck, ClipboardList, Lightbulb, Siren, TriangleAlert, Wallet } from "lucide-react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton, ResetButton } from "@/components/ui";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { beregnHusleje, HUSLEJE_STANDARD } from "@/lib/husleje";
 
 export default function HuslejeBudgetBeregner() {
-  // Indkomst
-  const [maanedligNettoLoen, setMaanedligNettoLoen] = useState<number>(28000);
-  const [partnerLoen, setPartnerLoen] = useState<number>(0);
-  const [andreIndkomster, setAndreIndkomster] = useState<number>(0);
-  
-  // Faste udgifter
-  const [madOgDagligvarer, setMadOgDagligvarer] = useState<number>(4000);
-  const [transport, setTransport] = useState<number>(2000);
-  const [forsikringer, setForsikringer] = useState<number>(1000);
-  const [mobilOgInternet, setMobilOgInternet] = useState<number>(500);
-  const [abonnementer, setAbonnementer] = useState<number>(500);
-  const [andreUdgifter, setAndreUdgifter] = useState<number>(1000);
-  
-  // Opsparing
-  const [opsparingProcent, setOpsparingProcent] = useState<number>(10);
+  const { locale } = useLocale();
 
-  const beregning = useMemo(() => {
-    // Samlet indkomst
-    const samletIndkomst = maanedligNettoLoen + partnerLoen + andreIndkomster;
-    
-    // Faste udgifter (uden husleje)
-    const fasteUdgifter = madOgDagligvarer + transport + forsikringer + 
-                          mobilOgInternet + abonnementer + andreUdgifter;
-    
-    // Opsparing
-    const opsparingBeloeb = samletIndkomst * (opsparingProcent / 100);
-    
-    // Tilgængeligt til husleje
-    const tilHusleje = samletIndkomst - fasteUdgifter - opsparingBeloeb;
-    
-    // Anbefalinger baseret på tommelfingerregler
-    const maxHusleje30Pct = samletIndkomst * 0.30; // 30% reglen
-    const maxHusleje33Pct = samletIndkomst * 0.33; // 33% reglen
-    
-    // Anbefalet husleje (den laveste af de to metoder)
-    const anbefalet = Math.min(tilHusleje, maxHusleje30Pct);
-    
-    // Kategorisering
-    let vurdering: "god" | "ok" | "risikabel" = "god";
-    let vurderingTekst = "";
-    
-    if (tilHusleje >= maxHusleje30Pct) {
-      vurdering = "god";
-      vurderingTekst = "Din økonomi tillader en god husleje med plads til opsparing og uforudsete udgifter.";
-    } else if (tilHusleje >= maxHusleje30Pct * 0.8) {
-      vurdering = "ok";
-      vurderingTekst = "Du kan godt betale huslejen, men overvej at reducere andre udgifter for mere buffer.";
-    } else {
-      vurdering = "risikabel";
-      vurderingTekst = "Din økonomi er stram. Overvej billigere bolig eller højere indkomst/lavere udgifter.";
-    }
-    
-    return {
-      samletIndkomst,
-      fasteUdgifter,
-      opsparingBeloeb,
-      tilHusleje,
-      maxHusleje30Pct,
-      maxHusleje33Pct,
-      anbefalet,
-      vurdering,
-      vurderingTekst,
-      resterendeEfterHusleje: tilHusleje - anbefalet,
-    };
-  }, [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, 
-      transport, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent]);
-
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const labels = {
+    da: {
+      dinIndkomst: "Din indkomst",
+      dinNettoLoen: "Din nettoløn pr. måned",
+      partnerRoommate: "Partner/roommate (valgfrit)",
+      andreIndkomster: "Andre indkomster",
+      andreIndkomsterHelp: "SU, børnepenge, etc.",
+      fasteUdgifter: "Dine faste udgifter (ekskl. husleje)",
+      madDagligvarer: "Mad & dagligvarer",
+      transport: "Transport",
+      transportHelp: "Bil, bus, tog",
+      boligforbrug: "El, vand og varme",
+      boligforbrugHelp: "Betales ofte via a conto. Sæt 0, hvis det er inkluderet i huslejen.",
+      forsikringer: "Forsikringer",
+      mobilInternet: "Mobil & internet",
+      abonnementer: "Abonnementer",
+      abonnementerHelp: "Streaming, fitness, etc.",
+      andreUdgifter: "Andre udgifter",
+      andreUdgifterHelp: "Tøj, hobby, etc.",
+      oensketOpsparing: "Ønsket opsparing",
+      maaned: "måned",
+      anbefaletMin: "10 % (anbefalet min.)",
+      duKanBruge: "Du kan bruge på husleje",
+      prMaaned: "pr. måned i husleje",
+      iAltBolig: "I alt med el, vand og varme",
+      prMaanedBolig: "pr. måned",
+      godOekonomi: "God økonomi",
+      acceptabelOekonomi: "Acceptabel økonomi",
+      stramOekonomi: "Stram økonomi",
+      vurderingGod: "Din økonomi tillader en god husleje med plads til opsparing og uforudsete udgifter.",
+      vurderingOk: "Du kan godt betale huslejen, men overvej at reducere andre udgifter for mere buffer.",
+      vurderingRisikabel: "Din økonomi er stram. Overvej billigere bolig eller højere indkomst/lavere udgifter.",
+      samletIndkomst: "Samlet indkomst",
+      fasteUdgifterLabel: "Faste udgifter",
+      opsparing: "Opsparing",
+      regel30: "30% reglen",
+      regel33: "33 %-reglen ville give",
+      ditBudget: "Dit budget",
+      samletMaanedlig: "Samlet månedlig indkomst",
+      tilgaengeligtHusleje: "Tilgængeligt til husleje",
+      tipsTitle: "Tommelfingerregler for husleje",
+      tip30: "Husleje bør max være 30 % af din nettoindkomst",
+      tipInkluder: "Husleje + el + vand + varme + evt. internet",
+      tipBuffer: "Hav altid 3-6 måneders udgifter i opsparing",
+      tipDepositum: "Husk at spare op til 3 måneders husleje i depositum",
+    },
+    se: {
+      dinIndkomst: "Din inkomst",
+      dinNettoLoen: "Din nettolön per månad",
+      partnerRoommate: "Partner/rumskamrat (valfritt)",
+      andreIndkomster: "Övriga inkomster",
+      andreIndkomsterHelp: "CSN, barnbidrag, etc.",
+      fasteUdgifter: "Dina fasta utgifter (exkl. hyra)",
+      madDagligvarer: "Mat & dagligvaror",
+      transport: "Transport",
+      transportHelp: "Bil, buss, tåg",
+      boligforbrug: "El, vatten och värme",
+      boligforbrugHelp: "Betalas ofta via a konto. Sätt 0 om det ingår i hyran.",
+      forsikringer: "Försäkringar",
+      mobilInternet: "Mobil & internet",
+      abonnementer: "Abonnemang",
+      abonnementerHelp: "Streaming, gym, etc.",
+      andreUdgifter: "Övriga utgifter",
+      andreUdgifterHelp: "Kläder, hobby, etc.",
+      oensketOpsparing: "Önskat sparande",
+      maaned: "månad",
+      anbefaletMin: "10 % (rekommenderat min.)",
+      duKanBruge: "Du kan lägga på hyra",
+      prMaaned: "per månad i hyra",
+      iAltBolig: "Totalt med el, vatten och värme",
+      prMaanedBolig: "per månad",
+      godOekonomi: "God ekonomi",
+      acceptabelOekonomi: "Acceptabel ekonomi",
+      stramOekonomi: "Stram ekonomi",
+      vurderingGod: "Din ekonomi tillåter en bra hyra med utrymme för sparande och oförutsedda utgifter.",
+      vurderingOk: "Du kan betala hyran, men överväg att minska andra utgifter för mer buffert.",
+      vurderingRisikabel: "Din ekonomi är stram. Överväg billigare boende eller högre inkomst/lägre utgifter.",
+      samletIndkomst: "Total inkomst",
+      fasteUdgifterLabel: "Fasta utgifter",
+      opsparing: "Sparande",
+      regel30: "30%-regeln",
+      regel33: "33 %-regeln skulle ge",
+      ditBudget: "Din budget",
+      samletMaanedlig: "Total månadsinkomst",
+      tilgaengeligtHusleje: "Tillgängligt för hyra",
+      tipsTitle: "Tumregler för hyra",
+      tip30: "Hyran bör max vara 30 % av din nettoinkomst",
+      tipInkluder: "Hyra + el + vatten + värme + ev. internet",
+      tipBuffer: "Ha alltid 3–6 månaders utgifter i sparande",
+      tipDepositum: "Kom ihåg att spara upp till 3 månaders hyra i deposition",
+    },
+    no: {
+      dinIndkomst: "Din inntekt",
+      dinNettoLoen: "Din nettolønn per måned",
+      partnerRoommate: "Partner/romkamerat (valgfritt)",
+      andreIndkomster: "Andre inntekter",
+      andreIndkomsterHelp: "Studiestøtte, barnetrygd, etc.",
+      fasteUdgifter: "Dine faste utgifter (ekskl. husleie)",
+      madDagligvarer: "Mat & dagligvarer",
+      transport: "Transport",
+      transportHelp: "Bil, buss, tog",
+      boligforbrug: "Strøm, vann og varme",
+      boligforbrugHelp: "Betales ofte via a-konto. Sett 0 hvis det er inkludert i husleien.",
+      forsikringer: "Forsikringer",
+      mobilInternet: "Mobil & internett",
+      abonnementer: "Abonnementer",
+      abonnementerHelp: "Streaming, trening, etc.",
+      andreUdgifter: "Andre utgifter",
+      andreUdgifterHelp: "Klær, hobby, etc.",
+      oensketOpsparing: "Ønsket sparing",
+      maaned: "måned",
+      anbefaletMin: "10 % (anbefalt min.)",
+      duKanBruge: "Du kan bruke på husleie",
+      prMaaned: "per måned i husleie",
+      iAltBolig: "Totalt med strøm, vann og varme",
+      prMaanedBolig: "per måned",
+      godOekonomi: "God økonomi",
+      acceptabelOekonomi: "Akseptabel økonomi",
+      stramOekonomi: "Stram økonomi",
+      vurderingGod: "Økonomien din tillater en god husleie med plass til sparing og uforutsette utgifter.",
+      vurderingOk: "Du kan betale husleien, men vurder å redusere andre utgifter for mer buffer.",
+      vurderingRisikabel: "Økonomien din er stram. Vurder rimeligere bolig eller høyere inntekt/lavere utgifter.",
+      samletIndkomst: "Samlet inntekt",
+      fasteUdgifterLabel: "Faste utgifter",
+      opsparing: "Sparing",
+      regel30: "30%-regelen",
+      regel33: "33 %-regelen ville gitt",
+      ditBudget: "Ditt budsjett",
+      samletMaanedlig: "Samlet månedlig inntekt",
+      tilgaengeligtHusleje: "Tilgjengelig for husleie",
+      tipsTitle: "Tommelfingerregler for husleie",
+      tip30: "Husleien bør maks være 30 % av nettoinntekten din",
+      tipInkluder: "Husleie + strøm + vann + varme + evt. internett",
+      tipBuffer: "Ha alltid 3–6 måneders utgifter i sparing",
+      tipDepositum: "Husk å spare opp til 3 måneders husleie i depositum",
+    },
   };
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
+  // Indkomst og udgifter starter i HUSLEJE_STANDARD, som er det samme eksempel
+  // siden og meta descriptionen lover ("25.000 kr netto -> ca. 7.500 kr/md").
+  const [maanedligNettoLoen, setMaanedligNettoLoen] = useState<number>(HUSLEJE_STANDARD.maanedligNettoLoen);
+  const [partnerLoen, setPartnerLoen] = useState<number>(HUSLEJE_STANDARD.partnerLoen);
+  const [andreIndkomster, setAndreIndkomster] = useState<number>(HUSLEJE_STANDARD.andreIndkomster);
+
+  // Faste udgifter
+  const [madOgDagligvarer, setMadOgDagligvarer] = useState<number>(HUSLEJE_STANDARD.madOgDagligvarer);
+  const [transport, setTransport] = useState<number>(HUSLEJE_STANDARD.transport);
+  const [boligforbrug, setBoligforbrug] = useState<number>(HUSLEJE_STANDARD.boligforbrug);
+  const [forsikringer, setForsikringer] = useState<number>(HUSLEJE_STANDARD.forsikringer);
+  const [mobilOgInternet, setMobilOgInternet] = useState<number>(HUSLEJE_STANDARD.mobilOgInternet);
+  const [abonnementer, setAbonnementer] = useState<number>(HUSLEJE_STANDARD.abonnementer);
+  const [andreUdgifter, setAndreUdgifter] = useState<number>(HUSLEJE_STANDARD.andreUdgifter);
+
+  // Opsparing
+  const [opsparingProcent, setOpsparingProcent] = useState<number>(HUSLEJE_STANDARD.opsparingProcent);
+  const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'husleje-budget') {
+      const inputs = urlState.inputs;
+      if (inputs.maanedligNettoLoen !== undefined) setMaanedligNettoLoen(inputs.maanedligNettoLoen);
+      if (inputs.partnerLoen !== undefined) setPartnerLoen(inputs.partnerLoen);
+      if (inputs.andreIndkomster !== undefined) setAndreIndkomster(inputs.andreIndkomster);
+      if (inputs.madOgDagligvarer !== undefined) setMadOgDagligvarer(inputs.madOgDagligvarer);
+      if (inputs.transport !== undefined) setTransport(inputs.transport);
+      if (inputs.boligforbrug !== undefined) setBoligforbrug(inputs.boligforbrug);
+      if (inputs.forsikringer !== undefined) setForsikringer(inputs.forsikringer);
+      if (inputs.mobilOgInternet !== undefined) setMobilOgInternet(inputs.mobilOgInternet);
+      if (inputs.abonnementer !== undefined) setAbonnementer(inputs.abonnementer);
+      if (inputs.andreUdgifter !== undefined) setAndreUdgifter(inputs.andreUdgifter);
+      if (inputs.opsparingProcent !== undefined) setOpsparingProcent(inputs.opsparingProcent);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("husleje");
+    const timer = setTimeout(() => {
+      trackCalculation("husleje");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'husleje-budget',
+      inputs: { maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, boligforbrug, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, boligforbrug, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent]);
+
+  const handleReset = useCallback(() => {
+    setMaanedligNettoLoen(HUSLEJE_STANDARD.maanedligNettoLoen);
+    setPartnerLoen(HUSLEJE_STANDARD.partnerLoen);
+    setAndreIndkomster(HUSLEJE_STANDARD.andreIndkomster);
+    setMadOgDagligvarer(HUSLEJE_STANDARD.madOgDagligvarer);
+    setTransport(HUSLEJE_STANDARD.transport);
+    setBoligforbrug(HUSLEJE_STANDARD.boligforbrug);
+    setForsikringer(HUSLEJE_STANDARD.forsikringer);
+    setMobilOgInternet(HUSLEJE_STANDARD.mobilOgInternet);
+    setAbonnementer(HUSLEJE_STANDARD.abonnementer);
+    setAndreUdgifter(HUSLEJE_STANDARD.andreUdgifter);
+    setOpsparingProcent(HUSLEJE_STANDARD.opsparingProcent);
+  }, []);
+
+  const beregning = useMemo(
+    () =>
+      beregnHusleje({
+        maanedligNettoLoen,
+        partnerLoen,
+        andreIndkomster,
+        madOgDagligvarer,
+        transport,
+        boligforbrug,
+        forsikringer,
+        mobilOgInternet,
+        abonnementer,
+        andreUdgifter,
+        opsparingProcent,
+      }),
+    [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport,
+      boligforbrug, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent],
+  );
+
+  const vurderingTekst = beregning.vurdering === "god"
+    ? l.vurderingGod
+    : beregning.vurdering === "ok"
+      ? l.vurderingOk
+      : l.vurderingRisikabel;
+
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
   const getVurderingFarve = () => {
-    switch (beregning.vurdering) {
-      case "god": return "bg-green-100 text-green-800 border-green-300";
-      case "ok": return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "risikabel": return "bg-red-100 text-red-800 border-red-300";
+    switch (beregning.vurdering) {      case "god": return "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/20 dark:text-green-300 dark:border-green-700";
+      case "ok": return "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-700";
+      case "risikabel": return "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/20 dark:text-red-300 dark:border-red-700";
     }
   };
 
@@ -90,127 +263,120 @@ export default function HuslejeBudgetBeregner() {
     <div className="space-y-8">
       {/* Indkomst */}
       <div>
-        <h3 className="text-lg font-medium mb-4">💰 Din indkomst</h3>
+        <h2 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><Wallet className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.dinIndkomst}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Din nettoløn pr. måned</label>
-            <input
-              type="number"
-              min="0"
-              step="500"
-              value={maanedligNettoLoen}
-              onChange={(e) => setMaanedligNettoLoen(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <label htmlFor="huslejebudget-dinnettoloen" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.dinNettoLoen}</label>
+            <div className="relative">
+              <input id="huslejebudget-dinnettoloen"
+                type="number"
+                min="0"
+                step="500"
+                value={maanedligNettoLoen}
+                onChange={(e) => setMaanedligNettoLoen(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Partner/roommate (valgfrit)</label>
-            <input
-              type="number"
-              min="0"
-              step="500"
-              value={partnerLoen}
-              onChange={(e) => setPartnerLoen(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <label htmlFor="huslejebudget-partnerroommate" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.partnerRoommate}</label>
+            <div className="relative">
+              <input id="huslejebudget-partnerroommate"
+                type="number"
+                min="0"
+                step="500"
+                value={partnerLoen}
+                onChange={(e) => setPartnerLoen(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Andre indkomster</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={andreIndkomster}
-              onChange={(e) => setAndreIndkomster(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
-            <p className="text-xs text-gray-500 mt-1">SU, børnepenge, etc.</p>
+            <label htmlFor="huslejebudget-andreindkomster" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.andreIndkomster}</label>
+            <div className="relative">
+              <input id="huslejebudget-andreindkomster"
+                type="number"
+                min="0"
+                step="100"
+                value={andreIndkomster}
+                onChange={(e) => setAndreIndkomster(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.andreIndkomsterHelp}</p>
           </div>
         </div>
       </div>
 
       {/* Faste udgifter */}
       <div>
-        <h3 className="text-lg font-medium mb-4">📋 Dine faste udgifter (ekskl. husleje)</h3>
+        <h2 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><ClipboardList className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.fasteUdgifter}</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Mad & dagligvarer</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={madOgDagligvarer}
-              onChange={(e) => setMadOgDagligvarer(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <label htmlFor="huslejebudget-maddagligvarer" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.madDagligvarer}</label>
+            <div className="relative">
+              <input id="huslejebudget-maddagligvarer" type="number" min="0" step="100" value={madOgDagligvarer} onChange={(e) => setMadOgDagligvarer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Transport</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={transport}
-              onChange={(e) => setTransport(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
-            <p className="text-xs text-gray-500 mt-1">Bil, bus, tog</p>
+            <label htmlFor="huslejebudget-transport" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.transport}</label>
+            <div className="relative">
+              <input id="huslejebudget-transport" type="number" min="0" step="100" value={transport} onChange={(e) => setTransport(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.transportHelp}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Forsikringer</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={forsikringer}
-              onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <label htmlFor="huslejebudget-boligforbrug" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.boligforbrug}</label>
+            <div className="relative">
+              <input id="huslejebudget-boligforbrug" type="number" min="0" step="100" value={boligforbrug} onChange={(e) => setBoligforbrug(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.boligforbrugHelp}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Mobil & internet</label>
-            <input
-              type="number"
-              min="0"
-              step="50"
-              value={mobilOgInternet}
-              onChange={(e) => setMobilOgInternet(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <label htmlFor="huslejebudget-forsikringer" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.forsikringer}</label>
+            <div className="relative">
+              <input id="huslejebudget-forsikringer" type="number" min="0" step="100" value={forsikringer} onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Abonnementer</label>
-            <input
-              type="number"
-              min="0"
-              step="50"
-              value={abonnementer}
-              onChange={(e) => setAbonnementer(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
-            <p className="text-xs text-gray-500 mt-1">Streaming, fitness, etc.</p>
+            <label htmlFor="huslejebudget-mobilinternet" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.mobilInternet}</label>
+            <div className="relative">
+              <input id="huslejebudget-mobilinternet" type="number" min="0" step="50" value={mobilOgInternet} onChange={(e) => setMobilOgInternet(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Andre udgifter</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={andreUdgifter}
-              onChange={(e) => setAndreUdgifter(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
-            <p className="text-xs text-gray-500 mt-1">Tøj, hobby, etc.</p>
+            <label htmlFor="huslejebudget-abonnementer" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.abonnementer}</label>
+            <div className="relative">
+              <input id="huslejebudget-abonnementer" type="number" min="0" step="50" value={abonnementer} onChange={(e) => setAbonnementer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.abonnementerHelp}</p>
+          </div>
+          <div>
+            <label htmlFor="huslejebudget-andreudgifter" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.andreUdgifter}</label>
+            <div className="relative">
+              <input id="huslejebudget-andreudgifter" type="number" min="0" step="100" value={andreUdgifter} onChange={(e) => setAndreUdgifter(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.andreUdgifterHelp}</p>
           </div>
         </div>
       </div>
 
       {/* Opsparing */}
       <div>
-        <label className="block text-sm font-medium mb-2">
-          Ønsket opsparing: {opsparingProcent}% ({formatKr(beregning.opsparingBeloeb)}/måned)
+        <label htmlFor="huslejebudget-oensketopsparing" className="block text-sm font-medium mb-2 dark:text-gray-200">
+          {l.oensketOpsparing}: {opsparingProcent} % ({formatKr(beregning.opsparingBeloeb)}/{l.maaned})
         </label>
-        <input
+        <input id="huslejebudget-oensketopsparing"
           type="range"
           min="0"
           max="30"
@@ -218,94 +384,116 @@ export default function HuslejeBudgetBeregner() {
           onChange={(e) => setOpsparingProcent(parseFloat(e.target.value))}
           className="w-full"
         />
-        <div className="flex justify-between text-xs text-gray-500">
-          <span>0%</span>
-          <span>10% (anbefalet min.)</span>
-          <span>30%</span>
+        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+          <span>0 %</span>
+          <span>{l.anbefaletMin}</span>
+          <span>30 %</span>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}
       <div className="p-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl text-center text-white">
-        <p className="text-lg opacity-90 mb-2">Du kan bruge på husleje</p>
+        <p className="text-lg opacity-90 mb-2">{l.duKanBruge}</p>
         <p className="text-5xl md:text-6xl font-bold">
-          {formatKr(Math.max(0, beregning.anbefalet))}
+          {formatKr(beregning.anbefaletHusleje)}
         </p>
-        <p className="text-sm opacity-75 mt-2">pr. måned inkl. el, vand og varme</p>
+        <p className="text-sm opacity-75 mt-2">{l.prMaaned}</p>
+        {boligforbrug > 0 && (
+          <p className="text-sm opacity-75 mt-1">
+            {l.iAltBolig}: {formatKr(beregning.anbefaletBoligudgifter)} {l.prMaanedBolig}
+          </p>
+        )}
       </div>
 
       {/* Vurdering */}
       <div className={`p-4 rounded-lg border ${getVurderingFarve()}`}>
         <p className="font-medium mb-1">
-          {beregning.vurdering === "god" && "✅ God økonomi"}
-          {beregning.vurdering === "ok" && "⚠️ Acceptabel økonomi"}
-          {beregning.vurdering === "risikabel" && "🚨 Stram økonomi"}
+          {beregning.vurdering === "god" && (
+            <span className="inline-flex items-center gap-1.5"><CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.godOekonomi}</span>
+          )}
+          {beregning.vurdering === "ok" && (
+            <span className="inline-flex items-center gap-1.5"><TriangleAlert className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.acceptabelOekonomi}</span>
+          )}
+          {beregning.vurdering === "risikabel" && (
+            <span className="inline-flex items-center gap-1.5"><Siren className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.stramOekonomi}</span>
+          )}
         </p>
-        <p className="text-sm">{beregning.vurderingTekst}</p>
+        <p className="text-sm">{vurderingTekst}</p>
       </div>
 
       {/* Detaljeret oversigt */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 bg-white border rounded-lg text-center">
-          <p className="text-xl font-bold text-gray-700">{formatKr(beregning.samletIndkomst)}</p>
-          <p className="text-sm text-gray-500">Samlet indkomst</p>
+        <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+          <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatKr(beregning.samletIndkomst)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{l.samletIndkomst}</p>
         </div>
-        <div className="p-4 bg-white border rounded-lg text-center">
-          <p className="text-xl font-bold text-red-600">{formatKr(beregning.fasteUdgifter)}</p>
-          <p className="text-sm text-gray-500">Faste udgifter</p>
+        <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+          <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatKr(beregning.fasteUdgifter + boligforbrug)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{l.fasteUdgifterLabel}</p>
         </div>
-        <div className="p-4 bg-white border rounded-lg text-center">
-          <p className="text-xl font-bold text-blue-600">{formatKr(beregning.opsparingBeloeb)}</p>
-          <p className="text-sm text-gray-500">Opsparing</p>
+        <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+          <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{formatKr(beregning.opsparingBeloeb)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{l.opsparing}</p>
         </div>
-        <div className="p-4 bg-white border rounded-lg text-center">
-          <p className="text-xl font-bold text-green-600">{formatKr(beregning.maxHusleje30Pct)}</p>
-          <p className="text-sm text-gray-500">30% reglen</p>
+        <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+          <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatKr(beregning.maxBoligudgifter)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{l.regel30}</p>
         </div>
       </div>
+      <p className="-mt-4 text-xs text-gray-500 dark:text-gray-400">
+        {l.regel33}: {formatKr(beregning.maxBoligudgifter33)} {l.prMaanedBolig}
+      </p>
 
       {/* Budget oversigt */}
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b">
-          <h3 className="font-medium">Dit budget</h3>
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
+          <h2 className="font-medium dark:text-white">{l.ditBudget}</h2>
         </div>
         <div className="p-4">
           <div className="space-y-3">
-            <div className="flex justify-between">
-              <span>Samlet månedlig indkomst</span>
-              <span className="font-bold text-green-600">+{formatKr(beregning.samletIndkomst)}</span>
+            <div className="flex justify-between dark:text-gray-200">
+              <span>{l.samletMaanedlig}</span>
+              <span className="font-bold text-green-600 dark:text-green-400">+{formatKr(beregning.samletIndkomst)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Mad & dagligvarer</span>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>{l.madDagligvarer}</span>
               <span>-{formatKr(madOgDagligvarer)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Transport</span>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>{l.transport}</span>
               <span>-{formatKr(transport)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Forsikringer</span>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>{l.boligforbrug}</span>
+              <span>-{formatKr(boligforbrug)}</span>
+            </div>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>{l.forsikringer}</span>
               <span>-{formatKr(forsikringer)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Mobil & internet</span>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>{l.mobilInternet}</span>
               <span>-{formatKr(mobilOgInternet)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Abonnementer</span>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>{l.abonnementer}</span>
               <span>-{formatKr(abonnementer)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Andre udgifter</span>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>{l.andreUdgifter}</span>
               <span>-{formatKr(andreUdgifter)}</span>
             </div>
-            <div className="flex justify-between text-blue-600">
-              <span>Opsparing ({opsparingProcent}%)</span>
+            <div className="flex justify-between text-blue-600 dark:text-blue-400">
+              <span>{l.opsparing} ({opsparingProcent} %)</span>
               <span>-{formatKr(beregning.opsparingBeloeb)}</span>
             </div>
-            <div className="flex justify-between font-bold text-lg border-t pt-3">
-              <span>Tilgængeligt til husleje</span>
-              <span className={beregning.tilHusleje >= 0 ? "text-green-600" : "text-red-600"}>
+            <div className="flex justify-between font-bold text-lg border-t dark:border-gray-700 pt-3 dark:text-gray-200">
+              <span>{l.tilgaengeligtHusleje}</span>
+              <span className={beregning.tilHusleje >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
                 {formatKr(beregning.tilHusleje)}
               </span>
             </div>
@@ -313,14 +501,23 @@ export default function HuslejeBudgetBeregner() {
         </div>
       </div>
 
+      <div className="flex justify-center">
+        <CopyResultButton text={`Max husleje: ${formatKr(beregning.anbefaletHusleje)}/måned`} />
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Huslejebudget-beregner"
+          resultSummary={`Max husleje: ${formatKr(beregning.anbefaletHusleje)}/måned`}
+        />
+      </div>
+
       {/* Tips */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-medium text-blue-800 mb-2">💡 Tommelfingerregler for husleje</h3>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li>• <strong>30% reglen:</strong> Husleje bør max være 30% af din nettoindkomst</li>
-          <li>• <strong>Inkluder alt:</strong> Husleje + el + vand + varme + evt. internet</li>
-          <li>• <strong>Buffer:</strong> Hav altid 3-6 måneders udgifter i opsparing</li>
-          <li>• <strong>Depositor:</strong> Husk at spare op til 3 måneders husleje i depositum</li>
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <h2 className="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.tipsTitle}</h2>
+        <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+          <li>• <strong>{l.regel30}:</strong> {l.tip30}</li>
+          <li>• <strong>{locale === "se" ? "Inkludera allt" : locale === "no" ? "Inkluder alt" : "Inkluder alt"}:</strong> {l.tipInkluder}</li>
+          <li>• <strong>Buffer:</strong> {l.tipBuffer}</li>
+          <li>• <strong>{locale === "se" ? "Deposition" : "Depositum"}:</strong> {l.tipDepositum}</li>
         </ul>
       </div>
     </div>

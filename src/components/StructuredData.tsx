@@ -1,5 +1,10 @@
 // JSON-LD Structured Data Components for SEO
 
+import { stripInlineMarkdown } from "@/components/inline-markdown";
+import { getDomainConfig } from "@/lib/domain-config";
+import { localizedPath } from "@/lib/locale-slugs";
+import { OG_IMAGE_URL } from "@/lib/page-helpers";
+
 interface FAQItem {
   question: string;
   answer: string;
@@ -10,6 +15,8 @@ interface CalculatorSchemaProps {
   description: string;
   url: string;
   category?: string;
+  siteName?: string;
+  currency?: string;
 }
 
 interface FAQSchemaProps {
@@ -24,7 +31,8 @@ interface WebSiteSchemaProps {
 
 interface BreadcrumbItem {
   name: string;
-  url: string;
+  /** Omitted for crumbs that are not a navigable page (e.g. a category that only exists on another domain, or the current page). */
+  url?: string;
 }
 
 interface BreadcrumbSchemaProps {
@@ -36,25 +44,31 @@ export function CalculatorSchema({
   description,
   url,
   category = "Calculator",
+  siteName,
+  currency,
 }: CalculatorSchemaProps) {
+  const pageUrl = new URL(url);
+  const domainConfig = getDomainConfig(pageUrl.hostname);
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     name,
     description,
-    url,
+    // Callers pass the internal slug; the schema names the URL this domain serves.
+    url: `${pageUrl.origin}${localizedPath(pageUrl.pathname, domainConfig.locale)}${pageUrl.search}`,
     applicationCategory: category,
     operatingSystem: "All",
     browserRequirements: "Requires JavaScript",
+    inLanguage: domainConfig.hreflangCode,
     offers: {
       "@type": "Offer",
       price: "0",
-      priceCurrency: "DKK",
+      priceCurrency: currency || domainConfig.currency,
     },
     provider: {
       "@type": "Organization",
-      name: "MinBeregner.dk",
-      url: "https://minberegner.dk",
+      name: siteName || domainConfig.siteName,
+      url: domainConfig.baseUrl,
     },
   };
 
@@ -72,10 +86,10 @@ export function FAQSchema({ items }: FAQSchemaProps) {
     "@type": "FAQPage",
     mainEntity: items.map((item) => ({
       "@type": "Question",
-      name: item.question,
+      name: stripInlineMarkdown(item.question),
       acceptedAnswer: {
         "@type": "Answer",
-        text: item.answer,
+        text: stripInlineMarkdown(item.answer),
       },
     })),
   };
@@ -97,19 +111,11 @@ export function WebSiteSchema({ name, url, description }: WebSiteSchemaProps) {
     description,
     publisher: {
       "@type": "Organization",
-      name: "MinBeregner.dk",
+      name,
       logo: {
         "@type": "ImageObject",
-        url: `${url}/logo.png`,
+        url: `${url}/icon.svg`,
       },
-    },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${url}/?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
     },
   };
 
@@ -129,7 +135,7 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: item.url,
+      ...(item.url ? { item: item.url } : {}),
     })),
   };
 
@@ -141,21 +147,80 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
   );
 }
 
-export function OrganizationSchema() {
+interface ArticleSchemaProps {
+  title: string;
+  description: string;
+  url: string;
+  /** ISO, fx "2026-02-17". */
+  datePublished: string;
+  /** ISO eller `null` — sender ikke `dateModified` hvis indlægget ikke viser en opdatering. */
+  dateModified?: string | null;
+  category?: string;
+}
+
+export function ArticleSchema({
+  title,
+  description,
+  url,
+  datePublished,
+  dateModified,
+  category = "Guide",
+}: ArticleSchemaProps) {
+  const pageUrl = new URL(url);
+  const domainConfig = getDomainConfig(pageUrl.hostname);
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#artikel`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    headline: title,
+    description,
+    url,
+    inLanguage: domainConfig.hreflangCode,
+    datePublished,
+    ...(dateModified ? { dateModified } : {}),
+    articleSection: category,
+    image: `${domainConfig.baseUrl}${OG_IMAGE_URL}`,
+    author: {
+      "@type": "Organization",
+      name: domainConfig.siteName,
+      url: domainConfig.baseUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: domainConfig.siteName,
+      url: domainConfig.baseUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${domainConfig.baseUrl}/icon.svg`,
+      },
+    },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+export function OrganizationSchema({
+  name = "MinBeregner.dk",
+  url = "https://minberegner.dk",
+  description = "Gratis online beregnere til økonomi, sundhed og hverdag.",
+}: {
+  name?: string;
+  url?: string;
+  description?: string;
+} = {}) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "MinBeregner.dk",
-    url: "https://minberegner.dk",
-    logo: "https://minberegner.dk/logo.png",
-    description:
-      "Danmarks samling af gratis online beregnere til økonomi, sundhed og hverdag.",
-    sameAs: [],
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "customer support",
-      availableLanguage: "Danish",
-    },
+    name,
+    url,
+    logo: `${url}/icon.svg`,
+    description,
   };
 
   return (

@@ -13,3 +13,9 @@ build/
 .DS_Store
 *.log
 .env*
+!.env.example
+
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo
+tsconfig.test.tsbuildinfo
+tsconfig.app.tsbuildinfo

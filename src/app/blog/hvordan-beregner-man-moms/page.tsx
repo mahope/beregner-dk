@@ -1,32 +1,43 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
+import { OG_IMAGE } from "@/lib/page-helpers";
+import { Lightbulb } from "lucide-react";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Hvordan beregner man moms? En komplet guide | MinBeregner.dk",
-  description:
-    "Lær alt om dansk moms: Hvordan du tillægger og fratrækker 25% moms, hvornår du skal momsregistreres, og hvad der er momsfrit.",
-  keywords: [
-    "beregn moms",
-    "hvordan beregner man moms",
-    "tillæg moms",
-    "fratræk moms",
-    "25% moms",
-    "moms guide",
-    "momsberegning",
-  ],
-  openGraph: {
-    title: "Hvordan beregner man moms? En komplet guide",
-    description: "Lær alt om dansk moms: Tillæg, fratræk og beregn 25% moms korrekt.",
-    url: `${baseUrl}/blog/hvordan-beregner-man-moms`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/hvordan-beregner-man-moms`,
-  },
-};
+  return {
+    title: { absolute: "Hvordan beregner man moms? En komplet guide" },
+    description:
+      "Lær alt om dansk moms: Hvordan du tillægger og fratrækker 25% moms, hvornår du skal momsregistreres, og hvad der er momsfrit.",
+    keywords: [
+      "beregn moms",
+      "hvordan beregner man moms",
+      "tillæg moms",
+      "fratræk moms",
+      "25% moms",
+      "moms guide",
+      "momsberegning",
+    ],
+    openGraph: {
+      images: OG_IMAGE,
+      title: "Hvordan beregner man moms? En komplet guide",
+      description: "Lær alt om dansk moms: Tillæg, fratræk og beregn 25% moms korrekt.",
+      url: `${baseUrl}/blog/hvordan-beregner-man-moms`,
+      type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/hvordan-beregner-man-moms`,
+    },
+  };
+}
 
 const faqItems = [
   {
@@ -46,6 +57,11 @@ const faqItems = [
 export default function MomsGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="hvordan-beregner-man-moms"
+        title="Hvordan beregner man moms? En komplet guide"
+        description="Lær alt om dansk moms: Hvordan du tillægger og fratrækker 25% moms, hvornår du skal momsregistreres, og hvad der er momsfrit."
+      />
       <FAQSchema items={faqItems} />
 
       {/* Breadcrumb */}
@@ -71,7 +87,9 @@ export default function MomsGuidePage() {
 
         <p className="lead">
           Moms (merværdiafgift) er en afgift på 25% der lægges på næsten alle varer og 
-          tjenesteydelser i Danmark. I denne guide lærer du, hvordan du beregner moms korrekt.
+          tjenesteydelser i Danmark. I denne guide lærer du, hvordan du beregner moms korrekt. 
+          Har du et beløb, du vil regne på med det samme, kan du bruge vores{" "}
+          <Link href="/moms" className="text-blue-600 hover:underline">momsberegner</Link>.
         </p>
 
         <h2>Hvad er moms?</h2>
@@ -87,11 +105,11 @@ export default function MomsGuidePage() {
 
         <h2>Sådan beregner du moms</h2>
         
-        <h3>Tillæg moms til en pris</h3>
+        <h3>Læg moms til en pris</h3>
         <p>
           Når du har en pris uden moms og vil finde prisen inkl. moms:
         </p>
-        <div className="bg-blue-50 p-4 rounded-lg not-prose mb-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose mb-4">
           <p className="font-mono text-lg">Pris inkl. moms = Pris uden moms × 1,25</p>
           <p className="text-sm text-gray-600 mt-2">
             Eksempel: 800 kr × 1,25 = 1.000 kr inkl. moms
@@ -102,7 +120,7 @@ export default function MomsGuidePage() {
         <p>
           Når du har en pris inkl. moms og vil finde prisen uden moms:
         </p>
-        <div className="bg-blue-50 p-4 rounded-lg not-prose mb-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose mb-4">
           <p className="font-mono text-lg">Pris uden moms = Pris inkl. moms ÷ 1,25</p>
           <p className="text-sm text-gray-600 mt-2">
             Eksempel: 1.000 kr ÷ 1,25 = 800 kr uden moms
@@ -113,32 +131,46 @@ export default function MomsGuidePage() {
         <p>
           Når du vil finde selve momsbeløbet i en pris inkl. moms:
         </p>
-        <div className="bg-blue-50 p-4 rounded-lg not-prose mb-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose mb-4">
           <p className="font-mono text-lg">Moms = Pris inkl. moms - (Pris inkl. moms ÷ 1,25)</p>
           <p className="text-sm text-gray-600 mt-2">
             Eksempel: 1.000 kr - 800 kr = 200 kr i moms
           </p>
         </div>
 
-        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-yellow-800">💡 Vigtig pointe</p>
-          <p className="text-yellow-700 text-sm mt-1">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
+          <p className="font-medium text-yellow-800 flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-yellow-500 shrink-0" aria-hidden="true" />
+            Vigtig pointe
+          </p>
+          <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
             Momsandelen i en pris inkl. moms er <strong>20%</strong> (ikke 25%). 
             Det skyldes at 200 kr af 1.000 kr er 20%. Momsen beregnes af prisen 
-            <em>uden</em> moms, ikke af totalen.
+            <em>uden</em> moms, ikke af totalen. Forvirret over procenter? Brug vores{" "}
+            <Link href="/procent" className="text-blue-600 hover:underline">procentberegner</Link>.
           </p>
         </div>
 
         <h2>Momsregistrering for virksomheder</h2>
         <p>
           Virksomheder med en årlig omsætning over <strong>50.000 kr</strong> skal 
-          momsregistreres hos SKAT. Som momsregistreret virksomhed:
+          momsregistreres hos Skattestyrelsen. Er du freelancer? Læs vores{" "}
+          <Link href="/blog/saadan-finder-du-din-timepris-som-freelancer" className="text-blue-600 hover:underline">guide til timepris</Link>{" "}
+          og brug <Link href="/timepris" className="text-blue-600 hover:underline">timepris-beregneren</Link>.
+          Som momsregistreret virksomhed:
         </p>
         <ul>
           <li>Opkræver du moms af dit salg (salgsmoms)</li>
           <li>Kan du trække moms fra på erhvervsmæssige indkøb (købsmoms)</li>
-          <li>Afregner du forskellen med SKAT (typisk kvartalsvis)</li>
+          <li>Afregner du forskellen med Skattestyrelsen (typisk kvartalsvis)</li>
         </ul>
+
+        <h2>Moms vs. indkomstskat</h2>
+        <p>
+          Moms er ikke det samme som indkomstskat. Moms betales af forbrugeren på varer/ydelser, 
+          mens indkomstskat trækkes af din løn. Vil du se hvor meget du får udbetalt efter skat? 
+          Brug vores <Link href="/loen-efter-skat" className="text-blue-600 hover:underline">løn efter skat beregner</Link>.
+        </p>
 
         <h2>Hvad er momsfrit?</h2>
         <p>
@@ -155,8 +187,28 @@ export default function MomsGuidePage() {
 
         <h2>Brug vores momsberegner</h2>
         <p>
-          Du behøver ikke regne i hovedet. Brug vores gratis momsberegner til at 
-          tillægge eller fratrække moms med det samme.
+          Du behøver ikke regne i hovedet. Vores{" "}
+          <Link href="/moms" className="text-blue-600 hover:underline">momsberegner</Link>{" "}
+          har en knap til hver af de tre regnestykker ovenfor, så du indtaster ét beløb
+          og får svaret med det samme:
+        </p>
+        <ul>
+          <li>
+            <strong>Læg moms til</strong> — du har et beløb uden moms og vil have prisen
+            inkl. moms (800 kr bliver 1.000 kr).
+          </li>
+          <li>
+            <strong>Træk moms fra</strong> — du har en pris inkl. moms og vil finde
+            prisen uden moms (1.000 kr bliver 800 kr).
+          </li>
+          <li>
+            <strong>Find moms</strong> — du vil se, hvor stor en andel af en pris inkl.
+            moms der er (1.000 kr indeholder 200 kr, svarende til 20 %).
+          </li>
+        </ul>
+        <p>
+          Beregneren bruger den danske sats på 25 %, og du kan kopiere, dele og printe
+          resultatet, når du er færdig.
         </p>
 
         <div className="not-prose my-8">
@@ -176,6 +228,12 @@ export default function MomsGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/moms"
+        handling="Beregn din moms"
+        beskrivelse="Læg moms til en pris ekskl. moms, eller træk moms fra en pris inkl. moms."
+      />
 
       {/* Related links */}
       <div className="mt-12 pt-8 border-t">

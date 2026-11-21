@@ -1,0 +1,28 @@
+{
+  "data": {
+    "BBR_Enhed": {
+      "nodes": [
+        {
+          "id_lokalId": "77d016cf-172f-458d-95f6-92ed16c14c2c",
+          "status": "10",
+          "bygning": "7bbfce32-a928-43f7-a458-2834ee4ba737",
+          "enh020EnhedensAnvendelse": "510",
+          "enh026EnhedensSamledeAreal": 68,
+          "enh027ArealTilBeboelse": 68,
+          "virkningTil": null,
+          "registreringTil": null
+        },
+        {
+          "id_lokalId": "e249bfb9-5129-4e69-bf45-d7fef699309a",
+          "status": "6",
+          "bygning": "20b6d6e6-3ca8-4073-a2cc-7f6364bc0972",
+          "enh020EnhedensAnvendelse": "510",
+          "enh026EnhedensSamledeAreal": 113,
+          "enh027ArealTilBeboelse": 113,
+          "virkningTil": null,
+          "registreringTil": null
+        }
+      ]
+    }
+  }
+}

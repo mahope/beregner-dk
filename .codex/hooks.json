@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --connect-timeout 2 http://127.0.0.1:59956/hook/busy?ptyId=38067aa8-238f-400d-a5fb-0c5fa820f2ff"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s --connect-timeout 2 http://127.0.0.1:59956/hook/stop?ptyId=38067aa8-238f-400d-a5fb-0c5fa820f2ff"
+          }
+        ]
+      }
+    ]
+  }
+}

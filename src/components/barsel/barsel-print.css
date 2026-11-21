@@ -1,0 +1,69 @@
+/* Weeks only one parent can use (pregnancy leave, earmarked weeks) are striped. */
+.barsel-stribet {
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-white) 55%, transparent) 0 2px,
+    transparent 2px 5px
+  );
+}
+
+.dark .barsel-stribet {
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-gray-900) 55%, transparent) 0 2px,
+    transparent 2px 5px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barsel-planlaegger *,
+  .barsel-planlaegger *::before,
+  .barsel-planlaegger *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print layout for the parental-leave planner: one tidy A4 overview. */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  .barsel-planlaegger,
+  .barsel-planlaegger * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .barsel-print {
+    font-size: 10pt;
+    line-height: 1.35;
+    color: #000;
+  }
+
+  .barsel-print p,
+  .barsel-print li {
+    max-width: none;
+  }
+
+  .barsel-print table {
+    page-break-inside: auto;
+  }
+
+  .barsel-print tr {
+    page-break-inside: avoid;
+  }
+
+  /* Floating overlays (cookie banner, assistant button) never belong on paper. */
+  body:has(.barsel-print) .fixed {
+    display: none !important;
+  }
+
+  /* Everything else on the page (intro, FAQ, links) is hidden when printing the plan. */
+  .barsel-side-indhold {
+    display: none !important;
+  }
+}

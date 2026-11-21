@@ -1,38 +1,209 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { SunMedium } from "lucide-react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton, ResetButton } from "@/components/ui";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+import { utcOffsetMinutter, type DstRegel } from "@/lib/sommertid";
+import { formatNumber } from "@/lib/format";
 
+/**
+ * Én række pr. tidszone. Navn og by ligger i *samme* række som offsetten, så
+ * en zone ikke kan have en dansk by og et svensk navn.
+ *
+ * `navn` og `by` er den danske form. `navnSe`/`bySe` er kun sat, når den
+ * svenske form afviger — samme konvention som `src/lib/tidszone-reference.ts`
+ * (`by` + `bySe`), så de to tabeller læses ens.
+ *
+ * Før C66 lå de samme oplysninger to steder: dette array med danske navne, og et
+ * `labels`-objekt med `navn`/`by` pr. locale, som displayen brugte. Arrayet var
+ * altså halvt dødt, og en redigering der havde brugt `tz.navn` ville have skrevet
+ * dansk på beraknare.se uden at nogen test kunne se det. Én række, én oversættelse.
+ */
 interface Tidszone {
   id: string;
+  /** Zonenavn med offset-forklaring, fx "Danmark (CET/CEST)". Dansk form. */
   navn: string;
-  offset: number; // UTC offset i minutter
+  /** Svensk form af `navn`, når den afviger. */
+  navnSe?: string;
+  offset: number; // UTC offset i minutter (vintertid)
+  offsetSommer?: number; // UTC offset i minutter (sommertid)
+  dst: DstRegel;
+  /** Byen i zonen, fx "København". Dansk form. */
   by: string;
+  /** Svensk form af `by`, når den afviger (Athen = Aten). */
+  bySe?: string;
 }
 
+/** Hjemtidszonen (Danmark på .dk, Sverige på .se): CET = UTC+1, CEST = UTC+2. */
+const HJEM_VINTER = 60;
+const HJEM_SOMMER = 120;
+const HJEM_DST: DstRegel = "eu";
+
+// `dk` er id'et for hjemtidszonen. Danmark og Sverige deler CET/CEST (UTC+1/+2),
+// så id'et og offsettet er uændret, mens navn og by mærkes pr. locale med `Se`-
+// varianter. Det holder gamle delte links (`?d=...fraTidszone=dk`) gyldige på
+// begge domæner.
+//
+// `offsetSommer` og `dst` er nødvendige, fordi vinteroffsetten alene gav
+// forkerte svar i den del af året, hvor Danmark har sommertid. Forskellen til
+// USA er 6 timer på 337 af årets 365 dage og 5 timer i de 28 øvrige, fordi
+// USA skifter anden søndag i marts og første søndag i november mens Danmark
+// skifter sidste søndag i marts og oktober. Tokyo (ingen sommertid) er 8
+// timer foran om vinteren og 7 timer foran mens Danmark har CEST, og Sydney
+// ligger mellem 8 og 10 timer foran. Det er den bevægelse, brugeren ellers
+// ikke så. `src/lib/sommertid.ts` slår sommer-
+// perioden op, og `TidszoneBeregner.test.tsx` holder offsettene samstemt med
+// `src/lib/tidszone-reference.ts`, som sidder i brødteksten.
+//
+// Kun de zoner, hvor den svenske form faktisk afviger, har en `Se`-variant:
+// Danmark/Sverige, USA's to kyster, Grækenland og Grønland. Resten står med det
+// samme ord på begge sprog (London, Tokyo, Dubai, São Paulo …), så en `navnSe`
+// der bare gentager `navn` ville være en løgn, testen `de zoner der afviger …`
+// fanger.
 const tidszoner: Tidszone[] = [
-  { id: "dk", navn: "Danmark (CET/CEST)", offset: 60, by: "København" },
-  { id: "uk", navn: "Storbritannien (GMT/BST)", offset: 0, by: "London" },
-  { id: "us_east", navn: "USA Østkyst (EST/EDT)", offset: -300, by: "New York" },
-  { id: "us_west", navn: "USA Vestkyst (PST/PDT)", offset: -480, by: "Los Angeles" },
-  { id: "japan", navn: "Japan (JST)", offset: 540, by: "Tokyo" },
-  { id: "china", navn: "Kina (CST)", offset: 480, by: "Beijing" },
-  { id: "australia", navn: "Australien (AEST)", offset: 600, by: "Sydney" },
-  { id: "india", navn: "Indien (IST)", offset: 330, by: "Mumbai" },
-  { id: "dubai", navn: "Dubai (GST)", offset: 240, by: "Dubai" },
-  { id: "brazil", navn: "Brasilien (BRT)", offset: -180, by: "São Paulo" },
-  { id: "germany", navn: "Tyskland (CET/CEST)", offset: 60, by: "Berlin" },
-  { id: "france", navn: "Frankrig (CET/CEST)", offset: 60, by: "Paris" },
-  { id: "thailand", navn: "Thailand (ICT)", offset: 420, by: "Bangkok" },
-  { id: "singapore", navn: "Singapore (SGT)", offset: 480, by: "Singapore" },
-  { id: "south_africa", navn: "Sydafrika (SAST)", offset: 120, by: "Johannesburg" },
+  { id: "dk", navn: "Danmark (CET/CEST)", navnSe: "Sverige (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "København", bySe: "Stockholm" },
+  { id: "uk", navn: "Storbritannien (GMT/BST)", offset: 0, offsetSommer: 60, dst: "eu", by: "London" },
+  { id: "us_east", navn: "USA Østkyst (EST/EDT)", navnSe: "USA Östkusten (EST/EDT)", offset: -300, offsetSommer: -240, dst: "us", by: "New York" },
+  { id: "us_west", navn: "USA Vestkyst (PST/PDT)", navnSe: "USA Västkusten (PST/PDT)", offset: -480, offsetSommer: -420, dst: "us", by: "Los Angeles" },
+  { id: "japan", navn: "Japan (JST)", offset: 540, dst: "ingen", by: "Tokyo" },
+  { id: "china", navn: "Kina (CST)", offset: 480, dst: "ingen", by: "Beijing" },
+  { id: "australia", navn: "Australien (AEST)", offset: 600, offsetSommer: 660, dst: "au", by: "Sydney" },
+  { id: "india", navn: "Indien (IST)", offset: 330, dst: "ingen", by: "Mumbai" },
+  { id: "dubai", navn: "Dubai (GST)", offset: 240, dst: "ingen", by: "Dubai" },
+  { id: "brazil", navn: "Brasilien (BRT)", offset: -180, dst: "ingen", by: "São Paulo" },
+  { id: "germany", navn: "Tyskland (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "Berlin" },
+  { id: "france", navn: "Frankrig (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "Paris" },
+  { id: "greece", navn: "Grækenland (EET/EEST)", navnSe: "Grekland (EET/EEST)", offset: 120, offsetSommer: 180, dst: "eu", by: "Athen", bySe: "Aten" },
+  { id: "greenland", navn: "Grønland (WGT/WGST)", navnSe: "Grönland (WGT/WGST)", offset: -120, offsetSommer: -60, dst: "eu", by: "Nuuk" },
+  { id: "thailand", navn: "Thailand (ICT)", offset: 420, dst: "ingen", by: "Bangkok" },
+  { id: "singapore", navn: "Singapore (SGT)", offset: 480, dst: "ingen", by: "Singapore" },
+  { id: "south_africa", navn: "Sydafrika (SAST)", offset: 120, dst: "ingen", by: "Johannesburg" },
 ];
 
+/**
+ * Den fælles tabel. Eksporteres, fordi `TidszoneBeregner.test.tsx` krydschecker
+ * offsettene mod `src/lib/tidszone-reference.ts` — den eneste anden tabel med
+ * de samme zoner. Der er ingen anden forbruger i `src/app`.
+ */
+export const TIDSZONER_BEREGNER = tidszoner;
+
 export default function TidszoneBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      nowIn: (by: string) => `Klokken nu i ${by}`,
+      fromZone: "Fra tidszone",
+      toZone: "Til tidszone",
+      timeDiff: "Tidsforskel",
+      hoursWord: "timer",
+      // `forskel` er allerede formateret, så brudtal skrives med komma på alle
+      // domæner. Se `formaterForskel`.
+      diffSentence: (tilBy: string, forskel: string, ahead: boolean, fraBy: string) =>
+        `${tilBy} er ${forskel} timer${ahead ? " foran" : " bagud"} ${fraBy}`,
+      convertTitle: "Konverter et specifikt tidspunkt",
+      hourLabel: "Time",
+      minuteLabel: "Minut",
+      dayBefore: "(dagen før)",
+      nextDay: "(næste dag)",
+      // Den kopierede tekst skal kunne tåles at læse uden for den side, den er
+      // kopieret fra. Før C56 var den "12:00 i København = 19:00 i Tokyo" uden
+      // dato og uden forskel — en påstand, der er sand i dag og forkert til
+      // vinter, fordi forskellen følger sommertiden. Derfor står der både
+      // forskellen og den dato, den gælder for, i strengen.
+      summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string, forskel: string, dato: string) =>
+        `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy}${dagTekst ? ` ${dagTekst}` : ""}. ${forskel}. Gælder ${dato} — forskellen følger sommertiden.`,
+      calcName: "Tidszoneberegner",
+      diffFromHome: "Tidsforskel fra Danmark",
+      hourSuffix: "t",
+      dstTitle: "Om sommertid",
+      dstBody:
+        "Beregneren følger sommertiden for dagens dato, så tidsforskellen er den faktiske. Danmark skifter til sommertid sidste søndag i marts og tilbage sidste søndag i oktober, mens USA skifter anden søndag i marts og første søndag i november. I de få dage omkring skiftet kan svaret derfor afvige en time.",
+      dateLocale: "da-DK",
+    },
+    se: {
+      nowIn: (by: string) => `Klockan nu i ${by}`,
+      fromZone: "Från tidszon",
+      toZone: "Till tidszon",
+      timeDiff: "Tidsskillnad",
+      hoursWord: "timmar",
+      diffSentence: (tilBy: string, forskel: string, ahead: boolean, fraBy: string) =>
+        `${tilBy} är ${forskel} timmar${ahead ? " före" : " efter"} ${fraBy}`,
+      convertTitle: "Konvertera en specifik tidpunkt",
+      hourLabel: "Timme",
+      minuteLabel: "Minut",
+      dayBefore: "(dagen innan)",
+      nextDay: "(nästa dag)",
+      summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string, forskel: string, dato: string) =>
+        `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy}${dagTekst ? ` ${dagTekst}` : ""}. ${forskel}. Gäller ${dato} — skillnaden följer sommartiden.`,
+      calcName: "Tidszonsberäknare",
+      diffFromHome: "Tidsskillnad från Sverige",
+      hourSuffix: "h",
+      dstTitle: "Om sommartid",
+      dstBody:
+        "Beräknaren följer sommartiden för dagens datum, så tidsskillnaden är den verkliga. Sverige byter till sommartid sista söndagen i mars och tillbaka sista söndagen i oktober, medan USA byter andra söndagen i mars och första söndagen i november. Under de få dagarna kring bytet kan svaret därför avvika en timme.",
+      dateLocale: "sv-SE",
+    },
+  } as const;
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
+  // Én afgørelse for hele komponenten: er vi på svensk? Zonenavnene læser den
+  // samme afgørelse som `labels`, så en ny locale uden eget `labels`-objekt
+  // (i dag `no`, som ikke er live endnu) får ét sprog frem for at blande danske
+  // zonenavne med dansk brødtekst. Før C66 blev det samme spørgsmål stillet på
+  // to måder — ét sted som `labels[locale] || labels.da` og ét sted som et
+  // bogstaveligt `locale === "se"` — og de to kan glide fra hinanden.
+  const erSvensk = l === labels.se;
+  const zoneBy = (tz: Tidszone) => (erSvensk ? tz.bySe ?? tz.by : tz.by);
+  const zoneNavn = (tz: Tidszone) => (erSvensk ? tz.navnSe ?? tz.navn : tz.navn);
+
   const [fraTidszone, setFraTidszone] = useState<string>("dk");
   const [tilTidszone, setTilTidszone] = useState<string>("us_east");
   const [timer, setTimer] = useState<number>(12);
   const [minutter, setMinutter] = useState<number>(0);
   const [aktuelTid, setAktuelTid] = useState<Date>(new Date());
+
+  const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'tidszone') {
+      const inputs = urlState.inputs;
+      if (inputs.fraTidszone) setFraTidszone(inputs.fraTidszone);
+      if (inputs.tilTidszone) setTilTidszone(inputs.tilTidszone);
+      if (inputs.timer !== undefined) setTimer(inputs.timer);
+      if (inputs.minutter !== undefined) setMinutter(inputs.minutter);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("tidszone");
+    const timer = setTimeout(() => {
+      trackCalculation("tidszone");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'tidszone',
+      inputs: { fraTidszone, tilTidszone, timer, minutter },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [fraTidszone, tilTidszone, timer, minutter]);
 
   // Opdater aktuel tid hvert sekund
   useEffect(() => {
@@ -42,12 +213,27 @@ export default function TidszoneBeregner() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleReset = useCallback(() => {
+    setFraTidszone("dk");
+    setTilTidszone("us_east");
+    setTimer(12);
+    setMinutter(0);
+  }, []);
+
   const beregning = useMemo(() => {
     const fraTz = tidszoner.find(t => t.id === fraTidszone)!;
     const tilTz = tidszoner.find(t => t.id === tilTidszone)!;
-    
+
+    // Sommertiden afgør den faktiske forskel. Dagens dato bruges, fordi
+    // værktøjet ikke tager en dato ind: spørgsmålet "hvad er klokken i USA, når
+    // det er 12 i Danmark" handler om det aktuelle klokkeslæt. Uden dette svarede
+    // beregneren med vinterforskellen og lå en time forkert i halvdelen af året.
+    const iDag = aktuelTid;
+    const fraOffset = utcOffsetMinutter(fraTz.offset, fraTz.offsetSommer, fraTz.dst, iDag);
+    const tilOffset = utcOffsetMinutter(tilTz.offset, tilTz.offsetSommer, tilTz.dst, iDag);
+
     // Forskellen i minutter
-    const forskelMinutter = tilTz.offset - fraTz.offset;
+    const forskelMinutter = tilOffset - fraOffset;
     const forskelTimer = forskelMinutter / 60;
     
     // Beregn tid i destination
@@ -71,9 +257,9 @@ export default function TidszoneBeregner() {
     const now = new Date();
     const utcNow = now.getTime() + now.getTimezoneOffset() * 60000;
     
-    const fraLokalTid = new Date(utcNow + fraTz.offset * 60000);
-    const tilLokalTid = new Date(utcNow + tilTz.offset * 60000);
-    
+    const fraLokalTid = new Date(utcNow + fraOffset * 60000);
+    const tilLokalTid = new Date(utcNow + tilOffset * 60000);
+
     return {
       fraTz,
       tilTz,
@@ -91,8 +277,26 @@ export default function TidszoneBeregner() {
     return `${timer.toString().padStart(2, '0')}:${minutter.toString().padStart(2, '0')}`;
   };
 
+  // Tidsforskellen er ikke altid et helt tal: Indien (UTC+5.30) ligger 3,5
+  // timer foran Danmark om sommeren. `String(3.5)` skrev "3.5" med punktum i
+  // dansk og svensk tekst, på tre steder: i det store tal, i sætningen under
+  // det og i huskelisten. Ét format her, så de tre ikke kan komme til at sige
+  // hver sit — samme konvention som `formatNumber` i `MomsBeregner`.
+  const formaterForskel = (timer: number) =>
+    formatNumber(timer, locale, { maximumFractionDigits: 2 });
+
+  // Datoen i den delte tekst. Den skal være læsbar i en sætning, altså lang
+  // form ("27. september 2026"), ikke 27/09/2026.
+  const formatDatoLang = (dato: Date) => {
+    return dato.toLocaleDateString(l.dateLocale, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   const formatDato = (dato: Date) => {
-    return dato.toLocaleTimeString('da-DK', {
+    return dato.toLocaleTimeString(l.dateLocale, {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
@@ -100,51 +304,75 @@ export default function TidszoneBeregner() {
   };
 
   const getDagTekst = () => {
-    if (beregning.dagForskel === -1) return "(dagen før)";
-    if (beregning.dagForskel === 1) return "(næste dag)";
+    if (beregning.dagForskel === -1) return l.dayBefore;
+    if (beregning.dagForskel === 1) return l.nextDay;
     return "";
   };
+
+  // Ét sted bygger forskelsætningen og ét sted bygger den delte tekst, så
+  // Kopier og Del ikke kan komme til at sige hver sit (/moms gjorde netop det,
+  // før C52 lagde dem i samme kald).
+  const forskelsaetning = () =>
+    l.diffSentence(
+      zoneBy(beregning.tilTz),
+      formaterForskel(Math.abs(beregning.forskelTimer)),
+      beregning.forskelTimer >= 0,
+      zoneBy(beregning.fraTz)
+    );
+
+  const deltTekst = () =>
+    l.summary(
+      formatTid(timer, minutter),
+      zoneBy(beregning.fraTz),
+      formatTid(beregning.tilTimer, beregning.tilMinutter),
+      zoneBy(beregning.tilTz),
+      getDagTekst(),
+      forskelsaetning(),
+      formatDatoLang(aktuelTid)
+    );
 
   return (
     <div className="space-y-8">
       {/* Aktuelle tider */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 bg-blue-50 rounded-lg text-center">
-          <p className="text-sm text-gray-600">Klokken nu i {beregning.fraTz.by}</p>
-          <p className="text-3xl font-bold text-blue-600">{formatDato(beregning.fraLokalTid)}</p>
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">{l.nowIn(zoneBy(beregning.fraTz))}</p>
+          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatDato(beregning.fraLokalTid)}</p>
         </div>
-        <div className="p-4 bg-green-50 rounded-lg text-center">
-          <p className="text-sm text-gray-600">Klokken nu i {beregning.tilTz.by}</p>
-          <p className="text-3xl font-bold text-green-600">{formatDato(beregning.tilLokalTid)}</p>
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">{l.nowIn(zoneBy(beregning.tilTz))}</p>
+          <p className="text-3xl font-bold text-green-600 dark:text-green-400">{formatDato(beregning.tilLokalTid)}</p>
         </div>
       </div>
 
       {/* Valg af tidszoner */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Fra tidszone</label>
+          <label htmlFor="tz-fra-zone" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fromZone}</label>
           <select
+            id="tz-fra-zone"
             value={fraTidszone}
             onChange={(e) => setFraTidszone(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
           >
             {tidszoner.map((tz) => (
               <option key={tz.id} value={tz.id}>
-                {tz.by} - {tz.navn}
+                {zoneBy(tz)} - {zoneNavn(tz)}
               </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Til tidszone</label>
+          <label htmlFor="tz-til-zone" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.toZone}</label>
           <select
+            id="tz-til-zone"
             value={tilTidszone}
             onChange={(e) => setTilTidszone(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
           >
             {tidszoner.map((tz) => (
               <option key={tz.id} value={tz.id}>
-                {tz.by} - {tz.navn}
+                {zoneBy(tz)} - {zoneNavn(tz)}
               </option>
             ))}
           </select>
@@ -152,28 +380,28 @@ export default function TidszoneBeregner() {
       </div>
 
       {/* Tidsforskel info */}
-      <div className="p-4 bg-gray-100 rounded-lg text-center">
-        <p className="text-gray-600">
-          Tidsforskel: <strong>
-            {beregning.forskelTimer >= 0 ? '+' : ''}{beregning.forskelTimer} timer
+      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
+        <p className="text-gray-600 dark:text-gray-400">
+          {l.timeDiff}: <strong className="dark:text-white">
+            {beregning.forskelTimer >= 0 ? '+' : ''}{formaterForskel(beregning.forskelTimer)} {l.hoursWord}
           </strong>
         </p>
-        <p className="text-sm text-gray-500">
-          {beregning.tilTz.by} er {Math.abs(beregning.forskelTimer)} timer 
-          {beregning.forskelTimer >= 0 ? ' foran' : ' bagud'} {beregning.fraTz.by}
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {forskelsaetning()}
         </p>
       </div>
 
       {/* Manuel tid konvertering */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="font-medium mb-4">Konverter et specifikt tidspunkt</h3>
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+        <h3 className="font-medium mb-4 dark:text-white">{l.convertTitle}</h3>
         <div className="grid grid-cols-2 gap-4 max-w-xs">
           <div>
-            <label className="block text-sm font-medium mb-2">Time</label>
+            <label htmlFor="tz-time" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hourLabel}</label>
             <select
+              id="tz-time"
               value={timer}
               onChange={(e) => setTimer(parseInt(e.target.value))}
-              className="w-full px-4 py-3 border rounded-lg"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
             >
               {Array.from({ length: 24 }, (_, i) => (
                 <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
@@ -181,11 +409,12 @@ export default function TidszoneBeregner() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Minut</label>
+            <label htmlFor="tz-minut" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.minuteLabel}</label>
             <select
+              id="tz-minut"
               value={minutter}
               onChange={(e) => setMinutter(parseInt(e.target.value))}
-              className="w-full px-4 py-3 border rounded-lg"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
             >
               {[0, 15, 30, 45].map((m) => (
                 <option key={m} value={m}>{m.toString().padStart(2, '0')}</option>
@@ -195,16 +424,20 @@ export default function TidszoneBeregner() {
         </div>
       </div>
 
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
+      </div>
+
       {/* Konverteringsresultat */}
       <div className="p-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl text-white">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
           <div className="text-center">
-            <p className="text-sm opacity-75">{beregning.fraTz.by}</p>
+            <p className="text-sm opacity-75">{zoneBy(beregning.fraTz)}</p>
             <p className="text-4xl font-bold">{formatTid(timer, minutter)}</p>
           </div>
           <div className="text-center text-4xl">→</div>
           <div className="text-center">
-            <p className="text-sm opacity-75">{beregning.tilTz.by}</p>
+            <p className="text-sm opacity-75">{zoneBy(beregning.tilTz)}</p>
             <p className="text-4xl font-bold">
               {formatTid(beregning.tilTimer, beregning.tilMinutter)}
             </p>
@@ -213,22 +446,47 @@ export default function TidszoneBeregner() {
         </div>
       </div>
 
-      {/* Populære tidszoner fra Danmark */}
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b">
-          <h3 className="font-medium">Tidsforskel fra Danmark</h3>
+      {/* Share button */}
+      <div className="flex justify-center gap-3">
+        <CopyResultButton text={deltTekst()} />
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName={l.calcName}
+          resultSummary={deltTekst()}
+        />
+      </div>
+
+      {/* Populære tidszoner fra hjemtidszonen */}
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+          <h3 className="font-medium dark:text-white">{l.diffFromHome}</h3>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             {tidszoner
               .filter(tz => tz.id !== 'dk')
               .map((tz) => {
-                const forskel = (tz.offset - 60) / 60;
+                const hjemNu = utcOffsetMinutter(HJEM_VINTER, HJEM_SOMMER, HJEM_DST, aktuelTid);
+                const forskel = (utcOffsetMinutter(tz.offset, tz.offsetSommer, tz.dst, aktuelTid) - hjemNu) / 60;
+                // Forskellen ændrer sig for de zoner, der skifter sommertid på
+                // et andet tidspunkt end Danmark. Da vises vinterværdien, ellers
+                // ville tallet se fast ud, mens det bevæger sig to gange om året.
+                const vinterDato = new Date(aktuelTid.getFullYear(), 0, 15);
+                const hjemVinter = utcOffsetMinutter(HJEM_VINTER, HJEM_SOMMER, HJEM_DST, vinterDato);
+                const forskelVinter =
+                  (utcOffsetMinutter(tz.offset, tz.offsetSommer, tz.dst, vinterDato) - hjemVinter) / 60;
+                const viserVinter = forskelVinter !== forskel;
+                const vinterOrd = erSvensk ? "på vintern" : "om vinteren";
                 return (
-                  <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 rounded">
-                    <span>{tz.by}</span>
-                    <span className="font-mono">
-                      {forskel >= 0 ? '+' : ''}{forskel}t
+                  <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                    <span className="dark:text-gray-300">{zoneBy(tz)}</span>
+                    <span className="font-mono dark:text-white">
+                      {forskel >= 0 ? '+' : ''}{formaterForskel(forskel)}{l.hourSuffix}
+                      {viserVinter && (
+                        <span className="text-gray-500 dark:text-gray-400">
+                          {' '}({forskelVinter >= 0 ? '+' : ''}{formaterForskel(forskelVinter)}{l.hourSuffix} {vinterOrd})
+                        </span>
+                      )}
                     </span>
                   </div>
                 );
@@ -238,12 +496,10 @@ export default function TidszoneBeregner() {
       </div>
 
       {/* Info */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="font-medium text-yellow-800 mb-2">⚠️ Om sommertid</h3>
-        <p className="text-sm text-yellow-700">
-          Denne beregner bruger standard tidsforskelle. Husk at sommertid (DST) kan påvirke 
-          den faktiske tidsforskel. Danmark skifter til sommertid sidste søndag i marts og 
-          tilbage sidste søndag i oktober.
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+        <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2 flex items-center gap-2"><SunMedium className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.dstTitle}</h3>
+        <p className="text-sm text-yellow-700 dark:text-yellow-400">
+          {l.dstBody}
         </p>
       </div>
     </div>

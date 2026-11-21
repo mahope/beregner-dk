@@ -1,0 +1,194 @@
+import Link from "next/link";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { BUNDFRADRAG, EFFEKTIV_MARGINAL_SATS, EKSEMPEL_BARN, EKSEMPLER_GUIDE } from "@/lib/arveafgift";
+import ArveafgiftBeregner from "@/components/ArveafgiftBeregner";
+import FAQ from "@/components/FAQ";
+import RelatedCalculators from "@/components/RelatedCalculators";
+import {
+  CalculatorSchema,
+  FAQSchema,
+} from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { TestamenteAffiliate } from "@/components/AffiliateBox";
+
+/** Bundfradraget i den skrivemåde brødteksten bruger: «392.300 kr». */
+const BUND_TEKST = BUNDFRADRAG.toLocaleString("da-DK");
+
+/** Den effektive marginale sats for søskende: 36,25. */
+const EFFEKTIV_PCT = (EFFEKTIV_MARGINAL_SATS * 100).toLocaleString("da-DK", {
+  maximumFractionDigits: 2,
+});
+
+export async function generateMetadata() {
+  return generatePageMetadata("arveafgift");
+}
+
+export default async function ArveafgiftPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("arveafgift", locale) || getPageData("arveafgift", "da")!;
+
+  return (
+    <div>
+      <CalculatorSchema
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/arveafgift`}
+        category={pageData.schemaCategory}
+      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/arveafgift" }]} />
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
+      <p className="text-gray-600 mb-8">
+        {pageData.description}
+      </p>
+
+      <ArveafgiftBeregner />
+
+      <TestamenteAffiliate className="mt-8" />
+
+      {locale === "da" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Arveafgift i Danmark</h2>
+        <p>
+          <strong>Arveafgift</strong> (også kaldet <strong>boafgift</strong>) er en skat, der betales af arvinger
+          efter en persons død. Reglerne varierer afhængigt af din <strong>relation til afdøde</strong>.
+        </p>
+
+        <h2>Bundfradrag og satser (2026)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Relation</th>
+              <th>Boafgift</th>
+              <th>Tillægsafgift</th>
+              <th>Bundfradrag</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ægtefælle</td>
+              <td>0 % (fritaget)</td>
+              <td>0 %</td>
+              <td>Ubegrænset</td>
+            </tr>
+            <tr>
+              <td>Børn, børnebørn, forældre</td>
+              <td>15 %</td>
+              <td>0 %</td>
+              <td>{BUND_TEKST} kr</td>
+            </tr>
+            <tr>
+              <td>Søskende</td>
+              <td>15 %</td>
+              <td>25 % af arv efter boafgift</td>
+              <td>{BUND_TEKST} kr</td>
+            </tr>
+            <tr>
+              <td>Andre (venner, fjern familie)</td>
+              <td>15 %</td>
+              <td>25 % af arv efter boafgift</td>
+              <td>{BUND_TEKST} kr</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Hvem betaler arveafgift?</h2>
+
+        <h3>Ægtefælle</h3>
+        <p>
+          Ægtefæller er <strong>helt fritaget</strong> for arveafgift i Danmark.
+          Dette gælder uanset størrelsen af arven. Ægtefællen arver alt boet
+          afgiftsfrit.
+        </p>
+
+        <h3>Børn, børnebørn og forældre</h3>
+        <p>
+          Nærmeste familie betaler <strong>15 % i boafgift</strong> af beløbet over bundfradraget
+          på <strong>{BUND_TEKST} kr</strong>. Der er ingen <strong>tillægsafgift</strong> for denne gruppe.
+        </p>
+        <ul>
+          <li><strong>Børn:</strong> Arv fra forældre</li>
+          <li><strong>Børnebarn:</strong> Arv fra bedsteforældre</li>
+          <li><strong>Forældre:</strong> Arv fra voksne børn (hvis der ikke er ægtefælle eller børn)</li>
+        </ul>
+
+        <h3>Søskende</h3>
+        <p>
+          Søskende betaler <strong>15 % boafgift</strong> plus <strong>25 % tillægsafgift</strong> af arven efter
+          boafgift. Den <strong>effektive marginale sats</strong> er for store arvebeløb <strong>{EFFEKTIV_PCT} %</strong>.
+          <strong>Bemærk:</strong> Fra 1. januar 2027 afskaffes tillægsafgiften for
+          søskende, så de fremover kun betaler 15 % boafgift.
+        </p>
+
+        <h3>Andre arvinger</h3>
+        <p>
+          Venner, fjern familie og andre uden direkte familiemæssig tilknytning
+          betaler <strong>15 % boafgift + 25 % tillægsafgift</strong> af arven efter boafgift.
+          Der er <strong>intet bundfradrag</strong> for tillægsafgiften.
+        </p>
+
+        <h2>Bundfradraget</h2>
+        <p>
+          <strong>Bundfradraget</strong> på <strong>{BUND_TEKST} kr</strong> (2026) gælder for alle arvinger undtagen
+          ægtefæller. Det betyder, at de første {BUND_TEKST} kr af arven er
+          <strong>afgiftsfri</strong> — uanset hvem der arver.
+        </p>
+        <p>
+          <strong>Eksempel:</strong> Et barn arver {EKSEMPEL_BARN.arv.toLocaleString("da-DK")} kr.
+          Arveafgiften beregnes således:{" "}
+          ({EKSEMPEL_BARN.arv.toLocaleString("da-DK")} − {BUND_TEKST}) × 15 % ={" "}
+          {EKSEMPEL_BARN.boafgift.toLocaleString("da-DK")} kr i afgift.
+        </p>
+
+        <h2>Hvornår skal arveafgift betales?</h2>
+        <p>
+          Arveafgiften skal betales til <strong>Skattestyrelsen</strong> inden <strong>1 år efter dødsfaldet</strong>.
+          Boet afvikles typisk gennem en <strong>bobestyrer</strong> eller <strong>advokat</strong>, som sørger
+          for at beregne og afregne afgifterne.
+        </p>
+
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
+          <p className="font-medium text-yellow-800">Vigtigt</p>
+          <p className="text-yellow-700">
+            Denne beregner giver et estimat baseret på gældende 2026-satser.
+            De faktiske afgifter kan variere afhængigt af boets specifikke
+            forhold. Vi anbefaler at kontakte en bobestyrer eller advokat
+            for præcis beregning.
+          </p>
+        </div>
+      </div>
+      )}
+
+      <section className="mt-12">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-4 not-prose">
+          <p className="font-medium text-blue-800 dark:text-blue-300">
+            Læs guiden om regler og satser
+          </p>
+          <p className="text-blue-700 dark:text-blue-400">
+            Vores{" "}
+            <Link
+              href="/blog/arveafgift-regler-og-satser"
+              className="underline font-medium"
+            >
+              guide til arveafgift
+            </Link>{" "}
+            gennemgår bundfradraget, kredsene, tillægsafgiften og to fulde regneeksempler
+            på {EKSEMPLER_GUIDE.barn.arv.toLocaleString("da-DK")} kr til børn og{" "}
+            {EKSEMPLER_GUIDE.soeskende.arv.toLocaleString("da-DK")} kr til en søskende.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <FAQ items={pageData.faqItems} title="Ofte stillede spørgsmål om arveafgift" />
+      </section>
+
+      <section className="mt-12">
+        <RelatedCalculators current="/arveafgift" />
+      </section>
+    </div>
+  );
+}

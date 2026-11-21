@@ -1,0 +1,148 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, test } from "vitest";
+import { BLOG_ARTIKLER } from "@/lib/blog-artikler";
+import { getDomainConfigByLocale } from "@/lib/domain-config";
+import { localizedSlug } from "@/lib/locale-slugs";
+import { getAvailableSlugs } from "@/lib/page-data";
+import { buildRobots } from "./robots";
+import { buildSitemap } from "./sitemap";
+
+const lastModified = new Date("2026-09-24T00:00:00.000Z");
+
+describe("host-aware sitemap", () => {
+  test("uses only Danish calculator and section URLs on the Danish host", () => {
+    const sitemap = buildSitemap(getDomainConfigByLocale("da"), lastModified);
+    const urls = sitemap.map((entry) => String(entry.url));
+
+    expect(urls).toContain("https://minberegner.dk/loen-efter-skat");
+    expect(urls).not.toContain("https://minberegner.dk/lon-efter-skatt");
+    expect(urls.some((url) => url.includes("/kategori/"))).toBe(true);
+    expect(urls.some((url) => url.includes("/blog/"))).toBe(true);
+  });
+
+  test("uses only Swedish calculator URLs on the Swedish host", () => {
+    const sitemap = buildSitemap(getDomainConfigByLocale("se"), lastModified);
+    const urls = sitemap.map((entry) => String(entry.url));
+
+    for (const slug of ["tidskalkylator", "datum", "nedrakning", "tidszon", "leasing", "lon-efter-skatt", "bolan"]) {
+      expect(urls, slug).toContain(`https://beraknare.se/${slug}`);
+    }
+    // The Danish slugs of the renamed pages are 301s on this host, not pages.
+    for (const slug of ["su", "loen-efter-skat", "ugenummer", "flyttebudget", "tidsberegner", "dato", "nedtaelling", "tidszone"]) {
+      expect(urls, slug).not.toContain(`https://beraknare.se/${slug}`);
+    }
+    expect(urls.some((url) => url.includes("/kategori/"))).toBe(false);
+    expect(urls.some((url) => url.includes("/blog"))).toBe(false);
+  });
+
+  test("includes every available live-domain calculator exactly once", () => {
+    for (const locale of ["da", "se"] as const) {
+      const config = getDomainConfigByLocale(locale);
+      const urls = buildSitemap(config, lastModified).map((entry) => String(entry.url));
+      for (const slug of getAvailableSlugs(locale)) {
+        const matches = urls.filter(
+          (url) => url === `${config.baseUrl}/${localizedSlug(slug, locale)}`,
+        );
+        expect(matches, `${locale}/${slug}`).toHaveLength(1);
+      }
+    }
+  });
+
+  test("keeps one canonical host for every entry", () => {
+    for (const locale of ["da", "se"] as const) {
+      const config = getDomainConfigByLocale(locale);
+      const urls = buildSitemap(config, lastModified).map((entry) => String(entry.url));
+      expect(urls.every((url) => url.startsWith(config.baseUrl))).toBe(true);
+      expect(new Set(urls).size).toBe(urls.length);
+    }
+  });
+});
+
+describe("sitemap lastmod hygiene", () => {
+  test("omits lastmod for pages that only change on deploy", () => {
+    for (const locale of ["da", "se"] as const) {
+      const sitemap = buildSitemap(getDomainConfigByLocale(locale), lastModified);
+      const stable = sitemap.filter((entry) => entry.changeFrequency !== "daily");
+      expect(stable.length, locale).toBeGreaterThan(50);
+      for (const entry of stable) {
+        expect(entry.lastModified, String(entry.url)).toBeUndefined();
+      }
+    }
+  });
+
+  test("keeps lastmod for the pages that really change every day", () => {
+    for (const locale of ["da", "se"] as const) {
+      const sitemap = buildSitemap(getDomainConfigByLocale(locale), lastModified);
+      const daily = sitemap.filter((entry) => entry.changeFrequency === "daily");
+      expect(daily.length, locale).toBeGreaterThan(0);
+      for (const entry of daily) {
+        expect(entry.lastModified, String(entry.url)).toEqual(lastModified);
+      }
+      expect(daily.map((entry) => String(entry.url))).toContain(
+        `${getDomainConfigByLocale(locale).baseUrl}/valuta`
+      );
+    }
+  });
+
+  test("stable entries are identical no matter when the sitemap is fetched", () => {
+    // The route resolves the host from headers, so it is rendered per request.
+    // Two fetches minutes apart must not claim the site changed in between.
+    for (const locale of ["da", "se"] as const) {
+      const config = getDomainConfigByLocale(locale);
+      const early = buildSitemap(config, new Date("2026-09-24T00:00:00.000Z"));
+      const late = buildSitemap(config, new Date("2026-09-26T03:00:00.000Z"));
+      const strip = (entries: ReturnType<typeof buildSitemap>) =>
+        JSON.stringify(
+          entries.filter((entry) => entry.changeFrequency !== "daily")
+        );
+      expect(strip(late), locale).toBe(strip(early));
+    }
+  });
+});
+
+describe("blog articles in the sitemap", () => {
+  /**
+   * `getBlogSlugs` was a second, hand-maintained copy of `BLOG_ARTIKLER`, and
+   * `/blog/rentefradrag-2026-satser-og-regler` shipped without ever being added
+   * to the copy: the article was live and in the footer, but never in the
+   * sitemap. It now reads the shared list, and these tests hold it there.
+   */
+  test("lists every article that exists as a directory", () => {
+    const da = getDomainConfigByLocale("da");
+    const kataloger = readdirSync(join(__dirname, "blog"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+      .map((entry) => entry.name);
+    const urls = buildSitemap(da).map((entry) => String(entry.url));
+    for (const slug of kataloger) {
+      expect(urls, `${slug} mangler i sitemapet`).toContain(`${da.baseUrl}/blog/${slug}`);
+    }
+    expect(kataloger).toHaveLength(BLOG_ARTIKLER.length);
+  });
+
+  test("has no blog URL that is not a registered article", () => {
+    const da = getDomainConfigByLocale("da");
+    const urls = buildSitemap(da).map((entry) => String(entry.url));
+    const registreret = new Set(BLOG_ARTIKLER.map((artikel) => artikel.slug));
+    const slugs = urls
+      .filter((url) => url.startsWith(`${da.baseUrl}/blog/`))
+      .map((url) => url.slice(`${da.baseUrl}/blog/`.length));
+    expect(slugs.filter((slug) => !registreret.has(slug))).toEqual([]);
+  });
+
+  test("the Swedish sitemap has no blog articles", () => {
+    const urls = buildSitemap(getDomainConfigByLocale("se")).map((entry) => String(entry.url));
+    expect(urls.filter((url) => url.includes("beraknare.se/blog/"))).toEqual([]);
+  });
+});
+
+describe("host-aware robots", () => {
+  test("points each live host to its own sitemap", () => {
+    expect(buildRobots(getDomainConfigByLocale("da")).sitemap).toBe(
+      "https://minberegner.dk/sitemap.xml"
+    );
+    expect(buildRobots(getDomainConfigByLocale("se")).sitemap).toBe(
+      "https://beraknare.se/sitemap.xml"
+    );
+  });
+});

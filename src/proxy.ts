@@ -1,0 +1,80 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getDomainConfigForHost } from "@/lib/domain-config";
+import {
+  getIndexNowKeyFromPathname,
+  getIndexNowKeyPathname,
+} from "@/lib/indexnow";
+import { getRouteDecision } from "@/lib/routing";
+
+export function proxy(request: NextRequest) {
+  const hostname = request.headers.get("host") || "localhost";
+  const domainConfig = getDomainConfigForHost(hostname);
+  const locale = domainConfig?.locale || "da";
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-locale", locale);
+  requestHeaders.set("x-hostname", hostname);
+
+  // The IndexNow payload advertises `{host}/{key}.txt` as its `keyLocation`, and
+  // the protocol has the search engine fetch that exact URL before it accepts
+  // the submission. The key itself is an env value, so it cannot be a file in
+  // `public/`; this rewrite makes the advertised URL real on every domain, and
+  // it runs before the locale decision because the key file belongs to the host,
+  // not to one language. The route answers 404 for a key that is not configured.
+  const indexnowKey = getIndexNowKeyFromPathname(request.nextUrl.pathname);
+  if (indexnowKey) {
+    return NextResponse.rewrite(
+      new URL(getIndexNowKeyPathname(indexnowKey), request.url),
+      { request: { headers: requestHeaders } },
+    );
+  }
+
+  const decision = getRouteDecision(domainConfig, request.nextUrl.pathname);
+
+  if (decision.type === "redirect") {
+    const requestUrl = new URL(request.nextUrl.toString());
+    const redirectBase =
+      domainConfig && !domainConfig.baseUrl.includes("localhost")
+        ? domainConfig.baseUrl
+        : request.nextUrl.origin;
+    const redirectUrl = new URL(decision.destination, redirectBase);
+    redirectUrl.search = requestUrl.search;
+    redirectUrl.hash = requestUrl.hash;
+    return NextResponse.redirect(redirectUrl, decision.status);
+  }
+
+  if (decision.type === "rewrite") {
+    const rewriteUrl = new URL(decision.destination, request.url);
+    rewriteUrl.search = request.nextUrl.search;
+    const rewritten = NextResponse.rewrite(rewriteUrl, {
+      request: { headers: requestHeaders },
+    });
+    rewritten.headers.set("x-locale", locale);
+    rewritten.headers.set("x-hostname", hostname);
+    return rewritten;
+  }
+
+  if (decision.type === "not-found") {
+    const notFoundUrl = new URL(
+      "/locale-unavailable",
+      domainConfig?.baseUrl || request.nextUrl.origin
+    );
+    notFoundUrl.search = request.nextUrl.search;
+    return NextResponse.rewrite(notFoundUrl, {
+      status: 404,
+      request: { headers: requestHeaders },
+    });
+  }
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set("x-locale", locale);
+  response.headers.set("x-hostname", hostname);
+  return response;
+}
+
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/).*)",
+    "/api/:path*",
+  ],
+};

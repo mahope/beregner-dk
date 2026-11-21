@@ -1,124 +1,162 @@
-import type { Metadata } from "next";
-import DatoBeregner from "@/components/DatoBeregner";
+import { localizedPath } from "@/lib/locale-slugs";
+import { ResultAd } from "@/components/ads/AdBanner";
+import dynamic from "next/dynamic";
+const DatoBeregner = dynamic(() => import("@/components/DatoBeregner"));
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { getIntlLocale } from "@/lib/format";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import Link from "next/link";
+import { dageTilbageIAaret, getDageTilHubRækker, isDageTilLocale, formatTargetDate,
+} from "@/lib/dage-til";
+import { denneMaanedEksempel, maanedEksempel } from "@/lib/dato-eksempler";
+import { helligdagsnavne } from "@/lib/helligdage";
+import { naestePinseInterval } from "@/lib/pinse-intervaller";
+import { formatNumber } from "@/lib/format";
+import { getTextLocale, getDaSeLocale, getLocaleText } from "@/lib/locale-text";
 
-const baseUrl = "https://minberegner.dk";
-
-export const metadata: Metadata = {
-  title: "Datoberegner - Beregn dage mellem datoer gratis",
-  description:
-    "Gratis datoberegner. Beregn antal dage mellem to datoer, tilføj dage til en dato, beregn arbejdsdage, eller find din præcise alder.",
-  keywords: [
-    "datoberegner",
-    "dage mellem datoer",
-    "beregn dage",
-    "arbejdsdage beregner",
-    "tilføj dage til dato",
-    "alder beregner",
-    "hvor mange dage",
-    "dato kalkulator",
-  ],
-  openGraph: {
-    title: "Datoberegner - Beregn dage mellem datoer",
-    description:
-      "Beregn dage mellem datoer, arbejdsdage, eller din præcise alder. Gratis datoberegner.",
-    url: `${baseUrl}/dato`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/dato`,
-  },
+const dageTilHeading: Record<"da" | "se" | "no", string> = {
+  da: "Hvor mange dage er der til …?",
+  se: "Hur många dagar är det till …?",
+  no: "Hvor mange dager er det til …?",
 };
 
-const faqItems = [
-  {
-    question: "Hvordan beregner jeg dage mellem to datoer?",
-    answer:
-      "Vælg 'Dage mellem' og indtast start- og slutdato. Beregneren viser antal dage, uger, måneder, arbejdsdage og weekenddage.",
-  },
-  {
-    question: "Tæller beregneren arbejdsdage korrekt?",
-    answer:
-      "Beregneren tæller hverdage (mandag-fredag) som arbejdsdage. Den tager ikke højde for helligdage, da disse varierer fra år til år og afhænger af din branche/arbejdsplads.",
-  },
-  {
-    question: "Kan jeg trække dage fra en dato?",
-    answer:
-      "Ja! I 'Tilføj dage' tilstanden kan du indtaste et negativt tal for at gå tilbage i tid. F.eks. -30 for at finde datoen 30 dage før.",
-  },
-  {
-    question: "Hvordan beregner jeg min præcise alder?",
-    answer:
-      "Vælg 'Alder' og indtast din fødselsdato. Du får din alder i år, måneder og dage, samt total antal dage og uger du har levet.",
-  },
-  {
-    question: "Hvad er forskellen på 'Tilføj dage' og 'Arbejdsdage'?",
-    answer:
-      "'Tilføj dage' tæller alle kalenderdage (inkl. weekender). 'Arbejdsdage' springer weekender over og tæller kun hverdage.",
-  },
-  {
-    question: "Tager beregneren højde for skudår?",
-    answer:
-      "Ja, beregneren håndterer skudår korrekt. Februar har 29 dage i skudår (år der er delelige med 4, undtagen hele århundreder der ikke er delelige med 400).",
-  },
-  {
-    question: "Kan jeg bruge beregneren til projektplanlægning?",
-    answer:
-      "Ja! 'Arbejdsdage' funktionen er ideel til at beregne projektdeadlines. Indtast antal arbejdsdage, og se hvilken dato det svarer til.",
-  },
-  {
-    question: "Hvorfor er 'ca. måneder' ikke helt præcis?",
-    answer:
-      "Måneder har forskellig længde (28-31 dage), så vi bruger gennemsnittet på 30,44 dage per måned. For præcis beregning, brug dage eller uger.",
-  },
-];
+const dageTilIntro: Record<"da" | "se" | "no", string> = {
+  da: "Vil du se det præcise antal dage til en bestemt dato? Siden for hver dato tæller sig selv frem hver dag, så tallet er altid aktuelt.",
+  se: "Vill du veta exakt hur många dagar som är kvar till ett bestämt datum? Sidan för varje datum räknar om sig själv varje dag, så talet är alltid aktuellt.",
+  no: "Vil du se det presise antallet dager til en bestemt dato? Siden for hver dato teller seg selv frem hver dag, så tallet er alltid aktuelt.",
+};
 
-export default function DatoPage() {
+const dageTilRecalc: Record<"da" | "se" | "no", string> = {
+  da: "Tallet nedenfor er dagens antal dage, og det genberegnes hver dag.",
+  se: "Talet nedan är dagens antal dagar, och räknas om varje dag.",
+  no: "Tallet nedenfor er dagens antall dager, og det genberegnes hver dag.",
+};
+
+const dageTilListIntro: Record<"da" | "se" | "no", string> = {
+  da: "Listen dækker de datoer, der altid søges på. Skal du tælle til en helt anden dato — en fødselsdag, en deadline eller noget uden for listen — vælger du den i værktøjet «Dage til dato» ovenfor.",
+  se: "Listan tar upp de datum som alltid efterfrågas. Vill du räkna till ett helt annat datum — ett födelsedatum, en deadline eller något utanför listan — väljer du det i verktyget «Dagar till datum» ovanför.",
+  no: "Listen dekker de datoene som alltid søkes på. Skal du telle til en helt annen dato — en fødselsdag, en deadline eller noe utenfor listen — velger du den i verktøyet «Dager til dato» ovenfor.",
+};
+
+export async function generateMetadata() {
+  return generatePageMetadata("dato");
+}
+
+export default async function DatoPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("dato", locale) || getPageData("dato", "da")!;
+  // Search Console (2026-09-03→10-01) har "hvor mange dage er der til 1 december"
+  // (1.219 visninger, pos. 5) og "hvor mange dage er der til den 24 december"
+  // (1.001, pos. 5) som sidens to største søgninger, og 863 klik på 131.320
+  // visninger. `/dage-til/*` svarer på begge, men `/dato` linkede til ingen af
+  // dem først: hele kæden lå kun den anden vej. Listen svarer nu selv, og den
+  // henter rækkerne fra `getDageTilHubRækker` — samme funktion `/dage-til`-hubben
+  // og `/dage-til/*` selv bruger, så et tal i listen kan ikke glide fra sit eget
+  // regnestykke, og rækkerne kommer **nærmeste først**.
+  //
+  // Den sidste egenskab er rettelsen: listen lå i `getDageTilEvents`-rækkefølge,
+  // altså begivenhedernes rækkefølge og ikke datoernes, så Halloween (28 dage
+  // den 3. oktober) lå som række 13 og «1. december» (59 dage) som række 6.
+  // Den læser der spørger «hvor mange dage er der til 1 december» skulle rulle
+  // forbi tolv andre datoer for at finde sit eget svar, og «Hvor mange dage er
+  // der fra påske til pinse» (169 dage) lå oven i «påskedag» (176 dage) — de var
+  // ikke engang sorteret efter tallet. `getDageTilHubRækker` sorterer på
+  // `days`, og ved lige dag taler spørgsmålet, så rækkefølgen aldrig afhænger af
+  // rækkefølgen i begivenhedslisten.
+  const dageTilLinks = isDageTilLocale(locale)
+    ? getDageTilHubRækker(locale, new Date()).map((raekke) => ({
+        href: raekke.href,
+        question: raekke.question,
+        days: raekke.days,
+        target: formatTargetDate(raekke.targetDate, locale),
+        weeks: raekke.weeks,
+        daysLeft: raekke.daysLeft,
+      }))
+: [];
+  // "hvor mange dage er der tilbage af 2026?" (227 visninger, pos. 5 i dansk
+  // GSC) og "dagar till 31 dec" (367 visninger i svensk) er to søgninger om
+  // årets sidste dag — ikke om nytårsdag. Siden havde nul forekomster af
+  // "tilbage af", så taleren faldt hele vejen. Tallet regnes fra dagens dato,
+  // altså er den samme server-renderede side svar på dagens spørgsmål.
+  const textLocale = getTextLocale(locale);
+  const daSeLocale = getDaSeLocale(locale);
+  const tilbage = dageTilbageIAaret(new Date(), daSeLocale);
+  // "antal dage i en måned" er dansk autocompletes nr. 1 under både "antal dage
+  // i en måned" (nr. 2 er Excel) og "hvor mange dage i en måned" (nr. 2 er
+  // "uden weekender"), og svensk autocomplete spørger det samme med "antal
+  // dagar i en måned" og "hur många arbetsdagar i en måned". Siden svarede på
+  // året ("1 år = 365 dage") men aldrig på måneden: 0 forekomster af "i en
+  // måned" i begge sprog. Eksemplet følger det kalenderår siden ligger i, så
+  // skudårsflaget kan ikke blive stående fra et tidligere år.
+  const maaned = maanedEksempel(tilbage.year, 2, daSeLocale);
+  // "hvor mange dage er der i den her måned" er dansk autocompletes nr. 9 under
+  // "hvor mange dage er der i" (hvor nr. 1-6 og 8 er "i juli", "i august 2026"
+  // og således), og tabellen nedenfor svarer på den slags kun indirecte: tolv
+  // rækker, hvor læseren selv skal finde sin måned. `denneMaanedEksempel`
+  // læser dagen i Europe/Copenhagen og regner med de samme `daysBetween` og
+  // `taellArbejdsdage`, som rækkerne og `DatoBeregner` bruger.
+  const denneMaaned = denneMaanedEksempel(new Date(), daSeLocale);
+  // "hvor mange dage er der fra påske til pinse" og "hvor mange dage er der i
+  // pinsen" er de to øvrige danske autocomplete-træffere under "hvor mange
+  // dage er der til pinse", og de er *interval* spørgsmål, ikke nedtællinger.
+  // En dage-til-side ville svare med et tal der altid er det samme og se ud
+  // som en nedtælling, så de hører hjemme her, ved siden af måneds- og
+  // årstabellen. Afstandene (39, 49, 50) er uafhængige af året; datoerne er
+  // næste pinses, så en forældet rendering er synlig i teksten frem for at
+  // gemme sig i et tal der tilfældigvis stadig passer.
+  const pinse = isDageTilLocale(locale)
+    ? naestePinseInterval(new Date(), locale)
+    : null;
+  const pinseLocale = textLocale;
+  const pinseFormatLocale = daSeLocale;
+  // `getHelligdage` bygger lokale midnatspunkter, så en ISO-formatering ville
+  // trække dagen en enhed tilbage i de tidszoner, der ligger foran UTC. Begge
+  // formater normaliserer derfor til UTC-midnat først — samme greb som
+  // `formatTargetDate` gør på dage-til-siderne.
+  const pinseDato = (d: Date) =>
+    formatTargetDate(
+      new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())),
+      pinseFormatLocale
+    );
+  const pinseUgedag = (d: Date) =>
+    new Intl.DateTimeFormat(getIntlLocale(pinseLocale), {
+      weekday: "long",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())));
+
   return (
     <div>
       <CalculatorSchema
-        name="Datoberegner"
-        description="Gratis datoberegner. Beregn dage mellem datoer, arbejdsdage, eller din præcise alder."
-        url={`${baseUrl}/dato`}
-        category="UtilitiesApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/dato`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Datoberegner", url: `${baseUrl}/dato` },
-        ]}
-      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/dato" }]} />
 
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Datoberegner</span>
-      </nav>
-
-      <h1 className="text-3xl font-bold mb-2">Datoberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn antal dage mellem to datoer, tilføj dage til en dato, beregn
-        arbejdsdage, eller find din præcise alder.
+        {pageData.description}
       </p>
 
-      <DatoBeregner />
+      <DatoBeregner resultAd={<ResultAd page="/dato" />} />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du datoberegneren</h2>
-        <p>Datoberegneren har fire forskellige funktioner:</p>
+        <p>Datoberegneren har <strong>fire forskellige funktioner</strong>:</p>
 
         <h3>1. Dage mellem datoer</h3>
         <p>
-          Beregn hvor mange dage der er mellem to datoer. Du får også antal
+          Beregn hvor mange <strong>dage der er mellem to datoer</strong>. Du får også antal
           uger, ca. måneder, arbejdsdage og weekenddage.
         </p>
         <ul>
@@ -131,7 +169,7 @@ export default function DatoPage() {
 
         <h3>2. Tilføj dage</h3>
         <p>
-          Find ud af hvilken dato det bliver om X dage, eller hvilken dato det
+          Find ud af hvilken dato det bliver om <strong>X dage</strong>, eller hvilken dato det
           var for X dage siden.
         </p>
         <ul>
@@ -142,33 +180,207 @@ export default function DatoPage() {
 
         <h3>3. Arbejdsdage</h3>
         <p>
-          Beregn en dato baseret på antal arbejdsdage. Perfekt til
-          projektplanlægning og deadline-beregning.
+          Beregn en dato baseret på antal <strong>arbejdsdage</strong>. Perfekt til
+          {" "}<strong>projektplanlægning</strong> og deadline-beregning.
         </p>
         <ul>
           <li>Vælg startdato</li>
           <li>Indtast antal arbejdsdage</li>
-          <li>Weekender springes automatisk over</li>
+          <li>Weekender, helligdage og nytårsaften springes over</li>
         </ul>
 
         <h3>4. Alder</h3>
         <p>
-          Beregn din præcise alder i år, måneder og dage. Se også hvor mange
-          dage du har levet, og hvornår du fylder år.
+          Beregn din <strong>præcise alder</strong> i år, måneder og dage. Se også hvor mange
+          dage du har levet, og hvornår du fylder år. Vil du finde ud af, hvor gammel du
+          var på en bestemt dato, kan du bruge{" "}
+          <Link href="/alder">aldersberegneren</Link>.
+        </p>
+
+        <h2>Hvor mange dage er der på et år?</h2>
+        <p>
+          Et kalenderår har 365 dage, men de tolv måneder er ikke lige lange.
+          Alle 12 med dage, hverdage og weekenddage står på en{" "}
+          <Link href="/dage-i-aaret">egen side med hele årets oversigt</Link>,
+          sammen med hvor mange dage der er tilbage af året. Hvis du vil vide
+          hvor mange dage der er tilbage af i år, står der en{" "}
+          <Link href="/dage-tilbage-i-aaret">egen nedtælling for året</Link>.
+          Skal du bruge hvor mange dage der er i en bestemt måned, står det på{" "}
+          <Link href="/dage-i-maaneden">en side for hver måned</Link>.
+        </p>
+
+        <h2>Sådan tæller du dage mellem to datoer i Excel</h2>
+        <p>
+          Vil du kun have det ene spørgsmål, så ligger der en{" "}
+          <Link href="/dage-mellem-datoer">dedikeret side til dage mellem datoer</Link>{" "}
+          med det samme værktøj og de tre oftest stillede spørgsmål.
+        </p>
+        <p>
+          Læg startdatoen i <strong>A1</strong> og slutdatoen i{" "}
+          <strong>B1</strong>, så er den korte formel{" "}
+          <code>=B1-A1</code>. Den tæller forskellen i hele døgn: 1. januar
+          2026 til 1. januar 2027 er <strong>365 dage</strong>.
+        </p>
+        <p>
+          <code>=DATEDIF(A1;B1;&quot;d&quot;)</code> giver præcis det samme tal,
+          men kan også tælle i måneder og år:{" "}
+          <code>=DATEDIF(A1;B1;&quot;m&quot;)</code> giver hele måneder og{" "}
+          <code>=DATEDIF(A1;B1;&quot;y&quot;)</code> hele år. 15. marts 2026 til
+          25. september 2026 er <strong>194 dage</strong> — altså 6 hele måneder.
+        </p>
+        <p>
+          Dansk Excel bruger <strong>semikolon</strong> som skilletegn, fordi
+          komma er decimaltegn. <code>DATEDIF</code> er et skjult navn: det
+          står ikke i formelassistenten, men virker i alle Excel-versioner.
+        </p>
+        <p>
+          Skal du tælle <strong>arbejdsdage</strong> eller se hvilke
+          helligdage der ligger imellem, gør datoberegneren det samme uden at
+          du skal skrive en eneste formel.
+        </p>
+
+        <h2>Hvor mange dage er der tilbage af {tilbage.year}?</h2>
+        <p>
+          Der er{" "}
+          <strong>
+            {tilbage.dage} {tilbage.dage === 1 ? "dag" : "dage"} tilbage af{" "}
+            {tilbage.year}
+          </strong>{" "}
+          — altså {tilbage.uger} uger og {tilbage.dageEfterUger}{" "}
+          {tilbage.dageEfterUger === 1 ? "dag" : "dage"}. Det er den
+          officielle kalender, ikke kalorier: årets sidste dag er 31. december,
+          så tællingen står på 0 nytårsaften og begynder forfra 1. januar.
+        </p>
+        <p>
+          Er du mere interesseret i datoen end i årstiden, så tæller{" "}
+          <a href="/dage-til/1-december">dagene til 1. december</a> og{" "}
+          <a href="/dage-til/31-december">nytårsaften</a> — de er forskellige
+          spørgsmål med forskellige tal.
+        </p>
+
+        {locale === "da" && (
+        <>
+        <h2>Hvor mange dage er der i den her måned?</h2>
+        <p>
+          {denneMaaned.name} {denneMaaned.year} har{" "}
+          <strong>{denneMaaned.dage} dage</strong> i alt. I dag er det{" "}
+          <strong>
+            {denneMaaned.dato}. {denneMaaned.name}
+          </strong>
+          , altså månedens {denneMaaned.dageForbruget}. dag, så der er{" "}
+          <strong>
+            {denneMaaned.dageTilbage}{" "}
+            {denneMaaned.dageTilbage === 1 ? "dag" : "dage"} tilbage
+          </strong>{" "}
+          {denneMaaned.name} — måneden slutter{" "}
+          <strong>{denneMaaned.sidsteDag}</strong>.
+        </p>
+        <p>
+          Ser du vil regne den i Excel, er månedens længde{" "}
+          <code>=DATEDIF({denneMaaned.foersteDag};{denneMaaned.sidsteDag};&quot;d&quot;)+1</code>{" "}
+          = <strong>{denneMaaned.dage} dage</strong>, og de dage der er gået er
+          dagens dato. Uden weekender og helligdage er der{" "}
+          <strong>{denneMaaned.arbejdsdage} arbejdsdage</strong> i{" "}
+          {denneMaaned.name} {denneMaaned.year} — samme tal som tabellen
+          nedenfor.
+        </p>
+        </>
+        )}
+
+        <h2>Hvor mange dage er der i en måned?</h2>
+        <p>
+          En måned har <strong>28 til 31 dage</strong> — den korteste er februar
+          med 28 dage (29 i skudår), og den længste er de syv måneder med 31
+          dage. I gennemsnit er en måned{" "}
+          <strong>{formatNumber(maaned.gennemsnit, "da", { maximumFractionDigits: 2 })} dage</strong>,
+          fordi et gregorianisk år gennemsnitligt har 365,2425 dage fordelt på 12
+          måneder. Det gennemsnit er altså et regnestykke, ikke en virkelig
+          måned.
+        </p>
+        <p>
+          Her er alle tolv måneder i {maaned.year}, med dage, arbejdsdage og
+          weekenddage. Tallene er de samme som værktøjet ovenfor regner, så du
+          kan efterprøve hver enkelt række.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Måned</th>
+              <th>Dage</th>
+              <th>Arbejdsdage</th>
+              <th>Weekenddage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {maaned.raekker.map((r) => (
+              <tr key={r.month}>
+                <th scope="row">
+                  {r.name}
+                  {r.skudaar ? " (skudår)" : ""}
+                </th>
+                <td>{r.dage}</td>
+                <td>{r.arbejdsdage}</td>
+                <td>{r.weekenddage}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Vil du have antallet uden weekender, står det i kolonnen{" "}
+          <strong>Arbejdsdage</strong> — den tæller mandag til fredag og springer
+          helligdagene over. Hele året giver de tolv rækker{" "}
+          <strong>{formatNumber(maaned.aarArbejdsdage, "da")} arbejdsdage</strong>{" "}
+          i {maaned.year}.
+        </p>
+
+        <h3>Sådan tæller du dage i en måned i Excel</h3>
+        <p>
+          Sæt den <strong>første dag i måneden i A1</strong> og den første dag i
+          næste måned i <strong>B1</strong>, så giver{" "}
+          <code>=B1-A1</code> månedens længde direkte. Med A1 ={" "}
+          <code>{maaned.start}</code> og B1 = <code>{maaned.sluttOgKoeb}</code> er
+          svaret <strong>{maaned.formelResultat} dage</strong> — samme tal som
+          formlen i tabellen ovenfor.
+        </p>
+        <p>
+          <code>=DATEDIF(A1;B1;&quot;d&quot;)</code> giver præcis det samme tal.
+          Fælden er, at du ikke må skrive månedens <em>sidste</em> dag: giver du
+          B1 = 28. februar, får du 27, fordi Excel tæller forskellen i hele
+          døgn. Skriv dagen <em>efter</em> månedens sidste dag, så slipper du
+          også for at skulle vide om året er et skudår.
+        </p>
+
+        <h2>Hvor mange dage er der i et år?</h2>
+        <p>
+          Et år har <strong>{formatNumber(maaned.aarDage, "da")} dage</strong> —{" "}
+          {maaned.aarDage === 366
+            ? `${maaned.year} er et skudår, fordi det er deleligt med 4.`
+            : "366 dage, hvis året er et skudår."}{" "}
+          Det svarer til {formatNumber(maaned.aarDage / 7, "da", { maximumFractionDigits: 1 })}{" "}
+          uger, så et kalenderår er altid lidt mere end 52 uger. Den
+          gennemsnitlige arbejdsuge er 5 dage, hvilket giver omkring 260
+          hverdage om året.
         </p>
 
         <h2>Nyttige datofakta</h2>
         <ul>
-          <li>1 år = 365 dage (366 i skudår)</li>
-          <li>1 måned = ca. 30,44 dage i gennemsnit</li>
+          <li>
+            1 år = {formatNumber(maaned.aarDage, "da")} dage (366 i skudår)
+          </li>
+          <li>
+            1 måned = ca.{" "}
+            {formatNumber(maaned.gennemsnit, "da", { maximumFractionDigits: 2 })} dage
+            i gennemsnit
+          </li>
           <li>1 uge = 7 dage</li>
           <li>1 arbejdsuge = typisk 5 dage</li>
-          <li>1 år ≈ 52 uger</li>
-          <li>1 år ≈ 260 arbejdsdage (uden helligdage)</li>
+          <li>1 år &asymp; 52 uger</li>
+          <li>1 år &asymp; 260 hverdage (uden helligdage)</li>
+          <li>{maaned.year} har {formatNumber(maaned.aarArbejdsdage, "da")} arbejdsdage</li>
         </ul>
 
         <h2>Skudår</h2>
-        <p>Et år er et skudår hvis:</p>
+        <p>Et år er et <strong>skudår</strong> hvis:</p>
         <ul>
           <li>Året er deleligt med 4, OG</li>
           <li>Året er IKKE deleligt med 100, MED MINDRE</li>
@@ -179,19 +391,478 @@ export default function DatoPage() {
           (deleligt med 100). 2000 var skudår (deleligt med 400).
         </p>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tip</p>
           <p className="text-blue-700">
-            Beregneren tager ikke højde for helligdage ved beregning af
-            arbejdsdage, da disse varierer fra år til år. Tilføj selv ekstra
-            dage for helligdage i din periode.
+            Arbejdsdage tælles mandag til fredag og springer de tolv
+            offentlige helligdage over: {helligdagsnavne(tilbage.year, "da")}.
+            Nytårsaften er ikke en helligdag, men er heller ikke en
+            arbejdsdag, så den springes også over. Store bededag var
+            afskaffet som helligdag i 2024.
           </p>
         </div>
-      </div>
 
-      <FAQ items={faqItems} />
+        {pinse && (
+        <>
+        <h2>Hvor mange dage er der fra påske til pinse?</h2>
+        <p>
+          Der er <strong>{formatNumber(pinse.dage[1].dageFraPaaske, "da")} dage
+          fra påskedagen til pinsedagen</strong> — og{" "}
+          <strong>{formatNumber(pinse.dage[2].dageFraPaaske, "da")} dage til 2.
+          pinsedag</strong>. De tal ændrer sig aldrig, fordi påskedagen er en
+          søndag: kristi himmelfartsdag er påskedag +{" "}
+          {formatNumber(pinse.dage[0].dageFraPaaske, "da")} (torsdag), pinsedagen
+          er påskedag + {formatNumber(pinse.dage[1].dageFraPaaske, "da")} (søndag
+          igen), og 2. pinsedag er påskedag +{" "}
+          {formatNumber(pinse.dage[2].dageFraPaaske, "da")} (mandag). Mellem
+          kristi himmelfartsdag og pinsedagen er der derfor altid 10 dage.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Dag</th>
+              <th>{pinse.year}</th>
+              <th>Ugedag</th>
+              <th>Dage fra påskedag</th>
+              <th>Helligdag</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pinse.dage.map((dag) => (
+              <tr key={dag.navn}>
+                <th scope="row">{dag.navn}</th>
+                <td>{pinseDato(dag.date)}</td>
+                <td>{pinseUgedag(dag.date)}</td>
+                <td>{formatNumber(dag.dageFraPaaske, "da")}</td>
+                <td>{dag.helligdag ? "Ja" : "Nej"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Påskedagen i {pinse.year} er {pinseDato(pinse.paaskedag)}, så alle tre
+          datoer ovenfor følger af den. De er fundet i den samme helligdagsliste,
+          som værktøjet ovenfor bruger, når det springer helligdagene over.
+        </p>
+
+        <h2>Hvor mange dage er der i pinsen?</h2>
+        <p>
+          Pinseperioden er de{" "}
+          <strong>{formatNumber(pinse.periodeKalenderdage, "da")} kalenderdage</strong>{" "}
+          fra kristi himmelfartsdag {pinseDato(pinse.himmelfartsdag)} til 2.
+          pinsedag {pinseDato(pinse.andenPinsedag)} — altså{" "}
+          {formatNumber(pinse.dageHimmelfartTilAndenPinse, "da")} dage imellem, ikke
+          én uge, fordi de tre helligdage ligger i to kalenderuger. Inden for de{" "}
+          {formatNumber(pinse.periodeKalenderdage, "da")} dage er der{" "}
+          {formatNumber(pinse.periodeArbejdsdage, "da")} arbejdsdage og{" "}
+          {formatNumber(pinse.periodeFrieDage, "da")} dage uden arbejde, og
+          helligdagene i perioden er{" "}
+          {pinse.periodeHelligdagsnavne.join(", ")}.
+        </p>
+        <p>
+          Vil du se den enkelte dato tælle ned til, er der en side for hver af dem:{" "}
+          <Link href="/dage-til/kristi-himmelfartsdag">kristi himmelfartsdag</Link>{" "}
+          og <Link href="/dage-til/2-pinsedag">2. pinsedag</Link>.
+        </p>
+        </>
+        )}
+      </div>
+      )}
+
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Antal dagar mellan datum</h2>
+        <p>
+          <strong>Antal dagar mellan datum</strong> är slutdatum minus startdatum. Från 1 mars
+          2027 till 1 mars 2028 är det <strong>366 dagar</strong>, eftersom 2028 är ett
+          skottår. Vill du veta <strong>hur många dagar mellan två datum</strong> det är,
+          fyller du i startdatum och slutdatum ovan — du får då också hela veckor,
+          ungefärligt antal månader, arbetsdagar, helgdagar och lördagar/söndagar.
+        </p>
+
+        <h2>Så här använder du datumräknaren</h2>
+        <p>Datumräknaren har <strong>fyra olika funktioner</strong>:</p>
+
+        <h3>1. Dagar mellan datum</h3>
+        <p>
+          Beräkna hur många <strong>dagar det är mellan två datum</strong>. Du får också antal
+          hela veckor, ungefärligt antal månader, arbetsdagar och helgdagar.
+        </p>
+        <ul>
+          <li>Välj startdatum och slutdatum</li>
+          <li>Resultatet visas automatiskt</li>
+          <li>
+            Negativt tal betyder att slutdatumet är före startdatumet
+          </li>
+        </ul>
+
+        <h3>2. Lägg till dagar</h3>
+        <p>
+          Ta reda på vilket datum det blir om <strong>X dagar</strong>, eller vilket datum det
+          var för X dagar sedan.
+        </p>
+        <ul>
+          <li>Välj ett utgångsdatum</li>
+          <li>Ange antal dagar (använd minus för att gå bakåt)</li>
+          <li>Se resultatet med veckodag och datum</li>
+        </ul>
+
+        <h3>3. Arbetsdagar</h3>
+        <p>
+          Beräkna ett datum baserat på antal <strong>arbetsdagar</strong>. Perfekt för
+          {" "}<strong>projektplanering</strong> och deadline-beräkning.
+        </p>
+        <ul>
+          <li>Välj startdatum</li>
+          <li>Ange antal arbetsdagar</li>
+          <li>Helger och röda dagar hoppas över</li>
+        </ul>
+
+        <h3>4. Ålder</h3>
+        <p>
+          Beräkna din <strong>exakta ålder</strong> i år, månader och dagar. Se också hur många
+          dagar du har levt, och när du fyller år.
+        </p>
+
+        <h2>Hur många dagar är det på ett år?</h2>
+        <p>
+          Ett kalenderår har 365 dagar, men de tolv månaderna är inte lika långa.
+          Alla 12 med dagar, vardagar och helvdagar står på en{" "}
+          <Link href="/dagar-i-aret">egen sida med hela årets översikt</Link>,
+          tillsammans med hur många dagar som är kvar av året.
+          Om du vill veta hur många dagar som är i en viss månad står det på{" "}
+          <Link href="/dagar-i-manaden">en sida för varje månad</Link>.
+        </p>
+
+        <h2>Så räknar du ut dagar mellan två datum i Excel</h2>
+        <p>
+          Vill du bara ha den frågan finns det en{" "}
+          <Link href="/dagar-mellan-datum">dedikerad sida för dagar mellan datum</Link>{" "}
+          med samma verktyg och de tre vanligaste frågorna.
+        </p>
+        <p>
+          Lägg startdatumet i <strong>A1</strong> och slutdatumet i{" "}
+          <strong>B1</strong>, så är den korta formeln <code>=B1-A1</code>. Den
+          räknar skillnaden i hela dygn: 1 januari 2026 till 1 januari 2027 är{" "}
+          <strong>365 dagar</strong>.
+        </p>
+        <p>
+          <code>=DATEDIF(A1;B1;&quot;d&quot;)</code> ger exakt samma tal, men kan
+          även räkna i månader och år:{" "}
+          <code>=DATEDIF(A1;B1;&quot;m&quot;)</code> ger hela månader och{" "}
+          <code>=DATEDIF(A1;B1;&quot;y&quot;)</code> hela år. 15 mars 2026 till
+          25 september 2026 är <strong>194 dagar</strong> — alltså 6 hela
+          månader.
+        </p>
+        <p>
+          Svensk Excel använder <strong>semikolon</strong> som avgränsare,
+          eftersom komma är decimaltecken. <code>DATEDIF</code> är ett dolt
+          namn: det syns inte i formelassistenten, men fungerar i alla
+          Excel-versioner.
+        </p>
+        <p>
+          Vill du räkna <strong>arbetsdagar</strong> eller se vilka helgdagar
+          som ligger emellan gör datokalkylatorn samma sak utan att du skriver
+          en enda formel.
+        </p>
+
+        <h2>Hur många dagar är det kvar av {tilbage.year}?</h2>
+        <p>
+          Det är{" "}
+          <strong>
+            {tilbage.dage} {tilbage.dage === 1 ? "dag" : "dagar"} kvar av{" "}
+            {tilbage.year}
+          </strong>{" "}
+          — alltså {tilbage.uger} veckor och {tilbage.dageEfterUger}{" "}
+          {tilbage.dageEfterUger === 1 ? "dag" : "dagar"}. Det gäller
+          kalenderåret, inte räkenskapsåret: årets sista dag är 31 december,
+          så räknaren står på 0 nyårsafton och börjar om 1 januari.
+        </p>
+        <p>
+          Vill du räkna till ett bestämt datum i stället för till årsskiftet
+          finns <a href="/dagar-till/1-december">dagarna till 1 december</a> och{" "}
+          <a href="/dagar-till/nyarsafton">nyårsafton</a> — olika frågor med
+          olika siffror.
+        </p>
+
+        <h2>Hur många dagar är det i den här månaden?</h2>
+        <p>
+          {denneMaaned.name} {denneMaaned.year} har{" "}
+          <strong>{denneMaaned.dage} dagar</strong> totalt. I dag är det{" "}
+          <strong>
+            {denneMaaned.dato}. {denneMaaned.name}
+          </strong>
+          , alltså månadens {denneMaaned.dageForbruget}. dag, så det finns{" "}
+          <strong>
+            {denneMaaned.dageTilbage}{" "}
+            {denneMaaned.dageTilbage === 1 ? "dag" : "dagar"} kvar
+          </strong>{" "}
+          {denneMaaned.name} — månaden slutar{" "}
+          <strong>{denneMaaned.sidsteDag}</strong>.
+        </p>
+        <p>
+          Vill du räkna ut det i Excel är månadens längd{" "}
+          <code>=DATEDIF({denneMaaned.foersteDag};{denneMaaned.sidsteDag};&quot;d&quot;)+1</code>{" "}
+          = <strong>{denneMaaned.dage} dagar</strong>, och de dagar som gått är
+          dagens datum. Utan veckoslut och helger är det{" "}
+          <strong>{denneMaaned.arbejdsdage} arbetsdagar</strong> i{" "}
+          {denneMaaned.name} {denneMaaned.year} — samma tal som tabellen nedan.
+        </p>
+
+        <h2>Hur många dagar är det i en månad?</h2>
+        <p>
+          En månad har <strong>28 till 31 dagar</strong> — den kortaste är februari
+          med 28 dagar (29 under skottår), och den längsta är de sju månader som
+          har 31 dagar. I genomsnitt är en månad{" "}
+          <strong>
+            {formatNumber(maaned.gennemsnit, "se", { maximumFractionDigits: 2 })} dagar
+          </strong>
+          , eftersom ett gregoriskt år i genomsnitt har 365,2425 dagar fördelade
+          på 12 månader. Genomsnittet är alltså en uträkning, inte en verklig
+          månad.
+        </p>
+        <p>
+          Här är alla tolv månader i {maaned.year}, med dagar,
+          arbetsdagar och veckoslut. Talen är desamma som verktyget ovan
+          räknar, så du kan kontrollera varje rad.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Månad</th>
+              <th>Dagar</th>
+              <th>Arbetsdagar</th>
+              <th>Veckoslut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {maaned.raekker.map((r) => (
+              <tr key={r.month}>
+                <th scope="row">
+                  {r.name}
+                  {r.skudaar ? " (skottår)" : ""}
+                </th>
+                <td>{r.dage}</td>
+                <td>{r.arbejdsdage}</td>
+                <td>{r.weekenddage}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Vill du ha antalet utan veckoslut står det i kolumnen{" "}
+          <strong>Arbetsdagar</strong> — den räknar måndag till fredag och hoppar
+          över helgdagerna. Hela året ger de tolv raderna{" "}
+          <strong>
+            {formatNumber(maaned.aarArbejdsdage, "se")} arbetsdagar
+          </strong>{" "}
+          i {maaned.year}.
+        </p>
+
+        <h3>Så räknar du ut dagar i en månad i Excel</h3>
+        <p>
+          Sätt månadens <strong>första dag i A1</strong> och första dagen i
+          nästa månad i <strong>B1</strong>, så ger <code>=B1-A1</code> månadens
+          längd direkt. Med A1 = <code>{maaned.start}</code> och B1 ={" "}
+          <code>{maaned.sluttOgKoeb}</code> blir svaret{" "}
+          <strong>{maaned.formelResultat} dagar</strong> — samma tal som i
+          tabellen ovan.
+        </p>
+        <p>
+          <code>=DATEDIF(A1;B1;&quot;d&quot;)</code> ger exakt samma tal. Fällan är
+          att du inte får skriva månadens <em>sista</em> dag: sätter du B1 = 28
+          februari får du 27, eftersom Excel räknar skillnaden i hela dygn. Skriv
+          dagen <em>efter</em> månadens sista dag, så slipper du också behöva
+          veta om året är ett skottår.
+        </p>
+
+        <h2>Hur många dagar är det i ett år?</h2>
+        <p>
+          Ett år har <strong>{formatNumber(maaned.aarDage, "se")} dagar</strong> —{" "}
+          {maaned.aarDage === 366
+            ? `${maaned.year} är ett skottår, eftersom det är delbart med 4.`
+            : "366 dagar om året är ett skottår."}{" "}
+          Det motsvarar{" "}
+          {formatNumber(maaned.aarDage / 7, "se", { maximumFractionDigits: 1 })} veckor,
+          så ett kalenderår alltid är något mer än 52 veckor. Den genomsnittliga
+          arbetsveckan är 5 dagar, vilket blir omkring 260 vardagar per år.
+        </p>
+
+        <h2>Nyttiga datumfakta</h2>
+        <ul>
+          <li>
+            1 år = {formatNumber(maaned.aarDage, "se")} dagar (366 under skottår)
+          </li>
+          <li>
+            1 månad = ca{" "}
+            {formatNumber(maaned.gennemsnit, "se", { maximumFractionDigits: 2 })} dagar
+            i genomsnitt
+          </li>
+          <li>1 vecka = 7 dagar</li>
+          <li>1 arbetsvecka = vanligtvis 5 dagar</li>
+          <li>1 år &asymp; 52 veckor</li>
+          <li>1 år &asymp; 260 vardagar (utan helgdagar)</li>
+        </ul>
+
+        <h2>Skottår</h2>
+        <p>Ett år är ett <strong>skottår</strong> om:</p>
+        <ul>
+          <li>Året är delbart med 4, OCH</li>
+          <li>Året är INTE delbart med 100, OM INTE</li>
+          <li>Året är delbart med 400</li>
+        </ul>
+        <p>
+          Exempel: 2024 är skottår (delbart med 4). 2100 är inte skottår
+          (delbart med 100). 2000 var skottår (delbart med 400).
+        </p>
+
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
+          <p className="font-medium text-blue-800">Tips</p>
+          <p className="text-blue-700">
+            Arbetsdagar räknas måndag till fredag och hoppar över Sveriges
+            rödagar: {helligdagsnavne(tilbage.year, "se")}. Midsommardagen och
+            alla helgons dag infaller alltid på en lördag.
+          </p>
+        </div>
+
+        {pinse && (
+        <>
+        <h2>Hur många dagar är det mellan påsk och pingst?</h2>
+        <p>
+          Det är <strong>{formatNumber(pinse.dage[1].dageFraPaaske, "se")} dagar
+          från påskdagen till pingstdagen</strong> — och{" "}
+          <strong>{formatNumber(pinse.dage[2].dageFraPaaske, "se")} dagar till
+          annandag pingst</strong>. Talen ändras aldrig, eftersom påskdagen är
+          en söndag: kristi himmelsfärdsdagen är påskdagen +{" "}
+          {formatNumber(pinse.dage[0].dageFraPaaske, "se")} (torsdag), pingstdagen
+          är påskdagen + {formatNumber(pinse.dage[1].dageFraPaaske, "se")} (söndag
+          igen) och annandag pingst är påskdagen +{" "}
+          {formatNumber(pinse.dage[2].dageFraPaaske, "se")} (måndag). Mellan
+          kristi himmelsfärdsdagen och pingstdagen ligger det därför alltid 10
+          dagar.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Dag</th>
+              <th>{pinse.year}</th>
+              <th>Veckodag</th>
+              <th>Dagar från påskdagen</th>
+              <th>Röd dag</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pinse.dage.map((dag) => (
+              <tr key={dag.navn}>
+                <th scope="row">{dag.navn}</th>
+                <td>{pinseDato(dag.date)}</td>
+                <td>{pinseUgedag(dag.date)}</td>
+                <td>{formatNumber(dag.dageFraPaaske, "se")}</td>
+                <td>{dag.helligdag ? "Ja" : "Nej"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Påskdagen {pinse.year} infaller {pinseDato(pinse.paaskedag)}, så alla
+          tre datum ovan följer av den. De är hämtade ur samma rödagslista som
+          verktyget ovan använder när det hoppar över helgdagarna.
+        </p>
+
+        <h2>Hur många dagar är det i pingsten?</h2>
+        <p>
+          Pingstperioden är de{" "}
+          <strong>{formatNumber(pinse.periodeKalenderdage, "se")} kalenderdagar</strong>{" "}
+          från kristi himmelsfärdsdagen {pinseDato(pinse.himmelfartsdag)} till
+          annandag pingst {pinseDato(pinse.andenPinsedag)} — alltså{" "}
+          {formatNumber(pinse.dageHimmelfartTilAndenPinse, "se")} dagar emellan,
+          inte en vecka, eftersom de tre dagarna ligger i två kalenderveckor.
+          Inom de {formatNumber(pinse.periodeKalenderdage, "se")} dagarna finns{" "}
+          {formatNumber(pinse.periodeArbejdsdage, "se")} arbetsdagar och{" "}
+          {formatNumber(pinse.periodeFrieDage, "se")} dagar utan arbete, och
+          helgdagarna i perioden är{" "}
+          {pinse.periodeHelligdagsnavne.join(", ")}. Annandag pingst är en vanlig
+          måndag i Sverige — bara i Danmark är den en helig dag.
+        </p>
+        <p>
+          Vill du räkna ner till det enstaka datumet finns en sida för var och en:{" "}
+          <Link href="/dagar-till/kristi-himmelsfardsdag">
+            kristi himmelsfärdsdagen
+          </Link>{" "}
+          och <Link href="/dagar-till/pingstdagen">pingstdagen</Link>.
+        </p>
+        </>
+        )}
+      </div>
+      )}
+
+      {dageTilLinks.length > 0 && (
+      <div className="prose dark:prose-invert max-w-none mt-12">
+        <h2>{getLocaleText(dageTilHeading, locale)}</h2>
+        <p>{getLocaleText(dageTilIntro, locale)}</p>
+        <p>{getLocaleText(dageTilRecalc, locale)}</p>
+        {/* Listen dækker de datoer der altid søges på — juleaften, nytår,
+            Halloween, ferier. Dansk autocomplete under «hvor mange dage er der
+            til» rummer også helt vilkårlige datoer («den 10 august»), som ingen
+            liste kan dække, så de sendes videre til værktøjets egen
+            «dage til dato»-tilstand ovenfor. Uden den henvisning står den
+            læser med et spørgsmål, listen ikke kan svare på. */}
+        <p>{getLocaleText(dageTilListIntro, locale)}</p>
+        <ul>
+          {dageTilLinks.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href}>{link.question}</Link>{" "}
+              {locale === "se" ? (
+                <>
+                  {link.target} {formatNumber(link.days, "se")}{" "}
+                  {link.days === 1 ? "dag" : "dagar"}
+                  {link.days === 0 ? " — det är dagen i dag." : ` (${formatNumber(link.weeks, "se")} ${link.weeks === 1 ? "vecka" : "veckor"}${link.daysLeft === 0 ? "" : ` och ${formatNumber(link.daysLeft, "se")} ${link.daysLeft === 1 ? "dag" : "dagar"}`}).`}
+                </>
+              ) : (
+                <>
+                  {link.target}:{" "}
+                  <strong>{formatNumber(link.days, "da")} dage</strong>
+                  {link.days === 0 ? " — det er dagen i dag." : ` (${formatNumber(link.weeks, "da")} ${link.weeks === 1 ? "uge" : "uger"}${link.daysLeft === 0 ? "" : ` og ${formatNumber(link.daysLeft, "da")} ${link.daysLeft === 1 ? "dag" : "dage"}`}).`}
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+        <p>
+          {locale === "se" ? (
+            <>
+              Du kan också se{" "}
+              <Link href="/dagar-till">alla datum samlade på en sida</Link>.
+            </>
+          ) : (
+            <>
+              Du kan også se{" "}
+              <Link href="/dage-til">alle datoer samlet på én side</Link>.
+            </>
+          )}
+        </p>
+        <p>
+          {locale === "se" ? (
+            <>
+              Vill du bara räkna ner till ett datum och se det som veckor och dagar kan du
+              använda <Link href="/nedrakning">nedräkningen</Link>.
+            </>
+          ) : (
+            <>
+              Vil du bare tælle ned til én dato og se det som uger og dage, kan du bruge{" "}
+              <Link href={localizedPath("/nedtaelling", locale)}>nedtællingen</Link>.
+            </>
+          )}
+        </p>
+      </div>
+      )}
+
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/dato" />
+
+      {/* Returlink til indlægget om emnet (kun danske domæner) */}
+      <RelateredeArtikler current="/dato" locale={locale} />
     </div>
   );
 }

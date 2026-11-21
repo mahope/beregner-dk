@@ -1,168 +1,171 @@
-import type { Metadata } from "next";
-import LoenBeregner from "@/components/LoenBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import dynamic from "next/dynamic";
+const LoenBeregner = dynamic(() => import("@/components/LoenBeregner"));
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import Sidebar from "@/components/Sidebar";
+import { formatNumber } from "@/lib/format";
+import { KOMMUNER, KOMMUNER_ANTAL, KOMMUNER_SNIT } from "@/lib/kommuner";
+import { SATSER_2026 } from "@/lib/satser-2026";
 
-const baseUrl = "https://minberegner.dk";
+/**
+ * Alle tallene i afsnittet "Sådan beregnes din skat i Danmark" læses fra
+ * `SATSER_2026` — samme fil som beregneren og `/blog/skat-2026-alt-du-skal-vide`
+ * bruger. De stod tidligere som hårdkodede tal i brødteksten, så en
+ * satsændring kunne ramme beregningen og ikke copyen (eller omvendt).
+ *
+ * Kommunetabellen er tilsvarende afledet af `KOMMUNER` i stedet for at være
+ * skrevet i hånden. Den hårdkodede tabel sagde "Allerød (23,3 %)", mens
+ * `KOMMUNER` siger 24,80 % — og Allerød er ikke blandt de tre laveste
+ * kommuner overhovedet (Lyngby-Taarbæk er det med 23,00 %). Nu kan tabellen
+ * ikke komme på afveje, fordi den *er* tabellen.
+ *
+ * Sammenligninger med 2025 ("op fra 49.700 kr", "op fra 45.100 kr", "sat ned
+ * fra 12,22 %") er fjernet i stedet for rettet: de 2025-tal har ingen kilde i
+ * repoet, og skat.dk svarer HTTP 500 for både browser og hentning (1/10), så de
+ * kunne ikke verificeres. `SATSER_2026` bærer de verificerede 2026-tal med
+ * kilde — en påstand om et gammelt år uden kilde hører ikke der.
+ *
+ * Kommuneskat-afsnittet blandede to populationer (review-fund 29/9): det skrev
+ * «Landsgennemsnittet er ca. 25,049 %» fra `SATSER_2026` og «den billigste
+ * ligger på 22,5 %, 27,8 % er den dyreste» fra `KOMMUNER` i samme afsnit. De 98
+ * rækkers eget middeltal er **25,626 %**, så de to tal kan ikke begge være
+ * sande om de 98 kommuner. Afsnittet skriver nu tabellens middeltal
+ * (`KOMMUNER_SNIT`) og nævner satsfilens tal i en egen linje med sin kilde.
+ */
+const da = (beloeb: number) => formatNumber(beloeb, "da");
+const pct = (sats: number) =>
+  formatNumber(sats * 100, "da", { maximumFractionDigits: 3 });
+/** `KOMMUNER` fører procent som 22.5, mens `pct` forventer en andel. */
+const pctTal = (procent: number) => pct(procent / 100);
+/** Tabellens middeltal vises med to decimaler — det er et gennemsnit. */
+const pctSnit = (procent: number) =>
+  formatNumber(procent, "da", { maximumFractionDigits: 2 });
 
-export const metadata: Metadata = {
-  title: "Løn efter skat 2026 - Beregn din nettoløn gratis",
-  description:
-    "Gratis lønberegner 2026. Se hvad du får udbetalt efter skat, AM-bidrag og pension. Beregn din nettoløn med aktuelle danske skattesatser.",
-  keywords: [
-    "løn efter skat",
-    "lønberegner",
-    "nettoløn",
-    "beregn løn efter skat",
-    "hvad får jeg udbetalt",
-    "skat beregner",
-    "bruttoløn til nettoløn",
-    "løn 2026",
-    "skatteberegner",
-    "am-bidrag",
-  ],
-  openGraph: {
-    title: "Løn efter skat 2026 - Beregn din nettoløn",
-    description:
-      "Se hvad du får udbetalt efter skat. Gratis lønberegner med 2026 satser.",
-    url: `${baseUrl}/loen-efter-skat`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/loen-efter-skat`,
-  },
-};
+/** De tre laveste og tre højeste kommuneskatter i `KOMMUNER`, beregnet her. */
+const KOMMUNER_STIGENDE = [...KOMMUNER].sort(
+  (a, b) => a.kommuneskat - b.kommuneskat
+);
+const LAVESTE_KOMMUNER = KOMMUNER_STIGENDE.slice(0, 3);
+const HOEJESTE_KOMMUNER = KOMMUNER_STIGENDE.slice(-3).reverse();
 
-const faqItems = [
-  {
-    question: "Hvordan beregnes min løn efter skat?",
-    answer:
-      "Din nettoløn beregnes ved først at trække AM-bidrag (8%) fra bruttolønnen. Derefter trækkes bundskat, kommuneskat og eventuel kirkeskat fra den skattepligtige indkomst efter fradrag. Tjener du over topskattegrænsen, betales også 15% topskat.",
-  },
-  {
-    question: "Hvad er AM-bidrag?",
-    answer:
-      "AM-bidrag (arbejdsmarkedsbidrag) er 8% af din bruttoløn før andre fradrag. Bidraget går til at finansiere dagpenge, efterløn og andre arbejdsmarkedsordninger. AM-bidrag trækkes før skat beregnes.",
-  },
-  {
-    question: "Hvornår skal jeg betale topskat?",
-    answer:
-      "I 2026 skal du betale topskat på 15%, hvis din indkomst efter AM-bidrag overstiger ca. 588.900 kr årligt. Det svarer til en månedsløn på omkring 53.000 kr før skat.",
-  },
-  {
-    question: "Hvad er personfradraget i 2026?",
-    answer:
-      "Personfradraget i 2026 er 49.700 kr. Det betyder, at du ikke betaler skat af de første 49.700 kr af din årlige indkomst (efter AM-bidrag). Alle skatteydere får automatisk dette fradrag.",
-  },
-  {
-    question: "Hvorfor varierer kommuneskatten?",
-    answer:
-      "Hver kommune fastsætter sin egen skatteprocent baseret på kommunens økonomi og serviceniveau. I 2026 varierer kommuneskatten fra ca. 22,5% (Rudersdal) til 27,8% (Langeland). Landsgennemsnittet er omkring 24,94%.",
-  },
-  {
-    question: "Hvad er forskellen på brutto og netto?",
-    answer:
-      "Bruttoløn er din løn før skat og bidrag. Nettoløn er det beløb, du faktisk får udbetalt på kontoen efter alle fradrag. Forskellen udgøres af AM-bidrag, skat, pension og eventuelle andre fradrag.",
-  },
-  {
-    question: "Hvordan påvirker pension min skat?",
-    answer:
-      "Arbejdsgiverbetalt pension trækkes fra bruttolønnen før AM-bidrag beregnes, hvilket reducerer din skattepligtige indkomst. Det betyder, at du betaler mindre i skat nu, men skal betale skat når du hæver pensionen.",
-  },
-  {
-    question: "Er denne beregner præcis?",
-    answer:
-      "Beregneren giver et godt estimat baseret på gennemsnitlige satser. Din faktiske nettoløn kan variere afhængigt af dine specifikke fradrag, kommune og situation. For præcis beregning, brug SKAT's officielle værktøjer.",
-  },
-];
+export async function generateMetadata() {
+  return generatePageMetadata("loen-efter-skat");
+}
 
-export default function LoenPage() {
+export default async function LoenPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("loen-efter-skat", locale) || getPageData("loen-efter-skat", "da")!;
+
   return (
-    <div>
+    <div className="flex flex-col lg:flex-row gap-8">
+      {/* Main Content - Left Column */}
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
-        name="Lønberegner - Løn efter skat"
-        description="Gratis lønberegner. Se hvad du får udbetalt efter skat, AM-bidrag og pension."
-        url={`${baseUrl}/loen-efter-skat`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/loen-efter-skat`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Løn efter skat", url: `${baseUrl}/loen-efter-skat` },
-        ]}
-      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/loen-efter-skat" }]} />
 
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Løn efter skat</span>
-      </nav>
-
-      <h1 className="text-3xl font-bold mb-2">Løn efter skat 2026</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn din nettoløn og se hvad du får udbetalt efter skat, AM-bidrag og
-        pension. Opdateret med de nyeste danske skattesatser for 2026.
+        {pageData.description}
       </p>
 
       <LoenBeregner />
 
-      <div className="mt-12 prose max-w-none">
+      {locale === "da" && (
+      <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Sådan beregnes din skat i Danmark</h2>
         <p>
           I Danmark betaler vi skat af vores indkomst i flere lag. Her er en
           oversigt over hvordan din løn beskattes i 2026:
         </p>
 
-        <h3>1. AM-bidrag (8%)</h3>
+        <h3>1. AM-bidrag ({pct(SATSER_2026.amBidrag)} %)</h3>
         <p>
-          Først trækkes <strong>arbejdsmarkedsbidraget</strong> på 8% fra din
-          bruttoløn. Dette bidrag går til dagpenge, efterløn og andre
-          arbejdsmarkedsordninger.
+          Først trækkes <strong>arbejdsmarkedsbidraget</strong> på{" "}
+          {pct(SATSER_2026.amBidrag)} % fra din bruttoløn. Dette bidrag går til
+          dagpenge, efterløn og andre arbejdsmarkedsordninger.
         </p>
 
-        <h3>2. Personfradrag (49.700 kr)</h3>
+        <h3>2. Personfradrag ({da(SATSER_2026.personfradrag)} kr)</h3>
         <p>
-          Alle har ret til et <strong>personfradrag</strong> på 49.700 kr i
-          2026. Du betaler ikke skat af dette beløb.
+          Alle har ret til et <strong>personfradrag</strong> på{" "}
+          {da(SATSER_2026.personfradrag)} kr i 2026. Du betaler ikke skat af dette
+          beløb.
         </p>
 
-        <h3>3. Beskæftigelsesfradrag</h3>
+        <h3>3. Beskæftigelsesfradrag ({pct(SATSER_2026.beskaeftigelsesfradragPct)} %)</h3>
         <p>
-          Som lønmodtager får du et ekstra fradrag på 10,65% af din lønindkomst
-          (efter AM-bidrag), dog maks. ca. 45.100 kr i 2026.
+          Som lønmodtager får du et ekstra fradrag på{" "}
+          {pct(SATSER_2026.beskaeftigelsesfradragPct)} % af din lønindkomst (efter
+          AM-bidrag), dog maks. {da(SATSER_2026.beskaeftigelsesfradragMax)} kr i
+          2026.
         </p>
 
-        <h3>4. Bundskat (12,22%)</h3>
+        <h3>4. Bundskat ({pct(SATSER_2026.bundskat)} %)</h3>
         <p>
-          Alle betaler <strong>bundskat</strong> af den skattepligtige indkomst
-          (efter fradrag).
+          Alle betaler <strong>bundskat</strong> på {pct(SATSER_2026.bundskat)} %
+          af den skattepligtige indkomst (efter fradrag).
         </p>
 
         <h3>5. Kommuneskat (varierer)</h3>
         <p>
-          <strong>Kommuneskatten</strong> varierer fra kommune til kommune.
-          Landsgennemsnittet er ca. 24,94% i 2026. De billigste kommuner ligger
-          omkring 22%, mens de dyreste er over 27%.
+          <strong>Kommuneskatten</strong> varierer fra kommune til kommune. I
+          tabellen med de {KOMMUNER_ANTAL} kommuner er gennemsnittet{" "}
+          {pctSnit(KOMMUNER_SNIT)} %, den billigste ligger på{" "}
+          {pctTal(LAVESTE_KOMMUNER[0].kommuneskat)} %, og{" "}
+          {pctTal(HOEJESTE_KOMMUNER[0].kommuneskat)} % er den dyreste.
+        </p>
+        <p>
+          <small>
+            Beregnerens forudindstillede sats er et andet gennemsnit:{" "}
+            {pct(SATSER_2026.kommuneskatSnit)} % ifølge svmn.dk's
+            2026-gennemsnit. Det er ikke det samme som tabellens middeltal.
+          </small>
         </p>
 
         <h3>6. Kirkeskat (valgfri)</h3>
         <p>
-          Medlemmer af folkekirken betaler <strong>kirkeskat</strong> på ca.
-          0,6-1% (gennemsnit 0,68%).
+          Medlemmer af folkekirken betaler <strong>kirkeskat</strong> på ca. 0,6-1 %
+          (gennemsnit {pct(SATSER_2026.kirkeskatSnit)} %).
         </p>
 
-        <h3>7. Topskat (15%)</h3>
+        <h3>7. Nyt: Mellemskat, topskat og top-topskat (2026)</h3>
         <p>
-          Tjener du over ca. 588.900 kr årligt (efter AM-bidrag), betaler du
-          <strong> topskat</strong> på 15% af beløbet over grænsen.
+          Fra 2026 er den gamle topskat på 15% erstattet af tre nye skattebrackets:
+        </p>
+        <ul>
+          <li>
+            <strong>Mellemskat ({pct(SATSER_2026.mellemskat)} %):</strong>{" "}
+            Indkomst over {da(SATSER_2026.mellemskatGraense)} kr/år (efter
+            AM-bidrag)
+          </li>
+          <li>
+            <strong>Topskat ({pct(SATSER_2026.topskat)} %):</strong> Indkomst
+            over {da(SATSER_2026.topskatGraense)} kr/år (efter AM-bidrag)
+          </li>
+          <li>
+            <strong>Top-topskat ({pct(SATSER_2026.topTopskat)} %):</strong>{" "}
+            Indkomst over {da(SATSER_2026.topTopskatGraense)} kr/år (efter
+            AM-bidrag)
+          </li>
+        </ul>
+        <p>
+          For de fleste danskere betyder reformen en skattelettelse, da
+          mellemskattegrænsen er højere end den gamle topskattegrænse.
         </p>
 
         <h2>Kommuner med lavest og højest skat (2026)</h2>
@@ -170,24 +173,23 @@ export default function LoenPage() {
           <table>
             <thead>
               <tr>
-                <th>Laveste skatteprocent</th>
-                <th>Højeste skatteprocent</th>
+<th>Laveste skatteprocent</th>
+              <th>Højeste skatteprocent</th>
+            </tr>
+          </thead>
+          <tbody>
+            {LAVESTE_KOMMUNER.map((k, i) => (
+              <tr key={k.navn}>
+                <td>
+                  {k.navn} ({pctTal(k.kommuneskat)} %)
+                </td>
+                <td>
+                  {HOEJESTE_KOMMUNER[i].navn} (
+                  {pctTal(HOEJESTE_KOMMUNER[i].kommuneskat)} %)
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Rudersdal (22,5%)</td>
-                <td>Langeland (27,8%)</td>
-              </tr>
-              <tr>
-                <td>Gentofte (22,8%)</td>
-                <td>Ishøj (27,2%)</td>
-              </tr>
-              <tr>
-                <td>Allerød (23,3%)</td>
-                <td>Brøndby (27,1%)</td>
-              </tr>
-            </tbody>
+            ))}
+          </tbody>
           </table>
         </div>
 
@@ -211,9 +213,9 @@ export default function LoenPage() {
           </li>
         </ul>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
-          <p className="font-medium text-blue-800">Tip</p>
-          <p className="text-blue-700">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
+          <p className="font-medium text-blue-800 dark:text-blue-300">Tip</p>
+          <p className="text-blue-700 dark:text-blue-400">
             Tjek din forskudsopgørelse på{" "}
             <a
               href="https://skat.dk"
@@ -227,19 +229,22 @@ export default function LoenPage() {
           </p>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
-          <p className="font-medium text-yellow-800">Bemærk</p>
-          <p className="text-yellow-700">
-            Denne beregner giver et estimat baseret på gennemsnitlige satser.
-            Din faktiske skat afhænger af din specifikke situation, fradrag og
-            kommune. For præcis beregning, brug SKAT's officielle værktøjer.
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800 dark:text-green-300">Opdateret med 2026-skattereform</p>
+          <p className="text-green-700 dark:text-green-400">
+            Denne beregner er opdateret med det nye skattesystem fra 2026 med mellemskat,
+            topskat og top-topskat. Kilde: skm.dk, skat.dk. Sidst verificeret februar 2026.
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/loen-efter-skat" />
+      </div>
+
+      <Sidebar currentHref="/loen-efter-skat" />
     </div>
   );
 }

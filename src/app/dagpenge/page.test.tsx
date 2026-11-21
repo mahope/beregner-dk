@@ -1,0 +1,129 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { renderToStaticMarkup } from "react-dom/server";
+import { beforeEach, describe, expect, test, vi } from "vitest";
+import { getDomainConfigByLocale } from "@/lib/domain-config";
+import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import { DAGPENGE_2026 } from "@/lib/satser-2026";
+import {
+  DAGPENGE_SATSER,
+  KOMMUNESKAT_SNIT_PCT_DAGPENGE,
+  dagpengeEfterSkat,
+  dagpengeKroner,
+} from "@/lib/dagpenge-satser";
+import DagpengePage from "./page";
+
+vi.mock("@/components/StructuredData", () => ({
+  CalculatorSchema: () => null,
+  FAQSchema: () => null, ArticleSchema: () => null }));
+vi.mock("@/components/Sidebar", () => ({ default: () => null }));
+vi.mock("@/components/DagpengeBeregner", () => ({ default: () => null }));
+vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
+vi.mock("@/components/FAQ", () => ({ FAQ: () => null }));
+vi.mock("@/components/RelatedCalculators", () => ({
+  RelatedCalculators: () => null,
+}));
+vi.mock("@/lib/get-locale", () => ({
+  getLocale: vi.fn(),
+  getCurrentDomainConfig: vi.fn(),
+}));
+
+const kilde = readFileSync(join(__dirname, "page.tsx"), "utf8");
+
+/**
+ * C19 (2026-09-26): /dagpenge viste dimittend-satsen 15.174 kr, som i
+ * værktøjet var mærket "2026 estimat" og ikke findes i ministeriets tabel.
+ * Siden skal nu læse alle dagpenge-satser fra `DAGPENGE_2026`.
+ */
+describe("side /dagpenge", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
+  test("læser 2026-satser fra det delte satsmodul", () => {
+    expect(kilde).toContain('from "@/lib/satser-2026"');
+  });
+
+  test("indeholder ikke den estimerede dimittendsats", () => {
+    expect(kilde).not.toContain("15.174");
+  });
+
+  test("renderer max-, deltids- og dimittendsatserne fra modulet", async () => {
+    const html = renderToStaticMarkup(await DagpengePage());
+    const kr = (n: number) => `${new Intl.NumberFormat("da-DK").format(n)} kr`;
+
+    expect(html).toContain(kr(DAGPENGE_2026.fuldtid));
+    expect(html).toContain(kr(DAGPENGE_2026.deltid));
+    expect(html).toContain(kr(DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt));
+    expect(html).toContain(kr(DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt));
+  });
+
+  /**
+   * 1/10: «dagpenge nyuddannet» er en af de danske autocomplete-træffere under
+   * «dagpenge», men ordet «nyuddannet» fandtes ikke ét sted på /dagpenge — siden
+   * sagde kun «Dimittend», og de to betingelser for dimittendsatsen (uddannelsens
+   * længde og tilmelding til A-kassen) lå kun i et blogindlæg. Porten dømmer på
+   * den **renderede** side, så den kan ikke grønne ved at læse kildefilen.
+   */
+  test("svarer på «dagpenge nyuddannet» med dimittendens to betingelser", async () => {
+    const html = renderToStaticMarkup(await DagpengePage());
+    const kr = (n: number) => `${new Intl.NumberFormat("da-DK").format(n)} kr`;
+    const start = html.indexOf("Nyuddannet?");
+    expect(start).toBeGreaterThan(-1);
+    const afsnit = html.slice(start);
+
+    expect(afsnit).toContain(String(DAGPENGE_2026.dimittendUddannelseMdr));
+    expect(afsnit).toContain(String(DAGPENGE_2026.dimittendTilmeldingDage));
+    expect(afsnit).toContain(kr(DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt));
+    expect(afsnit).toContain(kr(DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt));
+  });
+
+  /**
+   * 2/10: «dagpenge sats 2026 efter skat» er dansk autocomplete nr. 2 under «dagpenge
+   * sats 2026» og nr. 4 under «dagpenge sats» (målt 11:25), og siden lovede
+   * «dagpenge efter skat» i sin egen `keywords` og FAQ uden at vise ét beløb.
+   * Porten dømmer den **renderede** tabel, så den kan ikke grønne ved at læse
+   * kildefilen eller FAQ'en.
+   */
+  test("viser beløbet efter skat for hver sats, regnet af dagpenge-modulet", async () => {
+    const html = renderToStaticMarkup(await DagpengePage());
+    const kr = (n: number) => `${new Intl.NumberFormat("da-DK").format(Math.round(n))} kr`;
+
+    for (const sats of DAGPENGE_SATSER) {
+      expect(html).toContain(kr(sats.belob));
+      expect(html).toContain(dagpengeKroner(dagpengeEfterSkat(sats.belob).efterSkat));
+    }
+    expect(html).toContain("efter skat");
+    expect(html).toContain(KOMMUNESKAT_SNIT_PCT_DAGPENGE);
+  });
+
+  test("skriver intet dagpenge-beløb som tekstliteral", async () => {
+    // Før 2/10 stod «26.198 kr» to gange, «263.232 kr» og «90 % … 8 % AM-bidrag»
+    // i brødteksten. De læses nu fra `dagpenge-satser`/`satser-2026`.
+    expect(kilde).toContain('from "@/lib/dagpenge-satser"');
+    expect(kilde).not.toContain("26.198");
+    expect(kilde).not.toContain("263.232");
+    expect(kilde).not.toContain("22.041");
+    expect(kilde).not.toContain("90%");
+    expect(kilde).not.toContain("8% AM-bidrag");
+
+    // `kr(DAGPENGE_2026.indkomstkravTimer)` skrev «1.924 kr timer» på den live
+    // side 2/10 — «kr» på et timetal. Porten dømmer den renderede tekst.
+    const html = renderToStaticMarkup(await DagpengePage());
+    expect(html).not.toContain("kr timer");
+    expect(html).toContain(
+      `${new Intl.NumberFormat("da-DK").format(DAGPENGE_2026.indkomstkravTimer)} timer`,
+    );
+  });
+
+  test("«nyuddannet» og «dimittend» bruges om hinanden, så begge søgninger rammer", async () => {
+    const html = renderToStaticMarkup(await DagpengePage());
+    const start = html.indexOf("Nyuddannet?");
+    expect(start).toBeGreaterThan(-1);
+    const afsnit = html.slice(start);
+
+    expect(afsnit).toContain("nyuddannet");
+    expect(afsnit).toContain("dimittend");
+  });
+});

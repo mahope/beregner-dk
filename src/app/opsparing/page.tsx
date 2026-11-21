@@ -1,123 +1,67 @@
-import type { Metadata } from "next";
-import OpsparingsBeregner from "@/components/OpsparingsBeregner";
+import Link from "next/link";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { rentersRenteEksempel, tidVsBeloeb } from "@/lib/opsparing";
+import { formatCurrency, formatNumber } from "@/lib/format";
+import { hentInflation } from "@/lib/statbank";
+import dynamic from "next/dynamic";
+const OpsparingsBeregner = dynamic(() => import("@/components/OpsparingsBeregner"));
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata() {
+  return generatePageMetadata("opsparing");
+}
 
-export const metadata: Metadata = {
-  title: "Opsparingsberegner - Renters rente beregner",
-  description:
-    "Gratis opsparingsberegner. Beregn hvad din opsparing vokser til med renters rente. Se udviklingen år for år og forstå effekten af løbende indbetalinger.",
-  keywords: [
-    "opsparingsberegner",
-    "renters rente",
-    "beregn opsparing",
-    "renteberegner opsparing",
-    "compound interest",
-    "investering beregner",
-    "opsparing med rente",
-    "fremtidig værdi",
-    "pensionsopsparing beregner",
-  ],
-  openGraph: {
-    title: "Opsparingsberegner - Renters rente",
-    description:
-      "Beregn hvad din opsparing vokser til med renters rente. Gratis opsparingsberegner.",
-    url: `${baseUrl}/opsparing`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/opsparing`,
-  },
-};
+export default async function OpsparingPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("opsparing", locale) || getPageData("opsparing", "da")!;
+  // Danish site: latest annual inflation from Danmarks Statistik (null on failure -> static default).
+  const dstInflation = locale === "da" ? await hentInflation() : null;
 
-const faqItems = [
-  {
-    question: "Hvad er renters rente?",
-    answer:
-      "Renters rente (compound interest) betyder, at du tjener rente ikke kun på dit oprindelige indskud, men også på den rente du allerede har tjent. Over tid accelererer dette din opsparing markant.",
-  },
-  {
-    question: "Hvor meget skal jeg spare op om måneden?",
-    answer:
-      "En tommelfingerregel er at spare 10-20% af din indkomst. Men selv små beløb vokser over tid. 500 kr/md i 30 år med 5% rente bliver til over 400.000 kr.",
-  },
-  {
-    question: "Hvornår skal jeg starte med at spare op?",
-    answer:
-      "Jo før jo bedre! Tid er den vigtigste faktor ved renters rente. En 25-årig der sparer 1.000 kr/md i 40 år ender med mere end en 35-årig der sparer 2.000 kr/md i 30 år (ved samme rente).",
-  },
-  {
-    question: "Hvad er en realistisk rente at regne med?",
-    answer:
-      "Historisk har aktiemarkedet givet ca. 7% årligt i gennemsnit (før inflation). Obligationer giver typisk 2-4%. Bankkonti giver ofte under 1%. Vælg ud fra din risikoprofil.",
-  },
-  {
-    question: "Skal jeg betale skat af min opsparing?",
-    answer:
-      "Ja, afkast beskattes typisk som kapitalindkomst (ca. 42%) eller aktieindkomst (27%/42%). Pension beskattes anderledes. Denne beregner viser beløb før skat.",
-  },
-  {
-    question: "Hvad er forskellen på månedlig og årlig rentetilskrivning?",
-    answer:
-      "Ved månedlig tilskrivning får du rente 12 gange om året, og renters rente-effekten er lidt større. Forskellen er dog minimal - typisk under 0,5% om året.",
-  },
-  {
-    question: "Hvordan påvirker inflation min opsparing?",
-    answer:
-      "Inflation reducerer købekraften af dine penge. Med 2% inflation og 5% rente er din reelle rente kun ca. 3%. Husk at justere dine forventninger for inflation.",
-  },
-  {
-    question: "Er det bedre at betale gæld eller spare op?",
-    answer:
-      "Generelt bør du betale dyr gæld (over 5-6% rente) af først. Billig gæld (boliglån) kan ofte løbe parallelt med opsparing, især hvis afkastet overstiger lånerenten.",
-  },
-];
+// Alle beløb i brødteksten regnes i `src/lib/opsparing.ts` med den samme
+  // `simulerOpsparing`, som `OpsparingsBeregner` bruger, og formateres med
+  // sidens egen tusindtalsseparator — dansk `1.522.077 kr.`, svensk
+  // `1 522 077 kr` — så de to sprog ikke kan komme ud af trit.
+  const sprog = locale === "se" ? "se" : "da";
+  const kr = (beloeb: number) =>
+    formatCurrency(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const tal = (beloeb: number) =>
+    formatNumber(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const rentersRente = rentersRenteEksempel(sprog);
+  const tidVsBelob = tidVsBeloeb();
 
-export default function OpsparingPage() {
   return (
     <div>
       <CalculatorSchema
-        name="Opsparingsberegner - Renters rente"
-        description="Gratis opsparingsberegner. Beregn hvad din opsparing vokser til med renters rente."
-        url={`${baseUrl}/opsparing`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/opsparing`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Opsparingsberegner", url: `${baseUrl}/opsparing` },
-        ]}
-      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/opsparing" }]} />
 
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Opsparingsberegner</span>
-      </nav>
-
-      <h1 className="text-3xl font-bold mb-2">Opsparingsberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn hvad din opsparing vokser til med renters rente. Se hvordan
-        løbende indbetalinger og tid får din formue til at vokse.
+        {pageData.description}
       </p>
 
-      <OpsparingsBeregner />
+      <OpsparingsBeregner dstInflation={dstInflation} />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du opsparingsberegneren</h2>
         <p>
-          Med vores opsparingsberegner kan du se, hvordan din opsparing vokser
-          over tid med renters rente:
+          Med vores <strong>opsparingsberegner</strong> kan du se, hvordan din opsparing vokser
+          over tid med <strong>renters rente</strong>:
         </p>
         <ol>
           <li>
@@ -137,19 +81,21 @@ export default function OpsparingPage() {
 
         <h2>Kraften i renters rente</h2>
         <p>
-          Renters rente er en af de mest kraftfulde kræfter inden for økonomi.
-          Albert Einstein sagde angiveligt, at &quot;renters rente er verdens
-          ottende vidunder&quot;.
+          <strong>Renters rente</strong> er en af de mest kraftfulde kræfter inden for økonomi.
+          Albert Einstein sagde angiveligt, at &quot;<strong>renters rente er verdens
+          ottende vidunder</strong>&quot;.
         </p>
         <p>Her er et eksempel på forskellen:</p>
         <ul>
           <li>
-            <strong>Uden renters rente:</strong> 10.000 kr med 5% simpel rente i
-            30 år = 25.000 kr
+            <strong>Uden renters rente:</strong> {kr(rentersRente.startBeloeb)} med{" "}
+            {rentersRente.aarligRentePct} % simpel rente i {rentersRente.aar} år ={" "}
+            {kr(rentersRente.uden)}
           </li>
           <li>
-            <strong>Med renters rente:</strong> 10.000 kr med 5% renters rente i
-            30 år = 43.219 kr
+            <strong>Med renters rente:</strong> {kr(rentersRente.startBeloeb)} med{" "}
+            {rentersRente.aarligRentePct} % renters rente i {rentersRente.aar} år ={" "}
+            {kr(rentersRente.med)}
           </li>
         </ul>
         <p>Det er næsten det dobbelte!</p>
@@ -167,22 +113,22 @@ export default function OpsparingPage() {
             <tbody>
               <tr>
                 <td>Bankkonto</td>
-                <td>0-1%</td>
+                <td>0-1 %</td>
                 <td>Ingen</td>
               </tr>
               <tr>
                 <td>Obligationer</td>
-                <td>2-4%</td>
+                <td>2-4 %</td>
                 <td>Lav</td>
               </tr>
               <tr>
                 <td>Blandede fonde</td>
-                <td>4-6%</td>
+                <td>4-6 %</td>
                 <td>Medium</td>
               </tr>
               <tr>
                 <td>Aktiefonde</td>
-                <td>6-8%</td>
+                <td>6-8 %</td>
                 <td>Høj</td>
               </tr>
               <tr>
@@ -218,16 +164,31 @@ export default function OpsparingPage() {
           </li>
         </ul>
 
-        <div className="bg-green-50 border-l-4 border-green-400 p-4 my-6 not-prose">
+        <p>
+          Et budget er første skridt til at finde penge til opsparing. Se vores <Link href="/blog/maanedsbudget-2026-komplet-guide" className="text-blue-600 hover:underline">komplette guide til månedsbudget 2026</Link>.
+        </p>
+
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800">Eksempel: Tid vs. beløb</p>
           <p className="text-green-700">
-            Person A starter med 25 år og sparer 1.000 kr/md i 40 år (5% rente) = <strong>1,5 mio kr</strong><br />
-            Person B starter med 35 år og sparer 2.000 kr/md i 30 år (5% rente) = <strong>1,7 mio kr</strong><br />
-            Person A indbetaler kun 480.000 kr, Person B indbetaler 720.000 kr - men forskellen er minimal!
+            Person A starter med {tidVsBelob.a.alder} år og sparer{" "}
+            {tal(tidVsBelob.a.maanedlig)} kr/md i {tidVsBelob.a.aar} år til{" "}
+            {tidVsBelob.a.aarligRentePct} % årlig rente ={" "}
+            <strong>{kr(tidVsBelob.a.slutSaldo)}</strong>
+            <br />
+            Person B starter med {tidVsBelob.b.alder} år og sparer{" "}
+            {tal(tidVsBelob.b.maanedlig)} kr/md i {tidVsBelob.b.aar} år til{" "}
+            {tidVsBelob.b.aarligRentePct} % årlig rente ={" "}
+            <strong>{kr(tidVsBelob.b.slutSaldo)}</strong>
+            <br />
+            Person A indbetaler {kr(tidVsBelob.a.indskud)}, Person B indbetaler{" "}
+            {kr(tidVsBelob.b.indskud)}: B betaler altså{" "}
+            {kr(tidVsBelob.forskelIndbetalet)} mere ind og har {kr(tidVsBelob.forskelSlutSaldo)}{" "}
+            mere til sidst. Tid vejer tungere end beløb.
           </p>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Bemærk</p>
           <p className="text-yellow-700">
             Denne beregner viser beløb før skat og inflation. Faktisk afkast
@@ -236,8 +197,150 @@ export default function OpsparingPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Så använder du sparkalkylatorn</h2>
+        <p>
+          Med vår <strong>sparkalkylator</strong> ser du hur ditt <strong>sparande</strong> växer
+          över tid tack vare <strong>ränta-på-ränta</strong>:
+        </p>
+        <ol>
+          <li>
+            <strong>Startbelopp:</strong> hur mycket har du att börja med?
+          </li>
+          <li>
+            <strong>Månadssparande:</strong> hur mycket vill du spara varje
+            månad?
+          </li>
+          <li>
+            <strong>Årlig avkastning:</strong> vilken ränta eller avkastning
+            räknar du med?
+          </li>
+          <li>
+            <strong>Sparhorisont:</strong> hur många år vill du spara?
+          </li>
+        </ol>
+
+        <h2>Kraften i ränta-på-ränta</h2>
+        <p>
+          <strong>Ränta-på-ränta</strong> är en av de mest kraftfulla krafterna inom ekonomi.
+          Albert Einstein ska ha sagt att &quot;<strong>ränta-på-ränta är världens
+          åttonde underverk</strong>&quot;.
+        </p>
+        <p>Här är ett exempel på skillnaden:</p>
+        <ul>
+          <li>
+            <strong>Utan ränta-på-ränta:</strong> {kr(rentersRente.startBeloeb)} med{" "}
+            {rentersRente.aarligRentePct} % enkel ränta i {rentersRente.aar} år ={" "}
+            {kr(rentersRente.uden)}
+          </li>
+          <li>
+            <strong>Med ränta-på-ränta:</strong> {kr(rentersRente.startBeloeb)} med{" "}
+            {rentersRente.aarligRentePct} % ränta-på-ränta i {rentersRente.aar} år ={" "}
+            {kr(rentersRente.med)}
+          </li>
+        </ul>
+        <p>Nästan dubbelt så mycket!</p>
+
+        <h2>Typisk avkastning på olika sparformer</h2>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Typ</th>
+                <th>Typisk årlig avkastning</th>
+                <th>Risk</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Sparkonto</td>
+                <td>0-3 %</td>
+                <td>Ingen</td>
+              </tr>
+              <tr>
+                <td>Obligationer</td>
+                <td>2-4 %</td>
+                <td>Låg</td>
+              </tr>
+              <tr>
+                <td>Blandfonder</td>
+                <td>4-6 %</td>
+                <td>Medel</td>
+              </tr>
+              <tr>
+                <td>Aktiefonder</td>
+                <td>6-8 %</td>
+                <td>Hög</td>
+              </tr>
+              <tr>
+                <td>Enskilda aktier</td>
+                <td>Varierande</td>
+                <td>Mycket hög</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Tips för ett effektivt sparande</h2>
+        <ul>
+          <li>
+            <strong>Börja tidigt:</strong> tiden är viktigare än beloppet. Även
+            små belopp växer enormt över 30-40 år.
+          </li>
+          <li>
+            <strong>Automatisera:</strong> lägg upp en fast överföring så att du
+            sparar automatiskt varje månad.
+          </li>
+          <li>
+            <strong>Öka gradvis:</strong> höj sparandet varje gång du får en
+            löneökning.
+          </li>
+          <li>
+            <strong>Diversifiera:</strong> sprid ditt sparande över flera typer
+            av tillgångar.
+          </li>
+          <li>
+            <strong>Håll avgifterna låga:</strong> välj fonder med låga årliga
+            avgifter.
+          </li>
+        </ul>
+
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800">Exempel: tid kontra belopp</p>
+          <p className="text-green-700">
+            Person A börjar vid {tidVsBelob.a.alder} års ålder och sparar{" "}
+            {tal(tidVsBelob.a.maanedlig)} kr/mån i {tidVsBelob.a.aar} år till{" "}
+            {tidVsBelob.a.aarligRentePct} % årlig ränta ={" "}
+            <strong>{kr(tidVsBelob.a.slutSaldo)}</strong>
+            <br />
+            Person B börjar vid {tidVsBelob.b.alder} års ålder och sparar{" "}
+            {tal(tidVsBelob.b.maanedlig)} kr/mån i {tidVsBelob.b.aar} år till{" "}
+            {tidVsBelob.b.aarligRentePct} % årlig ränta ={" "}
+            <strong>{kr(tidVsBelob.b.slutSaldo)}</strong>
+            <br />
+            Person A sätter bara in {kr(tidVsBelob.a.indskud)}, Person B sätter in{" "}
+            {kr(tidVsBelob.b.indskud)}: B betalar alltså in{" "}
+            {kr(tidVsBelob.forskelIndbetalet)} mer och har {kr(tidVsBelob.forskelSlutSaldo)}{" "}
+            mer när perioden är slut. Tid väger tyngre än belopp.
+          </p>
+        </div>
+
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
+          <p className="font-medium text-yellow-800">Observera</p>
+          <p className="text-yellow-700">
+            Kalkylatorn visar belopp före skatt och inflation. Sparar du i ett
+            ISK eller på ett sparkonto påverkas nettoresultatet av skatt och
+            avgifter. Faktisk avkastning kan variera betydligt, och historisk
+            avkastning är ingen garanti för framtida avkastning.
+          </p>
+        </div>
+      </div>
+      )}
+
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/opsparing" />
     </div>

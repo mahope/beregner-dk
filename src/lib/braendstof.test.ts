@@ -1,0 +1,307 @@
+import { describe, it, expect } from "vitest";
+import { getPageData } from "./page-data";
+import {
+  BRAENDSTOF_EGENT_FORBRUG,
+  BRAENDSTOF_FORUDSETNINGER,
+  ELBIL_FORUDSETNINGER,
+  braendstofEksempelRækker,
+  heleKroner,
+  kmPrLiter,
+  literPr100km,
+  besparelseProcent,
+  braendstofForudsætninger,
+  breakEvenKwhPris,
+  elbilForudsætninger,
+  elbilSammenligning,
+  prisPrKm,
+  procent1Decimals,
+} from "./braendstof";
+
+describe("prisPrKm", () => {
+  it("beregner benzinpris pr. km", () => {
+    expect(prisPrKm("benzin")).toBeCloseTo(0.9, 6);
+  });
+
+  it("beregner dieselpris pr. km", () => {
+    expect(prisPrKm("diesel")).toBeCloseTo(12.8 / 18, 6);
+  });
+
+  it("beregner elpris pr. km", () => {
+    expect(prisPrKm("el")).toBeCloseTo(0.425, 6);
+  });
+
+  it("laeser forudsætningerne, der ikke er hardkodede to steder", () => {
+    expect(BRAENDSTOF_FORUDSETNINGER.benzin).toEqual({ literPris: 13.5, kmPerLiter: 15 });
+    expect(BRAENDSTOF_FORUDSETNINGER.diesel).toEqual({ literPris: 12.8, kmPerLiter: 18 });
+    expect(BRAENDSTOF_FORUDSETNINGER.el).toEqual({ kwhPris: 2.5, kwhPer100km: 17 });
+  });
+});
+
+describe("besparelseProcent", () => {
+  it("giver 52,8 % mod benzin — ikke et rundt 50-70 %-interval", () => {
+    expect(procent1Decimals(besparelseProcent("benzin"))).toBe(52.8);
+  });
+
+  it("giver 40,2 % mod diesel, altså under 50 %", () => {
+    expect(procent1Decimals(besparelseProcent("diesel"))).toBe(40.2);
+  });
+
+  it("er mindre mod endelingsbil end mod benzin, fordi diesel er billigere pr. km", () => {
+    expect(besparelseProcent("diesel")).toBeLessThan(besparelseProcent("benzin"));
+  });
+
+  it("er 0 mod sig selv", () => {
+    expect(besparelseProcent("el")).toBe(0);
+  });
+
+  it("går negativ, når el er dyrere end sammenligningsbrændstoffet", () => {
+    const { kwhPer100km } = BRAENDSTOF_FORUDSETNINGER.el;
+    const dyrt = breakEvenKwhPris("diesel") * 1.5;
+    const elPris = (kwhPer100km / 100) * dyrt;
+    expect(elPris).toBeGreaterThan(prisPrKm("diesel"));
+  });
+});
+
+describe("breakEvenKwhPris", () => {
+  it("er ca. 4,18 kr./kWh mod diesel", () => {
+    expect(breakEvenKwhPris("diesel")).toBeCloseTo(4.18, 2);
+  });
+
+  it("er ca. 5,29 kr./kWh mod benzin", () => {
+    expect(breakEvenKwhPris("benzin")).toBeCloseTo(5.29, 2);
+  });
+
+  it("ved break-even er el og sammenligningsbrændstoffet pr. km lige dyre", () => {
+    for (const type of ["benzin", "diesel"] as const) {
+      const el = (BRAENDSTOF_FORUDSETNINGER.el.kwhPer100km / 100) * breakEvenKwhPris(type);
+      expect(el).toBeCloseTo(prisPrKm(type), 6);
+    }
+  });
+});
+
+describe("procent1Decimals", () => {
+  it("runder rigtigt både op og ned", () => {
+    expect(procent1Decimals(52.777)).toBe(52.8);
+    expect(procent1Decimals(40.234)).toBe(40.2);
+    expect(procent1Decimals(0)).toBe(0);
+  });
+});
+
+describe("/braendstof FAQ", () => {
+  const locales = ["da", "no", "se"] as const;
+
+  function elSvar(locale: (typeof locales)[number]): string {
+    const faq = getPageData("braendstof", locale)!.faqItems;
+    const fundet = faq.find((f) => elSpoergsmaal.test(f.question));
+    if (!fundet) throw new Error(`Ingen el-spørgsmål i ${locale}`);
+    return fundet.answer;
+  }
+
+  it("findes i alle tre sprogversioner", () => {
+    for (const locale of locales) {
+      expect(elSvar(locale)).toBeTruthy();
+    }
+  });
+
+  it("lover ikke længere det runde 50-70 %-interval, værktøjet selv modsiger", () => {
+    for (const locale of locales) {
+      const svar = elSvar(locale);
+      expect(svar).not.toMatch(/50-70/);
+    }
+  });
+
+  // De to var skrevet med besparelseProcent("benzin"), altså de førte de danske
+  // forudsætninger ind i den svenska og norske svara — og låste netop den fejl, denne
+  // opgave lukker: på beraknare.se er diesel dyrere end bensin pr. liter, så de to
+  // procentstal er ikke de danske. Graden læses derfor fra det sprog, der spørges.
+  function sparelseGrader(locale: string) {
+    const F = braendstofForudsætninger(locale);
+    const elPris = (F.el.kwhPris / 100) * F.el.kwhPer100km;
+    const grad = (type: "benzin" | "diesel") => {
+      const anden = F[type].literPris / F[type].kmPerLiter;
+      return medKomma(((anden - elPris) / anden) * 100);
+    };
+    return { benzin: grad("benzin"), diesel: grad("diesel") };
+  }
+
+  it("nævner de to faktiske besparelsesgrader for det sprog, der spørges", () => {
+    for (const locale of locales) {
+      const svar = elSvar(locale);
+      const { benzin, diesel } = sparelseGrader(locale);
+      expect(svar).toContain(`${benzin} %`);
+      expect(svar).toContain(`${diesel} %`);
+    }
+  });
+
+  it("laeser de to procenttal i den rigtige rækkefølge", () => {
+    for (const locale of locales) {
+      const svar = elSvar(locale);
+      const { benzin, diesel } = sparelseGrader(locale);
+      const benzinPct = svar.indexOf(`${benzin} %`);
+      const dieselPct = svar.indexOf(`${diesel} %`);
+      expect(benzinPct).toBeGreaterThanOrEqual(0);
+      expect(dieselPct).toBeGreaterThan(benzinPct);
+    }
+  });
+
+  it("dansk og norsk: besparelsen er lavere mod diesel end mod benzin", () => {
+    // I Sverige er rækkefølgen omvendt, fordi diesel kostar mere pr. liter end bensin.
+    // Derfor må testen være hård på de to sprog, hvor den gælder.
+    for (const locale of ["da", "no"] as const) {
+      const svar = elSvar(locale);
+      const benzinPct = svar.indexOf(`${medKomma(besparelseProcent("benzin"))} %`);
+      const dieselPct = svar.indexOf(`${medKomma(besparelseProcent("diesel"))} %`);
+      expect(dieselPct).toBeGreaterThan(benzinPct);
+    }
+  });
+
+  it("skriver procent med komma, som dansk og svensk kræver", () => {
+    for (const locale of locales) {
+      expect(elSvar(locale)).not.toMatch(/\d\.\d\s*%/);
+    }
+  });
+});
+
+const elSpoergsmaal = /el-?biler billigere|elbiler billigere|elbilar billigare/i;
+
+/** Spejler formateringen i page-data.ts: én decimal, komma. */
+function medKomma(value: number): string {
+  return procent1Decimals(value).toFixed(1).replace(".", ",");
+}
+
+describe("elbilForudsætninger", () => {
+  it("er standarderne /elbil-værktøjet bruger, ikke en tredje sæt", () => {
+    expect(ELBIL_FORUDSETNINGER.da).toEqual({
+      elKwhPris: 2.5,
+      elKwhPer100km: 18,
+      benzinLiterPris: 13.5,
+      benzinKmPerLiter: 16,
+      kmPrAar: 15000,
+      aar: 5,
+    });
+    expect(ELBIL_FORUDSETNINGER.se).toEqual({
+      elKwhPris: 2,
+      elKwhPer100km: 18,
+      benzinLiterPris: 19,
+      benzinKmPerLiter: 16,
+      kmPrAar: 15000,
+      aar: 5,
+    });
+  });
+
+  it("giver svensk på beraknare.se og dansk overalt ellers", () => {
+    expect(elbilForudsætninger("se")).toBe(ELBIL_FORUDSETNINGER.se);
+    expect(elbilForudsætninger("da")).toBe(ELBIL_FORUDSETNINGER.da);
+    expect(elbilForudsætninger("no")).toBe(ELBIL_FORUDSETNINGER.da);
+    expect(elbilForudsætninger("")).toBe(ELBIL_FORUDSETNINGER.da);
+  });
+});
+
+describe("elbilSammenligning", () => {
+  it("giver 0,45 mod 0,84 kr. pr. km på dansk — 46,7 %, ikke under halvdelen", () => {
+    const da = elbilSammenligning("da");
+    expect(da.elPrisPrKm).toBeCloseTo(0.45, 6);
+    expect(da.benzinPrisPrKm).toBeCloseTo(0.84375, 6);
+    expect(da.besparelseProcent).toBe(46.7);
+    // Løftet "under halvdelen" er falsk ved værktøjets egne standarder.
+    expect(da.elPrisPrKm / da.benzinPrisPrKm).toBeGreaterThan(0.5);
+  });
+
+  it("gør el dyrere end benzin over 4,7 kr./kWh", () => {
+    expect(elbilSammenligning("da").breakEvenKwhPris).toBe(4.7);
+  });
+
+  it("giver ca. 5.900 kr. pr. år på 15.000 km", () => {
+    expect(elbilSammenligning("da").aarligBesparelse).toBe(5900);
+  });
+
+  it("giver svensk 0,36 mod 1,19 kr. pr. km og ca. 12.400 kr. pr. år", () => {
+    const se = elbilSammenligning("se");
+    expect(se.elPrisPrKm).toBeCloseTo(0.36, 6);
+    expect(se.benzinPrisPrKm).toBeCloseTo(1.1875, 6);
+    expect(se.besparelseProcent).toBe(69.7);
+    expect(se.aarligBesparelse).toBe(12400);
+  });
+
+  it("ligger samme vej som /braendstof-tabellen, så de to sammenligninger ikke kan glide fra hinanden", () => {
+    const tabel = procent1Decimals(besparelseProcent("benzin"));
+    const elbil = elbilSammenligning("da").besparelseProcent;
+    // 18 kWh/100 km og 16 km/l er hver især dyrere for el end tabellens 17 og 15.
+    expect(elbil).toBeLessThan(tabel);
+    expect(BRAENDSTOF_FORUDSETNINGER.benzin.kmPerLiter).toBeLessThan(
+      ELBIL_FORUDSETNINGER.da.benzinKmPerLiter,
+    );
+    expect(BRAENDSTOF_FORUDSETNINGER.el.kwhPer100km).toBeLessThan(
+      ELBIL_FORUDSETNINGER.da.elKwhPer100km,
+    );
+  });
+});
+
+describe("literPr100km og kmPrLiter", () => {
+  it("omregner km/l til l/100 km, som tankinstrumentet viser", () => {
+    expect(literPr100km(15)).toBe(6.7);
+    expect(literPr100km(18)).toBe(5.6);
+    expect(literPr100km(12)).toBe(8.3);
+    expect(literPr100km(22)).toBe(4.5);
+    expect(literPr100km(15)).toBe(6.7);
+  });
+
+  it("omregner den anden vej", () => {
+    expect(kmPrLiter(6.7)).toBe(14.9);
+    expect(kmPrLiter(10.5)).toBe(9.5);
+  });
+
+  it("giver 0 i stedet for uendelig ved et ugyldigt forbrug", () => {
+    expect(literPr100km(0)).toBe(0);
+    expect(kmPrLiter(0)).toBe(0);
+    expect(literPr100km(-1)).toBe(0);
+  });
+});
+
+describe("braendstofEksempelRækker", () => {
+  const rækker = braendstofEksempelRækker();
+
+  it("regner benzinrækken til de 450 kr., titlen og beskrivelsen lover", () => {
+    const benzin = rækker[0];
+    expect(benzin.type).toBe("benzin");
+    expect(benzin.forbrug).toBe(15);
+    expect(benzin.maengde).toBe(33.3);
+    expect(benzin.pris).toBe(450);
+    expect(benzin.prisPrKm).toBeCloseTo(0.9, 10);
+  });
+
+  it("regner diesel og el på samme måde", () => {
+    const diesel = rækker[1];
+    expect(diesel.forbrug).toBe(18);
+    expect(diesel.maengde).toBe(27.8);
+    expect(diesel.pris).toBe(356);
+    expect(diesel.prisPrKm).toBeCloseTo(0.7111, 4);
+
+    const el = rækker[2];
+    expect(el.forbrug).toBe(17);
+    expect(el.maengde).toBe(85);
+    expect(el.pris).toBe(213);
+    expect(el.prisPrKm).toBeCloseTo(0.425, 10);
+  });
+
+  it("gør hvert regnestykke på siden efterprøvbart med hånden", () => {
+    // Prisen er rundet op til hele kroner fra den *afroundede* mængde, så det
+    // trykte "33,3 l × 13,50 kr." kan efterprøves som det står — ikke bare
+    // regnes på en skjult fuldpræcis værdi.
+    for (const række of rækker) {
+      expect(heleKroner(række.maengde * række.enhedPris)).toBe(række.pris);
+    }
+  });
+
+  it("laver el-rækken ingen l/100 km om, fordi der ikke er liter", () => {
+    expect(rækker[2].literPr100km).toBeNull();
+    expect(rækker[0].literPr100km).toBe(6.7);
+  });
+
+  it("følger en anden distance uden at ændre forudsætningerne", () => {
+    const tusinde = braendstofEksempelRækker(1000);
+    expect(tusinde[0].maengde).toBe(66.7);
+    expect(tusinde[0].pris).toBe(900);
+    expect(tusinde[0].prisPrKm).toBeCloseTo(0.9, 10);
+  });
+});

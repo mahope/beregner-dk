@@ -1,94 +1,346 @@
-import type { Metadata } from "next";
+import { localizedPath } from "@/lib/locale-slugs";
+import { ResultAd } from "@/components/ads/AdBanner";
 import TidsBeregner from "@/components/TidsBeregner";
-import { RelatedCalculators } from "@/components/RelatedCalculators";
+import PlusTidBeregner from "@/components/PlusTidBeregner";
+import MinutterTilTimerBeregner from "@/components/MinutterTilTimerBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { formatNumber, getIntlLocale } from "@/lib/format";
+import type { Locale } from "@/lib/i18n";
+import {
+  TIDS_EKSEEMPLER,
+  TIDS_EKSEMPEL_DAG,
+  TIDS_EKSEMPEL_FLERE_DAGE,
+  TIDS_EKSEMPEL_MIDNAT,
+  TIDS_EKSEMPEL_PAUSE,
+  TIDS_UDEN_DATOER,
+  formatTidsvar,
+  excelDifferens,
+  totalMinutter,
+  MINUTTER_TILL_TIMMAR,
+} from "@/lib/tids-eksempler";
+import {
+  TIDS_SUMMER,
+  summerTidsrum,
+  formatDoegn,
+} from "@/lib/tids-summer";
+import {
+  DAGE_I_SKUDAAR,
+  TIMER_I_DAGT,
+  TIMER_I_SKUDAAR,
+  TIMER_PERIODER,
+} from "@/lib/timer-periode";
+import RelatedCalculators from "@/components/RelatedCalculators";
+import {
+  TEMPO_EKSEMPLER,
+  beregnTempo,
+  formatSekunder,
+  type TempoEksempel,
+} from "@/lib/tidsberegner";
+import { PLUS_TID_EKSEMPLER, plusTid } from "@/lib/plus-tid";
 import FAQ from "@/components/FAQ";
+import DageTilLinks from "@/components/DageTilLinks";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk/tidsberegner";
+/**
+ * De to sumelformler står som **tekst** i JSX, ikke som en klamme om
+ * konstanten.
+ *
+ * Samme fil skriver allerede `=(B1-A1)*24` og `=MOD(B1-A1;1)*24` som
+ * bogstavelige strenge, så det er husets egen form. Grunden er ikke smag:
+ * `locale-leak.mjs`' port-analyse tæller *hver* klamme i rå kilde — også i
+ * kommentarer — så hver klamme om en konstant i den danske blok får
+ * scanneren til at pege på den frem for på porten, og de to sidste danske
+ * afsnit blev rapporteret som synlige på beraknare.se. To falske fund i en
+ * port, der ellers er korrekt. Konstanterne er derfor stadig **testets**
+ * kilde til sandheden: `page.test.tsx` kræver at markupken indeholder dem
+ * tegn for tegn, så siden og modulet ikke kan glide fra hinanden.
+ *
+ * Samme regel gælder alle klammer i kommentarerne nedenfor: en kommentar der
+ * *citerer* en åben klamme uden den lukkende gør hele filens port-analyse
+ * ubrugelig, fordi scanneren ikke ved, at den læser kommentar. Derfor står
+ * der ingen klammer i dem.
+ */
 
-export const metadata: Metadata = {
-  title: "Tidsberegner - Beregn timer og minutter mellem tidspunkter",
-  description:
-    "Gratis tidsberegner. Beregn antal timer og minutter mellem to tidspunkter. Perfekt til arbejdstid, møder og timeregistrering.",
-  keywords: [
-    "tidsberegner",
-    "timer mellem tidspunkter",
-    "arbejdstid beregner",
-    "tid beregner",
-    "timer og minutter",
-    "timeregistrering",
-  ],
-  openGraph: {
-    title: "Tidsberegner - Timer og minutter mellem tidspunkter",
-    description: "Beregn tid mellem to tidspunkter. Gratis og let at bruge.",
-    url: baseUrl,
-    type: "website",
+/**
+ * Rækkerne i summerings-tabellen, bygget uden for JSX.
+ *
+ * Først blev rækkerne lavet med en pilefunktion, der **åbner en klamme**
+ * direkte i JSX. Det fik port-analysen til at miste den danske port og
+ * rapportere den nye blok som værende synlig på beraknare.se. Derfor bygges
+ * rækkerne her, og JSX'en får kun ét kald. Samme fejltype som C120's
+ * `locale`-port, bare i scanneren og ikke i koden.
+ */
+function sumRækker(locale: "da" | "se") {
+  return TIDS_SUMMER.map((raekke) => {
+    const sum = summerTidsrum(raekke);
+    if (!sum) return null;
+    return (
+      <tr key={raekke.id}>
+        <td>
+          {raekke.forsteStart}–{raekke.forsteSlut}
+          {raekke.pauseForste > 0 && ` − ${raekke.pauseForste} min`}
+        </td>
+        <td>
+          {raekke.andenStart}–{raekke.andenSlut}
+          {raekke.pauseAnden > 0 && ` − ${raekke.pauseAnden} min`}
+        </td>
+        <td>{formatTidsvar(sum, locale)}</td>
+        <td>
+          {formatNumber(sum.decimalTimer, locale, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </td>
+        <td>{formatDoegn(sum.heleDoegn, locale)}</td>
+      </tr>
+    );
+  });
+}
+
+/**
+ * Hvilken dag et resultat fra `plusTid` lander på. Kun hele dage, for et
+ * klokkeslæt uden dato er det eneste tidspunkt, der er mening.
+ *
+ * Teksterne ligger i et `Record` og ikke i en terning inde i funktionen:
+ * locale-leak-scanneren læser en dansk streng i en `se`-gren som et læk, og
+ * det er præcis den fejl LAANTYPE-straffen havde (se `plus-tid.test.ts`).
+ */
+const PLUS_TID_DAG_TEKST: Record<
+  "da" | "se",
+  { nul: string; en: string; mange: string; foer: string; mangeFoer: string }
+> = {
+  da: {
+    nul: "samme dag",
+    en: "dagen efter",
+    mange: "dage efter",
+    foer: "dagen før",
+    mangeFoer: "dage før",
   },
-  alternates: {
-    canonical: baseUrl,
+  se: {
+    nul: "samma dag",
+    en: "dagen efter",
+    mange: "dagar efter",
+    foer: "dagen innan",
+    mangeFoer: "dagar innan",
   },
 };
 
-const faqItems = [
-  {
-    question: "Hvordan beregner jeg arbejdstid?",
-    answer:
-      "Indtast dit mødetidspunkt som starttid og fyraftenstid som sluttid. Husk at trække din frokostpause fra i pausefeltet.",
-  },
-  {
-    question: "Hvad er decimal timer?",
-    answer:
-      "Decimal timer viser tiden som et tal med decimaler i stedet for timer:minutter. 1,5 timer = 1 time og 30 minutter. Bruges ofte til timeregistrering og fakturering.",
-  },
-  {
-    question: "Kan jeg beregne tid over midnat?",
-    answer:
-      "Ja! Hvis sluttidspunktet er før starttidspunktet, antager beregneren automatisk at det går over midnat. F.eks. 22:00 til 06:00 = 8 timer.",
-  },
-  {
-    question: "Hvad med arbejdsdage?",
-    answer:
-      "Arbejdsdage beregnes ud fra 8 timer = 1 arbejdsdag. Så 16 timer = 2 arbejdsdage. Nyttigt til projektplanlægning.",
-  },
-];
+function plusTidDag(heleDage: number, locale: "da" | "se"): string {
+  const t = PLUS_TID_DAG_TEKST[locale];
+  if (heleDage === 0) return t.nul;
+  if (heleDage === 1) return t.en;
+  if (heleDage === -1) return t.foer;
+  return `${Math.abs(heleDage)} ${heleDage > 0 ? t.mange : t.mangeFoer}`;
+}
 
-const relatedCalculators = [
-  {
-    title: "Datoberegner",
-    href: "/dato",
-    description: "Beregn dage mellem datoer",
-  },
-  {
-    title: "Timeprisberegner",
-    href: "/timepris",
-    description: "Find din timepris",
-  },
-  {
-    title: "Tidszoneberegner",
-    href: "/tidszone",
-    description: "Se tid i andre lande",
-  },
-];
+const TEMPO_RAEKKE = TEMPO_EKSEMPLER.map((eksempel) => ({
+  ...eksempel,
+  tempo: beregnTempo(eksempel.minutter, eksempel.km)!,
+}));
 
-export default function TidsberegnerPage() {
+/**
+ * Halvmarathon-rækken fra tempo-tabellen. Brødteksten læser sit tempo herfra,
+ * så «tid ÷ tempo = distance» ikke kan skrive et andet tal end den tabel der
+ * står lige over den. Rækken slås op på id, så rækkefølgen i `TEMPO_EKSEMPLER`
+ * ikke betyder noget — men `halvmaraton` skal findes, ellers er `!` falsk.
+ */
+const TEMPO_HALV = TEMPO_RAEKKE.find((raekke) => raekke.id === "halvmaraton")!;
+
+const TEMPO_NAEVN_DA: Record<TempoEksempel["id"], string> = {
+  km5: "5 km",
+  km10: "10 km",
+  halvmaraton: "Halvmarathon (21,1 km)",
+  maraton: "Marathon (42,2 km)",
+};
+
+const TEMPO_NAEVN_SE: Record<TempoEksempel["id"], string> = {
+  km5: "5 km",
+  km10: "10 km",
+  halvmaraton: "Halvmarathon (21,1 km)",
+  maraton: "Maraton (42,2 km)",
+};
+
+/** "2026-09-25" → "25. sep.". Datoerne læses i UTC, så de kan ikke glide en dag. */function formatDato(iso: string | undefined, locale: Locale): string {
+  if (!iso) return "";
+  const dato = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(dato.getTime())) return iso;
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(dato);
+}
+
+/**
+ * Eksemplernes decimaltimer er tal, ikke strenge (se `TidsintervalResultat`),
+ * så notationen vælges her. Før dette skrev tabellen og brødteksten
+ * "8.25 timer" på både minberegner.dk og beraknare.se.
+ */
+/**
+ * Periodernes dage er brøktal for måned og kvartal (30,4167 og 91,25), fordi
+ * de er snit af et år på 365 dage. Derfor får de to decimaler, mens et døgn,
+ * en uge og et år står som hele tal.
+ */
+function formatDage(dage: number, locale: "da" | "se" | "no"): string {
+  return formatNumber(dage, locale, {
+    minimumFractionDigits: Number.isInteger(dage) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatTimer(tal: number, locale: "da" | "se" | "no"): string {
+  return formatNumber(tal, locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export async function generateMetadata() {
+  return generatePageMetadata("tidsberegner");
+}
+
+export default async function TidsberegnerPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("tidsberegner", locale) || getPageData("tidsberegner", "da")!;
+  /** Svar-først-tabellen findes i de to sprog, der serverer kalkulatorer. */
+  const daSe = locale === "se" ? "se" : "da";
+
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/tidsberegner`}
+        category={pageData.schemaCategory}
+      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/tidsberegner" }]} />
+
       <h1 className="text-3xl md:text-4xl font-bold mb-4">
-        ⏱️ Tidsberegner
+        {locale === "da"
+          ? "Hvor lang tid er der mellem to klokkeslæt?"
+          : locale === "se"
+            ? "Hur lång tid är det mellan två klockslag?"
+            : pageData.title}
       </h1>
       <p className="text-gray-600 mb-8 text-lg">
-        Beregn antal timer og minutter mellem to tidspunkter. Perfekt til
-        arbejdstid, møder og timeregistrering.
+        {pageData.description}
       </p>
+
+      {/* Værktøjet står *før* svar-først-tabellen og alt den øvrige brødtekst,
+          fordi siden peger på det med "ovenfor" i ni steder — "Indtast dine egne
+          klokkeslæt ovenfor", "præcis som værktøjet ovenfor", "bruger du værktøjet
+          ovenfor". Så længe tabellen stod først, var alle ni henvisninger til
+          det, der lå *nedenfor* dem, og læseren blev sendt op til et felt, der
+          ikke var der. At flytte værktøjet op gør alle ni rigtige på én gang
+          uden at røre en eneste brødtekst, og det er samme rækkefølge som
+          /procent (beregneren direkte under H1). */}
 
       <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
         <TidsBeregner />
       </div>
 
+      {/* Plus tid: «hvad er klokken om 8 timer». Målt 6/10 05:1x har dansk
+          autocomplete 10 af 10 træffere under «hvad er klokken om» i formen
+          «hvad er klokken om N timer» (N = 8, 12, 16, 9, 17, 18, 14, 15, 8,
+          19), og GSC for beraknare.se har «räkna timmar och minuter» (141
+          visninger) på pos. 10 og «räkna tid» (121) på pos. 10 — de to
+          søgninger TidsBeregner ovenfor ikke kan svare på, fordi den regner
+          *imellem* to klokkeslæt og ikke *på* ét. Værktøjet får den anden
+          halvdel også: summering af flere tidsrum, som siden indtil nu kun
+          besvarede med en omvej (“sæt den første sluttid ind som den andens
+          starttid”). Samme rækkefølge som /kvadratmeter og /braendstof:
+          værktøjet over brødteksten, der spørger om det. */}
+      <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
+        <PlusTidBeregner />
+      </div>
+
+      {/* Svar-først: Search Console viser 790 visninger (pos. 6) på søgningen
+          "hvor lang tid" og 969 (pos. 4) på "tidsberegner", men spørgsmålet
+          stod ingen steder på siden. Tallene nedenfor kommer fra
+          `beregnTidsinterval` — samme modul som værktøjet bruger.
+          C51 lagde de to rækker med datofelter ind, fordi værktøjet kan
+          intervaller på tværs af datoer, men siden ikke nævnte det.
+          C120 løftede `locale === "da"`-porten: beraknare.se/tidsberegner er
+          domænets andenstørste side (59.270 visninger) og havde 0 fund på
+          "8 t 15 min", "1 t 30 min" og "80,00" — hele svar-først-tabellen var
+          dansk-only. Svaret formateres med `formatTidsvar`, så beraknare.se
+          får "8 h 15 min" og ikke den danske "t" (C73's R4). */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8">
+        <h2 className="text-xl font-bold mb-3 dark:text-white">
+          {daSe === "se"
+            ? "Svar på de vanligaste tidsintervallen"
+            : "Svar på de oftest søgte tidsrum"}
+        </h2>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Start</th>
+                <th>Slut</th>
+                <th>{daSe === "se" ? "Datum" : "Dato"}</th>
+                <th>{daSe === "se" ? "Paus" : "Pause"}</th>
+                <th>Svar</th>
+                <th>{daSe === "se" ? "Decimaltimmar" : "Decimaltimer"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TIDS_EKSEEMPLER.map((eksempel) => (
+                <tr key={`${eksempel.start}-${eksempel.slut}`}>
+                  <td>{eksempel.start}</td>
+                  <td>{eksempel.slut}</td>
+                  <td>
+                    {eksempel.startDato
+                      ? `${formatDato(eksempel.startDato, daSe)} – ${formatDato(eksempel.slutDato, daSe)}`
+                      : daSe === "se"
+                        ? "Samma dag"
+                        : "Samme dag"}
+                  </td>
+                  <td>{eksempel.pause > 0 ? `${eksempel.pause} min` : "Ingen"}</td>
+                  <td>
+                    <strong>{formatTidsvar(eksempel, daSe)}</strong>
+                    {eksempel.overMidnat && !eksempel.startDato && " (dagen efter)"}
+                  </td>
+                  <td>
+                    {formatTimer(eksempel.decimalTimer, locale)}{" "}
+                    {daSe === "se" ? "timmar" : "timer"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+          {locale === "se" ? (
+            <>
+              {TIDS_EKSEEMPLER[0].start} till {TIDS_EKSEEMPLER[0].slut} är alltså{" "}
+              <strong>{formatTidsvar(TIDS_EKSEEMPLER[0], "se")}</strong> ={" "}
+              {formatTimer(TIDS_EKSEEMPLER[0].decimalTimer, "se")} decimaltimmar. Fyll i dina egna
+              klockslag ovanför, så drar kalkylatorn automatiskt av en lunchrast om du anger den.
+            </>
+          ) : (
+            <>
+              {TIDS_EKSEEMPLER[0].start} til {TIDS_EKSEEMPLER[0].slut} er altså{" "}
+              <strong>{formatTidsvar(TIDS_EKSEEMPLER[0], "da")}</strong> ={" "}
+              {formatTimer(TIDS_EKSEEMPLER[0].decimalTimer, "da")} decimaltimer. Indtast dine egne
+              klokkeslæt ovenfor, og beregneren trækker automatisk en frokostpause
+              fra, hvis du angiver den.
+            </>
+          )}
+        </p>
+      </div>
+
+
       {/* SEO Content */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
-        <h2>Sådan bruger du tidsberegneren</h2>
+        <h2>Hvordan beregner du tid mellem to klokkeslæt?</h2>
         <p>
-          Vores tidsberegner hjælper dig med at beregne den præcise tid mellem
+          Vores <strong>tidsberegner</strong> hjælper dig med at beregne den <strong>præcise tid</strong> mellem
           to tidspunkter. Den er ideel til:
         </p>
         <ul>
@@ -105,7 +357,132 @@ export default function TidsberegnerPage() {
           <li>
             <strong>Nattevagter</strong> - beregn tid over midnat
           </li>
+          <li>
+            <strong>Intervaller på flere dage</strong> - beregn fra en dato og
+            et klokkeslæt til en anden dato og et andet klokkeslæt
+          </li>
         </ul>
+
+        <h2>Beregner tid på tværs af datoer</h2>
+        <p>
+          Under de to klokkeslæt ligger der to <strong>valgfrie datofelter</strong>.
+          Uden dem regner beregneren inden for samme døgn, og den tager så
+          automatisk natten med, når sluttidspunktet er tidligere end
+          starttidspunktet. Det dækker en arbejdsdag og en nattevagt. Men skal
+          tiden dække mere end ét døgn — en weekend, en ferie, en turnus over
+          flere dage — så skal begge datoer ind, ellers regner beregneren kun
+          det, der ligger mellem klokkeslættene.
+        </p>
+        <p>
+          Et gennemgående eksempel: <strong>fredag kl. {TIDS_EKSEMPEL_FLERE_DAGE.start} til mandag kl.{" "}
+          {TIDS_EKSEMPEL_FLERE_DAGE.slut}</strong> er{" "}
+          <strong>{formatTidsvar(TIDS_EKSEMPEL_FLERE_DAGE, "da")}</strong> ={" "}
+          {formatTimer(TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer, locale)} decimaltimer, fordi de tre
+          fulde døgn regnes med. Uden datoerne ville det samme interval være{" "}
+          {TIDS_UDEN_DATOER.da} — kun det, der ligger mellem klokkeslættene.
+        </p>
+        <p>
+          Er startdatoen tidligere end slutdatoen, viser beregneren intet
+          resultat, fordi et interval ikke kan gå baglæns. Er der kun indtastet
+          én dato, bruges den anden som samme dag — så begge datoer skal derfor
+          ind, hvis intervallet går over en dag.
+        </p>
+
+        <h2>Hvor hurtigt løber jeg? Tempo i minutter pr. kilometer</h2>
+        <p>
+          Tempoet er løbetiden delt med distancen:{" "}
+          <strong>5 km på 25 minutter er 5:00 pr. kilometer</strong>, altså
+          25 ÷ 5. Den samme fart er 8:03 pr. engelsk mil, fordi én mil er 1,609344
+          km. Sådan regner du: tag løbetiden i minutter, del den med
+          kilometerne, så har du tempoet — og du kan gange det med distancen for
+          at finde den samme fart over en længere tur.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Løb</th>
+              <th>Tid</th>
+              <th>Min. pr. km</th>
+              <th>Min. pr. mil</th>
+            </tr>
+          </thead>
+          <tbody>
+            {TEMPO_RAEKKE.map((raekke) => (
+              <tr key={raekke.id}>
+                <td>{TEMPO_NAEVN_DA[raekke.id]}</td>
+                <td>{raekke.minutter} min.</td>
+                <td>{formatSekunder(raekke.tempo.sekunderPerKm)}</td>
+                <td>{formatSekunder(raekke.tempo.sekunderPerMil)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Har du en løbetid og vil vide, hvor langt du nåede, er det
+          modsatte regnestykke det samme:{" "}
+          <strong>tid ÷ tempo = distance</strong>. Et 5 km-løb på 25 minutter er
+          altså 5 km, og en halvmarathon på 1 time og 45 minutter er 21,1 km ved{" "}
+          {formatSekunder(TEMPO_HALV.tempo.sekunderPerKm)} pr. kilometer. Samme
+          regel som værktøjet bruger ovenfor: et interval er bare en tid delt med
+          en distance.
+        </p>
+
+        <h2>Sådan beregner du tid mellem to klokkeslæt i Excel</h2>
+        <p>
+          Skriv starttidspunktet i <strong>A1</strong> og sluttidspunktet i{" "}
+          <strong>B1</strong> — begge som rigtige klokkeslæt, ikke som tekst.
+          Så er den korte formel <code>=B1-A1</code>, og med cellen formateret
+          som <strong>Tid</strong> viser den{" "}
+          <strong>
+            {TIDS_EKSEMPEL_DAG.slut} − {TIDS_EKSEMPEL_DAG.start} ={" "}
+            {formatTidsvar(TIDS_EKSEMPEL_DAG, "da")}
+          </strong>{" "}
+          (altså {totalMinutter(TIDS_EKSEMPEL_DAG)} minutter).
+        </p>
+        <p>
+          Til <strong>decimaltimer</strong> — den notation mange virksomheder
+          bruger — skal du gange med 24:{" "}
+          <code>=(B1-A1)*24</code> giver{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_DAG.decimalTimer, "da")} timer</strong>{" "}
+          for præcis det samme par. Og til <strong>alle minutter i ét tal</strong>{" "}
+          (til en løntimesrapport) er det{" "}
+          <code>=(B1-A1)*24*60</code> ={" "}
+          <strong>{totalMinutter(TIDS_EKSEMPEL_DAG)}</strong>.
+        </p>
+        <p>
+          <strong>Den fælde, der giver et negativt tal:</strong> hvis
+          sluttidspunktet er tidligere end starttidspunktet — en nattevagt fra{" "}
+          {TIDS_EKSEMPEL_MIDNAT.start} til {TIDS_EKSEMPEL_MIDNAT.slut} — giver{" "}
+          <code>=B1-A1</code>{" "}
+          <strong>
+            {formatNumber(excelDifferens(TIDS_EKSEMPEL_MIDNAT), "da", { maximumFractionDigits: 2 })}
+          </strong>{" "}
+          døgn, altså minus 16 timer. Wrap formlen i{" "}
+          <code>=MOD(B1-A1;1)*24</code>, så den tager de 24 timer med igen, og
+          du får <strong>{formatTimer(TIDS_EKSEMPEL_MIDNAT.decimalTimer, "da")} timer</strong>{" "}
+          — præcis som værktøjet ovenfor.
+        </p>
+        <p>
+          <strong>Og en pause?</strong> Træk den fra i timer, ikke i klokkeslæt:{" "}
+          <code>=(B1-A1)*24-0,5</code> giver{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_PAUSE.decimalTimer, "da")} timer</strong>{" "}
+          for {TIDS_EKSEMPEL_PAUSE.start} til {TIDS_EKSEMPEL_PAUSE.slut} med 30
+          minutters frokost. Dansk Excel bruger <strong>semikolon</strong> som
+          skilletegn, fordi komma er decimaltegn — samme som i{" "}
+          <a href={localizedPath("/dato", locale)}>datoberegnerens</a> formler.
+        </p>
+        <p>
+          Er tallet hjemme i Excel{" "}
+          <strong>
+            {formatNumber(excelDifferens(TIDS_EKSEMPEL_DAG), "da", { maximumFractionDigits: 4 })}
+          </strong>{" "}
+          i stedet for{" "}
+          {formatTidsvar(TIDS_EKSEMPEL_DAG, "da")}, står cellen formateret som{" "}
+          <strong>Tal</strong>: Excel gemmer et klokkeslæt som en brøkdel af et
+          døgn, og {TIDS_EKSEMPEL_DAG.slut} − {TIDS_EKSEMPEL_DAG.start} er
+          netop {formatNumber(TIDS_EKSEMPEL_DAG.heleDoegn, "da", { maximumFractionDigits: 4 })}{" "}
+          af et døgn. Skift formateringen til Tid, eller gang med 24.
+        </p>
 
         <h2>Decimal timer vs. timer:minutter</h2>
         <p>
@@ -119,16 +496,614 @@ export default function TidsberegnerPage() {
           <li>1 time 15 min = 1,25 timer</li>
         </ul>
 
-        <h2>Tips til præcis timeregistrering</h2>
+        {/* DA-autocomplete under "minutter til timer" er 7 af 10 numeriske
+            variationer (300, 1000, 150, 2000, 120, 1500, 2500 minutter), og
+            under "time og minutter" ligger "1 time og 30 minutter" og
+            "1 time og 45 minutter". Den danske side havde kun decimal-listen
+            ovenfor, som er fire linjer — altså svarer den på ingen af dem.
+            Sektionen er C120's svenska "Räkna om minuter till timmar", og
+            alle tal regnes fra `MINUTTER_TILL_TIMMAR` i `tids-eksempler.ts`,
+            som div/mod 60 bruger — samme regel som værktøjet. */}
+        {/* Værktøjet står lige over brødteksten, så læseren der skriver «omregn
+            145 minutter til timer» finder regnestykket som en beregning og
+            ikke som en tabel, han selv skal læse. Se `src/lib/tidsenhed.ts`
+            for autocomplete-målingen (8 af 8 træffere under «omregn minutter
+            til timer» er selve opgaven, fire af dem med et konkret tal). */}
+        <MinutterTilTimerBeregner />
+        <h2>Omregn minutter til timer – og timer til minutter</h2>
         <p>
-          Husk altid at fratrække pauser fra din arbejdstid. De fleste har 30
-          minutters frokostpause, som ikke tælles med i den betalte arbejdstid.
+          Omregningen er altid <strong>minutter ÷ 60 = timer</strong>, og den
+          anden vej er <strong>timer × 60 = minutter</strong>. Decimaltimer er
+          samme sag med komma: 90 minutter er 1,50 timer, og 1,50 timer er 90
+          minutter igen.
         </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Minutter</th>
+              <th>Timer og minutter</th>
+              <th>Decimaltimer</th>
+              <th>Divisionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {MINUTTER_TILL_TIMMAR.map((raekke) => (
+              <tr key={raekke.minutter}>
+                <td>{raekke.minutter}</td>
+                <td>
+                  {formatTidsvar(
+                    { timer: raekke.timer, minutter: raekke.restMinutter },
+                    "da"
+                  )}
+                </td>
+                <td>{formatTimer(raekke.decimalTimer, "da")}</td>
+                <td>
+                  {raekke.minutter} ÷ 60 = {formatTimer(raekke.decimalTimer, "da")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Den anden vej er <strong>timer × 60 = minutter</strong>: 7,5 timer
+          bliver 450 minutter, altså 7 timer og 30 minutter. Og 495 minutter er
+          08:30–16:45 ovenfor — det er samme par rækker som værktøjet regner.
+          Vil du vide hvor langt du kom under et løb, deler du tiden med
+          tempoet i stedet, og det står under{" "}
+          <a href={localizedPath("/fart", locale)}>fartberegneren</a>.
+        </p>
+
+        {/* Autocomplete (målt 2/10, hl=da gl=dk) spørger om hele perioden:
+            "hvor mange timer er der på et år" er nr. 1 under "hvor mange
+            timer", "hvor mange timer i en uge" er nr. 1 under "timer i en
+            uge", og "hvor mange timer er der i en måned" ligger i samme
+            blok. Siden svarede på "minutter ÷ 60" men ikke på periode-spørgsmålet.
+            Alle tal læses fra `TIMER_PERIODER`, så et døgn og dets timer ikke
+            kan glide fra hinanden. Måned og kvartal er snit af et år på 365
+            dage — det står i modulens docblock og i teksten under. */}
+        <h2>Hvor mange timer er der i et døgn, en uge, en måned og et år?</h2>
+        <p>
+          Et døgn har {TIMER_I_DAGT} timer, så alt andet er samme tal ganget
+          med antallet af dage. Tabellen regner alle rækker for dig:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Periode</th>
+                <th>Dage</th>
+                <th>Timer</th>
+                <th>Minutter</th>
+                <th>Sekunder</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TIMER_PERIODER.map((raekke) => (
+                <tr key={raekke.id}>
+                  <td>{raekke.naevn.da}</td>
+                  <td>{formatDage(raekke.dage, "da")}</td>
+                  <td>{formatNumber(raekke.timer, "da")}</td>
+                  <td>{formatNumber(raekke.minutter, "da")}</td>
+                  <td>{formatNumber(raekke.sekunder, "da")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Måneden og kvartalet er gennemsnit af et normalt år, så de står med
+          brøkdele af en dag — en måned er lidt mere end 30 dage, fordi
+          månederne ikke er lige lange. Et skudår har {DAGE_I_SKUDAAR} dage,
+          altså {formatNumber(TIMER_I_SKUDAAR, "da")} timer, og det er præcis
+          ét døgn mere end et normalt år. Skal du regne et bestemt tidsrum ud,
+          bruger du værktøjet ovenfor, og vil du bare omregne, står omregningen
+          fra minutter til timer lige over denne tabel. Vil du se alle
+          perioderne samlet på én side — inklusive alle tolv måneder — står de i{" "}
+          <a href="/timer-i-aret">timer i hvert tidsrum</a>.
+        </p>
+
+        {/* C187: DA-autocomplete under "timer og minutter" har fire
+            variationer om at lægge sammen — "læg timer og minutter
+            sammen" (nr. 4), "regn timer og minutter sammen" (nr. 7) og
+            "plus timer og minutter" (nr. 8) — og SE under "timmar och
+            minuter" har "addera timmar och minuter" (nr. 5) og "summera
+            timmar och minuter i excel" (nr. 6). Begge sproggrene havde 0
+            forekomster af "læg timer"/"addera"/"summera" i den
+            server-renderede HTML. Alle tal går gennem `summerTidsrum`, som
+            kalder `beregnTidsinterval` — altså samme modul værktøjet bruger,
+            så tabellen ikke kan modsige det (C84's fejlklasse). */}
+        <h2>Sådan lægger du to tidsrum sammen</h2>
+        <p>
+          Reglerne er simple: du lægger minutterne sammen og deler med 60
+          igen. <strong>8 timer og 15 minutter + 5 timer og 15 minutter er
+          13 timer og 30 minutter</strong>, fordi 495 + 315 = 810 minutter, og
+          810 ÷ 60 = 13,50. Værktøjet ovenfor tager ét tidsrum ad gangen, så
+          summerer du to dage ved at sætte den første sluttid ind som den
+          andens starttid — eller du bruger fanen «Læg tidsrum sammen» i
+          værktøjet «Hvad er klokken om X timer?», der lægger tre rum sammen
+          på én gang.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Første tidsrum</th>
+              <th>Andet tidsrum</th>
+              <th>I alt</th>
+              <th>Decimaltimer</th>
+              <th>Hele døgn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sumRækker("da")}
+          </tbody>
+        </table>
+        <p>
+          Den tredje række er den fælde, der tager flest: en pause på 90
+          minutter er <strong>mere end én time</strong>, så den skal trækkes
+          fra <em>før</em> du lægger sammen — ellers får du et negativt tal.
+          Og de to rum i anden række støder op ad hinanden, så 16:45 er både
+          den første sluttid og den anden starttid. Tæller du den med to
+          gange, får du 13 timer og 45 minutter i stedet for 13 og 30.
+        </p>
+        <p>
+          I Excel gør du det samme med{" "}
+          <code>=(B1-A1)*24+(D1-C1)*24</code>, hvor A1 og B1 er det første
+          tidsrum og C1 og D1 det andet. Har du pauser, skal de trækkes fra i
+          timer, fordi <code>=(B1-A1)*24</code> ikke kender en frokostpause:{" "}
+          <code>=(B1-A1)*24+(D1-C1)*24-E1-E2</code>, hvor E1 og E2 er pauserne.
+        </p>
+
+        {/* Alle tal går gennem `plusTid`, altså samme modul som
+            værktøjet bruger, så tabellen ikke kan modsige det (C84's
+            fejlklasse). Ingen dato i regnestykket — kun klokkeslæt — så
+            sommer-/vintertid ikke kan komme ind i en forkert værdi. */}
+        <h2>Læg tid på et klokkeslæt: hvad er klokken om X timer?</h2>
+        <p>
+          Det er den anden vej rundt: her lægger du en <strong>varighed på
+          et klokkeslæt</strong> i stedet for at finde varigheden mellem to.
+          Skriv klokkeslættet, vælg om du lægger til eller trækker fra, og
+          skriv hvor mange timer og minutter. Værktøjet regner på minutter og
+          tager resten modulo 1440, så resultatet altid er et rigtigt
+          klokkeslæt — også når du krydser midnat.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Regnestykke</th>
+                <th>Bliver</th>
+                <th>Hvilken dag</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PLUS_TID_EKSEMPLER.map((eksempel) => {
+                const r = plusTid(eksempel)!;
+                const fortegn = eksempel.timer < 0 || eksempel.minutter < 0 ? "−" : "+";
+                return (
+                  <tr key={eksempel.id}>
+                    <td>
+                      {eksempel.klokkeslaet} {fortegn}{" "}
+                      {formatTidsvar(
+                        {
+                          timer: Math.abs(eksempel.timer),
+                          minutter: Math.abs(eksempel.minutter),
+                        },
+                        locale,
+                      )}{" "}
+                      = {eksempel.timer * 60 + eksempel.minutter} minutter
+                    </td>
+                    <td>{r.klokkeslaet}</td>
+                    <td>{plusTidDag(r.heleDage, "da")}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          To rækker er fælderne. <strong>12:00 plus 12 timer er 00:00 dagen
+          efter</strong>, ikke 24:00 — et klokkeslæt har kun 24 tal, så et
+          døgnskifte skal tælles som en hel dag ved siden af. Og <strong>06:00
+          minus 8 timer er 22:00 dagen før</strong>: trækker du bare
+          minutterne fra, får du et negativt tal, som ikke er noget klokkeslæt.
+          Skal du regne på en bestemt dato, skal du bruge datofelterne i{" "}
+          <a href={localizedPath("/dato", locale)}>dato-værktøjet</a> — her er der kun klokkeslæt, og
+          det er derfor svaret er det samme uanset sommer- eller vintertid.
+        </p>
+
+        <h2>Tips til præcis timeregistrering</h2>
+        <ul>
+          <li>Husk altid at <strong>fratrække pauser</strong> fra din arbejdstid</li>
+          <li>De fleste har <strong>30 minutters frokostpause</strong>, som ikke tælles med i den betalte arbejdstid</li>
+          <li>Brug <strong>decimal timer</strong> når din virksomhed kræver det til timeregistrering</li>
+        </ul>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Så här använder du tidsberäknaren</h2>
+        <p>
+          Vår <strong>tidsberäknare</strong> hjälper dig att beräkna den <strong>exakta tiden</strong> mellan
+          två tidpunkter. Den är idealisk för:
+        </p>
+        <ul>
+          <li>
+            <strong>Arbetstidsregistrering</strong> - beräkna dina timmar till
+            lönebesked
+          </li>
+          <li>
+            <strong>Mötestid</strong> - se hur länge ett möte varade
+          </li>
+          <li>
+            <strong>Projektplanering</strong> - uppskatta tid för uppgifter
+          </li>
+          <li>
+            <strong>Nattpass</strong> - beräkna tid över midnatt
+          </li>
+          <li>
+            <strong>Intervall som spänner flera dagar</strong> - beräkna från
+            ett datum och en tid till ett annat datum och en annan tid
+          </li>
+        </ul>
 
-      <RelatedCalculators calculators={relatedCalculators} />
+        <h2>Beräkna tid över flera datum</h2>
+        <p>
+          Under de två klockslagen finns två <strong>valfria datumfält</strong>.
+          Utan dem räknar verktyget inom ett dygn, och det tar då automatiskt
+          med natten när sluttiden är tidigare än starttiden. Det räcker till
+          en arbetsdag eller ett nattpass. Ska tiden omfatta mer än ett dygn —
+          en weekend, en semester, ett skift över flera dagar — ska båda
+          datum indateras, annars räknar verktyget bara det som ligger
+          mellan klockslagen.
+        </p>
+        <p>
+          Ett återkommande exempel: <strong>fredag kl. {TIDS_EKSEMPEL_FLERE_DAGE.start} till måndag kl.{" "}
+          {TIDS_EKSEMPEL_FLERE_DAGE.slut}</strong> är{" "}
+          <strong>{formatTidsvar(TIDS_EKSEMPEL_FLERE_DAGE, "se")}</strong> ={" "}
+          {formatTimer(TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer, locale)} decimaltimmar, för de tre
+          fulla dygnen räknas med. Utan datum skulle samma intervall bli{" "}
+          {TIDS_UDEN_DATOER.se} — bara det som ligger mellan klockslagen.
+        </p>
+        <p>
+          Är startdatumet efter slutdatumet visar verktyget inget resultat, eftersom
+          ett intervall inte kan gå bakåt. Är bara ett datum ifyllt används det
+          andra som samma dag — så båda datum behöver alltså ifyllas om
+          intervallet går över en dag.
+        </p>
+
+        <h2>Hur fort springer jag? Tempo i minuter per kilometer</h2>
+        <p>
+          Tempot är loptiden delad med distansen:{" "}
+          <strong>5 km på 25 minuter är 5:00 per kilometer</strong>, alltså
+          25 ÷ 5. Samma fart är 8:03 per engelsk mil, eftersom en mil är 1,609344
+          km. Så räknar du: ta loptiden i minuter, dela den med kilometrarna, så
+          har du tempot — och du kan multiplicera det med distansen för att
+          hitta samma fart över en längre tur.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Lopp</th>
+              <th>Tid</th>
+              <th>Min. per km</th>
+              <th>Min. per mil</th>
+            </tr>
+          </thead>
+          <tbody>
+            {TEMPO_RAEKKE.map((raekke) => (
+              <tr key={raekke.id}>
+                <td>{TEMPO_NAEVN_SE[raekke.id]}</td>
+                <td>{raekke.minutter} min.</td>
+                <td>{formatSekunder(raekke.tempo.sekunderPerKm)}</td>
+                <td>{formatSekunder(raekke.tempo.sekunderPerMil)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Har du en loptid och vill veta hur långt du kom, är det motsatt
+          uttryck: <strong>tid ÷ tempo = distans</strong>. Ett 5 km-lopp på 25
+          minuter är alltså 5 km, och en halvmaraton på 1 timme och 45 minuter är 21,1
+          km med {formatSekunder(TEMPO_HALV.tempo.sekunderPerKm)} per kilometer.
+          Samma regel som verktyget använder ovan: ett intervall är bara en tid
+          delad med en distans.
+        </p>
+
+        <h2>Så räknar du ut timmar mellan två klockslag i Excel</h2>
+        <p>
+          Skriv starttiden i <strong>A1</strong> och sluttiden i{" "}
+          <strong>B1</strong> — båda som riktiga klockslag, inte som text. Då är
+          den korta formeln <code>=B1-A1</code>, och med cellen formaterad som{" "}
+          <strong>Tid</strong> visar den{" "}
+          <strong>
+            {TIDS_EKSEMPEL_DAG.slut} − {TIDS_EKSEMPEL_DAG.start} ={" "}
+            {formatTidsvar(TIDS_EKSEMPEL_DAG, "se")}
+          </strong>{" "}
+          (alltså {totalMinutter(TIDS_EKSEMPEL_DAG)} minuter).
+        </p>
+        <p>
+          För <strong>decimaltimmar</strong> — den notation många företag
+          använder — ska du multiplicera med 24:{" "}
+          <code>=(B1-A1)*24</code> ger{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_DAG.decimalTimer, "se")} timmar</strong>{" "}
+          för exakt samma par. Och för <strong>alla minuter i ett tal</strong>{" "}
+          (till en lönerapport) är det{" "}
+          <code>=(B1-A1)*24*60</code> ={" "}
+          <strong>{totalMinutter(TIDS_EKSEMPEL_DAG)}</strong>.
+        </p>
+        <p>
+          <strong>Fällan som ger ett negativt tal:</strong> om sluttiden är
+          tidigare än starttiden — ett nattpass från{" "}
+          {TIDS_EKSEMPEL_MIDNAT.start} till {TIDS_EKSEMPEL_MIDNAT.slut} — ger{" "}
+          <code>=B1-A1</code>{" "}
+          <strong>
+            {formatNumber(excelDifferens(TIDS_EKSEMPEL_MIDNAT), "se", { maximumFractionDigits: 2 })}
+          </strong>{" "}
+          dygn, alltså minus 16 timmar. Lägg formeln i{" "}
+          <code>=MOD(B1-A1;1)*24</code>, så tar den med de 24 timmarna igen, och
+          du får{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_MIDNAT.decimalTimer, "se")} timmar</strong>{" "}
+          — precis som verktyget ovan.
+        </p>
+        <p>
+          <strong>En rast?</strong> Dra av den i timmar, inte i klockslag:{" "}
+          <code>=(B1-A1)*24-0,5</code> ger{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_PAUSE.decimalTimer, "se")} timmar</strong>{" "}
+          för {TIDS_EKSEMPEL_PAUSE.start} till {TIDS_EKSEMPEL_PAUSE.slut} med 30
+          minuters lunch. Svensk Excel använder <strong>semikolon</strong> som
+          avgränsare, eftersom komma är decimaltecken — samma som i{" "}
+          <a href="/datum">datokalkylatorns</a> formler.
+        </p>
+        <p>
+          Blir talet i Excel{" "}
+          <strong>
+            {formatNumber(excelDifferens(TIDS_EKSEMPEL_DAG), "se", { maximumFractionDigits: 4 })}
+          </strong>{" "}
+          i stället för{" "}
+          {formatTidsvar(TIDS_EKSEMPEL_DAG, "se")}, står cellen formaterad som{" "}
+          <strong>Tal</strong>: Excel lagrar ett klockslag som en bråkdel av ett
+          dygn, och {TIDS_EKSEMPEL_DAG.slut} − {TIDS_EKSEMPEL_DAG.start} är
+          precis{" "}
+          {formatNumber(TIDS_EKSEMPEL_DAG.heleDoegn, "se", { maximumFractionDigits: 4 })}{" "}
+          av ett dygn. Byt formateringen till Tid, eller multiplicera med 24.
+        </p>
+
+        <h2>Decimaltimmar vs. timmar:minuter</h2>
+        <p>
+          Många företag använder decimaltimmar för tidsregistrering. Här är
+          en snabb referens:
+        </p>
+        <ul>
+          <li>15 min = 0,25 timmar</li>
+          <li>30 min = 0,50 timmar</li>
+          <li>45 min = 0,75 timmar</li>
+          <li>1 timme 15 min = 1,25 timmar</li>
+        </ul>
+
+        {/* C120: SE-autocomplete under "räkna ut timmar och minuter" har
+            "räkna ut timmar från minuter" (nr. 7) og "räkna timmar till
+            minuter" (nr. 10) — altså båda riktningarna i omvandlingen. Den
+            svenska sidan svarade på ingen av dem. Alla tal räknas från
+            `totalMinutter`, så de kan inte glida ifrån `decimalTimer`. */}
+        {/* Samma verktyg som den danska grenen ovan, så beraknare.se får
+            räkningen och inte bara tabellen. Komponenten har egna svenska
+            etiketter; den danska grenen och den här monterar den en gång var,
+            precis som sidan redan gör med `TidsBeregner`. */}
+        <MinutterTilTimerBeregner />
+        <h2>Räkna om minuter till timmar – och tillbaka</h2>
+        <p>
+          Omvandlingen är alltid <strong>minuter ÷ 60 = timmar</strong>, och
+          den andra vägen är <strong>timmar × 60 = minuter</strong>. Decimaltimmar
+          är samma sak med kommatecken: 90 minuter är 1,50 timmar, och 1,50
+          timmar är 90 minuter igen.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Minuter</th>
+              <th>Timmar och minuter</th>
+              <th>Decimaltimmar</th>
+              <th>Divisionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {MINUTTER_TILL_TIMMAR.map((række) => (
+              <tr key={række.minutter}>
+                <td>{række.minutter}</td>
+                <td>
+                  {formatTidsvar(
+                    { timer: række.timer, minutter: række.restMinutter },
+                    "se"
+                  )}
+                </td>
+                <td>{formatTimer(række.decimalTimer, "se")}</td>
+                <td>
+                  {række.minutter} ÷ 60 = {formatTimer(række.decimalTimer, "se")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Den andra vägen är <strong>timmar × 60 = minuter</strong>: 7,5 timmar
+          blir 450 minuter, alltså 7 timmar och 30 minuter. Och 495 minuter
+          timmar tillbaka till 08:30–16:45 ovan — det är samma par rader som
+          verktyget räknar. Vill du veta hur långt du kommit under ett lopp
+          delar du tiden med tempot i stället, och det står under{" "}
+          <a href={localizedPath("/fart", locale)}>fartberäknaren</a>.
+        </p>
+
+        {/* Samma klynge som den danska tabellen ovan, målt på svensk
+            autocomplete 2/10 (hl=sv gl=se): "hur många timmar är det på ett
+            år" och "hur många timmar är det på en vecka" ligger överst, och
+            "hur många timmar på en månad" i samma block. Talen läses från
+            `TIMER_PERIODER`, så timmar och minuter för samma period inte kan
+            glida ifrån varandra. */}
+        <h2>Hur många timmar finns det i ett dygn, en vecka, en månad och ett år?</h2>
+        <p>
+          Ett dygn har {TIMER_I_DAGT} timmar, så allt annat är samma tal gånger
+          antalet dagar. Tabellen räknar alla rader åt dig:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Dagar</th>
+                <th>Timmar</th>
+                <th>Minuter</th>
+                <th>Sekunder</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TIMER_PERIODER.map((raekke) => (
+                <tr key={raekke.id}>
+                  <td>{raekke.naevn.se}</td>
+                  <td>{formatDage(raekke.dage, "se")}</td>
+                  <td>{formatNumber(raekke.timer, "se")}</td>
+                  <td>{formatNumber(raekke.minutter, "se")}</td>
+                  <td>{formatNumber(raekke.sekunder, "se")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Månaden och kvartalet är genomsnitt av ett normalt år, därför står de
+          med bråktal av en dag — en månad är lite mer än 30 dagar, eftersom
+          månaderna inte är lika långa. Ett skottår har {DAGE_I_SKUDAAR}
+          dagar, alltså {formatNumber(TIMER_I_SKUDAAR, "se")} timmar, och det
+          är exakt ett dygn mer än ett normalt år. Vill du räkna ut en viss
+          tidsperiod använder du verktyget ovan, och vill du bara omräkna står
+          omräkningen från minuter till timmar strax under den här tabellen.
+          Vill du se alla perioderna samlat på en sida — inklusive alla tolv
+          månaderna — står de i <a href="/timmar-i-aret">timmar i varje tidsperiod</a>.
+        </p>
+
+        {/* C187: SE-autocomplete under "timmar och minuter" har "addera
+            timmar och minuter" (nr. 5) och "summera timmar och minuter i
+            excel" (nr. 6), och DA har fire variationer i samma klynge. Begge
+            sproggrene havde 0 forekomster av orden i den
+            server-renderade HTML. Samma modell som den danska tabellen —
+            `summerTidsrum` kaller `beregnTidsinterval`, så talen inte kan
+            glida ifrån verktyget. */}
+        <h2>Så här lägger du ihop två tidsintervall</h2>
+        <p>
+          Reglerna är enkla: lägg ihop minuterna och dela med 60 igen.{" "}
+          <strong>8 timmar och 15 minuter + 5 timmar och 15 minuter blir 13
+          timmar och 30 minuter</strong>, eftersom 495 + 315 = 810 minuter,
+          och 810 ÷ 60 = 13,50. Verktyget ovan tar ett tidsintervall i taget,
+          så du summerar två dagar genom att sätta in den första
+          sluttiden som den andra starttiden — eller du använder fliken
+          «Lägg ihop tidsintervall» i verktyget «Vad är klockan om X
+          timmar?», som lägger ihop tre intervall i taget.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Första tidsintervallet</th>
+              <th>Andra tidsintervallet</th>
+              <th>Totalt</th>
+              <th>Decimaltimmar</th>
+              <th>Hela dygn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sumRækker("se")}
+          </tbody>
+        </table>
+        <p>
+          Den tredje raden är fällan som tar flest: en paus på 90 minuter är{" "}
+          <strong>mer än en timme</strong>, så den måste dras av{" "}
+          <em>innan</em> du lägger ihop — annars får du ett negativt tal. Och
+          de två intervallen i andra raden möts, så 16:45 är både den första
+          sluttiden och den andra starttiden. Räknar du den två går får du
+          13 timmar och 45 minuter i stället för 13 och 30.
+        </p>
+        <p>
+          I Excel gör du samma sak med <code>=(B1-A1)*24+(D1-C1)*24</code>, där A1
+          och B1 är det första tidsintervallet och C1 och D1 det andra. Har
+          du pauser måste de dras av i timmar, eftersom{" "}
+          <code>=(B1-A1)*24</code> inte känner en lunchpaus:{" "}
+          <code>=(B1-A1)*24+(D1-C1)*24-E1-E2</code>, där E1 och E2 är pauserna.
+        </p>
+
+        <h2>Lägg tid på ett klockslag: vad är klockan om X timmar?</h2>
+        <p>
+          Det är den andra vägen: här lägger du en <strong>varaktighet på
+          ett klockslag</strong> i stället för att hitta varaktigheten mellan
+          två. Skriv klockslaget, välj om du lägger till eller drar av, och
+          skriv hur många timmar och minuter. Verktyget räknar i minuter och
+          tar resten modulo 1440, så svaret alltid är ett riktigt klockslag —
+          även när du går över midnatt.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Uttrycket</th>
+                <th>Blir</th>
+                <th>Vilken dag</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PLUS_TID_EKSEMPLER.map((eksempel) => {
+                const r = plusTid(eksempel)!;
+                const fortegn = eksempel.timer < 0 || eksempel.minutter < 0 ? "−" : "+";
+                return (
+                  <tr key={eksempel.id}>
+                    <td>
+                      {eksempel.klokkeslaet} {fortegn}{" "}
+                      {formatTidsvar(
+                        {
+                          timer: Math.abs(eksempel.timer),
+                          minutter: Math.abs(eksempel.minutter),
+                        },
+                        "se",
+                      )}{" "}
+                      = {eksempel.timer * 60 + eksempel.minutter} minuter
+                    </td>
+                    <td>{r.klokkeslaet}</td>
+                    <td>{plusTidDag(r.heleDage, "se")}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Två rader är fällorna. <strong>12:00 plus 12 timmar blir 00:00
+          dagen efter</strong>, inte 24:00 — ett klockslag har bara 24 tal, så
+          ett dygnsskifte måste räknas som en hel dag vid sidan av. Och
+          <strong> 06:00 minus 8 timmar blir 22:00 dagen innan</strong>: drar
+          du bara av minuterna får du ett negativt tal, vilket inte är något
+          klockslag. Räknar du på en bestämd dag använder du datumfälten i{" "}
+          <a href="/datum">datumverktyget</a> — här finns bara klockslag, och
+          det är därför svaret är detsamma oavsett sommar- eller vintertid.
+        </p>
+
+        <h2>Tips för exakt tidsregistrering</h2>
+        <ul>
+          <li>Kom alltid ihåg att <strong>dra av raster</strong> från din arbetstid</li>
+          <li>De flesta har <strong>30 minuters lunchrast</strong>, som inte räknas med i den betalda arbetstiden</li>
+          <li>Använd <strong>decimaltimmar</strong> när ditt företag kräver det för tidsregistrering</li>
+        </ul>
+      </div>
+      )}
+
+      <ResultAd page="/tidsberegner" />
+
+      {/* Search Console: /tidsberegner er sidens tredjestørste side (79.641
+          visninger, pos. 6,7) og dens egne søgninger er «hvor lang tid er der
+          til» og «hvad er klokken om 13 timer» — men siden havde **0** links
+          til /dage-til/*, mod /dato's 25. Blokken er den samme som på /dato
+          (DageTilLinks), så tallene ikke kan slæbe hen mellem siderne. */}
+      <DageTilLinks locale={locale} vaerktoej="datoberegner" />
+
+      <FAQ items={pageData.faqItems} />
+
+      <RelatedCalculators current="/tidsberegner" />
     </div>
   );
 }

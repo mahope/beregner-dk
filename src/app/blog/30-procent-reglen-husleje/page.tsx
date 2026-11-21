@@ -1,31 +1,42 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
+import { OG_IMAGE } from "@/lib/page-helpers";
+import { CheckCircle } from "lucide-react";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "30% reglen: Hvor meget bør du bruge på husleje? | MinBeregner.dk",
-  description:
-    "Forstå 30% reglen for husleje. Lær hvordan du budgetterer din bolig korrekt baseret på din nettoindkomst.",
-  keywords: [
-    "30 procent reglen",
-    "husleje budget",
-    "hvor meget husleje",
-    "hvad har jeg råd til i husleje",
-    "boligbudget",
-    "husleje nettoløn",
-  ],
-  openGraph: {
-    title: "30% reglen: Hvor meget bør du bruge på husleje?",
-    description: "Forstå 30% reglen og lær at budgettere din bolig korrekt.",
-    url: `${baseUrl}/blog/30-procent-reglen-husleje`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/30-procent-reglen-husleje`,
-  },
-};
+  return {
+    title: { absolute: "30% reglen: Hvor meget bør du bruge på husleje?" },
+    description:
+      "Forstå 30% reglen for husleje. Lær hvordan du budgetterer din bolig korrekt baseret på din nettoindkomst.",
+    keywords: [
+      "30 procent reglen",
+      "husleje budget",
+      "hvor meget husleje",
+      "hvad har jeg råd til i husleje",
+      "boligbudget",
+      "husleje nettoløn",
+    ],
+    openGraph: {
+      images: OG_IMAGE,
+      title: "30% reglen: Hvor meget bør du bruge på husleje?",
+      description: "Forstå 30% reglen og lær at budgettere din bolig korrekt.",
+      url: `${baseUrl}/blog/30-procent-reglen-husleje`,
+      type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/30-procent-reglen-husleje`,
+    },
+  };
+}
 
 const faqItems = [
   {
@@ -45,6 +56,11 @@ const faqItems = [
 export default function HuslejeGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="30-procent-reglen-husleje"
+        title="30% reglen: Hvor meget bør du bruge på husleje?"
+        description="Forstå 30% reglen for husleje. Lær hvordan du budgetterer din bolig korrekt baseret på din nettoindkomst."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6">
@@ -76,10 +92,11 @@ export default function HuslejeGuidePage() {
         <p>
           30% reglen er en simpel tommelfingerregel: <strong>Din husleje bør max udgøre 
           30% af din nettoindkomst</strong>. Hvis du tjener 25.000 kr efter skat, bør din 
-          husleje altså ikke overstige 7.500 kr.
+          husleje altså ikke overstige 7.500 kr. Kender du ikke din nettoløn? Brug vores{" "}
+          <Link href="/loen-efter-skat" className="text-blue-600 hover:underline">løn efter skat beregner</Link>.
         </p>
 
-        <div className="bg-blue-50 p-4 rounded-lg not-prose my-6">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose my-6">
           <p className="font-mono text-lg">Max husleje = Nettoløn × 0,30</p>
           <p className="text-sm text-gray-600 mt-2">
             Eksempel: 28.000 kr × 0,30 = 8.400 kr max husleje
@@ -110,9 +127,12 @@ export default function HuslejeGuidePage() {
           <li>Evt. parkering</li>
         </ul>
 
-        <div className="bg-green-50 border border-green-200 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-green-800">✅ Eksempel på boligbudget</p>
-          <div className="text-green-700 text-sm mt-2 space-y-1">
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-lg not-prose my-6">
+          <p className="font-medium text-green-800 flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+            Eksempel på boligbudget
+          </p>
+          <div className="text-green-700 dark:text-green-300 text-sm mt-2 space-y-1">
             <p>Husleje: 6.500 kr</p>
             <p>A conto varme/vand: 500 kr</p>
             <p>El: 400 kr</p>
@@ -137,7 +157,8 @@ export default function HuslejeGuidePage() {
         <ul>
           <li>Du har høj gæld der skal afdrages</li>
           <li>Din indkomst er usikker (freelance, provision)</li>
-          <li>Du sparer op til noget stort (bolig, uddannelse)</li>
+          <li>Du sparer op til noget stort (bolig, uddannelse) - se vores{" "}
+            <Link href="/opsparing" className="text-blue-600 hover:underline">opsparingsberegner</Link></li>
           <li>Du har høje andre faste udgifter (bil, børn)</li>
         </ul>
 
@@ -148,7 +169,16 @@ export default function HuslejeGuidePage() {
           <li><strong>Almene boliger</strong> - Skriv dig op i boligforeninger</li>
           <li><strong>Mindre kvadratmeter</strong> - Har du virkelig brug for 70m²?</li>
           <li><strong>Forhandl</strong> - Nogen huslejer kan forhandles</li>
+          <li><strong>Boligstøtte</strong> - Se standardmaksima og{" "}
+            <Link href="/boligstoette" className="text-blue-600 hover:underline">formuegrænser</Link></li>
         </ol>
+
+        <h2>Overvejer du at købe?</h2>
+        <p>
+          Hvis du overvejer at købe bolig i stedet for at leje, kan du bruge vores{" "}
+          <Link href="/boliglaan" className="text-blue-600 hover:underline">boliglånsberegner</Link>{" "}
+          til at se, hvad dine månedlige ydelser ville være.
+        </p>
 
         <h2>Brug vores husleje-beregner</h2>
         <p>
@@ -173,6 +203,12 @@ export default function HuslejeGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/husleje"
+        handling="Se hvor meget du har til husleje"
+        beskrivelse="Sæt indkomsten ind, og se hvad der er til husleje efter de 30 % regel."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

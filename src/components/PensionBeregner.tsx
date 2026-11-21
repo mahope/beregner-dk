@@ -1,8 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
+import { InputField } from "./InputField";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton, ResetButton } from "@/components/ui";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency } from '@/lib/format';
+import { beregnFolkepension2026, formatFolkepensionsalder, folkepensionsalderForAlder, type FolkepensionSamliv } from '@/lib/folkepension';
+
+interface AarData {
+  aar: number;
+  alder: number;
+  saldo: number;
+  indskud: number;
+  afkast: number;
+}
 
 export default function PensionBeregner() {
+  const { locale } = useLocale();
   const [alder, setAlder] = useState<number>(30);
   const [pensionsalder, setPensionsalder] = useState<number>(68);
   const [maanedligIndbetaling, setMaanedligIndbetaling] = useState<number>(3000);
@@ -10,53 +28,162 @@ export default function PensionBeregner() {
   const [forventetAfkast, setForventetAfkast] = useState<number>(5);
   const [inflation, setInflation] = useState<number>(2);
   const [udbetalingsperiode, setUdbetalingsperiode] = useState<number>(20);
+  const [oensketMaanedlig, setOensketMaanedlig] = useState<number>(25000);
+  const [samliv, setSamliv] = useState<FolkepensionSamliv>("enlig");
+  const [samleverErPensionist, setSamleverErPensionist] = useState<boolean>(false);
+  const [aarligIndkomst, setAarligIndkomst] = useState<number>(0);
+  const [aarligSamleverIndkomst, setAarligSamleverIndkomst] = useState<number>(0);
+
+  const isLoading = useCalculationLoading([
+    alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
+    forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig,
+    samliv, samleverErPensionist, aarligIndkomst, aarligSamleverIndkomst,
+  ]);
+
+  const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'pension') {
+      const inputs = urlState.inputs;
+      if (inputs.alder !== undefined) setAlder(inputs.alder);
+      if (inputs.pensionsalder !== undefined) setPensionsalder(inputs.pensionsalder);
+      if (inputs.maanedligIndbetaling !== undefined) setMaanedligIndbetaling(inputs.maanedligIndbetaling);
+      if (inputs.nuværendeOpsparing !== undefined) setNuværendeOpsparing(inputs.nuværendeOpsparing);
+      if (inputs.forventetAfkast !== undefined) setForventetAfkast(inputs.forventetAfkast);
+      if (inputs.inflation !== undefined) setInflation(inputs.inflation);
+      if (inputs.udbetalingsperiode !== undefined) setUdbetalingsperiode(inputs.udbetalingsperiode);
+      if (inputs.oensketMaanedlig !== undefined) setOensketMaanedlig(inputs.oensketMaanedlig);
+      if (inputs.samliv === "enlig" || inputs.samliv === "samlevende") setSamliv(inputs.samliv);
+      if (typeof inputs.samleverErPensionist === "boolean") setSamleverErPensionist(inputs.samleverErPensionist);
+      if (inputs.aarligIndkomst !== undefined) setAarligIndkomst(inputs.aarligIndkomst);
+      if (inputs.aarligSamleverIndkomst !== undefined) setAarligSamleverIndkomst(inputs.aarligSamleverIndkomst);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("pension");
+    const timer = setTimeout(() => {
+      trackCalculation("pension");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'pension',
+      inputs: {
+        alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
+        forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig,
+        samliv, samleverErPensionist, aarligIndkomst, aarligSamleverIndkomst,
+      },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
+      forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig,
+      samliv, samleverErPensionist, aarligIndkomst, aarligSamleverIndkomst]);
+
+  const handleReset = useCallback(() => {
+    setAlder(30);
+    setPensionsalder(68);
+    setMaanedligIndbetaling(3000);
+    setNuværendeOpsparing(200000);
+    setForventetAfkast(5);
+    setInflation(2);
+    setUdbetalingsperiode(20);
+    setOensketMaanedlig(25000);
+    setSamliv("enlig");
+    setSamleverErPensionist(false);
+    setAarligIndkomst(0);
+    setAarligSamleverIndkomst(0);
+  }, []);
 
   const resultat = useMemo(() => {
     const aarTilPension = pensionsalder - alder;
     if (aarTilPension <= 0) return null;
 
-    // Real afkast (efter inflation)
     const realAfkast = (1 + forventetAfkast / 100) / (1 + inflation / 100) - 1;
     const maanedligRealAfkast = realAfkast / 12;
     const antalMaaneder = aarTilPension * 12;
 
-    // Fremtidig værdi af nuværende opsparing
+    // Fremtidig værdi
     const fvNuvaerende = nuværendeOpsparing * Math.pow(1 + realAfkast, aarTilPension);
-
-    // Fremtidig værdi af månedlige indbetalinger (annuitet)
     let fvIndbetalinger: number;
     if (maanedligRealAfkast === 0) {
       fvIndbetalinger = maanedligIndbetaling * antalMaaneder;
     } else {
-      fvIndbetalinger = maanedligIndbetaling * 
+      fvIndbetalinger = maanedligIndbetaling *
         ((Math.pow(1 + maanedligRealAfkast, antalMaaneder) - 1) / maanedligRealAfkast);
     }
 
     const samletOpsparing = fvNuvaerende + fvIndbetalinger;
 
-    // Månedlig udbetaling i pensionen
+    // Månedlig udbetaling
     const udbetalingsMaaneder = udbetalingsperiode * 12;
     let maanedligUdbetaling: number;
     if (maanedligRealAfkast === 0) {
       maanedligUdbetaling = samletOpsparing / udbetalingsMaaneder;
     } else {
-      maanedligUdbetaling = samletOpsparing * 
+      maanedligUdbetaling = samletOpsparing *
         (maanedligRealAfkast * Math.pow(1 + maanedligRealAfkast, udbetalingsMaaneder)) /
         (Math.pow(1 + maanedligRealAfkast, udbetalingsMaaneder) - 1);
     }
 
-    // Samlet indbetaling
     const samletIndbetalt = nuværendeOpsparing + (maanedligIndbetaling * antalMaaneder);
     const samletAfkast = samletOpsparing - samletIndbetalt;
 
-    // Beregn ekstra scenarier
-    const ekstraPr500 = 500 * 
-      ((Math.pow(1 + maanedligRealAfkast, antalMaaneder) - 1) / maanedligRealAfkast);
-    
-    // Folkepension (2026 satser, ca.)
-    const folkepensionGrundbeloeb = 6900; // månedlig
-    const folkepensionTillaeg = 8200; // månedlig for enlige, ca. 4100 for samboende
-    const anslaaetFolkepension = folkepensionGrundbeloeb + (folkepensionTillaeg * 0.7); // modregning antaget
+    // Ekstra ved +500 kr/md
+    const ekstraPr500 = maanedligRealAfkast === 0
+      ? 500 * antalMaaneder
+      : 500 * ((Math.pow(1 + maanedligRealAfkast, antalMaaneder) - 1) / maanedligRealAfkast);
+
+    // Folkepension 2026: grundbeløb + pensionstillæg, nedsat af andre indkomster
+    // Kilde: borger.dk, verificeret 2026-09-25 — se src/lib/folkepension.ts
+    const folkepension = beregnFolkepension2026({
+      samliv,
+      aarligIndkomst,
+      samleverErPensionist,
+      aarligSamleverIndkomst,
+    });
+
+    // Folkepension + udbetaling fra egen opsparing
+    const samletMaanedlig = folkepension.iAlt + Math.round(maanedligUdbetaling);
+
+    // Pension gap
+    const gap = oensketMaanedlig - samletMaanedlig;
+
+    // Årlig udvikling til graf
+    const aarligData: AarData[] = [];
+    let saldo = nuværendeOpsparing;
+    let totalIndskud = nuværendeOpsparing;
+    let totalAfkast = 0;
+
+    for (let m = 1; m <= antalMaaneder; m++) {
+      saldo += maanedligIndbetaling;
+      totalIndskud += maanedligIndbetaling;
+      const afk = saldo * maanedligRealAfkast;
+      saldo += afk;
+      totalAfkast += afk;
+
+      if (m % 12 === 0) {
+        aarligData.push({
+          aar: m / 12,
+          alder: alder + m / 12,
+          saldo,
+          indskud: totalIndskud,
+          afkast: totalAfkast,
+        });
+      }
+    }
 
     return {
       aarTilPension,
@@ -65,121 +192,97 @@ export default function PensionBeregner() {
       samletIndbetalt: Math.round(samletIndbetalt),
       samletAfkast: Math.round(samletAfkast),
       ekstraPr500: Math.round(ekstraPr500),
-      folkepension: Math.round(anslaaetFolkepension),
-      samletMaanedlig: Math.round(maanedligUdbetaling + anslaaetFolkepension),
+      folkepension: folkepension.iAlt,
+      folkepensionDetaljer: folkepension,
+      opsparingUdbetaling: Math.round(maanedligUdbetaling),
+      samletMaanedlig,
+      gap,
+      aarligData,
     };
-  }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing, forventetAfkast, inflation, udbetalingsperiode]);
+  }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing, forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig, samliv, aarligIndkomst, samleverErPensionist, aarligSamleverIndkomst]);
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  const folkepensionsalder = useMemo(
+    () => folkepensionsalderForAlder(alder),
+    [alder],
+  );
+
+  const aarForskel = Math.abs(pensionsalder - folkepensionsalder.alder).toLocaleString("da-DK", {
+    maximumFractionDigits: 1,
+  });
 
   return (
     <div className="space-y-8">
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Din alder</label>
-            <input
-              type="number"
-              min="18"
-              max="70"
-              value={alder}
-              onChange={(e) => setAlder(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Ønsket pensionsalder</label>
-            <input
-              type="number"
-              min={alder + 1}
-              max="80"
-              value={pensionsalder}
-              onChange={(e) => setPensionsalder(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Folkepensionsalder er 68 år (stigende)
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Nuværende pensionsopsparing</label>
-            <input
-              type="number"
-              min="0"
-              max="50000000"
-              step="10000"
-              value={nuværendeOpsparing}
-              onChange={(e) => setNuværendeOpsparing(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
-            <p className="text-sm text-gray-500 mt-1">{formatKr(nuværendeOpsparing)}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Månedlig indbetaling</label>
-            <input
-              type="number"
-              min="0"
-              max="100000"
-              step="500"
-              value={maanedligIndbetaling}
-              onChange={(e) => setMaanedligIndbetaling(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Inkl. arbejdsgiverbidrag (ofte 12-17% af løn)
-            </p>
-          </div>
+          <InputField
+            label="Din alder"
+            value={alder}
+            onChange={setAlder}
+            min={18}
+            max={70}
+          />
+          <InputField
+            label="Ønsket pensionsalder"
+            value={pensionsalder}
+            onChange={setPensionsalder}
+            min={alder + 1}
+            max={80}
+            helpText={
+              folkepensionsalder.praecis
+                ? `Din folkepensionsalder er ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} (født ca. ${folkepensionsalder.fodselsaar})`
+                : `Din folkepensionsalder er ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} — den præcise alder afhænger af fødselsdatoen i ${folkepensionsalder.fodselsaar}`
+            }
+          />
+          <InputField
+            label="Nuværende pensionsopsparing"
+            value={nuværendeOpsparing}
+            onChange={setNuværendeOpsparing}
+            min={0}
+            max={50000000}
+            step={10000}
+            unit="kr"
+          />
+          <InputField
+            label="Månedlig indbetaling"
+            value={maanedligIndbetaling}
+            onChange={setMaanedligIndbetaling}
+            min={0}
+            max={100000}
+            step={500}
+            unit="kr"
+            helpText="Inkl. arbejdsgiverbidrag (ofte 12-17% af løn)"
+          />
         </div>
 
         <div className="space-y-4">
+          <InputField
+            label="Forventet årligt afkast (%)"
+            value={forventetAfkast}
+            onChange={setForventetAfkast}
+            min={0}
+            max={15}
+            step={0.5}
+            helpText="Historisk gennemsnit: 5-7 % (aktier), 2-4 % (obligationer)"
+          />
+          <InputField
+            label="Forventet inflation (%)"
+            value={inflation}
+            onChange={setInflation}
+            min={0}
+            max={10}
+            step={0.5}
+            helpText="Historisk gennemsnit: ca. 2%"
+          />
           <div>
-            <label className="block text-sm font-medium mb-2">Forventet årligt afkast (%)</label>
-            <input
-              type="number"
-              min="0"
-              max="15"
-              step="0.5"
-              value={forventetAfkast}
-              onChange={(e) => setForventetAfkast(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Historisk gennemsnit: 5-7% (aktier), 2-4% (obligationer)
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Forventet inflation (%)</label>
-            <input
-              type="number"
-              min="0"
-              max="10"
-              step="0.5"
-              value={inflation}
-              onChange={(e) => setInflation(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Historisk gennemsnit: ca. 2%
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Udbetalingsperiode (år)</label>
+            <label htmlFor="pension-udbetalingsperiode" className="block text-sm font-medium mb-2 dark:text-gray-200">Udbetalingsperiode (år)</label>
             <select
+              id="pension-udbetalingsperiode"
               value={udbetalingsperiode}
               onChange={(e) => setUdbetalingsperiode(parseInt(e.target.value))}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
             >
               <option value="10">10 år</option>
               <option value="15">15 år</option>
@@ -188,84 +291,297 @@ export default function PensionBeregner() {
               <option value="30">Livsvarig (ca. 30 år)</option>
             </select>
           </div>
+          <InputField
+            label="Ønsket månedlig pension"
+            value={oensketMaanedlig}
+            onChange={setOensketMaanedlig}
+            min={0}
+            max={200000}
+            step={1000}
+            unit="kr"
+            helpText="Til beregning af pension gap"
+          />
+          <div>
+            <label htmlFor="pension-samliv" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              Samlivsstatus
+            </label>
+            <select
+              id="pension-samliv"
+              value={samliv}
+              onChange={(e) => setSamliv(e.target.value as FolkepensionSamliv)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
+            >
+              <option value="enlig">Enlig</option>
+              <option value="samlevende">Gift eller samlevende</option>
+            </select>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Påvirker kun pensionstillægget — grundbeløbet er det samme
+            </p>
+          </div>
+          {samliv === "samlevende" && (
+            <label htmlFor="pension-samlever-pensionist" className="flex items-start gap-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
+              <input
+                id="pension-samlever-pensionist"
+                type="checkbox"
+                checked={samleverErPensionist}
+                onChange={(e) => setSamleverErPensionist(e.target.checked)}
+                className="mt-1 w-4 h-4"
+              />
+              <span className="text-sm dark:text-gray-300">
+                Min ægtefælle/samlever er også folkepensionsmodtager
+                <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Uden pensionist tæller kun 46 % af samleverens indkomst med
+                </span>
+              </span>
+            </label>
+          )}
+          <InputField
+            label="Din årlige indkomst ud over arbejdsindkomst"
+            value={aarligIndkomst}
+            onChange={setAarligIndkomst}
+            min={0}
+            max={2000000}
+            step={5000}
+            unit="kr"
+            helpText="Fx ATP, arbejdsmarkedspension, rateudbetalinger, aktieindkomst og nettokapitalindkomst"
+          />
+          {samliv === "samlevende" && (
+            <InputField
+              label="Samleverens årlige indkomst ud over arbejdsindkomst"
+              value={aarligSamleverIndkomst}
+              onChange={setAarligSamleverIndkomst}
+              min={0}
+              max={2000000}
+              step={5000}
+              unit="kr"
+            />
+          )}
         </div>
       </div>
 
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
+      </div>
+
       {/* Resultat */}
-      {resultat && (
-        <div className="p-6 bg-white rounded-xl shadow-sm border">
-          <div className="text-center mb-6">
-            <p className="text-sm text-gray-500 mb-1">Forventet månedlig pension</p>
-            <p className="text-5xl font-bold text-green-600">
-              {formatKr(resultat.samletMaanedlig)}
-            </p>
-            <p className="text-gray-500 mt-2">
-              (i dag's kroner • {resultat.aarTilPension} år til pension)
-            </p>
-          </div>
+      <CalculationLoading
+        isLoading={isLoading}
+        loadingText="Beregner din pension..."
+        minHeight="300px"
+      >
+        {resultat && (
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
+            <div className="text-center mb-6">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Forventet månedlig pension</p>
+              <p className="text-5xl font-bold text-green-600 dark:text-green-400">
+                {formatKr(resultat.samletMaanedlig)}
+              </p>
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
+                (i dagens kroner - {resultat.aarTilPension} år til pension)
+              </p>
+            </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="p-4 bg-blue-50 rounded-lg text-center">
-              <p className="text-sm text-blue-600">Fra din opsparing</p>
-              <p className="font-bold text-xl">{formatKr(resultat.maanedligUdbetaling)}</p>
+            {/* Folkepension + opsparing */}
+            <div className="mb-6">
+              <h2 className="text-sm font-medium mb-3 dark:text-gray-200">Hvor kommer pensionen fra</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center">
+                  <div className="relative mx-auto w-16 bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden" style={{ height: "120px" }}>
+                    <div
+                      className="absolute bottom-0 w-full bg-purple-500 dark:bg-purple-400 rounded-t-lg transition-all"
+                      style={{ height: `${resultat.samletMaanedlig > 0 ? (resultat.folkepension / resultat.samletMaanedlig) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <p className="text-xs font-medium mt-2 dark:text-gray-200">Folkepension</p>
+                  <p className="text-sm font-bold text-purple-600 dark:text-purple-400">{formatKr(resultat.folkepension)}</p>
+                </div>
+                <div className="text-center">
+                  <div className="relative mx-auto w-16 bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden" style={{ height: "120px" }}>
+                    <div
+                      className="absolute bottom-0 w-full bg-green-500 dark:text-green-400 rounded-t-lg transition-all"
+                      style={{ height: `${resultat.samletMaanedlig > 0 ? (resultat.opsparingUdbetaling / resultat.samletMaanedlig) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <p className="text-xs font-medium mt-2 dark:text-gray-200">Din opsparing</p>
+                  <p className="text-sm font-bold text-green-600 dark:text-green-400">{formatKr(resultat.opsparingUdbetaling)}</p>
+                </div>
+              </div>
+              <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-xs dark:text-gray-300">
+                <p className="font-medium dark:text-gray-200 mb-1">Folkepension 2026 — sådan er den sat sammen</p>
+                <ul className="space-y-1">
+                  <li className="flex justify-between gap-4">
+                    <span>Grundbeløb</span>
+                    <span className="font-medium">{formatKr(resultat.folkepensionDetaljer.grundbeloeb)}</span>
+                  </li>
+                  <li className="flex justify-between gap-4">
+                    <span>
+                      Pensionstillæg, fuldt ({samliv === "enlig" ? "enlig" : "gift/samlevende"})
+                    </span>
+                    <span className="font-medium">{formatKr(resultat.folkepensionDetaljer.tillaegFuld)}</span>
+                  </li>
+                  {resultat.folkepensionDetaljer.nedsatMed > 0 && (
+                    <li className="flex justify-between gap-4 text-red-600 dark:text-red-400">
+                      <span>Nedsat på grund af andre indkomster</span>
+                      <span>&minus;{formatKr(resultat.folkepensionDetaljer.nedsatMed)}</span>
+                    </li>
+                  )}
+                  {resultat.folkepensionDetaljer.bortfaldet && (
+                    <li className="flex justify-between gap-4 text-red-600 dark:text-red-400">
+                      <span>Pensionstillæg</span>
+                      <span className="font-medium">0 kr. — bortfaldet</span>
+                    </li>
+                  )}
+                  <li className="flex justify-between gap-4 border-t border-gray-300 dark:border-gray-600 pt-1 font-medium dark:text-gray-200">
+                    <span>I alt pr. måned før skat</span>
+                    <span>{formatKr(resultat.folkepension)}</span>
+                  </li>
+                </ul>
+                <p className="mt-2">
+                  {resultat.folkepensionDetaljer.bortfaldet
+                    ? `Din indkomst på ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} over bortfaldsgrænsen på ${formatKr(resultat.folkepensionDetaljer.graense.bortfaldOver)} fjerner pensionstillægget helt. Grundbeløbet betales stadig.`
+                    : resultat.folkepensionDetaljer.nedsatMed > 0
+                      ? `Tillægget sættes ned med ${(resultat.folkepensionDetaljer.graense.pct * 100).toLocaleString("da-DK")} % af indkomsten over ${formatKr(resultat.folkepensionDetaljer.graense.nedsaetningOver)}. Du har opgivet ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} i årlig indkomst ud over arbejdsindkomst.`
+                      : resultat.folkepensionDetaljer.indkomstGrundlag === 0
+                        ? `Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på ${formatKr(resultat.folkepensionDetaljer.tillaegFuld)}`
+                        : `Din indkomst på ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} er under grænsen på ${formatKr(resultat.folkepensionDetaljer.graense.nedsaetningOver)}, så du får det fulde pensionstillæg.`}
+                  {resultat.folkepensionDetaljer.samleverUdeladt > 0 &&
+                    ` Der er holdt ${formatKr(resultat.folkepensionDetaljer.samleverUdeladt)} ude, fordi kun 46 % af din samlevers indkomst tæller med, når samleveren ikke er pensionist.`}
+                </p>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">
+                  Grundbeløbet påvirkes aldrig af andre indkomster, så du får det uanset hvad du
+                  tjener. Kilde: borger.dk, verificeret 25. september 2026. Din egen
+                  arbejdsmarkedspension er ikke medregnet, fordi den afhænger af din arbejdsgiver —
+                  se hele din pension på PensionsInfo.dk.
+                </p>
+                <p className="mt-2">
+                  {pensionsalder < folkepensionsalder.alder
+                    ? `Du har valgt at gå på pension ${aarForskel} år før din folkepensionsalder på ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} — folkepensionen udbetales først, når du har nået folkepensionsalderen.`
+                    : pensionsalder > folkepensionsalder.alder
+                      ? `Du har valgt at gå på pension ${aarForskel} år efter din folkepensionsalder på ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} — folkepensionen er fra det tidspunkt tilgængelig, men du skal selv søge om den.`
+                      : `Din valgte alder er din folkepensionsalder på ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} — husk at du skal selv søge om folkepensionen.`}
+                </p>
+              </div>
             </div>
-            <div className="p-4 bg-purple-50 rounded-lg text-center">
-              <p className="text-sm text-purple-600">Folkepension (ca.)</p>
-              <p className="font-bold text-xl">{formatKr(resultat.folkepension)}</p>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">Ved pension</p>
-              <p className="font-bold text-lg">{formatKr(resultat.samletOpsparing)}</p>
+            {/* Pension gap */}
+            {resultat.gap !== 0 && (
+              <div className={`mb-6 p-4 rounded-lg text-center ${
+                resultat.gap > 0
+                  ? "bg-red-50 dark:bg-red-900/20"
+                  : "bg-green-50 dark:bg-green-900/20"
+              }`}>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  {resultat.gap > 0 ? "Pension gap (mangler pr. måned)" : "Overskud ift. dit mål"}
+                </p>
+                <p className={`text-2xl font-bold ${resultat.gap > 0 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                  {resultat.gap > 0 ? `-${formatKr(resultat.gap)}` : `+${formatKr(Math.abs(resultat.gap))}`}
+                </p>
+                {resultat.gap > 0 && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Du skal spare ca. {formatKr(Math.round(resultat.gap * 1.5))} ekstra pr. måned for at lukke gabet
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Ved pension</p>
+                <p className="font-bold text-lg dark:text-white">{formatKr(resultat.samletOpsparing)}</p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Indbetalt</p>
+                <p className="font-bold text-lg dark:text-white">{formatKr(resultat.samletIndbetalt)}</p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Afkast</p>
+                <p className="font-bold text-lg text-green-600 dark:text-green-400">{formatKr(resultat.samletAfkast)}</p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">År til pension</p>
+                <p className="font-bold text-lg dark:text-white">{resultat.aarTilPension}</p>
+              </div>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">Indbetalt</p>
-              <p className="font-bold text-lg">{formatKr(resultat.samletIndbetalt)}</p>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">Afkast</p>
-              <p className="font-bold text-lg text-green-600">{formatKr(resultat.samletAfkast)}</p>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">År til pension</p>
-              <p className="font-bold text-lg">{resultat.aarTilPension}</p>
-            </div>
+
+            {/* Pensionsformue graf */}
+            {resultat.aarligData.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-sm font-medium mb-3 dark:text-gray-200">Pensionsformue over tid</h2>
+                <div className="flex items-end gap-1 h-36">
+                  {resultat.aarligData
+                    .filter((_, i) => i % Math.max(1, Math.floor(resultat.aarligData.length / 15)) === 0 || i === resultat.aarligData.length - 1)
+                    .map((d) => {
+                      const maxSaldo = resultat.aarligData[resultat.aarligData.length - 1].saldo;
+                      const totalH = maxSaldo > 0 ? (d.saldo / maxSaldo) * 100 : 0;
+                      const indskudH = maxSaldo > 0 ? (d.indskud / maxSaldo) * 100 : 0;
+                      const afkastH = totalH - indskudH;
+                      return (
+                        <div key={d.aar} className="flex-1 flex flex-col justify-end items-center" title={`${d.alder} år`}>
+                          <div className="w-full flex flex-col justify-end" style={{ height: "144px" }}>
+                            <div className="bg-green-400 dark:bg-green-500 rounded-t-sm w-full" style={{ height: `${afkastH}%` }} />
+                            <div className="bg-blue-400 dark:bg-blue-500 w-full" style={{ height: `${indskudH}%` }} />
+                          </div>
+                          <span className="text-[9px] text-gray-500 dark:text-gray-400 mt-1">{d.alder}</span>
+                        </div>
+                      );
+                    })}
+                </div>
+                <div className="flex gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-sm bg-blue-400 inline-block" /> Indskud
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-sm bg-green-400 inline-block" /> Afkast
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
+        )}
+      </CalculationLoading>
+
+      {/* Del beregning */}
+      {resultat && !isLoading && (
+        <div className="flex justify-center gap-3">
+          <CopyResultButton text={`Forventet pension: ${formatKr(resultat.samletMaanedlig)}/md`} />
+          <ShareCalculation
+            getShareableLink={getShareableLink}
+            calculatorName="Pensionsberegner"
+            resultSummary={`Forventet pension: ${formatKr(resultat.samletMaanedlig)}/md`}
+          />
         </div>
       )}
 
       {/* Ekstra info */}
-      {resultat && (
-        <div className="p-4 bg-green-50 rounded-lg">
-          <h3 className="font-medium mb-2 text-green-800">💡 Vidste du?</h3>
-          <p className="text-green-700">
-            Hvis du øger din månedlige indbetaling med <strong>500 kr</strong>, 
+      {resultat && !isLoading && (
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+          <h2 className="font-medium mb-2 text-green-800 dark:text-green-300">Vidste du?</h2>
+          <p className="text-green-700 dark:text-green-400">
+            Hvis du øger din månedlige indbetaling med <strong>500 kr</strong>,
             vil din opsparing vokse med yderligere <strong>{formatKr(resultat.ekstraPr500)}</strong> til pension.
           </p>
         </div>
       )}
 
       {/* Aldersbaseret anbefaling */}
-      <div className="p-4 bg-blue-50 rounded-lg">
-        <h3 className="font-medium mb-3 text-blue-800">📊 Tommelfingerregel: Opsparing efter alder</h3>
+      <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+        <h2 className="font-medium mb-3 text-blue-800 dark:text-blue-200">Tommelfingerregel: Opsparing efter alder</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <span className="text-blue-600 font-medium">30 år</span>
-            <p>1x årsløn opsparet</p>
+            <span className="text-blue-600 dark:text-blue-400 font-medium">30 år</span>
+            <p className="dark:text-gray-300">1x årsløn opsparet</p>
           </div>
           <div>
-            <span className="text-blue-600 font-medium">40 år</span>
-            <p>3x årsløn opsparet</p>
+            <span className="text-blue-600 dark:text-blue-400 font-medium">40 år</span>
+            <p className="dark:text-gray-300">3x årsløn opsparet</p>
           </div>
           <div>
-            <span className="text-blue-600 font-medium">50 år</span>
-            <p>6x årsløn opsparet</p>
+            <span className="text-blue-600 dark:text-blue-400 font-medium">50 år</span>
+            <p className="dark:text-gray-300">6x årsløn opsparet</p>
           </div>
           <div>
-            <span className="text-blue-600 font-medium">60 år</span>
-            <p>8x årsløn opsparet</p>
+            <span className="text-blue-600 dark:text-blue-400 font-medium">60 år</span>
+            <p className="dark:text-gray-300">8x årsløn opsparet</p>
           </div>
         </div>
       </div>

@@ -1,20 +1,37 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, type ReactNode } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton, ResetButton } from "@/components/ui";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { getIntlLocale, formatNumber } from '@/lib/format';
+import {
+  foegArbejdsdage,
+  taellArbejdsdage,
+  taellHelligdagePaaHverdag,
+  taellNytarsaften,
+  taellWeekender,
+  type HelligdagLocale,
+} from '@/lib/helligdage';
+import { dageTilDato, naesteJuleaften, type DageMellemLocale } from '@/lib/dage-mellem-datoer';
+import { heleDageMellem, parseIsoDato, plusIsoMaaneder, tilIsoDato } from '@/lib/lokal-dato';
+import { beregnAlder } from '@/lib/alder';
 
-type BeregningsMode = "dage-mellem" | "tilfoej-dage" | "arbejdsdage" | "alder";
+type BeregningsMode =
+  | "dage-mellem"
+  | "dage-til"
+  | "tilfoej-dage"
+  | "arbejdsdage"
+  | "alder";
 
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month + 1, 0).getDate();
+function helligdagLocale(locale: string): HelligdagLocale {
+  return locale === "se" ? "se" : "da";
 }
 
-function isWeekend(date: Date): boolean {
-  const day = date.getDay();
-  return day === 0 || day === 6;
-}
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("da-DK", {
+function formatDate(date: Date, intlLocale: string): string {
+  return date.toLocaleDateString(intlLocale, {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -22,17 +39,158 @@ function formatDate(date: Date): string {
   });
 }
 
-export default function DatoBeregner() {
+/**
+ * Kort dato til deleteksten: "27. september 2026". Uden ugedagsnavn, fordi
+ * teksten skal kunne ligge i én linje i en mail eller en besked.
+ */
+function formatDateShort(date: Date, intlLocale: string): string {
+  return date.toLocaleDateString(intlLocale, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+const labels = {
+  da: {
+    modeDageMellemLabel: "Dage mellem",
+    modeDageMellemDesc: "Beregn dage mellem to datoer",
+    modeDageTilLabel: "Dage til dato",
+    modeDageTilDesc: "Hvor mange dage er der til …?",
+    modeTilfoejLabel: "Tilføj dage",
+    modeTilfoejDesc: "Tilføj/træk dage fra en dato",
+    modeArbejdsdageLabel: "Arbejdsdage",
+    modeArbejdsdageDesc: "Beregn arbejdsdage fremad",
+    modeAlderLabel: "Alder",
+    modeAlderDesc: "Beregn præcis alder",
+    maalDato: "Hvilken dato",
+    dageTil: "Dage til datoen",
+    dageSiden: "Dage siden",
+    heleUger: "Hele uger",
+    restDage: "Restdage",
+    fraDato: "Fra dato",
+    tilDato: "Til dato",
+    udgangsdato: "Udgangsdato",
+    antal: "Antal",
+    arbejdsdageWord: "arbejdsdage",
+    dageWord: "dage",
+    dageSuffix: "dage",
+    negativHint: "Brug negativ værdi for at trække fra",
+    foedselsdato: "Fødselsdato",
+    antalDage: "Antal dage",
+    ugerWord: "uger",
+    ogWord: "og",
+    uger: "Uger",
+    caMaaneder: "Ca. måneder",
+    arbejdsdage: "Arbejdsdage",
+    fridage: "Weekenddage",
+    helligdage: "Helligdage",
+    resultat: "Resultat",
+    arbejdsdageFra: "arbejdsdage fra",
+    kalenderdageIAlt: "Kalenderdage i alt",
+    fridageSprunget: "Weekenddage sprunget",
+    helligdageIPerioden: "helligdage i perioden",
+    nytarsaftenNote:
+      "Nytårsaften er ikke en officiel helligdag og tælles heller ikke som arbejdsdag. Derfor ligger der {n} dag i antal dage, som ikke er fordelt på felterne ovenfor.",
+    dinAlder: "Din alder",
+    aarWord: "år",
+    maanederWord: "måneder",
+    totalDage: "Total dage",
+    totalUger: "Total uger",
+    naesteFoedselsdag: "Næste fødselsdag",
+    om: "Om",
+    dageMellem: "mellem",
+    dagEntyd: "dag",
+    fra: "fra",
+    foer: "før",
+    aarSummary: "år",
+    mdrSummary: "mdr",
+    dageSummary: "dage",
+    calculatorName: "Datoberegner",
+  },
+  se: {
+    modeDageMellemLabel: "Dagar mellan",
+    modeDageMellemDesc: "Beräkna dagar mellan två datum",
+    modeDageTilLabel: "Dagar till datum",
+    modeDageTilDesc: "Hur många dagar är det till …?",
+    modeTilfoejLabel: "Lägg till dagar",
+    modeTilfoejDesc: "Lägg till/dra av dagar från ett datum",
+    modeArbejdsdageLabel: "Arbetsdagar",
+    modeArbejdsdageDesc: "Beräkna arbetsdagar framåt",
+    modeAlderLabel: "Ålder",
+    modeAlderDesc: "Beräkna exakt ålder",
+    maalDato: "Vilket datum",
+    dageTil: "Dagar till datumet",
+    dageSiden: "Dagar sedan",
+    heleUger: "Hela veckor",
+    restDage: "Restdagar",
+    fraDato: "Från datum",
+    tilDato: "Till datum",
+    udgangsdato: "Utgångsdatum",
+    antal: "Antal",
+    arbejdsdageWord: "arbetsdagar",
+    dageWord: "dagar",
+    dageSuffix: "dagar",
+    negativHint: "Använd negativt värde för att dra av",
+    foedselsdato: "Födelsedatum",
+    antalDage: "Antal dagar",
+    ugerWord: "veckor",
+    ogWord: "och",
+    uger: "Veckor",
+    caMaaneder: "Ca. månader",
+    arbejdsdage: "Arbetsdagar",
+    fridage: "Lördagar/söndagar",
+    helligdage: "Helgdagar",
+    resultat: "Resultat",
+    arbejdsdageFra: "arbetsdagar från",
+    kalenderdageIAlt: "Kalenderdagar totalt",
+    fridageSprunget: "Skippade lörd/sön",
+    helligdageIPerioden: "helgdagar i perioden",
+    nytarsaftenNote:
+      "Nyårsafton är inte en officiell helgdag och räknas inte heller som arbetsdag. Därför finns {n} dag i antalet dagar som inte är fördelad på rutorna ovan.",
+    dinAlder: "Din ålder",
+    aarWord: "år",
+    maanederWord: "månader",
+    totalDage: "Totalt dagar",
+    totalUger: "Totalt veckor",
+    naesteFoedselsdag: "Nästa födelsedag",
+    om: "Om",
+    dageMellem: "mellan",
+    dagEntyd: "dag",
+    fra: "från",
+    foer: "före",
+    aarSummary: "år",
+    mdrSummary: "mån",
+    dageSummary: "dagar",
+    calculatorName: "Datumberäknare",
+  },
+} as const;
+
+export default function DatoBeregner({ resultAd }: { resultAd?: ReactNode }) {
+  const { locale } = useLocale();
+  const intlLocale = getIntlLocale(locale);
+  const l = labels[locale as keyof typeof labels] || labels.da;
   const [mode, setMode] = useState<BeregningsMode>("dage-mellem");
 
-  // Dage mellem mode
-  const today = new Date().toISOString().split("T")[0];
+  // Dage mellem mode. Datoerne er kalenderdatoer i læserens egen tidszone:
+  // `toISOString()` skriver dem i UTC, så en dansk læser kl. 01.00 ville få
+  // dagen i går som standard.
+  const today = tilIsoDato(new Date());
   const [startDato, setStartDato] = useState<string>(today);
-  const [slutDato, setSlutDato] = useState<string>(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() + 1);
-    return d.toISOString().split("T")[0];
-  });
+  const [slutDato, setSlutDato] = useState<string>(
+    () => plusIsoMaaneder(today, 1) ?? today
+  );
+
+  // Dage til dato. Feltet er forudvalgt til den næste juleaften, fordi det er
+  // den dato GSC's to største søgninger på `/dato` spørger om («hvor mange dage
+  // er der til den 24 december», 1.036 visninger, pos. 5) — så den læser der
+  // lander i tilstanden får et rigtigt svar uden at røre noget. I dag læses i
+  // sidens egen tidszone, altså `Europe/Copenhagen` på dansk, så nedtællingen
+  // ikke springer en dag mellem dansk og svensk aften.
+  const dageMellemLocale: DageMellemLocale = locale === "se" ? "se" : "da";
+  const [malDato, setMalDato] = useState<string>(() =>
+    naesteJuleaften(dageMellemLocale, new Date())
+  );
 
   // Tilføj dage mode
   const [baseDato, setBaseDato] = useState<string>(today);
@@ -40,26 +198,86 @@ export default function DatoBeregner() {
 
   // Alder mode
   const [foedselsdato, setFoedselsdato] = useState<string>("1990-01-01");
+  const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'dato') {
+      const inputs = urlState.inputs;
+      if (inputs.mode) setMode(inputs.mode);
+      if (inputs.startDato) setStartDato(inputs.startDato);
+      if (inputs.slutDato) setSlutDato(inputs.slutDato);
+      if (inputs.baseDato) setBaseDato(inputs.baseDato);
+      if (inputs.malDato) setMalDato(inputs.malDato);
+      if (inputs.antalDage !== undefined) setAntalDage(inputs.antalDage);
+      if (inputs.foedselsdato) setFoedselsdato(inputs.foedselsdato);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("dato");
+    const timer = setTimeout(() => {
+      trackCalculation("dato");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'dato',
+      inputs: { mode, startDato, slutDato, malDato, baseDato, antalDage, foedselsdato },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [mode, startDato, slutDato, malDato, baseDato, antalDage, foedselsdato]);
+
+  const handleReset = useCallback(() => {
+    const iDag = tilIsoDato(new Date());
+    setMode("dage-mellem");
+    setStartDato(iDag);
+    setMalDato(naesteJuleaften(locale === "se" ? "se" : "da", new Date()));
+    setSlutDato(plusIsoMaaneder(iDag, 1) ?? iDag);
+    setBaseDato(iDag);
+    setAntalDage(30);
+    setFoedselsdato("1990-01-01");
+  }, []);
 
   const resultat = useMemo(() => {
     switch (mode) {
       case "dage-mellem": {
-        const start = new Date(startDato);
-        const slut = new Date(slutDato);
-        const diffTime = slut.getTime() - start.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // Et tomt datofelt giver ingen dato at regne på, så der vises intet
+        // resultat frem for "NaN dage".
+        const start = parseIsoDato(startDato);
+        const slut = parseIsoDato(slutDato);
+        if (!start || !slut) return null;
+        const diffDays = heleDageMellem(start, slut);
         const diffWeeks = Math.floor(Math.abs(diffDays) / 7);
         const diffMonths = Math.round(Math.abs(diffDays) / 30.44);
+        const hl = helligdagLocale(locale);
 
-        // Tæl arbejdsdage
-        let arbejdsdage = 0;
-        const current = new Date(start);
-        while (current <= slut) {
-          if (!isWeekend(current)) {
-            arbejdsdage++;
-          }
-          current.setDate(current.getDate() + 1);
-        }
+        // Slutdatoen kan ligge før startdatoen, så intervallet sorteres før
+        // tællerne kører. `dage` beholder sin fortegn, så et negativt tal stadig
+        // kan trækkes fra.
+        const fra = slut < start ? slut : start;
+        const til = slut < start ? start : slut;
+
+        // "Antal dage" er forskellen mellem datoerne, altså intervallet
+        // [fra, til). Tællerne skal derfor starte dagen efter `fra`, ellers
+        // summerer de tre dagstyper til ét mere end det store tal.
+        const dagEfterFra = new Date(fra);
+        dagEfterFra.setDate(dagEfterFra.getDate() + 1);
+
+        const arbejdsdage = taellArbejdsdage(dagEfterFra, til, hl);
+        // En helligdag på en lørdag eller søndag tælles som weekenddag, ellers
+        // tælles samme dag to gange, og felterne kan så summere til mere end
+        // "Antal dage".
+        const helligdage = taellHelligdagePaaHverdag(dagEfterFra, til, hl);
+        const nytarsaften = taellNytarsaften(dagEfterFra, til);
 
         return {
           type: "dage-mellem" as const,
@@ -67,192 +285,245 @@ export default function DatoBeregner() {
           uger: diffWeeks,
           maaneder: diffMonths,
           arbejdsdage,
-          weekenddage: Math.abs(diffDays) - arbejdsdage,
+          helligdage,
+          nytarsaften,
+          fridage: taellWeekender(dagEfterFra, til),
         };
       }
 
+      case "dage-til": {
+        // Samme `heleDageMellem` som `/dage-til/*` og resten af værktøjet, så
+        // et tal på denne side og et tal på `/dage-til/juleaften` ikke kan
+        // glide fra hinanden. Et tomt felt giver intet svar frem for «NaN dage».
+        const udregnet = dageTilDato(dageMellemLocale, malDato, new Date());
+        return udregnet ? { type: "dage-til" as const, ...udregnet } : null;
+      }
+
       case "tilfoej-dage": {
-        const base = new Date(baseDato);
+        const base = parseIsoDato(baseDato);
+        if (!base) return null;
         const resultatDato = new Date(base);
         resultatDato.setDate(resultatDato.getDate() + antalDage);
 
         return {
           type: "tilfoej-dage" as const,
           resultatDato,
-          formatteret: formatDate(resultatDato),
+          formatteret: formatDate(resultatDato, intlLocale),
         };
       }
 
       case "arbejdsdage": {
-        const base = new Date(baseDato);
-        let dageAtTilfoeje = antalDage;
-        const resultatDato = new Date(base);
-
-        while (dageAtTilfoeje > 0) {
-          resultatDato.setDate(resultatDato.getDate() + 1);
-          if (!isWeekend(resultatDato)) {
-            dageAtTilfoeje--;
-          }
-        }
+        const base = parseIsoDato(baseDato);
+        if (!base) return null;
+        const hl = helligdagLocale(locale);
+        const resultatDato = foegArbejdsdage(base, antalDage, hl);
 
         // Tæl samlede dage inkl. weekender
-        const diffTime = resultatDato.getTime() - base.getTime();
-        const samledeDage = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const samledeDage = heleDageMellem(base, resultatDato);
+
+        // Et negativt antal løber baglæns, så intervallet skal vendes for tællingerne.
+        const fra = antalDage >= 0 ? base : resultatDato;
+        const til = antalDage >= 0 ? resultatDato : base;
 
         return {
           type: "arbejdsdage" as const,
           resultatDato,
-          formatteret: formatDate(resultatDato),
+          formatteret: formatDate(resultatDato, intlLocale),
           samledeDage,
-          weekenddage: samledeDage - antalDage,
+          fridage: taellWeekender(fra, til),
+          helligdage: taellHelligdagePaaHverdag(fra, til, hl),
         };
       }
 
       case "alder": {
-        const foedt = new Date(foedselsdato);
-        const nu = new Date();
-
-        let aar = nu.getFullYear() - foedt.getFullYear();
-        let maaneder = nu.getMonth() - foedt.getMonth();
-        let dage = nu.getDate() - foedt.getDate();
-
-        if (dage < 0) {
-          maaneder--;
-          dage += getDaysInMonth(nu.getFullYear(), nu.getMonth() - 1);
-        }
-        if (maaneder < 0) {
-          aar--;
-          maaneder += 12;
-        }
-
-        const totalDage = Math.floor(
-          (nu.getTime() - foedt.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        const totalUger = Math.floor(totalDage / 7);
-
-        // Næste fødselsdag
-        const naesteFoedselsdag = new Date(
-          nu.getFullYear(),
-          foedt.getMonth(),
-          foedt.getDate()
-        );
-        if (naesteFoedselsdag <= nu) {
-          naesteFoedselsdag.setFullYear(naesteFoedselsdag.getFullYear() + 1);
-        }
-        const dageTilFoedselsdag = Math.ceil(
-          (naesteFoedselsdag.getTime() - nu.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        // Samme modul som `/alder` bruger, så de to værktøjer ikke kan give
+        // forskellige svar på den samme fødselsdato. Et tomt eller umuligt
+        // felt, og en fødselsdato i fremtiden, giver intet resultat.
+        const alder = beregnAlder({
+          foedselsdato,
+          beregningsdato: tilIsoDato(new Date()),
+        });
+        if (!alder) return null;
 
         return {
           type: "alder" as const,
-          aar,
-          maaneder,
-          dage,
-          totalDage,
-          totalUger,
-          dageTilFoedselsdag,
-          naesteFoedselsdag: formatDate(naesteFoedselsdag),
+          aar: alder.aar,
+          maaneder: alder.maaneder,
+          dage: alder.dage,
+          totalDage: alder.totalDage,
+          totalUger: alder.totalUger,
+          dageTilFoedselsdag: alder.dageTilFoedselsdag,
+          naesteFoedselsdag: formatDate(alder.naesteFoedselsdagDato, intlLocale),
         };
       }
 
       default:
         return null;
     }
-  }, [mode, startDato, slutDato, baseDato, antalDage, foedselsdato]);
+  }, [mode, startDato, slutDato, malDato, baseDato, antalDage, foedselsdato, dageMellemLocale]);
+
+  const baseDatoKort = useMemo(() => {
+    const base = parseIsoDato(baseDato);
+    return base ? formatDateShort(base, intlLocale) : "";
+  }, [baseDato, intlLocale]);
+
+  // Én tekst til både kopier og deling, så de to aldrig kan komme til at sige
+  // hver sit (/moms gjorde det, før C52 lagde dem i samme kald). Et dag-tal er
+  // værd intet uden de datoer det gælder, så datoerne er med i alle tre
+  // datotilstande: modtageren får ellers "61 dage mellem datoer" og ingen
+  // idé om hvilke.
+  const resultatTekst = useMemo(() => {
+    if (!resultat) return "";
+    switch (resultat.type) {
+      case "dage-mellem": {
+        const fra = parseIsoDato(startDato);
+        const til = parseIsoDato(slutDato);
+        if (!fra || !til) return "";
+        const antal = Math.abs(resultat.dage);
+        return `${formatNumber(antal, locale)} ${antal === 1 ? l.dagEntyd : l.dageWord} ${l.dageMellem} ${formatDateShort(fra, intlLocale)} ${l.ogWord} ${formatDateShort(til, intlLocale)}`;
+      }
+      case "dage-til":
+        // Sætningen er den komplette svar-som-brugere-sender-videre: den har
+        // både dag-tallet og datoen det gælder, så modtageren ikke skal spørge
+        // «til hvilken dato?».
+        return resultat.sætning;
+      case "tilfoej-dage": {
+        if (!baseDatoKort) return "";
+        const antal = Math.abs(antalDage);
+        return `${formatNumber(antal, locale)} ${antal === 1 ? l.dagEntyd : l.dageWord} ${antalDage < 0 ? l.foer : l.fra} ${baseDatoKort}`;
+      }
+      case "arbejdsdage": {
+        if (!baseDatoKort) return "";
+        const antal = Math.abs(antalDage);
+        return `${formatNumber(antal, locale)} ${l.arbejdsdageWord} ${antalDage < 0 ? l.foer : l.fra} ${baseDatoKort}`;
+      }
+      case "alder":
+        return `${formatNumber(resultat.aar, locale)} ${l.aarSummary}, ${formatNumber(resultat.maaneder, locale)} ${l.mdrSummary}, ${formatNumber(resultat.dage, locale)} ${l.dageSummary}`;
+      default:
+        return "";
+    }
+  }, [resultat, startDato, slutDato, antalDage, baseDatoKort, locale, intlLocale, l]);
 
   const modes = [
     {
       id: "dage-mellem" as BeregningsMode,
-      label: "Dage mellem",
-      desc: "Beregn dage mellem to datoer",
+      label: l.modeDageMellemLabel,
+      desc: l.modeDageMellemDesc,
+    },
+    {
+      id: "dage-til" as BeregningsMode,
+      label: l.modeDageTilLabel,
+      desc: l.modeDageTilDesc,
     },
     {
       id: "tilfoej-dage" as BeregningsMode,
-      label: "Tilføj dage",
-      desc: "Tilføj/træk dage fra en dato",
+      label: l.modeTilfoejLabel,
+      desc: l.modeTilfoejDesc,
     },
     {
       id: "arbejdsdage" as BeregningsMode,
-      label: "Arbejdsdage",
-      desc: "Beregn arbejdsdage fremad",
+      label: l.modeArbejdsdageLabel,
+      desc: l.modeArbejdsdageDesc,
     },
     {
       id: "alder" as BeregningsMode,
-      label: "Alder",
-      desc: "Beregn præcis alder",
+      label: l.modeAlderLabel,
+      desc: l.modeAlderDesc,
     },
   ];
 
   return (
     <div className="space-y-8">
       {/* Mode selection */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
         {modes.map((m) => (
-          <button
+          <button type="button"
             key={m.id}
             onClick={() => setMode(m.id)}
             className={`p-3 rounded-lg border-2 text-left transition-colors ${
               mode === m.id
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <span className="font-medium block">{m.label}</span>
-            <span className="text-xs text-gray-500">{m.desc}</span>
+            <span className="font-medium block dark:text-gray-200">{m.label}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{m.desc}</span>
           </button>
         ))}
       </div>
 
       {/* Input */}
-      <div className="bg-gray-50 rounded-xl p-6">
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
         {mode === "dage-mellem" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Fra dato</label>
+              <label htmlFor="dato-fra-dato" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fraDato}</label>
               <input
+                id="dato-fra-dato"
                 type="date"
                 value={startDato}
                 onChange={(e) => setStartDato(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg"
+                className="w-full px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Til dato</label>
+              <label htmlFor="dato-til-dato" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.tilDato}</label>
               <input
+                id="dato-til-dato"
                 type="date"
                 value={slutDato}
                 onChange={(e) => setSlutDato(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg"
+                className="w-full px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
+          </div>
+        )}
+
+        {mode === "dage-til" && (
+          <div>
+            <label htmlFor="dato-mal-dato" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              {l.maalDato}
+            </label>
+            <input
+              id="dato-mal-dato"
+              type="date"
+              value={malDato}
+              onChange={(e) => setMalDato(e.target.value)}
+              className="w-full md:w-1/2 px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
           </div>
         )}
 
         {(mode === "tilfoej-dage" || mode === "arbejdsdage") && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Udgangsdato
+              <label htmlFor="dato-udgangsdato" className="block text-sm font-medium mb-2 dark:text-gray-200">
+                {l.udgangsdato}
               </label>
               <input
+                id="dato-udgangsdato"
                 type="date"
                 value={baseDato}
                 onChange={(e) => setBaseDato(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg"
+                className="w-full px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Antal {mode === "arbejdsdage" ? "arbejdsdage" : "dage"}
+              <label htmlFor="dato-antal" className="block text-sm font-medium mb-2 dark:text-gray-200">
+                {l.antal} {mode === "arbejdsdage" ? l.arbejdsdageWord : l.dageWord}
               </label>
-              <input
-                type="number"
-                value={antalDage}
-                onChange={(e) => setAntalDage(parseInt(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Brug negativ værdi for at trække fra
+              <div className="relative">
+                <input
+                  id="dato-antal"
+                  type="number"
+                  value={antalDage}
+                  onChange={(e) => setAntalDage(parseInt(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-16 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">{l.dageSuffix}</span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {l.negativHint}
               </p>
             </div>
           </div>
@@ -260,17 +531,22 @@ export default function DatoBeregner() {
 
         {mode === "alder" && (
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Fødselsdato
+            <label htmlFor="dato-foedselsdato" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              {l.foedselsdato}
             </label>
             <input
+              id="dato-foedselsdato"
               type="date"
               value={foedselsdato}
               onChange={(e) => setFoedselsdato(e.target.value)}
-              className="w-full md:w-1/2 px-4 py-3 border rounded-lg"
+              className="w-full md:w-1/2 px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
         )}
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}
@@ -278,44 +554,84 @@ export default function DatoBeregner() {
         <>
           {resultat.type === "dage-mellem" && (
             <div className="space-y-4">
-              <div className="p-6 bg-blue-100 rounded-xl text-center">
-                <p className="text-sm text-gray-600 mb-1">Antal dage</p>
-                <p className="text-5xl font-bold text-blue-700">
+              <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.antalDage}</p>
+                <p className="text-5xl font-bold text-blue-700 dark:text-blue-300">
                   {resultat.dage}
                 </p>
-                <p className="text-gray-600 mt-2">
-                  {resultat.uger} uger og {Math.abs(resultat.dage) % 7} dage
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                  {resultat.uger} {l.ugerWord} {l.ogWord} {Math.abs(resultat.dage) % 7} {l.dageWord}
                 </p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Uger</p>
-                  <p className="text-2xl font-bold">{resultat.uger}</p>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.uger}</p>
+                  <p className="text-2xl font-bold dark:text-gray-200">{resultat.uger}</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Ca. måneder</p>
-                  <p className="text-2xl font-bold">{resultat.maaneder}</p>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.caMaaneder}</p>
+                  <p className="text-2xl font-bold dark:text-gray-200">{resultat.maaneder}</p>
                 </div>
-                <div className="p-4 bg-green-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Arbejdsdage</p>
-                  <p className="text-2xl font-bold text-green-600">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.arbejdsdage}</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {resultat.arbejdsdage}
                   </p>
                 </div>
-                <div className="p-4 bg-yellow-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Weekenddage</p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {resultat.weekenddage}
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.fridage}</p>
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {resultat.fridage}
                   </p>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.helligdage}</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {resultat.helligdage}
+                  </p>
+                </div>
+              </div>
+              {resultat.nytarsaften > 0 && locale === "da" && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {l.nytarsaftenNote.replace("{n}", String(resultat.nytarsaften))}
+                </p>
+              )}
+            </div>
+          )}
+
+          {resultat.type === "dage-til" && (
+            <div className="space-y-4">
+              <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  {resultat.overskredet ? l.dageSiden : l.dageTil}
+                </p>
+                <p className="text-5xl font-bold text-blue-700 dark:text-blue-300">
+                  {Math.abs(resultat.dage)}
+                </p>
+                {/* Kun ugedagen sættes med stor forbogstav. `capitalize` på hele
+                    linjen ville også gøre «24. December 2026», fordi klassen
+                    gør hvert ord stort. */}
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                  {resultat.datoTekst} · <span className="capitalize">{resultat.ugedagTekst}</span>
+                </p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.heleUger}</p>
+                  <p className="text-2xl font-bold dark:text-gray-200">{resultat.uger}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.restDage}</p>
+                  <p className="text-2xl font-bold dark:text-gray-200">{resultat.restDage}</p>
                 </div>
               </div>
             </div>
           )}
 
           {resultat.type === "tilfoej-dage" && (
-            <div className="p-6 bg-blue-100 rounded-xl text-center">
-              <p className="text-sm text-gray-600 mb-1">Resultat</p>
-              <p className="text-2xl font-bold text-blue-700 capitalize">
+            <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.resultat}</p>
+              <p className="text-2xl font-bold text-blue-700 dark:text-blue-300 capitalize">
                 {resultat.formatteret}
               </p>
             </div>
@@ -323,23 +639,29 @@ export default function DatoBeregner() {
 
           {resultat.type === "arbejdsdage" && (
             <div className="space-y-4">
-              <div className="p-6 bg-green-100 rounded-xl text-center">
-                <p className="text-sm text-gray-600 mb-1">
-                  {antalDage} arbejdsdage fra nu
+              <div className="p-6 bg-green-100 dark:bg-green-900/20 rounded-xl text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  {antalDage} {l.arbejdsdageFra} {baseDatoKort}
                 </p>
-                <p className="text-2xl font-bold text-green-700 capitalize">
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300 capitalize">
                   {resultat.formatteret}
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Kalenderdage i alt</p>
-                  <p className="text-2xl font-bold">{resultat.samledeDage}</p>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.kalenderdageIAlt}</p>
+                  <p className="text-2xl font-bold dark:text-gray-200">{resultat.samledeDage}</p>
                 </div>
-                <div className="p-4 bg-yellow-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Weekenddage sprunget</p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {resultat.weekenddage}
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.fridageSprunget}</p>
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {resultat.fridage}
+                  </p>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.helligdageIPerioden}</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {resultat.helligdage}
                   </p>
                 </div>
               </div>
@@ -348,34 +670,34 @@ export default function DatoBeregner() {
 
           {resultat.type === "alder" && (
             <div className="space-y-4">
-              <div className="p-6 bg-blue-100 rounded-xl text-center">
-                <p className="text-sm text-gray-600 mb-1">Din alder</p>
-                <p className="text-5xl font-bold text-blue-700">
-                  {resultat.aar} år
+              <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.dinAlder}</p>
+                <p className="text-5xl font-bold text-blue-700 dark:text-blue-300">
+                  {resultat.aar} {l.aarWord}
                 </p>
-                <p className="text-lg text-gray-600 mt-2">
-                  {resultat.maaneder} måneder og {resultat.dage} dage
+                <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
+                  {resultat.maaneder} {l.maanederWord} {l.ogWord} {resultat.dage} {l.dageWord}
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Total dage</p>
-                  <p className="text-xl font-bold">
-                    {resultat.totalDage.toLocaleString("da-DK")}
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.totalDage}</p>
+                  <p className="text-xl font-bold dark:text-gray-200">
+                    {resultat.totalDage.toLocaleString(intlLocale)}
                   </p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Total uger</p>
-                  <p className="text-xl font-bold">
-                    {resultat.totalUger.toLocaleString("da-DK")}
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.totalUger}</p>
+                  <p className="text-xl font-bold dark:text-gray-200">
+                    {resultat.totalUger.toLocaleString(intlLocale)}
                   </p>
                 </div>
-                <div className="p-4 bg-green-50 rounded-lg text-center col-span-2">
-                  <p className="text-sm text-gray-600">Næste fødselsdag</p>
-                  <p className="text-lg font-bold text-green-600">
-                    Om {resultat.dageTilFoedselsdag} dage
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center col-span-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.naesteFoedselsdag}</p>
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                    {l.om} {resultat.dageTilFoedselsdag} {l.dageWord}
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                     {resultat.naesteFoedselsdag}
                   </p>
                 </div>
@@ -384,6 +706,16 @@ export default function DatoBeregner() {
           )}
         </>
       )}
+
+      <div className="flex justify-center">
+        <CopyResultButton text={resultatTekst} />
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName={l.calculatorName}
+          resultSummary={resultatTekst || undefined}
+        />
+      </div>
+      {resultat && resultAd}
     </div>
   );
 }

@@ -1,142 +1,48 @@
 import Link from "next/link";
-
-interface Calculator {
-  title: string;
-  description: string;
-  href: string;
-  icon: string;
-}
+import { getLocale } from "@/lib/get-locale";
+import { getTranslations } from "@/lib/i18n";
+import { getRelatedCalculators, getCalculatorsByLocale } from "@/lib/calculator-list";
+import type { Calculator } from "@/lib/calculator-list";
+import { CalcIcon } from "@/components/ui/icons";
 
 interface RelatedCalculatorsProps {
-  current?: string; // Current page href to exclude (optional)
+  current?: string;
   calculators?: Calculator[];
 }
 
-const allCalculators: Calculator[] = [
-  {
-    title: "BMI Beregner",
-    description: "Beregn dit Body Mass Index",
-    href: "/bmi",
-    icon: "⚖️",
-  },
-  {
-    title: "Løn efter skat",
-    description: "Se din nettoløn efter skat",
-    href: "/loen-efter-skat",
-    icon: "💰",
-  },
-  {
-    title: "Renteberegner",
-    description: "Beregn ydelse på lån",
-    href: "/renteberegner",
-    icon: "🏦",
-  },
-  {
-    title: "Procentberegner",
-    description: "Beregn procent nemt",
-    href: "/procent",
-    icon: "➗",
-  },
-  {
-    title: "Opsparingsberegner",
-    description: "Renters rente beregner",
-    href: "/opsparing",
-    icon: "📈",
-  },
-  {
-    title: "Kalorieberegner",
-    description: "Beregn kaloriebehov",
-    href: "/kalorier",
-    icon: "🍎",
-  },
-  {
-    title: "Datoberegner",
-    description: "Dage mellem datoer",
-    href: "/dato",
-    icon: "📅",
-  },
-  {
-    title: "Elberegner",
-    description: "Beregn dit elforbrug",
-    href: "/elberegner",
-    icon: "⚡",
-  },
-  {
-    title: "Feriepenge",
-    description: "Beregn dine feriepenge",
-    href: "/feriepenge",
-    icon: "🏖️",
-  },
-  {
-    title: "Børnepenge",
-    description: "Se børne- og ungeydelse",
-    href: "/boernepenge",
-    icon: "👶",
-  },
-  {
-    title: "SU Beregner",
-    description: "Beregn din SU",
-    href: "/su",
-    icon: "🎓",
-  },
-];
-
-// Map related calculators by topic
-const relatedMap: Record<string, string[]> = {
-  "/bmi": ["/kalorier", "/loen-efter-skat"],
-  "/loen-efter-skat": ["/feriepenge", "/renteberegner", "/opsparing"],
-  "/elberegner": ["/loen-efter-skat", "/procent"],
-  "/feriepenge": ["/loen-efter-skat", "/opsparing", "/su"],
-  "/boernepenge": ["/su", "/feriepenge", "/loen-efter-skat"],
-  "/su": ["/loen-efter-skat", "/boernepenge", "/feriepenge"],
-  "/renteberegner": ["/opsparing", "/loen-efter-skat", "/procent"],
-  "/procent": ["/renteberegner", "/loen-efter-skat", "/elberegner"],
-  "/opsparing": ["/renteberegner", "/loen-efter-skat", "/procent"],
-  "/kalorier": ["/bmi", "/dato", "/procent"],
-  "/dato": ["/procent", "/loen-efter-skat", "/feriepenge"],
-};
-
-export default function RelatedCalculators({
+export async function RelatedCalculators({
   current,
   calculators,
 }: RelatedCalculatorsProps) {
-  // If calculators are provided directly, use them
+  const locale = await getLocale();
+  const t = getTranslations(locale);
+
+  let items: Calculator[];
+
   if (calculators && calculators.length > 0) {
-    return <RelatedGrid calculators={calculators} />;
+    items = calculators;
+  } else if (current) {
+    items = getRelatedCalculators(current, locale);
+  } else {
+    items = getCalculatorsByLocale(locale).slice(0, 5);
   }
 
-  // Use provided calculators or get related ones based on current page
-  const relatedHrefs = current ? relatedMap[current] || [] : [];
-  const related = allCalculators
-    .filter((calc) => relatedHrefs.includes(calc.href))
-    .slice(0, 3);
+  if (items.length === 0) return null;
 
-  if (related.length === 0) {
-    // Fallback: show 3 random calculators (not current)
-    const fallback = allCalculators
-      .filter((calc) => calc.href !== current)
-      .slice(0, 3);
-    return <RelatedGrid calculators={fallback} />;
-  }
-
-  return <RelatedGrid calculators={related} />;
-}
-
-function RelatedGrid({ calculators }: { calculators: Calculator[] }) {
   return (
-    <section className="mt-12 pt-8 border-t">
-      <h2 className="text-xl font-bold mb-4">Relaterede beregnere</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {calculators.map((calc) => (
+    <section className="mt-12 pt-8 border-t dark:border-gray-700">
+      <h2 className="text-xl font-bold mb-4 dark:text-white">{t.ui.relatedCalculators}</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((calc) => (
           <Link
             key={calc.href}
             href={calc.href}
-            className="p-4 bg-white rounded-lg border hover:shadow-md transition-shadow flex items-center gap-3"
+            className="p-4 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 hover:shadow-md dark:hover:bg-gray-700 transition-shadow flex items-center gap-3"
           >
-            <span className="text-2xl">{calc.icon}</span>
+            <CalcIcon href={calc.href} className="h-8 w-8 text-gray-500 dark:text-gray-400 shrink-0" aria-hidden="true" />
             <div>
-              <p className="font-medium">{calc.title}</p>
-              <p className="text-sm text-gray-500">{calc.description}</p>
+              <p className="font-medium dark:text-white">{calc.title}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{calc.description}</p>
             </div>
           </Link>
         ))}
@@ -144,3 +50,5 @@ function RelatedGrid({ calculators }: { calculators: Calculator[] }) {
     </section>
   );
 }
+
+export default RelatedCalculators;

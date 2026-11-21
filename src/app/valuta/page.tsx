@@ -1,125 +1,70 @@
-import type { Metadata } from "next";
 import ValutaBeregner from "@/components/ValutaBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+} from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import Sidebar from "@/components/Sidebar";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { hentNationalbankKurser } from "@/lib/nationalbanken";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata() {
+  return generatePageMetadata("valuta");
+}
 
-export const metadata: Metadata = {
-  title: "Valutaberegner - Omregn valuta online | MinBeregner.dk",
-  description:
-    "Gratis valutaberegner. Omregn mellem DKK, EUR, USD, GBP, SEK, NOK og mange flere valutaer. Se aktuelle vejledende kurser.",
-  keywords: [
-    "valutaberegner",
-    "valuta omregner",
-    "omregn valuta",
-    "dkk til euro",
-    "dollar til kroner",
-    "valutakurs",
-    "veksle penge",
-    "currency converter",
-    "kroner til euro",
-  ],
-  openGraph: {
-    title: "Valutaberegner - Omregn valuta nemt",
-    description: "Omregn mellem danske kroner og andre valutaer. EUR, USD, GBP, SEK, NOK og mange flere.",
-    url: `${baseUrl}/valuta`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/valuta`,
-  },
-};
+export default async function ValutaPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("valuta", locale) || getPageData("valuta", "da")!;
+  // Danish site: official Nationalbank rates (null on failure -> the component falls back to ECB).
+  const officielleKurser = locale === "da" ? await hentNationalbankKurser() : null;
 
-const faqItems = [
-  {
-    question: "Hvad er kursen mellem DKK og EUR?",
-    answer:
-      "Den danske krone er bundet til euroen via ERM2-samarbejdet. Kursen ligger typisk omkring 7,44-7,47 DKK pr. EUR. Danmark fører fastkurspolitik over for euroen.",
-  },
-  {
-    question: "Hvorfor svinger valutakurser?",
-    answer:
-      "Valutakurser påvirkes af mange faktorer: renteniveauer, inflation, handelsbalancer, politisk stabilitet og markedets forventninger. DKK er dog relativt stabil pga. fastkurspolitikken over for EUR.",
-  },
-  {
-    question: "Hvor kan jeg veksle penge?",
-    answer:
-      "Du kan veksle penge i banker, vekselkontorer og lufthavne. Online banker og Wise tilbyder ofte bedre kurser. Sammenlign altid kurser og gebyrer inden du veksler.",
-  },
-  {
-    question: "Hvad er forskellen på købs- og salgskurs?",
-    answer:
-      "Banker og vekselkontorer køber valuta billigere (købskurs) end de sælger (salgskurs). Forskellen kaldes spread og er vekslerens fortjeneste.",
-  },
-  {
-    question: "Er kurserne på denne side aktuelle?",
-    answer:
-      "Kurserne er vejledende og opdateres ikke i realtid. Ved faktisk veksling bør du altid tjekke den aktuelle kurs hos din bank eller vekselkontor.",
-  },
-  {
-    question: "Hvad er Forex/valutahandel?",
-    answer:
-      "Forex er det internationale valutamarked, hvor valutaer handles 24/7. Det er verdens største finansielle marked med daglige omsætninger på over 6 billioner dollars.",
-  },
-];
-
-const relatedCalculators = [
-  {
-    title: "Momsberegner",
-    href: "/moms",
-    description: "Beregn dansk moms",
-    icon: "🧾",
-  },
-  {
-    title: "Procentberegner",
-    href: "/procent",
-    description: "Beregn procenter nemt",
-    icon: "➗",
-  },
-  {
-    title: "Løn efter skat",
-    href: "/loen-efter-skat",
-    description: "Se din nettoløn",
-    icon: "💰",
-  },
-];
-
-export default function ValutaPage() {
   return (
-    <div className="max-w-4xl mx-auto">
-      <FAQSchema items={faqItems} />
-      
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex-1 min-w-0">
+      <CalculatorSchema
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/valuta`}
+        category={pageData.schemaCategory}
+      />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/valuta" }]} />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Valutaberegner
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600">
-          Omregn nemt mellem danske kroner og andre valutaer. Se vejledende kurser for EUR, USD, GBP, SEK, NOK og mange flere.
+          {pageData.description}
         </p>
       </div>
 
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
-        <ValutaBeregner />
+        <ValutaBeregner officielleKurser={officielleKurser} />
       </div>
 
       {/* Informativ tekst - SEO */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Om valutaomregning</h2>
         <p>
-          Valutakurser angiver, hvor meget én valuta er værd i forhold til en anden. 
-          Den danske krone (DKK) er bundet til euroen gennem ERM2-samarbejdet, 
-          hvilket betyder at kursen mellem DKK og EUR er relativt stabil.
+          <strong>Valutakurser</strong> angiver, hvor meget én valuta er værd i forhold til en anden.
+          Den <strong>danske krone (DKK)</strong> er bundet til euroen gennem <strong>ERM2-samarbejdet</strong>,
+          hvilket betyder at kursen mellem DKK og EUR er relativt <strong>stabil</strong>.
         </p>
-        
+
         <h3>Danmarks fastkurspolitik</h3>
         <p>
-          Danmark fører fastkurspolitik over for euroen. Det betyder, at Nationalbanken 
-          holder kronens kurs inden for et snævert bånd omkring centralkursen på 7,46038 DKK pr. EUR. 
-          Dette giver stabilitet i handlen med eurolandene.
+          Danmark fører <strong>fastkurspolitik</strong> over for euroen. Det betyder, at <strong>Nationalbanken</strong>
+          holder kronens kurs inden for et snævert bånd omkring <strong>centralkursen på 7,46038 DKK pr. EUR</strong>.
+          Dette giver <strong>stabilitet</strong> i handlen med eurolandene.
         </p>
 
         <h3>Populære valutaer</h3>
@@ -140,14 +85,53 @@ export default function ValutaPage() {
           <li>Veksle aldrig mere end nødvendigt - du taber på begge veje</li>
         </ul>
       </div>
+      )}
+
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om valutaomvandling</h2>
+        <p>
+          <strong>Växelkurser</strong> anger hur mycket en <strong>valuta</strong> är värd i förhållande till en annan.
+          Kurserna ändras hela tiden beroende på utbud och efterfrågan, räntor och det ekonomiska läget
+          i respektive land.
+        </p>
+
+        <h3>Populära valutor</h3>
+        <ul>
+          <li><strong>EUR (Euro)</strong> - Används i 20 EU-länder</li>
+          <li><strong>USD (US-dollar)</strong> - Världens mest handlade valuta</li>
+          <li><strong>GBP (Brittiska pund)</strong> - Storbritanniens valuta</li>
+          <li><strong>SEK (Svenska kronor)</strong> - Sveriges valuta</li>
+          <li><strong>NOK (Norska kronor)</strong> - Vårt grannlands valuta</li>
+        </ul>
+
+        <h3>Tänk på avgifterna vid växling</h3>
+        <p>
+          Den <strong>växelkurs</strong> du ser är sällan den du faktiskt betalar. Banker och växelkontor
+          lägger på ett <strong>påslag</strong> och tar ofta ut en <strong>växlingsavgift</strong>. Även vid
+          kortbetalning utomlands kan det tillkomma avgifter, så jämför alltid den totala kostnaden.
+        </p>
+
+        <h3>Tips vid valutaväxling</h3>
+        <ul>
+          <li>Jämför kurser mellan banker och växelkontor</li>
+          <li>Undvik att växla på flygplatser - kurserna är ofta sämre</li>
+          <li>Överväg onlinetjänster som Wise för bättre kurser</li>
+          <li>Använd kort med bra villkor för utlandsbetalningar</li>
+          <li>Växla aldrig mer än nödvändigt - du förlorar på båda hållen</li>
+        </ul>
+      </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-8">
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </div>
 
       {/* Related Calculators */}
-      <RelatedCalculators calculators={relatedCalculators} />
+      <RelatedCalculators current="/valuta" />
+      </div>
+      <Sidebar currentHref="/valuta" />
     </div>
   );
 }

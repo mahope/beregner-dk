@@ -1,14 +1,127 @@
 @import "tailwindcss";
 
+/* Dark mode via class */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Font configuration */
 :root {
   --font-inter: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Design System — Color Palette */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-light: #dbeafe;
+  --color-primary-text: #1e40af;
+
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f9fafb;
+  --color-background: #f9fafb;
+
+  --color-text: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #9ca3af;
+
+  --color-border: #e5e7eb;
+  --color-border-hover: #d1d5db;
+
+  --color-success: #22c55e;
+  --color-success-light: #f0fdf4;
+  --color-success-text: #15803d;
+
+  --color-warning: #f59e0b;
+  --color-warning-light: #fffbeb;
+  --color-warning-text: #b45309;
+
+  --color-error: #ef4444;
+  --color-error-light: #fef2f2;
+  --color-error-text: #b91c1c;
+
+  --color-info: #3b82f6;
+  --color-info-light: #eff6ff;
+  --color-info-text: #1e40af;
+
+  /* Spacing & Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
 }
 
-/* Smooth scrolling */
+.dark {
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93c5fd;
+  --color-primary-light: rgba(37, 99, 235, 0.2);
+  --color-primary-text: #93c5fd;
+
+  --color-surface: #1f2937;
+  --color-surface-elevated: #374151;
+  --color-background: #030712;
+
+  --color-text: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #9ca3af; /* Upgraded from #6b7280 for better contrast */
+
+  --color-border: #374151;
+  --color-border-hover: #4b5563;
+
+  --color-success: #4ade80;
+  --color-success-light: rgba(34, 197, 94, 0.15);
+  --color-success-text: #86efac;
+
+  --color-warning: #fbbf24;
+  --color-warning-light: rgba(245, 158, 11, 0.15);
+  --color-warning-text: #fcd34d;
+
+  --color-error: #f87171;
+  --color-error-light: rgba(239, 68, 68, 0.15);
+  --color-error-text: #fca5a5;
+
+  --color-info: #60a5fa;
+  --color-info-light: rgba(59, 130, 246, 0.15);
+  --color-info-text: #93c5fd;
+}
+
+/* Typography — better readability */
 html {
+  font-size: 17px;
   scroll-behavior: smooth;
+}
+
+body {
+  line-height: 1.65;
+  /* Theme-aware base text color so content without an explicit text-color
+     utility (e.g. the SEO prose blocks) stays readable in dark mode. */
+  color: var(--color-text);
+  background-color: var(--color-background);
+}
+
+/* Optimal reading width for prose text */
+p, li, dd, blockquote {
+  max-width: 70ch;
+}
+
+/* Headings tighter line-height */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.25;
+}
+
+/* Mobile touch target minimum — 44×44px per WCAG 2.5.5 */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  select,
+  summary {
+    min-height: 44px;
+  }
+
+  input[type="number"],
+  input[type="text"],
+  input[type="email"],
+  input[type="search"] {
+    min-height: 44px;
+  }
 }
 
 /* Better focus styles */
@@ -36,30 +149,354 @@ html {
   background: #a1a1a1;
 }
 
-/* Prose improvements */
-.prose table {
-  display: block;
-  overflow-x: auto;
-  white-space: nowrap;
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
 }
 
-@media (min-width: 640px) {
-  .prose table {
-    display: table;
-    white-space: normal;
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Animations — subtle micro-interactions */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.4s ease-out both;
+}
+
+/* Staggered children animation */
+.animate-stagger > * {
+  animation: fade-in-up 0.4s ease-out both;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.animate-stagger > *:nth-child(6) { animation-delay: 300ms; }
+
+/* Card hover lift effect */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.dark .hover-lift:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Prose typography.
+   The @tailwindcss/typography plugin is not installed, so these rules provide
+   readable, theme-aware styling for the SEO content blocks (className="prose")
+   rendered on each calculator page. Selectors are wrapped in :where() to keep
+   specificity at (0,1,0) so page-level utility classes always win, and exclude
+   any descendant of .not-prose so opt-out callouts keep their own styling. */
+.prose {
+  color: var(--color-text);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+.prose :where(> :first-child):not(:where(.not-prose *)) {
+  margin-top: 0;
+}
+.prose :where(> :last-child):not(:where(.not-prose *)) {
+  margin-bottom: 0;
+}
+
+.prose :where(h2):not(:where(.not-prose *)) {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin-top: 2.25rem;
+  margin-bottom: 1rem;
+}
+
+.prose :where(h3):not(:where(.not-prose *)) {
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose :where(h4):not(:where(.not-prose *)) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose :where(p):not(:where(.not-prose *)) {
+  margin-top: 0;
+  margin-bottom: 1.15rem;
+}
+
+.prose :where(ul, ol):not(:where(.not-prose *)) {
+  margin-top: 0;
+  margin-bottom: 1.15rem;
+  padding-left: 1.5rem;
+}
+.prose :where(ul):not(:where(.not-prose *)) {
+  list-style: disc;
+}
+.prose :where(ol):not(:where(.not-prose *)) {
+  list-style: decimal;
+}
+.prose :where(li):not(:where(.not-prose *)) {
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+.prose :where(li):not(:where(.not-prose *))::marker {
+  color: var(--color-text-muted);
+}
+
+.prose :where(a):not(:where(.not-prose *)) {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose :where(a:hover):not(:where(.not-prose *)) {
+  color: var(--color-primary-hover);
+}
+
+.prose :where(strong):not(:where(.not-prose *)) {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.prose :where(blockquote):not(:where(.not-prose *)) {
+  border-left: 4px solid var(--color-border);
+  padding-left: 1rem;
+  margin: 1.25rem 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.prose :where(code):not(:where(.not-prose *)) {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+
+.prose :where(hr):not(:where(.not-prose *)) {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
+}
+
+/* Tables inside prose */
+.prose :where(table):not(:where(.not-prose *)) {
+  width: 100%;
+  margin: 1.25rem 0;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.prose :where(th, td):not(:where(.not-prose *)) {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose :where(thead th):not(:where(.not-prose *)) {
+  background: var(--color-surface-elevated);
+  font-weight: 600;
+}
+
+/* Let wide prose tables scroll on small screens */
+@media (max-width: 639px) {
+  .prose :where(table):not(:where(.not-prose *)) {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Responsive tables outside prose */
+table {
+  border-collapse: collapse;
+}
+
+@media (max-width: 639px) {
+  .responsive-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
   }
 }
 
 /* Print styles */
 @media print {
+  /* Hide non-essential elements */
   header,
   footer,
-  nav {
+  nav,
+  .print\\:hidden,
+  [data-cookie-consent],
+  .cookie-consent,
+  #cookie-consent,
+  .share-calculation,
+  .related-calculators,
+  .ad-banner,
+  .affiliate-box,
+  .skip-link,
+  .theme-toggle,
+  button[title="Skift tema"],
+  .mobile-menu-toggle {
     display: none !important;
   }
 
+  /* Reset background colors for print */
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+  }
+
+  /* Main content full width */
   main {
     max-width: none !important;
+    padding: 1cm !important;
+    margin: 0 !important;
+  }
+
+  /* Container resets */
+  .container,
+  .max-w-4xl,
+  .max-w-3xl,
+  .max-w-2xl {
+    max-width: none !important;
     padding: 0 !important;
+  }
+
+  /* Print area styling */
+  .print-area {
+    page-break-inside: avoid;
+  }
+
+  /* Print header styling */
+  #print-meta {
+    display: block !important;
+    margin-bottom: 1cm;
+    padding-bottom: 0.5cm;
+    border-bottom: 2px solid #333;
+  }
+
+  #print-meta .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  #print-meta .print-logo {
+    font-weight: bold;
+    font-size: 14pt;
+  }
+
+  #print-meta .print-title {
+    font-size: 16pt;
+    font-weight: 600;
+  }
+
+  #print-meta .print-date {
+    font-size: 10pt;
+    color: #666;
+  }
+
+  /* Result cards styling for print */
+  .bg-white,
+  .bg-gray-50 {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  /* Dark mode elements reset for print */
+  .dark\\:bg-gray-800,
+  .dark\\:bg-gray-700,
+  .dark\\:bg-gray-900 {
+    background: white !important;
+  }
+
+  .dark\\:text-white,
+  .dark\\:text-gray-200,
+  .dark\\:text-gray-300 {
+    color: black !important;
+  }
+
+  /* Ensure colored text prints visibly */
+  .text-blue-600,
+  .text-green-600,
+  .text-yellow-600,
+  .text-orange-600,
+  .text-red-500,
+  .text-red-700 {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Input fields in print */
+  input,
+  select {
+    border: 1px solid #999 !important;
+    background: #f9f9f9 !important;
+    padding: 0.5em !important;
+  }
+
+  /* Links styling for print */
+  a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* Don't show URL for internal links */
+  a[href^="/"]::after,
+  a[href^="#"]::after {
+    content: "";
+  }
+
+  /* Print footer */
+  @page {
+    margin: 1.5cm;
+    @bottom-center {
+      content: "minberegner.dk";
+      font-size: 10pt;
+      color: #666;
+    }
+  }
+
+  /* Avoid page breaks in cards */
+  .rounded-xl,
+  .rounded-lg {
+    page-break-inside: avoid;
   }
 }
