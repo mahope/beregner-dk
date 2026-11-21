@@ -107,7 +107,7 @@ export default async function BoligsalgPage() {
             <p className="mt-8">
               Læs vores komplette guide:{' '}
               <Link href="/blog/boligsalg-2026-guide-til-omkostninger-og-provenu" className="text-blue-600 hover:underline font-medium">
-                Boligsalg 2026 — omkostninger og salgsprovenu →
+                Boligsalg — omkostninger og salgsprovenu →
               </Link>
             </p>
 

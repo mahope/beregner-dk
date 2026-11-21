@@ -413,7 +413,7 @@ export default function KvadratmeterGuidePage() {
             className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <span className="font-medium dark:text-white">
-              Boligsalg 2026: omkostninger og provenu →
+              Boligsalg: omkostninger og provenu →
             </span>
           </Link>
         </div>

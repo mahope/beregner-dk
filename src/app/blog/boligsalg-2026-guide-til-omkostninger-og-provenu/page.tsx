@@ -11,15 +11,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: { absolute: "Boligsalg 2026: Guide til omkostninger og salgsprovenu" },
+    title: { absolute: "Boligsalg: Guide til omkostninger og salgsprovenu" },
     description:
-      "Boligsalg 2026: Hvad koster mægler, energimærke, tilstandsrapport og ejerskifteforsikring? Beregn dit nettoprovenu.",
+      "Boligsalg: Hvad koster mægler, energimærke, tilstandsrapport og ejerskifteforsikring? Beregn dit nettoprovenu.",
     keywords: [
-      "boligsalg 2026",
+      "boligsalg",
       "omkostninger ved salg af bolig",
       "salgsprovenu beregner",
-      "ejendomsmægler pris 2026",
-      "energimærke pris 2026",
+      "ejendomsmægler pris",
+      "energimærke pris",
       "tilstandsrapport pris",
       "ejerskifteforsikring pris",
       "salgsomkostninger bolig",
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     openGraph: {
       images: OG_IMAGE,
-      title: "Boligsalg 2026: Guide til omkostninger og salgsprovenu",
+      title: "Boligsalg: Guide til omkostninger og salgsprovenu",
       description: "Komplet guide til omkostninger ved boligsalg. Beregn dit nettoprovenu — få overblik over mæglerhonorar, rapporter, istandsættelse og alle salgsomkostninger.",
       url: `${baseUrl}/blog/boligsalg-2026-guide-til-omkostninger-og-provenu`,
       type: "article",
@@ -42,11 +42,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const faqItems = [
   {
-    question: "Hvad koster det at sælge en bolig i 2026?",
-    answer: "Salgsomkostningerne for en bolig til 3 mio. kr. er typisk 150.000-250.000 kr. De største poster er ejendomsmægler (3-6 %), istandsættelse (20.000-50.000 kr) og energimærke (7.500-8.700 kr). Brug vores boligsalgsberegner til at se dit præcise nettoprovenu.",
+    question: "Hvad koster det at sælge en bolig?",
+    answer: "Salgsomkostningerne for en bolig til 3 mio. kr. er typisk 150.000-250.000 kr. De største poster er ejendomsmægler (3-6 %), istandsættelse (20.000-50.000 kr) og energimærke (reguleret maksimalpris 6.931-8.319 kr afhængigt af boligens størrelse). Brug vores boligsalgsberegner til at se dit præcise nettoprovenu.",
   },
   {
-    question: "Hvad er et typisk mæglersalær i 2026?",
+    question: "Hvad er et typisk mæglersalær?",
     answer: "Ejendomsmæglere tager typisk 3-6 % af salgsprisen for huse, eller et fast salær på 25.000-60.000 kr. Mange mæglere er villige til at forhandle salæret, især ved høje salgspriser. Indhent altid 3-4 tilbud før du vælger mægler.",
   },
   {
@@ -55,7 +55,7 @@ const faqItems = [
   },
   {
     question: "Hvilke rapporter kræves ved boligsalg?",
-    answer: "Ved salg af ejerbolig kræves normalt: tilstandsrapport (5.000-8.000 kr), elinstallationsrapport (3.000-5.000 kr), energimærke (6.900-8.700 kr) og ejendomsdatarapport (ca. 105 kr). Disse skal være udarbejdet inden for de seneste 6-12 måneder.",
+    answer: "Ved salg af ejerbolig kræves normalt: tilstandsrapport (5.000-8.000 kr), elinstallationsrapport (3.000-5.000 kr), energimærke (reguleret maksimalpris 6.931-8.319 kr) og ejendomsdatarapport (ca. 105 kr). Disse skal være udarbejdet inden for de seneste 6-12 måneder.",
   },
   {
     question: "Hvordan optimerer jeg mit salgsprovenu?",
@@ -72,8 +72,8 @@ export default function Boligsalg2026GuidePage() {
     <div className="max-w-3xl mx-auto">
       <BlogArticleSchema
         slug="boligsalg-2026-guide-til-omkostninger-og-provenu"
-        title="Boligsalg 2026: Guide til omkostninger og salgsprovenu"
-        description="Komplet guide til boligsalg i 2026: Hvad koster en ejendomsmægler? Hvor meget koster energimærke, tilstandsrapport og ejerskifteforsikring? Beregn dit nettoprovenu med vores gratis boligsalgsberegner."
+        title="Boligsalg: Guide til omkostninger og salgsprovenu"
+        description="Komplet guide til boligsalg: Hvad koster en ejendomsmægler? Hvor meget koster energimærke, tilstandsrapport og ejerskifteforsikring? Beregn dit nettoprovenu med vores gratis boligsalgsberegner."
       />
       <FAQSchema items={faqItems} />
 
@@ -82,13 +82,13 @@ export default function Boligsalg2026GuidePage() {
         <span className="mx-2">/</span>
         <Link href="/blog" className="hover:text-blue-600">Blog</Link>
         <span className="mx-2">/</span>
-        <span>Boligsalg 2026</span>
+        <span>Boligsalg</span>
       </nav>
 
       <article className="prose prose-lg dark:prose-invert max-w-none">
         <header className="not-prose mb-8">
           <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">Bolig & Økonomi</span>
-          <h1 className="text-3xl md:text-4xl font-bold mt-2 text-gray-900 dark:text-white">Boligsalg 2026: Guide til omkostninger og salgsprovenu</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mt-2 text-gray-900 dark:text-white">Boligsalg: Guide til omkostninger og salgsprovenu</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">24. august 2026 · 9 min læsetid</p>
         </header>
 
@@ -127,8 +127,8 @@ export default function Boligsalg2026GuidePage() {
             </tr>
             <tr>
               <td>Energimærke</td>
-              <td>6.900-8.700 kr</td>
-              <td>Afhænger af boligstørrelse</td>
+              <td>Maks. 6.931-8.319 kr</td>
+              <td>Reguleret maksimalpris; afhænger af boligstørrelse (se nedenfor)</td>
             </tr>
             <tr>
               <td>Tilstandsrapport</td>
@@ -173,7 +173,7 @@ export default function Boligsalg2026GuidePage() {
           </tbody>
         </table>
         <p className="text-sm text-gray-600 dark:text-gray-400 italic">
-          Priserne er vejledende markedsestimater 2026. Tinglysningssatser fra Boligejer.dk (Erhvervsstyrelsen). Kilde: Boligejer.dk, MinBeregner.dk research.
+          Priserne er vejledende. Energimærke og tinglysning: Boligejer.dk (Erhvervsstyrelsen). Øvrige poster er typiske intervaller uden fast kilde.
         </p>
 
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 my-6 not-prose">
@@ -306,7 +306,7 @@ export default function Boligsalg2026GuidePage() {
           For en ny bolig til 3,5 mio. kr med 80 % realkreditlån er tinglysnings-
           omkostningerne ca. <strong>60.000-65.000 kr</strong>.
           <br />
-          <em>Kilde: Boligejer.dk, Erhvervsstyrelsen. 2026-estimat.</em>
+          <em>Kilde: Boligejer.dk, Erhvervsstyrelsen. Tjek de aktuelle satser på tinglysning.dk, før du regner med dem.</em>
         </p>
 
         <h2>Samlet eksempel: Boligsalg for 3 mio. kr</h2>

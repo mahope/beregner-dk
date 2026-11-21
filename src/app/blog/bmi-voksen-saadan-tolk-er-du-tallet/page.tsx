@@ -127,7 +127,7 @@ export default function BmiVoksenGuidePage() {
             BMI for voksne: sådan tolker du dit BMI-tal
           </h1>
           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-            <span>21. november 2026</span>
+            <span>1. oktober 2026</span>
             <span>•</span>
             <span>6 min læsetid</span>
           </div>

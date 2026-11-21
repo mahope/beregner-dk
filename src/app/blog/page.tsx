@@ -208,7 +208,7 @@ const blogPosts = [
   },
   {
     slug: "boligsalg-2026-guide-til-omkostninger-og-provenu",
-    title: "Boligsalg 2026: Guide til omkostninger og salgsprovenu",
+    title: "Boligsalg: Guide til omkostninger og salgsprovenu",
     description: "Komplet guide til omkostninger ved boligsalg i 2026: Ejendomsmægler, energimærke, tilstandsrapport, ejerskifteforsikring og alle andre salgsomkostninger. Beregn dit nettoprovenu.",
     category: "Bolig & Økonomi",
   },
