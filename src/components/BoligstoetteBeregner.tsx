@@ -24,7 +24,8 @@ import { CALCULATION_STATE_HISTORY_KEY } from "@/lib/calculation-state-privacy";
 import { formatNumber } from "@/lib/format";
 import { BOLIGSTOETTE_2026 } from "@/lib/satser-2026";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AffiliateBox, partnerAdsLink } from "./AffiliateBox";
+import { AffiliateBox } from "./AffiliateBox";
+import { partnerAdsLink } from "@/lib/partner-ads";
 
 function numberOrZero(value: string): number {
   return parseBoligstoetteNumber(value) ?? 0;

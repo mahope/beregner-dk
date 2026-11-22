@@ -2,7 +2,8 @@
 
 import { useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
-import { AffiliateBox, PantelaanAffiliate, partnerAdsLink } from "./AffiliateBox";
+import { AffiliateBox, PantelaanAffiliate } from "./AffiliateBox";
+import { partnerAdsLink } from "@/lib/partner-ads";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
 import { CopyResultButton, ResetButton } from "@/components/ui";

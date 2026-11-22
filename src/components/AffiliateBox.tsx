@@ -3,6 +3,7 @@
 import { trackAffiliateClick } from "@/lib/analytics";
 import { adtractionLink } from "@/lib/adtraction";
 import { withSubid } from "@/lib/affiliate";
+import { partnerAdsLink } from "@/lib/partner-ads";
 import { usePathname } from "next/navigation";
 import { useLocale } from "@/components/LocaleProvider";
 import type { LucideIcon } from "lucide-react";
@@ -137,17 +138,10 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, placement, cr
 
 // Pre-konfigurerede affiliate data
 //
-// Kun programmer Mahope er godkendt til hos Partner-ads (partnerid 42553).
+// Kun programmer Mahope er godkendt til hos Partner-ads (partnerid 42553); linkene bygges af partnerAdsLink i
+// @/lib/partner-ads (ikke her: eksporter fra en "use client"-fil kan ikke kaldes fra serverkomponenter).
 // Sub-id (uid) pr. side og boks tilføjes af AffiliateBox via withSubid().
 // Tilføj ALDRIG links med en hjemmelavet ?ref= — de giver ingen kommission.
-
-const PARTNER_ADS_ID = "42553";
-
-/** Partner-ads tracking-link, evt. som deeplink til en underside hos annoncøren. */
-export function partnerAdsLink(bannerId: string, deeplink?: string): string {
-  const base = `https://www.partner-ads.com/dk/klikbanner.php?partnerid=${PARTNER_ADS_ID}&bannerid=${bannerId}`;
-  return deeplink ? `${base}&htmlurl=${encodeURIComponent(deeplink)}` : base;
-}
 
 const COVER_BILFORSIKRING = "110013"; // Cover Forsikring (11253), 275 kr./lead
 const FINDFORSIKRING = "60068"; // Findforsikring.dk (4935), 60 kr./lead

@@ -99,6 +99,7 @@ describe("affiliate links in the code", () => {
   const allowed = new Set([
     "lib/affiliate.ts",
     "lib/adtraction.ts",
+    "lib/partner-ads.ts",
     "components/AffiliateBox.tsx",
   ]);
   const files: string[] = [];

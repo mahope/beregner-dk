@@ -18,7 +18,8 @@ import {
   type SuYouthAgeGroup,
 } from "@/lib/su";
 import { SU_2026 } from "@/lib/satser-2026";
-import { AffiliateBox, partnerAdsLink } from "./AffiliateBox";
+import { AffiliateBox } from "./AffiliateBox";
+import { partnerAdsLink } from "@/lib/partner-ads";
 
 type Boligstatus = SuHousing;
 type Uddannelsestype = SuEducation;

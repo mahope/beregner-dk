@@ -2,13 +2,13 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { TRACKING_URLS } from "@/lib/adtraction";
+import { partnerAdsLink } from "@/lib/partner-ads";
 import {
   bilforsikringAffiliates,
   boligforsikringAffiliates,
   KREDIT_ADVARSEL,
   forsikringAffiliates,
   pantelaanAffiliates,
-  partnerAdsLink,
   selvstaendigAffiliates,
   testamenteAffiliates,
 } from "./AffiliateBox";
