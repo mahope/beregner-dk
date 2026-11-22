@@ -2,7 +2,6 @@ import { describe, test, expect } from "vitest";
 import { getPageData } from "./page-data";
 import { NUTIDSKRONER_TITEL_EKSEMPEL } from "./page-data";
 import { kvadratmeterEksempelLignelse } from "./kvadratmeter-eksempler";
-import { dageTilDecember } from "./dage-mellem-datoer";
 import { alderLevet } from "./alder-levet";
 import { iDagISidensTidszone } from "./lokal-dato";
 import { formatBelob, formatNumber } from "./format";
@@ -95,16 +94,16 @@ const REGNETE_EKSEMPLER: {
   { slug: "procent", resulter: { da: PROCENT_TITEL_DA, se: "10 % av ett tal" } },
   {
     slug: "dato",
-    // da: titlens dagstal skifter hver dag, så porten regner dem med samme
-    // funktion som siden. se: fast eksempel, regnet efter i
+    // da: fast, håndskrevet regnestykke (som se).
+    // se: regnet efter i
     // `title-eksempel.test.ts`: 15. marts til 25. september 2026 er 194 dage.
     resulter: {
-      da: `1. december: ${dageTilDecember("da", new Date()).kort} tilbage`,
+      da: "15. mar–25. sep = 194 dage",
       se: "15 mar–25 sep = 194 dagar",
     },
   },
   { slug: "tidsberegner", resulter: { da: "08:30 til 16:45 = 8 t 15 min", se: "08:30 till 16:45 = 8 t 15 min" } },
-  { slug: "tidszone", resulter: { da: "12 i Danmark = 06 i New York, USA", se: "12 i Sverige = 06 i New York, USA" } },
+  { slug: "tidszone", resulter: { da: "Danmark er CET (UTC+1), sommertid CEST (UTC+2)", se: "12 i Sverige = 06 i New York, USA" } },
   { slug: "moms", resulter: { da: "1.000 kr. ekskl. moms + 25 % = 1.250 kr.", se: "1 000 kr. exkl. moms + 25 % = 1 250 kr." } },
   { slug: "kalorier", resulter: { da: "80 kg, 180 cm, 30 år, moderat = 2.759 kcal", se: "man 80 kg, 180 cm = 2 759 kcal/dag" } },
   // De to sider fra feature-køen, der manglede et regnestykke. Tallene kommer

@@ -625,7 +625,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Promilleberegner: 4 øl på 80 kg = 0,88 ‰",
+      title: "Promille beregner: 4 øl på 80 kg = 0,88 ‰",
       visible: "4 øl til en mand på 80 kg giver 0,88 ‰",
       answer: "4 øl på 80 kg = 0,88 ‰",
       drivingAfter: "5,9 timer",
@@ -806,7 +806,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      titel: "Beregn dage til 1. december: {DAGE_TIL_DEC} tilbage",
+      titel: "Beregn dage mellem to datoer: 15. mar–25. sep = 194 dage",
       heading: "Beregn antal dage mellem to datoer",
       intent: "antal dage mellem to datoer",
       answer: "Vælg en startdato og en slutdato",
@@ -857,7 +857,7 @@ describe("getPageData", () => {
       // 8/11: den svenske titel er målrettet «dagar mellan datum» (se `title-eksempel.test.ts`),
       // men tællesøgningerne lever videre i beskrivelsen, som stadig starter
       // med spørgsmålet.
-      expect(data.metaTitle).toMatch(/dage til 1\. december|dagar mellan datum/);
+      expect(data.metaTitle).toMatch(/dage mellem to datoer|dagar mellan datum/);
       expect(data.metaDescription.startsWith(countdown)).toBe(true);
       expect(data.metaDescription).not.toBe(data.metaTitle);
     }
