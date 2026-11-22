@@ -17,7 +17,8 @@ import { BARSEL_2026 } from '@/lib/satser-2026';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
-import { AffiliateBox, partnerAdsLink } from "./AffiliateBox";
+import { AffiliateBox } from "./AffiliateBox";
+import { partnerAdsLink } from "@/lib/partner-ads";
 import { adtractionLink } from "@/lib/adtraction";
 
 const DEFAULT_EMPLOYER_WEEKS = '14';
