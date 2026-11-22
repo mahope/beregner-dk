@@ -37,14 +37,34 @@ const files = walk(src);
 const text = new Map(files.map((f) => [f, readFileSync(f, "utf-8")]));
 const clientModules = new Set(files.filter((f) => isClient(text.get(f) ?? "")));
 
-/** Non-component value exports of a client module (functions, constants, data). */
+const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+/** The names in a `{ a, b as c, type D }` list: [imported/local name, exported/alias name], types skipped. */
+function braceNames(list: string): [string, string][] {
+  return stripComments(list)
+    .split(",")
+    .map((raw) => raw.trim())
+    .filter((item) => item && !item.startsWith("type "))
+    .map((item) => {
+      const [name, alias] = item.split(/\s+as\s+/).map((s) => s.trim());
+      return [name as string, (alias ?? name) as string];
+    });
+}
+
+/** Non-component value exports of a client module (functions, classes, constants, data). */
 function nonComponentExports(file: string): Set<string> {
+  const body = stripComments(text.get(file) ?? "");
   const names = new Set<string>();
-  for (const m of (text.get(file) ?? "").matchAll(/export\s+(?:async\s+)?(function\*?|const|let|var)\s+(\w+)/g)) {
+  for (const m of body.matchAll(/export\s+(?:async\s+)?(function\*?|class|const|let|var)\s+(\w+)/g)) {
     const name = m[2] as string;
     // A function with a capital first letter is a component (also FAQ); a constant only when PascalCase.
-    const component = m[1] === "function" ? /^[A-Z]/.test(name) : isComponentName(name);
+    const component =
+      m[1] === "class" ? false : m[1]?.startsWith("function") ? /^[A-Z]/.test(name) : isComponentName(name);
     if (!component) names.add(name);
+  }
+  // `export { helper, other as alias }` at the bottom of a file (without `from`).
+  for (const m of body.matchAll(/export\s*\{([^}]*)\}(?!\s*from)/g)) {
+    for (const [, exported] of braceNames(m[1] as string)) if (!isComponentName(exported)) names.add(exported);
   }
   return names;
 }
@@ -59,17 +79,27 @@ describe("client boundary", () => {
     for (const file of files) {
       const body = text.get(file) ?? "";
       if (isClient(body)) continue;
-      for (const m of body.matchAll(/import\s+(type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g)) {
-        if (m[1]) continue;
-        const target = resolveImport(file, m[3] as string);
+      // import { a }, import Default, { a }, import * as ns, export { a } from, export * from (also multi-line).
+      for (const m of stripComments(body).matchAll(
+        /\b(import|export)\s+(type\s+)?([\w\s,*{}$]*?)\s*from\s*["']([^"']+)["']/g,
+      )) {
+        if (m[2]) continue;
+        const target = resolveImport(file, m[4] as string);
         if (!target || !clientModules.has(target)) continue;
         const forbidden = nonComponentExports(target);
-        for (const raw of (m[2] as string).split(",")) {
-          const item = raw.trim();
-          if (!item || item.startsWith("type ")) continue;
-          const name = item.split(/\s+as\s+/)[0] as string;
-          if (forbidden.has(name)) offenders.push(`${relative(src, file)}: ${name} from ${relative(src, target)}`);
-        }
+        const where = `${relative(src, file)}: %s from ${relative(src, target)}`;
+        const clause = m[3] as string;
+        // A namespace import or a star re-export hands every export over, also the helpers.
+        if (/\*/.test(clause) && forbidden.size) offenders.push(where.replace("%s", `* (${[...forbidden].join(", ")})`));
+        const brace = clause.match(/\{([^}]*)\}/);
+        for (const [name] of brace ? braceNames(brace[1] as string) : [])
+          if (forbidden.has(name)) offenders.push(where.replace("%s", name));
+      }
+      // await import("<client module>") in a server module: only the default (a component) may be used.
+      for (const m of body.matchAll(/import\(\s*["']([^"']+)["']\s*\)\s*\)?\s*\.\s*(\w+)/g)) {
+        const target = resolveImport(file, m[1] as string);
+        if (target && clientModules.has(target) && nonComponentExports(target).has(m[2] as string))
+          offenders.push(`${relative(src, file)}: ${m[2]} from ${relative(src, target)} (dynamic import)`);
       }
     }
     expect(offenders).toEqual([]);
