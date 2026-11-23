@@ -1,10 +1,12 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
+import { renderToString } from "react-dom/server";
 import KalorieBeregner from "./KalorieBeregner";
 import SolcelleBeregner from "./SolcelleBeregner";
 import { LocaleProvider } from "./LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
 import { TRACKING_URLS } from "@/lib/adtraction";
+import { generateShareableLink } from "@/lib/calculation-state";
 import { trackAffiliateClick } from "@/lib/analytics";
 
 vi.mock("next/navigation", () => ({ usePathname: () => window.location.pathname }));
@@ -14,10 +16,7 @@ vi.mock("@/lib/analytics", async (importOriginal) => ({
 }));
 vi.mock("@/lib/adtraction", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/adtraction")>();
-  Object.assign(actual.TRACKING_URLS, {
-    "1951492778": "https://tracking.example/t/t?a=1&as=2056156501&t=2",
-    "1888641530": "https://tracking.example/t/t?a=2&as=2056156501&t=2",
-  });
+  actual.TRACKING_URLS["1888641530"] = "https://tracking.example/t/t?a=2&as=2056156501&t=2";
   return actual;
 });
 
@@ -42,7 +41,7 @@ function vis(Component: (typeof cases)[number]["Component"], path: string, local
   );
 }
 
-test.each(cases)("$name vises efter resultatet med annonce og kliksporing", ({ Component, path, name, id, result }) => {
+test.each(cases)("$name vises efter resultatet med annonce og kliksporing", ({ Component, path, name, result }) => {
   vis(Component, path);
   const annonce = screen.getByText("Annonce");
   const link = screen.getByRole<HTMLAnchorElement>("link", { name: new RegExp(name) });
@@ -50,7 +49,9 @@ test.each(cases)("$name vises efter resultatet med annonce og kliksporing", ({ C
   expect(screen.getByText(result).compareDocumentPosition(annonce) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   expect(link.rel.split(" ")).toEqual(expect.arrayContaining(["sponsored", "nofollow", "noopener"]));
   const epi = `epi=mb.${path.slice(1)}.${name.toLowerCase()}`;
-  const basis = TRACKING_URLS[id];
+  const basis = name === "Lifesum"
+    ? "https://ion.lifesum.com/t/t?a=1951492779&as=2056156501&t=2&tk=1"
+    : "https://tracking.example/t/t?a=2&as=2056156501&t=2";
   const deeplink = name === "Solvari" ? `&url=${encodeURIComponent("https://www.solvari.dk/solceller")}` : "";
   expect(link.href).toBe(`${basis}&${epi}${deeplink}`);
   expect(trackAffiliateClick).not.toHaveBeenCalled();
@@ -70,7 +71,7 @@ test.each(cases)("$name skjules uden registreret trackinglink", ({ Component, pa
     vis(Component, path);
     expect(screen.queryByRole("link", { name: new RegExp(name) })).not.toBeInTheDocument();
   } finally {
-    TRACKING_URLS[id] = link;
+    if (link !== undefined) TRACKING_URLS[id] = link;
   }
 });
 
@@ -90,4 +91,28 @@ test("Lifesum skjules ved en alder under 18 år", () => {
   fireEvent.change(screen.getByRole("spinbutton", { name: /Alder/i }), { target: { value: "17" } });
   expect(screen.getByText("Dagligt kaloriebehov")).toBeVisible();
   expect(screen.queryByRole("link", { name: /Lifesum/ })).not.toBeInTheDocument();
+});
+
+test.each([17, 18])("Lifesum afventer delingslinkets alder (%i) efter første HTML", (alder) => {
+  window.history.replaceState({}, "", "/kalorier");
+  const { fullUrl } = generateShareableLink({
+    type: "kalorier",
+    inputs: { alder },
+    timestamp: Date.now(),
+  });
+  window.history.replaceState({}, "", fullUrl);
+  const calculator = (
+    <LocaleProvider locale="da" domainConfig={getDomainConfig("minberegner.dk")}>
+      <KalorieBeregner />
+    </LocaleProvider>
+  );
+
+  const html = renderToString(calculator);
+  expect(html).toContain("Dagligt kaloriebehov");
+  expect(html).not.toContain("Lifesum");
+
+  render(calculator);
+  expect(screen.getByRole("spinbutton", { name: /Alder/i })).toHaveValue(alder);
+  const link = screen.queryByRole("link", { name: /Lifesum/ });
+  expect(Boolean(link)).toBe(alder >= 18);
 });

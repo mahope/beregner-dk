@@ -57,20 +57,34 @@ Partner-ads har ingen offentlig API-dokumentation. Det, vi kan dokumentere:
 | Side | Program | Placering | EPI |
 |---|---|---|---|
 | `/kalorier` | [Lifesum](https://adtraction.com/advertisers/1951492778) | Efter kalorie- og makroresultatet, ved alder fra 18 år | `mb.kalorier.lifesum` |
-| `/solceller` | [Solvari DK](https://adtraction.com/dk/annoncorer/1888641530) | Efter et gyldigt solcelleoverslag, med link til [tilbud på solceller](https://www.solvari.dk/solceller) | `mb.solceller.solvari` |
+| `/solceller` | [Solvari DK](https://adtraction.com/dk/annoncorer/1888641530) | Afventer fungerende trackinglink til [tilbud på solceller](https://www.solvari.dk/solceller) efter et gyldigt solcelleoverslag | `mb.solceller.solvari` |
 
 Boksene vises på dansk, når programmets trackinglink findes i `TRACKING_URLS`.
-Hent basislinkene i [Adtractions partnerportal](https://help.adtraction.com/en/articles/1563592-how-to-create-tracking-links) for MinBeregner-kanalen `2056156501`. Kontrollér program, kanal og annonce-ID i portalen. Gem basislinkene i `src/lib/adtraction.ts` under henholdsvis `1951492778` og `1888641530`. Koden tilføjer Solvaris deeplink og den relevante EPI. For Lifesum gælder programmets begrænsninger for betalt trafik og søgeoptimering på brandnavnet.
+Lifesums basislink er hentet via `POST /v2/public/tracking/link/` i [Adtractions API](https://api.adtraction.com/) for MinBeregner-kanalen `2056156501`, program `1951492778` og annonce `1951492779`. For Lifesum gælder programmets begrænsninger for betalt trafik og søgeoptimering på brandnavnet.
+
+For Solvari skal [partnerportalen](https://help.adtraction.com/en/articles/1563592-how-to-create-tracking-links) eller Adtraction levere et link til solcelletilbud for program `1888641530` og kanal `2056156501`. Når det består redirect-tjekket, gemmes basislinket i `src/lib/adtraction.ts`. Koden tilføjer deeplink og EPI.
 
 ### Klikbaseline
 
-Den 23. november 2026 indeholdt HTML fra de to produktionssider ingen links til Lifesum eller Solvari. Det er baseline for placeringerne. Der foreligger ingen målt klikbaseline fra analytics eller Adtraction i denne session.
+Førmåling for **16.–22. november 2026** (begge dage inklusive, Europe/Copenhagen). Rapportstatus registreret 23. november 2026.
+
+| Placering (EPI) | Adtraction, kanal `2056156501` | Siteanalyse, `ad_clicked` |
+|---|---|---|
+| `mb.kalorier.lifesum` | Rapport utilgængelig fra agent-worker. Samlede og unikke klik ukendte. | Rapport utilgængelig fra agent-worker. Antal hændelser ukendt. |
+| `mb.solceller.solvari` | Rapport utilgængelig fra agent-worker. Samlede og unikke klik ukendte. | Rapport utilgængelig fra agent-worker. Antal hændelser ukendt. |
+
+Adtractions EPI-rapport returnerede HTTP 403 uden partnerlogin for begge programmer. Adgang til siteanalysen manglede ved gennemgangen. Ukendt registreres særskilt fra nul klik og fra en rapport uden en række for EPI'en. HTML-tjekket den 23. november viste, at de to produktionssider ikke havde Lifesum- eller Solvari-links i den hentede HTML.
 
 Lige før deploy registreres antal klik (samlede og unikke) for de foregående syv hele dage i Adtraction, filtreret på MinBeregner-kanalen, program og hver af de to EPI'er. Samme periode registreres i Umami eller Plausible for `ad_clicked` på hver side med den tilsvarende EPI i `destination`. Notér periode, tidszone og om rapporten viser nul, mangler en række eller ikke er tilgængelig. Sammenlign med de første syv hele dage efter deploy og behold de to målekilder hver for sig.
 
 ### Redirect og live-tjek
 
-1. Før deploy verificeres de to links fra partnerportalen. Kopiér de færdige URL'er fra lokale resultater. Erstat kun `epi` med henholdsvis `mb.kalorier.lifesum-qa` og `mb.solceller.solvari-qa`. Bevar Solvaris `url` sidst. Testklik kan blive registreret hos Adtraction. Hold QA-EPI'erne ude af rapporten for brugerklik.
-2. Send en GET uden cookies til hvert testlink med `curl --proto '=https' --max-time 15 --silent --show-error --output /dev/null --write-out '%{http_code} %{redirect_url}\n' "$qa_url"`. Følg kun kendte HTTPS-destinationer ét hop ad gangen ud fra `Location`. Registrér statuskoder og slutvært/-sti uden click-ID eller cookies. Forvent Lifesums landingsside og Solvaris side for solceller. Stop ved landingssiden. Ingen formularer, tilmeldinger, køb, konverteringspixels eller JavaScript.
-3. Efter en godkendt deploy åbnes `/kalorier` og `/solceller` på MinBeregner i mobil- og desktopbredde. Kontrollér annonceetiket, tastaturfokus og læserækkefølge samt de faktiske `href`- og `rel`-attributter. Tjek at Solvari forsvinder ved tomt årligt elforbrug, at Lifesum skjules under 18 år, og at PVGIS fortsat har sit redaktionelle link. Kontrollér også svensk og norsk visning.
+QA den 23. november 2026 med GET uden cookies og særskilte QA-EPI'er:
+
+- Lifesum: `ion.lifesum.com/t/t` gav HTTP 200 med en redirect-side, hvis meta-refresh peger til `lifesum.com/` (HTTP 200). Destinationen blev hentet direkte uden at køre redirect-sidens kode.
+- Solvari: API'et returnerede annonce `1888641533`. Både kodet og ukodet deeplink til `www.solvari.dk/solceller` gav HTTP 302 fra `go.adt212.net/t/t` til `smartebesparelser.dk/page-adtraction-solceller/`. Det næste HTTP 301-hop sendte til `www.solvari.dk/smartebesparelser` (HTTP 200). Det er en generel overgangsside. Solvari-boksen holdes skjult, indtil et link fører til solcelletilbuddet.
+
+1. Før deploy verificeres de links, der aktiveres. Kopiér de færdige URL'er fra lokale resultater. Erstat kun `epi` med henholdsvis `mb.kalorier.lifesum-qa` og `mb.solceller.solvari-qa`. Bevar Solvaris `url` sidst. Testklik kan blive registreret hos Adtraction. Hold QA-EPI'erne ude af rapporten for brugerklik.
+2. Send en GET uden cookies til hvert testlink med `curl --proto '=https' --max-time 15 --silent --show-error --output /dev/null --write-out '%{http_code} %{redirect_url}\n' "$qa_url"`. Følg kun kendte HTTPS-destinationer ét hop ad gangen ud fra `Location`. Ved HTTP 200 med en redirect-side kan du læse sidens meta-refresh i svaret og hente den angivne destination direkte. Registrér statuskoder og slutvært/-sti uden click-ID eller cookies. Forvent Lifesums landingsside og Solvaris side for solceller. Stop ved landingssiden. Ingen formularer, tilmeldinger, køb, konverteringspixels eller JavaScript.
+3. Efter en godkendt deploy åbnes `/kalorier` og `/solceller` på MinBeregner i mobil- og desktopbredde. Kontrollér annonceetiket, tastaturfokus og læserækkefølge samt de faktiske `href`- og `rel`-attributter. Tjek at Lifesum skjules under 18 år, også via et delingslink, og at PVGIS fortsat har sit redaktionelle link. Når Solvari er aktiveret, tjekkes også, at annoncen forsvinder ved tomt årligt elforbrug. Kontrollér svensk og norsk visning.
 4. Sammenlign produktionssidernes URL'er med de lokale, verificerede URL'er. Hvis redirect skal testes igen, brug QA-EPI og proceduren ovenfor. Efter Adtractions rapportforsinkelse kontrolleres QA-klikkene og dernæst brugerklik på de to normale EPI'er. Lokale komponenttests verificerer `ad_clicked` ved aktivering af linket. Det almindelige produktionslink behøver derfor ikke et manuelt klik til smoke-testen.

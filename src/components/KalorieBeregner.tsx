@@ -135,6 +135,7 @@ export default function KalorieBeregner() {
   const [hoejde, setHoejde] = useState<number>(175);
   const [aktivitet, setAktivitet] = useState<AktivitetsNiveau>("moderat");
   const [maal, setMaal] = useState<KalorieMaal>("vedligehold");
+  const [hasResolvedAge, setHasResolvedAge] = useState(false);
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -154,6 +155,7 @@ export default function KalorieBeregner() {
       if (inputs.aktivitet) setAktivitet(inputs.aktivitet);
       if (inputs.maal) setMaal(inputs.maal);
     }
+    setHasResolvedAge(true);
   }, []);
 
   // Get shareable link for current calculation
@@ -439,7 +441,7 @@ export default function KalorieBeregner() {
         />
       </div>
 
-      {alder >= 18 && <LifesumAffiliate />}
+      {hasResolvedAge && alder >= 18 && <LifesumAffiliate />}
 
       {/* Info */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
