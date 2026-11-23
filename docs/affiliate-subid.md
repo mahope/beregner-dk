@@ -51,3 +51,26 @@ Partner-ads har ingen offentlig API-dokumentation. Det, vi kan dokumentere:
 - `uid` vises i Partner-ads' egne statistikker og salgsspecifikationer (kilde: FAQ ovenfor og https://www.amino.dk/blogs/affiliateguide/archive/2010/08/31/statistik-og-analyser-for-dine-affiliate-sider-s-229-dan-f-248-lger-du-med.aspx).
 - Dataudtræk sker via menuen "Dataudtræk / API" i partnerlogin, hvor den personlige API-nøgle står. Tredjepartsværktøjer (fx Strackr, https://strackr.com/docs/partner-ads) henter transaktioner og klik derfra og eksponerer `uid` som sub-id.
 - Hverken `programstat` eller et bestemt klikrapport-endpoint er bekræftet i offentlig dokumentation. Nichespejderen skal derfor starte med at åbne "Dataudtræk / API" i Partner-ads, notere endpoint og feltnavn for `uid` her i dokumentet, og først derefter bygge hentningen. Gæt ikke endpoints.
+
+## Lifesum og Solvari på MinBeregner
+
+| Side | Program | Placering | EPI |
+|---|---|---|---|
+| `/kalorier` | [Lifesum](https://adtraction.com/advertisers/1951492778) | Efter kalorie- og makroresultatet, ved alder fra 18 år | `mb.kalorier.lifesum` |
+| `/solceller` | [Solvari DK](https://adtraction.com/dk/annoncorer/1888641530) | Efter et gyldigt solcelleoverslag, med link til [tilbud på solceller](https://www.solvari.dk/solceller) | `mb.solceller.solvari` |
+
+Boksene vises på dansk, når programmets trackinglink findes i `TRACKING_URLS`.
+Hent basislinkene i [Adtractions partnerportal](https://help.adtraction.com/en/articles/1563592-how-to-create-tracking-links) for MinBeregner-kanalen `2056156501`. Kontrollér program, kanal og annonce-ID i portalen. Gem basislinkene i `src/lib/adtraction.ts` under henholdsvis `1951492778` og `1888641530`. Koden tilføjer Solvaris deeplink og den relevante EPI. For Lifesum gælder programmets begrænsninger for betalt trafik og søgeoptimering på brandnavnet.
+
+### Klikbaseline
+
+Den 23. november 2026 indeholdt HTML fra de to produktionssider ingen links til Lifesum eller Solvari. Det er baseline for placeringerne. Der foreligger ingen målt klikbaseline fra analytics eller Adtraction i denne session.
+
+Lige før deploy registreres antal klik (samlede og unikke) for de foregående syv hele dage i Adtraction, filtreret på MinBeregner-kanalen, program og hver af de to EPI'er. Samme periode registreres i Umami eller Plausible for `ad_clicked` på hver side med den tilsvarende EPI i `destination`. Notér periode, tidszone og om rapporten viser nul, mangler en række eller ikke er tilgængelig. Sammenlign med de første syv hele dage efter deploy og behold de to målekilder hver for sig.
+
+### Redirect og live-tjek
+
+1. Før deploy verificeres de to links fra partnerportalen. Kopiér de færdige URL'er fra lokale resultater. Erstat kun `epi` med henholdsvis `mb.kalorier.lifesum-qa` og `mb.solceller.solvari-qa`. Bevar Solvaris `url` sidst. Testklik kan blive registreret hos Adtraction. Hold QA-EPI'erne ude af rapporten for brugerklik.
+2. Send en GET uden cookies til hvert testlink med `curl --proto '=https' --max-time 15 --silent --show-error --output /dev/null --write-out '%{http_code} %{redirect_url}\n' "$qa_url"`. Følg kun kendte HTTPS-destinationer ét hop ad gangen ud fra `Location`. Registrér statuskoder og slutvært/-sti uden click-ID eller cookies. Forvent Lifesums landingsside og Solvaris side for solceller. Stop ved landingssiden. Ingen formularer, tilmeldinger, køb, konverteringspixels eller JavaScript.
+3. Efter en godkendt deploy åbnes `/kalorier` og `/solceller` på MinBeregner i mobil- og desktopbredde. Kontrollér annonceetiket, tastaturfokus og læserækkefølge samt de faktiske `href`- og `rel`-attributter. Tjek at Solvari forsvinder ved tomt årligt elforbrug, at Lifesum skjules under 18 år, og at PVGIS fortsat har sit redaktionelle link. Kontrollér også svensk og norsk visning.
+4. Sammenlign produktionssidernes URL'er med de lokale, verificerede URL'er. Hvis redirect skal testes igen, brug QA-EPI og proceduren ovenfor. Efter Adtractions rapportforsinkelse kontrolleres QA-klikkene og dernæst brugerklik på de to normale EPI'er. Lokale komponenttests verificerer `ad_clicked` ved aktivering af linket. Det almindelige produktionslink behøver derfor ikke et manuelt klik til smoke-testen.

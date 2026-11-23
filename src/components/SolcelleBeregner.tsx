@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
+import { SolvariAffiliate } from "./ResultAffiliate";
 import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
@@ -574,6 +575,7 @@ export default function SolcelleBeregner({ spotGennemsnit = null }: Props = {}) 
               . Postnumrenes midtpunkter er fra GeoNames (CC BY 4.0).
             </p>
           )}
+          <SolvariAffiliate />
         </div>
       )}
     </div>

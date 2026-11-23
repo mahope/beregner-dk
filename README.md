@@ -28,7 +28,8 @@ tick ikke skæres af, også på mobil.
 Alle affiliate-links går gennem `withSubid` (`src/lib/affiliate.ts`) via `AffiliateBox`, som
 tilføjer et sub-id `mb.<side>.<placering>` (Adtraction `epi`, Partner-ads `uid`).
 Hver `AffiliateBox` kræver et `placement`-prop. Format, kilder og hentning af
-statistik pr. sub-id står i [docs/affiliate-subid.md](docs/affiliate-subid.md).
+statistik pr. sub-id står i [docs/affiliate-subid.md](docs/affiliate-subid.md). Samme dokument beskriver
+aktivering, klikbaseline og live-tjek for Lifesum på kalorieberegneren og Solvari på solcelleberegneren.
 
 ## AdSense
 

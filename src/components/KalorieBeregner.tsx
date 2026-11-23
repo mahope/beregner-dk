@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
+import { LifesumAffiliate } from "./ResultAffiliate";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -437,6 +438,8 @@ export default function KalorieBeregner() {
           resultSummary={deltTekst()}
         />
       </div>
+
+      {alder >= 18 && <LifesumAffiliate />}
 
       {/* Info */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
