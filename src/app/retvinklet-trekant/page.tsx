@@ -136,7 +136,7 @@ export default async function RetvinkletTrekantPage() {
 
         <RelatedCalculators current="/retvinklet-trekant" />
       </div>
-      <Sidebar currentHref="/retvinklet-trekant" adSlotId="retvinklet-trekant-sidebar" />
+      <Sidebar currentHref="/retvinklet-trekant" />
     </div>
   );
 }

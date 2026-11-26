@@ -140,7 +140,7 @@ export default async function HundealderPage() {
 
         <RelatedCalculators current="/hundealder" />
       </div>
-      <Sidebar currentHref="/hundealder" adSlotId="hundealder-sidebar" />
+      <Sidebar currentHref="/hundealder" />
     </div>
   );
 }

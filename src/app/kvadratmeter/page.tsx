@@ -1,3 +1,4 @@
+import { ResultAd } from "@/components/ads/AdBanner";
 import BoligOpslag from "@/components/BoligOpslag";
 import KvadratmeterBeregner from "@/components/KvadratmeterBeregner";
 import ArealOmregner from "@/components/ArealOmregner";
@@ -84,6 +85,7 @@ export default async function KvadratmeterPage() {
           m²» — første danske træffer under «kvadratfod», jf. autocomplete 6/10 —
           var umulig at løse på sitet. */}
       <ArealOmregner />
+      <ResultAd page="/kvadratmeter" />
 
       {/* Teksten under værktøjet, så brødteksten og facit læser de samme tal. */}
       {(locale === "da" || locale === "se") && (

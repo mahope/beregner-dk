@@ -135,7 +135,10 @@ describe("shouldDropSentryEvent", () => {
   it("kender Next's egen fejlkode for en rodet router-state header", () => {
     // The port dømmer på den installerede ramme: et kodenummer-skift i en
     // Next-opgradering gør den her rød i stedet for at slå filteret fra i stilhed.
-    expect(nextFejlkode(NEXT_STØJ)).toBe(NEXT_ROUTER_STATE_ERROR_CODE);
+    // Next 16.4 kaster fejlen uden __NEXT_ERROR_CODE (16.3 mærkede den "E10"), så
+    // koden er kun en bonusnøgle; sidder der en, skal det stadig være E10.
+    const kode = nextFejlkode(NEXT_STØJ);
+    if (kode !== undefined) expect(kode).toBe(NEXT_ROUTER_STATE_ERROR_CODE);
   });
 
   it("dropper Next.js RSC-støj på fejlens kode, selv hvis teksten er omskrevet", () => {
@@ -161,10 +164,14 @@ describe("shouldDropSentryEvent", () => {
     // Målt 2/10: på client-`captureException`-vejen er hintet kun `event_id` og
     // `integrations`, så koden er ikke altid tilgængelig. Den er derfor aldrig
     // eneste nøgle — men når den er med, skal den slå en helt fremmed ordlyd ihjel.
+    const medKode = Object.defineProperty(new Error("Helt ukendt Next-fejl"), "__NEXT_ERROR_CODE", {
+      value: NEXT_ROUTER_STATE_ERROR_CODE,
+      enumerable: false,
+    });
     expect(
       shouldDropSentryEvent(
         { exception: { values: [{ value: "Helt ukendt Next-fejl" }] } },
-        { originalException: NEXT_STØJ },
+        { originalException: medKode },
       ),
     ).toBe(true);
     // Og en anden kode må ikke gøre det.

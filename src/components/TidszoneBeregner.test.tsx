@@ -14,16 +14,6 @@ import TidszoneBeregner, { TIDSZONER_BEREGNER } from "./TidszoneBeregner";
 import { LocaleProvider } from "./LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
 import { TIDSZONER } from "@/lib/tidszone-reference";
-import { utcOffsetMinutter } from "@/lib/sommertid";
-
-/**
- * Danmarks egen UTC-interval. Samme to tal som `TidszoneBeregner.tsx:42-43`
- * (`HJEM_VINTER`/`HJEM_SOMMER`), som ikke er eksporterede. De står her, fordi
- * porten skal regne forventningen selv — se testen «sommer- og vinterværdien»
- * for hvorfor et håndskrevet tidszonetal går rødt to gange om året.
- */
-const HJEM_VINTER = 60;
-const HJEM_SOMMER = 120;
 
 vi.mock("@/lib/analytics", () => ({
   trackCalculation: vi.fn(),
@@ -53,12 +43,15 @@ function selectOptions(container: HTMLElement) {
 
 describe("TidszoneBeregner", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-01T12:00:00Z"));
     window.history.replaceState({}, "", "/tidszone");
     vi.clearAllMocks();
   });
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
   });
 
   test("forankrer hjemtidszonen i Danmark på dansk", () => {
@@ -229,43 +222,22 @@ describe("TidszoneBeregner", () => {
     const { container } = renderTidszone("da");
     const tekst = container.textContent ?? "";
 
-    // Sydney står på AEST om sommeren og AEDT om vinteren, så tallet bevæger sig
-    // to gange om året. Kun det aktuelle tal uden vinterværdien ville være en
-    // vildledende halvdel.
-    //
-    // **De to tal regnes herfra, de er ikke håndskrevet.** 4/10 2026 gik denne
-    // test rød, fordi Sydney skiftede til AEDT netop den dag (første søndag i
-    // oktober): «+8t» holdt kun fra marts til oktober. `tidszone-reference.ts`
-    // siger i sin egen docblock, at Sydney ligger mellem 8 og 10, fordi de to
-    // lande skifter på hver sin dato — så et fast tal i en port er et tal, der
-    // går rødt to gange om året. Forventningen regnes derfor fra
-    // `TIDSZONER_BEREGNER` — komponentens egen tabel i **minutter** — og
-    // `erSommertid`, altså de præcis samme to kilder
-    // `TidszoneBeregner.tsx:469-477` regner med. Ikke fra
-    // `tidszone-reference.ts`, hvis `TIDSZONER` står i timer og derfor ville
-    // give et tal 60 gange for lille.
-    const nu = new Date();
-    const Sydney = TIDSZONER_BEREGNER.find((z) => z.by === "Sydney");
-    const Tokyo = TIDSZONER_BEREGNER.find((z) => z.by === "Tokyo");
-    if (!Sydney || !Tokyo) throw new Error("Sydney eller Tokyo mangler i tabellen");
-    const hjemNu = utcOffsetMinutter(HJEM_VINTER, HJEM_SOMMER, "eu", nu);
-    const sydneyNu =
-      (utcOffsetMinutter(Sydney.offset, Sydney.offsetSommer, Sydney.dst, nu) - hjemNu) / 60;
-    const tokyoNu = (utcOffsetMinutter(Tokyo.offset, Tokyo.offsetSommer, Tokyo.dst, nu) - hjemNu) / 60;
-    const vinterDato = new Date(nu.getFullYear(), 0, 15);
-    const hjemVinter = utcOffsetMinutter(HJEM_VINTER, HJEM_SOMMER, "eu", vinterDato);
-    const sydneyVinter =
-      (utcOffsetMinutter(Sydney.offset, Sydney.offsetSommer, Sydney.dst, vinterDato) - hjemVinter) / 60;
-    const tokyoVinter =
-      (utcOffsetMinutter(Tokyo.offset, Tokyo.offsetSommer, Tokyo.dst, vinterDato) - hjemVinter) / 60;
-
-    expect(tekst).toMatch(new RegExp(`Sydney\\+${sydneyNu}t \\(\\+${sydneyVinter}t om vinteren\\)`));
-    expect(tekst).toMatch(new RegExp(`Tokyo\\+${tokyoNu}t \\(\\+${tokyoVinter}t om vinteren\\)`));
+    expect(tekst).toMatch(/Sydney\+8t \(\+10t om vinteren\)/);
+    expect(tekst).toMatch(/Tokyo\+7t \(\+8t om vinteren\)/);
 
     // London skifter sommertid sammen med Danmark, så forskelsen er den hele
     // året og viser ingen vinterværdi.
     expect(tekst).toMatch(/London-1t(?! \()/);
     expect(tekst).toMatch(/New York-6t(?! \()/);
+  });
+
+  test("vinterværdien vises uden en gentaget vinternote om vinteren", () => {
+    vi.setSystemTime(new Date("2026-12-01T12:00:00Z"));
+    const { container } = renderTidszone("da");
+    const tekst = container.textContent ?? "";
+
+    expect(tekst).toMatch(/Sydney\+10t(?! \()/);
+    expect(tekst).toMatch(/Tokyo\+8t(?! \()/);
   });
 
   test("sommertidsnoten fortæller, at beregneren følger sommertiden", () => {

@@ -120,7 +120,7 @@ export default async function ProteinbehovPage() {
 
         <RelatedCalculators current="/proteinbehov" />
       </div>
-      <Sidebar currentHref="/proteinbehov" adSlotId="proteinbehov-sidebar" />
+      <Sidebar currentHref="/proteinbehov" />
     </div>
   );
 }

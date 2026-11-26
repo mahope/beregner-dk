@@ -231,7 +231,7 @@ export default async function SaltIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/salt-i-madvarer" adSlotId="salt-i-madvarer-sidebar" />
+      <Sidebar currentHref="/salt-i-madvarer" />
     </div>
   );
 }

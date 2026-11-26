@@ -118,7 +118,7 @@ export default async function ElbilPage() {
 
         <RelatedCalculators current="/elbil" />
       </div>
-      <Sidebar currentHref="/elbil" adSlotId="elbil-sidebar" />
+      <Sidebar currentHref="/elbil" />
     </div>
   );
 }

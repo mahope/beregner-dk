@@ -9,6 +9,7 @@ import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { formatNumber } from "@/lib/format";
 import { AffiliateBox } from "./AffiliateBox";
+import { partnerAdsLink } from "@/lib/partner-ads";
 import { useLocale } from "@/components/LocaleProvider";
 type Enhed = "metrisk" | "imperial";
 type ZoneKey = "under" | "normal" | "over" | "fedme1" | "fedme2" | "fedme3";
@@ -768,15 +769,17 @@ export default function BMIBeregner() {
         </p>
       </div>
       <AffiliateBox
+        placement="sundhed"
         title="Sundhed & velvære"
         subtitle="Vitaminer, kosttilskud og vægttab"
-        links={[{ name: "Med24", description: "Danmarks apotek på nettet — vitaminer, kosttilskud og produkter til vægttab.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=42807&uid=minberegner", cta: "Se produkter hos Med24", highlight: true }]}
+        links={[{ name: "Med24", description: "Danmarks apotek på nettet — vitaminer, kosttilskud og produkter til vægttab.", url: partnerAdsLink("42807"), cta: "Se produkter hos Med24", highlight: true }]}
         className="mt-6"
       />
       <AffiliateBox
+        placement="sundhedsforsikring"
         title="Sundhedsforsikring"
         subtitle="Hurtig behandling uden ventetid"
-        links={[{ name: "Findforsikring.dk", description: "Sammenlign sundhedsforsikringer og få hurtig adgang til behandling, fysioterapi og speciallæge uden lange ventelister.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign sundhedsforsikring", highlight: true }]}
+        links={[{ name: "Findforsikring.dk", description: "Sammenlign sundhedsforsikringer og få hurtig adgang til behandling, fysioterapi og speciallæge uden lange ventelister.", url: partnerAdsLink("60068"), cta: "Sammenlign sundhedsforsikring", highlight: true }]}
         className="mt-6"
       />
     </div>

@@ -192,7 +192,7 @@ export default async function FedtIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/fedt-i-madvarer" adSlotId="fedt-i-madvarer-sidebar" />
+      <Sidebar currentHref="/fedt-i-madvarer" />
     </div>
   );
 }

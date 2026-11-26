@@ -87,8 +87,8 @@ export default async function VeckodagPage() {
             räknar <Link href="/dagar-mellan-datum">dagar mellan datum</Link> ut
             det. Och för att se vilken veckodag det <em>er</em> nu, utan att
             skriva in något, står det på{" "}
-            <Link href="/nedtaelling">nedräkningen till dagens datum</Link> och på{" "}
-            <Link href="/dato">datumsidan</Link>, som båda visar dagens datum med
+            <Link href="/nedrakning">nedräkningen till dagens datum</Link> och på{" "}
+            <Link href="/datum">datumsidan</Link>, som båda visar dagens datum med
             veckodagsnamn.
           </p>
         </div>
@@ -99,7 +99,7 @@ export default async function VeckodagPage() {
 
         <RelatedCalculators current="/veckodag" />
       </div>
-      <Sidebar currentHref="/veckodag" adSlotId="veckodag-sidebar" />
+      <Sidebar currentHref="/veckodag" />
     </div>
   );
 }

@@ -131,7 +131,7 @@ export default async function ValutaPage() {
       {/* Related Calculators */}
       <RelatedCalculators current="/valuta" />
       </div>
-      <Sidebar currentHref="/valuta" adSlotId="valuta-sidebar" />
+      <Sidebar currentHref="/valuta" />
     </div>
   );
 }

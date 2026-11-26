@@ -155,7 +155,7 @@ export default async function MalingPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/maling" adSlotId="maling-sidebar" />
+      <Sidebar currentHref="/maling" />
     </div>
   );
 }

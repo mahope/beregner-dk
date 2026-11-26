@@ -84,7 +84,7 @@ export default async function BefordringsfradragPage() {
 
         <RelatedCalculators current="/befordringsfradrag" />
       </div>
-      <Sidebar currentHref="/befordringsfradrag" adSlotId="befordringsfradrag-sidebar" />
+      <Sidebar currentHref="/befordringsfradrag" />
     </div>
   );
 }

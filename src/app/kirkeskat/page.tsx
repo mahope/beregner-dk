@@ -156,7 +156,7 @@ export default async function KirkeskatPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/kirkeskat" adSlotId="kirkeskat-sidebar" />
+      <Sidebar currentHref="/kirkeskat" />
     </div>
   );
 }

@@ -8,7 +8,6 @@ import { SATSER_2026 } from "@/lib/satser-2026";
 import PensionGuidePage from "./blog/pension-hvor-meget-skal-du-spare-op/page";
 
 vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null, ArticleSchema: () => null }));
-vi.mock("@/components/ads/AdBanner", () => ({ InlineAd: () => null }));
 vi.mock("@/lib/get-locale", () => ({
   getLocale: vi.fn(),
   getCurrentDomainConfig: vi.fn(),

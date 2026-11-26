@@ -189,7 +189,7 @@ export default async function KalorierIOpskriftPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/kalorier-i-opskrift" adSlotId="kalorier-i-opskrift-sidebar" />
+      <Sidebar currentHref="/kalorier-i-opskrift" />
     </div>
   );
 }

@@ -177,7 +177,7 @@ export default async function GaveafgiftPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/gaveafgift" adSlotId="gaveafgift-sidebar" />
+      <Sidebar currentHref="/gaveafgift" />
     </div>
   );
 }

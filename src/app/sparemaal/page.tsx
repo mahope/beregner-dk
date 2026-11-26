@@ -89,7 +89,7 @@ export default async function SparemaalPage() {
 
         <RelatedCalculators current="/sparemaal" />
       </div>
-      <Sidebar currentHref="/sparemaal" adSlotId="sparemaal-sidebar" />
+      <Sidebar currentHref="/sparemaal" />
     </div>
   );
 }

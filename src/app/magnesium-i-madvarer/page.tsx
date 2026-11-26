@@ -291,7 +291,7 @@ export default async function MagnesiumIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/magnesium-i-madvarer" adSlotId="magnesium-i-madvarer-sidebar" />
+      <Sidebar currentHref="/magnesium-i-madvarer" />
     </div>
   );
 }

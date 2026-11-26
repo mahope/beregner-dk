@@ -3,6 +3,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import MomsBeregner from "@/components/MomsBeregner";
 import ImportmomsBeregner from "@/components/ImportmomsBeregner";
+import TimeTrackTipBox from "@/components/TimeTrackTipBox";
 import FAQ from "@/components/FAQ";
 import {
   CalculatorSchema,
@@ -640,6 +641,8 @@ export default async function MomsPage() {
       </div>
       )}
 
+      <TimeTrackTipBox tip="moms" locale={locale} />
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />
@@ -650,7 +653,7 @@ export default async function MomsPage() {
 
       <RelateredeArtikler current="/moms" locale={locale} />
       </div>
-      <Sidebar currentHref="/moms" adSlotId="moms-sidebar" />
+      <Sidebar currentHref="/moms" />
     </div>
   );
 }

@@ -188,7 +188,7 @@ export default async function BrokPage() {
         {/* Returlink til indlægget om emnet (kun danske domæner) */}
         <RelateredeArtikler current="/brok" locale={locale} />
       </div>
-      <Sidebar currentHref="/brok" adSlotId="brok-sidebar" />
+      <Sidebar currentHref="/brok" />
     </div>
   );
 }

@@ -217,7 +217,7 @@ export default async function SukkerIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/sukker-i-madvarer" adSlotId="sukker-i-madvarer-sidebar" />
+      <Sidebar currentHref="/sukker-i-madvarer" />
     </div>
   );
 }

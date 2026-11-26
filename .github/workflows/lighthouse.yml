@@ -10,6 +10,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # Job-imaget på Forgejo-runneren har ingen Chrome.
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          install-dependencies: true
       - name: Install deps
         run: npm ci
       - name: Build
@@ -21,10 +26,15 @@ jobs:
           for i in {1..60}; do curl -fsS http://localhost:3000 && exit 0 || sleep 2; done; exit 1
       - name: Run Lighthouse
         uses: treosh/lighthouse-ci-action@v12
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          # Jobbet kører som root i en container, hvor Chromes sandbox ikke kan starte.
+          LHCI_COLLECT__SETTINGS__CHROME_FLAGS: "--no-sandbox --headless=new --disable-dev-shm-usage"
         with:
           urls: |
             http://localhost:3000/
-          uploadArtifacts: true
+          # actions/artifact v2 understøttes ikke af Forgejo; rapporten deles via temporaryPublicStorage.
+          uploadArtifacts: false
           temporaryPublicStorage: true
       - name: Stop server
         if: always()

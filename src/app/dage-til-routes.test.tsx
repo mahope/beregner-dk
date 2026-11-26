@@ -267,7 +267,7 @@ describe("dage-til side", () => {
       const html = renderToStaticMarkup(
         await ROUTE_FOR[locale]({ params: Promise.resolve({ dato: slug }) })
       );
-      expect(html, slug).toContain(`<time dateTime="${isoTarget}">${dato} er en ${ugedag}</time>`);
+      expect(html, slug).toContain(`<time dateTime="${isoTarget}">${dato} ${locale === "da" ? "er" : "är"} en ${ugedag}</time>`);
       expect(
         new RegExp(`${dage} (?:dage|dagar) (?:til|till) `).test(html),
         `${slug}: ${dage} dage fra 15. januar 2026 skal stå i svaret`
