@@ -135,7 +135,7 @@ export default function MomsCvrPanel() {
   return (
     <section
       aria-labelledby={`${id}-titel`}
-      className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-4 sm:p-6 dark:border-blue-900 dark:bg-blue-900/20"
+      className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4 sm:p-6 dark:border-blue-900 dark:bg-gray-900"
       data-testid="moms-cvr"
     >
       <h2 id={`${id}-titel`} className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -183,7 +183,7 @@ export default function MomsCvrPanel() {
         </div>
 
         {visSamtykke && (
-          <div className="flex items-start gap-3 rounded-lg bg-white/70 p-3 dark:bg-gray-800/60">
+          <div className="flex items-start gap-3 rounded-lg bg-white p-3 dark:bg-gray-800">
             <input
               id={`${id}-samtykke`}
               type="checkbox"
