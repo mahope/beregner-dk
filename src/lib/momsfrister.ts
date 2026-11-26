@@ -14,6 +14,8 @@ export type Momsperiode = "maaned" | "kvartal" | "halvaar";
 
 export const MOMS_GRAENSE_KVARTAL = 5_000_000;
 export const MOMS_GRAENSE_MAANED = 50_000_000;
+/** Registration duty: taxable turnover above this over 12 months. */
+export const MOMS_REGISTRERINGSGRAENSE = 50_000;
 
 export const MOMSPERIODE_NAVN: Record<Momsperiode, string> = {
   maaned: "Månedlig",

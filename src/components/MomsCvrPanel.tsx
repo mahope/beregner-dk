@@ -18,6 +18,7 @@ import {
 import {
   MOMS_GRAENSE_KVARTAL,
   MOMS_GRAENSE_MAANED,
+  MOMS_REGISTRERINGSGRAENSE,
   MOMSPERIODE_NAVN,
   type Momsfrist,
   momsfristerIcs,
@@ -77,7 +78,8 @@ export default function MomsCvrPanel() {
   }, [tilstand, data]);
 
   // Danish site only and behind the feature flag. The page also gates this.
-  if (!isMomsCvrEnabled() || locale !== "da") return null;
+  if (locale !== "da") return null;
+  if (!isMomsCvrEnabled()) return null;
 
   const cvr = rensCvr(cvrTekst);
   const visSamtykke = /^\d{8}$/.test(cvr);
@@ -246,7 +248,7 @@ export default function MomsCvrPanel() {
             {data.momsregistreret === false && (
               <p className="mt-3 text-sm text-gray-700 dark:text-gray-200">
                 Virksomheden står ikke som momsregistreret, så der er ingen momsfrister. Den skal registreres, når den
-                momspligtige omsætning passerer 50.000 kr. på 12 måneder.
+                momspligtige omsætning passerer {formatNumber(MOMS_REGISTRERINGSGRAENSE, "da")} kr. på 12 måneder.
               </p>
             )}
             {frister.length > 0 && (
