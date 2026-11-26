@@ -179,7 +179,9 @@ export default function LaaneplanBeregner({
     if (!aendretAfBruger.current) return;
     const url = new URL(window.location.href);
     for (const k of DEL_NOEGLER) url.searchParams.delete(k);
-    new URLSearchParams(tilQuery(state)).forEach((v, k) => url.searchParams.set(k, v));
+    new URLSearchParams(tilQuery(state)).forEach((v, k) => {
+      url.searchParams.set(k, v);
+    });
     window.history.replaceState(null, "", url);
   }, [state]);
 
