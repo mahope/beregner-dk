@@ -122,7 +122,7 @@ describe("byggeCvrradarForespoergsel", () => {
   const mail = "anna.hansen@firma.dk";
 
   it("with consent sends prefix and mail domain, never the full IP or local part", () => {
-    const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: true, ip, mail });
+    const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: true, ipPrefiks: ipPrefiks(ip), mail });
     expect(body).toEqual({
       cvr: "39413892",
       kilde: "minberegner.dk/moms",
@@ -138,17 +138,25 @@ describe("byggeCvrradarForespoergsel", () => {
   });
 
   it("without consent sends no learning data at all", () => {
-    const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: false, ip, mail });
+    const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: false, ipPrefiks: ipPrefiks(ip), mail });
     expect(body).toEqual({ cvr: "39413892", kilde: "minberegner.dk/moms", samtykke: "ingen", eget: false });
     expect(body).not.toHaveProperty("ipPrefiks");
     expect(body).not.toHaveProperty("mailDomaene");
   });
 
   it("leaves out a private IP even with consent", () => {
-    const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: true, ip: "192.168.0.7" });
+    const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: true, ipPrefiks: ipPrefiks("192.168.0.7") });
     expect(body).not.toHaveProperty("ipPrefiks");
     expect(body.samtykke).toBe("begge");
   });
+
+  it.each(["81.7.12.234", "81.7.12.234/24", "2a01:4f8:c17:1234::1", "81.7.0.0/16"])(
+    "drops a value that is not a /24 or /48 prefix (%s)",
+    (v) => {
+      const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: true, ipPrefiks: v });
+      expect(body).not.toHaveProperty("ipPrefiks");
+    },
+  );
 });
 
 describe("parseCvrradarSvar", () => {

@@ -129,14 +129,18 @@ export interface CvrradarForespoergsel {
   mailDomaene?: string;
 }
 
+// Only shapes `ipPrefiks` can produce; a full address passed by mistake is dropped.
+const PREFIKS_RE = /^(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.0\/24|[0-9a-f]{1,4}:[0-9a-f]{1,4}:[0-9a-f]{1,4}::\/48)$/;
+
 /**
- * Builds the body sent to cvrradar. The full IP and the mail local part are taken as
- * input only to be reduced; they are never part of the output.
+ * Builds the body sent to cvrradar. Takes an already cut network prefix and reduces the
+ * mail to its domain; neither the full IP nor the mail local part can be in the output.
  */
 export function byggeCvrradarForespoergsel(input: {
   cvr: string;
   samtykke: boolean;
-  ip?: string | null;
+  /** Output of `ipPrefiks`; the caller cuts the IP before anything else happens. */
+  ipPrefiks?: string | null;
   mail?: unknown;
 }): CvrradarForespoergsel {
   const body: CvrradarForespoergsel = {
@@ -146,8 +150,7 @@ export function byggeCvrradarForespoergsel(input: {
     eget: input.samtykke,
   };
   if (input.samtykke) {
-    const prefiks = ipPrefiks(input.ip);
-    if (prefiks) body.ipPrefiks = prefiks;
+    if (input.ipPrefiks && PREFIKS_RE.test(input.ipPrefiks)) body.ipPrefiks = input.ipPrefiks;
     const domaene = mailDomaene(input.mail);
     if (domaene) body.mailDomaene = domaene;
   }
