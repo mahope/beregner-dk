@@ -5,6 +5,7 @@ import { BLOG_ARTIKLER } from "@/lib/blog-artikler";
 import { isCalculatorAvailable } from "@/lib/calculator-list";
 import { getFooterBlogLinks } from "@/lib/footer-data";
 import type { Locale } from "@/lib/i18n";
+import { localizedSlug } from "@/lib/locale-slugs";
 import { getAvailableSlugs } from "@/lib/page-data";
 import { getDageTilHubPath, getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
 import { getKlokkenHubPath, getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klokken-i";
@@ -43,7 +44,7 @@ export function buildSitemap(
   const calculatorEntries: MetadataRoute.Sitemap = availableSlugs.map((slug) => {
     const daily = dailyUpdates.has(slug);
     return {
-      url: `${baseUrl}/${slug}`,
+      url: `${baseUrl}/${localizedSlug(slug, locale)}`,
       ...(daily ? { lastModified: now } : {}),
       changeFrequency: daily ? ("daily" as const) : ("monthly" as const),
       priority: highPriority.has(slug) ? 0.9 : 0.8,

@@ -133,7 +133,7 @@ export default async function OmkredsPage() {
 
         <RelatedCalculators current="/omkreds" />
       </div>
-      <Sidebar currentHref="/omkreds" adSlotId="omkreds-sidebar" />
+      <Sidebar currentHref="/omkreds" />
     </div>
   );
 }

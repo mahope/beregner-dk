@@ -224,7 +224,7 @@ describe("tovejslink", () => {
   test("siden linker videre til søstersiderne og ikke til sig selv", async () => {
     for (const sprog of ["da", "se"] as const) {
       const html = await render(sprog);
-      expect(html, sprog).toContain('href="/dato"');
+      expect(html, sprog).toContain(sprog === "se" ? 'href="/datum"' : 'href="/dato"');
       expect(html, sprog).not.toContain(`href="${UGER_I_ARET_PATH[sprog]}"`);
     }
   });

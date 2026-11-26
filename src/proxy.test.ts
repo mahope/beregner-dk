@@ -16,12 +16,45 @@ function makeRequest(hostname: string, path: string): NextRequest {
 
 describe("proxy locale routing", () => {
   test("forwards Swedish request context without redirecting canonical pages", () => {
-    const response = proxy(makeRequest("beraknare.se", "/dato?from=test"));
+    const response = proxy(makeRequest("beraknare.se", "/datum?from=test"));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-locale")).toBe("se");
     expect(response.headers.get("x-middleware-request-x-locale")).toBe("se");
     expect(response.headers.get("location")).toBeNull();
+    // The public slug is served by the Danish-named folder, URL unchanged.
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "https://beraknare.se/dato?from=test",
+    );
+  });
+
+  test("redirects the old Danish slug on the Swedish host to the Swedish one", () => {
+    const pairs = {
+      "/dato": "/datum",
+      "/tidsberegner": "/tidskalkylator",
+      "/nedtaelling": "/nedrakning",
+      "/tidszone": "/tidszon",
+    };
+    for (const [old, nyt] of Object.entries(pairs)) {
+      const response = proxy(makeRequest("beraknare.se", `${old}?x=1`));
+      expect(response.status, old).toBe(301);
+      expect(response.headers.get("location"), old).toBe(
+        `https://beraknare.se${nyt}?x=1`,
+      );
+    }
+  });
+
+  test("keeps the Danish slugs on the Danish host", () => {
+    for (const path of ["/dato", "/tidsberegner", "/nedtaelling", "/tidszone"]) {
+      const response = proxy(makeRequest("minberegner.dk", path));
+      expect(response.status, path).toBe(200);
+      expect(response.headers.get("x-middleware-rewrite"), path).toBeNull();
+    }
+    // The Swedish slug is not a Danish page.
+    const response = proxy(makeRequest("minberegner.dk", "/datum"));
+    expect(response.headers.get("x-middleware-rewrite")).not.toBe(
+      "https://minberegner.dk/dato",
+    );
   });
 
   test("keeps Danish canonical routes available in Denmark", () => {
@@ -76,10 +109,9 @@ describe("proxy locale routing", () => {
   test("redirects approved Swedish aliases in one hop with query intact", () => {
     const aliases = {
       "/loen-efter-skat": "/lon-efter-skatt",
-      "/tidskalkylator": "/tidsberegner",
-      "/datumkalkylator": "/dato",
-      "/nedrakning": "/nedtaelling",
+      "/datumkalkylator": "/datum",
       "/leasingkalkylator": "/leasing",
+      "/enhudspris": "/jamforpris",
     };
 
     for (const [alias, target] of Object.entries(aliases)) {
@@ -94,24 +126,24 @@ describe("proxy locale routing", () => {
   });
 
   test("normalizes protocol, port, and www alias hosts", () => {
-    const request = new NextRequest("http://www.beraknare.se:3100/nedrakning?x=1", {
+    const request = new NextRequest("http://www.beraknare.se:3100/nedtaelling?x=1", {
       headers: { host: "www.beraknare.se:3100" },
     });
     const response = proxy(request);
     expect(response.status).toBe(301);
     expect(response.headers.get("location")).toBe(
-      "https://beraknare.se/nedtaelling?x=1"
+      "https://beraknare.se/nedrakning?x=1"
     );
   });
 
   test("normalizes a trailing slash without adding a second redirect", () => {
     const response = proxy(
-      makeRequest("beraknare.se", "/dato/?source=test&value=1")
+      makeRequest("beraknare.se", "/datum/?source=test&value=1")
     );
 
     expect(response.status).toBe(308);
     expect(response.headers.get("location")).toBe(
-      "https://beraknare.se/dato?source=test&value=1"
+      "https://beraknare.se/datum?source=test&value=1"
     );
   });
 
@@ -125,7 +157,7 @@ describe("proxy locale routing", () => {
   });
 
   test("does not redirect an alias target again", () => {
-    for (const path of ["/lon-efter-skatt", "/tidsberegner", "/dato", "/nedtaelling", "/leasing"]) {
+    for (const path of ["/lon-efter-skatt", "/tidskalkylator", "/datum", "/nedrakning", "/leasing"]) {
       const response = proxy(makeRequest("beraknare.se", path));
       expect(response.status, path).toBe(200);
       expect(response.headers.get("location"), path).toBeNull();
@@ -133,8 +165,9 @@ describe("proxy locale routing", () => {
   });
 
   test("does not apply the Swedish alias to the Danish host", () => {
-    const response = proxy(makeRequest("minberegner.dk", "/tidskalkylator"));
+    const response = proxy(makeRequest("minberegner.dk", "/datumkalkylator"));
     expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
   });
 
   test("handles a trailing-dot Swedish host as the same locale", () => {

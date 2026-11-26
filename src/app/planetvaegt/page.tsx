@@ -87,7 +87,7 @@ export default async function PlanetVaegtPage() {
 
         <RelatedCalculators current="/planetvaegt" />
       </div>
-      <Sidebar currentHref="/planetvaegt" adSlotId="planetvaegt-sidebar" />
+      <Sidebar currentHref="/planetvaegt" />
     </div>
   );
 }

@@ -359,11 +359,11 @@ export default function DagpengeBeregner() {
         </div>
       </div>
       <AffiliateBox
+        placement="akasse"
         title="Find den rette a-kasse"
         subtitle="Sammenlign a-kasser og sikre din indkomst ved ledighed"
         links={[
-          { name: "Det Faglige Hus", description: "Danmarks billigste a-kasse og fagforening - bliv medlem online", url: adtractionLink("1873805030", "https://www.detfagligehus.dk"), cta: "Bliv medlem", highlight: true },
-          { name: "ASE", description: "A-kasse for alle - uanset job. Hurtig tilmelding", url: adtractionLink("1666137874", "https://www.ase.dk"), cta: "Se priser" },
+          { name: "Ase A-kasse", description: "A-kasse for alle, uanset job, med online tilmelding", url: adtractionLink("1666137874", "https://www.ase.dk"), cta: "Se priser og bliv medlem", highlight: true },
           { name: "Min A-kasse", description: "Tværfaglig a-kasse med fokus på god service", url: adtractionLink("1667704482", "https://min-a-kasse.dk"), cta: "Bliv medlem" },
         ]}
         className="mt-6"

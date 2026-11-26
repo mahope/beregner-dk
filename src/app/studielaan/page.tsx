@@ -83,7 +83,7 @@ export default async function StudielaanPage() {
         <RelatedCalculators current="/studielaan" />
       </div>
 
-      <Sidebar currentHref="/studielaan" adSlotId="studielaan-sidebar" />
+      <Sidebar currentHref="/studielaan" />
     </div>
   );
 }

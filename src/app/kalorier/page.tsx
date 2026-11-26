@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import KalorieBeregner from "@/components/KalorieBeregner";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
@@ -133,7 +134,7 @@ export default async function KalorierPage() {
         <p>
           Kolonnen <strong>vægttab</strong> er 500 kcal under dagens forbrug, så
           tallet <strong>2.259 kcal</strong> for en mand på 80 kg er både det
-          værktøjet viser og det, <a href="/vaegttab">/vaegttab</a> regner ud fra
+          værktøjet viser og det, <a href={localizedPath("/vaegttab", locale)}>/vaegttab</a> regner ud fra
           0,5 kg tab pr. uge. Er du lille og inaktiv, kan 500 kcal ikke tages
           uden at komme under dit basalstofskifte — så lægger værktøjet et
           mindre underskud i stedet.
@@ -141,7 +142,7 @@ export default async function KalorierPage() {
         <p>
           Er tallene højere eller lavere end du forventer, er det
           aktivitetsniveauet der er forkert, ikke din vægt. Svarer du{" "}
-          <a href="/motion-kalorier">stillesiddende</a> men træner tre gange om
+          <a href={localizedPath("/motion-kalorier", locale)}>stillesiddende</a> men træner tre gange om
           ugen, er du ikke stillesiddende.
         </p>
 
@@ -345,7 +346,7 @@ export default async function KalorierPage() {
         <p>
           Spalten <strong>viktnedgång</strong> ligger 500 kcal under dagsförbrukningen,
           så talet <strong>2.259 kcal</strong> för en man på 80 kg är både det
-          verktyget visar och det som <a href="/vaegttab">/vaegttab</a> räknar
+          verktyget visar och det som <a href={localizedPath("/vaegttab", locale)}>/vaegttab</a> räknar
           fram till 0,5 kg viktnedgång per vecka. Är du liten och inaktiv går 500
           kcal inte att dra av utan att komma under ditt basalomsättning — då
           lägger verktyget in ett mindre underskott i stället.
@@ -353,7 +354,7 @@ export default async function KalorierPage() {
         <p>
           Blir talen högre eller lägre än du väntat dig är det
           aktivitetsnivån som är fel, inte din vikt. Svarar du{" "}
-          <a href="/motion-kalorier">stillsittande</a> men tränar tre gånger i
+          <a href={localizedPath("/motion-kalorier", locale)}>stillsittande</a> men tränar tre gånger i
           veckan är du inte stillsittande.
         </p>
 

@@ -66,7 +66,7 @@ export default async function FlyttebudgetPage() {
         <RelatedCalculators current="/flyttebudget" />
       </div>
 
-      <Sidebar currentHref="/flyttebudget" adSlotId="flyttebudget-sidebar" />
+      <Sidebar currentHref="/flyttebudget" />
     </div>
   );
 }

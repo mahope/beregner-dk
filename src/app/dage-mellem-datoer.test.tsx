@@ -49,6 +49,12 @@ vi.mock("@/components/FAQ", () => ({
   ),
 }));
 vi.mock("@/components/StructuredData", () => ({
+  CalculatorSchema: ({ name, url }: { name: string; url: string }) => (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@type": "WebApplication", name, url }) }}
+    />
+  ),
   FAQSchema: ({ items }: { items: Spg }) => (
     <script
       type="application/ld+json"
@@ -119,7 +125,11 @@ describe("dage mellem datoer: den peger på sit eget spørgsmål", () => {
       }
       // JSON-LD'en skal være *samme* tre svar — dens tegn er escaped i
       // markupken, så den læses tilbage og sammenlignes med kopien.
-      const rå = /<script type="application\/ld\+json">(.*?)<\/script>/s.exec(html)?.[1];
+      // Siden bærer to JSON-LD-blokke (WebApplication og FAQPage); FAQ'en er den
+      // med spørgsmålene.
+      const rå = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)]
+        .map((m) => m[1])
+        .find((json) => json.includes("items"));
       expect(rå, sprog).toBeDefined();
       const json = JSON.parse(
         (rå as string)
@@ -204,7 +214,7 @@ describe("dage mellem datoer: den peger på sit eget spørgsmål", () => {
     expect(da).toContain('href="/ugenummer"');
     expect(da).toContain('href="/dage-til"');
     const se = await render("se");
-    expect(se).toContain('href="/dato"');
+    expect(se).toContain('href="/datum"');
     expect(se).toContain('href="/dagar-till"');
     // `/ugenummer` er `daOnly`, så et svensk link ville være en 404.
     expect(se).not.toContain('href="/ugenummer"');

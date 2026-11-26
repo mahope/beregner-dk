@@ -81,6 +81,14 @@ export const BARSEL_2026 = {
   source:
     "https://www.borger.dk/familie-og-boern/barsel-oversigt/barsel-loenmodtagere-ny-orlovsmodel",
   verifiedAt: "2026-09-23",
+  // Selvstændige og ledige har egne borger.dk-sider; læst 2026-09-25 (docs/barsel/regler-2026.md).
+  sourceSelfEmployed:
+    "https://www.borger.dk/familie-og-boern/barsel-oversigt/barsel-selvstaendige-ny-orlovsmodel",
+  sourceUnemployed:
+    "https://www.borger.dk/familie-og-boern/barsel-oversigt/barsel-ledige-ny-orlovsmodel",
+  sourceLaw: "https://www.retsinformation.dk/eli/lta/2026/206",
+  sourcesVerifiedAt: "2026-09-25",
+  selfEmployedProfitForMaxRate: 264420, // årligt overskud for fuld sats, selvstændig (2026)
   maxWeeklyRate: 5085,
   maxHourlyRate: 137.43,
   fullTimeHours: 37,

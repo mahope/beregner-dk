@@ -148,8 +148,8 @@ describe("dage-til hub: rendering", () => {
   test("hubben linker videre til dato- og nedtællingsberegneren", async () => {
     for (const sprog of ["da", "se"] as const) {
       const hrefsPaaSiden = hrefs(await render(sprog));
-      expect(hrefsPaaSiden, sprog).toContain("/dato");
-      expect(hrefsPaaSiden, sprog).toContain("/nedtaelling");
+      expect(hrefsPaaSiden, sprog).toContain(sprog === "se" ? "/datum" : "/dato");
+      expect(hrefsPaaSiden, sprog).toContain(sprog === "se" ? "/nedrakning" : "/nedtaelling");
     }
   });
 

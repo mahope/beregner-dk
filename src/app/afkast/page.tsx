@@ -87,7 +87,7 @@ export default async function AfkastPage() {
 
         <RelatedCalculators current="/afkast" />
       </div>
-      <Sidebar currentHref="/afkast" adSlotId="afkast-sidebar" />
+      <Sidebar currentHref="/afkast" />
     </div>
   );
 }

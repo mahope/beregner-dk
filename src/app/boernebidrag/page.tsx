@@ -171,7 +171,7 @@ export default async function BoernebidragPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/boernebidrag" adSlotId="boernebidrag-sidebar" />
+      <Sidebar currentHref="/boernebidrag" />
     </div>
   );
 }

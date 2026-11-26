@@ -90,7 +90,7 @@ export default async function BolanPage() {
 
         <RelatedCalculators current="/bolan" />
       </div>
-      <Sidebar currentHref="/bolan" adSlotId="bolan-sidebar" />
+      <Sidebar currentHref="/bolan" />
     </div>
   );
 }

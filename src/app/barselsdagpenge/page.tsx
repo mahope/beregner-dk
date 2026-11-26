@@ -1,7 +1,8 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
-import { BARSEL_2026 } from "@/lib/satser-2026";
+import { BARSEL_2026, SATSER_2026 } from "@/lib/satser-2026";
+import { beregnBarselsdagpenge } from "@/lib/barselsdagpenge";
 import { estimerNettoMaaned } from "@/lib/barsel/netto";
 import Link from "next/link";
 import BarselBeregner from "@/components/BarselBeregner";
@@ -23,7 +24,17 @@ export default async function BarselPage() {
   const timebaseretPerMaaned = (BARSEL_2026.maxHourlyRate * BARSEL_2026.fullTimeHours * 52) / 12;
   const maksNetto = estimerNettoMaaned({ loen: 0, ydelse: maksPerMaaned });
   const maksNettoKirke = estimerNettoMaaned({ loen: 0, ydelse: maksPerMaaned, kirkeskat: true });
-  const satsRækker = [4000, 4500, BARSEL_2026.maxWeeklyRate].map((uge) => {
+  const kr = (value: number) => `${Math.round(value).toLocaleString("da-DK")} kr.`;
+  // Lowest gross monthly pay (full time) where the after-AM hourly pay reaches the cap, rounded to 50 kr.
+  const loenForMaksSats =
+    Math.ceil(
+      (BARSEL_2026.maxHourlyRate / (1 - SATSER_2026.amBidrag)) * BARSEL_2026.fullTimeHours * 52 / 12 / 50,
+    ) * 50;
+  const loenRaekker = [20000, 25000, 30000, 40000].map((loen) => {
+    const r = beregnBarselsdagpenge({ monthlyIncome: loen, weeklyHours: BARSEL_2026.fullTimeHours, weeks: BARSEL_2026.defaultWeeks })!;
+    return { loen, ugesats: r.weeklyRate, nettoMaaned: r.monthlyAfterTax, erMaks: r.weeklyRate >= BARSEL_2026.maxWeeklyRate };
+  });
+  const satsRækker =[4000, 4500, BARSEL_2026.maxWeeklyRate].map((uge) => {
     const prMaaned = (uge * 52) / 12;
     const n = estimerNettoMaaned({ loen: 0, ydelse: prMaaned });
     return {
@@ -75,6 +86,44 @@ export default async function BarselPage() {
               Kilde: <a href={BARSEL_2026.source} className="underline">Borger.dk</a>, verificeret {BARSEL_2026.verifiedAt}.
             </p>
           </div>
+
+          {locale === "da" && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Barselsdagpenge sats 2026
+            </h2>
+            <div className="prose max-w-none text-gray-700">
+              <p>
+                Den højeste sats for barselsdagpenge i 2026 er <strong>{kr(BARSEL_2026.maxWeeklyRate)} om ugen før skat</strong> ved {BARSEL_2026.fullTimeHours} timer, svarende til {BARSEL_2026.maxHourlyRate.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr. i timen. Satsen er den samme for mor, far og medmor. Din egen sats er din timeløn efter AM-bidrag gange din ugentlige arbejdstid, men aldrig mere end maksimum.
+              </p>
+              <p>
+                Som lønmodtager på fuld tid rammer du maksimum ved en bruttoløn på ca. {kr(loenForMaksSats)} om måneden. Tjener du mindre, får du din egen løn efter AM-bidrag, og tjener du mere, får du stadig kun maksimum.
+              </p>
+              <table className="w-full border-collapse mt-4">
+                <caption className="sr-only">Barselsdagpenge pr. uge og måned ved forskellig løn</caption>
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border p-3 text-left">Løn pr. måned (fuldtid)</th>
+                    <th className="border p-3 text-left">Barselsdagpenge pr. uge</th>
+                    <th className="border p-3 text-left">Pr. måned efter skat (skøn)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loenRaekker.map((r) => (
+                    <tr key={r.loen} className={r.erMaks ? "font-semibold" : undefined}>
+                      <td className="border p-3">{kr(r.loen)}</td>
+                      <td className="border p-3">{kr(r.ugesats)}{r.erMaks ? " (maks)" : ""}</td>
+                      <td className="border p-3">{kr(r.nettoMaaned)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-4 text-sm">
+                Kilde: <a href={BARSEL_2026.source} className="underline">Borger.dk, lønmodtager på barsel</a>, verificeret {BARSEL_2026.verifiedAt}. Beløbene efter skat er et skøn.
+              </p>
+            </div>
+          </section>
+          )}
 
           {locale === "da" && (
           <section className="mb-12">
@@ -144,14 +193,31 @@ export default async function BarselPage() {
               <p>
                 <strong>Barselsdagpenge</strong> er en offentlig ydelse fra Udbetaling Danmark. Den kan erstatte løn, når du holder pause fra arbejdet for at være sammen med dit barn.
               </p>
-              <h3 className="text-xl font-semibold mt-6 mb-3">Hvem kan få barselsdagpenge?</h3>
+              <h3 className="text-xl font-semibold mt-6 mb-3">Hvem har ret til barselsdagpenge?</h3>
+              <p>Som lønmodtager skal du opfylde disse krav:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Være ansat på den første dag i orloven eller dagen før</li>
                 <li>Have arbejdet mindst {BARSEL_2026.employmentHours} timer inden for de seneste {BARSEL_2026.employmentMonths} hele måneder</li>
                 <li>Have arbejdet mindst {BARSEL_2026.monthlyHoursThreshold} timer om måneden i mindst {BARSEL_2026.monthsWithMonthlyHours} af de {BARSEL_2026.employmentMonths} måneder</li>
                 <li>Være sammen med dit barn dagligt</li>
               </ul>
-              <p>Selvstændige, ledige og studerende har andre regler. Se Min barsel eller spørg Udbetaling Danmark om din konkrete situation.</p>
+              <h3 className="text-xl font-semibold mt-6 mb-3">Selvstændige og ledige</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>
+                  <strong>Selvstændig:</strong> Satsen bygger på virksomhedens overskud, og du skal have drevet virksomhed i mindst halvdelen af en normal arbejdsuge i mindst 6 af de seneste 12 måneder. Fuld sats kræver et årligt overskud på ca. {kr(BARSEL_2026.selfEmployedProfitForMaxRate)}. Øremærkningen af uger gælder ikke selvstændige. Kilde: <a href={BARSEL_2026.sourceSelfEmployed} className="underline">Borger.dk, selvstændig på barsel</a>.
+                </li>
+                <li>
+                  <strong>Ledig:</strong> Er du medlem af en a-kasse og ville have været berettiget til dagpenge, får du barselsdagpenge med samme sats som dine <Link href="/dagpenge" className="font-medium underline">dagpenge</Link>, dog højst {kr(BARSEL_2026.maxWeeklyRate)} om ugen. Fraværet skal meldes til a-kassen. Kilde: <a href={BARSEL_2026.sourceUnemployed} className="underline">Borger.dk, ledig på barsel</a>.
+                </li>
+                <li>
+                  <strong>Studerende:</strong> SU alene giver ikke ret til barselsdagpenge. Du kan i stedet få SU-fødselsstøtte. Se <Link href="/su" className="font-medium underline">SU-beregneren</Link>.
+                </li>
+              </ul>
+              <p className="mt-2 text-sm">Reglerne for selvstændige og ledige er gennemgået {BARSEL_2026.sourcesVerifiedAt}. Beregneren ovenfor regner for dem med overskuddet eller dagpengene som grundlag, og tallet er et skøn.</p>
+              <h3 className="text-xl font-semibold mt-6 mb-3">Løn under barsel</h3>
+              <p>
+                Om du får løn under barsel, afgøres af din overenskomst eller kontrakt, ikke af barselsloven. Betaler arbejdsgiveren løn, får arbejdsgiveren barselsdagpengene som refusion, og du får lønnen i stedet. I beregneren kan du sætte, hvor mange uger arbejdsgiveren betaler, og få et gennemsnit for hele barslen. Tjek din overenskomst for antallet af uger.
+              </p>
               <h3 className="text-xl font-semibold mt-6 mb-3">Barselsoversigt 2026</h3>
               <p>Når forældrene bor sammen ved fødslen, har hver som udgangspunkt {BARSEL_2026.afterBirthWeeks} uger med barselsdagpenge efter fødslen:</p>
               <table className="w-full border-collapse mt-4">
@@ -203,7 +269,17 @@ export default async function BarselPage() {
                 <li>Far/medmor skal søge senest {BARSEL_2026.applicationDeadlineWeeks} uger efter første orlovsdag.</li>
                 <li>En for sen ansøgning giver som udgangspunkt først ydelse fra den dag, Udbetaling Danmark modtager ansøgningen.</li>
               </ul>
-              <p className="mt-4 text-sm">Kilde: <a href={BARSEL_2026.source} className="underline">Borger.dk, lønmodtager på barsel</a>. Verificeret {BARSEL_2026.verifiedAt}.</p>
+              <h3 className="text-xl font-semibold mt-6 mb-3">Sådan søger du barselsdagpenge</h3>
+              <ol className="list-decimal pl-6 space-y-2">
+                <li>Giv din arbejdsgiver besked om orloven inden for fristerne i barselsloven. Mor varsler senest 3 måneder før forventet fødsel. <Link href="/barselsplanlaegger" className="font-medium underline">Barselsplanlæggeren</Link> regner datoerne ud for jer.</li>
+                <li>Søg Udbetaling Danmark via Borger.dk, så snart orloven er aftalt, og inden fristerne ovenfor (som udgangspunkt {BARSEL_2026.applicationDeadlineWeeks} uger efter fødslen eller første orlovsdag).</li>
+                <li>Er du ledig, skal du også melde fraværet til din a-kasse. Er du selvstændig, skal du dokumentere dit overskud.</li>
+                <li>Udbetaling Danmark oplyser normalt, at du får svar inden for {BARSEL_2026.applicationProcessingDays} hverdage. Pengene udbetales sidste torsdag i måneden.</li>
+              </ol>
+              <p className="mt-4">
+                Skal du bruge tal fra andre ydelser, kan du også prøve <Link href="/dagpenge" className="font-medium underline">dagpengeberegneren</Link> (a-dagpenge som ledig) og <Link href="/sygedagpenge" className="font-medium underline">sygedagpengeberegneren</Link>.
+              </p>
+              <p className="mt-4 text-sm">Kilde: <a href={BARSEL_2026.source} className="underline">Borger.dk, lønmodtager på barsel</a>. Verificeret {BARSEL_2026.verifiedAt}. Frister og varsler: <a href={BARSEL_2026.sourceLaw} className="underline">barselsloven (Retsinformation)</a>.</p>
             </div>
           </section>
           )}

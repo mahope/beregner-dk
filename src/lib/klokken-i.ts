@@ -369,7 +369,7 @@ const TITEL_REFERENCE_MINUTTER = 12 * 60;
 /**
  * Landesidens `<title>`: spørgsmålet plus den regnede omregning.
  *
- * Datagrunden er samme måling som brødteksten: 12 i Danmark er det samme
+ * Datagrunden er samme måling som brødteksten: 12 i Danmark er det klokkeslæt
  * klokkeslæt som `/tidszone`s egen titel, og forskellen læses fra
  * `tidsforskelMinutter` på det øjeblik, siden serveres — altså kan den ikke stå
  * som et håndskrevet tal, der bliver 6 timer hele året i et land, der skifter

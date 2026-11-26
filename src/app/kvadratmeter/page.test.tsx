@@ -5,6 +5,10 @@ import { getPageData } from "@/lib/page-data";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import KvadratmeterPage from "./page";
 
+vi.mock("@/components/ads/AdBanner", () => ({
+  ResultAd: () => <p>Annonce</p>,
+}));
+
 vi.mock("@/components/KvadratmeterBeregner", () => ({
   default: () => <div>Arealværktøj</div>,
 }));
@@ -13,7 +17,7 @@ vi.mock("@/components/KvadratmeterBeregner", () => ({
 vi.mock("@/components/ArealOmregner", () => ({
   default: () => <div>Omregn arealværktøj</div>,
 }));
-vi.mock("@/components/BoligOpslag", () => ({ default: () => null }));
+vi.mock("@/components/BoligOpslag", () => ({ default: () => <div>BBR-opslag</div> }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));
@@ -45,6 +49,17 @@ describe("kvadratmeter page", () => {
   beforeEach(() => {
     vi.mocked(getLocale).mockResolvedValue("da");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
+  test("viser annoncen efter alle værktøjer", async () => {
+    const html = renderToStaticMarkup(await KvadratmeterPage());
+    const annonce = html.indexOf("<p>Annonce</p>");
+
+    expect(annonce).toBeGreaterThan(-1);
+    for (const værktøj of ["Arealværktøj", "BBR-opslag", "Omregn arealværktøj"]) {
+      expect(html.indexOf(værktøj)).toBeGreaterThan(-1);
+      expect(html.indexOf(værktøj)).toBeLessThan(annonce);
+    }
   });
 
   test.each([

@@ -426,7 +426,6 @@ export default async function KolesterolIMadvarerPage() {
 
       <Sidebar
         currentHref="/kolesterol-i-madvarer"
-        adSlotId="kolesterol-i-madvarer-sidebar"
       />
     </div>
   );

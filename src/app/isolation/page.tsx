@@ -209,7 +209,7 @@ export default async function IsolationPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/isolation" adSlotId="isolation-sidebar" />
+      <Sidebar currentHref="/isolation" />
     </div>
   );
 }

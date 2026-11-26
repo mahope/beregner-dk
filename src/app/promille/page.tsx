@@ -560,7 +560,7 @@ export default async function PromillePage() {
 
         <RelatedCalculators current="/promille" />
       </div>
-      <Sidebar currentHref="/promille" adSlotId="promille-sidebar" />
+      <Sidebar currentHref="/promille" />
     </div>
   );
 }

@@ -116,7 +116,7 @@ export default async function LeasingPage() {
         <RelatedCalculators current="/leasing" />
       </div>
 
-      <Sidebar currentHref="/leasing" adSlotId="leasing-sidebar" />
+      <Sidebar currentHref="/leasing" />
     </div>
   );
 }

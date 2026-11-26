@@ -185,7 +185,7 @@ export default async function ProteinIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/protein-i-madvarer" adSlotId="protein-i-madvarer-sidebar" />
+      <Sidebar currentHref="/protein-i-madvarer" />
     </div>
   );
 }

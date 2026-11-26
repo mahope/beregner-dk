@@ -8,6 +8,8 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+import { iDagPaSiden } from "@/lib/lokal-dato";
+import { isoUge } from "@/lib/ugenummer";
 
 export async function generateMetadata() {
   return generatePageMetadata("ugenummer");
@@ -17,6 +19,18 @@ export default async function UgenummerPage() {
   const domainConfig = await getCurrentDomainConfig();
   const locale = domainConfig.locale;
   const pageData = getPageData("ugenummer", locale) || getPageData("ugenummer", "da")!;
+
+  // Svar-først på "hvilken uge er vi i": dagens ugenummer står i HTML'en.
+  // Siden er dynamisk (domænet læses fra headers), så tallet regnes pr. kald.
+  const iDag = iDagPaSiden(new Date(), "da");
+  const iDagUge = isoUge(iDag);
+  const iDagTekst = new Intl.DateTimeFormat("da-DK", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(iDag + "T12:00:00Z"));
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -39,6 +53,16 @@ export default async function UgenummerPage() {
           <h1 className="text-3xl md:text-4xl font-bold mb-4">{pageData.title}</h1>
           <p className="text-lg text-gray-600 dark:text-gray-400">{pageData.description}</p>
         </div>
+
+        {locale === "da" && iDagUge && (
+          <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+            <h2 className="text-xl font-bold mb-2">Hvilken uge er vi i?</h2>
+            <p>
+              Vi er i uge <strong>{iDagUge.uge}</strong> i {iDagUge.isoAar}. I dag er det {iDagTekst}.
+              Ugenummeret følger ISO 8601, hvor ugen starter på mandag.
+            </p>
+          </div>
+        )}
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
           <UgenummerBeregner />
@@ -88,7 +112,7 @@ export default async function UgenummerPage() {
 
         <RelatedCalculators current="/ugenummer" />
       </div>
-      <Sidebar currentHref="/ugenummer" adSlotId="ugenummer-sidebar" />
+      <Sidebar currentHref="/ugenummer" />
     </div>
   );
 }

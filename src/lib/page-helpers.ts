@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getAllDomainConfigs, type DomainConfig } from "./domain-config";
 import { getCurrentDomainConfig } from "./get-locale";
 import type { Locale } from "./i18n";
+import { localizedSlug } from "./locale-slugs";
 import { getPageData } from "./page-data";
 
 const alternateSlugs: Record<string, Partial<Record<Locale, string>>> = {
@@ -46,13 +47,15 @@ export function buildPageMetadata(
     return { robots: { index: false, follow: false } };
   }
 
-  const canonicalUrl = `${domainConfig.baseUrl}/${slug}`;
+  // `slug` is the internal (Danish) one; the canonical is what this domain serves.
+  const canonicalUrl = `${domainConfig.baseUrl}/${localizedSlug(slug, domainConfig.locale)}`;
   const languages: Record<string, string> = {};
 
   for (const config of getAllDomainConfigs()) {
     const alternateSlug = getAlternateSlug(slug, config.locale);
     if (getPageData(alternateSlug, config.locale)) {
-      languages[config.hreflangCode] = `${config.baseUrl}/${alternateSlug}`;
+      languages[config.hreflangCode] =
+        `${config.baseUrl}/${localizedSlug(alternateSlug, config.locale)}`;
     }
   }
 
