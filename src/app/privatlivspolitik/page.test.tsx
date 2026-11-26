@@ -46,3 +46,26 @@ test("den danske cookiepolitik omtaler kun AdSense med flaget til", async () => 
   expect(screen.getByRole("heading", { name: /Google AdSense/ })).toBeInTheDocument();
   expect((await generateMetadata()).description).toContain("Google AdSense");
 });
+
+test("CVR-afsnittet (#cvr) vises kun på dansk med flaget til og linker til tilbagetrækning", async () => {
+  vi.mocked(getLocale).mockResolvedValue("da");
+  vi.stubEnv("NEXT_PUBLIC_MOMS_CVR", "0");
+  render(await PrivacyPolicy());
+  expect(screen.queryByRole("heading", { name: "CVR-nummer på momsberegneren" })).not.toBeInTheDocument();
+
+  cleanup();
+  vi.stubEnv("NEXT_PUBLIC_MOMS_CVR", "1");
+  render(await PrivacyPolicy());
+  expect(screen.getByRole("heading", { name: "CVR-nummer på momsberegneren" })).toHaveAttribute("id", "cvr");
+  expect(screen.getByRole("link", { name: "Slet vores virksomheds netværk" })).toHaveAttribute(
+    "href",
+    "https://cvrradar.dk/slet-netvaerk",
+  );
+  // The analytics promise still stands next to the consent-based CVR field.
+  expect(screen.getByText(/ingen IP-adresser, fingerprints eller device IDs/)).toBeInTheDocument();
+
+  cleanup();
+  vi.mocked(getLocale).mockResolvedValue("se");
+  render(await PrivacyPolicy());
+  expect(screen.queryByRole("heading", { name: "CVR-nummer på momsberegneren" })).not.toBeInTheDocument();
+});

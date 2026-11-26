@@ -1,4 +1,5 @@
 import { isAdSenseEnabled } from "@/lib/ads";
+import { CVRRADAR_TILBAGETRAEK_URL, isMomsCvrEnabled } from "@/lib/moms-cvr";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import type { Metadata } from "next";
@@ -31,6 +32,60 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+/** The optional CVR field on /moms. Shown only while NEXT_PUBLIC_MOMS_CVR is on. */
+function CvrAfsnit() {
+  return (
+    <>
+      <h2 id="cvr" className="scroll-mt-24">
+        CVR-nummer på momsberegneren
+      </h2>
+      <p>
+        På momsberegneren kan du skrive din virksomheds CVR-nummer og se momsstatus, momsperiode og de næste
+        momsfrister. Det er frivilligt, og beregneren virker fuldt ud uden.
+      </p>
+      <ul>
+        <li>
+          <strong>Uden samtykke:</strong> Din browser sender CVR-nummeret til vores server i selve anmodningen (ikke i
+          URL&apos;en). Serveren slår virksomheden op hos cvrradar.dk, som også drives af Mahope, og sender kun
+          CVR-nummeret videre. Din IP-adresse sendes ikke videre, og vi gemmer intet om dit opslag.
+        </li>
+        <li>
+          <strong>Med samtykke:</strong> Sætter du flueben i &quot;Det er min virksomhed …&quot;, gemmer Mahope (CVR
+          39413892), som driver minberegner.dk og cvrradar.dk, at virksomhedens internetforbindelse hører til
+          CVR-nummeret. Vi gemmer kun netværksdelen af IP-adressen: de første tre dele af en IPv4-adresse (fx
+          192.0.2.x) eller de første tre grupper af en IPv6-adresse. Vores server skærer adressen til, før den sendes
+          til cvrradar.dk, så den fulde adresse aldrig gemmes eller logges. Sammen med netværket gemmes CVR-nummeret,
+          tidspunktet for samtykket og tidspunktet for sidste besøg.
+        </li>
+        <li>
+          <strong>Formål:</strong> At genkende besøg fra virksomhedens netværk på vores egne sites og i cvrradar.dk&apos;s
+          tjenester til virksomheder.
+        </li>
+        <li>
+          <strong>Hvad vi ikke gemmer:</strong> Din fulde IP-adresse, dit navn, din e-mail og din beregning. Vi sætter
+          ingen cookies. Vi henter heller ingen oplysninger om ejere eller direktører.
+        </li>
+        <li>
+          <strong>Opbevaring:</strong> Oplysningen slettes 30 dage efter sidste besøg fra netværket.
+        </li>
+        <li>
+          <strong>Grundlag og tilbagetrækning:</strong> Behandlingen sker på grundlag af dit samtykke
+          (databeskyttelsesforordningens artikel 6, stk. 1, litra a). Du kan trække samtykket tilbage når som helst på
+          siden{" "}
+          <a href={CVRRADAR_TILBAGETRAEK_URL} target="_blank" rel="noopener noreferrer">
+            Slet vores virksomheds netværk
+          </a>{" "}
+          på cvrradar.dk eller ved at skrive til os. Tilbagetrækning påvirker ikke det, der er sket før.
+        </li>
+      </ul>
+      <p>
+        Dette er det eneste sted, hvor vi gemmer noget, der stammer fra en IP-adresse, og kun når du selv har givet
+        samtykke. Vores analytics (se nedenfor) indsamler stadig ingen IP-adresser.
+      </p>
+    </>
+  );
+}
+
 function DaContent() {
   return (
     <>
@@ -40,6 +95,13 @@ function DaContent() {
           <strong>TL;DR:</strong> Vi lagrer ikke dine personlige input i nogen database. Alle
           beregninger sker lokalt i din browser. Vi bruger privacy-fokuseret
           analytics uden cookies og uden persondata.
+          {isMomsCvrEnabled() && (
+            <>
+              {" "}
+              Eneste undtagelse er CVR-feltet på momsberegneren: giver du samtykke dér, gemmer vi, hvilket netværk
+              din virksomhed bruger. Se <a href="#cvr">CVR-nummer på momsberegneren</a>.
+            </>
+          )}
         </p>
 
         <h2>Dine beregningsdata</h2>
@@ -108,6 +170,8 @@ function DaContent() {
           beregninger med personer, du har tilladelse til at give oplysningerne til.
         </p>
 
+        {isMomsCvrEnabled() && <CvrAfsnit />}
+
         <h2>Cookies og lokal lagring</h2>
         <p>
           Vores trafikmåling bruger ingen cookies. Vi bruger browserens
@@ -138,7 +202,10 @@ function DaContent() {
         <ul>
           <li><strong>Ikke bruger cookies</strong> — ingen cookie-banner nødvendig for analytics</li>
           <li><strong>Ikke tracker individuelle brugere</strong> — ingen personprofiler</li>
-          <li><strong>Ikke indsamler persondata</strong> — ingen IP-adresser, fingerprints eller device IDs</li>
+          <li>
+            <strong>Ikke indsamler persondata</strong> — ingen IP-adresser, fingerprints eller device IDs
+            {isMomsCvrEnabled() && " (det samtykkebaserede CVR-felt ovenfor er adskilt fra vores analytics)"}
+          </li>
           <li><strong>Er GDPR-kompatible</strong> uden samtykke, da de ikke er personhenførbare</li>
           <li><strong>Er self-hosted</strong> — data forlader ikke vores egne servere</li>
         </ul>
