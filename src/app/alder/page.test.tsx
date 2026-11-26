@@ -374,7 +374,8 @@ describe("alder page", () => {
     expect(html).toContain(formatDageTal(levet.totalTimer, locale));
     // Kalenderdage, ikke timer: et døgn med uret stillet er stadig 1 dag.
     expect(html).toContain("24");
-    expect(html).toContain('href="/dato"');
+    // Datokalkylatoren har sin egen sti pr. domæne (se locale-slugs.ts).
+    expect(html).toContain(locale === "se" ? 'href="/datum"' : 'href="/dato"');
 
     // Og når de to ure *er* uenige — UTC-server mellem 00:00 og 02:00 dansk
     // tid, altså det vindue CI lå i da denne test blev rød — må tallet fra

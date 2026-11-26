@@ -1,27 +1,29 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
+import { TRACKING_URLS } from "@/lib/adtraction";
+import { partnerAdsLink } from "@/lib/partner-ads";
 import {
   bilforsikringAffiliates,
   boligforsikringAffiliates,
+  KREDIT_ADVARSEL,
   forsikringAffiliates,
-  partnerAdsLink,
+  pantelaanAffiliates,
   selvstaendigAffiliates,
   testamenteAffiliates,
 } from "./AffiliateBox";
 
-const presets = [
+const partnerAdsPresets = [
   ...bilforsikringAffiliates,
   ...boligforsikringAffiliates,
-  ...forsikringAffiliates,
   ...selvstaendigAffiliates,
   ...testamenteAffiliates,
 ];
 
 describe("affiliate-links", () => {
-  test("partnerAdsLink bygger et sporbart link med site-uid", () => {
+  test("partnerAdsLink bygger et sporbart link (uid tilføjes af withSubid)", () => {
     expect(partnerAdsLink("60068")).toBe(
-      "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner",
+      "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068",
     );
   });
 
@@ -31,8 +33,14 @@ describe("affiliate-links", () => {
     );
   });
 
-  test.each(presets.map((p) => [p.name, p.url]))("%s går gennem Partner-ads med vores id", (_navn, url) => {
-    expect(url).toMatch(/^https:\/\/www\.partner-ads\.com\/dk\/klikbanner\.php\?partnerid=42553&bannerid=\d+&uid=minberegner/);
+  test.each(partnerAdsPresets.map((p) => [p.name, p.url]))("%s går gennem Partner-ads med vores id", (_navn, url) => {
+    expect(url).toMatch(/^https:\/\/www\.partner-ads\.com\/dk\/klikbanner\.php\?partnerid=42553&bannerid=\d+/);
+  });
+
+  test("Findforsikring.dk i boligbudgettet går gennem Adtraction", () => {
+    expect(forsikringAffiliates[0].url).toBe(
+      "https://go.findforsikring.dk/t/t?a=1873805483&as=2056156501&t=2&tk=1&url=https%3A%2F%2Fwww.findforsikring.dk%2F",
+    );
   });
 
   // Links med en hjemmelavet ?ref= giver ingen kommission (sådan så de gamle presets ud).
@@ -42,5 +50,75 @@ describe("affiliate-links", () => {
       .filter((f) => f.endsWith(".tsx") && !f.includes(".test."))
       .filter((f) => /url:\s*"https?:\/\/[^"]*[?&]ref=minberegner/.test(readFileSync(join(dir, f), "utf-8")));
     expect(syndere).toEqual([]);
+  });
+
+  test("pantelån går gennem Partner-ads", () => {
+    expect(pantelaanAffiliates).toHaveLength(1);
+    expect(pantelaanAffiliates[0].url).toContain("bannerid=78126");
+  });
+
+  test("kreditadvarslen indeholder lovpligtig tekst og ÅOP-eksempel", () => {
+    expect(KREDIT_ADVARSEL).toContain("Det koster penge at låne penge");
+    expect(KREDIT_ADVARSEL).toContain("ÅOP");
+    expect(KREDIT_ADVARSEL).toContain("ca. 1.116 kr. i renter");
+    expect(KREDIT_ADVARSEL).toContain("ÅOP på ca. 21,9 %");
+  });
+
+  test("ingen komponent eller side lover hurtighed, nemhed eller bedste rente ved lån", () => {
+    const forbudt = /uden kreditvurdering|hurtigt svar|hurtig udbetaling|nem ansøgning|bedste rente|find den laveste rente/i;
+    const samlFiler = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const sti = join(dir, e.name);
+        if (e.isDirectory()) return samlFiler(sti);
+        return /\.tsx?$/.test(e.name) && !e.name.includes(".test.") ? [sti] : [];
+      });
+    const filer = samlFiler(join(__dirname, ".."));
+    expect(filer.length).toBeGreaterThan(100);
+    for (const f of filer) {
+      expect(readFileSync(f, "utf-8"), f).not.toMatch(forbudt);
+    }
+  });
+
+  test("ingen affiliate-boks peger på et program, Mahope ikke er godkendt til", () => {
+    // Kun Adtraction-programmer Mahope er godkendt i (Ase, CA, Krifa, Bornfiber,
+    // Hiper, Oslo Skin Lab) og Partner-ads. Listen er kendt ikke-godkendte.
+    const ikkeGodkendt =
+      /detfagligehus|faglige hus|lederne\.dk|qred\.|name: "Qred"|facitbank|facit bank"|capitalbox|banknorwegian|name: "Bank Norwegian"|unilaan|name: "Unil[åa]n"|svea|name: "3 |3\.dk|tjenestetorvet/i;
+    const samlFiler = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const sti = join(dir, e.name);
+        if (e.isDirectory()) return samlFiler(sti);
+        return /\.tsx?$/.test(e.name) && !e.name.includes(".test.") ? [sti] : [];
+      });
+    for (const f of samlFiler(join(__dirname, ".."))) {
+      expect(readFileSync(f, "utf-8"), f).not.toMatch(ikkeGodkendt);
+    }
+    expect(Object.keys(TRACKING_URLS)).not.toContain("1873805030"); // Det Faglige Hus
+  });
+
+  test("a-kasse-boksene fører Ase A-kasse og nævner ikke Det Faglige Hus", () => {
+    for (const navn of ["Dagpenge", "Sygedagpenge", "Efterloens"]) {
+      const kilde = readFileSync(join(__dirname, `${navn}Beregner.tsx`), "utf-8");
+      expect(kilde, navn).toContain('name: "Ase A-kasse"');
+      expect(kilde, navn).toContain('adtractionLink("1666137874"');
+      expect(kilde, navn).not.toMatch(/Det Faglige Hus/);
+    }
+  });
+
+  test("forsikrings- og a-kasse-tekster lover hverken tid eller pris-rangering", () => {
+    const forbudt = /på 2 minutter|på få minutter|hurtig tilmelding|danmarks billigste|billigste (indbo|hus|bil|forsikring|a-kasse)/i;
+    const samlFiler = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const sti = join(dir, e.name);
+        if (e.isDirectory()) return samlFiler(sti);
+        return /\.tsx?$/.test(e.name) && !e.name.includes(".test.") ? [sti] : [];
+      });
+    for (const f of samlFiler(join(__dirname, ".."))) {
+      expect(readFileSync(f, "utf-8"), f).not.toMatch(forbudt);
+    }
+  });
+
+  test("affiliate-links markeres sponsored nofollow", () => {
+    expect(readFileSync(join(__dirname, "AffiliateBox.tsx"), "utf-8")).toContain('rel="sponsored nofollow noopener noreferrer"');
   });
 });

@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { localizedPath } from "./locale-slugs";
 import { iDagPaSiden } from "./lokal-dato";
 
 /**
@@ -18,6 +19,11 @@ import { iDagPaSiden } from "./lokal-dato";
  * machine they are the same and the old bug hides.
  */
 export function getTrendingHrefs(today: Date, locale: Locale): string[] {
+  // The cards on the homepage link to the slug each domain serves.
+  return trendingInternalHrefs(today, locale).map((href) => localizedPath(href, locale));
+}
+
+function trendingInternalHrefs(today: Date, locale: Locale): string[] {
   const isoDato = iDagPaSiden(today, locale);
   const month = Number(isoDato.slice(5, 7)) - 1; // 0-indexed
 

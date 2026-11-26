@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -96,7 +97,7 @@ function getAnswerText(
     return {
       headline: `${copy[locale].today} ${dageTilArm(event, locale).copy.short} — 0 ${u.days}`,
       equivalent: locale === "da" ? "Der er 0 dage tilbage." : "Det finns 0 dagar kvar.",
-      target: `${target} ${formatTargetYear(answer.targetDate)} er en ${weekday}`,
+      target: `${target} ${formatTargetYear(answer.targetDate)} ${locale === "da" ? "er" : "är"} en ${weekday}`,
       targetIso: answer.targetDate.toISOString().slice(0, 10),
     };
   }
@@ -107,12 +108,14 @@ function getAnswerText(
     equivalent:
       answer.daysLeft === 0
         ? `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)}.`
-        : `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)} og ${count(
+        : `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)} ${
+            locale === "da" ? "og" : "och"
+          } ${count(
             answer.daysLeft,
             u.day,
             u.days
           )}.`,
-    target: `${target} ${formatTargetYear(answer.targetDate)} er en ${weekday}`,
+    target: `${target} ${formatTargetYear(answer.targetDate)} ${locale === "da" ? "er" : "är"} en ${weekday}`,
     targetIso: answer.targetDate.toISOString().slice(0, 10),
   };
 }
@@ -135,7 +138,7 @@ export async function buildDageTilMetadata(
   if (!event) {
     return { robots: { index: false, follow: false } };
   }
-  const { headline, target, targetIso } = getAnswerText(event, dageLocale, today);
+  const { headline, equivalent, target, targetIso } = getAnswerText(event, dageLocale, today);
   const canonical = `${baseUrl}${prefix}${slug}`;
   const u = units[dageLocale];
   const days = getDageTilAnswer(event, dageLocale, today).days;
@@ -158,7 +161,18 @@ export async function buildDageTilMetadata(
   // title; these nine are the exception because their question alone is the
   // whole lift. C81 locked this for the 160 `page-data` titles, and this is
   // the same rule applied to the nine the gate could not see.
-  const titleText = `${dageTilArm(event, dageLocale).copy.question} ${count(days, u.day, u.days)}`;
+  // 1. advent is the exception on .dk: GSC 22/10-19/11-2026 shows ~25.000
+  // impressions on "1 advent 2026", "første advent 2026" and "1. søndag i
+  // advent 2026" (pos. 7-11, almost no clicks). Those searchers want the date,
+  // so the title carries the year, the weekday and the date, which also
+  // matches the wording the searches use.
+  const { targetDate } = getDageTilAnswer(event, dageLocale, today);
+  const titleText =
+    dageLocale === "da" && event.id === "advent"
+      ? `1. advent ${formatTargetYear(targetDate)}: ${copy.da.weekday(
+          targetDate.getUTCDay()
+        )} ${formatTargetDate(targetDate, "da")} (${count(days, u.day, u.days)})`
+      : `${dageTilArm(event, dageLocale).copy.question} ${count(days, u.day, u.days)}`;
 
   // The description used to open with the event's own question — the exact
   // words the title already carries — so the first ~38 characters of the
@@ -171,11 +185,10 @@ export async function buildDageTilMetadata(
   // does not say — and lands under Google's ~160-character cut.
   return {
     title: { absolute: titleText },
-    description: `${headline}. ${target}. ${
+    description:
       dageLocale === "da"
-        ? "Tallet opdateres hver dag."
-        : "Talet uppdateras varje dag."
-    }`,
+        ? `${headline}. ${target}. Tallet opdateres hver dag.`
+        : `${headline}. ${target}. ${equivalent} Gratis nedräkning som uppdateras varje dag.`,
     openGraph: {
       title: titleText,
       description: `${headline}. ${target} (${targetIso}).`,
@@ -325,13 +338,13 @@ export async function DageTilRoute({
         </ul>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/dato"
+            href={localizedPath("/dato", locale)}
             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
           >
             {dageLocale === "da" ? "Datoberegner" : "Datumräknare"}
           </Link>
           <Link
-            href="/nedtaelling"
+            href={localizedPath("/nedtaelling", locale)}
             className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg text-sm font-medium"
           >
             {dageLocale === "da" ? "Nedtæller" : "Nedräknare"}

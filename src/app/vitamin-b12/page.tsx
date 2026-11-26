@@ -340,7 +340,7 @@ export default async function VitaminB12Page() {
         </section>
       </div>
 
-      <Sidebar currentHref="/vitamin-b12" adSlotId="vitamin-b12-sidebar" />
+      <Sidebar currentHref="/vitamin-b12" />
     </div>
   );
 }

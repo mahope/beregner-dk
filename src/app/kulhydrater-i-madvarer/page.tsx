@@ -187,7 +187,7 @@ export default async function KulhydraterIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/kulhydrater-i-madvarer" adSlotId="kulhydrater-i-madvarer-sidebar" />
+      <Sidebar currentHref="/kulhydrater-i-madvarer" />
     </div>
   );
 }

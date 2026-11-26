@@ -98,7 +98,7 @@ export default async function KonfirmationPage() {
         <RelatedCalculators current="/konfirmation" />
       </div>
 
-      <Sidebar currentHref="/konfirmation" adSlotId="konfirmation-sidebar" />
+      <Sidebar currentHref="/konfirmation" />
     </div>
   );
 }

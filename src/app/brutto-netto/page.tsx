@@ -64,7 +64,7 @@ export default async function BruttoNettoPage() {
         <RelatedCalculators current="/brutto-netto" />
       </div>
 
-      <Sidebar currentHref="/brutto-netto" adSlotId="brutto-netto-sidebar" />
+      <Sidebar currentHref="/brutto-netto" />
     </div>
   );
 }

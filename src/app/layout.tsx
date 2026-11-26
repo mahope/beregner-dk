@@ -59,19 +59,16 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t.site.description,
       images: OG_IMAGE,
     },
+    // No `index`/`follow` and no canonical here: this metadata is inherited by
+    // the 404 page, where Next adds its own `noindex`. Indexable is the default
+    // for every real page, and each of those declares its own canonical
+    // (see not-found-metadata.test.ts).
     robots: {
-      index: true,
-      follow: true,
       googleBot: {
-        index: true,
-        follow: true,
         "max-video-preview": -1,
         "max-image-preview": "large",
         "max-snippet": -1,
       },
-    },
-    alternates: {
-      canonical: baseUrl,
     },
   };
 }
@@ -107,12 +104,16 @@ export default async function RootLayout({
           src="https://analytics.holstjensen.eu/js/script.js"
         />
 
-        {/* Google AdSense */}
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1902871361369866"
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
-        />
+        {/* Umami Analytics - Self-hosted, runs alongside Plausible */}
+        {domainConfig.umamiWebsiteId && (
+          <Script
+            src="https://stats.mahoje.dk/s.js"
+            data-website-id={domainConfig.umamiWebsiteId}
+            data-exclude-search="true"
+            data-exclude-hash="true"
+            strategy="afterInteractive"
+          />
+        )}
 
         <OrganizationSchema
           name={domainConfig.siteName}

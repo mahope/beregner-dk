@@ -141,7 +141,7 @@ export default async function PensionsalderPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/pensionsalder" adSlotId="pensionsalder-sidebar" />
+      <Sidebar currentHref="/pensionsalder" />
     </div>
   );
 }

@@ -289,7 +289,7 @@ export default async function ZinkIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/zink-i-madvarer" adSlotId="zink-i-madvarer-sidebar" />
+      <Sidebar currentHref="/zink-i-madvarer" />
     </div>
   );
 }

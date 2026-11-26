@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -93,8 +94,8 @@ export default async function UgedagPage() {
                 <Link href="/dagar-mellan-datum">dagar mellan datum</Link> ut det.
                 Och för att räkna ut vilken veckodag det <em>er</em> just nu,
                 utan att skriva in något, finns{" "}
-                <Link href="/nedtaelling">nedräkningen till dagens datum</Link> og{" "}
-                <Link href="/dato">datumsidan</Link>, som begge viser dagens dato
+                <Link href="/nedrakning">nedräkningen till dagens datum</Link> og{" "}
+                <Link href="/datum">datumsidan</Link>, som begge viser dagens dato
                 med ugedagsnavn.
               </p>
             </>
@@ -138,8 +139,8 @@ export default async function UgedagPage() {
                 <Link href="/dage-mellem-datoer">dage mellem datoer</Link> det ud.
                 Og vil du bare se hvilken ugedag det er <em>nu</em> uden at
                 indtaste noget, står det på{" "}
-                <Link href="/nedtaelling">nedtællingen til dagens dato</Link> og
-                på <Link href="/dato">datovæktøjet</Link>, som begge viser
+                <Link href={localizedPath("/nedtaelling", locale)}>nedtællingen til dagens dato</Link> og
+                på <Link href={localizedPath("/dato", locale)}>datovæktøjet</Link>, som begge viser
                 dagens dato med ugedagsnavn.
               </p>
             </>
@@ -152,7 +153,7 @@ export default async function UgedagPage() {
 
         <RelatedCalculators current="/ugedag" />
       </div>
-      <Sidebar currentHref="/ugedag" adSlotId="ugedag-sidebar" />
+      <Sidebar currentHref="/ugedag" />
     </div>
   );
 }

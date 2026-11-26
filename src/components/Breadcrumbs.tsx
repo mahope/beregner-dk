@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BreadcrumbSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getTranslations } from "@/lib/i18n";
+import { localizedPath } from "@/lib/locale-slugs";
 import { getRouteDecision } from "@/lib/routing";
 
 interface BreadcrumbItem {
@@ -32,10 +33,16 @@ export default async function Breadcrumbs({ items }: BreadcrumbsProps) {
   const baseUrl = domainConfig.baseUrl;
   const homeName = t.nav.home;
 
-  const allItems = [{ name: homeName, href: "/" }, ...items];
+  // Callers pass the internal (Danish) slug; the trail links to the slug this
+  // domain actually serves, so it never hands out a URL that is a 301.
+  const allItems = [{ name: homeName, href: "/" }, ...items].map((item) => ({
+    ...item,
+    href: localizedPath(item.href, domainConfig.locale),
+  }));
   const lastIndex = allItems.length - 1;
   const isLinkable = (item: BreadcrumbItem, index: number) =>
-    index < lastIndex && getRouteDecision(domainConfig, item.href).type === "allow";
+    index < lastIndex &&
+    ["allow", "rewrite"].includes(getRouteDecision(domainConfig, item.href).type);
 
   const schemaItems = allItems.map((item, index) => ({
     name: item.name,

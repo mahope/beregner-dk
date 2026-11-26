@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { describe, expect, test } from "vitest";
 import { getCalculatorsByLocale, getRelatedCalculators } from "@/lib/calculator-list";
+import { internalPathAnyLocale } from "@/lib/locale-slugs";
 
 const root = join(__dirname, "..", "..");
 const srcDir = join(root, "src");
@@ -35,7 +36,9 @@ const metadataAssets = new Set(
 
 /** A static internal path matches a route when every literal segment is equal. */
 function resolvesToRoute(href: string): boolean {
-  const path = href.replace(/^\//, "").replace(/\/$/, "");
+  // A public slug (`/datum`) has no folder of its own: the proxy rewrites it to
+  // the internal one.
+  const path = internalPathAnyLocale(href).replace(/^\//, "").replace(/\/$/, "");
   if (path === "") return true;
   if (existsSync(join(root, "public", path))) return true;
   if (metadataAssets.has(`/${path}`)) return true;

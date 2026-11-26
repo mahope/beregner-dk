@@ -19,6 +19,7 @@ import {
 } from "@/lib/su";
 import { SU_2026 } from "@/lib/satser-2026";
 import { AffiliateBox } from "./AffiliateBox";
+import { partnerAdsLink } from "@/lib/partner-ads";
 
 type Boligstatus = SuHousing;
 type Uddannelsestype = SuEducation;
@@ -675,9 +676,10 @@ export default function SUBeregner() {
         </p>
       </div>
       <AffiliateBox
+        placement="studiebooger"
         title="Spar på studiebøgerne"
         subtitle="Køb dit pensum billigere"
-        links={[{ name: "Plusbog", description: "Stort udvalg af fag- og studiebøger til skarpe priser og hurtig levering.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=100622&uid=minberegner", cta: "Se studiebøger hos Plusbog", highlight: true }]}
+        links={[{ name: "Plusbog", description: "Stort udvalg af fag- og studiebøger til skarpe priser og hurtig levering.", url: partnerAdsLink("100622"), cta: "Se studiebøger hos Plusbog", highlight: true }]}
         className="mt-6"
       />
         </div>

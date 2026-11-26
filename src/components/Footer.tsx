@@ -3,7 +3,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getTranslations } from "@/lib/i18n";
 import { getFooterCategories, getFooterBlogLinks } from "@/lib/footer-data";
 import { getAllDomainConfigs } from "@/lib/domain-config";
-import { FooterAd } from "./ads/AdBanner";
+import { CookieSettingsButton } from "./CookieConsent";
 import CountryFlag from "./CountryFlag";
 import { CalcIcon, CategoryIcon } from "@/components/ui/icons";
 import { Calculator, CalendarDays, ShieldCheck } from "lucide-react";
@@ -64,8 +64,8 @@ export default async function Footer() {
           </div>
         </div>
 
-        {/* Blog + info + cross-links */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 pb-10 border-b border-gray-800">
+        {/* Blog + info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 pb-10 border-b border-gray-800">
           <div>
             <h3 className="text-white font-bold text-lg mb-4">
               {domainConfig.siteName}
@@ -92,6 +92,9 @@ export default async function Footer() {
                 >
                   {t.footer.cookieLink}
                 </Link>
+              </li>
+              <li>
+                <CookieSettingsButton label={t.footer.cookieSettings} />
               </li>
             </ul>
           </div>
@@ -124,28 +127,6 @@ export default async function Footer() {
             </div>
           )}
 
-          <div>
-            <h4 className="text-white font-semibold mb-4">
-              {t.footer.otherTools}
-            </h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="https://gratisfaktura.dk" className="hover:text-white transition-colors">
-                  Faktura Generator
-                </a>
-              </li>
-              <li>
-                <a href="https://kodeord.dk" className="hover:text-white transition-colors">
-                  Kodeord Generator
-                </a>
-              </li>
-              <li>
-                <a href="https://countdowntimer.dk" className="hover:text-white transition-colors">
-                  Countdown Timer
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* hreflang cross-links between domains */}
@@ -163,11 +144,21 @@ export default async function Footer() {
           ))}
         </div>
 
+        {locale === "da" && (
+          <p className="mb-4 text-center text-xs text-gray-500">
+            Flere værktøjer fra Mahoje:{" "}
+            <a
+              href="https://timetrack.dk/?utm_source=minberegner&utm_medium=referral&utm_campaign=sostersites&utm_content=footer"
+              className="hover:text-white transition-colors"
+            >
+              TimeTrack – tidsregistrering til freelancere
+            </a>
+          </p>
+        )}
+
         <div className="text-center text-sm">
           <p>{t.footer.copyright.replace("{year}", String(year))}</p>
         </div>
-
-        <FooterAd />
       </div>
     </footer>
   );

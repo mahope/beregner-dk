@@ -86,7 +86,7 @@ export default async function RejsebudgetPage() {
         <RelatedCalculators current="/rejsebudget" />
       </div>
 
-      <Sidebar currentHref="/rejsebudget" adSlotId="rejsebudget-sidebar" />
+      <Sidebar currentHref="/rejsebudget" />
     </div>
   );
 }

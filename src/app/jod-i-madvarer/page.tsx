@@ -342,7 +342,7 @@ export default async function JodIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/jod-i-madvarer" adSlotId="jod-i-madvarer-sidebar" />
+      <Sidebar currentHref="/jod-i-madvarer" />
     </div>
   );
 }

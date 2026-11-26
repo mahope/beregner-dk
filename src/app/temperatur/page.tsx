@@ -85,7 +85,7 @@ export default async function TemperaturPage() {
 
         <RelatedCalculators current="/temperatur" />
       </div>
-      <Sidebar currentHref="/temperatur" adSlotId="temperatur-sidebar" />
+      <Sidebar currentHref="/temperatur" />
     </div>
   );
 }

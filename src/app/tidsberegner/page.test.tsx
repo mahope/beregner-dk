@@ -37,6 +37,10 @@ import {
   formatTargetDate,
 } from "@/lib/dage-til";
 
+vi.mock("@/components/ads/AdBanner", () => ({
+  ResultAd: () => <p>Annonce</p>,
+}));
+
 vi.mock("@/components/TidsBeregner", () => ({
   default: () => <div>Tidsværktøj</div>,
 }));
@@ -59,6 +63,17 @@ describe("tidsberegner page", () => {
   beforeEach(() => {
     vi.mocked(getLocale).mockResolvedValue("da");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
+  test("viser annoncen efter alle værktøjer", async () => {
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+    const annonce = html.indexOf("<p>Annonce</p>");
+
+    expect(annonce).toBeGreaterThan(-1);
+    for (const værktøj of ["Tidsværktøj", "Plus-tidsværktøj", "Minutter-til-timer-værktøj"]) {
+      expect(html.indexOf(værktøj)).toBeGreaterThan(-1);
+      expect(html.indexOf(værktøj)).toBeLessThan(annonce);
+    }
   });
 
   test.each([
@@ -199,7 +214,7 @@ describe("tidsberegner page — dage-til-listen", () => {
     for (const slug of getDageTilSlugs("se")) {
       expect(html, slug).toContain(`href="/dagar-till/${slug}"`);
     }
-    expect(html).toContain('href="/dato"');
+    expect(html).toContain('href="/datum"');
     expect(html).not.toMatch(/href="\/dage-til\//);
   });
 
@@ -313,7 +328,7 @@ describe("Excel-svaret på /tidsberegner", () => {
 
       const html = renderToStaticMarkup(await TidsberegnerPage());
 
-      expect(html).toContain('href="/dato"');
+      expect(html).toContain(locale === "se" ? 'href="/datum"' : 'href="/dato"');
     }
   });
 
@@ -499,7 +514,7 @@ describe("minuter ↔ timmar på beraknare.se", () => {
     // modulet, så de to tabeller ikke kan komme i mellemkrig om et facit.
     expect(html).toContain("8 h 15 min");
     expect(totalMinutter(TIDS_EKSEMPEL_DAG)).toBe(495);
-    expect(html).toContain('href="/fart"');
+    expect(html).toContain('href="/hastighet"');
   });
 
   test("omvandlingen i tabellen er den samme regel som formatTidsvar", () => {
@@ -568,9 +583,9 @@ describe("minuter ↔ timmar på beraknare.se", () => {
     vi.mocked(getLocale).mockResolvedValue("da");
     const daHtml = renderToStaticMarkup(await TidsberegnerPage());
 
-    for (const html of [seHtml, daHtml]) {
+    for (const [html, fart] of [[seHtml, "/hastighet"], [daHtml, "/fart"]] as const) {
       expect(html).toContain("÷ 60 = ");
-      expect(html).toContain('href="/fart"');
+      expect(html).toContain(`href="${fart}"`);
     }
     // Svensk må ikke få danske forkortelser i tabellen (C73's R4).
     expect(seHtml).not.toContain("timer × 60 = minutter");

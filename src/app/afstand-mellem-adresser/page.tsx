@@ -43,9 +43,7 @@ export default async function AfstandMellemAdresserPage() {
           <p className="text-lg text-gray-600 dark:text-gray-400">{pageData.description}</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
-          <AfstandsBeregner />
-        </div>
+        <AfstandsBeregner />
 
         {locale === "da" && (
           <div className="prose dark:prose-invert max-w-none mb-8">
@@ -107,7 +105,7 @@ export default async function AfstandMellemAdresserPage() {
 
         <RelatedCalculators current={`/${SLUG}`} />
       </div>
-      <Sidebar currentHref={`/${SLUG}`} adSlotId="afstand-mellem-adresser-sidebar" />
+      <Sidebar currentHref={`/${SLUG}`} />
     </div>
   );
 }

@@ -291,7 +291,7 @@ export default async function JernIMadvarerPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/jern-i-madvarer" adSlotId="jern-i-madvarer-sidebar" />
+      <Sidebar currentHref="/jern-i-madvarer" />
     </div>
   );
 }

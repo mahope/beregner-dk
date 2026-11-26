@@ -82,7 +82,7 @@ export default async function SkattefradragPage() {
         <RelatedCalculators current="/skattefradrag" />
       </div>
 
-      <Sidebar currentHref="/skattefradrag" adSlotId="skattefradrag-sidebar" />
+      <Sidebar currentHref="/skattefradrag" />
     </div>
   );
 }

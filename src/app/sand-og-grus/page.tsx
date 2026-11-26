@@ -187,7 +187,7 @@ export default async function SandOgGrusPage() {
         </section>
       </div>
 
-      <Sidebar currentHref="/sand-og-grus" adSlotId="sand-og-grus-sidebar" />
+      <Sidebar currentHref="/sand-og-grus" />
     </div>
   );
 }

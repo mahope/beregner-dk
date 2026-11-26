@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { internalPathAnyLocale, localizedPath, rewriteTarget } from "./locale-slugs";
 
 export interface Calculator {
   title: string;
@@ -168,12 +169,17 @@ export function getCalculatorHrefs(): string[] {
   return calculatorDefs.map((definition) => definition.href);
 }
 
+/**
+ * Both spellings of a calculator's path count: the internal (Danish) slug and
+ * the public slug of any language (`/datum`). Whether the one in front of you
+ * is served on a given domain is `isCalculatorAvailable`'s question.
+ */
 export function isCalculatorPath(href: string): boolean {
-  return calculatorDefsByHref.has(href);
+  return calculatorDefsByHref.has(internalPathAnyLocale(href));
 }
 
 export function isCalculatorAvailable(href: string, locale: Locale): boolean {
-  const definition = calculatorDefsByHref.get(href);
+  const definition = calculatorDefsByHref.get(rewriteTarget(href, locale) ?? href);
   if (!definition) return false;
   if (definition.daOnly) return locale === "da";
   if (definition.seOnly) return locale === "se";
@@ -184,6 +190,20 @@ export function isCalculatorAvailable(href: string, locale: Locale): boolean {
  * Get all calculators for a given locale (filtered to only available ones).
  */
 export function getCalculatorsByLocale(locale: Locale): Calculator[] {
+  return internalCalculators(locale).map((calc) => localizeCalculator(calc, locale));
+}
+
+/** The `href` a visitor on this domain should be linked to (the public slug). */
+function localizeCalculator(calc: Calculator, locale: Locale): Calculator {
+  return { ...calc, href: localizedPath(calc.href, locale) };
+}
+
+/**
+ * Same list with the internal (Danish) slugs, which `relatedMap`, the popular
+ * lists and every lookup in this file are keyed on. Public callers get the
+ * localized hrefs from `getCalculatorsByLocale` and the two functions below.
+ */
+function internalCalculators(locale: Locale): Calculator[] {
   return calculatorDefs
     .filter((definition) => isCalculatorAvailable(definition.href, locale))
     .map((d) => ({
@@ -352,7 +372,7 @@ export function getRelatedCalculators(
   currentHref: string,
   locale: Locale
 ): Calculator[] {
-  const allCalcs = getCalculatorsByLocale(locale);
+  const allCalcs = internalCalculators(locale);
   const relatedHrefs = relatedMap[currentHref] || [];
 
   // Filter to only available calculators for this locale
@@ -363,10 +383,13 @@ export function getRelatedCalculators(
     .filter(Boolean);
 
   if (related.length === 0) {
-    return allCalcs.filter((c) => c.href !== currentHref).slice(0, 5);
+    return allCalcs
+      .filter((c) => c.href !== currentHref)
+      .slice(0, 5)
+      .map((c) => localizeCalculator(c, locale));
   }
 
-  return related;
+  return related.map((c) => localizeCalculator(c, locale));
 }
 
 /**
@@ -415,8 +438,9 @@ export function getPopularCalculators(locale: Locale): Calculator[] {
       ]
       : ["/moms", "/bmi", "/laaneberegner", "/procent", "/valuta", "/boliglaan", "/timepris"];
 
-  const allCalcs = getCalculatorsByLocale(locale);
+  const allCalcs = internalCalculators(locale);
   return popularHrefs
     .map((href) => allCalcs.find((c) => c.href === href)!)
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((c) => localizeCalculator(c, locale));
 }

@@ -1,82 +1,123 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useLocaleOptional } from "@/components/LocaleProvider";
+import { ADSENSE_PAGES, isAdSenseEnabled, reloadAfterAdConsentWithdrawal } from "@/lib/ads";
+import { hasAdConsent, subscribeToCookieConsent } from "@/lib/cookie-consent";
 
 const AD_CLIENT = "ca-pub-1902871361369866";
+const SCRIPT_URL = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CLIENT}`;
 
-interface AdBannerProps {
-  slotId?: string;
-  format?: "auto" | "rectangle" | "horizontal" | "vertical";
-  className?: string;
+type AdQueue = {
+  requestNonPersonalizedAds?: 1;
+  push: (request: Record<string, never>) => unknown;
+};
+
+declare global {
+  interface Window {
+    adsbygoogle?: AdQueue;
+  }
 }
 
-export default function AdBanner({
-  slotId,
-  format = "auto",
-  className = "",
-}: AdBannerProps) {
+let scriptLoaded = false;
+let stopWatchingConsent: (() => void) | undefined;
+const pendingScripts = new Set<symbol>();
+
+function stopConsentWatcher() {
+  stopWatchingConsent?.();
+  stopWatchingConsent = undefined;
+}
+
+function watchConsentAfterScriptInsertion() {
+  stopWatchingConsent ??= subscribeToCookieConsent(() => {
+    if (hasAdConsent()) return;
+
+    stopConsentWatcher();
+    scriptLoaded = false;
+    pendingScripts.clear();
+    // Removing the script element cannot stop Google code that has already executed.
+    reloadAfterAdConsentWithdrawal();
+  });
+}
+
+function nonPersonalizedQueue() {
+  const queue: AdQueue = window.adsbygoogle ?? ([] as Record<string, never>[]);
+  window.adsbygoogle = queue;
+  queue.requestNonPersonalizedAds = 1;
+  return queue;
+}
+
+function AdUnit({ slot }: { slot: string }) {
+  const accepted = useSyncExternalStore(subscribeToCookieConsent, hasAdConsent, () => false);
   const adRef = useRef<HTMLModElement>(null);
-  const pushed = useRef(false);
+  const requestedAd = useRef<HTMLModElement>(null);
 
   useEffect(() => {
-    if (pushed.current) return;
-    pushed.current = true;
-    try {
-      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-    } catch {
-      // AdSense not loaded or blocked
+    const ad = adRef.current;
+    if (!accepted || !ad || requestedAd.current === ad || !hasAdConsent()) return;
+
+    const requestAd = () => {
+      if (!hasAdConsent()) return;
+      const queue = nonPersonalizedQueue();
+      try {
+        queue.push({});
+        requestedAd.current = ad;
+      } catch {
+        // En blokeret eller afvist annonce må ikke påvirke beregneren.
+      }
+    };
+
+    if (scriptLoaded) {
+      requestAd();
+      return;
     }
-  }, []);
+
+    nonPersonalizedQueue();
+    const script = document.createElement("script");
+    script.src = SCRIPT_URL;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    const pendingScript = Symbol();
+    pendingScripts.add(pendingScript);
+    script.onload = () => {
+      if (!pendingScripts.delete(pendingScript)) return;
+      scriptLoaded = true;
+      if (script.isConnected) requestAd();
+    };
+    script.onerror = () => {
+      pendingScripts.delete(pendingScript);
+      script.remove();
+      if (!scriptLoaded && pendingScripts.size === 0) stopConsentWatcher();
+    };
+    watchConsentAfterScriptInsertion();
+    document.head.append(script);
+
+    return () => {
+      // Removal may leave a pending script running. Keep its load and error handlers.
+      script.remove();
+    };
+  }, [accepted]);
+
+  if (!accepted) return null;
 
   return (
-    <div
-      className={`w-full overflow-hidden ${className}`}
-      aria-label="Annonce"
-    >
-      <div className="text-xs text-gray-400 dark:text-gray-500 mb-1">Annonce</div>
+    <div className="mx-auto my-8 min-h-[280px] w-fit text-center md:min-h-[270px]">
+      <p className="mb-1 text-xs text-gray-600 dark:text-gray-300">Annonce</p>
       <ins
         ref={adRef}
         className="adsbygoogle"
-        style={{ display: "block" }}
+        style={{ display: "block", marginInline: "auto", width: 250, height: 250 }}
         data-ad-client={AD_CLIENT}
-        data-ad-slot={slotId}
-        data-ad-format={format}
-        data-full-width-responsive="true"
+        data-ad-slot={slot}
       />
     </div>
   );
 }
 
-export function SidebarAd({ slotId = "sidebar" }: { slotId?: string }) {
-  return (
-    <aside className="w-full sticky top-4" aria-label="Reklame">
-      <AdBanner slotId={slotId} format="rectangle" />
-    </aside>
-  );
-}
-
-export function InlineAd({ slotId = "inline" }: { slotId?: string }) {
-  return (
-    <div className="my-8" aria-label="Reklame">
-      <AdBanner slotId={slotId} format="auto" />
-    </div>
-  );
-}
-
-export function FooterAd({ slotId = "footer" }: { slotId?: string }) {
-  return (
-    <div className="w-full py-6 mt-8 border-t border-gray-200 dark:border-gray-700" aria-label="Reklame">
-      <div className="max-w-[728px] mx-auto">
-        <AdBanner slotId={slotId} format="horizontal" />
-      </div>
-    </div>
-  );
-}
-
-export function HorizontalAd({ slotId = "horizontal" }: { slotId?: string }) {
-  return (
-    <div className="my-6" aria-label="Reklame">
-      <AdBanner slotId={slotId} format="horizontal" />
-    </div>
-  );
+export function ResultAd({ page }: { page: string }) {
+  const locale = useLocaleOptional()?.locale;
+  const slot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT;
+  if (locale !== "da" || !ADSENSE_PAGES.has(page)) return null;
+  if (!isAdSenseEnabled() || !slot || !/^\d+$/.test(slot)) return null;
+  return <AdUnit key={slot} slot={slot} />;
 }

@@ -1,3 +1,4 @@
+import { localizedPath } from "@/lib/locale-slugs";
 import TidszoneBeregner from "@/components/TidszoneBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
@@ -143,6 +144,19 @@ export default async function TidszonePage() {
           {pageData.description}
         </p>
       </div>
+
+      {/* Svar-først på den mest søgte forespørgsel: "hvilken tidszone er danmark (i)" */}
+      {locale === "da" && (
+        <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+          <h2 className="text-xl font-bold mb-2">Hvilken tidszone er Danmark i?</h2>
+          <p>
+            Danmark ligger i tidszonen <strong>CET (UTC+1)</strong>, mellemeuropæisk tid. Om
+            sommeren er der sommertid, <strong>CEST (UTC+2)</strong>, fra sidste søndag i marts
+            til sidste søndag i oktober. Det gælder hele Danmark; Grønland og Færøerne har deres
+            egne tidszoner.
+          </p>
+        </div>
+      )}
 
       {/* Svar-foerst: besvarer "hvad er klokken i X naar den er 12 i Danmark" */}
       {locale === "da" && (
@@ -567,7 +581,7 @@ export default async function TidszonePage() {
           timer. Og en by på den anden side af jorden kan ligge både foran og
           bagud: New York er 6 timer <em>bagefter</em>, Tokyo er 7 timer{" "}
           <em>frem</em>, selv om begge tal står som 12 minus 6 og 12 minus 9.{" "}
-          <Link href="/tidsberegner" className="underline">
+          <Link href={localizedPath("/tidsberegner", locale)} className="underline">
             Tidsberegneren
           </Link>{" "}
           tager sig af det sidste, hvis du vil se forskellen i hele døgn.
@@ -706,7 +720,7 @@ export default async function TidszonePage() {
           timmar. Och en stad på andra sidan om jorden kan ligga både före och
           efter: New York är 6 timmar <em>bakåt</em>, Tokyo är 7 timmar{" "}
           <em>framåt</em>, även om båda talen skrivs som 12 minus 6 och 12
-          minus 9. <Link href="/tidsberegner" className="underline">
+          minus 9. <Link href={localizedPath("/tidsberegner", locale)} className="underline">
             Tidskalkylatorn
           </Link>{" "}
           tar hand om det sista om du vill se skillnaden i hela dygn.

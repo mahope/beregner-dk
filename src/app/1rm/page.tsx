@@ -91,7 +91,7 @@ export default async function EnRepMaxPage() {
 
         <RelatedCalculators current="/1rm" />
       </div>
-      <Sidebar currentHref="/1rm" adSlotId="1rm-sidebar" />
+      <Sidebar currentHref="/1rm" />
     </div>
   );
 }

@@ -130,7 +130,7 @@ export default async function BoligsalgPage() {
         <RelatedCalculators current="/boligsalg" />
       </div>
 
-      <Sidebar currentHref="/boligsalg" adSlotId="boligsalg-sidebar" />
+      <Sidebar currentHref="/boligsalg" />
     </div>
   );
 }
