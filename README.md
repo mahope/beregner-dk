@@ -51,7 +51,9 @@ ingen cookies og intet om personer.
 
 Slået fra som standard. `NEXT_PUBLIC_MOMS_CVR=1` ved build tænder feltet,
 privatlivsafsnittet `#cvr` og ruten `/api/cvr`. Ruten kræver
-`CVRRADAR_BEREGNER_NOEGLE` (hemmelig, kun på serveren). Kontrakt, regler og
+`CVRRADAR_BEREGNER_NOEGLE` (hemmelig, kun på serveren). Momsperiode og frister kommer
+fra cvrradar, som kun svarer for selskaber. IP-adressen læses fra `CF-Connecting-IP`
+(Cloudflare), aldrig fra `X-Forwarded-For`. Kontrakt, regler og
 miljøvariabler står i [docs/moms-cvr.md](docs/moms-cvr.md).
 
 ## Barselsdagpenge

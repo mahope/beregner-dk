@@ -21,12 +21,12 @@ import {
   MOMS_REGISTRERINGSGRAENSE,
   MOMSPERIODE_NAVN,
   type Momsfrist,
+  fristerFraCvrradar,
   momsfristerIcs,
-  naesteMomsfrister,
 } from "@/lib/momsfrister";
 
-type Fundet = Extract<CvrApiSvar, { fundet: true }>;
-type Tilstand = "klar" | "henter" | "fundet" | "ikke_fundet" | "utilgaengelig" | "for_mange";
+type Fundet = Extract<CvrApiSvar, { selskab: true }>;
+type Tilstand = "klar" | "henter" | "fundet" | "ikke_selskab" | "ikke_fundet" | "utilgaengelig" | "for_mange";
 
 const datoFormat = new Intl.DateTimeFormat("da-DK", {
   weekday: "long",
@@ -35,17 +35,25 @@ const datoFormat = new Intl.DateTimeFormat("da-DK", {
   year: "numeric",
 });
 
+const mio = (kr: number) => `${formatNumber(kr / 1e6, "da")} mio. kr.`;
+
+/** Why cvrradar estimates this period. The period is a guide; the real one is in TastSelv. */
 function periodeForklaring(d: Fundet): string {
-  if (d.momsperiodeKilde === "cvrradar") return "Ifølge cvrradar.dk.";
-  if (d.momsperiodeKilde === "standard") {
-    return "Vi kender ikke omsætningen. Nye og mindre virksomheder starter på halvårlig moms.";
+  const aar = d.regnskabsaar ? ` for regnskabsåret ${d.regnskabsaar}` : "";
+  if (d.grundlag === "ny_virksomhed") return "Nye virksomheder har kvartalsmoms de første 18 måneder.";
+  if (d.grundlag === "bruttofortjeneste") {
+    return `Skønnet ud fra bruttofortjenesten i årsrapporten${aar} (over ${mio(MOMS_GRAENSE_MAANED)}).`;
   }
-  const oms = `${formatNumber(d.omsaetning ?? 0, "da")} kr.`;
-  if (d.momsperiode === "maaned") return `Ud fra en omsætning på ${oms} (over ${formatNumber(MOMS_GRAENSE_MAANED / 1e6, "da")} mio. kr.).`;
-  if (d.momsperiode === "kvartal") {
-    return `Ud fra en omsætning på ${oms} (mellem ${formatNumber(MOMS_GRAENSE_KVARTAL / 1e6, "da")} og ${formatNumber(MOMS_GRAENSE_MAANED / 1e6, "da")} mio. kr.).`;
+  if (d.grundlag === "omsaetning") {
+    const graense =
+      d.momsperiode === "maaned"
+        ? `over ${mio(MOMS_GRAENSE_MAANED)}`
+        : d.momsperiode === "kvartal"
+          ? `mellem ${formatNumber(MOMS_GRAENSE_KVARTAL / 1e6, "da")} og ${mio(MOMS_GRAENSE_MAANED)}`
+          : `under ${mio(MOMS_GRAENSE_KVARTAL)}`;
+    return `Skønnet ud fra nettoomsætningen i årsrapporten${aar} (${graense}).`;
   }
-  return `Ud fra en omsætning på ${oms} (under ${formatNumber(MOMS_GRAENSE_KVARTAL / 1e6, "da")} mio. kr.).`;
+  return "Vi kan ikke skønne momsperioden. Du finder den i TastSelv Erhverv.";
 }
 
 function hentIcs(frister: Momsfrist[], d: Fundet) {
@@ -74,7 +82,7 @@ export default function MomsCvrPanel() {
 
   useEffect(() => () => abortRef.current?.abort(), []);
   useEffect(() => {
-    if (tilstand === "fundet" || tilstand === "ikke_fundet") resultatRef.current?.focus();
+    if (tilstand === "fundet" || tilstand === "ikke_fundet" || tilstand === "ikke_selskab") resultatRef.current?.focus();
   }, [tilstand, data]);
 
   // Danish site only and behind the feature flag. The page also gates this.
@@ -121,6 +129,7 @@ export default function MomsCvrPanel() {
       const svar = (await res.json()) as CvrApiSvar;
       if (!res.ok || !svar.tilgaengelig) return setTilstand("utilgaengelig");
       if (!svar.fundet) return setTilstand("ikke_fundet");
+      if (!svar.selskab) return setTilstand("ikke_selskab");
       setData(svar);
       setTilstand("fundet");
     } catch {
@@ -128,7 +137,8 @@ export default function MomsCvrPanel() {
     }
   };
 
-  const frister = data && data.momsregistreret !== false ? naesteMomsfrister(data.momsperiode, new Date(), 3) : [];
+  const ikkeRegistreret = !!data && (data.momsregistreret === "nej" || !data.aktiv);
+  const frister = data && !ikkeRegistreret && data.momsperiode ? fristerFraCvrradar(data.momsperiode, data.frister) : [];
   const fejlId = `${id}-fejl`;
   const hjaelpId = `${id}-hjaelp`;
 
@@ -221,6 +231,18 @@ export default function MomsCvrPanel() {
             Vi fandt ingen virksomhed med CVR {cvr}.
           </h3>
         )}
+        {tilstand === "ikke_selskab" && (
+          <div>
+            <h3 ref={resultatRef} tabIndex={-1} className="text-sm font-medium text-gray-900 focus:outline-none dark:text-white">
+              Vi viser kun momsoplysninger for selskaber.
+            </h3>
+            <p className="mt-1 text-sm text-gray-700 dark:text-gray-200">
+              CVR {cvr} er ikke et selskab (ApS, A/S, P/S og lignende). Enkeltmandsvirksomheder og andre virksomheder,
+              der ejes af en person, viser vi ikke, fordi oplysningerne handler om personen. Der er ikke gemt noget. Du
+              finder momsperiode og frister i TastSelv Erhverv. Momsberegneren ovenfor virker som altid.
+            </p>
+          </div>
+        )}
         {tilstand === "fundet" && data && (
           <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
             <h3 ref={resultatRef} tabIndex={-1} className="text-base font-semibold text-gray-900 focus:outline-none dark:text-white">
@@ -230,22 +252,31 @@ export default function MomsCvrPanel() {
               <div>
                 <dt className="text-gray-500 dark:text-gray-400">Momsstatus</dt>
                 <dd className="font-medium text-gray-900 dark:text-white">
-                  {data.momsregistreret === true
-                    ? "Momsregistreret"
-                    : data.momsregistreret === false
-                      ? "Ikke momsregistreret"
-                      : "Ukendt"}
+                  {!data.aktiv
+                    ? "Ophørt"
+                    : data.momsregistreret === "ja"
+                      ? "Momsregistreret"
+                      : data.momsregistreret === "nej"
+                        ? "Ikke momsregistreret"
+                        : "Ukendt"}
                 </dd>
               </div>
-              {data.momsregistreret !== false && (
+              {!ikkeRegistreret && (
                 <div>
                   <dt className="text-gray-500 dark:text-gray-400">Momsperiode</dt>
-                  <dd className="font-medium text-gray-900 dark:text-white">{MOMSPERIODE_NAVN[data.momsperiode]}</dd>
+                  <dd className="font-medium text-gray-900 dark:text-white">
+                    {data.momsperiode ? `${MOMSPERIODE_NAVN[data.momsperiode]} (vejledende)` : "Ukendt"}
+                  </dd>
                   <dd className="text-gray-600 dark:text-gray-300">{periodeForklaring(data)}</dd>
                 </div>
               )}
             </dl>
-            {data.momsregistreret === false && (
+            {!data.aktiv && (
+              <p className="mt-3 text-sm text-gray-700 dark:text-gray-200">
+                Virksomheden står som ophørt i CVR-registret, så der er ingen momsfrister.
+              </p>
+            )}
+            {data.aktiv && data.momsregistreret === "nej" && (
               <p className="mt-3 text-sm text-gray-700 dark:text-gray-200">
                 Virksomheden står ikke som momsregistreret, så der er ingen momsfrister. Den skal registreres, når den
                 momspligtige omsætning passerer {formatNumber(MOMS_REGISTRERINGSGRAENSE, "da")} kr. på 12 måneder.
@@ -271,9 +302,9 @@ export default function MomsCvrPanel() {
                 </button>
               </div>
             )}
-            {data.laert && (
+            {data.gemt && (
               <p className="mt-4 text-sm text-gray-700 dark:text-gray-200">
-                Tak. Vi genkender nu besøg fra jeres netværk, indtil 30 dage efter sidste besøg.{" "}
+                Tak. Vi har noteret, at besøget kom fra jeres netværk. Det slettes 30 dage efter sidste besøg.{" "}
                 <a
                   href={CVRRADAR_TILBAGETRAEK_URL}
                   target="_blank"

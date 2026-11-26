@@ -19,8 +19,9 @@ cvrradar to recognise the company's network.
 | --- | --- |
 | `src/components/MomsCvrPanel.tsx` | Client form, consent checkbox, result, `.ics` download |
 | `src/app/api/cvr/route.ts` | Server route; holds the secret key and talks to cvrradar |
-| `src/lib/moms-cvr.ts` | Flag, CVR validation, IP prefix, mail domain, request builder, answer parser |
-| `src/lib/momsfrister.ts` | VAT period from turnover, deadlines (bank-day adjusted), `.ics` |
+| `src/lib/moms-cvr.ts` | Flag, CVR validation, client IP and prefix, mail domain, request builder, answer parser |
+| `src/lib/cvrradar-klient.ts` | HTTP client for cvrradar without browser headers |
+| `src/lib/momsfrister.ts` | Period names, cvrradar deadlines to dates, `.ics` |
 | `src/app/privatlivspolitik/page.tsx` | Section `#cvr` (shown with the flag on) |
 
 ## Browser -> `/api/cvr`
@@ -39,85 +40,112 @@ cvrradar to recognise the company's network.
 Answers (always `Cache-Control: no-store`):
 
 ```jsonc
-{ "tilgaengelig": false }                       // no key, cvrradar down or odd answer
-{ "tilgaengelig": true, "fundet": false }       // unknown CVR
+{ "tilgaengelig": false }                       // no key, cvrradar down/refused or odd answer
+{ "tilgaengelig": true, "fundet": false }       // unknown CVR (cvrradar 404)
+{ "tilgaengelig": true, "fundet": true, "selskab": false, "cvr": "12345678" }  // ENK, PMV, I/S ...: nothing else
 {
-  "tilgaengelig": true, "fundet": true,
-  "cvr": "39413892", "navn": "Mahope",
-  "momsregistreret": true,                      // true | false | null (unknown)
-  "momsperiode": "halvaar",                     // "maaned" | "kvartal" | "halvaar"
-  "momsperiodeKilde": "omsaetning",             // "cvrradar" | "omsaetning" | "standard"
-  "omsaetning": 800000,                         // DKK or null
-  "laert": false                                // true only with consent and upstream confirmation
+  "tilgaengelig": true, "fundet": true, "cvr": "39413892",
+  "selskab": true, "navn": "Mahope ApS", "aktiv": true,
+  "momsregistreret": "ja",                      // "ja" | "nej" | "ukendt" (VIES)
+  "momsperiode": "halvaar",                     // "maaned" | "kvartal" | "halvaar" | null (estimate)
+  "grundlag": "omsaetning",                     // "omsaetning" | "bruttofortjeneste" | "ny_virksomhed" | "ukendt"
+  "regnskabsaar": "2025",                       // or null
+  "frister": [{ "fra": "2026-07-01", "til": "2026-12-31", "frist": "2027-03-01" }],
+  "gemt": false                                 // cvrradar stored an observation; always false without consent
 }
 ```
 
 Other statuses: 404 (flag off or non-Danish host), 403 (cross-site `Sec-Fetch-Site`),
 429 (more than 20 lookups per minute from one /24 or /48 network).
 
-## Server -> cvrradar (proposed contract)
+### Client IP
 
-The cvrradar side (`mahope/cvr`, branch `feat/beregner-cvr`) was not pushed when this was
-built, so this is the contract minberegner expects. Keep it small; change both sides together.
+minberegner.dk is behind Cloudflare. The IP is read from `CF-Connecting-IP`, which
+Cloudflare always overwrites with the address it saw. `X-Forwarded-For` is never used:
+Cloudflare keeps whatever the browser sent there and only appends, so its first entry can
+be forged. That would tie someone else's network to a CVR and get around the rate limit.
+A value with a comma or space is refused. `MOMS_CVR_IP_HEADER` can name another
+single-value header if the proxy setup changes. Remaining assumption: the origin is only
+reachable through Cloudflare; a request sent straight to the origin could set the header
+itself. Without the header there is no prefix (nothing is learned), and such requests
+share one rate-limit bucket.
+
+## Server -> cvrradar
+
+The contract is cvrradar's: `mahope/cvr`, branch `feat/beregner-cvr`, `src/beregner/web.ts`
+and the README section "minberegner.dk's CVR field". Change both sides together.
 
 `POST https://cvrradar.dk/v1/intern/beregner` (override with `CVRRADAR_BEREGNER_URL` for
-local tests)
+local tests). cvrradar needs `BESOEGSRADAR_BEREGNER=1` (else 404) and learns only with
+`BESOEGSRADAR=1` as well.
 
-Headers: `Authorization: Bearer <CVRRADAR_BEREGNER_NOEGLE>`, `Content-Type: application/json`.
+Headers: `Authorization: Bearer <CVRRADAR_BEREGNER_NOEGLE>` (at least 32 characters on
+cvrradar's side), `Content-Type: application/json`. Nothing that looks like a browser:
+cvrradar answers 403 to `Origin`, any `Sec-Fetch-*` or `Cookie`. Node's `fetch` always adds
+`Sec-Fetch-Mode: cors`, so the call goes through `node:http(s)` in
+`src/lib/cvrradar-klient.ts`.
 
-Request body:
+Request body (max 4 KB):
 
 ```jsonc
 {
   "cvr": "39413892",
-  "kilde": "minberegner.dk/moms",
-  "samtykke": "begge",          // "begge" (box ticked) | "ingen"
-  "eget": true,                 // visitor says it is their company (same checkbox)
-  "ipPrefiks": "81.7.12.0/24",  // only with consent; /24 IPv4 or /48 IPv6, e.g. "2a01:4f8:c17::/48"
-  "mailDomaene": "firma.dk"     // only with consent and only if a mail was given; never the local part
+  "samtykke": "cvrradar-kunder",   // box ticked; otherwise "none"
+  "eget": true,                    // visitor says it is their company (same checkbox)
+  "ip_praefiks": "81.7.12.0/24",   // only with consent; public /24 IPv4 or /48 IPv6, e.g. "2a01:4f8:c17::/48"
+  "maildomaene": "firma.dk"        // only with consent and only if a mail was given; never the local part
 }
 ```
 
-Rules for cvrradar:
+The checkbox text covers our own sites and cvrradar.dk's services to companies, so a tick
+maps to cvrradar's widest scope, `cvrradar-kunder` (the other is `egne-sites`).
+cvrradar answers 400 to private, CGNAT and documentation nets (192.0.0.0/16,
+198.18.0.0/15, 2001:db8::/32); `ipPrefiks` returns null for all of them, so they are never sent.
 
-- Learn (store prefix -> CVR) only when `samtykke === "begge"` and `ipPrefiks` is present.
-  Store the prefix, CVR, consent time and last-visit time; delete 30 days after last visit.
-- Without consent the request has no `ipPrefiks`/`mailDomaene`; treat it as a plain lookup.
-- Private, loopback and link-local addresses never produce a prefix.
-
-Response body (200; 404 = unknown CVR):
+Response (200; 404 = unknown CVR):
 
 ```jsonc
+// company (ApS, A/S, P/S ...)
 {
-  "fundet": true,
-  "navn": "Mahope",
-  "momsregistreret": true,      // boolean or null
-  "omsaetning": 800000,         // latest annual turnover in DKK, or null
-  "momsperiode": null,          // optional override: "maaned" | "kvartal" | "halvaar"
-  "laert": true                 // true when the prefix was stored
+  "cvr": "39413892", "selskab": true, "navn": "Mahope ApS", "aktiv": true,
+  "moms": {
+    "registreret": "ja", "periode": "halvaar", "grundlag": "omsaetning", "regnskabsaar": "2025",
+    "frister": [{ "fra": "2026-07-01", "til": "2026-12-31", "frist": "2027-03-01" }],  // next three, bank days
+    "vejledende": true
+  },
+  "observation": { "gemt": true }
 }
+// not a company (ENK, PMV, I/S, K/S, estates): nothing about persons
+{ "cvr": "12345678", "selskab": false, "observation": { "gemt": false }, "besked": "..." }
 ```
 
-Any other field (owners, directors, persons) is ignored by minberegner.
+minberegner whitelists these fields (`parseCvrradarSvar`) and drops everything else. For a
+non-company it keeps only `selskab: false`, even if a name came along.
 
-## VAT rules used
+`observation.gemt` means cvrradar stored an observation of the network, not that it has
+learned it: learning needs one more confirmation (RIPE match, mail domain, or a second day).
+The UI therefore says "Vi har noteret, at besøget kom fra jeres netværk", not that the network
+is now recognised.
 
-- Period from annual turnover: over 50 mio. kr. month, 5-50 mio. kr. quarter, under 5
-  mio. kr. half year; unknown turnover gives half year (start rule).
-- Deadlines: month = 25th of the following month (June: 17 August); quarter = 1 June,
-  1 September, 1 December, 1 March; half year = 1 September, 1 March. Moved to the next
-  bank day (weekends, holidays, 5 June, 24 and 31 December, Friday after Ascension).
+## VAT period and deadlines
+
+Both come from cvrradar (`moms.periode`, `moms.grundlag`, `moms.frister`). minberegner does
+not calculate them itself, so the page and the `.ics` file always match cvrradar. The period is
+an estimate (`vejledende`), shown as such; with no period there are no deadlines and the UI
+points to TastSelv Erhverv. `src/lib/momsfrister.ts` only names the periods and builds the
+`.ics` file.
 
 ## Withdrawal
 
 The consent text links to `/privatlivspolitik#cvr`, which links to the withdrawal page
 "Slet vores virksomheds netværk" at `https://cvrradar.dk/slet-netvaerk`
-(`CVRRADAR_TILBAGETRAEK_URL` in `src/lib/moms-cvr.ts`; align with the cvr branch).
+(`CVRRADAR_TILBAGETRAEK_URL` in `src/lib/moms-cvr.ts`; matches cvrradar's `SLET_STI`).
 
 ## Environment
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
 | `NEXT_PUBLIC_MOMS_CVR` | build | `1` turns the feature on (default off) |
-| `CVRRADAR_BEREGNER_NOEGLE` | runtime, secret | Bearer key for cvrradar; missing = panel says "kan ikke hente" |
+| `CVRRADAR_BEREGNER_NOEGLE` | runtime, secret | Bearer key for cvrradar (same value as cvrradar's `BEREGNER_NOEGLE`); missing = panel says "kan ikke hente" |
 | `CVRRADAR_BEREGNER_URL` | runtime, optional | Override endpoint (tests/staging) |
+| `MOMS_CVR_IP_HEADER` | runtime, optional | Header with the client IP; default `cf-connecting-ip` |

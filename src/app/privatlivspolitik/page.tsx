@@ -55,7 +55,9 @@ function CvrAfsnit() {
           CVR-nummeret. Vi gemmer kun netværksdelen af IP-adressen: de første tre dele af en IPv4-adresse (fx
           192.0.2.x) eller de første tre grupper af en IPv6-adresse. Vores server skærer adressen til, før den sendes
           til cvrradar.dk, så den fulde adresse aldrig gemmes eller logges. Sammen med netværket gemmes CVR-nummeret,
-          tidspunktet for samtykket og tidspunktet for sidste besøg.
+          datoen for besøget og hvad du har givet samtykke til. Netværket bliver først genkendt, når det er bekræftet
+          en gang til, fx ved endnu et besøg en anden dag. Det gælder kun selskaber (ApS, A/S og lignende); for
+          enkeltmandsvirksomheder gemmes intet.
         </li>
         <li>
           <strong>Formål:</strong> At genkende besøg fra virksomhedens netværk på vores egne sites og i cvrradar.dk&apos;s

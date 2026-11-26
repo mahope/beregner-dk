@@ -1,14 +1,9 @@
-// Danish VAT periods and payment deadlines, plus an .ics export of them.
+// Danish VAT period names and an .ics export of the VAT deadlines.
 //
-// Rules (skat.dk, "Frister for moms"):
-// - Period from annual taxable turnover: over 50 mio. kr. = month, 5-50 mio. kr. = quarter,
-//   under 5 mio. kr. = half year. New companies start on half year.
-// - Month: the 25th of the following month, but 17 August for June.
-// - Quarter: Q1 -> 1 June, Q2 -> 1 September, Q3 -> 1 December, Q4 -> 1 March.
-// - Half year: H1 -> 1 September, H2 -> 1 March.
-// - A deadline on a weekend or bank holiday moves to the next bank day.
-
-import { erArbejdsdag, erHelligdag } from "@/lib/helligdage";
+// The period and the deadlines themselves come from cvrradar (POST /v1/intern/beregner,
+// `moms.periode` and `moms.frister`, already moved to bank days). minberegner keeps no
+// second copy of the deadline rules, so the page and the .ics file always show the same
+// dates as cvrradar.
 
 export type Momsperiode = "maaned" | "kvartal" | "halvaar";
 
@@ -23,38 +18,6 @@ export const MOMSPERIODE_NAVN: Record<Momsperiode, string> = {
   halvaar: "Halvårlig",
 };
 
-/** The VAT period for an annual turnover in DKK. Unknown turnover gives half year (the start rule). */
-export function momsperiodeForOmsaetning(omsaetning: number | null | undefined): Momsperiode {
-  if (omsaetning == null || !Number.isFinite(omsaetning)) return "halvaar";
-  if (omsaetning > MOMS_GRAENSE_MAANED) return "maaned";
-  if (omsaetning >= MOMS_GRAENSE_KVARTAL) return "kvartal";
-  return "halvaar";
-}
-
-/**
- * True on a Danish bank day. Besides weekends, public holidays and New Year's Eve,
- * banks close on Constitution Day (5 June), Christmas Eve and the Friday after Ascension.
- */
-export function erBankdag(d: Date): boolean {
-  if (!erArbejdsdag(d, "da")) return false;
-  const m = d.getMonth();
-  const dag = d.getDate();
-  if ((m === 5 && dag === 5) || (m === 11 && dag === 24)) return false;
-  if (d.getDay() === 5) {
-    // A Friday after a Thursday holiday is the day after Ascension (the other
-    // Thursday holiday, Maundy Thursday, is followed by Good Friday anyway).
-    const torsdag = new Date(d.getFullYear(), m, dag - 1);
-    if (erHelligdag(torsdag, "da")) return false;
-  }
-  return true;
-}
-
-function naesteBankdag(d: Date): Date {
-  let x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  while (!erBankdag(x)) x = new Date(x.getFullYear(), x.getMonth(), x.getDate() + 1);
-  return x;
-}
-
 export interface Momsfrist {
   /** e.g. "2. kvartal 2026" */
   periodeNavn: string;
@@ -65,48 +28,47 @@ export interface Momsfrist {
   frist: Date;
 }
 
+/** A deadline as cvrradar sends it: ISO dates (YYYY-MM-DD), both period days included. */
+export interface CvrradarFrist {
+  fra: string;
+  til: string;
+  frist: string;
+}
+
 const MAANEDER = [
   "januar", "februar", "marts", "april", "maj", "juni",
   "juli", "august", "september", "oktober", "november", "december",
 ];
 
-/** All periods that end in `aar`, with their (unadjusted) deadline. */
-function perioderIAar(periode: Momsperiode, aar: number): Array<Omit<Momsfrist, "frist"> & { raaFrist: Date }> {
-  const slutAf = (m: number) => new Date(aar, m + 1, 0);
-  if (periode === "maaned") {
-    return MAANEDER.map((navn, m) => ({
-      periodeNavn: `${navn[0].toUpperCase()}${navn.slice(1)} ${aar}`,
-      periodeStart: new Date(aar, m, 1),
-      periodeSlut: slutAf(m),
-      raaFrist: m === 5 ? new Date(aar, 7, 17) : new Date(aar, m + 1, 25),
-    }));
-  }
-  if (periode === "kvartal") {
-    const frister = [new Date(aar, 5, 1), new Date(aar, 8, 1), new Date(aar, 11, 1), new Date(aar + 1, 2, 1)];
-    return frister.map((raaFrist, k) => ({
-      periodeNavn: `${k + 1}. kvartal ${aar}`,
-      periodeStart: new Date(aar, k * 3, 1),
-      periodeSlut: slutAf(k * 3 + 2),
-      raaFrist,
-    }));
-  }
-  return [
-    { periodeNavn: `1. halvår ${aar}`, periodeStart: new Date(aar, 0, 1), periodeSlut: slutAf(5), raaFrist: new Date(aar, 8, 1) },
-    { periodeNavn: `2. halvår ${aar}`, periodeStart: new Date(aar, 6, 1), periodeSlut: slutAf(11), raaFrist: new Date(aar + 1, 2, 1) },
-  ];
+const ISO_DATO = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** A local calendar date from YYYY-MM-DD, or null if it is not a real date. */
+export function isoDato(s: unknown): Date | null {
+  if (typeof s !== "string") return null;
+  const m = ISO_DATO.exec(s);
+  if (!m) return null;
+  const [aar, maaned, dag] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const d = new Date(aar, maaned - 1, dag);
+  return d.getFullYear() === aar && d.getMonth() === maaned - 1 && d.getDate() === dag ? d : null;
 }
 
-/** The next `antal` deadlines on or after `fra` (date only), in order. */
-export function naesteMomsfrister(periode: Momsperiode, fra: Date, antal = 3): Momsfrist[] {
-  const idag = new Date(fra.getFullYear(), fra.getMonth(), fra.getDate()).getTime();
+function periodeNavn(periode: Momsperiode, start: Date): string {
+  const aar = start.getFullYear();
+  const m = start.getMonth();
+  if (periode === "maaned") return `${MAANEDER[m][0].toUpperCase()}${MAANEDER[m].slice(1)} ${aar}`;
+  if (periode === "kvartal") return `${Math.floor(m / 3) + 1}. kvartal ${aar}`;
+  return `${m < 6 ? 1 : 2}. halvår ${aar}`;
+}
+
+/** Turns cvrradar's deadlines into named deadlines. Entries with bad dates are dropped. */
+export function fristerFraCvrradar(periode: Momsperiode, frister: readonly CvrradarFrist[]): Momsfrist[] {
   const ud: Momsfrist[] = [];
-  for (let aar = fra.getFullYear() - 1; ud.length < antal && aar <= fra.getFullYear() + 3; aar++) {
-    for (const p of perioderIAar(periode, aar)) {
-      const frist = naesteBankdag(p.raaFrist);
-      if (frist.getTime() < idag) continue;
-      ud.push({ periodeNavn: p.periodeNavn, periodeStart: p.periodeStart, periodeSlut: p.periodeSlut, frist });
-      if (ud.length === antal) break;
-    }
+  for (const f of frister) {
+    const periodeStart = isoDato(f.fra);
+    const periodeSlut = isoDato(f.til);
+    const frist = isoDato(f.frist);
+    if (!periodeStart || !periodeSlut || !frist) continue;
+    ud.push({ periodeNavn: periodeNavn(periode, periodeStart), periodeStart, periodeSlut, frist });
   }
   return ud;
 }
@@ -167,7 +129,7 @@ export function momsfristerIcs(
       `DTSTART;VALUE=DATE:${icsDato(f.frist)}`,
       `DTEND;VALUE=DATE:${icsDato(slut)}`,
       `SUMMARY:${icsTekst(`Momsfrist: ${f.periodeNavn}`)}`,
-      `DESCRIPTION:${icsTekst(`Sidste frist for at indberette og betale moms for ${f.periodeNavn} for ${hvem}. Beregnet af minberegner.dk/moms. Tjek altid fristen i TastSelv Erhverv.`)}`,
+      `DESCRIPTION:${icsTekst(`Sidste frist for at indberette og betale moms for ${f.periodeNavn} for ${hvem}. Vejledende frist fra cvrradar.dk via minberegner.dk/moms. Tjek altid fristen i TastSelv Erhverv.`)}`,
       "TRANSP:TRANSPARENT",
       "BEGIN:VALARM",
       "ACTION:DISPLAY",

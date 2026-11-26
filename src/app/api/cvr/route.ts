@@ -10,7 +10,7 @@ import {
   klientIpFraHeaders,
   parseCvrradarSvar,
 } from "@/lib/moms-cvr";
-import { momsperiodeForOmsaetning } from "@/lib/momsfrister";
+import { postTilCvrradar } from "@/lib/cvrradar-klient";
 import { lavRateLimit } from "@/lib/rate-limit";
 
 /**
@@ -20,10 +20,13 @@ import { lavRateLimit } from "@/lib/rate-limit";
  *
  * - Off (404) unless NEXT_PUBLIC_MOMS_CVR is on, and only on Danish hosts.
  * - The key (CVRRADAR_BEREGNER_NOEGLE) is only read here and never sent to the browser.
- * - The visitor's IP is cut to /24 (IPv4) or /48 (IPv6) at once; the full address is not
+ * - The IP comes from CF-Connecting-IP (set by Cloudflare), never from X-Forwarded-For,
+ *   which a visitor can forge. The visitor's IP is cut to /24 (IPv4) or /48 (IPv6) at once; the full address is not
  *   kept, logged or forwarded. Prefix and mail domain are only forwarded with consent.
  * - Missing key or a failing cvrradar gives 200 { tilgaengelig: false }, so the
  *   calculator just works without the extra facts.
+ * - cvrradar is called with node:http(s), not fetch: fetch adds Sec-Fetch-Mode, and cvrradar
+ *   refuses anything that looks like a browser.
  * Contract: docs/moms-cvr.md.
  */
 export const dynamic = "force-dynamic";
@@ -68,41 +71,26 @@ export async function POST(req: NextRequest) {
   const forespoergsel = byggeCvrradarForespoergsel({ cvr, samtykke, ipPrefiks: prefiks, mail: body.mail });
 
   try {
-    const res = await fetch(process.env.CVRRADAR_BEREGNER_URL || CVRRADAR_BEREGNER_URL, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${noegle}`,
-        "content-type": "application/json",
-        accept: "application/json",
-      },
-      body: JSON.stringify(forespoergsel),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      cache: "no-store",
-    });
+    const res = await postTilCvrradar(
+      process.env.CVRRADAR_BEREGNER_URL || CVRRADAR_BEREGNER_URL,
+      noegle,
+      forespoergsel,
+      TIMEOUT_MS,
+    );
     if (res.status === 404) return json({ tilgaengelig: true, fundet: false });
-    if (!res.ok) {
+    if (res.status < 200 || res.status >= 300) {
       console.warn(`[cvr] cvrradar svarede ${res.status}`);
       return json({ tilgaengelig: false });
     }
-    const svar = parseCvrradarSvar(await res.json());
+    const svar = parseCvrradarSvar(res.json);
     if (!svar) {
       console.warn("[cvr] uventet svar fra cvrradar");
       return json({ tilgaengelig: false });
     }
-    if (!svar.fundet) return json({ tilgaengelig: true, fundet: false });
-
-    const momsperiode = svar.momsperiode ?? momsperiodeForOmsaetning(svar.omsaetning);
-    return json({
-      tilgaengelig: true,
-      fundet: true,
-      cvr,
-      navn: svar.navn,
-      momsregistreret: svar.momsregistreret,
-      momsperiode,
-      momsperiodeKilde: svar.momsperiode ? "cvrradar" : svar.omsaetning !== null ? "omsaetning" : "standard",
-      omsaetning: svar.omsaetning,
-      laert: samtykke && svar.laert,
-    });
+    // Not a company (ENK, PMV, I/S ...): cvrradar sends nothing about it, and neither do we.
+    if (!svar.selskab) return json({ tilgaengelig: true, fundet: true, selskab: false, cvr });
+    // Without consent we never tell the visitor anything was stored, whatever cvrradar says.
+    return json({ tilgaengelig: true, fundet: true, cvr, ...svar, gemt: samtykke && svar.gemt });
   } catch {
     console.warn("[cvr] cvrradar svarede ikke");
     return json({ tilgaengelig: false });

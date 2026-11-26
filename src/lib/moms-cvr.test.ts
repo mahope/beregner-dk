@@ -4,6 +4,7 @@ import {
   erGyldigtCvr,
   ipPrefiks,
   isMomsCvrEnabled,
+  klientIpFraHeaders,
   mailDomaene,
   parseCvrradarSvar,
   rensCvr,
@@ -54,7 +55,7 @@ describe("ipPrefiks", () => {
     [" 81.7.12.34 ", "81.7.12.0/24"],
     ["::ffff:81.7.12.34", "81.7.12.0/24"],
     ["::ffff:5107:c22", "81.7.12.0/24"],
-    ["2001:db8:abcd:12:3456:789a:bcde:f012", "2001:db8:abcd::/48"],
+    ["2a02:c7c:abcd:12:3456:789a:bcde:f012", "2a02:c7c:abcd::/48"],
     ["2a01:4f8:c17:1234::1", "2a01:4f8:c17::/48"],
     ["2a01:4f8::1", "2a01:4f8:0::/48"],
     ["[2a01:4f8:c17:1234::1]", "2a01:4f8:c17::/48"],
@@ -78,6 +79,11 @@ describe("ipPrefiks", () => {
     "100.64.0.1",
     "0.0.0.0",
     "224.0.0.1",
+    // Reserved nets cvrradar rejects with 400: 192.0.0.0/16, 198.18.0.0/15, 2001:db8::/32.
+    "192.0.2.10",
+    "198.18.5.6",
+    "198.19.5.6",
+    "2001:db8:abcd::1",
     "::1",
     "::",
     "fe80::1",
@@ -117,19 +123,42 @@ describe("mailDomaene", () => {
   });
 });
 
+
+describe("klientIpFraHeaders", () => {
+  it("reads CF-Connecting-IP, which Cloudflare overwrites", () => {
+    expect(klientIpFraHeaders(new Headers({ "cf-connecting-ip": "81.7.12.34" }))).toBe("81.7.12.34");
+  });
+
+  it("never uses a forged X-Forwarded-For or X-Real-IP", () => {
+    const h = new Headers({ "x-forwarded-for": "203.0.113.9, 81.7.12.34", "x-real-ip": "203.0.113.9" });
+    expect(klientIpFraHeaders(h)).toBeNull();
+    h.set("cf-connecting-ip", "81.7.12.34");
+    expect(klientIpFraHeaders(h)).toBe("81.7.12.34");
+  });
+
+  it("refuses a list in the trusted header", () => {
+    expect(klientIpFraHeaders(new Headers({ "cf-connecting-ip": "203.0.113.9, 81.7.12.34" }))).toBeNull();
+  });
+
+  it("can be pointed at another single-value header", () => {
+    vi.stubEnv("MOMS_CVR_IP_HEADER", "X-Real-IP");
+    const h = new Headers({ "x-real-ip": "81.7.12.34", "cf-connecting-ip": "203.0.113.9" });
+    expect(klientIpFraHeaders(h)).toBe("81.7.12.34");
+  });
+});
+
 describe("byggeCvrradarForespoergsel", () => {
   const ip = "81.7.12.234";
   const mail = "anna.hansen@firma.dk";
 
-  it("with consent sends prefix and mail domain, never the full IP or local part", () => {
+  it("with consent sends prefix and mail domain under cvrradar's names, never the full IP or local part", () => {
     const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: true, ipPrefiks: ipPrefiks(ip), mail });
     expect(body).toEqual({
       cvr: "39413892",
-      kilde: "minberegner.dk/moms",
-      samtykke: "begge",
+      samtykke: "cvrradar-kunder",
       eget: true,
-      ipPrefiks: "81.7.12.0/24",
-      mailDomaene: "firma.dk",
+      ip_praefiks: "81.7.12.0/24",
+      maildomaene: "firma.dk",
     });
     const tekst = JSON.stringify(body);
     expect(tekst).not.toContain("234");
@@ -139,61 +168,98 @@ describe("byggeCvrradarForespoergsel", () => {
 
   it("without consent sends no learning data at all", () => {
     const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: false, ipPrefiks: ipPrefiks(ip), mail });
-    expect(body).toEqual({ cvr: "39413892", kilde: "minberegner.dk/moms", samtykke: "ingen", eget: false });
-    expect(body).not.toHaveProperty("ipPrefiks");
-    expect(body).not.toHaveProperty("mailDomaene");
+    expect(body).toEqual({ cvr: "39413892", samtykke: "none", eget: false });
+    expect(body).not.toHaveProperty("ip_praefiks");
+    expect(body).not.toHaveProperty("maildomaene");
   });
 
   it("leaves out a private IP even with consent", () => {
     const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: true, ipPrefiks: ipPrefiks("192.168.0.7") });
-    expect(body).not.toHaveProperty("ipPrefiks");
-    expect(body.samtykke).toBe("begge");
+    expect(body).not.toHaveProperty("ip_praefiks");
+    expect(body.samtykke).toBe("cvrradar-kunder");
   });
 
   it.each(["81.7.12.234", "81.7.12.234/24", "2a01:4f8:c17:1234::1", "81.7.0.0/16"])(
     "drops a value that is not a /24 or /48 prefix (%s)",
     (v) => {
       const body = byggeCvrradarForespoergsel({ cvr: "39413892", samtykke: true, ipPrefiks: v });
-      expect(body).not.toHaveProperty("ipPrefiks");
+      expect(body).not.toHaveProperty("ip_praefiks");
     },
   );
 });
 
 describe("parseCvrradarSvar", () => {
-  it("keeps only company fields", () => {
-    const svar = parseCvrradarSvar({
-      fundet: true,
-      navn: " Mahope ",
-      momsregistreret: true,
-      omsaetning: 1_200_000,
-      momsperiode: "kvartal",
-      laert: true,
-      ejere: [{ navn: "Person" }],
-      direktion: ["Person"],
-    });
+  const selskab = {
+    cvr: "39413892",
+    selskab: true,
+    navn: " Mahope ApS ",
+    aktiv: true,
+    moms: {
+      registreret: "ja",
+      periode: "kvartal",
+      grundlag: "omsaetning",
+      regnskabsaar: "2025",
+      frister: [{ fra: "2026-07-01", til: "2026-09-30", frist: "2026-12-01" }],
+      vejledende: true,
+    },
+    observation: { gemt: true },
+  };
+
+  it("keeps only company fields from cvrradar's answer", () => {
+    const svar = parseCvrradarSvar({ ...selskab, ejere: [{ navn: "Person" }], direktion: ["Person"] });
     expect(svar).toEqual({
-      fundet: true,
-      navn: "Mahope",
-      momsregistreret: true,
-      omsaetning: 1_200_000,
+      selskab: true,
+      navn: "Mahope ApS",
+      aktiv: true,
+      momsregistreret: "ja",
       momsperiode: "kvartal",
-      laert: true,
+      grundlag: "omsaetning",
+      regnskabsaar: "2025",
+      frister: [{ fra: "2026-07-01", til: "2026-09-30", frist: "2026-12-01" }],
+      gemt: true,
     });
     expect(JSON.stringify(svar)).not.toContain("Person");
   });
 
-  it("treats unknown or bad values as null", () => {
-    expect(parseCvrradarSvar({ fundet: true, momsregistreret: "ja", omsaetning: -5, momsperiode: "uge", laert: "ja" })).toEqual({
-      fundet: true,
-      navn: null,
-      momsregistreret: null,
-      omsaetning: null,
-      momsperiode: null,
-      laert: false,
+  it("keeps nothing but selskab:false for a non-company, even if a name comes along", () => {
+    expect(parseCvrradarSvar({ cvr: "39413892", selskab: false, navn: "Anna Hansen", observation: { gemt: true } })).toEqual({
+      selskab: false,
+      gemt: false,
     });
   });
 
-  it.each([null, "x", {}, { fundet: "ja" }])("rejects %s", (v) => {
+  it("treats unknown or bad values as unknown", () => {
+    expect(
+      parseCvrradarSvar({
+        selskab: true,
+        moms: { registreret: true, periode: "uge", grundlag: "gaet", frister: [{ fra: "2026-07-01" }] },
+        observation: { gemt: "ja" },
+      }),
+    ).toEqual({
+      selskab: true,
+      navn: null,
+      aktiv: true,
+      momsregistreret: "ukendt",
+      momsperiode: null,
+      grundlag: "ukendt",
+      regnskabsaar: null,
+      frister: [],
+      gemt: false,
+    });
+  });
+
+  it("drops deadlines with bad dates and keeps the good ones", () => {
+    const svar = parseCvrradarSvar({
+      ...selskab,
+      moms: {
+        ...selskab.moms,
+        frister: [{ fra: "2026-07-01", til: "2026-09-30", frist: "1. december" }, ...selskab.moms.frister, "x"],
+      },
+    });
+    expect(svar?.selskab && svar.frister).toEqual(selskab.moms.frister);
+  });
+
+  it.each([null, "x", {}, { fundet: true }, { selskab: "ja" }])("rejects %s", (v) => {
     expect(parseCvrradarSvar(v)).toBeNull();
   });
 });

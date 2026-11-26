@@ -7,15 +7,19 @@
 // - Without consent the request to cvrradar carries no IP prefix and no mail domain,
 //   so cvrradar has nothing to learn from.
 // - Only company fields are read from cvrradar's answer (never owners or directors).
-// Contract: docs/moms-cvr.md.
+// Contract: docs/moms-cvr.md (cvrradar: mahope/cvr, src/beregner/web.ts).
 
-import type { Momsperiode } from "@/lib/momsfrister";
+import { type CvrradarFrist, type Momsperiode, isoDato } from "@/lib/momsfrister";
 
 export const CVRRADAR_BEREGNER_URL = "https://cvrradar.dk/v1/intern/beregner";
 /** Withdrawal page ("Slet vores virksomheds netværk") hosted by cvrradar. */
 export const CVRRADAR_TILBAGETRAEK_URL = "https://cvrradar.dk/slet-netvaerk";
-export const MOMS_CVR_KILDE = "minberegner.dk/moms";
-export const SAMTYKKE_SCOPE = "begge" as const;
+/**
+ * Consent scope sent with a ticked box. The checkbox text covers both our own sites and
+ * cvrradar.dk's services to companies, which is cvrradar's widest scope ("cvrradar-kunder").
+ * cvrradar accepts "none" | "egne-sites" | "cvrradar-kunder".
+ */
+export const SAMTYKKE_SCOPE = "cvrradar-kunder" as const;
 
 /** Feature flag. Off unless NEXT_PUBLIC_MOMS_CVR is "1" or "true" (inlined at build time). */
 export function isMomsCvrEnabled(): boolean {
@@ -53,6 +57,9 @@ function ipv4ErPrivat([a, b]: number[]): boolean {
     (a === 169 && b === 254) ||
     (a === 172 && b >= 16 && b <= 31) ||
     (a === 192 && b === 168) ||
+    // Same reserved nets cvrradar rejects (it answers 400 on them): 192.0.0.0/16 and 198.18.0.0/15.
+    (a === 192 && b === 0) ||
+    (a === 198 && (b === 18 || b === 19)) ||
     a >= 224
   );
 }
@@ -97,14 +104,27 @@ export function ipPrefiks(ip: string | null | undefined): string | null {
     return ipPrefiks(`${g[6] >> 8}.${g[6] & 255}.${g[7] >> 8}.${g[7] & 255}`);
   }
   // Only global unicast (2000::/3) is worth a prefix: skips ::1, fc00::/7, fe80::/10, ff00::/8.
-  if ((g[0] & 0xe000) !== 0x2000) return null;
+  // The documentation net 2001:db8::/32 is rejected by cvrradar too.
+  if ((g[0] & 0xe000) !== 0x2000 || (g[0] === 0x2001 && g[1] === 0x0db8)) return null;
   return `${g.slice(0, 3).map((x) => x.toString(16)).join(":")}::/48`;
 }
 
-/** Reads the client IP from proxy headers (first X-Forwarded-For entry, else X-Real-IP). */
+/**
+ * Header the visitor's IP is read from. minberegner.dk is behind Cloudflare, which always
+ * overwrites CF-Connecting-IP with the address it saw. X-Forwarded-For is never used: Cloudflare
+ * keeps whatever the browser sent there and only appends, so its first entry can be forged, and
+ * that would tie someone else's network to a CVR (and dodge the rate limit).
+ * MOMS_CVR_IP_HEADER can name another single-value header for a different proxy setup.
+ */
+export function klientIpHeader(): string {
+  return (process.env.MOMS_CVR_IP_HEADER || "cf-connecting-ip").trim().toLowerCase();
+}
+
+/** The client IP from the trusted proxy header, or null. A list or anything with spaces is refused. */
 export function klientIpFraHeaders(h: Headers): string | null {
-  const fwd = h.get("x-forwarded-for");
-  return (fwd ? fwd.split(",")[0] : h.get("x-real-ip"))?.trim() || null;
+  const vaerdi = h.get(klientIpHeader())?.trim();
+  if (!vaerdi || /[\s,]/.test(vaerdi)) return null;
+  return vaerdi;
 }
 
 /** Returns only the domain of a mail address (lower case), or null. The local part is dropped. */
@@ -116,17 +136,17 @@ export function mailDomaene(mail: unknown): string | null {
   return /^(?=.{3,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(domaene) ? domaene : null;
 }
 
+/** Body for cvrradar's POST /v1/intern/beregner (field names are cvrradar's). */
 export interface CvrradarForespoergsel {
   cvr: string;
-  kilde: string;
-  /** "begge" = visitor ticked the consent box; "ingen" = cvrradar must not learn anything. */
-  samtykke: typeof SAMTYKKE_SCOPE | "ingen";
+  /** SAMTYKKE_SCOPE when the visitor ticked the consent box, otherwise "none" (nothing is learned). */
+  samtykke: typeof SAMTYKKE_SCOPE | "none";
   /** The visitor states the CVR is their own company (part of the same checkbox). */
   eget: boolean;
-  /** Network prefix, only with consent. */
-  ipPrefiks?: string;
-  /** Mail domain, only with consent. */
-  mailDomaene?: string;
+  /** Network prefix (/24 or /48), only with consent. */
+  ip_praefiks?: string;
+  /** Mail domain without the local part, only with consent. */
+  maildomaene?: string;
 }
 
 // Only shapes `ipPrefiks` can produce; a full address passed by mistake is dropped.
@@ -145,62 +165,87 @@ export function byggeCvrradarForespoergsel(input: {
 }): CvrradarForespoergsel {
   const body: CvrradarForespoergsel = {
     cvr: input.cvr,
-    kilde: MOMS_CVR_KILDE,
-    samtykke: input.samtykke ? SAMTYKKE_SCOPE : "ingen",
+    samtykke: input.samtykke ? SAMTYKKE_SCOPE : "none",
     eget: input.samtykke,
   };
   if (input.samtykke) {
-    if (input.ipPrefiks && PREFIKS_RE.test(input.ipPrefiks)) body.ipPrefiks = input.ipPrefiks;
+    if (input.ipPrefiks && PREFIKS_RE.test(input.ipPrefiks)) body.ip_praefiks = input.ipPrefiks;
     const domaene = mailDomaene(input.mail);
-    if (domaene) body.mailDomaene = domaene;
+    if (domaene) body.maildomaene = domaene;
   }
   return body;
 }
 
-export interface CvrradarSvar {
-  fundet: boolean;
-  navn: string | null;
-  /** true/false when known; null when cvrradar does not know. */
-  momsregistreret: boolean | null;
-  /** Latest annual turnover in DKK, when published. */
-  omsaetning: number | null;
-  /** Explicit period from cvrradar, if it knows better than the turnover rule. */
-  momsperiode: Momsperiode | null;
-  /** True when cvrradar stored the network prefix (consent given and accepted). */
-  laert: boolean;
-}
+export type Momsregistreret = "ja" | "nej" | "ukendt";
+/** How cvrradar estimated the VAT period. */
+export type Momsgrundlag = "omsaetning" | "bruttofortjeneste" | "ny_virksomhed" | "ukendt";
+
+/** cvrradar's answer, whitelisted. A non-company (ENK, PMV, I/S ...) carries no name or VAT data. */
+export type CvrradarSvar =
+  | { selskab: false; gemt: false }
+  | {
+      selskab: true;
+      navn: string | null;
+      aktiv: boolean;
+      momsregistreret: Momsregistreret;
+      momsperiode: Momsperiode | null;
+      grundlag: Momsgrundlag;
+      /** Financial year the estimate is based on (only for turnover/gross profit). */
+      regnskabsaar: string | null;
+      /** Next deadlines from cvrradar, already moved to bank days. */
+      frister: CvrradarFrist[];
+      /** cvrradar stored an observation of the network. Learning needs a further confirmation. */
+      gemt: boolean;
+    };
 
 /** What /api/cvr answers the browser. */
 export type CvrApiSvar =
   | { tilgaengelig: false }
   | { tilgaengelig: true; fundet: false }
-  | {
-      tilgaengelig: true;
-      fundet: true;
-      cvr: string;
-      navn: string | null;
-      momsregistreret: boolean | null;
-      momsperiode: Momsperiode;
-      /** Where the period comes from: cvrradar, the turnover rule, or the start rule. */
-      momsperiodeKilde: "cvrradar" | "omsaetning" | "standard";
-      omsaetning: number | null;
-      laert: boolean;
-    };
+  | { tilgaengelig: true; fundet: true; selskab: false; cvr: string }
+  | ({ tilgaengelig: true; fundet: true; cvr: string } & Extract<CvrradarSvar, { selskab: true }>);
 
 const PERIODER: readonly Momsperiode[] = ["maaned", "kvartal", "halvaar"];
+const GRUNDLAG: readonly Momsgrundlag[] = ["omsaetning", "bruttofortjeneste", "ny_virksomhed", "ukendt"];
+const MAKS_FRISTER = 12;
 
-/** Whitelists the company fields from cvrradar's answer. Anything else (persons) is dropped. */
+function frister(v: unknown): CvrradarFrist[] {
+  if (!Array.isArray(v)) return [];
+  const ud: CvrradarFrist[] = [];
+  for (const f of v.slice(0, MAKS_FRISTER)) {
+    if (!f || typeof f !== "object") continue;
+    const { fra, til, frist } = f as Record<string, unknown>;
+    if (isoDato(fra) && isoDato(til) && isoDato(frist)) {
+      ud.push({ fra: fra as string, til: til as string, frist: frist as string });
+    }
+  }
+  return ud;
+}
+
+/**
+ * Whitelists the company fields from cvrradar's answer. Anything else (persons) is dropped,
+ * and a non-company keeps nothing but `selskab: false`.
+ */
 export function parseCvrradarSvar(json: unknown): CvrradarSvar | null {
   if (!json || typeof json !== "object") return null;
   const o = json as Record<string, unknown>;
-  if (typeof o.fundet !== "boolean") return null;
-  const tal = (v: unknown) => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : null);
+  if (o.selskab === false) return { selskab: false, gemt: false };
+  if (o.selskab !== true) return null;
+  const moms = o.moms && typeof o.moms === "object" ? (o.moms as Record<string, unknown>) : {};
+  const observation =
+    o.observation && typeof o.observation === "object" ? (o.observation as Record<string, unknown>) : {};
+  const momsperiode = PERIODER.includes(moms.periode as Momsperiode) ? (moms.periode as Momsperiode) : null;
+  const registreret = moms.registreret;
   return {
-    fundet: o.fundet,
+    selskab: true,
     navn: typeof o.navn === "string" && o.navn.trim() ? o.navn.trim().slice(0, 200) : null,
-    momsregistreret: typeof o.momsregistreret === "boolean" ? o.momsregistreret : null,
-    omsaetning: tal(o.omsaetning),
-    momsperiode: PERIODER.includes(o.momsperiode as Momsperiode) ? (o.momsperiode as Momsperiode) : null,
-    laert: o.laert === true,
+    aktiv: o.aktiv !== false,
+    momsregistreret: registreret === "ja" || registreret === "nej" ? registreret : "ukendt",
+    momsperiode,
+    grundlag: GRUNDLAG.includes(moms.grundlag as Momsgrundlag) ? (moms.grundlag as Momsgrundlag) : "ukendt",
+    regnskabsaar:
+      typeof moms.regnskabsaar === "string" && moms.regnskabsaar.trim() ? moms.regnskabsaar.trim().slice(0, 40) : null,
+    frister: momsperiode ? frister(moms.frister) : [],
+    gemt: observation.gemt === true,
   };
 }
