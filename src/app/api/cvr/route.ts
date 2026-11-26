@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getDomainConfigForHost } from "@/lib/domain-config";
 import {
   CVRRADAR_BEREGNER_URL,
+  type CvrApiSvar,
   byggeCvrradarForespoergsel,
   erGyldigtCvr,
   ipPrefiks,
@@ -9,7 +10,7 @@ import {
   klientIpFraHeaders,
   parseCvrradarSvar,
 } from "@/lib/moms-cvr";
-import { momsperiodeForOmsaetning, type Momsperiode } from "@/lib/momsfrister";
+import { momsperiodeForOmsaetning } from "@/lib/momsfrister";
 import { lavRateLimit } from "@/lib/rate-limit";
 
 /**
@@ -32,22 +33,6 @@ const TIMEOUT_MS = 5000;
 const GRAENSE_PR_MINUT = 20;
 // Keyed by network prefix, never by the full IP.
 const rateLimit = lavRateLimit(GRAENSE_PR_MINUT);
-
-export type CvrApiSvar =
-  | { tilgaengelig: false }
-  | { tilgaengelig: true; fundet: false }
-  | {
-      tilgaengelig: true;
-      fundet: true;
-      cvr: string;
-      navn: string | null;
-      momsregistreret: boolean | null;
-      momsperiode: Momsperiode;
-      /** Where the period comes from: cvrradar, the turnover rule, or the start rule. */
-      momsperiodeKilde: "cvrradar" | "omsaetning" | "standard";
-      omsaetning: number | null;
-      laert: boolean;
-    };
 
 const json = (body: CvrApiSvar | { fejl: string }, status = 200) =>
   NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });

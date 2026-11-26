@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
@@ -10,6 +10,9 @@ import MomsPage from "./page";
 
 vi.mock("@/components/MomsBeregner", () => ({
   default: () => <div>Momsværktøj</div>,
+}));
+vi.mock("@/components/MomsCvrPanel", () => ({
+  default: () => <div>CVR-panel</div>,
 }));
 vi.mock("@/components/ImportmomsBeregner", () => ({
   default: () => <div>Importmomsværktøj</div>,
@@ -606,5 +609,26 @@ describe("moms: import fra lande uden for EU", () => {
     expect(html).toContain("Finns moms på varor från länder utanför EU");
     expect(html).toContain(`${kr(r.momsgrundlag)} och momsen ${kr(r.moms)} — totalt ${kr(r.iAlt)}`);
     expect(html).not.toContain("eventuell tull vid import");
+  });
+
+  describe("CVR-feltet", () => {
+    afterEach(() => vi.unstubAllEnvs());
+
+    test("er skjult, når flaget er slået fra", async () => {
+      vi.stubEnv("NEXT_PUBLIC_MOMS_CVR", "0");
+      expect(renderToStaticMarkup(await MomsPage())).not.toContain("CVR-panel");
+    });
+
+    test("vises på den danske side, når flaget er slået til", async () => {
+      vi.stubEnv("NEXT_PUBLIC_MOMS_CVR", "1");
+      expect(renderToStaticMarkup(await MomsPage())).toContain("CVR-panel");
+    });
+
+    test("vises aldrig på den svenske side", async () => {
+      vi.stubEnv("NEXT_PUBLIC_MOMS_CVR", "1");
+      vi.mocked(getLocale).mockResolvedValue("se");
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+      expect(renderToStaticMarkup(await MomsPage())).not.toContain("CVR-panel");
+    });
   });
 });

@@ -170,6 +170,23 @@ export interface CvrradarSvar {
   laert: boolean;
 }
 
+/** What /api/cvr answers the browser. */
+export type CvrApiSvar =
+  | { tilgaengelig: false }
+  | { tilgaengelig: true; fundet: false }
+  | {
+      tilgaengelig: true;
+      fundet: true;
+      cvr: string;
+      navn: string | null;
+      momsregistreret: boolean | null;
+      momsperiode: Momsperiode;
+      /** Where the period comes from: cvrradar, the turnover rule, or the start rule. */
+      momsperiodeKilde: "cvrradar" | "omsaetning" | "standard";
+      omsaetning: number | null;
+      laert: boolean;
+    };
+
 const PERIODER: readonly Momsperiode[] = ["maaned", "kvartal", "halvaar"];
 
 /** Whitelists the company fields from cvrradar's answer. Anything else (persons) is dropped. */
