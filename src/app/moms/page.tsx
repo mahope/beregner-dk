@@ -2,6 +2,8 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import MomsBeregner from "@/components/MomsBeregner";
+import MomsCvrPanel from "@/components/MomsCvrPanel";
+import { isMomsCvrEnabled } from "@/lib/moms-cvr";
 import ImportmomsBeregner from "@/components/ImportmomsBeregner";
 import TimeTrackTipBox from "@/components/TimeTrackTipBox";
 import FAQ from "@/components/FAQ";
@@ -34,6 +36,8 @@ export default async function MomsPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("moms", locale) || getPageData("moms", "da")!;
+  // Optional CVR field: Danish site only, behind NEXT_PUBLIC_MOMS_CVR. Never in /embed.
+  const visCvr = isMomsCvrEnabled() && locale === "da" && domainConfig.locale === "da";
 
   // Samme modul som vaerktøjet bruger, saa tabellerne ikke kan modsige
   // regnestykket. Kun den danske gren bruger dem.
@@ -142,6 +146,7 @@ export default async function MomsPage() {
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <MomsBeregner />
+        {visCvr && <MomsCvrPanel />}
         <SelvstaendigAffiliate className="mt-8" />
       </div>
 

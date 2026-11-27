@@ -41,6 +41,21 @@ deres gemte valg under Cookieindstillinger i footeren.
 Se [.env.example](.env.example) og [annonceopsætningen](docs/annoncer.md)
 for placering, samtykke og Docker-build.
 
+## CVR-felt på /moms ("Din virksomhed")
+
+Et valgfrit CVR-felt under momsberegneren på minberegner.dk viser momsstatus,
+momsperiode og de næste momsfrister (med .ics-download) via cvrradar.dk. Et
+afkrydsningsfelt uden flueben giver samtykke til, at virksomhedens netværk
+(kun /24 eller /48 af IP-adressen) genkendes. Kun dansk, aldrig i `/embed`,
+ingen cookies og intet om personer.
+
+Slået fra som standard. `NEXT_PUBLIC_MOMS_CVR=1` ved build tænder feltet,
+privatlivsafsnittet `#cvr` og ruten `/api/cvr`. Ruten kræver
+`CVRRADAR_BEREGNER_NOEGLE` (hemmelig, kun på serveren). Momsperiode og frister kommer
+fra cvrradar, som kun svarer for selskaber. IP-adressen læses fra `CF-Connecting-IP`
+(Cloudflare), aldrig fra `X-Forwarded-For`. Kontrakt, regler og
+miljøvariabler står i [docs/moms-cvr.md](docs/moms-cvr.md).
+
 ## Barselsdagpenge
 
 `/barselsdagpenge` er sitets eneste barselsberegner (én beregner pr. side).
